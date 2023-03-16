@@ -45,15 +45,15 @@ final class Window {
         enforce(SDL_Init(SDL_INIT_EVERYTHING) == 0,
             "SDL initialisation failure: " ~ fromStringz(SDL_GetError()));
 
-        //enforce(TTF_Init() != -1, "SDL ttf initialisation failure");
-        //enforce(Mix_OpenAudio(44_100, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS,
-        //        1024) != -1, "no audio device connected");
-        //enforce(Mix_AllocateChannels(16) != -1, "audio channels allocation failure");
+        enforce(TTF_Init() != -1, "SDL ttf initialisation failure");
+        enforce(Mix_OpenAudio(44_100, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS,
+                1024) != -1, "no audio device connected");
+        enforce(Mix_AllocateChannels(16) != -1, "audio channels allocation failure");
 
-        //IMG_Load(toStringz("yo"));
+        IMG_Load(toStringz("yo"));
 
 
-        //SDL_SetHint(SDL_HINT_RENDER_BATCHING, "1");
+        SDL_SetHint(SDL_HINT_RENDER_BATCHING, "1");
 
         enforce(SDL_CreateWindowAndRenderer(_width, _height,
                 SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_WINDOW_RESIZABLE,

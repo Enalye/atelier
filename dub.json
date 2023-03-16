@@ -25,11 +25,18 @@
     "subConfigurations": {
         "bindbc-sdl": "static"
     },
-    "libs": [
+    "libs-windows": [
         "libs/$PLATFORM/$ARCH/SDL2",
         "libs/$PLATFORM/$ARCH/SDL2_image",
         "libs/$PLATFORM/$ARCH/SDL2_mixer",
         "libs/$PLATFORM/$ARCH/SDL2_ttf"
+    ],
+    "lflags": ["-L-Llibs/$PLATFORM/$ARCH/", "-L-lz"],
+    "libs-posix": [
+        "SDL2",
+        "SDL2_image",
+        "SDL2_mixer",
+        "SDL2_ttf"
     ],
     "configurations": [
         {

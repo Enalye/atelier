@@ -1,0 +1,56 @@
+{
+    "authors": [
+        "enalye"
+    ],
+    "copyright": "Copyright © 2023, Enalye",
+    "description": "Framework 2D pour Grimoire",
+    "license": "Zlib",
+    "name": "dahu",
+    "targetType": "executable",
+    "targetName": "dahu",
+    "targetPath": "bin",
+    "workingDirectory": ".",
+    "dependencies": {
+        "grimoire": {
+            "path": "grimoire"
+        },
+        "bindbc-sdl": "~master"
+    },
+    "versions": [
+        "SDL_2_26",
+        "SDL_Image_2_6",
+        "SDL_Mixer_2_6",
+        "SDL_TTF_2_20"
+    ],
+    "subConfigurations": {
+        "bindbc-sdl": "static"
+    },
+    "libs": [
+        "libs/$PLATFORM/$ARCH/SDL2",
+        "libs/$PLATFORM/$ARCH/SDL2_image",
+        "libs/$PLATFORM/$ARCH/SDL2_mixer",
+        "libs/$PLATFORM/$ARCH/SDL2_ttf"
+    ],
+    "configurations": [
+        {
+            "name": "debug",
+            "targetPath": "bin"
+        },
+        {
+            "name": "dahu_dev",
+            "versions": [
+                "DahuDev"
+            ],
+            "targetPath": "export",
+            "targetName": "dahu"
+        },
+        {
+            "name": "dahu_rt",
+            "versions": [
+                "DahuRT"
+            ],
+            "targetPath": "export",
+            "targetName": "dahurt"
+        }
+    ]
+}

@@ -7,12 +7,10 @@
 *.dylib
 *.dll
 
-# Compiled Static libraries
-*.a
-*.lib
-
 # Executables
 *.exe
+bin/
+export/
 
 # DUB
 .dub

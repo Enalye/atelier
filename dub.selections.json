@@ -1,0 +1,8 @@
+{
+	"fileVersion": 1,
+	"versions": {
+		"bindbc-loader": "1.0.3",
+		"bindbc-sdl": "~master",
+		"grimoire": {"path":"grimoire"}
+	}
+}

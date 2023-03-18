@@ -17,6 +17,7 @@
         "bindbc-sdl": "~master"
     },
     "versions": [
+        "BindSDL_Static",
         "SDL_2_26",
         "SDL_Image_2_6",
         "SDL_Mixer_2_6",
@@ -31,7 +32,10 @@
         "libs/$PLATFORM/$ARCH/SDL2_mixer",
         "libs/$PLATFORM/$ARCH/SDL2_ttf"
     ],
-    "lflags": ["-L-Llibs/$PLATFORM/$ARCH/", "-L-lz"],
+    "lflags-posix": [
+        "-L-Llibs/$PLATFORM/$ARCH/",
+        "-L-lz"
+    ],
     "libs-posix": [
         "SDL2",
         "SDL2_image",
@@ -41,7 +45,11 @@
     "configurations": [
         {
             "name": "debug",
-            "targetPath": "bin"
+            "targetPath": "bin",
+            "dflags": ["-gf"],
+            "versions": [
+                "DahuDebug"
+            ]
         },
         {
             "name": "dahu_dev",

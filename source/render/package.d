@@ -3,8 +3,9 @@
  * License: Zlib
  * Authors: Enalye
  */
-module runtime;
+module render;
 
 public {
-    import runtime.application;
+    import render.renderer;
+    import render.texture;
 }

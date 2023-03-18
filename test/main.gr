@@ -1,0 +1,3 @@
+event main() {
+    print("Main");
+}

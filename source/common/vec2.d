@@ -3,12 +3,12 @@
  * License: Zlib
  * Authors: Enalye
  */
-module dahu.common.vec2;
+module common.vec2;
 
 import std.math;
 
-import dahu.common.vec3;
-import dahu.common.vec4;
+import common.vec3;
+import common.vec4;
 
 /// Ratio to multiply with to get a value in radians from a value in degrees.
 enum double degToRad = std.math.PI / 180.0;

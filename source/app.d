@@ -3,20 +3,24 @@
  * License: Zlib
  * Authors: Enalye
  */
-
-import std.stdio;
-import std.exception;
-import std.string;
-
-import dahu.cli;
+import cli;
 
 void main(string[] args) {
-    writeln("yo");
     version (Windows) {
         import core.sys.windows.windows : SetConsoleOutputCP;
 
         SetConsoleOutputCP(65_001);
     }
-    
-    parseCommand(args);
+
+    try {
+        parseCommand(args);
+    }
+    catch (Exception e) {
+        import std.stdio;
+
+        writeln("Erreur: ", e.msg);
+        foreach (trace; e.info) {
+            writeln("at: ", trace);
+        }
+    }
 }

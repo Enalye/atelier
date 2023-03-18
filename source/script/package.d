@@ -3,7 +3,7 @@
  * License: Zlib
  * Authors: Enalye
  */
-module dahu.script;
+module script;
 
 import grimoire;
 

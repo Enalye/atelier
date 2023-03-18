@@ -3,12 +3,14 @@
  * License: Zlib
  * Authors: Enalye
  */
-module dahu.window;
+module window;
 
 import std.exception : enforce;
 import std.string : toStringz, fromStringz;
 
 import bindbc.sdl;
+
+import render;
 
 final class Window {
     enum Display {
@@ -19,7 +21,7 @@ final class Window {
 
     private {
         SDL_Window* _sdlWindow;
-        SDL_Renderer* _sdlRenderer;
+        Renderer _renderer;
         SDL_Surface* _icon;
         string _title;
         uint _width, _height;
@@ -50,14 +52,26 @@ final class Window {
                 1024) != -1, "no audio device connected");
         enforce(Mix_AllocateChannels(16) != -1, "audio channels allocation failure");
 
-        IMG_Load(toStringz("yo"));
-
-
-        SDL_SetHint(SDL_HINT_RENDER_BATCHING, "1");
-
+        SDL_Renderer* _sdlRenderer;
         enforce(SDL_CreateWindowAndRenderer(_width, _height,
                 SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_WINDOW_RESIZABLE,
                 &_sdlWindow, &_sdlRenderer) != -1, "window initialisation failure");
 
+        _renderer = new Renderer(_sdlRenderer);
+    }
+
+    void close() {
+        SDL_DestroyWindow(_sdlWindow);
+        Mix_CloseAudio();
+    }
+
+    void setIcon(string path) {
+        if (_icon) {
+            SDL_FreeSurface(_icon);
+            _icon = null;
+        }
+        _icon = IMG_Load(toStringz(path));
+
+        SDL_SetWindowIcon(_sdlWindow, _icon);
     }
 }

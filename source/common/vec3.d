@@ -3,10 +3,10 @@
  * License: Zlib
  * Authors: Enalye
  */
-module dahu.common.vec3;
+module common.vec3;
 
 import std.math;
-import dahu.common.vec2;
+import common.vec2;
 
 /// Represent a mathematical 3-dimensional vector.
 struct Vec3(T) {

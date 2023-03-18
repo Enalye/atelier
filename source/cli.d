@@ -3,11 +3,13 @@
  * License: Zlib
  * Authors: Enalye
  */
-module dahu.cli;
+module cli;
 
 import std.stdio;
 import std.string;
 import std.algorithm;
+
+import runtime;
 
 enum DH_VERSION = "v0.0.0";
 
@@ -99,6 +101,9 @@ void displayHelp(string[] args = []) {
 
 void runProject() {
     writeln("running app");
+
+    Runtime rt = new Runtime();
+    rt.run();
 }
 
 void initProject() {

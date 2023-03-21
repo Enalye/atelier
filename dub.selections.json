@@ -2,7 +2,7 @@
 	"fileVersion": 1,
 	"versions": {
 		"bindbc-loader": "1.0.3",
-		"bindbc-sdl": "~master",
+		"bindbc-sdl": "1.3.3",
 		"grimoire": {"path":"grimoire"}
 	}
 }

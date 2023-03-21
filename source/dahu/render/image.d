@@ -3,17 +3,27 @@
  * License: Zlib
  * Authors: Enalye
  */
-module render.image;
+module dahu.render.image;
 
 import std.conv : to;
 
-import common;
+import dahu.common;
 
-import render.texture;
+import dahu.render.texture;
 
 final class Image {
     private {
         Texture _texture;
+    }
+
+    @property {
+        pragma(inline) uint width() const {
+            return _texture.width;
+        }
+
+        pragma(inline) uint height() const {
+            return _texture.height;
+        }
     }
 
     Vec2f size = Vec2f.zero;
@@ -36,6 +46,10 @@ final class Image {
 
     this(string path) {
         _texture = fetchPrototype!Texture(path);
+    }
+
+    this(Texture tex) {
+        _texture = tex;
     }
 
     this(Image img) {
@@ -62,10 +76,10 @@ final class Image {
         size = to!Vec2f(clip.zw).contain(size_);
     }
 
-    void draw(float x, float y) {
+    void draw(Vec2f pos) {
         _texture.color = color;
         _texture.blend = blend;
         _texture.alpha = alpha;
-        _texture.draw(x, y, size.x, size.y, clip, angle, pivot, flipX, flipY);
+        _texture.draw(pos, size, clip, angle, pivot, flipX, flipY);
     }
 }

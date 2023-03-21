@@ -3,7 +3,7 @@
  * License: Zlib
  * Authors: Enalye
  */
-module render.texture;
+module dahu.render.texture;
 
 import std.string;
 import std.exception;
@@ -11,8 +11,8 @@ import std.algorithm.comparison : clamp;
 
 import bindbc.sdl;
 
-import common;
-import render.renderer;
+import dahu.common;
+import dahu.render.renderer;
 
 /// Indicate if something is mirrored.
 enum Flip {
@@ -260,16 +260,16 @@ final class Texture {
     }
 
     /// Dessine la texture
-    void draw(float x, float y, float w, float h, Vec4i clip, double angle,
+    void draw(Vec2f pos, Vec2f size, Vec4i clip, double angle,
         Vec2f pivot = Vec2f.zero, bool flipX = false, bool flipY = false) const {
         enforce(_isLoaded, "can't render the texture: asset not loaded");
 
         SDL_Rect sdlSrc = clip.toSdlRect();
-        SDL_FRect sdlDest = {x, y, w, h};
+        SDL_FRect sdlDest = {pos.x, pos.y, size.x, size.y};
         SDL_FPoint sdlPivot = {pivot.x, pivot.y};
 
         SDL_RenderCopyExF(sdlRenderer, cast(SDL_Texture*) _texture, &sdlSrc, //
-            &sdlDest, angle, null, //
+            &sdlDest, angle, &sdlPivot, //
             (flipX ? SDL_FLIP_HORIZONTAL
                 : SDL_FLIP_NONE) | //
             (flipY ? SDL_FLIP_VERTICAL : SDL_FLIP_NONE));

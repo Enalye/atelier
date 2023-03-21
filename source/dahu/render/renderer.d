@@ -3,7 +3,7 @@
  * License: Zlib
  * Authors: Enalye
  */
-module render.renderer;
+module dahu.render.renderer;
 
 import bindbc.sdl;
 

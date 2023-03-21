@@ -3,7 +3,7 @@
  * License: Zlib
  * Authors: Enalye
  */
-module runtime.application;
+module dahu.core.runtime;
 
 import std.stdio : writeln;
 import std.path, std.file, std.exception;
@@ -12,12 +12,22 @@ import core.thread;
 
 import grimoire;
 
-import common, window;
+import dahu.common, dahu.window, dahu.ui, dahu.input;
 
-import runtime.loader;
+import dahu.core.loader;
 
 private void _print(string msg) {
     writeln(msg);
+}
+
+private {
+    Runtime _runtime;
+}
+
+@property pragma(inline) {
+    Runtime runtime() {
+        return _runtime;
+    }
 }
 
 final class Runtime {
@@ -25,7 +35,7 @@ final class Runtime {
         string _filePath;
 
         // Grimoire
-        GrEngine _engine;
+        GrEngine _grEngine;
         GrLibrary _stdLib;
         GrLibrary _dhLib;
         GrBytecode _bytecode;
@@ -40,6 +50,14 @@ final class Runtime {
         int _nominalFPS = 60;
 
         Window _window;
+        UI _ui;
+        Input _input;
+    }
+
+    @property {
+        pragma(inline) Window window() {
+            return _window;
+        }
     }
 
     version (DahuDebug) this() {
@@ -60,7 +78,7 @@ final class Runtime {
         enforce(exists(path), "boot file does not exist `" ~ _filePath ~ "`");
 
         _stdLib = grLoadStdLibrary();
-writeln("A");
+
         version (DahuRT) {
             _bytecode = new GrBytecode(path);
         }
@@ -68,71 +86,70 @@ writeln("A");
             GrCompiler compiler = new GrCompiler;
             compiler.addLibrary(_stdLib);
 
+            compiler.addFile(path);
+
             version (DahuDev) {
-                _bytecode = compiler.compileFile(path, GrOption.symbols, GrLocale.fr_FR);
+                _bytecode = compiler.compile(GrOption.symbols, GrLocale.fr_FR);
             }
             else version (DahuDebug) {
-writeln("aa");
-                _bytecode = compiler.compileFile(path,
-                    GrOption.profile | GrOption.symbols | GrOption.safe, GrLocale.fr_FR);
-writeln("aab");
+                _bytecode = compiler.compile(GrOption.profile | GrOption.symbols | GrOption.safe,
+                    GrLocale.fr_FR);
             }
 
-writeln("aac");
             if (!_bytecode) {
                 writeln(compiler.getError().prettify(GrLocale.fr_FR));
                 return;
             }
         }
-writeln("B");
 
-        _engine = new GrEngine;
-        _engine.addLibrary(_stdLib);
-        _engine.load(_bytecode);
+        _grEngine = new GrEngine;
+        _grEngine.addLibrary(_stdLib);
+        _grEngine.load(_bytecode);
 
-        _engine.callEvent("main");
+        _grEngine.callEvent("main");
 
         grSetOutputFunction(&_print);
 
         _window = new Window(800, 600);
+        _ui = new UI();
+        _input = new Input();
 
         loadResources();
-writeln("C");
     }
 
     void run() {
-        if (!_engine)
+        if (!_grEngine)
             return;
 
         _tickStartFrame = Clock.currStdTime();
 
-        while (true) {
-            //InputEvent[] inputEvents = currentApplication.pollEvents();
+        while (!_input.hasQuit()) {
+            InputEvent[] inputEvents = _input.pollEvents();
 
-            if (_engine) {
+            if (_grEngine) {
                 /*if (_inputEvent) {
                     foreach (InputEvent inputEvent; inputEvents) {
-                        _engine.callEvent(_inputEvent, [GrValue(inputEvent)]);
+                        _grEngine.callEvent(_inputEvent, [GrValue(inputEvent)]);
                     }
                 }*/
 
-                if (_engine.hasTasks)
-                    _engine.process();
+                if (_grEngine.hasTasks)
+                    _grEngine.process();
                 else {
-                    _engine = null;
+                    _grEngine = null;
                     return;
                 }
 
                 //remove!(a => a.isAccepted)(inputEvents);
 
-                if (_engine.isPanicking) {
-                    string err = "panique: " ~ _engine.panicMessage ~ "\n";
-                    foreach (trace; _engine.stackTraces) {
+                if (_grEngine.isPanicking) {
+                    string err = "panique: " ~ _grEngine.panicMessage ~ "\n";
+                    foreach (trace; _grEngine.stackTraces) {
                         err ~= "[" ~ to!string(
                             trace.pc) ~ "] dans " ~ trace.name ~ " à " ~ trace.file ~ "(" ~ to!string(
                             trace.line) ~ "," ~ to!string(trace.column) ~ ")\n";
                     }
-                    _engine = null;
+                    _grEngine = null;
                     writeln(err);
                     return;
                 }

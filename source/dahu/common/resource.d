@@ -3,14 +3,14 @@
  * License: Zlib
  * Authors: Enalye
  */
-module common.resource;
+module dahu.common.resource;
 
 import std.typecons;
 import std.algorithm : count;
 import std.conv : to;
 import std.traits : isCopyable;
 
-import render;
+import dahu.render;
 
 private {
     void*[string] _caches;

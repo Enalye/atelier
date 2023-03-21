@@ -3,7 +3,7 @@
  * License: Zlib
  * Authors: Enalye
  */
-module common.color;
+module dahu.common.color;
 
 import std.math;
 import std.typecons;
@@ -12,8 +12,8 @@ import std.algorithm.comparison : clamp;
 
 import bindbc.sdl;
 
-import common.stream;
-import common.vec3;
+import dahu.common.stream;
+import dahu.common.vec3;
 
 /// An RGB color structure.
 struct Color {

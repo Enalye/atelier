@@ -3,11 +3,11 @@
  * License: Zlib
  * Authors: Enalye
  */
-module common.vec4;
+module dahu.common.vec4;
 
 import bindbc.sdl;
 
-import common.vec2;
+import dahu.common.vec2;
 
 struct Vec4(T) {
     static assert(__traits(isArithmetic, T));

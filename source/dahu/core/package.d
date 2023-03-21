@@ -3,8 +3,8 @@
  * License: Zlib
  * Authors: Enalye
  */
-module runtime;
+module dahu.core;
 
 public {
-    import runtime.application;
+    import dahu.core.runtime;
 }

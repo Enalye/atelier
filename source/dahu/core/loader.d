@@ -3,13 +3,13 @@
  * License: Zlib
  * Authors: Enalye
  */
-module runtime.loader;
+module dahu.core.loader;
 
 import std.file;
 import std.path;
 import std.stdio;
 
-import common, render;
+import dahu.common, dahu.render;
 
 package void loadResources() {
     auto files = dirEntries(buildNormalizedPath("test", "assets"), SpanMode.depth);

@@ -3,7 +3,7 @@
  * License: Zlib
  * Authors: Enalye
  */
-import cli;
+import dahu.cli;
 
 void main(string[] args) {
     version (Windows) {

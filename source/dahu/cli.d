@@ -3,13 +3,13 @@
  * License: Zlib
  * Authors: Enalye
  */
-module cli;
+module dahu.cli;
 
 import std.stdio;
 import std.string;
 import std.algorithm;
 
-import runtime;
+import dahu.core;
 
 enum DH_VERSION = "v0.0.0";
 

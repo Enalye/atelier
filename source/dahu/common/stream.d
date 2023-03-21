@@ -3,7 +3,7 @@
  * License: Zlib
  * Authors: Enalye
  */
-module common.stream;
+module dahu.common.stream;
 
 import std.array;
 import std.conv;

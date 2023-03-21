@@ -3,14 +3,24 @@
  * License: Zlib
  * Authors: Enalye
  */
-module window;
+module dahu.window;
 
 import std.exception : enforce;
 import std.string : toStringz, fromStringz;
 
 import bindbc.sdl;
 
-import render;
+import dahu.render;
+
+private {
+    Window _window;
+}
+
+@property {
+    pragma(inline) Window getWindow() {
+        return _window;
+    }
+}
 
 final class Window {
     enum Display {
@@ -38,6 +48,14 @@ final class Window {
             SDL_SetWindowTitle(_sdlWindow, toStringz(_title));
             return _title;
         }
+
+        uint width() const {
+            return _width;
+        }
+
+        uint height() const {
+            return _height;
+        }
     }
 
     this(uint width_, uint height_) {
@@ -58,6 +76,8 @@ final class Window {
                 &_sdlWindow, &_sdlRenderer) != -1, "window initialisation failure");
 
         _renderer = new Renderer(_sdlRenderer);
+
+        _window = this;
     }
 
     void close() {

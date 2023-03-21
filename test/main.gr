@@ -1,3 +1,7 @@
 event main() {
     print("Main");
+
+    loop yield {}
 }
+
+//grimoire freeze sur des fichiers vides

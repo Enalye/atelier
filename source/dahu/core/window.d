@@ -3,7 +3,7 @@
  * License: Zlib
  * Authors: Enalye
  */
-module dahu.window;
+module dahu.core.window;
 
 import std.exception : enforce;
 import std.string : toStringz, fromStringz;
@@ -38,6 +38,10 @@ final class Window {
     }
 
     @property {
+        Renderer renderer() {
+            return _renderer;
+        }
+
         /// Titre de la fenêtre
         string title() const {
             return _title;

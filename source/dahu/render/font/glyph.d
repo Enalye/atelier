@@ -5,7 +5,7 @@
  */
 module dahu.render.font.glyph;
 
-import dahu.common, dahu.window;
+import dahu.common, dahu.core;
 
 import dahu.render.texture;
 
@@ -27,7 +27,7 @@ interface Glyph {
     }
 
     /// Render glyph
-    void draw(Vec2f, float, Color, float);
+    void draw(float x, float y, float, Color, float);
 }
 
 /// Ditto
@@ -93,11 +93,11 @@ final class BasicGlyph : Glyph {
     }
 
     /// Render glyph
-    void draw(Vec2f pos, float scale, Color color, float alpha) {
-        const Vec2f size = Vec2f(_width, _height) * scale;
+    void draw(float x, float y, float scale, Color color, float alpha) {
         _texture.color = color;
         _texture.blend = Blend.alpha;
         _texture.alpha = alpha;
-        _texture.draw(pos, size, Vec4i(_packX, _packY, _packWidth, _packHeight), 0f);
+        _texture.draw(x, y, _width * scale, _height * scale, Vec4i(_packX,
+                _packY, _packWidth, _packHeight), 0f);
     }
 }

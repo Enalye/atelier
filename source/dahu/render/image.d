@@ -76,10 +76,10 @@ final class Image {
         size = to!Vec2f(clip.zw).contain(size_);
     }
 
-    void draw(Vec2f pos) {
+    void draw(float x, float y) {
         _texture.color = color;
         _texture.blend = blend;
         _texture.alpha = alpha;
-        _texture.draw(pos, size, clip, angle, pivot, flipX, flipY);
+        _texture.draw(x, y, size.x, size.y, clip, angle, pivot, flipX, flipY);
     }
 }

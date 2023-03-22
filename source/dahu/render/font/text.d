@@ -7,7 +7,7 @@ import dahu.common;
 import dahu.render.font.font, dahu.render.font.glyph;
 
 /// Render text on screen
-void drawText(string text, Vec2f start, Color color, float alpha = 1f, Font font = null) {
+/+void drawText(string text, Vec2f start, Color color, float alpha = 1f, Font font = null) {
     if (!font)
         font = getDefaultFont();
     const _charScale = 1;
@@ -57,4 +57,4 @@ Vec2f getTextSize(string text, Font font = null) {
         }
     }
     return size;
-}
+}+/

@@ -1,7 +1,27 @@
 event main() {
     print("Main");
 
-    loop yield {}
-}
+    
+    var label = @Label("Bonjour à tous !");
+    label.pos(50f, 200f);
+    label.align(AlignX.right, AlignY.top);
+    appendUI(label);
 
-//grimoire freeze sur des fichiers vides
+
+    var state = @UIState("hidden");
+    state.time = .25f;
+    state.time += 2f;
+    state.spline = Spline.sineInOut;
+    state.alpha = 0f;
+    state.offsetX = -100f;
+    state.angle = 45f;
+    label.addState(state);
+
+    sleep(2.seconds);
+    label.runState("hidden");
+
+    loop yield {
+        if(isPressed(KeyButton.escape))
+            exit;
+    }
+}

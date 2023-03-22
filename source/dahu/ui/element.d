@@ -1,11 +1,12 @@
 module dahu.ui.element;
 
-import dahu.common;
+import dahu.common, dahu.render;
 
 /// Abstract class representing an UI element
 abstract class UIElement {
     public {
         UIElement[] _children;
+        Canvas _canvas;
     }
 
     float posX = 0f, posY = 0f;
@@ -53,5 +54,11 @@ abstract class UIElement {
     // Propriétés
     bool isHovered, isClicked;
 
-    void draw(Mat3f);
+    @property {
+        pragma(inline) final Canvas canvas() {
+            return _canvas;
+        }
+    }
+
+    void draw();
 }

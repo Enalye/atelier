@@ -12,21 +12,21 @@ import core.thread;
 
 import grimoire;
 
-import dahu.common, dahu.window, dahu.ui, dahu.input;
+import dahu.common, dahu.ui, dahu.input, dahu.render, dahu.script;
 
-import dahu.core.loader;
+import dahu.core.loader, dahu.core.window;
 
 private void _print(string msg) {
     writeln(msg);
 }
 
 private {
-    Runtime _runtime;
+    Runtime _app;
 }
 
 @property pragma(inline) {
-    Runtime runtime() {
-        return _runtime;
+    Runtime app() {
+        return _app;
     }
 }
 
@@ -50,6 +50,7 @@ final class Runtime {
         int _nominalFPS = 60;
 
         Window _window;
+        Renderer _renderer;
         UI _ui;
         Input _input;
     }
@@ -58,19 +59,34 @@ final class Runtime {
         pragma(inline) Window window() {
             return _window;
         }
+
+        pragma(inline) Renderer renderer() {
+            return _renderer;
+        }
+
+        pragma(inline) UI ui() {
+            return _ui;
+        }
+
+        pragma(inline) Input input() {
+            return _input;
+        }
     }
 
     version (DahuDebug) this() {
+        _app = this;
         string path = buildNormalizedPath("test", "main.gr");
 
         _load(path);
     }
 
     version (DahuRT) this() {
+        _app = this;
 
     }
 
     version (DahuDev) this(string path) {
+        _app = this;
         _load(path);
     }
 
@@ -78,6 +94,7 @@ final class Runtime {
         enforce(exists(path), "boot file does not exist `" ~ _filePath ~ "`");
 
         _stdLib = grLoadStdLibrary();
+        _dhLib = loadLibrary();
 
         version (DahuRT) {
             _bytecode = new GrBytecode(path);
@@ -85,6 +102,7 @@ final class Runtime {
         else {
             GrCompiler compiler = new GrCompiler;
             compiler.addLibrary(_stdLib);
+            compiler.addLibrary(_dhLib);
 
             compiler.addFile(path);
 
@@ -104,6 +122,7 @@ final class Runtime {
 
         _grEngine = new GrEngine;
         _grEngine.addLibrary(_stdLib);
+        _grEngine.addLibrary(_dhLib);
         _grEngine.load(_bytecode);
 
         _grEngine.callEvent("main");
@@ -111,6 +130,7 @@ final class Runtime {
         grSetOutputFunction(&_print);
 
         _window = new Window(800, 600);
+        _renderer = _window.renderer;
         _ui = new UI();
         _input = new Input();
 
@@ -122,6 +142,8 @@ final class Runtime {
             return;
 
         _tickStartFrame = Clock.currStdTime();
+
+        _ui.appendRoot(new Label("Hallaaaao !"));
 
         while (!_input.hasQuit()) {
             InputEvent[] inputEvents = _input.pollEvents();
@@ -154,6 +176,11 @@ final class Runtime {
                     return;
                 }
             }
+
+            _ui.update(_deltatime);
+            _ui.draw();
+
+            _renderer.render();
 
             long deltaTicks = Clock.currStdTime() - _tickStartFrame;
             if (deltaTicks < (10_000_000 / _nominalFPS))

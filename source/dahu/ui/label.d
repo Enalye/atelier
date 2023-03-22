@@ -55,12 +55,12 @@ final class Label : UIElement {
         reload();
     }
 
-    override void draw(Mat3f transform) {
-        Vec2f pos = transform.toVector();
+    override void draw() {
+        Vec2f pos = Vec2f.zero;
         dchar prevChar;
         foreach (dchar ch; _text) {
             if (ch == '\n') {
-                pos.x = transform.toVector().x;
+                pos.x = 0f;
                 pos.y += _font.lineSkip * _charScale;
                 prevChar = 0;
             }
@@ -69,9 +69,11 @@ final class Label : UIElement {
                 if (!metrics.exists)
                     continue;
                 pos.x += _font.getKerning(prevChar, ch) * _charScale;
-                Vec2f drawPos = Vec2f(pos.x + metrics.offsetX * _charScale,
-                    pos.y - metrics.offsetY * _charScale);
-                metrics.draw(drawPos, _charScale, Color.white, alpha);
+
+                float x = pos.x + metrics.offsetX * _charScale;
+                float y = pos.y - metrics.offsetY * _charScale;
+
+                metrics.draw(x, y, _charScale, Color.white, alpha);
                 pos.x += (metrics.advance + _charSpacing) * _charScale;
                 prevChar = ch;
             }

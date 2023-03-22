@@ -12,6 +12,8 @@ import std.stdio;
 import dahu.common, dahu.render;
 
 package void loadResources() {
+    initFont();
+
     auto files = dirEntries(buildNormalizedPath("test", "assets"), SpanMode.depth);
 
     foreach (file; files) {

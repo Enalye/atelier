@@ -7,6 +7,10 @@ module dahu.script;
 
 import grimoire;
 
+import dahu.script.input;
+import dahu.script.spline;
+import dahu.script.ui;
+
 /// Charge la bibliothèque
 GrLibrary loadLibrary() {
     GrLibrary library = new GrLibrary;
@@ -20,6 +24,5 @@ GrLibrary loadLibrary() {
 
 /// Retourne les fonctions de chargement de la bibliothèque
 GrLibLoader[] getLibraryLoaders() {
-    return [
-    ];
+    return [&loadLibInput, &loadLibSpline, &loadLibUI];
 }

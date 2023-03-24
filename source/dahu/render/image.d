@@ -10,10 +10,11 @@ import std.conv : to;
 import dahu.common;
 
 import dahu.render.drawable;
+import dahu.render.graphic;
 import dahu.render.texture;
 import dahu.render.util;
 
-final class Image : Drawable {
+final class Image : Graphic, Drawable {
     private {
         Texture _texture;
     }

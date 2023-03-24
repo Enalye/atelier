@@ -13,43 +13,26 @@ import bindbc.sdl;
 
 import dahu.common;
 
+import dahu.render.graphic;
 import dahu.render.image;
 import dahu.render.texture;
 import dahu.render.util;
 
-/// Series of aligned tiles.
-final class Tileset {
+/// Jeu de tuiles
+final class Tileset : Graphic {
     private {
         Texture _texture;
     }
 
     @property {
-        pragma(inline) uint width() const {
+        pragma(inline) override uint width() const {
             return _texture.width;
         }
 
-        pragma(inline) uint height() const {
+        pragma(inline) override uint height() const {
             return _texture.height;
         }
     }
-
-    float sizeX = 0f, sizeY = 0f;
-
-    Vec4i clip;
-
-    double angle = 0.0;
-
-    bool flipX, flipY;
-
-    Vec2f anchor = Vec2f.zero;
-
-    Vec2f pivot = Vec2f.zero;
-
-    Blend blend = Blend.alpha;
-
-    Color color = Color.white;
-
-    float alpha = 1f;
 
     int columns, lines, maxCount;
     int marginX, marginY;
@@ -67,19 +50,8 @@ final class Tileset {
 
     /// Copie
     this(Tileset tileset) {
+        super(tileset);
         _texture = tileset._texture;
-        sizeX = tileset.sizeX;
-        sizeY = tileset.sizeY;
-        clip = tileset.clip;
-        angle = tileset.angle;
-        flipX = tileset.flipX;
-        flipY = tileset.flipY;
-        anchor = tileset.anchor;
-        pivot = tileset.pivot;
-        blend = tileset.blend;
-        color = tileset.color;
-        alpha = tileset.alpha;
-        clip = tileset.clip;
         columns = tileset.columns;
         lines = tileset.lines;
         maxCount = tileset.maxCount;

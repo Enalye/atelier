@@ -14,12 +14,13 @@ import dahu.common;
 import dahu.core;
 
 import dahu.render.drawable;
+import dahu.render.graphic;
 import dahu.render.image;
 import dahu.render.texture;
 import dahu.render.tileset;
 
 /// Série d’images joués séquenciellement
-final class Animation : Drawable {
+final class Animation : Graphic, Drawable {
     private {
         Texture _texture;
         int _frame;

@@ -3,7 +3,7 @@
  * License: Zlib
  * Authors: Enalye
  */
-module dahu.render.nintepatch;
+module dahu.render.ninepatch;
 
 import std.conv : to;
 import std.algorithm.comparison : min;
@@ -13,13 +13,15 @@ import bindbc.sdl;
 
 import dahu.common;
 import dahu.core;
+
 import dahu.render.drawable;
+import dahu.render.graphic;
 import dahu.render.texture;
 import dahu.render.writabletexture;
 import dahu.render.util;
 
 /// Render a resizable repeated sprite with borders. (ex: bubble speech).
-final class NinePatch : Drawable {
+final class NinePatch : Graphic, Drawable {
     @property {
         pragma(inline) override uint width() const {
             return _cache.width;

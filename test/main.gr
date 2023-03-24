@@ -9,15 +9,14 @@ event main() {
 
 
     var state = @UIState("hidden");
-    state.time = .25f;
-    state.time += 2f;
+    state.time = 500;
     state.spline = Spline.sineInOut;
     state.alpha = 0f;
     state.offsetX = -100f;
     state.angle = 45f;
     label.addState(state);
 
-    sleep(2.seconds);
+    sleep(1.seconds);
     label.runState("hidden");
 
     loop yield {

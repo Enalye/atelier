@@ -31,15 +31,14 @@ final class Window {
 
     private {
         SDL_Window* _sdlWindow;
-        Renderer _renderer;
         SDL_Surface* _icon;
         string _title;
         uint _width, _height;
     }
 
     @property {
-        Renderer renderer() {
-            return _renderer;
+        SDL_Window* sdlWindow() {
+            return _sdlWindow;
         }
 
         /// Titre de la fenêtre
@@ -74,12 +73,9 @@ final class Window {
                 1024) != -1, "no audio device connected");
         enforce(Mix_AllocateChannels(16) != -1, "audio channels allocation failure");
 
-        SDL_Renderer* _sdlRenderer;
-        enforce(SDL_CreateWindowAndRenderer(_width, _height,
-                SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_WINDOW_RESIZABLE,
-                &_sdlWindow, &_sdlRenderer) != -1, "window initialisation failure");
-
-        _renderer = new Renderer(_sdlRenderer);
+        _sdlWindow = SDL_CreateWindow(toStringz("dahu"), SDL_WINDOWPOS_CENTERED,
+            SDL_WINDOWPOS_CENTERED, _width, _height, SDL_WINDOW_RESIZABLE);
+        enforce(_sdlWindow, "window initialisation failure");
 
         _window = this;
     }

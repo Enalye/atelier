@@ -19,16 +19,16 @@ class UI {
     }
 
     /// Update
-    void update(float deltaTime) {
+    void update() {
         foreach (UIElement element; _roots) {
-            update(deltaTime, element);
+            update(element);
         }
     }
 
-    private void update(float deltaTime, UIElement element) {
+    private void update(UIElement element) {
         // Compute transitions
         if (element.timer.isRunning) {
-            element.timer.update(deltaTime);
+            element.timer.update();
 
             SplineFunc splineFunc = getSplineFunc(element.targetState.spline);
             const float t = splineFunc(element.timer.value01);
@@ -45,7 +45,7 @@ class UI {
 
         // Update children
         foreach (UIElement child; element._children) {
-            update(deltaTime, child);
+            update(child);
         }
     }
 
@@ -85,17 +85,22 @@ class UI {
             break;
         }
 
-        getRenderer.pushCanvas(cast(uint) element.sizeX, cast(uint) element.sizeY);
+        app.renderer.pushCanvas(cast(uint) element.sizeX, cast(uint) element.sizeY);
+
+        foreach (Drawable drawable; element._drawables) {
+            drawable.draw(0f, 0f);
+        }
 
         element.draw();
+
         foreach (UIElement child; element._children) {
             draw(child, element);
         }
 
         float sizeX = element.scaleX * element.sizeX;
         float sizeY = element.scaleY * element.sizeY;
-        getRenderer.popCanvas(x, y, sizeX, sizeY, element.pivotX * sizeX,
-            element.pivotY * sizeY, element.angle);
+        app.renderer.popCanvas(x, y, sizeX, sizeY, element.pivotX * sizeX,
+            element.pivotY * sizeY, element.angle, Color.white, element.alpha);
     }
 
     /// Add an UIElement to the manager at root level

@@ -9,77 +9,62 @@ import std.conv : to;
 
 import dahu.common;
 
+import dahu.render.drawable;
 import dahu.render.texture;
+import dahu.render.util;
 
-final class Image {
+final class Image : Drawable {
     private {
         Texture _texture;
     }
 
     @property {
-        pragma(inline) uint width() const {
+        pragma(inline) override uint width() const {
             return _texture.width;
         }
 
-        pragma(inline) uint height() const {
+        pragma(inline) override uint height() const {
             return _texture.height;
         }
     }
 
-    Vec2f size = Vec2f.zero;
-
-    Vec4i clip;
-
-    double angle = 0f;
-
-    bool flipX, flipY;
-
-    Vec2f anchor = Vec2f.zero;
-
-    Vec2f pivot = Vec2f.zero;
-
-    Blend blend = Blend.alpha;
-
-    Color color = Color.white;
-
-    float alpha = 1f;
-
-    this(string path) {
-        _texture = fetchPrototype!Texture(path);
+    this(string name) {
+        _texture = fetchPrototype!Texture(name);
+        clip = Vec4i(0, 0, _texture.width, _texture.height);
+        sizeX = _texture.width;
+        sizeY = _texture.height;
     }
 
     this(Texture tex) {
         _texture = tex;
+        clip = Vec4i(0, 0, _texture.width, _texture.height);
+        sizeX = _texture.width;
+        sizeY = _texture.height;
     }
 
     this(Image img) {
+        super(img);
         _texture = img._texture;
-        size = img.size;
-        clip = img.clip;
-        angle = img.angle;
-        flipX = img.flipX;
-        flipY = img.flipY;
-        anchor = img.anchor;
-        pivot = img.pivot;
-        blend = img.blend;
-        color = img.color;
-        alpha = img.alpha;
     }
 
-    /// Set the img's size to fit inside the specified size.
-    void fit(Vec2f size_) {
-        size = to!Vec2f(clip.zw).fit(size_);
+    /// Redimensionne l’image pour qu’elle puisse tenir dans une taille donnée
+    void fit(float x, float y) {
+        Vec2f size = to!Vec2f(clip.zw).fit(Vec2f(x, y));
+        sizeX = size.x;
+        sizeY = size.y;
     }
 
-    /// Set the img's size to contain the specified size.
-    void contain(Vec2f size_) {
-        size = to!Vec2f(clip.zw).contain(size_);
+    /// Redimensionne l’image pour qu’elle puisse contenir une taille donnée
+    void contain(float x, float y) {
+        Vec2f size = to!Vec2f(clip.zw).contain(Vec2f(x, y));
+        sizeX = size.x;
+        sizeY = size.y;
     }
 
-    void draw(float x, float y) {
+    override void draw(float x, float y) {
         _texture.color = color;
         _texture.blend = blend;
         _texture.alpha = alpha;
-        _texture.draw(x, y, size.x, size.y, clip, angle, pivot, flipX, flipY);
+        _texture.draw(x, y, sizeX, sizeY, clip, angle, pivot, flipX, flipY);
     }
 }

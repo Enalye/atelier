@@ -10,9 +10,12 @@ import std.exception : enforce;
 
 import bindbc.sdl;
 
-import dahu.common, dahu.core;
+import dahu.common;
+import dahu.core;
 
-import dahu.render.texture, dahu.render.renderer;
+import dahu.render.renderer;
+import dahu.render.texture;
+import dahu.render.util;
 
 /// Behave like Texture but you can render onto it.
 /// Use pushCanvas/popCanvas to start the drawing region on it.

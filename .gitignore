@@ -20,3 +20,6 @@ docs/
 
 # Code coverage
 *.lst
+
+# Tests
+test/

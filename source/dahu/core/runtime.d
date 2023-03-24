@@ -130,7 +130,7 @@ final class Runtime {
         grSetOutputFunction(&_print);
 
         _window = new Window(800, 600);
-        _renderer = _window.renderer;
+        _renderer = new Renderer(_window);
         _ui = new UI();
         _input = new Input();
 
@@ -142,54 +142,62 @@ final class Runtime {
             return;
 
         _tickStartFrame = Clock.currStdTime();
-
-        _ui.appendRoot(new Label("Hallaaaao !"));
+        float accumulator = 0f;
 
         while (!_input.hasQuit()) {
-            InputEvent[] inputEvents = _input.pollEvents();
-
-            if (_grEngine) {
-                /*if (_inputEvent) {
-                    foreach (InputEvent inputEvent; inputEvents) {
-                        _grEngine.callEvent(_inputEvent, [GrValue(inputEvent)]);
-                    }
-                }*/
-
-                if (_grEngine.hasTasks)
-                    _grEngine.process();
-                else {
-                    _grEngine = null;
-                    return;
-                }
-
-                //remove!(a => a.isAccepted)(inputEvents);
-
-                if (_grEngine.isPanicking) {
-                    string err = "panique: " ~ _grEngine.panicMessage ~ "\n";
-                    foreach (trace; _grEngine.stackTraces) {
-                        err ~= "[" ~ to!string(
-                            trace.pc) ~ "] dans " ~ trace.name ~ " à " ~ trace.file ~ "(" ~ to!string(
-                            trace.line) ~ "," ~ to!string(trace.column) ~ ")\n";
-                    }
-                    _grEngine = null;
-                    writeln(err);
-                    return;
-                }
-            }
-
-            _ui.update(_deltatime);
-            _ui.draw();
-
-            _renderer.render();
-
             long deltaTicks = Clock.currStdTime() - _tickStartFrame;
-            if (deltaTicks < (10_000_000 / _nominalFPS))
-                Thread.sleep(dur!("hnsecs")((10_000_000 / _nominalFPS) - deltaTicks));
+            //if (deltaTicks < (10_000_000 / _nominalFPS))
+            //    Thread.sleep(dur!("hnsecs")((10_000_000 / _nominalFPS) - deltaTicks));
 
             deltaTicks = Clock.currStdTime() - _tickStartFrame;
             _deltatime = (cast(float)(deltaTicks) / 10_000_000f) * _nominalFPS;
             _currentFps = (_deltatime == .0f) ? .0f : (10_000_000f / cast(float)(deltaTicks));
             _tickStartFrame = Clock.currStdTime();
+
+            accumulator += _deltatime;
+
+            // Màj
+            while (accumulator >= 1f) {
+                InputEvent[] inputEvents = _input.pollEvents();
+
+                if (_grEngine) {
+                    /*if (_inputEvent) {
+                    foreach (InputEvent inputEvent; inputEvents) {
+                        _grEngine.callEvent(_inputEvent, [GrValue(inputEvent)]);
+                    }
+                }*/
+
+                    if (_grEngine.hasTasks)
+                        _grEngine.process();
+                    else {
+                        _grEngine = null;
+                        return;
+                    }
+
+                    //remove!(a => a.isAccepted)(inputEvents);
+
+                    if (_grEngine.isPanicking) {
+                        string err = "panique: " ~ _grEngine.panicMessage ~ "\n";
+                        foreach (trace; _grEngine.stackTraces) {
+                            err ~= "[" ~ to!string(
+                                trace.pc) ~ "] dans " ~ trace.name ~ " à " ~ trace.file ~ "(" ~ to!string(
+                                trace.line) ~ "," ~ to!string(trace.column) ~ ")\n";
+                        }
+                        _grEngine = null;
+                        writeln(err);
+                        return;
+                    }
+                }
+
+                _ui.update();
+
+                accumulator -= 1f;
+            }
+
+            // Rendu
+            _ui.draw();
+
+            _renderer.render();
         }
     }
 }

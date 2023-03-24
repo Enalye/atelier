@@ -25,6 +25,7 @@ package void loadResources() {
         case ".png":
         case ".tga":
             storePrototype!Texture(file, new Texture(file));
+            writeln("loaded: ", file);
             break;
         default:
             break;

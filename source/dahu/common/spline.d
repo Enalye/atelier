@@ -1,11 +1,8 @@
-/**
-    Tweening
-
-    Copyright: (c) Enalye 2017
-    License: Zlib
-    Authors: Enalye
-*/
-
+/** 
+ * Copyright: Enalye
+ * License: Zlib
+ * Authors: Enalye
+ */
 module dahu.common.spline;
 
 import std.math;

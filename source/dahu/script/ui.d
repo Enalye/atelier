@@ -71,7 +71,7 @@ package void loadLibUI(GrLibDefinition lib) {
     lib.addProperty(&_ui_state_alpha!"get", &_ui_state_alpha!"set",
         "alpha", stateType, grFloat);
 
-    lib.addProperty(&_ui_state_time!"get", &_ui_state_time!"set", "time", stateType, grFloat);
+    lib.addProperty(&_ui_state_time!"get", &_ui_state_time!"set", "time", stateType, grInt);
     lib.addProperty(&_ui_state_spline!"get", &_ui_state_spline!"set",
         "spline", stateType, splineType);
 
@@ -413,9 +413,9 @@ private void _ui_state_time(string op)(GrCall call) {
         return;
     }
     static if (op == "set") {
-        state.time = call.getFloat(1);
+        state.time = call.getInt(1);
     }
-    call.setFloat(state.time);
+    call.setInt(state.time);
 }
 
 private void _ui_state_spline(string op)(GrCall call) {

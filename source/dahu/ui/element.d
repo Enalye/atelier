@@ -6,7 +6,7 @@ import dahu.common, dahu.render;
 abstract class UIElement {
     public {
         UIElement[] _children;
-        Canvas _canvas;
+        Drawable[] _drawables;
     }
 
     float posX = 0f, posY = 0f;
@@ -42,7 +42,7 @@ abstract class UIElement {
         float scaleX = 1f, scaleY = 1f;
         float angle = 0f;
         float alpha = 1f;
-        float time = 1f;
+        int time = 60;
         Spline spline = Spline.linear;
     }
 
@@ -53,12 +53,6 @@ abstract class UIElement {
 
     // Propriétés
     bool isHovered, isClicked;
-
-    @property {
-        pragma(inline) final Canvas canvas() {
-            return _canvas;
-        }
-    }
 
     void draw();
 }

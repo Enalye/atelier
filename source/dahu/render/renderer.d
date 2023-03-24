@@ -9,27 +9,22 @@ import std.exception : enforce;
 
 import bindbc.sdl;
 
-import dahu.common;
+import dahu.common, dahu.core;
 
 import dahu.render.canvas;
 
 private {
-    Renderer _renderer;
+    SDL_Renderer* _sdlRenderer;
 }
 
 @property pragma(inline) {
     SDL_Renderer* sdlRenderer() {
-        return _renderer._sdlRenderer;
-    }
-
-    Renderer getRenderer() {
-        return _renderer;
+        return _sdlRenderer;
     }
 }
 
 final class Renderer {
     private {
-        SDL_Renderer* _sdlRenderer;
         final class CanvasContext {
             Canvas canvas;
             Vec4i clip;
@@ -39,9 +34,10 @@ final class Renderer {
         int _idxContext = -1;
     }
 
-    this(SDL_Renderer* sdlRenderer) {
-        _sdlRenderer = sdlRenderer;
-        _renderer = this;
+    this(Window window) {
+        _sdlRenderer = SDL_CreateRenderer(window.sdlWindow, -1,
+            SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+        enforce(_sdlRenderer, "renderer creation failure");
     }
 
     void close() {
@@ -81,7 +77,8 @@ final class Renderer {
         SDL_RenderClear(_sdlRenderer);
     }
 
-    void popCanvas(float x, float y, float w, float h, float pivotX, float pivotY, float angle) {
+    void popCanvas(float x, float y, float w, float h, float pivotX, float pivotY,
+        float angle, Color color, float alpha) {
         if (_idxContext < 0)
             return;
 
@@ -93,6 +90,8 @@ final class Renderer {
         else
             SDL_SetRenderTarget(_sdlRenderer, null);
 
+        context.canvas.color = color;
+        context.canvas.alpha = alpha;
         context.canvas.draw(x, y, w, h, context.clip, pivotX, pivotY, angle);
     }
 }

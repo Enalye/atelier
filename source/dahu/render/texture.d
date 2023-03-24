@@ -13,53 +13,7 @@ import bindbc.sdl;
 
 import dahu.common;
 import dahu.render.renderer;
-
-/// Indicate if something is mirrored.
-enum Flip {
-    none,
-    horizontal,
-    vertical,
-    both
-}
-
-package SDL_RendererFlip getSDLFlip(Flip flip) {
-    final switch (flip) with (Flip) {
-    case both:
-        return cast(SDL_RendererFlip)(SDL_FLIP_HORIZONTAL | SDL_FLIP_VERTICAL);
-    case horizontal:
-        return SDL_FLIP_HORIZONTAL;
-    case vertical:
-        return SDL_FLIP_VERTICAL;
-    case none:
-        return SDL_FLIP_NONE;
-    }
-}
-
-/// Blending algorithm \
-/// none: Paste everything without transparency \
-/// modular: Multiply color value with the destination \
-/// additive: Add color value with the destination \
-/// alpha: Paste everything with transparency (Default one)
-enum Blend {
-    none,
-    modular,
-    additive,
-    alpha
-}
-
-/// Returns the SDL blend flag.
-package SDL_BlendMode getSDLBlend(Blend blend) {
-    final switch (blend) with (Blend) {
-    case alpha:
-        return SDL_BLENDMODE_BLEND;
-    case additive:
-        return SDL_BLENDMODE_ADD;
-    case modular:
-        return SDL_BLENDMODE_MOD;
-    case none:
-        return SDL_BLENDMODE_NONE;
-    }
-}
+import dahu.render.util;
 
 /// Base rendering class.
 final class Texture {
@@ -172,15 +126,15 @@ final class Texture {
 
     /// Call it if you set the preload flag on ctor.
     void postload() {
-        enforce(null != _surface, "invalid surface");
-        enforce(null != sdlRenderer, "the renderer does not exist");
+        enforce(_surface, "invalid surface");
+        enforce(sdlRenderer, "the renderer does not exist");
 
-        if (null != _texture)
+        if (_texture)
             SDL_DestroyTexture(_texture);
         if (_isSmooth)
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
         _texture = SDL_CreateTextureFromSurface(sdlRenderer, _surface);
-        enforce(null != _texture, "error occurred while converting a surface to a texture format");
+        enforce(_texture, "error occurred while converting a surface to a texture format");
         if (_isSmooth)
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
         updateSettings();
@@ -190,21 +144,24 @@ final class Texture {
     package void load(SDL_Surface* surface_) {
         if (_surface && _ownData)
             SDL_FreeSurface(_surface);
+
         _surface = surface_;
 
-        enforce(null != _surface, "invalid surface");
-        enforce(null != sdlRenderer, "the renderer does not exist");
+        enforce(_surface, "invalid surface");
+        enforce(sdlRenderer, "the renderer does not exist");
 
-        if (null != _texture)
+        if (_texture)
             SDL_DestroyTexture(_texture);
 
         if (_isSmooth)
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
+
         _texture = SDL_CreateTextureFromSurface(sdlRenderer, _surface);
+
         if (_isSmooth)
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 
-        enforce(null != _texture, "error occurred while converting a surface to a texture format.");
+        enforce(_texture, "error occurred while converting a surface to a texture format.");
         updateSettings();
 
         _width = _surface.w;
@@ -218,20 +175,21 @@ final class Texture {
     void load(string path) {
         if (_surface && _ownData)
             SDL_FreeSurface(_surface);
+
         _surface = IMG_Load(toStringz(path));
 
-        enforce(null != _surface, "can't load image file `" ~ path ~ "`");
-        enforce(null != sdlRenderer, "the renderer does not exist");
+        enforce(_surface, "can't load image file `" ~ path ~ "`");
+        enforce(sdlRenderer, "the renderer does not exist");
 
         if (_isSmooth)
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
+
         _texture = SDL_CreateTextureFromSurface(sdlRenderer, _surface);
+
         if (_isSmooth)
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 
-        if (null == _texture)
-            throw new Exception("Error occurred while converting `" ~ path ~
-                    "` to a texture format.");
+        enforce(_texture, "error occurred while converting `" ~ path ~ "` to a texture format.");
         updateSettings();
 
         _width = _surface.w;
@@ -245,10 +203,13 @@ final class Texture {
     void unload() {
         if (!_ownData)
             return;
+
         if (_surface)
             SDL_FreeSurface(_surface);
+
         if (_texture)
             SDL_DestroyTexture(_texture);
+
         _isLoaded = false;
     }
 

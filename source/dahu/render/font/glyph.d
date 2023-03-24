@@ -8,6 +8,7 @@ module dahu.render.font.glyph;
 import dahu.common, dahu.core;
 
 import dahu.render.texture;
+import dahu.render.util;
 
 /// Information about a single character
 interface Glyph {

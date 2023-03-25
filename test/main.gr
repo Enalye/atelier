@@ -5,7 +5,10 @@ event main() {
     var label = @Label("Bonjour à tous !");
     label.pos(50f, 200f);
     label.align(AlignX.right, AlignY.top);
-    appendUI(label);
+    /*label.onClick = event(label: Label) {
+        "hello".print;
+    };*/
+    //appendUI(label);
 
 
     var state = @UIState("hidden");

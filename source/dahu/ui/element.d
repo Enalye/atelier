@@ -1,5 +1,7 @@
 module dahu.ui.element;
 
+import grimoire;
+
 import dahu.common, dahu.render;
 
 /// Abstract class representing an UI element
@@ -34,14 +36,14 @@ abstract class UIElement {
     float offsetX = 0f, offsetY = 0f;
     float scaleX = 1f, scaleY = 1f;
     float alpha = 1f;
-    float angle = 0f;
+    double angle = 0.0;
 
     static final class State {
         string name;
         float offsetX = 0f, offsetY = 0f;
         float scaleX = 1f, scaleY = 1f;
-        float angle = 0f;
         float alpha = 1f;
+        double angle = 0.0;
         int time = 60;
         Spline spline = Spline.linear;
     }
@@ -53,6 +55,11 @@ abstract class UIElement {
 
     // Propriétés
     bool isHovered, isClicked;
+    bool active = true, movable;
+    bool hasFocus;
 
-    void draw();
+    GrEvent onSubmit;
+
+    void update() {}
+    void draw() {}
 }

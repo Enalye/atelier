@@ -5,9 +5,15 @@ import std.string;
 
 import bindbc.sdl;
 
-import dahu.common, dahu.render, dahu.core;
+import grimoire;
+
+import dahu.common;
+import dahu.core;
+import dahu.input;
+import dahu.render;
 
 public {
+    import dahu.ui.button;
     import dahu.ui.element;
     import dahu.ui.label;
 }
@@ -16,6 +22,19 @@ public {
 class UI {
     private {
         UIElement[] _roots;
+
+        bool _hasClicked;
+        UIElement _clickedUI;
+        float _clickedUIPosX = 0f, _clickedUIPosY = 0f;
+
+        UIElement _tempGrabbedUI, _grabbedUI;
+        float _grabbedUIPosX = 0f, _grabbedUIPosY = 0f;
+
+        UIElement _focusedUI;
+
+        bool _wasHoveredGuiElementAlreadyHovered;
+        UIElement _hoveredGuiElement;
+        float _hoveredUIPosX = 0f, _hoveredUIPosY = 0f;
     }
 
     /// Update
@@ -23,6 +42,149 @@ class UI {
         foreach (UIElement element; _roots) {
             update(element);
         }
+    }
+
+    void dispatch(InputEvent[] events) {
+        foreach (InputEvent event; events) {
+            switch (event.type) with (InputEvent.Type) {
+            case mouseButton:
+                auto mouseButtonEvent = event.asMouseButton();
+                if (mouseButtonEvent.pressed) {
+                    foreach (UIElement element; _roots) {
+                        dispatchMouseDownEvent(mouseButtonEvent.x, mouseButtonEvent.y, element);
+                    }
+                }
+                else {
+                    foreach (UIElement element; _roots) {
+                        dispatchMouseUpEvent(mouseButtonEvent.x, mouseButtonEvent.y, element);
+                    }
+                }
+                break;
+            case mouseMotion:
+                auto mouseMotionEvent = event.asMouseMotion();
+                foreach (UIElement element; _roots) {
+                    dispatchMouseUpdateEvent(mouseMotionEvent.x, mouseMotionEvent.y, element);
+                }
+                break;
+            default:
+                break;
+            }
+        }
+    }
+
+    /// Process a mouse down event down the tree.
+    private void dispatchMouseDownEvent(float x, float y, UIElement element, UIElement parent = null) {
+        Vec2f mousePos = _getPointInElement(x, y, element, parent);
+        Vec2f elementSize = Vec2f(element.sizeX * element.scaleX, element.sizeY * element.scaleY);
+
+        bool isInside = mousePos.isBetween(Vec2f.zero, elementSize);
+        if (!element.active || !isInside) {
+            return;
+        }
+
+        _clickedUI = element;
+        _tempGrabbedUI = null;
+
+        _clickedUIPosX = mousePos.x;
+        _clickedUIPosY = mousePos.y;
+        _hasClicked = true;
+
+        if (element.movable && !_grabbedUI) {
+            _tempGrabbedUI = element;
+            _grabbedUIPosX = _clickedUIPosX;
+            _grabbedUIPosY = _clickedUIPosY;
+        }
+
+        foreach (child; element._children)
+            dispatchMouseDownEvent(mousePos.x, mousePos.y, child, element);
+    }
+
+    /// Process a mouse up event down the tree.
+    private void dispatchMouseUpEvent(float x, float y, UIElement element, UIElement parent = null) {
+        Vec2f mousePos = _getPointInElement(x, y, element, parent);
+        Vec2f elementSize = Vec2f(element.sizeX * element.scaleX, element.sizeY * element.scaleY);
+
+        bool isInside = mousePos.isBetween(Vec2f.zero, elementSize);
+        if (!element.active || !isInside) {
+            return;
+        }
+
+        foreach (child; element._children)
+            dispatchMouseUpEvent(mousePos.x, mousePos.y, child, element);
+
+        if (_clickedUI == element) {
+            //The previous widget is now unfocused.
+            if (_focusedUI) {
+                _focusedUI.hasFocus = false;
+            }
+
+            //The widget is now focused and receive the onSubmit event.
+            _focusedUI = _clickedUI;
+            _hasClicked = true;
+            element.hasFocus = true;
+
+            if(element.onSubmit) {
+                app.callEvent(element.onSubmit, [GrValue(element)]);
+            }
+        }
+
+        if (_clickedUI)
+            _clickedUI.isClicked = false;
+    }
+
+    /// Process a mouse update event down the tree.
+    private void dispatchMouseUpdateEvent(float x, float y, UIElement element,
+        UIElement parent = null) {
+        Vec2f mousePos = _getPointInElement(x, y, element, parent);
+        Vec2f elementSize = Vec2f(element.sizeX * element.scaleX, element.sizeY * element.scaleY);
+
+        bool isInside = mousePos.isBetween(Vec2f.zero, elementSize);
+
+        bool wasHovered = element.isHovered;
+
+        if (element.active && element == _grabbedUI) {
+            if (!element.movable) {
+                _grabbedUI = null;
+            }
+            else {
+                float deltaX = mousePos.x - _grabbedUIPosX;
+                float deltaY = mousePos.y - _grabbedUIPosY;
+
+                if (element.alignX == UIElement.AlignX.right)
+                    deltaX = -deltaX;
+
+                if (element.alignY == UIElement.AlignY.bottom)
+                    deltaY = -deltaY;
+
+                element.posX += deltaX;
+                element.posY += deltaY;
+
+                _grabbedUIPosX = mousePos.x;
+                _grabbedUIPosY = mousePos.y;
+            }
+        }
+
+        if (element.active && isInside) {
+            //Register element
+            _wasHoveredGuiElementAlreadyHovered = wasHovered;
+            _hoveredGuiElement = element;
+            _hoveredUIPosX = mousePos.x;
+            _hoveredUIPosY = mousePos.y;
+            _hasClicked = true;
+        }
+        else {
+            void unHoverRoots(UIElement element) {
+                element.isHovered = false;
+                foreach (child; element._children)
+                    unHoverRoots(child);
+            }
+
+            unHoverRoots(element);
+            return;
+        }
+
+        foreach (child; element._children)
+            dispatchMouseUpdateEvent(mousePos.x, mousePos.y, child, element);
     }
 
     private void update(UIElement element) {
@@ -43,20 +205,31 @@ class UI {
             element.alpha = lerp(element.initState.alpha, element.targetState.alpha, t);
         }
 
+        element.update();
+
         // Update children
         foreach (UIElement child; element._children) {
             update(child);
         }
     }
 
-    /// Draw
-    void draw() {
-        foreach (UIElement element; _roots) {
-            draw(element);
+    pragma(inline) private Vec2f _getPointInElement(float x, float y,
+        UIElement element, UIElement parent = null) {
+        Vec2f mousePos = Vec2f(x, y);
+        Vec2f elementPos = _getElementOrigin(element, parent);
+        Vec2f elementSize = Vec2f(element.sizeX * element.scaleX, element.sizeY * element.scaleY);
+        Vec2f pivot = elementPos + elementSize * Vec2f(element.pivotX, element.pivotY);
+
+        if (element.angle != 0.0) {
+            Vec2f mouseDelta = mousePos - pivot;
+            mouseDelta.rotate(degToRad * -element.angle);
+            mousePos = mouseDelta + pivot;
         }
+        mousePos -= elementPos;
+        return mousePos;
     }
 
-    private void draw(UIElement element, UIElement parent = null) {
+    pragma(inline) private Vec2f _getElementOrigin(UIElement element, UIElement parent = null) {
         float x = element.posX + element.offsetX;
         float y = element.posY + element.offsetY;
 
@@ -85,6 +258,19 @@ class UI {
             break;
         }
 
+        return Vec2f(x, y);
+    }
+
+    /// Draw
+    void draw() {
+        foreach (UIElement element; _roots) {
+            draw(element);
+        }
+    }
+
+    private void draw(UIElement element, UIElement parent = null) {
+        Vec2f pos = _getElementOrigin(element, parent);
+
         app.renderer.pushCanvas(cast(uint) element.sizeX, cast(uint) element.sizeY);
 
         foreach (Drawable drawable; element._drawables) {
@@ -99,8 +285,9 @@ class UI {
 
         float sizeX = element.scaleX * element.sizeX;
         float sizeY = element.scaleY * element.sizeY;
-        app.renderer.popCanvas(x, y, sizeX, sizeY, element.pivotX * sizeX,
-            element.pivotY * sizeY, element.angle, Color.white, element.alpha);
+        app.renderer.popCanvas(pos.x, pos.y, sizeX, sizeY,
+            element.pivotX * sizeX, element.pivotY * sizeY, element.angle,
+            Color.white, element.alpha);
     }
 
     /// Add an UIElement to the manager at root level

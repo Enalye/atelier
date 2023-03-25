@@ -12,6 +12,7 @@ public {
     import dahu.render.graphic;
     import dahu.render.image;
     import dahu.render.ninepatch;
+    import dahu.render.rectangle;
     import dahu.render.renderer;
     import dahu.render.texture;
     import dahu.render.tileset;

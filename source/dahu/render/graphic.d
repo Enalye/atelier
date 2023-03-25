@@ -9,12 +9,30 @@ import dahu.common;
 import dahu.render.util;
 
 abstract class Graphic {
+    protected {
+        float _sizeX = 0f, _sizeY = 0f;
+    }
+
     @property {
         uint width() const;
         uint height() const;
-    }
 
-    float sizeX = 0f, sizeY = 0f;
+        pragma(inline) float sizeX() const {
+            return _sizeX;
+        }
+
+        pragma(inline) float sizeX(float sizeX_) {
+            return _sizeX = sizeX_;
+        }
+
+        pragma(inline) float sizeY() const {
+            return _sizeY;
+        }
+
+        pragma(inline) float sizeY(float sizeY_) {
+            return _sizeY = sizeY_;
+        }
+    }
 
     Vec4i clip;
 

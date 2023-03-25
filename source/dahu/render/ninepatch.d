@@ -22,6 +22,17 @@ import dahu.render.util;
 
 /// Render a resizable repeated sprite with borders. (ex: bubble speech).
 final class NinePatch : Graphic, Drawable {
+    private {
+        SDL_Surface* _surface;
+        int _surfaceWidth, _surfaceHeight;
+        WritableTexture _cache;
+        Vec2f _size;
+        Vec4i _clip;
+        int _top, _bottom, _left, _right;
+        bool _isDirty = true;
+        bool _ownSurface;
+    }
+
     @property {
         pragma(inline) override uint width() const {
             return _cache.width;
@@ -31,17 +42,28 @@ final class NinePatch : Graphic, Drawable {
             return _cache.height;
         }
 
-        /// Size of the render zone. \
-        /// Changing the value allocate a new Canvas (don't do it too often).
-        Vec2f size() {
-            return _size;
+        pragma(inline) override float sizeX() const {
+            return _sizeX;
         }
-        /// Ditto
-        Vec2f size(const Vec2f size_) {
-            if ((cast(Vec2i) _size) != (cast(Vec2i) size_))
+
+        pragma(inline) override float sizeX(float sizeX_) {
+            if ((cast(int) _sizeX) != (cast(int) sizeX_)) {
                 _isDirty = true;
-            _size = size_;
-            return _size;
+            }
+            _sizeX = sizeX_;
+            return _sizeX;
+        }
+
+        pragma(inline) override float sizeY() const {
+            return _sizeY;
+        }
+
+        pragma(inline) override float sizeY(float sizeY_) {
+            if ((cast(int) _sizeY) != (cast(int) sizeY_)) {
+                _isDirty = true;
+            }
+            _sizeY = sizeY_;
+            return _sizeY;
         }
 
         /// Texture's region used.
@@ -124,38 +146,29 @@ final class NinePatch : Graphic, Drawable {
         }
     }
 
-    private {
-        SDL_Surface* _surface;
-        int _surfaceWidth, _surfaceHeight;
-        WritableTexture _cache;
-        Vec2f _size;
-        Vec4i _clip;
-        int _top, _bottom, _left, _right;
-        bool _isDirty = true;
-        bool _ownSurface;
+    /// Ctor
+    this(string name, Vec4i clip_, int top_, int bottom_, int left_, int right_) {
+        Texture tex = fetchPrototype!Texture(name);
+
+        _surface = SDL_ConvertSurfaceFormat(tex.surface, SDL_PIXELFORMAT_RGBA8888, 0);
+        enforce(_surface, "can't format surface");
+        _surfaceWidth = tex.width;
+        _surfaceHeight = tex.height;
+        _ownSurface = true;
+
+        _clip = clip_;
+        _top = top_;
+        _bottom = bottom_;
+        _left = left_;
+        _right = right_;
+        sizeX = _clip.z;
+        sizeY = _clip.w;
+        _isDirty = true;
     }
 
-    double angle = 0f;
-
-    bool flipX, flipY;
-
-    Vec2f anchor = Vec2f.zero;
-
-    Vec2f pivot = Vec2f.zero;
-
-    Blend blend = Blend.alpha;
-
-    Color color = Color.white;
-
-    float alpha = 1f;
-
-    /// Default ctor
-    this() {
-    }
-
-    /// Copy ctor
+    /// Copie
     this(NinePatch ninePatch) {
-        _size = ninePatch._size;
+        super(ninePatch);
         _surface = ninePatch._surface;
         _surfaceWidth = ninePatch._surfaceWidth;
         _surfaceHeight = ninePatch._surfaceHeight;
@@ -168,35 +181,27 @@ final class NinePatch : Graphic, Drawable {
         _isDirty = true;
     }
 
-    /// Ctor
-    this(Texture texture_, Vec4i clip_, int top_, int bottom_, int left_, int right_) {
-        _surface = SDL_ConvertSurfaceFormat(texture_.surface, SDL_PIXELFORMAT_RGBA8888, 0);
-        enforce(null != _surface, "can't format surface");
-        _surfaceWidth = texture_.width;
-        _surfaceHeight = texture_.height;
-        _ownSurface = true;
-        _clip = clip_;
-        _top = top_;
-        _bottom = bottom_;
-        _left = left_;
-        _right = right_;
-        _size = to!Vec2f(_clip.zw);
-        _isDirty = true;
-    }
-
     ~this() {
         if (_ownSurface && _surface)
             SDL_FreeSurface(_surface);
     }
 
-    /// Set the ninepatch's size to fit inside the specified size.
-    void fit(Vec2f sz) {
-        _size = to!Vec2f(_clip.zw).fit(sz);
-        _isDirty = true;
+    /// Redimensionne l’image pour qu’elle puisse tenir dans une taille donnée
+    void fit(float x, float y) {
+        Vec2f size = to!Vec2f(clip.zw).fit(Vec2f(x, y));
+        sizeX(size.x);
+        sizeY(size.y);
+    }
+
+    /// Redimensionne l’image pour qu’elle puisse contenir une taille donnée
+    void contain(float x, float y) {
+        Vec2f size = to!Vec2f(clip.zw).contain(Vec2f(x, y));
+        sizeX(size.x);
+        sizeY(size.y);
     }
 
     /// Render to the canvas.
-    private void renderToCache() {
+    private void _cacheTexture() {
         _isDirty = false;
         if (_surface is null || _clip.z <= (_left + _right) || _clip.w <= (_top + _bottom))
             return;
@@ -325,7 +330,7 @@ final class NinePatch : Graphic, Drawable {
     /// Render the NinePatch in this position.
     override void draw(float x, float y) {
         if (_isDirty)
-            renderToCache();
+            _cacheTexture();
 
         if (!_cache)
             return;

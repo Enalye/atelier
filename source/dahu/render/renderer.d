@@ -73,7 +73,7 @@ final class Renderer {
         }
 
         SDL_SetRenderTarget(_sdlRenderer, context.canvas.target);
-        //if (clear)
+        SDL_SetRenderDrawColor(_sdlRenderer, 0, 0, 0, 255);
         SDL_RenderClear(_sdlRenderer);
     }
 
@@ -93,5 +93,18 @@ final class Renderer {
         context.canvas.color = color;
         context.canvas.alpha = alpha;
         context.canvas.draw(x, y, w, h, context.clip, pivotX, pivotY, angle);
+    }
+
+    void drawRect(float x, float y, float w, float h, Color color, float alpha, bool filled) {
+        const auto sdlColor = color.toSDL();
+        SDL_SetRenderDrawColor(_sdlRenderer, sdlColor.r, sdlColor.g,
+            sdlColor.b, cast(ubyte)(clamp(alpha, 0f, 1f) * 255f));
+
+        const SDL_FRect rect = {x, y, w, h};
+
+        if (filled)
+            SDL_RenderFillRectF(_sdlRenderer, &rect);
+        else
+            SDL_RenderDrawRectF(_sdlRenderer, &rect);
     }
 }

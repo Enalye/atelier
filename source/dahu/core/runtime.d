@@ -144,6 +144,11 @@ final class Runtime {
         _tickStartFrame = Clock.currStdTime();
         float accumulator = 0f;
 
+        {
+            auto btn = new Button;
+            _ui.appendRoot(btn);
+        }
+
         while (!_input.hasQuit()) {
             long deltaTicks = Clock.currStdTime() - _tickStartFrame;
             //if (deltaTicks < (10_000_000 / _nominalFPS))
@@ -159,6 +164,8 @@ final class Runtime {
             // Màj
             while (accumulator >= 1f) {
                 InputEvent[] inputEvents = _input.pollEvents();
+
+                _ui.dispatch(inputEvents);
 
                 if (_grEngine) {
                     /*if (_inputEvent) {
@@ -199,5 +206,12 @@ final class Runtime {
 
             _renderer.render();
         }
+    }
+
+    void callEvent(GrEvent event, GrValue[] parameters = []) {
+        if(!_grEngine)
+            return;
+        
+        _grEngine.callEvent(event, parameters);
     }
 }

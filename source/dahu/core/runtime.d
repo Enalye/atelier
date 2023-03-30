@@ -118,6 +118,7 @@ final class Runtime {
                 writeln(compiler.getError().prettify(GrLocale.fr_FR));
                 return;
             }
+            //writeln(_bytecode.prettify());
         }
 
         _grEngine = new GrEngine;
@@ -143,11 +144,6 @@ final class Runtime {
 
         _tickStartFrame = Clock.currStdTime();
         float accumulator = 0f;
-
-        {
-            auto btn = new Button;
-            _ui.appendRoot(btn);
-        }
 
         while (!_input.hasQuit()) {
             long deltaTicks = Clock.currStdTime() - _tickStartFrame;

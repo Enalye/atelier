@@ -3,7 +3,7 @@
  * License: Zlib
  * Authors: Enalye
  */
-module dahu.script.texture;
+module dahu.script.render.texture;
 
 import grimoire;
 
@@ -12,10 +12,10 @@ import dahu.core;
 import dahu.input;
 import dahu.render;
 
-void loadLibTexture(GrLibDefinition lib) {
+void loadLibRender_texture(GrLibDefinition lib) {
     GrType textureType = lib.addNative("Texture");
 
-    GrType imageType = lib.addNative("Image");
+    GrType imageType = lib.addNative("Image", [], "Graphic");
 
     lib.addConstructor(&_image, imageType, [grString]);
     

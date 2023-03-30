@@ -11,11 +11,6 @@ class Button : UIElement {
         alignX = AlignX.right;
         alignY = AlignY.bottom;
 
-        posX = 150f;
-        posY = 250f;
-
-        sizeX = 100f;
-        sizeY = 50f;
 
         angle = 45f;
 
@@ -29,6 +24,6 @@ class Button : UIElement {
     override void update() {
         //pivotX = 0f;
         //angle ++;
-        rect.color = isHovered ? Color.red : Color.blue;
+        rect.color = focused ? Color.red : Color.blue;
     }
 }

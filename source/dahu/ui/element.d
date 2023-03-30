@@ -54,11 +54,12 @@ abstract class UIElement {
     Timer timer;
 
     // Propriétés
-    bool isHovered, isClicked;
+    bool focused, clicked;
     bool active = true, movable;
-    bool hasFocus;
 
-    GrEvent onSubmit;
+    GrEvent onClick;
+
+    bool alive = true;
 
     void update() {}
     void draw() {}

@@ -1,26 +1,77 @@
+    var click: bool;
+
+
 event main() {
-    print("Main");
+    // Plusieurs event identiques doivent retourner une erreur !
+    /*print("Main");
 
     
     var label = @Label("Bonjour à tous !");
-    label.pos(50f, 200f);
-    label.align(AlignX.right, AlignY.top);
+    label.setPos(50f, 200f);
+    label.setAlign(AlignX.right, AlignY.top);*/
     /*label.onClick = event(label: Label) {
         "hello".print;
     };*/
+
+
+    var btn = @Button;
+    btn.setSize(150f, 50f);
+    btn.setPos(150f, 200f);
+
+    var img = @Rectangle;
+    img.setSize(btn.sizeX, btn.sizeY);
+    img.color = @Color.blue;
+    btn.addDrawable(img);
+
+    btn.onClick = event {
+        //btn.angle += 20f;
+        print("CLICK");
+        
+        if(click)
+            img.color = @Color.red;
+        else
+            img.color = @Color.green;
+
+        click = !click;
+    };
+    appendUI(btn);
+
+    /*task(btn: Button) {
+        while yield(btn.alive) {
+            var msg = <- btn.message;
+            switch(msg)
+            case(UIMessage.press) {
+                print("bouton pressé !");
+            }
+        }
+    }(btn);
+
+    
+    task(btn: Button) {
+        loop yield {
+            var msg = <- btn.message;
+            switch(msg)
+            case(UIMessage.press) {
+                print("bouton pressé !");
+            }
+            case(UIMessage.kill) {
+                die;
+            }
+        }
+    }(btn);*/
     //appendUI(label);
 
 
-    var state = @UIState("hidden");
+    /*var state = @UIState("hidden");
     state.time = 500;
     state.spline = Spline.sineInOut;
     state.alpha = 0f;
     state.offsetX = -100f;
-    state.angle = 45f;
+    state.angle = 45d;
     label.addState(state);
 
     sleep(1.seconds);
-    label.runState("hidden");
+    label.runState("hidden");*/
 
     loop yield {
         if(isPressed(KeyButton.escape))

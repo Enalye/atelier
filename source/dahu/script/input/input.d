@@ -3,7 +3,7 @@
  * License: Zlib
  * Authors: Enalye
  */
-module dahu.script.input;
+module dahu.script.input.input;
 
 import std.traits;
 
@@ -13,7 +13,7 @@ import dahu.input;
 import dahu.common;
 import dahu.core;
 
-void loadLibInput(GrLibDefinition lib) {
+void loadLibInput_input(GrLibDefinition lib) {
     GrType keyButton = lib.addEnum("KeyButton", [
             __traits(allMembers, InputEvent.KeyButton.Button)
         ], cast(GrInt[])[EnumMembers!(InputEvent.KeyButton.Button)]);

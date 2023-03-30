@@ -24,17 +24,15 @@ class UI {
         UIElement[] _roots;
 
         bool _hasClicked;
-        UIElement _clickedUI;
+        UIElement _clickedElement;
         float _clickedUIPosX = 0f, _clickedUIPosY = 0f;
 
         UIElement _tempGrabbedUI, _grabbedUI;
         float _grabbedUIPosX = 0f, _grabbedUIPosY = 0f;
 
-        UIElement _focusedUI;
-
-        bool _wasHoveredGuiElementAlreadyHovered;
-        UIElement _hoveredGuiElement;
-        float _hoveredUIPosX = 0f, _hoveredUIPosY = 0f;
+        UIElement _focusedElement;
+        bool _elementAlreadyFocused;
+        float _focusedElementPosX = 0f, _focusedElementPosY = 0f;
     }
 
     /// Update
@@ -50,11 +48,23 @@ class UI {
             case mouseButton:
                 auto mouseButtonEvent = event.asMouseButton();
                 if (mouseButtonEvent.pressed) {
+                    _tempGrabbedUI = null;
+
                     foreach (UIElement element; _roots) {
                         dispatchMouseDownEvent(mouseButtonEvent.x, mouseButtonEvent.y, element);
                     }
+
+                    if (_tempGrabbedUI) {
+                        _grabbedUI = _tempGrabbedUI;
+                    }
+
+                    if (_hasClicked && _clickedElement !is null) {
+                        _clickedElement.clicked = true;
+                    }
                 }
                 else {
+                    _grabbedUI = null;
+
                     foreach (UIElement element; _roots) {
                         dispatchMouseUpEvent(mouseButtonEvent.x, mouseButtonEvent.y, element);
                     }
@@ -64,6 +74,11 @@ class UI {
                 auto mouseMotionEvent = event.asMouseMotion();
                 foreach (UIElement element; _roots) {
                     dispatchMouseUpdateEvent(mouseMotionEvent.x, mouseMotionEvent.y, element);
+                }
+
+                if (_hasClicked && _focusedElement) {
+                    if (!_elementAlreadyFocused)
+                        _focusedElement.focused = true;
                 }
                 break;
             default:
@@ -82,7 +97,7 @@ class UI {
             return;
         }
 
-        _clickedUI = element;
+        _clickedElement = element;
         _tempGrabbedUI = null;
 
         _clickedUIPosX = mousePos.x;
@@ -112,24 +127,24 @@ class UI {
         foreach (child; element._children)
             dispatchMouseUpEvent(mousePos.x, mousePos.y, child, element);
 
-        if (_clickedUI == element) {
+        if (_clickedElement == element) {
             //The previous widget is now unfocused.
-            if (_focusedUI) {
-                _focusedUI.hasFocus = false;
+            if (_focusedElement != _clickedElement) {
+                _focusedElement.focused = false;
             }
 
-            //The widget is now focused and receive the onSubmit event.
-            _focusedUI = _clickedUI;
+            //The widget is now focused and receive the onClick event.
+            _focusedElement = _clickedElement;
             _hasClicked = true;
-            element.hasFocus = true;
+            element.focused = true;
 
-            if(element.onSubmit) {
-                app.callEvent(element.onSubmit, [GrValue(element)]);
+            if (element.onClick) {
+                app.callEvent(element.onClick);
             }
         }
 
-        if (_clickedUI)
-            _clickedUI.isClicked = false;
+        if (_clickedElement)
+            _clickedElement.clicked = false;
     }
 
     /// Process a mouse update event down the tree.
@@ -140,7 +155,7 @@ class UI {
 
         bool isInside = mousePos.isBetween(Vec2f.zero, elementSize);
 
-        bool wasHovered = element.isHovered;
+        bool wasFocus = element.focused;
 
         if (element.active && element == _grabbedUI) {
             if (!element.movable) {
@@ -166,20 +181,22 @@ class UI {
 
         if (element.active && isInside) {
             //Register element
-            _wasHoveredGuiElementAlreadyHovered = wasHovered;
-            _hoveredGuiElement = element;
-            _hoveredUIPosX = mousePos.x;
-            _hoveredUIPosY = mousePos.y;
+            _elementAlreadyFocused = wasFocus;
+            _focusedElement = element;
+            _focusedElementPosX = mousePos.x;
+            _focusedElementPosY = mousePos.y;
             _hasClicked = true;
         }
         else {
-            void unHoverRoots(UIElement element) {
-                element.isHovered = false;
+            void unfocusElement(UIElement element) {
+                element.focused = false;
+                if (_focusedElement == element)
+                    _focusedElement = null;
                 foreach (child; element._children)
-                    unHoverRoots(child);
+                    unfocusElement(child);
             }
 
-            unHoverRoots(element);
+            unfocusElement(element);
             return;
         }
 

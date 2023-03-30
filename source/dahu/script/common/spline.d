@@ -3,11 +3,11 @@
  * License: Zlib
  * Authors: Enalye
  */
-module dahu.script.spline;
+module dahu.script.common.spline;
 
 import grimoire;
 
-package void loadLibSpline(GrLibDefinition lib) {
+package void loadLibCommon_spline(GrLibDefinition lib) {
     lib.addEnum("Spline", [
             "linear", "sineIn", "sineOut", "sineInOut", "quadIn", "quadOut",
             "quadInOut", "cubicIn", "cubicOut", "cubicInOut", "quartIn",

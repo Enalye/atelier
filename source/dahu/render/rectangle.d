@@ -35,21 +35,10 @@ final class Rectangle : Graphic, Drawable {
         filled = rect.filled;
     }
 
-    /// Redimensionne l’image pour qu’elle puisse tenir dans une taille donnée
-    void fit(float x, float y) {
-        Vec2f size = to!Vec2f(clip.zw).fit(Vec2f(x, y));
-        sizeX = size.x;
-        sizeY = size.y;
+    void update() {
     }
 
-    /// Redimensionne l’image pour qu’elle puisse contenir une taille donnée
-    void contain(float x, float y) {
-        Vec2f size = to!Vec2f(clip.zw).contain(Vec2f(x, y));
-        sizeX = size.x;
-        sizeY = size.y;
-    }
-
-    override void draw(float x, float y) {
+    void draw(float x, float y) {
         app.renderer.drawRect(x, y, sizeX, sizeY, color, alpha, filled);
     }
 }

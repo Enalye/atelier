@@ -80,7 +80,10 @@ final class Tileset : Graphic {
         image.blend = blend;
         image.color = color;
         image.alpha = alpha;
-        image.anchor = anchor;
+        image.anchorX = anchorX;
+        image.anchorY = anchorY;
+        image.pivotX = pivotX;
+        image.pivotY = pivotY;
         image.angle = angle;
         image.sizeX = sizeX;
         image.sizeY = sizeY;
@@ -97,20 +100,6 @@ final class Tileset : Graphic {
         foreach (id; 0 .. count)
             images ~= getImage(id);
         return images;
-    }
-
-    /// Redimensionne l’image pour qu’elle puisse tenir dans une taille donnée
-    void fit(float x, float y) {
-        Vec2f size = to!Vec2f(clip.zw).fit(Vec2f(x, y));
-        sizeX = size.x;
-        sizeY = size.y;
-    }
-
-    /// Redimensionne l’image pour qu’elle puisse contenir une taille donnée
-    void contain(float x, float y) {
-        Vec2f size = to!Vec2f(clip.zw).contain(Vec2f(x, y));
-        sizeX = size.x;
-        sizeY = size.y;
     }
 
     /// Dessine une tuile
@@ -134,6 +123,6 @@ final class Tileset : Graphic {
         _texture.color = color;
         _texture.blend = blend;
         _texture.alpha = alpha;
-        _texture.draw(x, y, sizeX, sizeY, currentClip, angle, Vec2f.zero);
+        _texture.draw(x, y, sizeX, sizeY, currentClip, angle, 0f, 0f);
     }
 }

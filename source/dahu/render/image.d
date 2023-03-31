@@ -48,24 +48,13 @@ final class Image : Graphic, Drawable {
         _texture = img._texture;
     }
 
-    /// Redimensionne l’image pour qu’elle puisse tenir dans une taille donnée
-    void fit(float x, float y) {
-        Vec2f size = to!Vec2f(clip.zw).fit(Vec2f(x, y));
-        sizeX = size.x;
-        sizeY = size.y;
+    void update() {
     }
 
-    /// Redimensionne l’image pour qu’elle puisse contenir une taille donnée
-    void contain(float x, float y) {
-        Vec2f size = to!Vec2f(clip.zw).contain(Vec2f(x, y));
-        sizeX = size.x;
-        sizeY = size.y;
-    }
-
-    override void draw(float x, float y) {
+    void draw(float x, float y) {
         _texture.color = color;
         _texture.blend = blend;
         _texture.alpha = alpha;
-        _texture.draw(x, y, sizeX, sizeY, clip, angle, pivot, flipX, flipY);
+        _texture.draw(x, y, sizeX, sizeY, clip, angle, pivotX, pivotY, flipX, flipY);
     }
 }

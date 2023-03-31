@@ -5,6 +5,8 @@
  */
 module dahu.render.graphic;
 
+import std.conv : to;
+
 import dahu.common;
 import dahu.render.util;
 
@@ -40,9 +42,9 @@ abstract class Graphic {
 
     bool flipX, flipY;
 
-    Vec2f anchor = Vec2f.zero;
+    float anchorX = 0f, anchorY = 0f;
 
-    Vec2f pivot = Vec2f.zero;
+    float pivotX = 0f, pivotY = 0f;
 
     Blend blend = Blend.alpha;
 
@@ -60,10 +62,26 @@ abstract class Graphic {
         angle = drawable.angle;
         flipX = drawable.flipX;
         flipY = drawable.flipY;
-        anchor = drawable.anchor;
-        pivot = drawable.pivot;
+        anchorX = drawable.anchorX;
+        anchorY = drawable.anchorY;
+        pivotX = drawable.pivotX;
+        pivotY = drawable.pivotY;
         blend = drawable.blend;
         color = drawable.color;
         alpha = drawable.alpha;
+    }
+
+    /// Redimensionne l’image pour qu’elle puisse tenir dans une taille donnée
+    final void fit(float x, float y) {
+        Vec2f size = to!Vec2f(clip.zw).fit(Vec2f(x, y));
+        sizeX(size.x);
+        sizeY(size.y);
+    }
+
+    /// Redimensionne l’image pour qu’elle puisse contenir une taille donnée
+    final void contain(float x, float y) {
+        Vec2f size = to!Vec2f(clip.zw).contain(Vec2f(x, y));
+        sizeX(size.x);
+        sizeY(size.y);
     }
 }

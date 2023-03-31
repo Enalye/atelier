@@ -134,7 +134,7 @@ final class Animation : Graphic, Drawable {
     }
 
     /// Render the current frame.
-    override void draw(float x, float y) {
+    void draw(float x, float y) {
         if (_frame < 0 || !frames.length)
             return;
 
@@ -151,6 +151,6 @@ final class Animation : Graphic, Drawable {
         _texture.color = color;
         _texture.blend = blend;
         _texture.alpha = alpha;
-        _texture.draw(x, y, sizeX, sizeY, imageClip, angle, pivot, flipX, flipY);
+        _texture.draw(x, y, sizeX, sizeY, imageClip, angle, pivotX, pivotY, flipX, flipY);
     }
 }

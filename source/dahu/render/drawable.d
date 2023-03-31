@@ -6,5 +6,6 @@
 module dahu.render.drawable;
 
 interface Drawable {
+    void update();
     void draw(float x, float y);
 }

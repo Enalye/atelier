@@ -186,18 +186,7 @@ final class NinePatch : Graphic, Drawable {
             SDL_FreeSurface(_surface);
     }
 
-    /// Redimensionne l’image pour qu’elle puisse tenir dans une taille donnée
-    void fit(float x, float y) {
-        Vec2f size = to!Vec2f(clip.zw).fit(Vec2f(x, y));
-        sizeX(size.x);
-        sizeY(size.y);
-    }
-
-    /// Redimensionne l’image pour qu’elle puisse contenir une taille donnée
-    void contain(float x, float y) {
-        Vec2f size = to!Vec2f(clip.zw).contain(Vec2f(x, y));
-        sizeX(size.x);
-        sizeY(size.y);
+    void update() {
     }
 
     /// Render to the canvas.
@@ -328,7 +317,7 @@ final class NinePatch : Graphic, Drawable {
     }
 
     /// Render the NinePatch in this position.
-    override void draw(float x, float y) {
+    void draw(float x, float y) {
         if (_isDirty)
             _cacheTexture();
 
@@ -339,6 +328,6 @@ final class NinePatch : Graphic, Drawable {
         _cache.blend = blend;
         _cache.alpha = alpha;
         _cache.draw(x, y, _size.x, _size.y, Vec4i(0, 0, _cache.width,
-                _cache.height), angle, pivot, flipX, flipY);
+                _cache.height), angle, pivotX, pivotY, flipX, flipY);
     }
 }

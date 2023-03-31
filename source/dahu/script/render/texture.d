@@ -14,13 +14,5 @@ import dahu.render;
 
 void loadLibRender_texture(GrLibDefinition lib) {
     GrType textureType = lib.addNative("Texture");
-
-    GrType imageType = lib.addNative("Image", [], "Graphic");
-
-    lib.addConstructor(&_image, imageType, [grString]);
     
-}
-
-private void _image(GrCall call) {
-    call.setNative(new Image(call.getString(0)));
 }

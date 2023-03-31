@@ -219,12 +219,12 @@ struct Vec2(T) {
         Vec2!T rotated(T radians) const {
             const T c = std.math.cos(radians);
             const T s = std.math.sin(radians);
-            return Vec2f(x * c - y * s, x * s + y * c);
+            return Vec2!T(x * c - y * s, x * s + y * c);
         }
 
         /// Returns a unit vector with an angle.
         static Vec2!T angled(T radians) {
-            return Vec2f(std.math.cos(radians), std.math.sin(radians));
+            return Vec2!T(std.math.cos(radians), std.math.sin(radians));
         }
     }
 

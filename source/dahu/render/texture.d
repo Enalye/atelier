@@ -222,12 +222,12 @@ final class Texture {
 
     /// Dessine la texture
     void draw(float x, float y, float w, float h, Vec4i clip, double angle,
-        Vec2f pivot = Vec2f.zero, bool flipX = false, bool flipY = false) {
+        float pivotX = 0f, float pivotY = 0f, bool flipX = false, bool flipY = false) {
         enforce(_isLoaded, "can't render the texture: asset not loaded");
 
         SDL_Rect sdlSrc = clip.toSdlRect();
         SDL_FRect sdlDest = {x, y, w, h};
-        SDL_FPoint sdlPivot = {pivot.x, pivot.y};
+        SDL_FPoint sdlPivot = {pivotX, pivotY};
 
         SDL_RenderCopyExF(sdlRenderer, _texture, &sdlSrc, //
             &sdlDest, angle, null, //

@@ -27,12 +27,7 @@ event main() {
         //btn.angle += 20f;
         print("CLICK");
         
-        if(click)
-            img.color = @Color.red;
-        else
-            img.color = @Color.green;
-
-        click = !click;
+        img.filled = !img.filled;
     };
     appendUI(btn);
 

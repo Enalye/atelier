@@ -205,11 +205,11 @@ final class WritableTexture {
 
     /// Render a section of the texture here
     void draw(float x, float y, float w, float h, Vec4i clip, double angle,
-        Vec2f pivot = Vec2f.zero, bool flipX = false, bool flipY = false) {
+        float pivotX = 0f, float pivotY = 0f, bool flipX = false, bool flipY = false) {
 
         SDL_Rect sdlSrc = clip.toSdlRect();
         SDL_FRect sdlDest = {x, y, w, h};
-        SDL_FPoint sdlPivot = {pivot.x, pivot.y};
+        SDL_FPoint sdlPivot = {pivotX, pivotY};
 
         SDL_RenderCopyExF(sdlRenderer, _texture, &sdlSrc, &sdlDest, angle, null, (flipX ?
     SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE) | (flipY ? SDL_FLIP_VERTICAL : SDL_FLIP_NONE));

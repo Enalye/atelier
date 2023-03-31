@@ -32,6 +32,8 @@ package void loadLibRender_graphic(GrLibDefinition lib) {
 
     lib.addProperty(&_alpha!"get", &_alpha!"set", "alpha", graphicType, grFloat);
 
+    lib.addFunction(&_fit, "fit", [graphicType, grFloat, grFloat]);
+    lib.addFunction(&_contain, "contain", [graphicType, grFloat, grFloat]);
 }
 
 private bool _drawable(GrData data, GrType type, const GrType[]) {
@@ -74,26 +76,26 @@ private void _sizeY(string op)(GrCall call) {
 private void _setPivot(GrCall call) {
     Graphic graphic = call.getNative!Graphic(0);
 
-    graphic.pivot.x = call.getFloat(1);
-    graphic.pivot.y = call.getFloat(2);
+    graphic.pivotX = call.getFloat(1);
+    graphic.pivotY = call.getFloat(2);
 }
 
 private void _pivotX(string op)(GrCall call) {
     Graphic graphic = call.getNative!Graphic(0);
 
     static if (op == "set") {
-        graphic.pivot.x = call.getFloat(1);
+        graphic.pivotX = call.getFloat(1);
     }
-    call.setFloat(graphic.pivot.x);
+    call.setFloat(graphic.pivotX);
 }
 
 private void _pivotY(string op)(GrCall call) {
     Graphic graphic = call.getNative!Graphic(0);
 
     static if (op == "set") {
-        graphic.pivot.y = call.getFloat(1);
+        graphic.pivotY = call.getFloat(1);
     }
-    call.setFloat(graphic.pivot.y);
+    call.setFloat(graphic.pivotY);
 }
 
 private void _angle(string op)(GrCall call) {
@@ -123,4 +125,16 @@ private void _alpha(string op)(GrCall call) {
         graphic.alpha = call.getFloat(1);
     }
     call.setFloat(graphic.alpha);
+}
+
+private void _fit(GrCall call) {
+    Graphic graphic = call.getNative!Graphic(0);
+
+    graphic.fit(call.getFloat(1), call.getFloat(2));
+}
+
+private void _contain(GrCall call) {
+    Graphic graphic = call.getNative!Graphic(0);
+
+    graphic.contain(call.getFloat(1), call.getFloat(2));
 }

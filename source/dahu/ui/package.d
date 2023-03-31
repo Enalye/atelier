@@ -222,6 +222,10 @@ class UI {
             element.alpha = lerp(element.initState.alpha, element.targetState.alpha, t);
         }
 
+        foreach (Drawable drawable; element._drawables) {
+            drawable.update();
+        }
+
         element.update();
 
         // Update children

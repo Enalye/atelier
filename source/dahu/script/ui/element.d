@@ -47,10 +47,12 @@ package void loadLibUI_element(GrLibDefinition lib) {
     lib.addProperty(&_alignX!"get", &_alignX!"set", "alignX", uiType, alignXType);
     lib.addProperty(&_alignY!"get", &_alignY!"set", "alignY", uiType, alignYType);
 
+    lib.addProperty(&_hovered, null, "hovered", uiType, grBool);
     lib.addProperty(&_focused, null, "focused", uiType, grBool);
-    lib.addProperty(&_clicked, null, "clicked", uiType, grBool);
+    lib.addProperty(&_pressed, null, "pressed", uiType, grBool);
 
-    lib.addProperty(&_onClick!"get", &_onClick!"set", "onClick", uiType, grOptional(grEvent()));
+    lib.addProperty(&_onPress!"get", &_onPress!"set", "onSubmit",
+        uiType, grOptional(grEvent()));
 
     lib.addFunction(&_addState, "addState", [uiType, stateType]);
     lib.addFunction(&_setState, "setState", [uiType, grString]);
@@ -206,27 +208,33 @@ private void _alignY(string op)(GrCall call) {
     call.setEnum!(UIElement.AlignY)(ui.alignY);
 }
 
+private void _hovered(GrCall call) {
+    UIElement ui = call.getNative!UIElement(0);
+
+    call.setBool(ui.hovered);
+}
+
 private void _focused(GrCall call) {
     UIElement ui = call.getNative!UIElement(0);
 
     call.setBool(ui.focused);
 }
 
-private void _clicked(GrCall call) {
+private void _pressed(GrCall call) {
     UIElement ui = call.getNative!UIElement(0);
 
-    call.setBool(ui.clicked);
+    call.setBool(ui.pressed);
 }
 
-private void _onClick(string op)(GrCall call) {
+private void _onPress(string op)(GrCall call) {
     UIElement ui = call.getNative!UIElement(0);
 
     static if (op == "set") {
-        ui.onClick = call.isNull(1) ? null : call.getEvent(1);
+        ui.onSubmitEvent = call.isNull(1) ? null : call.getEvent(1);
     }
 
-    if (ui.onClick)
-        call.setEvent(ui.onClick);
+    if (ui.onSubmitEvent)
+        call.setEvent(ui.onSubmitEvent);
     else
         call.setNull();
 }

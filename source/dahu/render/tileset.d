@@ -24,18 +24,19 @@ final class Tileset : Graphic {
         Texture _texture;
     }
 
+    float sizeX = 0f, sizeY = 0f;
+    int columns, lines, maxCount;
+    int marginX, marginY;
+
     @property {
-        pragma(inline) override uint width() const {
+        pragma(inline) uint width() const {
             return _texture.width;
         }
 
-        pragma(inline) override uint height() const {
+        pragma(inline) uint height() const {
             return _texture.height;
         }
     }
-
-    int columns, lines, maxCount;
-    int marginX, marginY;
 
     /// Ctor
     this(string name, Vec4i clip_, uint columns_, uint lines_, uint maxCount_ = 0) {
@@ -52,6 +53,8 @@ final class Tileset : Graphic {
     this(Tileset tileset) {
         super(tileset);
         _texture = tileset._texture;
+        sizeX = tileset.sizeX;
+        sizeY = tileset.sizeY;
         columns = tileset.columns;
         lines = tileset.lines;
         maxCount = tileset.maxCount;
@@ -124,5 +127,19 @@ final class Tileset : Graphic {
         _texture.blend = blend;
         _texture.alpha = alpha;
         _texture.draw(x, y, sizeX, sizeY, currentClip, angle, 0f, 0f);
+    }
+
+    /// Redimensionne l’image pour qu’elle puisse tenir dans une taille donnée
+    override void fit(float x, float y) {
+        Vec2f size = to!Vec2f(clip.zw).fit(Vec2f(x, y));
+        sizeX = size.x;
+        sizeY = size.y;
+    }
+
+    /// Redimensionne l’image pour qu’elle puisse contenir une taille donnée
+    override void contain(float x, float y) {
+        Vec2f size = to!Vec2f(clip.zw).contain(Vec2f(x, y));
+        sizeX = size.x;
+        sizeY = size.y;
     }
 }

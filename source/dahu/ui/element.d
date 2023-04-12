@@ -2,13 +2,19 @@ module dahu.ui.element;
 
 import grimoire;
 
-import dahu.common, dahu.render;
+import dahu.common;
+import dahu.core;
+import dahu.render;
 
 /// Abstract class representing an UI element
 abstract class UIElement {
     public {
         UIElement[] _children;
         Drawable[] _drawables;
+    }
+
+    private {
+        bool _hovered, _focused, _pressed, _selected, _activated, _grabbed;
     }
 
     float posX = 0f, posY = 0f;
@@ -29,8 +35,8 @@ abstract class UIElement {
         bottom
     }
 
-    AlignX alignX = AlignX.left;
-    AlignY alignY = AlignY.top;
+    AlignX alignX = AlignX.center;
+    AlignY alignY = AlignY.center;
 
     /// Transitions
     float offsetX = 0f, offsetY = 0f;
@@ -54,13 +60,114 @@ abstract class UIElement {
     Timer timer;
 
     // Propriétés
-    bool focused, clicked;
-    bool active = true, movable;
 
-    GrEvent onClick;
+    @property {
+        bool hovered() const {
+            return _hovered;
+        }
+
+        bool hovered(bool hovered_) {
+            if (_hovered != hovered_) {
+                _hovered = hovered_;
+                onHover();
+            }
+            return _hovered;
+        }
+
+        bool focused() const {
+            return _focused;
+        }
+
+        bool focused(bool focused_) {
+            if (_focused != focused_) {
+                _focused = focused_;
+                onFocus();
+            }
+            return _focused;
+        }
+
+        bool pressed() const {
+            return _pressed;
+        }
+
+        bool pressed(bool pressed_) {
+            if (_pressed != pressed_) {
+                _pressed = pressed_;
+                onPress();
+            }
+            return _pressed;
+        }
+
+        bool selected() const {
+            return _selected;
+        }
+
+        bool selected(bool selected_) {
+            if (_selected != selected_) {
+                _selected = selected_;
+                onSelect();
+            }
+            return _selected;
+        }
+
+        bool activated() const {
+            return _activated;
+        }
+
+        bool activated(bool activated_) {
+            if (_activated != activated_) {
+                _activated = activated_;
+                onActive();
+            }
+            return _activated;
+        }
+
+        bool grabbed() const {
+            return _grabbed;
+        }
+
+        bool grabbed(bool grabbed_) {
+            if (_grabbed != grabbed_) {
+                _grabbed = grabbed_;
+                onGrab();
+            }
+            return _grabbed;
+        }
+    }
+
+    bool disabled, focusable, movable;
+
+    GrEvent onSubmitEvent;
 
     bool alive = true;
 
-    void update() {}
-    void draw() {}
+    void update() {
+    }
+
+    void draw() {
+    }
+
+    void onHover() {
+    }
+
+    void onFocus() {
+    }
+
+    void onPress() {
+    }
+
+    void onSelect() {
+    }
+
+    void onActive() {
+    }
+
+    void onGrab() {
+    }
+
+    void onSubmit() {
+        if (onSubmitEvent) {
+            app.callEvent(onSubmitEvent);
+        }
+    }
 }

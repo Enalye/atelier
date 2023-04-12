@@ -11,31 +11,6 @@ import dahu.common;
 import dahu.render.util;
 
 abstract class Graphic {
-    protected {
-        float _sizeX = 0f, _sizeY = 0f;
-    }
-
-    @property {
-        uint width() const;
-        uint height() const;
-
-        pragma(inline) float sizeX() const {
-            return _sizeX;
-        }
-
-        pragma(inline) float sizeX(float sizeX_) {
-            return _sizeX = sizeX_;
-        }
-
-        pragma(inline) float sizeY() const {
-            return _sizeY;
-        }
-
-        pragma(inline) float sizeY(float sizeY_) {
-            return _sizeY = sizeY_;
-        }
-    }
-
     Vec4i clip;
 
     double angle = 0.0;
@@ -56,8 +31,6 @@ abstract class Graphic {
     }
 
     this(Graphic drawable) {
-        sizeX = drawable.sizeX;
-        sizeY = drawable.sizeY;
         clip = drawable.clip;
         angle = drawable.angle;
         flipX = drawable.flipX;
@@ -72,16 +45,8 @@ abstract class Graphic {
     }
 
     /// Redimensionne l’image pour qu’elle puisse tenir dans une taille donnée
-    final void fit(float x, float y) {
-        Vec2f size = to!Vec2f(clip.zw).fit(Vec2f(x, y));
-        sizeX(size.x);
-        sizeY(size.y);
-    }
+    abstract void fit(float x, float y);
 
     /// Redimensionne l’image pour qu’elle puisse contenir une taille donnée
-    final void contain(float x, float y) {
-        Vec2f size = to!Vec2f(clip.zw).contain(Vec2f(x, y));
-        sizeX(size.x);
-        sizeY(size.y);
-    }
+    abstract void contain(float x, float y);
 }

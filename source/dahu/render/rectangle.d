@@ -15,13 +15,15 @@ import dahu.render.graphic;
 import dahu.render.renderer;
 
 final class Rectangle : Graphic, Drawable {
+    float sizeX = 0f, sizeY = 0f;
+
     @property {
-        pragma(inline) override uint width() const {
-            return cast(uint) _sizeX;
+        pragma(inline) uint width() const {
+            return cast(uint) sizeX;
         }
 
-        pragma(inline) override uint height() const {
-            return cast(uint) _sizeY;
+        pragma(inline) uint height() const {
+            return cast(uint) sizeY;
         }
     }
 
@@ -32,6 +34,8 @@ final class Rectangle : Graphic, Drawable {
 
     this(Rectangle rect) {
         super(rect);
+        sizeX = rect.sizeX;
+        sizeY = rect.sizeY;
         filled = rect.filled;
     }
 
@@ -40,5 +44,19 @@ final class Rectangle : Graphic, Drawable {
 
     void draw(float x, float y) {
         app.renderer.drawRect(x, y, sizeX, sizeY, color, alpha, filled);
+    }
+
+    /// Redimensionne l’image pour qu’elle puisse tenir dans une taille donnée
+    override void fit(float x, float y) {
+        Vec2f size = to!Vec2f(clip.zw).fit(Vec2f(x, y));
+        sizeX = size.x;
+        sizeY = size.y;
+    }
+
+    /// Redimensionne l’image pour qu’elle puisse contenir une taille donnée
+    override void contain(float x, float y) {
+        Vec2f size = to!Vec2f(clip.zw).contain(Vec2f(x, y));
+        sizeX = size.x;
+        sizeY = size.y;
     }
 }

@@ -26,27 +26,28 @@ final class NinePatch : Graphic, Drawable {
         SDL_Surface* _surface;
         int _surfaceWidth, _surfaceHeight;
         WritableTexture _cache;
-        Vec2f _size;
         Vec4i _clip;
         int _top, _bottom, _left, _right;
         bool _isDirty = true;
         bool _ownSurface;
+
+        float _sizeX = 0f, _sizeY = 0f;
     }
 
     @property {
-        pragma(inline) override uint width() const {
+        pragma(inline) uint width() const {
             return _cache.width;
         }
 
-        pragma(inline) override uint height() const {
+        pragma(inline) uint height() const {
             return _cache.height;
         }
 
-        pragma(inline) override float sizeX() const {
+        pragma(inline) float sizeX() const {
             return _sizeX;
         }
 
-        pragma(inline) override float sizeX(float sizeX_) {
+        pragma(inline) float sizeX(float sizeX_) {
             if ((cast(int) _sizeX) != (cast(int) sizeX_)) {
                 _isDirty = true;
             }
@@ -54,11 +55,11 @@ final class NinePatch : Graphic, Drawable {
             return _sizeX;
         }
 
-        pragma(inline) override float sizeY() const {
+        pragma(inline) float sizeY() const {
             return _sizeY;
         }
 
-        pragma(inline) override float sizeY(float sizeY_) {
+        pragma(inline) float sizeY(float sizeY_) {
             if ((cast(int) _sizeY) != (cast(int) sizeY_)) {
                 _isDirty = true;
             }
@@ -170,6 +171,8 @@ final class NinePatch : Graphic, Drawable {
     this(NinePatch ninePatch) {
         super(ninePatch);
         _surface = ninePatch._surface;
+        _sizeX = ninePatch._sizeX;
+        _sizeY = ninePatch._sizeY;
         _surfaceWidth = ninePatch._surfaceWidth;
         _surfaceHeight = ninePatch._surfaceHeight;
         _ownSurface = false;
@@ -195,8 +198,8 @@ final class NinePatch : Graphic, Drawable {
         if (_surface is null || _clip.z <= (_left + _right) || _clip.w <= (_top + _bottom))
             return;
 
-        _cache = (_size.x >= 1f && _size.y >= 1f) ? new WritableTexture(cast(int) _size.x,
-            cast(int) _size.y) : null;
+        _cache = (_sizeX >= 1f && _sizeY >= 1f) ? new WritableTexture(cast(int) _sizeX,
+            cast(int) _sizeY) : null;
 
         if (!_cache)
             return;
@@ -327,7 +330,23 @@ final class NinePatch : Graphic, Drawable {
         _cache.color = color;
         _cache.blend = blend;
         _cache.alpha = alpha;
-        _cache.draw(x, y, _size.x, _size.y, Vec4i(0, 0, _cache.width,
+        _cache.draw(x, y, _sizeX, _sizeY, Vec4i(0, 0, _cache.width,
                 _cache.height), angle, pivotX, pivotY, flipX, flipY);
+    }
+
+    /// Redimensionne l’image pour qu’elle puisse tenir dans une taille donnée
+    override void fit(float x, float y) {
+        Vec2f size = to!Vec2f(clip.zw).fit(Vec2f(x, y));
+        _sizeX = size.x;
+        _sizeY = size.y;
+        _isDirty = true;
+    }
+
+    /// Redimensionne l’image pour qu’elle puisse contenir une taille donnée
+    override void contain(float x, float y) {
+        Vec2f size = to!Vec2f(clip.zw).contain(Vec2f(x, y));
+        _sizeX = size.x;
+        _sizeY = size.y;
+        _isDirty = true;
     }
 }

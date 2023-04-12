@@ -7,7 +7,9 @@ module dahu.render;
 
 public {
     import dahu.render.font;
+    import dahu.render.animation;
     import dahu.render.canvas;
+    import dahu.render.circle;
     import dahu.render.drawable;
     import dahu.render.graphic;
     import dahu.render.image;

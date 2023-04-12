@@ -28,21 +28,6 @@ final class Animation : Graphic, Drawable {
         bool _isRunning = true;
     }
 
-    @property {
-        pragma(inline) override uint width() const {
-            return _texture.width;
-        }
-
-        pragma(inline) override uint height() const {
-            return _texture.height;
-        }
-
-        /// L’animation est en cours de lecture ?
-        bool isPlaying() const {
-            return _isRunning;
-        }
-    }
-
     uint frameTime;
 
     int[] frames;
@@ -52,6 +37,23 @@ final class Animation : Graphic, Drawable {
     bool repeat = true;
 
     int marginX, marginY;
+
+    float sizeX = 0f, sizeY = 0f;
+
+    @property {
+        pragma(inline) uint width() const {
+            return _texture.width;
+        }
+
+        pragma(inline) uint height() const {
+            return _texture.height;
+        }
+
+        /// L’animation est en cours de lecture ?
+        bool isPlaying() const {
+            return _isRunning;
+        }
+    }
 
     /// Ctor
     this(string name, Vec4i clip_, uint columns_, uint lines_, uint maxCount_ = 0) {
@@ -79,6 +81,8 @@ final class Animation : Graphic, Drawable {
         repeat = anim.repeat;
         marginX = anim.marginX;
         marginY = anim.marginY;
+        sizeX = anim.sizeX;
+        sizeY = anim.sizeY;
     }
 
     /// Démarre l’animation du début
@@ -152,5 +156,19 @@ final class Animation : Graphic, Drawable {
         _texture.blend = blend;
         _texture.alpha = alpha;
         _texture.draw(x, y, sizeX, sizeY, imageClip, angle, pivotX, pivotY, flipX, flipY);
+    }
+
+    /// Redimensionne l’image pour qu’elle puisse tenir dans une taille donnée
+    override void fit(float x, float y) {
+        Vec2f size = to!Vec2f(clip.zw).fit(Vec2f(x, y));
+        sizeX = size.x;
+        sizeY = size.y;
+    }
+
+    /// Redimensionne l’image pour qu’elle puisse contenir une taille donnée
+    override void contain(float x, float y) {
+        Vec2f size = to!Vec2f(clip.zw).contain(Vec2f(x, y));
+        sizeX = size.x;
+        sizeY = size.y;
     }
 }

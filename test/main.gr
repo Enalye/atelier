@@ -1,7 +1,5 @@
-    var click: bool;
 
-
-event main() {
+event main {
     // Plusieurs event identiques doivent retourner une erreur !
     /*print("Main");
 
@@ -9,22 +7,25 @@ event main() {
     var label = @Label("Bonjour à tous !");
     label.setPos(50f, 200f);
     label.setAlign(AlignX.right, AlignY.top);*/
-    /*label.onClick = event(label: Label) {
+    /*label.onSubmit = event(label: Label) {
         "hello".print;
     };*/
 
+    //window.setColor(@Color.white);
 
+    appendUI(@Label("Bonjour !"));
+
+    var sz = 600;
     var btn = @Button;
-    btn.setSize(150f, 50f);
-    btn.setPos(150f, 200f);
+    btn.setSize(sz, sz);
+    //btn.setPos(150f, 200f);
+    btn.append(@Label("Bonjour !"));
 
-    var img = @Rectangle;
-    img.setSize(btn.sizeX, btn.sizeY);
+    var img = @Circle(sz as<float>, true, 2f);
     img.color = @Color.blue;
     btn.addDrawable(img);
 
-    btn.onClick = event {
-        //btn.angle += 20f;
+    btn.onSubmit = event {
         print("CLICK");
         
         img.filled = !img.filled;

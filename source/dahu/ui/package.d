@@ -13,6 +13,7 @@ import dahu.input;
 import dahu.render;
 
 public {
+    import dahu.ui.box;
     import dahu.ui.button;
     import dahu.ui.element;
     import dahu.ui.label;
@@ -23,16 +24,18 @@ class UI {
     private {
         UIElement[] _roots;
 
-        bool _hasClicked;
-        UIElement _clickedElement;
-        float _clickedUIPosX = 0f, _clickedUIPosY = 0f;
+        bool _hasPressed;
+        UIElement _pressedElement;
+        float _pressedUIPosX = 0f, _pressedUIPosY = 0f;
 
         UIElement _tempGrabbedUI, _grabbedUI;
         float _grabbedUIPosX = 0f, _grabbedUIPosY = 0f;
 
+        UIElement _hoveredElement;
+        bool _elementAlreadyhovered;
+        float _hoveredElementPosX = 0f, _hoveredElementPosY = 0f;
+
         UIElement _focusedElement;
-        bool _elementAlreadyFocused;
-        float _focusedElementPosX = 0f, _focusedElementPosY = 0f;
     }
 
     /// Update
@@ -49,6 +52,7 @@ class UI {
                 auto mouseButtonEvent = event.asMouseButton();
                 if (mouseButtonEvent.pressed) {
                     _tempGrabbedUI = null;
+                    _pressedElement = null;
 
                     foreach (UIElement element; _roots) {
                         dispatchMouseDownEvent(mouseButtonEvent.x, mouseButtonEvent.y, element);
@@ -58,8 +62,8 @@ class UI {
                         _grabbedUI = _tempGrabbedUI;
                     }
 
-                    if (_hasClicked && _clickedElement !is null) {
-                        _clickedElement.clicked = true;
+                    if (_hasPressed && _pressedElement !is null) {
+                        _pressedElement.pressed = true;
                     }
                 }
                 else {
@@ -67,6 +71,16 @@ class UI {
 
                     foreach (UIElement element; _roots) {
                         dispatchMouseUpEvent(mouseButtonEvent.x, mouseButtonEvent.y, element);
+                    }
+
+                    if (_focusedElement && _focusedElement != _pressedElement) {
+                        _focusedElement.focused = false;
+                    }
+                    _focusedElement = null;
+
+                    if (_pressedElement && _pressedElement.focusable) {
+                        _focusedElement = _pressedElement;
+                        _focusedElement.focused = true;
                     }
                 }
                 break;
@@ -76,9 +90,9 @@ class UI {
                     dispatchMouseUpdateEvent(mouseMotionEvent.x, mouseMotionEvent.y, element);
                 }
 
-                if (_hasClicked && _focusedElement) {
-                    if (!_elementAlreadyFocused)
-                        _focusedElement.focused = true;
+                if (_hasPressed && _hoveredElement) {
+                    if (!_elementAlreadyhovered)
+                        _hoveredElement.hovered = true;
                 }
                 break;
             default:
@@ -93,21 +107,21 @@ class UI {
         Vec2f elementSize = Vec2f(element.sizeX * element.scaleX, element.sizeY * element.scaleY);
 
         bool isInside = mousePos.isBetween(Vec2f.zero, elementSize);
-        if (!element.active || !isInside) {
+        if (element.disabled || !isInside) {
             return;
         }
 
-        _clickedElement = element;
+        _pressedElement = element;
         _tempGrabbedUI = null;
 
-        _clickedUIPosX = mousePos.x;
-        _clickedUIPosY = mousePos.y;
-        _hasClicked = true;
+        _pressedUIPosX = mousePos.x;
+        _pressedUIPosY = mousePos.y;
+        _hasPressed = true;
 
         if (element.movable && !_grabbedUI) {
             _tempGrabbedUI = element;
-            _grabbedUIPosX = _clickedUIPosX;
-            _grabbedUIPosY = _clickedUIPosY;
+            _grabbedUIPosX = _pressedUIPosX;
+            _grabbedUIPosY = _pressedUIPosY;
         }
 
         foreach (child; element._children)
@@ -120,31 +134,29 @@ class UI {
         Vec2f elementSize = Vec2f(element.sizeX * element.scaleX, element.sizeY * element.scaleY);
 
         bool isInside = mousePos.isBetween(Vec2f.zero, elementSize);
-        if (!element.active || !isInside) {
+        if (element.disabled || !isInside) {
             return;
         }
 
         foreach (child; element._children)
             dispatchMouseUpEvent(mousePos.x, mousePos.y, child, element);
 
-        if (_clickedElement == element) {
-            //The previous widget is now unfocused.
-            if (_focusedElement != _clickedElement) {
-                _focusedElement.focused = false;
+        if (_pressedElement == element) {
+            //The previous widget is now unhovered.
+            if (_hoveredElement != _pressedElement) {
+                _hoveredElement.hovered = false;
             }
 
-            //The widget is now focused and receive the onClick event.
-            _focusedElement = _clickedElement;
-            _hasClicked = true;
-            element.focused = true;
+            //The widget is now hovered and receive the onSubmit event.
+            _hoveredElement = _pressedElement;
+            _hasPressed = true;
+            element.hovered = true;
 
-            if (element.onClick) {
-                app.callEvent(element.onClick);
-            }
+            _pressedElement.onSubmit();
         }
 
-        if (_clickedElement)
-            _clickedElement.clicked = false;
+        if (_pressedElement)
+            _pressedElement.pressed = false;
     }
 
     /// Process a mouse update event down the tree.
@@ -155,9 +167,9 @@ class UI {
 
         bool isInside = mousePos.isBetween(Vec2f.zero, elementSize);
 
-        bool wasFocus = element.focused;
+        bool washover = element.hovered;
 
-        if (element.active && element == _grabbedUI) {
+        if (!element.disabled && element == _grabbedUI) {
             if (!element.movable) {
                 _grabbedUI = null;
             }
@@ -179,24 +191,24 @@ class UI {
             }
         }
 
-        if (element.active && isInside) {
+        if (!element.disabled && isInside) {
             //Register element
-            _elementAlreadyFocused = wasFocus;
-            _focusedElement = element;
-            _focusedElementPosX = mousePos.x;
-            _focusedElementPosY = mousePos.y;
-            _hasClicked = true;
+            _elementAlreadyhovered = washover;
+            _hoveredElement = element;
+            _hoveredElementPosX = mousePos.x;
+            _hoveredElementPosY = mousePos.y;
+            _hasPressed = true;
         }
         else {
-            void unfocusElement(UIElement element) {
-                element.focused = false;
-                if (_focusedElement == element)
-                    _focusedElement = null;
+            void unhoverElement(UIElement element) {
+                element.hovered = false;
+                if (_hoveredElement == element)
+                    _hoveredElement = null;
                 foreach (child; element._children)
-                    unfocusElement(child);
+                    unhoverElement(child);
             }
 
-            unfocusElement(element);
+            unhoverElement(element);
             return;
         }
 
@@ -226,12 +238,12 @@ class UI {
             drawable.update();
         }
 
-        element.update();
-
         // Update children
         foreach (UIElement child; element._children) {
             update(child);
         }
+
+        element.update();
     }
 
     pragma(inline) private Vec2f _getPointInElement(float x, float y,
@@ -264,7 +276,7 @@ class UI {
             x = parentW - (x + (element.sizeX * element.scaleX));
             break;
         case center:
-            x = parentW / 2f + x;
+            x = (parentW / 2f + x) - (element.sizeX * element.scaleX) / 2f;
             break;
         }
 
@@ -275,7 +287,7 @@ class UI {
             y = parentH - (y + (element.sizeY * element.scaleY));
             break;
         case center:
-            y = parentH / 2f + y;
+            y = (parentH / 2f + y) - (element.sizeY * element.scaleY) / 2f;
             break;
         }
 

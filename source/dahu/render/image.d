@@ -19,12 +19,14 @@ final class Image : Graphic, Drawable {
         Texture _texture;
     }
 
+    float sizeX = 0f, sizeY = 0f;
+
     @property {
-        pragma(inline) override uint width() const {
+        pragma(inline) uint width() const {
             return _texture.width;
         }
 
-        pragma(inline) override uint height() const {
+        pragma(inline) uint height() const {
             return _texture.height;
         }
     }
@@ -46,6 +48,8 @@ final class Image : Graphic, Drawable {
     this(Image img) {
         super(img);
         _texture = img._texture;
+        sizeX = img.sizeX;
+        sizeY = img.sizeY;
     }
 
     void update() {
@@ -56,5 +60,19 @@ final class Image : Graphic, Drawable {
         _texture.blend = blend;
         _texture.alpha = alpha;
         _texture.draw(x, y, sizeX, sizeY, clip, angle, pivotX, pivotY, flipX, flipY);
+    }
+
+    /// Redimensionne l’image pour qu’elle puisse tenir dans une taille donnée
+    override void fit(float x, float y) {
+        Vec2f size = to!Vec2f(clip.zw).fit(Vec2f(x, y));
+        sizeX = size.x;
+        sizeY = size.y;
+    }
+
+    /// Redimensionne l’image pour qu’elle puisse contenir une taille donnée
+    override void contain(float x, float y) {
+        Vec2f size = to!Vec2f(clip.zw).contain(Vec2f(x, y));
+        sizeX = size.x;
+        sizeY = size.y;
     }
 }

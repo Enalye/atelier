@@ -34,6 +34,8 @@ final class Renderer {
         int _idxContext = -1;
     }
 
+    Color color = Color.white;
+
     this(Window window) {
         _sdlRenderer = SDL_CreateRenderer(window.sdlWindow, -1,
             SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
@@ -45,8 +47,10 @@ final class Renderer {
     }
 
     void render() {
+        SDL_Color sdlColor = color.toSDL();
+
         SDL_RenderPresent(_sdlRenderer);
-        SDL_SetRenderDrawColor(_sdlRenderer, 0, 0, 0, 255);
+        SDL_SetRenderDrawColor(_sdlRenderer, sdlColor.r, sdlColor.g, sdlColor.b, 0);
         SDL_RenderClear(_sdlRenderer);
     }
 
@@ -72,8 +76,10 @@ final class Renderer {
             }
         }
 
+        SDL_Color sdlColor = context.canvas.color.toSDL();
+
         SDL_SetRenderTarget(_sdlRenderer, context.canvas.target);
-        SDL_SetRenderDrawColor(_sdlRenderer, 0, 0, 0, 255);
+        SDL_SetRenderDrawColor(_sdlRenderer, sdlColor.r, sdlColor.g, sdlColor.b, 0);
         SDL_RenderClear(_sdlRenderer);
     }
 

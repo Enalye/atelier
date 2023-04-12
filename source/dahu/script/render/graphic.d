@@ -18,10 +18,6 @@ package void loadLibRender_graphic(GrLibDefinition lib) {
 
     lib.addConstraint(&_drawable, "Drawable");
 
-    lib.addFunction(&_setSize, "setSize", [graphicType, grFloat, grFloat]);
-    lib.addProperty(&_sizeX!"get", &_sizeX!"set", "sizeX", graphicType, grFloat);
-    lib.addProperty(&_sizeY!"get", &_sizeY!"set", "sizeY", graphicType, grFloat);
-
     lib.addFunction(&_setPivot, "setPivot", [graphicType, grFloat, grFloat]);
     lib.addProperty(&_pivotX!"get", &_pivotX!"set", "pivotX", graphicType, grFloat);
     lib.addProperty(&_pivotY!"get", &_pivotY!"set", "pivotY", graphicType, grFloat);
@@ -40,37 +36,12 @@ private bool _drawable(GrData data, GrType type, const GrType[]) {
     if (type.base != GrType.Base.native)
         return false;
 
-    foreach (key; ["Animation", "Image", "NinePatch", "Rectangle"]) {
+    foreach (key; ["Animation", "Circle", "Image", "NinePatch", "Rectangle"]) {
         if (type.mangledType == key)
             return true;
     }
 
     return false;
-}
-
-private void _setSize(GrCall call) {
-    Graphic graphic = call.getNative!Graphic(0);
-
-    graphic.sizeX = call.getFloat(1);
-    graphic.sizeY = call.getFloat(2);
-}
-
-private void _sizeX(string op)(GrCall call) {
-    Graphic graphic = call.getNative!Graphic(0);
-
-    static if (op == "set") {
-        graphic.sizeX = call.getFloat(1);
-    }
-    call.setFloat(graphic.sizeX);
-}
-
-private void _sizeY(string op)(GrCall call) {
-    Graphic graphic = call.getNative!Graphic(0);
-
-    static if (op == "set") {
-        graphic.sizeY = call.getFloat(1);
-    }
-    call.setFloat(graphic.sizeY);
 }
 
 private void _setPivot(GrCall call) {

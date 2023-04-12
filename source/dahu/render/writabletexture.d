@@ -82,6 +82,8 @@ final class WritableTexture {
         }
     }
 
+    float sizeX = 0f, sizeY = 0f;
+
     /// Ctor
     this(const Texture texture) {
         load(texture.surface);

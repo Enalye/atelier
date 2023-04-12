@@ -108,12 +108,15 @@ final class TrueTypeFont : Font {
     private Glyph cache(dchar ch) {
         int xmin, xmax, ymin, ymax, advance;
         if (_outline == 0) {
-            if (-1 == TTF_GlyphMetrics(_trueTypeFont, cast(wchar) ch, &xmin,
-                    &xmax, &ymin, &ymax, &advance))
+            if (-1 == TTF_GlyphMetrics32(_trueTypeFont, ch, &xmin, &xmax,
+                    &ymin, &ymax, &advance))
                 return new BasicGlyph();
 
-            SDL_Surface* surface = TTF_RenderGlyph_Blended(_trueTypeFont,
-                cast(wchar) ch, Color.white.toSDL());
+            auto aa = Color.white.toSDL();
+            aa.a = 0;
+
+            SDL_Surface* surface = TTF_RenderGlyph32_Blended(_trueTypeFont, ch,
+                aa);
             assert(surface);
             Texture texture = new Texture(surface, false, _isSmooth);
             assert(texture);
@@ -124,20 +127,19 @@ final class TrueTypeFont : Font {
             return metrics;
         }
         else {
-            if (-1 == TTF_GlyphMetrics(_trueTypeFont, cast(wchar) ch, &xmin,
-                    &xmax, &ymin, &ymax, &advance))
+            if (-1 == TTF_GlyphMetrics32(_trueTypeFont, ch, &xmin, &xmax,
+                    &ymin, &ymax, &advance))
                 return new BasicGlyph();
 
             TTF_SetFontOutline(_trueTypeFont, _outline);
 
-            SDL_Surface* surfaceOutline = TTF_RenderGlyph_Blended(_trueTypeFont,
-                cast(wchar) ch, Color.black.toSDL());
+            SDL_Surface* surfaceOutline = TTF_RenderGlyph32_Blended(_trueTypeFont,
+                ch, Color.black.toSDL());
             assert(surfaceOutline);
 
             TTF_SetFontOutline(_trueTypeFont, 0);
 
-            SDL_Surface* surface = TTF_RenderGlyph_Blended(_trueTypeFont,
-                cast(wchar) ch, Color.white.toSDL());
+            SDL_Surface* surface = TTF_RenderGlyph32_Blended(_trueTypeFont, ch, Color.white.toSDL());
             assert(surface);
 
             SDL_Rect srcRect = {0, 0, surface.w, surface.h};

@@ -27,6 +27,10 @@ void loadLibRender_ninepatch(GrLibDefinition lib) {
         mixin("lib.addProperty(&_property!(property, \"get\"), &_property!(property, \"set\"),
             property, ninepatchType, grInt);");
     }
+
+    lib.addFunction(&_setSize, "setSize", [ninepatchType, grFloat, grFloat]);
+    lib.addProperty(&_sizeX!"get", &_sizeX!"set", "sizeX", ninepatchType, grFloat);
+    lib.addProperty(&_sizeY!"get", &_sizeY!"set", "sizeY", ninepatchType, grFloat);
 }
 
 private void _ctor(GrCall call) {
@@ -42,4 +46,29 @@ private void _property(string property, string op)(GrCall call) {
     }
 
     mixin("call.setInt(ninepatch.", property, ");");
+}
+
+private void _setSize(GrCall call) {
+    NinePatch circle = call.getNative!NinePatch(0);
+
+    circle.sizeX = call.getFloat(1);
+    circle.sizeY = call.getFloat(2);
+}
+
+private void _sizeX(string op)(GrCall call) {
+    NinePatch circle = call.getNative!NinePatch(0);
+
+    static if (op == "set") {
+        circle.sizeX = call.getFloat(1);
+    }
+    call.setFloat(circle.sizeX);
+}
+
+private void _sizeY(string op)(GrCall call) {
+    NinePatch circle = call.getNative!NinePatch(0);
+
+    static if (op == "set") {
+        circle.sizeY = call.getFloat(1);
+    }
+    call.setFloat(circle.sizeY);
 }

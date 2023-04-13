@@ -36,7 +36,10 @@ private bool _drawable(GrData data, GrType type, const GrType[]) {
     if (type.base != GrType.Base.native)
         return false;
 
-    foreach (key; ["Animation", "Circle", "Image", "NinePatch", "Rectangle"]) {
+    foreach (key; [
+            "Animation", "Capsule", "Circle", "Image", "NinePatch",
+            "Rectangle", "RoundedRectangle"
+        ]) {
         if (type.mangledType == key)
             return true;
     }

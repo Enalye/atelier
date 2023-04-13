@@ -198,8 +198,8 @@ final class NinePatch : Graphic, Drawable {
         if (_surface is null || _clip.z <= (_left + _right) || _clip.w <= (_top + _bottom))
             return;
 
-        _cache = (_sizeX >= 1f && _sizeY >= 1f) ? new WritableTexture(cast(int) _sizeX,
-            cast(int) _sizeY) : null;
+        _cache = (_sizeX >= 1f && _sizeY >= 1f) ? new WritableTexture(cast(uint) _sizeX,
+            cast(uint) _sizeY) : null;
 
         if (!_cache)
             return;
@@ -337,16 +337,14 @@ final class NinePatch : Graphic, Drawable {
     /// Redimensionne l’image pour qu’elle puisse tenir dans une taille donnée
     override void fit(float x, float y) {
         Vec2f size = to!Vec2f(clip.zw).fit(Vec2f(x, y));
-        _sizeX = size.x;
-        _sizeY = size.y;
-        _isDirty = true;
+        sizeX = size.x;
+        sizeY = size.y;
     }
 
     /// Redimensionne l’image pour qu’elle puisse contenir une taille donnée
     override void contain(float x, float y) {
         Vec2f size = to!Vec2f(clip.zw).contain(Vec2f(x, y));
-        _sizeX = size.x;
-        _sizeY = size.y;
-        _isDirty = true;
+        sizeX = size.x;
+        sizeY = size.y;
     }
 }

@@ -34,7 +34,7 @@ final class Renderer {
         int _idxContext = -1;
     }
 
-    Color color = Color.white;
+    Color color = Color.black;
 
     this(Window window) {
         _sdlRenderer = SDL_CreateRenderer(window.sdlWindow, -1,

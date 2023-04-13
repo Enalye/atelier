@@ -15,13 +15,12 @@ event main {
 
     appendUI(@Label("Bonjour !"));
 
-    var sz = 600;
     var btn = @Button;
-    btn.setSize(sz, sz);
+    btn.setSize(600, 600);
     //btn.setPos(150f, 200f);
     btn.append(@Label("Bonjour !"));
 
-    var img = @Circle(sz as<float>, true, 2f);
+    var img = @Circle(600, false, 10f);
     img.color = @Color.blue;
     btn.addDrawable(img);
 

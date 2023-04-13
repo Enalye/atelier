@@ -113,8 +113,7 @@ final class Circle : Graphic, Drawable {
                     for (int ix; ix < texWidth; ++ix) {
                         Vec2f point = Vec2f(ix, iy) + .5f;
                         float dist = point.distance(data.center);
-                        float value = clamp(abs((dist + data.thickness) - data.radius) - data.thickness,
-                            0f, 1f);
+                        float value = clamp(dist - data.radius, 0f, 1f);
 
                         dest[iy * texWidth + ix] = 0xFFFFFF00 | (cast(ubyte) lerp(255f, 0f, value));
                     }
@@ -125,7 +124,8 @@ final class Circle : Graphic, Drawable {
                     for (int ix; ix < texWidth; ++ix) {
                         Vec2f point = Vec2f(ix, iy) + .5f;
                         float dist = point.distance(data.center);
-                        float value = clamp(dist - data.radius, 0f, 1f);
+                        float value = clamp(abs((dist + data.thickness) - data.radius) - data.thickness,
+                            0f, 1f);
 
                         dest[iy * texWidth + ix] = 0xFFFFFF00 | (cast(ubyte) lerp(255f, 0f, value));
                     }

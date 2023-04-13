@@ -29,45 +29,45 @@ private void _ctor(GrCall call) {
 }
 
 private void _setSize(GrCall call) {
-    Capsule rect = call.getNative!Capsule(0);
+    Capsule capsule = call.getNative!Capsule(0);
 
-    rect.sizeX = call.getFloat(1);
-    rect.sizeY = call.getFloat(2);
+    capsule.sizeX = call.getFloat(1);
+    capsule.sizeY = call.getFloat(2);
 }
 
 private void _sizeX(string op)(GrCall call) {
-    Capsule rect = call.getNative!Capsule(0);
+    Capsule capsule = call.getNative!Capsule(0);
 
     static if (op == "set") {
-        rect.sizeX = call.getFloat(1);
+        capsule.sizeX = call.getFloat(1);
     }
-    call.setFloat(rect.sizeX);
+    call.setFloat(capsule.sizeX);
 }
 
 private void _sizeY(string op)(GrCall call) {
-    Capsule rect = call.getNative!Capsule(0);
+    Capsule capsule = call.getNative!Capsule(0);
 
     static if (op == "set") {
-        rect.sizeY = call.getFloat(1);
+        capsule.sizeY = call.getFloat(1);
     }
-    call.setFloat(rect.sizeY);
+    call.setFloat(capsule.sizeY);
 }
 
 private void _filled(string op)(GrCall call) {
-    Capsule rect = call.getNative!Capsule(0);
+    Capsule capsule = call.getNative!Capsule(0);
 
     static if (op == "set") {
-        rect.filled = call.getBool(1);
+        capsule.filled = call.getBool(1);
     }
 
-    call.setBool(rect.filled);
+    call.setBool(capsule.filled);
 }
 
 private void _thickness(string op)(GrCall call) {
-    Capsule rect = call.getNative!Capsule(0);
+    Capsule capsule = call.getNative!Capsule(0);
 
     static if (op == "set") {
-        rect.thickness = call.getFloat(1);
+        capsule.thickness = call.getFloat(1);
     }
-    call.setFloat(rect.thickness);
+    call.setFloat(capsule.thickness);
 }

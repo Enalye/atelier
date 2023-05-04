@@ -52,7 +52,6 @@ final class Label : UIElement {
     this(string text_ = "", Font font_ = getDefaultFont()) {
         _text = to!dstring(text_);
         _font = font_;
-        disabled = true;
         reload();
     }
 

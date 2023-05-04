@@ -126,6 +126,8 @@ final class Runtime {
         _grEngine.addLibrary(_dhLib);
         _grEngine.load(_bytecode);
 
+        _grEngine.setNativeVariable("app", GrValue(_app));
+
         _grEngine.callEvent("main");
 
         grSetOutputFunction(&_print);
@@ -205,9 +207,9 @@ final class Runtime {
     }
 
     void callEvent(GrEvent event, GrValue[] parameters = []) {
-        if(!_grEngine)
+        if (!_grEngine)
             return;
-        
+
         _grEngine.callEvent(event, parameters);
     }
 }

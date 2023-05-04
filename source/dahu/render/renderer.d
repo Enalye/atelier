@@ -34,7 +34,7 @@ final class Renderer {
         int _idxContext = -1;
     }
 
-    Color color = Color.black;
+    Color color = Color.white;
 
     this(Window window) {
         _sdlRenderer = SDL_CreateRenderer(window.sdlWindow, -1,
@@ -82,7 +82,7 @@ final class Renderer {
         SDL_SetRenderDrawColor(_sdlRenderer, sdlColor.r, sdlColor.g, sdlColor.b, 0);
         SDL_RenderClear(_sdlRenderer);
     }
-
+bool sosis = false;
     void popCanvas(float x, float y, float w, float h, float pivotX, float pivotY,
         float angle, Color color, float alpha) {
         if (_idxContext < 0)
@@ -95,10 +95,18 @@ final class Renderer {
             SDL_SetRenderTarget(_sdlRenderer, _canvases[_idxContext].canvas.target);
         else
             SDL_SetRenderTarget(_sdlRenderer, null);
+import dahu.render.util;
+        if(sosis) {
+            context.canvas.blend = Blend.additive;
+        }
 
         context.canvas.color = color;
         context.canvas.alpha = alpha;
         context.canvas.draw(x, y, w, h, context.clip, pivotX, pivotY, angle);
+        
+        if(sosis) {
+            context.canvas.blend = Blend.alpha;
+        }
     }
 
     void drawRect(float x, float y, float w, float h, Color color, float alpha, bool filled) {

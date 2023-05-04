@@ -13,21 +13,13 @@ event main {
 
     //window.setColor(@Color.white);
 
-    appendUI(@Label("Bonjour !"));
+    //appendUI(@Label("Bonjour !"));
 
-    var btn = @Button;
-    btn.setSize(600, 600);
-    //btn.setPos(150f, 200f);
-    btn.append(@Label("Bonjour !"));
-
-    var img = @Circle(600, false, 10f);
-    img.color = @Color.blue;
-    btn.addDrawable(img);
+    var btn = @FilledButton("Clique ici");
+    //btn.setSize(600, 200);
 
     btn.onSubmit = event {
         print("CLICK");
-        
-        img.filled = !img.filled;
     };
     appendUI(btn);
 
@@ -68,8 +60,13 @@ event main {
     sleep(1.seconds);
     label.runState("hidden");*/
 
+    //app.ui.isDebug = true;
+
     loop yield {
         if(isPressed(KeyButton.escape))
             exit;
+
+        if(isPressed(KeyButton.f1))
+            app.ui.isDebug = !app.ui.isDebug;
     }
 }

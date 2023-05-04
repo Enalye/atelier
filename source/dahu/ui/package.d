@@ -1,3 +1,8 @@
+/** 
+ * Copyright: Enalye
+ * License: Zlib
+ * Authors: Enalye
+ */
 module dahu.ui;
 
 import std.stdio;
@@ -24,7 +29,6 @@ class UI {
     private {
         UIElement[] _roots;
 
-        bool _hasPressed;
         UIElement _pressedElement;
         float _pressedUIPosX = 0f, _pressedUIPosY = 0f;
 
@@ -37,6 +41,18 @@ class UI {
 
         UIElement _focusedElement;
     }
+
+    @property {
+        float pressedX() const {
+            return _pressedUIPosX;
+        }
+
+        float pressedY() const {
+            return _pressedUIPosY;
+        }
+    }
+
+    bool isDebug;
 
     /// Update
     void update() {
@@ -62,7 +78,7 @@ class UI {
                         _grabbedUI = _tempGrabbedUI;
                     }
 
-                    if (_hasPressed && _pressedElement !is null) {
+                    if (_pressedElement) {
                         _pressedElement.pressed = true;
                     }
                 }
@@ -78,6 +94,10 @@ class UI {
                     }
                     _focusedElement = null;
 
+                    if (_pressedElement) {
+                        _pressedElement.pressed = false;
+                    }
+
                     if (_pressedElement && _pressedElement.focusable) {
                         _focusedElement = _pressedElement;
                         _focusedElement.focused = true;
@@ -90,9 +110,8 @@ class UI {
                     dispatchMouseUpdateEvent(mouseMotionEvent.x, mouseMotionEvent.y, element);
                 }
 
-                if (_hasPressed && _hoveredElement) {
-                    if (!_elementAlreadyhovered)
-                        _hoveredElement.hovered = true;
+                if (_hoveredElement && !_elementAlreadyhovered) {
+                    _hoveredElement.hovered = true;
                 }
                 break;
             default:
@@ -107,7 +126,7 @@ class UI {
         Vec2f elementSize = Vec2f(element.sizeX * element.scaleX, element.sizeY * element.scaleY);
 
         bool isInside = mousePos.isBetween(Vec2f.zero, elementSize);
-        if (element.disabled || !isInside) {
+        if (!element.enabled || !isInside) {
             return;
         }
 
@@ -116,7 +135,6 @@ class UI {
 
         _pressedUIPosX = mousePos.x;
         _pressedUIPosY = mousePos.y;
-        _hasPressed = true;
 
         if (element.movable && !_grabbedUI) {
             _tempGrabbedUI = element;
@@ -134,7 +152,7 @@ class UI {
         Vec2f elementSize = Vec2f(element.sizeX * element.scaleX, element.sizeY * element.scaleY);
 
         bool isInside = mousePos.isBetween(Vec2f.zero, elementSize);
-        if (element.disabled || !isInside) {
+        if (!element.enabled || !isInside) {
             return;
         }
 
@@ -149,14 +167,10 @@ class UI {
 
             //The widget is now hovered and receive the onSubmit event.
             _hoveredElement = _pressedElement;
-            _hasPressed = true;
             element.hovered = true;
 
             _pressedElement.onSubmit();
         }
-
-        if (_pressedElement)
-            _pressedElement.pressed = false;
     }
 
     /// Process a mouse update event down the tree.
@@ -169,7 +183,7 @@ class UI {
 
         bool washover = element.hovered;
 
-        if (!element.disabled && element == _grabbedUI) {
+        if (element.enabled && element == _grabbedUI) {
             if (!element.movable) {
                 _grabbedUI = null;
             }
@@ -191,13 +205,12 @@ class UI {
             }
         }
 
-        if (!element.disabled && isInside) {
+        if (element.enabled && isInside) {
             //Register element
             _elementAlreadyhovered = washover;
             _hoveredElement = element;
             _hoveredElementPosX = mousePos.x;
             _hoveredElementPosY = mousePos.y;
-            _hasPressed = true;
         }
         else {
             void unhoverElement(UIElement element) {
@@ -230,6 +243,7 @@ class UI {
             element.scaleX = lerp(element.initState.scaleX, element.targetState.scaleX, t);
             element.scaleY = lerp(element.initState.scaleY, element.targetState.scaleY, t);
 
+            element.color = lerp(element.initState.color, element.targetState.color, t);
             element.angle = lerp(element.initState.angle, element.targetState.angle, t);
             element.alpha = lerp(element.initState.alpha, element.targetState.alpha, t);
         }
@@ -320,7 +334,10 @@ class UI {
         float sizeY = element.scaleY * element.sizeY;
         app.renderer.popCanvas(pos.x, pos.y, sizeX, sizeY,
             element.pivotX * sizeX, element.pivotY * sizeY, element.angle,
-            Color.white, element.alpha);
+            element.color, element.alpha);
+
+        if (isDebug)
+            app.renderer.drawRect(pos.x, pos.y, sizeX, sizeY, Color.blue, 1f, false);
     }
 
     /// Add an UIElement to the manager at root level

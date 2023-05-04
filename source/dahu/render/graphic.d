@@ -17,7 +17,7 @@ abstract class Graphic {
 
     bool flipX, flipY;
 
-    float anchorX = 0f, anchorY = 0f;
+    float anchorX = .5f, anchorY = .5f;
 
     float pivotX = 0f, pivotY = 0f;
 

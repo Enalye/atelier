@@ -8,6 +8,7 @@ module dahu.script;
 import grimoire;
 
 import dahu.script.common;
+import dahu.script.core;
 import dahu.script.input;
 import dahu.script.render;
 import dahu.script.ui;
@@ -28,7 +29,7 @@ GrLibLoader[] getLibraryLoaders() {
     GrLibLoader[] loaders;
 
     static foreach (pack; [
-            &getLibLoaders_common, &getLibLoaders_input,
+            &getLibLoaders_common, &getLibLoaders_core, &getLibLoaders_input,
             &getLibLoaders_render, &getLibLoaders_ui,
         ]) {
         loaders ~= pack();

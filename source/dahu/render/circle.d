@@ -27,6 +27,8 @@ final class Circle : Graphic, Drawable {
         WritableTexture _cache;
     }
 
+    bool noCache;
+
     @property {
         float radius() const {
             return _radius;
@@ -83,7 +85,7 @@ final class Circle : Graphic, Drawable {
     void update() {
     }
 
-    private void _cacheTexture() {
+    void cache() {
         _isDirty = false;
 
         uint size = cast(uint) ceil(_radius * 2f);
@@ -135,8 +137,8 @@ final class Circle : Graphic, Drawable {
     }
 
     void draw(float x, float y) {
-        if (_isDirty)
-            _cacheTexture();
+        if (_isDirty && !noCache)
+            cache();
 
         if (!_cache)
             return;
@@ -144,8 +146,9 @@ final class Circle : Graphic, Drawable {
         _cache.color = color;
         _cache.blend = blend;
         _cache.alpha = alpha;
-        _cache.draw(x, y, _radius, _radius, Vec4i(0, 0, _cache.width,
-                _cache.height), angle, pivotX, pivotY, flipX, flipY);
+        _cache.draw(x - (anchorX * _radius), y - (anchorY * _radius), _radius,
+            _radius, Vec4i(0, 0, _cache.width, _cache.height), angle, pivotX,
+            pivotY, flipX, flipY);
     }
 
     /// Redimensionne l’image pour qu’elle puisse tenir dans une taille donnée

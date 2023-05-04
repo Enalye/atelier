@@ -13,14 +13,27 @@ import dahu.ui;
 
 package void loadLibUI_button(GrLibDefinition lib) {
     GrType buttonType = lib.addNative("Button", [], "UIElement");
+    GrType filledButtonType = lib.addNative("FilledButton", [], "UIElement");
+    GrType outlinedButtonType = lib.addNative("OutlinedButton", [], "Button");
+    GrType textButtonType = lib.addNative("TextButton", [], "Button");
 
-    lib.addConstructor(&_ctor, buttonType);
+    //GrType buttonStyleType = lib.addEnum("ButtonStyle", grNativeEnum!(Button.Style));
+
+    lib.addConstructor(&_filledBtn_ctor, filledButtonType, [grString]);
+    lib.addConstructor(&_outlinedBtn_ctor, outlinedButtonType, [grString]);
+    lib.addConstructor(&_textBtn_ctor, textButtonType, [grString]);
 }
 
-private void _ctor(GrCall call) {
-    Button button = new Button;
+private void _filledBtn_ctor(GrCall call) {
+    call.setNative(new FilledButton(call.getString(0)));
+}
 
-    call.setNative(button);
+private void _outlinedBtn_ctor(GrCall call) {
+    call.setNative(new OutlinedButton(call.getString(0)));
+}
+
+private void _textBtn_ctor(GrCall call) {
+    call.setNative(new TextButton(call.getString(0)));
 }
 
 private void _text(GrCall call) {

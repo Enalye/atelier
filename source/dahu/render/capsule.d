@@ -205,13 +205,13 @@ final class Capsule : Graphic, Drawable {
             }
             else {
                 const int thickness = cast(int) data.thickness;
-                const float halfThickness = data.thickness / 2f;
+                const float halfThickness = data.thickness / 2f - .5f;
 
                 // Coins supérieurs
                 for (int iy; iy < corner; ++iy) {
                     // Coin haut gauche
                     for (int ix; ix < corner; ++ix) {
-                        Vec2f point = Vec2f(ix, iy) + .5f;
+                        Vec2f point = Vec2f(ix, iy);
                         float dist = point.distance(Vec2f(corner, corner));
                         float value = clamp(abs((dist + halfThickness) - data.radius) - halfThickness,
                             0f, 1f);
@@ -221,7 +221,7 @@ final class Capsule : Graphic, Drawable {
 
                     // Coin haut droite
                     for (int ix; ix < corner; ++ix) {
-                        Vec2f point = Vec2f(ix, iy) + .5f;
+                        Vec2f point = Vec2f(ix + 1f, iy);
                         float dist = point.distance(Vec2f(0f, corner));
                         float value = clamp(abs((dist + halfThickness) - data.radius) - halfThickness,
                             0f, 1f);
@@ -235,7 +235,7 @@ final class Capsule : Graphic, Drawable {
                 for (int iy; iy < corner; ++iy) {
                     // Coin bas gauche
                     for (int ix; ix < corner; ++ix) {
-                        Vec2f point = Vec2f(ix, iy) + .5f;
+                        Vec2f point = Vec2f(ix, iy + 1f);
                         float dist = point.distance(Vec2f(corner, 0f));
                         float value = clamp(abs((dist + halfThickness) - data.radius) - halfThickness,
                             0f, 1f);
@@ -246,7 +246,7 @@ final class Capsule : Graphic, Drawable {
 
                     // Coin bas droite
                     for (int ix; ix < corner; ++ix) {
-                        Vec2f point = Vec2f(ix, iy) + .5f;
+                        Vec2f point = Vec2f(ix + 1f, iy + 1f);
                         float dist = point.distance(Vec2f.zero);
                         float value = clamp(abs((dist + halfThickness) - data.radius) - halfThickness,
                             0f, 1f);

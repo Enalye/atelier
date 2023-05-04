@@ -15,6 +15,7 @@ abstract class UIElement {
 
     private {
         bool _hovered, _focused, _pressed, _selected, _activated, _grabbed;
+        bool _enabled;
     }
 
     float posX = 0f, posY = 0f;
@@ -41,6 +42,7 @@ abstract class UIElement {
     /// Transitions
     float offsetX = 0f, offsetY = 0f;
     float scaleX = 1f, scaleY = 1f;
+    Color color = Color.white;
     float alpha = 1f;
     double angle = 0.0;
 
@@ -48,6 +50,7 @@ abstract class UIElement {
         string name;
         float offsetX = 0f, offsetY = 0f;
         float scaleX = 1f, scaleY = 1f;
+        Color color = Color.white;
         float alpha = 1f;
         double angle = 0.0;
         int time = 60;
@@ -133,9 +136,21 @@ abstract class UIElement {
             }
             return _grabbed;
         }
+
+        bool enabled() const {
+            return _enabled;
+        }
+
+        bool enabled(bool enabled_) {
+            if (_enabled != enabled_) {
+                _enabled = enabled_;
+                onEnable();
+            }
+            return _enabled;
+        }
     }
 
-    bool disabled, focusable, movable;
+    bool focusable, movable;
 
     GrEvent onSubmitEvent;
 
@@ -169,5 +184,8 @@ abstract class UIElement {
         if (onSubmitEvent) {
             app.callEvent(onSubmitEvent);
         }
+    }
+
+    void onEnable() {
     }
 }

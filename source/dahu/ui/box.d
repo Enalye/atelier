@@ -13,6 +13,10 @@ abstract class Box : UIElement {
     float paddingX = 0f, paddingY = 0f;
     float marginX = 0f, marginY = 0f;
     float spacing = 0f;
+
+    this() {
+        enabled = true;
+    }
 }
 
 class HBox : Box {

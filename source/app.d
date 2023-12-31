@@ -6,6 +6,10 @@
 import dahu.cli;
 
 void main(string[] args) {
+    version (DahuDev) {
+        args = args[0] ~ ["run", "test"];
+    }
+
     version (Windows) {
         import core.sys.windows.windows : SetConsoleOutputCP;
 
@@ -13,7 +17,7 @@ void main(string[] args) {
     }
 
     try {
-        parseCommand(args);
+        parseCli(args);
     }
     catch (Exception e) {
         import std.stdio;

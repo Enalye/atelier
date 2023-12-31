@@ -23,7 +23,7 @@ void loadLibRender_image(GrLibDefinition lib) {
 }
 
 private void _image(GrCall call) {
-    call.setNative(new Image(call.getString(0)));
+    call.setNative(Dahu.res.get!Image(call.getString(0)));
 }
 
 private void _setSize(GrCall call) {

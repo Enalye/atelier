@@ -500,7 +500,7 @@ final class Input {
     }
 
     /*
-    vec2f getVector(string leftAction, string rightAction, string upAction, string downAction) {
+    Vec2f getVector(string leftAction, string rightAction, string upAction, string downAction) {
 
     }*/
 }

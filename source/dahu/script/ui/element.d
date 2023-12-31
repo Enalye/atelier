@@ -299,7 +299,7 @@ private void _addDrawable(GrCall call) {
 private void _append_root(GrCall call) {
     UIElement ui = call.getNative!UIElement(0);
 
-    app.ui.appendRoot(ui);
+    Dahu.ui.appendRoot(ui);
 }
 
 private void _append_child(GrCall call) {

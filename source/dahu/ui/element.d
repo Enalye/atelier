@@ -182,7 +182,7 @@ abstract class UIElement {
 
     void onSubmit() {
         if (onSubmitEvent) {
-            app.callEvent(onSubmitEvent);
+            Dahu.vm.callEvent(onSubmitEvent);
         }
     }
 

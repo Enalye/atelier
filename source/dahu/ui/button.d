@@ -21,7 +21,7 @@ final class RippleEffect {
 
         Circle _circle;
 
-        Array!(Ripple, 16) _ripples;
+        Array!Ripple _ripples;
 
         float _x, _y;
         float _radius = 10f;
@@ -34,7 +34,7 @@ final class RippleEffect {
 
     this(float radius_) {
         _radius = radius_ * 2f;
-        _ripples = new Array!(Ripple, 16);
+        _ripples = new Array!Ripple;
 
         _circle = new Circle(_radius, true, 0f);
         _circle.blend = Blend.alpha;
@@ -48,8 +48,8 @@ final class RippleEffect {
             _pressedRipple = new Ripple;
             _pressedRipple.startRadius = _pressedRipple.radius = 10f;
             _pressedRipple.startAlpha = _pressedRipple.alpha = .26f;
-            _pressedRipple.x = app.ui.pressedX;
-            _pressedRipple.y = app.ui.pressedY;
+            _pressedRipple.x = Dahu.ui.pressedX;
+            _pressedRipple.y = Dahu.ui.pressedY;
             _pressedRipple.timer.start(30);
         }
         else {
@@ -99,8 +99,8 @@ final class RippleEffect {
         if (_isPressed) {
             _pressedRipple.timer.update();
 
-            _pressedRipple.x = app.ui.pressedX;
-            _pressedRipple.y = app.ui.pressedY;
+            _pressedRipple.x = Dahu.ui.pressedX;
+            _pressedRipple.y = Dahu.ui.pressedY;
 
             _pressedRipple.radius = lerp(_pressedRipple.startRadius, _radius,
                 easeOutSine(_pressedRipple.timer.value01));
@@ -179,7 +179,7 @@ final class ButtonFx {
         _background.alpha = _alpha;
         _background.draw(0f, 0f);
 
-        app.renderer.pushCanvas(cast(int) _ui.sizeX, cast(int) _ui.sizeY);
+        Dahu.renderer.pushCanvas(cast(int) _ui.sizeX, cast(int) _ui.sizeY);
 
         _rippleEffect.color = Color.fromHex(0xff0000);
         _rippleEffect.draw();
@@ -188,7 +188,7 @@ final class ButtonFx {
         _background.alpha = 1f;
         _background.draw(0f, 0f);
 
-        app.renderer.popCanvas(0f, 0f, _ui.sizeX, _ui.sizeY, 0f, 0f, 0f, color, 1f);
+        Dahu.renderer.popCanvas(0f, 0f, _ui.sizeX, _ui.sizeY, 0f, 0f, 0f, color, 1f);
     }
 
     void onPress(bool pressed) {

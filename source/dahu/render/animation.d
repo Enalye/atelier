@@ -20,7 +20,7 @@ import dahu.render.texture;
 import dahu.render.tileset;
 
 /// Série d’images joués séquenciellement
-final class Animation : Graphic, Drawable {
+final class Animation : Graphic, Drawable, Resource!Animation {
     private {
         Texture _texture;
         int _frame;
@@ -57,7 +57,7 @@ final class Animation : Graphic, Drawable {
 
     /// Ctor
     this(string name, Vec4i clip_, uint columns_, uint lines_, uint maxCount_ = 0) {
-        _texture = fetchPrototype!Texture(name);
+        _texture = Dahu.res.get!Texture(name);
         clip = clip_;
         sizeX = clip_.z;
         sizeY = clip_.w;
@@ -83,6 +83,11 @@ final class Animation : Graphic, Drawable {
         marginY = anim.marginY;
         sizeX = anim.sizeX;
         sizeY = anim.sizeY;
+    }
+
+    /// Accès à la ressource
+    Animation fetch() {
+        return new Animation(this);
     }
 
     /// Démarre l’animation du début

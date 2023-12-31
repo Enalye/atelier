@@ -16,7 +16,7 @@ import dahu.render.renderer;
 import dahu.render.util;
 
 /// Base rendering class.
-final class Texture {
+final class Texture : Resource!Texture {
     private {
         bool _isLoaded = false, _ownData, _isSmooth;
         SDL_Texture* _texture = null;
@@ -124,21 +124,9 @@ final class Texture {
         unload();
     }
 
-    /// Call it if you set the preload flag on ctor.
-    void postload() {
-        enforce(_surface, "invalid surface");
-        enforce(sdlRenderer, "the renderer does not exist");
-
-        if (_texture)
-            SDL_DestroyTexture(_texture);
-        if (_isSmooth)
-            SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
-        _texture = SDL_CreateTextureFromSurface(sdlRenderer, _surface);
-        enforce(_texture, "error occurred while converting a surface to a texture format");
-        if (_isSmooth)
-            SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
-        updateSettings();
-        _isLoaded = true;
+    /// Accès à la ressource
+    Texture fetch() {
+        return this;
     }
 
     package void load(SDL_Surface* surface_) {

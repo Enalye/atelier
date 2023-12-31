@@ -318,7 +318,7 @@ class UI {
     private void draw(UIElement element, UIElement parent = null) {
         Vec2f pos = _getElementOrigin(element, parent);
 
-        app.renderer.pushCanvas(cast(uint) element.sizeX, cast(uint) element.sizeY);
+        Dahu.renderer.pushCanvas(cast(uint) element.sizeX, cast(uint) element.sizeY);
 
         foreach (Drawable drawable; element._drawables) {
             drawable.draw(0f, 0f);
@@ -332,12 +332,12 @@ class UI {
 
         float sizeX = element.scaleX * element.sizeX;
         float sizeY = element.scaleY * element.sizeY;
-        app.renderer.popCanvas(pos.x, pos.y, sizeX, sizeY,
+        Dahu.renderer.popCanvas(pos.x, pos.y, sizeX, sizeY,
             element.pivotX * sizeX, element.pivotY * sizeY, element.angle,
             element.color, element.alpha);
 
         if (isDebug)
-            app.renderer.drawRect(pos.x, pos.y, sizeX, sizeY, Color.blue, 1f, false);
+            Dahu.renderer.drawRect(pos.x, pos.y, sizeX, sizeY, Color.blue, 1f, false);
     }
 
     /// Add an UIElement to the manager at root level

@@ -5,33 +5,29 @@
  */
 module dahu.core.runtime;
 
+import core.thread;
 import std.stdio : writeln;
 import std.path, std.file, std.exception;
 import std.datetime, std.conv;
-import core.thread;
 
 import grimoire;
 
-import dahu.common, dahu.ui, dahu.input, dahu.render, dahu.script;
+import dahu.audio;
+import dahu.common;
+import dahu.input;
+import dahu.render;
+import dahu.script;
+import dahu.ui;
 
-import dahu.core.loader, dahu.core.window;
+import dahu.core.loader;
+import dahu.core.window;
 
 private void _print(string msg) {
     writeln(msg);
 }
 
-private {
-    Runtime _app;
-}
-
-@property pragma(inline) {
-    Runtime app() {
-        return _app;
-    }
-}
-
-final class Runtime {
-    private {
+final class Dahu {
+    static private {
         string _filePath;
 
         // Grimoire
@@ -53,91 +49,67 @@ final class Runtime {
         Renderer _renderer;
         UI _ui;
         Input _input;
+        ResourceManager _resourceManager;
+
+        /// Gestionnaire audio
+        AudioManager _audioManager;
     }
 
-    @property {
-        pragma(inline) Window window() {
+    static @property pragma(inline) {
+        Window window() {
             return _window;
         }
 
-        pragma(inline) Renderer renderer() {
+        Renderer renderer() {
             return _renderer;
         }
 
-        pragma(inline) UI ui() {
+        UI ui() {
             return _ui;
         }
 
-        pragma(inline) Input input() {
+        /// Gestionnaire de ressources
+        ResourceManager res() {
+            return _resourceManager;
+        }
+
+        /// Le gestionnaire audio
+        AudioManager audio() {
+            return _audioManager;
+        }
+
+        Input input() {
             return _input;
         }
-    }
 
-    version (DahuDebug) this() {
-        _app = this;
-        string path = buildNormalizedPath("test", "main.gr");
-
-        _load(path);
-    }
-
-    version (DahuRT) this() {
-        _app = this;
-
-    }
-
-    version (DahuDev) this(string path) {
-        _app = this;
-        _load(path);
-    }
-
-    private void _load(string path) {
-        enforce(exists(path), "boot file does not exist `" ~ _filePath ~ "`");
-
-        _stdLib = grLoadStdLibrary();
-        _dhLib = loadLibrary();
-
-        version (DahuRT) {
-            _bytecode = new GrBytecode(path);
+        GrEngine vm() {
+            return _grEngine;
         }
-        else {
-            GrCompiler compiler = new GrCompiler;
-            compiler.addLibrary(_stdLib);
-            compiler.addLibrary(_dhLib);
+    }
 
-            compiler.addFile(path);
-
-            version (DahuDev) {
-                _bytecode = compiler.compile(GrOption.symbols, GrLocale.fr_FR);
-            }
-            else version (DahuDebug) {
-                _bytecode = compiler.compile(GrOption.profile | GrOption.symbols | GrOption.safe,
-                    GrLocale.fr_FR);
-            }
-
-            if (!_bytecode) {
-                writeln(compiler.getError().prettify(GrLocale.fr_FR));
-                return;
-            }
-            //writeln(_bytecode.prettify());
-        }
-
+    this(GrBytecode bytecode, GrLibrary[] libraries, uint windowWidth,
+        uint windowHeight, string windowTitle) {
+        _bytecode = bytecode;
         _grEngine = new GrEngine;
-        _grEngine.addLibrary(_stdLib);
-        _grEngine.addLibrary(_dhLib);
+        foreach (library; libraries) {
+            _grEngine.addLibrary(library);
+        }
         _grEngine.load(_bytecode);
-
-        _grEngine.setNativeVariable("app", GrValue(_app));
-
-        _grEngine.callEvent("main");
 
         grSetOutputFunction(&_print);
 
-        _window = new Window(800, 600);
+        _window = new Window(windowWidth, windowHeight);
         _renderer = new Renderer(_window);
         _ui = new UI();
         _input = new Input();
+        // Initialisation du gestionnaire audio
+        _audioManager = new AudioManager();
 
-        loadResources();
+        // Création du gestionnaire des ressources
+        _resourceManager = new ResourceManager();
+        setupDefaultResourceLoaders(_resourceManager);
+
+        _grEngine.callEvent("app");
     }
 
     void run() {
@@ -149,15 +121,11 @@ final class Runtime {
 
         while (!_input.hasQuit()) {
             long deltaTicks = Clock.currStdTime() - _tickStartFrame;
-            //if (deltaTicks < (10_000_000 / _nominalFPS))
-            //    Thread.sleep(dur!("hnsecs")((10_000_000 / _nominalFPS) - deltaTicks));
-
-            deltaTicks = Clock.currStdTime() - _tickStartFrame;
-            _deltatime = (cast(float)(deltaTicks) / 10_000_000f) * _nominalFPS;
-            _currentFps = (_deltatime == .0f) ? .0f : (10_000_000f / cast(float)(deltaTicks));
+            double deltatime = (cast(float)(deltaTicks) / 10_000_000f) * _nominalFPS;
+            _currentFps = (deltatime == .0f) ? .0f : (10_000_000f / cast(float)(deltaTicks));
             _tickStartFrame = Clock.currStdTime();
 
-            accumulator += _deltatime;
+            accumulator += deltatime;
 
             // Màj
             while (accumulator >= 1f) {
@@ -172,11 +140,8 @@ final class Runtime {
                     }
                 }*/
 
-                    if (_grEngine.hasTasks)
+                    if (_grEngine.hasTasks) {
                         _grEngine.process();
-                    else {
-                        _grEngine = null;
-                        return;
                     }
 
                     //remove!(a => a.isAccepted)(inputEvents);

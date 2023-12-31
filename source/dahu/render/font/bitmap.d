@@ -80,11 +80,6 @@ final class BitmapFont : Font {
         _texture = new Texture(font._texture);
     }
 
-    /// Call only after Renderer is created in main thread.
-    void postload() {
-        _texture.postload();
-    }
-
     @property {
         /// Font name
         string name() const {

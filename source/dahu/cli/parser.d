@@ -3,17 +3,51 @@
  * License: Zlib
  * Authors: Enalye
  */
-module dahu.cli;
+module dahu.cli.parser;
 
 import std.stdio;
 import std.string;
 import std.algorithm;
 
-import dahu.core;
+import dahu.common;
+import dahu.cli.cli_add;
+import dahu.cli.cli_default;
+import dahu.cli.cli_export;
+import dahu.cli.cli_init;
+import dahu.cli.cli_run;
 
-enum DH_VERSION = "v0.0.0";
+void parseCli(string[] args) {
+    Cli cli = new Cli("dahu");
+    cli.setDefault(&cliDefault);
+    cli.addOption("v", "version", "Affiche la version du programme");
+    cli.addOption("h", "help", "Affiche l’aide", [], ["command"]);
+    cli.addCommand(&cliVersion, "version", "Affiche la version du programme");
+    cli.addCommand(&cliHelp, "help", "Affiche l’aide", [], ["command"]);
 
-void parseCommand(string[] args) {
+    cli.addCommand(&cliInit, "init", "Crée un projet vide", [], ["directory"]);
+    cli.addCommandOption("init", "h", "help", "Affiche l’aide de la commande");
+    cli.addCommandOption("init", "a", "app", "Change le nom de l’application", [
+            "name"
+        ]);
+    cli.addCommandOption("init", "s", "source", "Change le chemin du fichier source", [
+            "path"
+        ]);
+
+    cli.addCommand(&cliAdd, "add", "Ajoute un programme au projet", ["name"]);
+    cli.addCommandOption("add", "h", "help", "Affiche l’aide de la commande");
+    cli.addCommandOption("add", "s", "source", "Change le chemin du fichier source", [
+            "path"
+        ]);
+
+    cli.addCommand(&cliRun, "run", "Exécute un programme", [], ["dir"]);
+    cli.addCommandOption("run", "h", "help", "Affiche l’aide de la commande");
+    cli.addCommandOption("run", "c", "config",
+        "Exécute la configuration spécifiée", ["config"]);
+
+    cli.addCommand(&cliExport, "export", "Exporte un projet", [], ["name"]);
+    cli.addCommandOption("export", "h", "help", "Affiche l’aide de la commande");
+    cli.parse(args);
+/*
     if (args.length > 1) {
         args = args[1 .. $];
 
@@ -41,7 +75,7 @@ void parseCommand(string[] args) {
     }
     else {
         runProject();
-    }
+    }*/
 }
 
 void displayHelp(string[] args = []) {
@@ -98,11 +132,11 @@ void displayHelp(string[] args = []) {
 
     writeln(txt);
 }
-
+/*
 void runProject() {
     writeln("running app");
 
-    Runtime rt = new Runtime();
+    Dahu rt = new Dahu();
     rt.run();
 }
 
@@ -113,3 +147,4 @@ void initProject() {
 void buildProject() {
     writeln("building app");
 }
+*/

@@ -21,7 +21,7 @@ import dahu.render.writabletexture;
 import dahu.render.util;
 
 /// Render a resizable repeated sprite with borders. (ex: bubble speech).
-final class NinePatch : Graphic, Drawable {
+final class NinePatch : Graphic, Drawable, Resource!NinePatch {
     private {
         SDL_Surface* _surface;
         int _surfaceWidth, _surfaceHeight;
@@ -149,7 +149,7 @@ final class NinePatch : Graphic, Drawable {
 
     /// Ctor
     this(string name, Vec4i clip_, int top_, int bottom_, int left_, int right_) {
-        Texture tex = fetchPrototype!Texture(name);
+        Texture tex = Dahu.res.get!Texture(name);
 
         _surface = SDL_ConvertSurfaceFormat(tex.surface, SDL_PIXELFORMAT_RGBA8888, 0);
         enforce(_surface, "can't format surface");
@@ -187,6 +187,11 @@ final class NinePatch : Graphic, Drawable {
     ~this() {
         if (_ownSurface && _surface)
             SDL_FreeSurface(_surface);
+    }
+
+    /// Accès à la ressource
+    NinePatch fetch() {
+        return new NinePatch(this);
     }
 
     void update() {

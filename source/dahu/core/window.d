@@ -69,9 +69,6 @@ final class Window {
             "SDL initialisation failure: " ~ fromStringz(SDL_GetError()));
 
         enforce(TTF_Init() != -1, "SDL ttf initialisation failure");
-        enforce(Mix_OpenAudio(44_100, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS,
-                1024) != -1, "no audio device connected");
-        enforce(Mix_AllocateChannels(16) != -1, "audio channels allocation failure");
 
         _sdlWindow = SDL_CreateWindow(toStringz("dahu"), SDL_WINDOWPOS_CENTERED,
             SDL_WINDOWPOS_CENTERED, _width, _height, SDL_WINDOW_RESIZABLE);
@@ -81,8 +78,8 @@ final class Window {
     }
 
     void close() {
-        SDL_DestroyWindow(_sdlWindow);
-        Mix_CloseAudio();
+        if (_sdlWindow)
+            SDL_DestroyWindow(_sdlWindow);
     }
 
     void setIcon(string path) {

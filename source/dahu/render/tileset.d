@@ -19,7 +19,7 @@ import dahu.render.texture;
 import dahu.render.util;
 
 /// Jeu de tuiles
-final class Tileset : Graphic {
+final class Tileset : Graphic, Resource!Tileset {
     private {
         Texture _texture;
     }
@@ -39,8 +39,8 @@ final class Tileset : Graphic {
     }
 
     /// Ctor
-    this(string name, Vec4i clip_, uint columns_, uint lines_, uint maxCount_ = 0) {
-        _texture = fetchPrototype!Texture(name);
+    this(Texture texture, Vec4i clip_, uint columns_, uint lines_, uint maxCount_ = 0) {
+        _texture = texture;
         clip = clip_;
         sizeX = clip_.z;
         sizeY = clip_.w;
@@ -91,6 +91,11 @@ final class Tileset : Graphic {
         image.sizeX = sizeX;
         image.sizeY = sizeY;
         return image;
+    }
+
+    /// Accès à la ressource
+    Tileset fetch() {
+        return new Tileset(this);
     }
 
     /// Retourne toutes les tuiles en images

@@ -6,8 +6,12 @@
 module dahu.common;
 
 public {
+    import dahu.common.archive;
     import dahu.common.array;
+    import dahu.common.cli;
     import dahu.common.color;
+    import dahu.common.constants;
+    import dahu.common.json;
     import dahu.common.mat3;
     import dahu.common.resource;
     import dahu.common.spline;

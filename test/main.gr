@@ -1,5 +1,5 @@
 
-event main {
+event app {
     // Plusieurs event identiques doivent retourner une erreur !
     /*print("Main");
 
@@ -60,13 +60,13 @@ event main {
     sleep(1.seconds);
     label.runState("hidden");*/
 
-    //app.ui.isDebug = true;
+    //Dahu.ui.isDebug = true;
 
     loop yield {
         if(isPressed(KeyButton.escape))
             exit;
 
-        if(isPressed(KeyButton.f1))
-            app.ui.isDebug = !app.ui.isDebug;
+        //if(isPressed(KeyButton.f1))
+        //    Dahu.ui.isDebug = !Dahu.ui.isDebug;
     }
 }

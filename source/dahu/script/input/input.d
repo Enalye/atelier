@@ -387,47 +387,47 @@ private void _makeDropFile(GrCall call) {
 }
 
 private void _isPressed(T)(GrCall call) {
-    call.setBool(app.input.isPressed(call.getEnum!T(0)));
+    call.setBool(Dahu.input.isPressed(call.getEnum!T(0)));
 }
 
 private void _getAxis(GrCall call) {
-    call.setFloat(app.input.getAxis(call.getEnum!(InputEvent.ControllerAxis.Axis)(0)));
+    call.setFloat(Dahu.input.getAxis(call.getEnum!(InputEvent.ControllerAxis.Axis)(0)));
 }
 
 // Action
 
 private void _addAction(GrCall call) {
-    app.input.addAction(call.getString(0), call.getFloat(1));
+    Dahu.input.addAction(call.getString(0), call.getFloat(1));
 }
 
 private void _removeAction(GrCall call) {
-    app.input.removeAction(call.getString(0));
+    Dahu.input.removeAction(call.getString(0));
 }
 
 private void _hasAction(GrCall call) {
-    call.setBool(app.input.hasAction(call.getString(0)));
+    call.setBool(Dahu.input.hasAction(call.getString(0)));
 }
 
 private void _isAction(GrCall call) {
-    call.setBool(app.input.isAction(call.getString(1), call.getNative!InputEvent(0)));
+    call.setBool(Dahu.input.isAction(call.getString(1), call.getNative!InputEvent(0)));
 }
 
 private void _addActionEvent(GrCall call) {
-    app.input.addActionEvent(call.getString(0), call.getNative!InputEvent(1));
+    Dahu.input.addActionEvent(call.getString(0), call.getNative!InputEvent(1));
 }
 
 private void _removeActionEvents(GrCall call) {
-    app.input.removeActionEvents(call.getString(0));
+    Dahu.input.removeActionEvents(call.getString(0));
 }
 
 private void _isActionPressed(GrCall call) {
-    call.setBool(app.input.isPressed(call.getString(0)));
+    call.setBool(Dahu.input.isPressed(call.getString(0)));
 }
 
 private void _getActionStrength(GrCall call) {
-    call.setFloat(app.input.getActionStrength(call.getString(0)));
+    call.setFloat(Dahu.input.getActionStrength(call.getString(0)));
 }
 
 private void _getActionAxis(GrCall call) {
-    call.setFloat(app.input.getActionAxis(call.getString(0), call.getString(1)));
+    call.setFloat(Dahu.input.getActionAxis(call.getString(0), call.getString(1)));
 }

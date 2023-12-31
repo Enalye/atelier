@@ -8,13 +8,14 @@ module dahu.render.image;
 import std.conv : to;
 
 import dahu.common;
+import dahu.core;
 
 import dahu.render.drawable;
 import dahu.render.graphic;
 import dahu.render.texture;
 import dahu.render.util;
 
-final class Image : Graphic, Drawable {
+final class Image : Graphic, Drawable, Resource!Image {
     private {
         Texture _texture;
     }
@@ -31,16 +32,13 @@ final class Image : Graphic, Drawable {
         }
     }
 
-    this(string name) {
-        _texture = fetchPrototype!Texture(name);
-        clip = Vec4i(0, 0, _texture.width, _texture.height);
-        sizeX = _texture.width;
-        sizeY = _texture.height;
+    this(Texture texture) {
+        this(texture, Vec4i(0, 0, _texture.width, _texture.height));
     }
 
-    this(Texture tex) {
-        _texture = tex;
-        clip = Vec4i(0, 0, _texture.width, _texture.height);
+    this(Texture texture, Vec4i clip_) {
+        _texture = texture;
+        clip = clip_;
         sizeX = _texture.width;
         sizeY = _texture.height;
     }
@@ -50,6 +48,11 @@ final class Image : Graphic, Drawable {
         _texture = img._texture;
         sizeX = img.sizeX;
         sizeY = img.sizeY;
+    }
+
+    /// Accès à la ressource
+    Image fetch() {
+        return new Image(this);
     }
 
     void update() {

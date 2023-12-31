@@ -13,11 +13,11 @@ import dahu.common;
 import dahu.core;
 
 import dahu.render.drawable;
-import dahu.render.graphic;
+import dahu.render.image;
 import dahu.render.renderer;
 import dahu.render.writabletexture;
 
-final class Capsule : Graphic, Drawable {
+final class Capsule : Image, Drawable {
     private {
         float _sizeX = 0f, _sizeY = 0f;
         float _thickness = 1f;

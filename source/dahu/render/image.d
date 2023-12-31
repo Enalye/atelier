@@ -8,74 +8,45 @@ module dahu.render.image;
 import std.conv : to;
 
 import dahu.common;
-import dahu.core;
-
-import dahu.render.drawable;
-import dahu.render.graphic;
-import dahu.render.texture;
 import dahu.render.util;
 
-final class Image : Graphic, Drawable, Resource!Image {
-    private {
-        Texture _texture;
+abstract class Image {
+    Vec4i clip;
+
+    double angle = 0.0;
+
+    bool flipX, flipY;
+
+    float anchorX = .5f, anchorY = .5f;
+
+    float pivotX = 0f, pivotY = 0f;
+
+    Blend blend = Blend.alpha;
+
+    Color color = Color.white;
+
+    float alpha = 1f;
+
+    this() {
     }
 
-    float sizeX = 0f, sizeY = 0f;
-
-    @property {
-        pragma(inline) uint width() const {
-            return _texture.width;
-        }
-
-        pragma(inline) uint height() const {
-            return _texture.height;
-        }
-    }
-
-    this(Texture texture) {
-        this(texture, Vec4i(0, 0, _texture.width, _texture.height));
-    }
-
-    this(Texture texture, Vec4i clip_) {
-        _texture = texture;
-        clip = clip_;
-        sizeX = _texture.width;
-        sizeY = _texture.height;
-    }
-
-    this(Image img) {
-        super(img);
-        _texture = img._texture;
-        sizeX = img.sizeX;
-        sizeY = img.sizeY;
-    }
-
-    /// Accès à la ressource
-    Image fetch() {
-        return new Image(this);
-    }
-
-    void update() {
-    }
-
-    void draw(float x, float y) {
-        _texture.color = color;
-        _texture.blend = blend;
-        _texture.alpha = alpha;
-        _texture.draw(x, y, sizeX, sizeY, clip, angle, pivotX, pivotY, flipX, flipY);
+    this(Image drawable) {
+        clip = drawable.clip;
+        angle = drawable.angle;
+        flipX = drawable.flipX;
+        flipY = drawable.flipY;
+        anchorX = drawable.anchorX;
+        anchorY = drawable.anchorY;
+        pivotX = drawable.pivotX;
+        pivotY = drawable.pivotY;
+        blend = drawable.blend;
+        color = drawable.color;
+        alpha = drawable.alpha;
     }
 
     /// Redimensionne l’image pour qu’elle puisse tenir dans une taille donnée
-    override void fit(float x, float y) {
-        Vec2f size = to!Vec2f(clip.zw).fit(Vec2f(x, y));
-        sizeX = size.x;
-        sizeY = size.y;
-    }
+    abstract void fit(float x, float y);
 
     /// Redimensionne l’image pour qu’elle puisse contenir une taille donnée
-    override void contain(float x, float y) {
-        Vec2f size = to!Vec2f(clip.zw).contain(Vec2f(x, y));
-        sizeX = size.x;
-        sizeY = size.y;
-    }
+    abstract void contain(float x, float y);
 }

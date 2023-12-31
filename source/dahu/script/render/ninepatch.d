@@ -15,7 +15,7 @@ import dahu.render;
 import dahu.script.util;
 
 void loadLibRender_ninepatch(GrLibDefinition lib) {
-    GrType ninepatchType = lib.addNative("NinePatch", [], "Graphic");
+    GrType ninepatchType = lib.addNative("NinePatch", [], "Image");
 
     GrType vec4iType = grGetNativeType("Vec4", [grInt]);
 

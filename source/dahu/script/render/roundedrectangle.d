@@ -11,7 +11,7 @@ import dahu.common;
 import dahu.render;
 
 package void loadLibRender_roundedRectangle(GrLibDefinition lib) {
-    GrType rrectType = lib.addNative("RoundedRectangle", [], "Graphic");
+    GrType rrectType = lib.addNative("RoundedRectangle", [], "Image");
 
     lib.addConstructor(&_ctor, rrectType, [
             grFloat, grFloat, grFloat, grBool, grFloat

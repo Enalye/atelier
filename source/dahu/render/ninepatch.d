@@ -15,13 +15,13 @@ import dahu.common;
 import dahu.core;
 
 import dahu.render.drawable;
-import dahu.render.graphic;
+import dahu.render.image;
 import dahu.render.texture;
 import dahu.render.writabletexture;
 import dahu.render.util;
 
 /// Render a resizable repeated sprite with borders. (ex: bubble speech).
-final class NinePatch : Graphic, Drawable, Resource!NinePatch {
+final class NinePatch : Image, Drawable, Resource!NinePatch {
     private {
         SDL_Surface* _surface;
         int _surfaceWidth, _surfaceHeight;

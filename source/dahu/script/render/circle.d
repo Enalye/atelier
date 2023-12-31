@@ -11,7 +11,7 @@ import dahu.common;
 import dahu.render;
 
 package void loadLibRender_circle(GrLibDefinition lib) {
-    GrType circleType = lib.addNative("Circle", [], "Graphic");
+    GrType circleType = lib.addNative("Circle", [], "Image");
 
     lib.addConstructor(&_ctor, circleType, [grFloat, grBool, grFloat]);
 

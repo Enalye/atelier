@@ -13,11 +13,11 @@ import dahu.common;
 import dahu.core;
 
 import dahu.render.drawable;
-import dahu.render.graphic;
+import dahu.render.image;
 import dahu.render.renderer;
 import dahu.render.writabletexture;
 
-final class Circle : Graphic, Drawable {
+final class Circle : Image, Drawable {
     private {
         float _radius = 0f;
         float _thickness = 1f;

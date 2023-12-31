@@ -8,45 +8,107 @@ module dahu.script.render.image;
 import grimoire;
 
 import dahu.common;
-import dahu.core;
-import dahu.input;
 import dahu.render;
 
-void loadLibRender_image(GrLibDefinition lib) {
-    GrType imageType = lib.addNative("Image", [], "Graphic");
+import dahu.script.util;
 
-    lib.addConstructor(&_image, imageType, [grString]);
+package void loadLibRender_image(GrLibDefinition lib) {
+    GrType imageType = lib.addNative("Image");
+    GrType colorType = grGetNativeType("Color");
 
-    lib.addFunction(&_setSize, "setSize", [imageType, grFloat, grFloat]);
-    lib.addProperty(&_sizeX!"get", &_sizeX!"set", "sizeX", imageType, grFloat);
-    lib.addProperty(&_sizeY!"get", &_sizeY!"set", "sizeY", imageType, grFloat);
+    lib.addConstraint(&_drawable, "Drawable");
+
+    lib.addFunction(&_setPivot, "setPivot", [imageType, grFloat, grFloat]);
+    lib.addProperty(&_pivotX!"get", &_pivotX!"set", "pivotX", imageType, grFloat);
+    lib.addProperty(&_pivotY!"get", &_pivotY!"set", "pivotY", imageType, grFloat);
+
+    lib.addProperty(&_angle!"get", &_angle!"set", "angle", imageType, grDouble);
+
+    lib.addProperty(&_color!"get", &_color!"set", "color", imageType, colorType);
+
+    lib.addProperty(&_alpha!"get", &_alpha!"set", "alpha", imageType, grFloat);
+
+    lib.addFunction(&_fit, "fit", [imageType, grFloat, grFloat]);
+    lib.addFunction(&_contain, "contain", [imageType, grFloat, grFloat]);
 }
 
-private void _image(GrCall call) {
-    call.setNative(Dahu.res.get!Image(call.getString(0)));
+private bool _drawable(GrData data, GrType type, const GrType[]) {
+    if (type.base != GrType.Base.native)
+        return false;
+
+    foreach (key; [
+            "Animation", "Capsule", "Circle", "Sprite", "NinePatch",
+            "Rectangle", "RoundedRectangle"
+        ]) {
+        if (type.mangledType == key)
+            return true;
+    }
+
+    return false;
 }
 
-private void _setSize(GrCall call) {
-    Image circle = call.getNative!Image(0);
+private void _setPivot(GrCall call) {
+    Image image = call.getNative!Image(0);
 
-    circle.sizeX = call.getFloat(1);
-    circle.sizeY = call.getFloat(2);
+    image.pivotX = call.getFloat(1);
+    image.pivotY = call.getFloat(2);
 }
 
-private void _sizeX(string op)(GrCall call) {
-    Image circle = call.getNative!Image(0);
+private void _pivotX(string op)(GrCall call) {
+    Image image = call.getNative!Image(0);
 
     static if (op == "set") {
-        circle.sizeX = call.getFloat(1);
+        image.pivotX = call.getFloat(1);
     }
-    call.setFloat(circle.sizeX);
+    call.setFloat(image.pivotX);
 }
 
-private void _sizeY(string op)(GrCall call) {
-    Image circle = call.getNative!Image(0);
+private void _pivotY(string op)(GrCall call) {
+    Image image = call.getNative!Image(0);
 
     static if (op == "set") {
-        circle.sizeY = call.getFloat(1);
+        image.pivotY = call.getFloat(1);
     }
-    call.setFloat(circle.sizeY);
+    call.setFloat(image.pivotY);
+}
+
+private void _angle(string op)(GrCall call) {
+    Image image = call.getNative!Image(0);
+
+    static if (op == "set") {
+        image.angle = call.getDouble(1);
+    }
+    call.setDouble(image.angle);
+}
+
+private void _color(string op)(GrCall call) {
+    Image image = call.getNative!Image(0);
+
+    static if (op == "set") {
+        image.color = call.getNative!SColor(1);
+    }
+    SColor color = new SColor;
+    color = image.color;
+    call.setNative(color);
+}
+
+private void _alpha(string op)(GrCall call) {
+    Image image = call.getNative!Image(0);
+
+    static if (op == "set") {
+        image.alpha = call.getFloat(1);
+    }
+    call.setFloat(image.alpha);
+}
+
+private void _fit(GrCall call) {
+    Image image = call.getNative!Image(0);
+
+    image.fit(call.getFloat(1), call.getFloat(2));
+}
+
+private void _contain(GrCall call) {
+    Image image = call.getNative!Image(0);
+
+    image.contain(call.getFloat(1), call.getFloat(2));
 }

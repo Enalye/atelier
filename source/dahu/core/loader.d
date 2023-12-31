@@ -69,7 +69,7 @@ private void _loadSprite(InStream stream) {
             clip.w = texture.height;
 
         Dahu.res.store(name, {
-            Image img = new Image(texture);
+            Sprite img = new Sprite(texture);
             img.clip = clip;
             return img;
         });

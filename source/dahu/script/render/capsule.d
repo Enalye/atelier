@@ -11,7 +11,7 @@ import dahu.common;
 import dahu.render;
 
 package void loadLibRender_capsule(GrLibDefinition lib) {
-    GrType capsuleType = lib.addNative("Capsule", [], "Graphic");
+    GrType capsuleType = lib.addNative("Capsule", [], "Image");
 
     lib.addConstructor(&_ctor, capsuleType, [grFloat, grFloat, grBool, grFloat]);
 

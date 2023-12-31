@@ -11,7 +11,7 @@ import dahu.common;
 import dahu.render;
 
 package void loadLibRender_rectangle(GrLibDefinition lib) {
-    GrType rectangleType = lib.addNative("Rectangle", [], "Graphic");
+    GrType rectangleType = lib.addNative("Rectangle", [], "Image");
 
     lib.addConstructor(&_ctor, rectangleType, [
             grFloat, grFloat, grBool, grFloat

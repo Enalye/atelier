@@ -12,14 +12,14 @@ import bindbc.sdl;
 
 import dahu.common;
 import dahu.core;
-
+import dahu.render.imagedata;
 import dahu.render.renderer;
 import dahu.render.texture;
 import dahu.render.util;
 
 /// Behave like Texture but you can render onto it.
 /// Use pushCanvas/popCanvas to start the drawing region on it.
-final class Canvas {
+final class Canvas : ImageData {
     private {
         SDL_Texture* _texture;
         uint _width, _height;
@@ -200,8 +200,8 @@ final class Canvas {
     }
 
     /// Dessine le canvas
-    void draw(float x, float y, float w, float h, Vec4i clip, float pivotX,
-        float pivotY, float angle, bool flipX = false, bool flipY = false) {
+    override void draw(float x, float y, float w, float h, Vec4i clip, double angle, float pivotX,
+        float pivotY, bool flipX = false, bool flipY = false) {
         SDL_Rect sdlSrc = clip.toSdlRect();
         SDL_FRect sdlDest = {x, y, w, h};
         SDL_FPoint sdlPivot = {pivotX, pivotY};

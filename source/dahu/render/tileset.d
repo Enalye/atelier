@@ -13,13 +13,13 @@ import bindbc.sdl;
 
 import dahu.common;
 
-import dahu.render.graphic;
 import dahu.render.image;
+import dahu.render.sprite;
 import dahu.render.texture;
 import dahu.render.util;
 
 /// Jeu de tuiles
-final class Tileset : Graphic, Resource!Tileset {
+final class Tileset : Image, Resource!Tileset {
     private {
         Texture _texture;
     }
@@ -63,7 +63,7 @@ final class Tileset : Graphic, Resource!Tileset {
     }
 
     /// Récupère une image correspondant à la tuile
-    Image getImage(int id) {
+    Sprite getImage(int id) {
         columns = max(columns, 1);
         lines = max(lines, 1);
         uint count = maxCount > 0 ? maxCount : columns * lines;
@@ -78,7 +78,7 @@ final class Tileset : Graphic, Resource!Tileset {
         Vec4i imageClip = Vec4i(clip.x + coord.x * (clip.z + marginX),
             clip.y + coord.y * (clip.w + marginY), clip.z, clip.w);
 
-        Image image = new Image(_texture);
+        Sprite image = new Sprite(_texture);
         image.clip = imageClip;
         image.blend = blend;
         image.color = color;
@@ -99,12 +99,12 @@ final class Tileset : Graphic, Resource!Tileset {
     }
 
     /// Retourne toutes les tuiles en images
-    Image[] asSprites() {
+    Sprite[] asSprites() {
         columns = max(columns, 1);
         lines = max(lines, 1);
         uint count = maxCount > 0 ? maxCount : columns * lines;
 
-        Image[] images;
+        Sprite[] images;
         foreach (id; 0 .. count)
             images ~= getImage(id);
         return images;

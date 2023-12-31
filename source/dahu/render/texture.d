@@ -12,11 +12,12 @@ import std.algorithm.comparison : clamp;
 import bindbc.sdl;
 
 import dahu.common;
+import dahu.render.imagedata;
 import dahu.render.renderer;
 import dahu.render.util;
 
 /// Base rendering class.
-final class Texture : Resource!Texture {
+final class Texture : ImageData, Resource!Texture {
     private {
         bool _isLoaded = false, _ownData, _isSmooth;
         SDL_Texture* _texture = null;
@@ -209,7 +210,7 @@ final class Texture : Resource!Texture {
     }
 
     /// Dessine la texture
-    void draw(float x, float y, float w, float h, Vec4i clip, double angle,
+    override void draw(float x, float y, float w, float h, Vec4i clip, double angle,
         float pivotX = 0f, float pivotY = 0f, bool flipX = false, bool flipY = false) {
         enforce(_isLoaded, "can't render the texture: asset not loaded");
 

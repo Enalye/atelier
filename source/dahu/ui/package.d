@@ -332,9 +332,8 @@ class UI {
 
         float sizeX = element.scaleX * element.sizeX;
         float sizeY = element.scaleY * element.sizeY;
-        Dahu.renderer.popCanvas(pos.x, pos.y, sizeX, sizeY,
-            element.pivotX * sizeX, element.pivotY * sizeY, element.angle,
-            element.color, element.alpha);
+        Dahu.renderer.popCanvas(pos.x, pos.y, sizeX, sizeY, element.angle,
+            element.pivotX * sizeX, element.pivotY * sizeY, element.color, element.alpha);
 
         if (isDebug)
             Dahu.renderer.drawRect(pos.x, pos.y, sizeX, sizeY, Color.blue, 1f, false);

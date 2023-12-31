@@ -13,12 +13,13 @@ import std.algorithm.comparison : clamp;
 import bindbc.sdl;
 
 import dahu.common;
+import dahu.render.imagedata;
 import dahu.render.renderer;
 import dahu.render.texture;
 import dahu.render.util;
 
 /// Texture éditable
-final class WritableTexture {
+final class WritableTexture : ImageData {
     private {
         SDL_Texture* _texture = null;
         SDL_Surface* _surface = null;
@@ -206,7 +207,7 @@ final class WritableTexture {
     }
 
     /// Render a section of the texture here
-    void draw(float x, float y, float w, float h, Vec4i clip, double angle,
+    override void draw(float x, float y, float w, float h, Vec4i clip, double angle,
         float pivotX = 0f, float pivotY = 0f, bool flipX = false, bool flipY = false) {
 
         SDL_Rect sdlSrc = clip.toSdlRect();

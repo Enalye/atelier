@@ -9,6 +9,6 @@ import dahu.common;
 
 abstract class ImageData {
     /// Dessine une section de l’image à cette position
-    void draw(float x, float y, float w, float h, Vec4i clip, double angle,
-        float pivotX = 0f, float pivotY = 0f, bool flipX = false, bool flipY = false);
+    void draw(Vec2f position = Vec2f.zero, Vec2f size, Vec4i clip, double angle,
+        Vec2f pivot = Vec2f.zero, bool flipX = false, bool flipY = false);
 }

@@ -13,14 +13,13 @@ import bindbc.sdl;
 import dahu.common;
 import dahu.core;
 
-import dahu.render.drawable;
 import dahu.render.image;
 import dahu.render.sprite;
 import dahu.render.texture;
 import dahu.render.tileset;
 
 /// Série d’images joués séquenciellement
-final class Animation : Image, Drawable, Resource!Animation {
+final class Animation : Image, Resource!Animation {
     private {
         Texture _texture;
         int _frame;
@@ -36,9 +35,9 @@ final class Animation : Image, Drawable, Resource!Animation {
 
     bool repeat = true;
 
-    int marginX, marginY;
+    Vec2i margin;
 
-    float sizeX = 0f, sizeY = 0f;
+    Vec2f size = Vec2f.zero;
 
     @property {
         pragma(inline) uint width() const {
@@ -59,8 +58,7 @@ final class Animation : Image, Drawable, Resource!Animation {
     this(string name, Vec4i clip_, uint columns_, uint lines_, uint maxCount_ = 0) {
         _texture = Dahu.res.get!Texture(name);
         clip = clip_;
-        sizeX = clip_.z;
-        sizeY = clip_.w;
+        size = to!Vec2f(clip_.zw);
         columns = columns_;
         lines = lines_;
         maxCount = maxCount_;
@@ -79,10 +77,8 @@ final class Animation : Image, Drawable, Resource!Animation {
         lines = anim.lines;
         maxCount = anim.maxCount;
         repeat = anim.repeat;
-        marginX = anim.marginX;
-        marginY = anim.marginY;
-        sizeX = anim.sizeX;
-        sizeY = anim.sizeY;
+        margin = anim.margin;
+        size = anim.size;
     }
 
     /// Accès à la ressource
@@ -115,7 +111,7 @@ final class Animation : Image, Drawable, Resource!Animation {
     }
 
     /// Avance l’animation
-    void update() {
+    override void update() {
         if (!_isRunning) {
             return;
         }
@@ -142,8 +138,18 @@ final class Animation : Image, Drawable, Resource!Animation {
         }
     }
 
+    /// Redimensionne l’image pour qu’elle puisse tenir dans une taille donnée
+    override void fit(Vec2f size_) {
+        size = to!Vec2f(clip.zw).fit(size_);
+    }
+
+    /// Redimensionne l’image pour qu’elle puisse contenir une taille donnée
+    override void contain(Vec2f size_) {
+        size = to!Vec2f(clip.zw).contain(size_);
+    }
+
     /// Render the current frame.
-    void draw(float x, float y) {
+    override void draw(Vec2f origin = Vec2f.zero) {
         if (_frame < 0 || !frames.length)
             return;
 
@@ -154,26 +160,12 @@ final class Animation : Image, Drawable, Resource!Animation {
 
         Vec2i coord = Vec2i(id % columns, id / columns);
 
-        Vec4i imageClip = Vec4i(clip.x + coord.x * (clip.z + marginX),
-            clip.y + coord.y * (clip.w + marginY), clip.z, clip.w);
+        Vec4i imageClip = Vec4i(clip.x + coord.x * (clip.z + margin.x),
+            clip.y + coord.y * (clip.w + margin.y), clip.z, clip.w);
 
         _texture.color = color;
         _texture.blend = blend;
         _texture.alpha = alpha;
-        _texture.draw(x, y, sizeX, sizeY, imageClip, angle, pivotX, pivotY, flipX, flipY);
-    }
-
-    /// Redimensionne l’image pour qu’elle puisse tenir dans une taille donnée
-    override void fit(float x, float y) {
-        Vec2f size = to!Vec2f(clip.zw).fit(Vec2f(x, y));
-        sizeX = size.x;
-        sizeY = size.y;
-    }
-
-    /// Redimensionne l’image pour qu’elle puisse contenir une taille donnée
-    override void contain(float x, float y) {
-        Vec2f size = to!Vec2f(clip.zw).contain(Vec2f(x, y));
-        sizeX = size.x;
-        sizeY = size.y;
+        _texture.draw(origin + position, size, imageClip, angle, pivot, flipX, flipY);
     }
 }

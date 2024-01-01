@@ -23,6 +23,8 @@ package void loadLibUI_element(GrLibDefinition lib) {
 
     GrType uiType = lib.addNative("UIElement");
 
+    GrType imageType = grGetNativeType("Image");
+
     lib.addFunction(&_setPos, "setPos", [uiType, grFloat, grFloat]);
     lib.addProperty(&_posX!"get", &_posX!"set", "posX", uiType, grFloat);
     lib.addProperty(&_posY!"get", &_posY!"set", "posY", uiType, grFloat);
@@ -58,8 +60,7 @@ package void loadLibUI_element(GrLibDefinition lib) {
     lib.addFunction(&_setState, "setState", [uiType, grString]);
     lib.addFunction(&_runState, "runState", [uiType, grString]);
 
-    lib.addFunction(&_addDrawable, "addDrawable", [uiType, grAny("T")], [],
-        [grConstraint("Drawable", grAny("T"))]);
+    lib.addFunction(&_addImage, "addImage", [uiType, imageType]);
 
     lib.addFunction(&_append_root, "appendUI", [uiType]);
     lib.addFunction(&_append_child, "append", [uiType, uiType]);
@@ -289,11 +290,11 @@ private void _runState(GrCall call) {
     ui.timer.start(ptr.time);
 }
 
-private void _addDrawable(GrCall call) {
+private void _addImage(GrCall call) {
     UIElement ui = call.getNative!UIElement(0);
-    Drawable drawable = call.getNative!Drawable(1);
+    Image image = call.getNative!Image(1);
 
-    ui._drawables ~= drawable;
+    ui._images ~= image;
 }
 
 private void _append_root(GrCall call) {

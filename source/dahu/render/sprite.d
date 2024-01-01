@@ -10,17 +10,16 @@ import std.conv : to;
 import dahu.common;
 import dahu.core;
 
-import dahu.render.drawable;
 import dahu.render.image;
 import dahu.render.texture;
 import dahu.render.util;
 
-final class Sprite : Image, Drawable, Resource!Sprite {
+final class Sprite : Image, Resource!Sprite {
     private {
         Texture _texture;
     }
 
-    float sizeX = 0f, sizeY = 0f;
+    Vec2f size = Vec2f.zero;
 
     @property {
         pragma(inline) uint width() const {
@@ -39,15 +38,13 @@ final class Sprite : Image, Drawable, Resource!Sprite {
     this(Texture texture, Vec4i clip_) {
         _texture = texture;
         clip = clip_;
-        sizeX = _texture.width;
-        sizeY = _texture.height;
+        size = Vec2f(_texture.width, _texture.height);
     }
 
-    this(Sprite img) {
-        super(img);
-        _texture = img._texture;
-        sizeX = img.sizeX;
-        sizeY = img.sizeY;
+    this(Sprite sprite) {
+        super(sprite);
+        _texture = sprite._texture;
+        size = sprite.size;
     }
 
     /// Accès à la ressource
@@ -55,27 +52,23 @@ final class Sprite : Image, Drawable, Resource!Sprite {
         return new Sprite(this);
     }
 
-    void update() {
-    }
-
-    void draw(float x, float y) {
-        _texture.color = color;
-        _texture.blend = blend;
-        _texture.alpha = alpha;
-        _texture.draw(x, y, sizeX, sizeY, clip, angle, pivotX, pivotY, flipX, flipY);
+    override void update() {
     }
 
     /// Redimensionne l’image pour qu’elle puisse tenir dans une taille donnée
-    override void fit(float x, float y) {
-        Vec2f size = to!Vec2f(clip.zw).fit(Vec2f(x, y));
-        sizeX = size.x;
-        sizeY = size.y;
+    override void fit(Vec2f size_) {
+        size = to!Vec2f(clip.zw).fit(size_);
     }
 
     /// Redimensionne l’image pour qu’elle puisse contenir une taille donnée
-    override void contain(float x, float y) {
-        Vec2f size = to!Vec2f(clip.zw).contain(Vec2f(x, y));
-        sizeX = size.x;
-        sizeY = size.y;
+    override void contain(Vec2f size_) {
+        size = to!Vec2f(clip.zw).contain(size_);
+    }
+
+    override void draw(Vec2f origin) {
+        _texture.color = color;
+        _texture.blend = blend;
+        _texture.alpha = alpha;
+        _texture.draw(origin + position, size, clip, angle, pivot, flipX, flipY);
     }
 }

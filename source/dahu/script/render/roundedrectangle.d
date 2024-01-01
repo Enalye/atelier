@@ -9,51 +9,35 @@ import grimoire;
 
 import dahu.common;
 import dahu.render;
+import dahu.script.util;
 
 package void loadLibRender_roundedRectangle(GrLibDefinition lib) {
     GrType rrectType = lib.addNative("RoundedRectangle", [], "Image");
+
+    GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
 
     lib.addConstructor(&_ctor, rrectType, [
             grFloat, grFloat, grFloat, grBool, grFloat
         ]);
 
-    lib.addFunction(&_setSize, "setSize", [rrectType, grFloat, grFloat]);
-    lib.addProperty(&_sizeX!"get", &_sizeX!"set", "sizeX", rrectType, grFloat);
-    lib.addProperty(&_sizeY!"get", &_sizeY!"set", "sizeY", rrectType, grFloat);
-
+    lib.addProperty(&_size!"get", &_size!"set", "size", rrectType, vec2fType);
     lib.addProperty(&_radius!"get", &_radius!"set", "radius", rrectType, grFloat);
     lib.addProperty(&_filled!"get", &_filled!"set", "filled", rrectType, grBool);
     lib.addProperty(&_thickness!"get", &_thickness!"set", "thickness", rrectType, grFloat);
 }
 
 private void _ctor(GrCall call) {
-    call.setNative(new RoundedRectangle(call.getFloat(0), call.getFloat(1),
-            call.getFloat(2), call.getBool(3), call.getFloat(4)));
+    call.setNative(new RoundedRectangle(Vec2f(call.getFloat(0),
+            call.getFloat(1)), call.getFloat(2), call.getBool(3), call.getFloat(4)));
 }
 
-private void _setSize(GrCall call) {
-    RoundedRectangle rect = call.getNative!RoundedRectangle(0);
-
-    rect.sizeX = call.getFloat(1);
-    rect.sizeY = call.getFloat(2);
-}
-
-private void _sizeX(string op)(GrCall call) {
+private void _size(string op)(GrCall call) {
     RoundedRectangle rect = call.getNative!RoundedRectangle(0);
 
     static if (op == "set") {
-        rect.sizeX = call.getFloat(1);
+        rect.size = call.getNative!SVec2f(1);
     }
-    call.setFloat(rect.sizeX);
-}
-
-private void _sizeY(string op)(GrCall call) {
-    RoundedRectangle rect = call.getNative!RoundedRectangle(0);
-
-    static if (op == "set") {
-        rect.sizeY = call.getFloat(1);
-    }
-    call.setFloat(rect.sizeY);
+    call.setNative(svec2(rect.size));
 }
 
 private void _radius(string op)(GrCall call) {

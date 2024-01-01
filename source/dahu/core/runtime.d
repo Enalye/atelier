@@ -16,6 +16,7 @@ import dahu.audio;
 import dahu.common;
 import dahu.input;
 import dahu.render;
+import dahu.scene;
 import dahu.script;
 import dahu.ui;
 
@@ -28,31 +29,30 @@ private void _print(string msg) {
 
 final class Dahu {
     static private {
-        string _filePath;
-
         // Grimoire
-        GrEngine _grEngine;
-        GrLibrary _stdLib;
-        GrLibrary _dhLib;
+        GrEngine _engine;
+        GrLibrary[] _libraries;
         GrBytecode _bytecode;
 
         // Événements
         GrEvent _inputEvent, _lateInputEvent;
 
+        // Ressources
+        Archive.File[] _resourceFiles, _compiledResourceFiles;
+
         // IPS
-        float _deltatime = 1f;
         float _currentFps;
         long _tickStartFrame;
         int _nominalFPS = 60;
 
+        // Modules
         Window _window;
         Renderer _renderer;
-        UI _ui;
-        Input _input;
+        UIManager _uiManager;
+        InputManager _inputManager;
         ResourceManager _resourceManager;
-
-        /// Gestionnaire audio
         AudioManager _audioManager;
+        SceneManager _sceneManager;
     }
 
     static @property pragma(inline) {
@@ -64,8 +64,9 @@ final class Dahu {
             return _renderer;
         }
 
-        UI ui() {
-            return _ui;
+        /// Le gestionnaire d’interfaces
+        UIManager ui() {
+            return _uiManager;
         }
 
         /// Gestionnaire de ressources
@@ -78,48 +79,153 @@ final class Dahu {
             return _audioManager;
         }
 
-        Input input() {
-            return _input;
+        /// Le gestionnaire d’entrés
+        InputManager input() {
+            return _inputManager;
         }
 
+        /// Le gestionnaire de scènes
+        SceneManager scene() {
+            return _sceneManager;
+        }
+
+        /// La machine virtuelle Grimoire
         GrEngine vm() {
-            return _grEngine;
+            return _engine;
         }
     }
 
     this(GrBytecode bytecode, GrLibrary[] libraries, uint windowWidth,
         uint windowHeight, string windowTitle) {
         _bytecode = bytecode;
-        _grEngine = new GrEngine;
-        foreach (library; libraries) {
-            _grEngine.addLibrary(library);
+        _libraries = libraries;
+
+        // Initialisation des modules
+        _window = new Window(windowWidth, windowHeight);
+        _renderer = new Renderer(_window);
+        _uiManager = new UIManager();
+        _inputManager = new InputManager();
+        _audioManager = new AudioManager();
+        _sceneManager = new SceneManager();
+        _resourceManager = new ResourceManager();
+
+        setupDefaultResourceLoaders(_resourceManager);
+    }
+
+    private void _startup() {
+        writeln("[DAHU] Compilation des ressources...");
+        long startTime = Clock.currStdTime();
+
+        foreach (Archive.File file; _resourceFiles) {
+            OutStream stream = new OutStream;
+            stream.write!string(Dahu_Resource_Compiled_MagicWord);
+
+            Json json = new Json(file.data);
+            Json[] resNodes = json.getObjects("resources", []);
+
+            stream.write!uint(cast(uint) resNodes.length);
+            foreach (resNode; resNodes) {
+                string resType = resNode.getString("type");
+                stream.write!string(resType);
+
+                ResourceManager.Loader loader = res.getLoader(resType);
+                loader.compile(dirName(file.path), resNode, stream);
+            }
+
+            file.data = cast(ubyte[]) stream.data;
+            _compiledResourceFiles ~= file;
         }
-        _grEngine.load(_bytecode);
+        _resourceFiles.length = 0;
+
+        double loadDuration = (cast(double)(Clock.currStdTime() - startTime) / 10_000_000.0);
+        writeln("  > Effectué en " ~ to!string(loadDuration) ~ "sec");
+
+        writeln("[DAHU] Chargement des ressources...");
+        startTime = Clock.currStdTime();
+
+        foreach (Archive.File file; _compiledResourceFiles) {
+            InStream stream = new InStream;
+            stream.data = cast(ubyte[]) file.data;
+            enforce(stream.read!string() == Dahu_Resource_Compiled_MagicWord,
+                "format du fichier de ressource `" ~ file.path ~ "` invalide");
+
+            uint nbRes = stream.read!uint();
+            for (uint i; i < nbRes; ++i) {
+                string resType = stream.read!string();
+                ResourceManager.Loader loader = res.getLoader(resType);
+                loader.load(stream);
+            }
+        }
+        _compiledResourceFiles.length = 0;
+
+        loadDuration = (cast(double)(Clock.currStdTime() - startTime) / 10_000_000.0);
+        writeln("  > Effectué en " ~ to!string(loadDuration) ~ "sec");
+
+        writeln("[DAHU] Initialisation de la machine virtuelle...");
+        startTime = Clock.currStdTime();
+
+        _engine = new GrEngine(Dahu_Version_ID);
+
+        foreach (GrLibrary library; _libraries) {
+            _engine.addLibrary(library);
+        }
+
+        enforce(_engine.load(_bytecode), "version du bytecode invalide");
+
+        _engine.callEvent("app");
+
+        _inputEvent = _engine.getEvent("input", [grGetNativeType("InputEvent")]);
+        _lateInputEvent = _engine.getEvent("lateInput", [
+                grGetNativeType("InputEvent")
+            ]);
 
         grSetOutputFunction(&_print);
 
-        _window = new Window(windowWidth, windowHeight);
-        _renderer = new Renderer(_window);
-        _ui = new UI();
-        _input = new Input();
-        // Initialisation du gestionnaire audio
-        _audioManager = new AudioManager();
+        loadDuration = (cast(double)(Clock.currStdTime() - startTime) / 10_000_000.0);
+        writeln("  > Effectué en " ~ to!string(loadDuration) ~ "sec");
+    }
 
-        // Création du gestionnaire des ressources
-        _resourceManager = new ResourceManager();
-        setupDefaultResourceLoaders(_resourceManager);
+    void loadResources(string path) {
+        writeln("[DAHU] Chargement de l’archive `" ~ path ~ "`...");
+        long startTime = Clock.currStdTime();
 
-        _grEngine.callEvent("app");
+        Archive archive = new Archive;
+
+        if (isDir(path)) {
+            enforce(exists(path), "le dossier `" ~ path ~ "` n’existe pas");
+            archive.pack(path);
+        }
+        else if (extension(path) == Dahu_Archive_Extension) {
+            enforce(exists(path), "l’archive `" ~ path ~ "` n’existe pas");
+            archive.load(path);
+        }
+
+        foreach (file; archive) {
+            const string ext = extension(file.name);
+            switch (ext) {
+            case Dahu_Resource_Extension:
+                _resourceFiles ~= file;
+                break;
+            case Dahu_Resource_Compiled_Extension:
+                _compiledResourceFiles ~= file;
+                break;
+            default:
+                res.write(file.path, file.data);
+                break;
+            }
+        }
+
+        double loadDuration = (cast(double)(Clock.currStdTime() - startTime) / 10_000_000.0);
+        writeln("  > Effectué en " ~ to!string(loadDuration) ~ "sec");
     }
 
     void run() {
-        if (!_grEngine)
-            return;
+        _startup();
 
         _tickStartFrame = Clock.currStdTime();
         float accumulator = 0f;
 
-        while (!_input.hasQuit()) {
+        while (!_inputManager.hasQuit()) {
             long deltaTicks = Clock.currStdTime() - _tickStartFrame;
             double deltatime = (cast(float)(deltaTicks) / 10_000_000f) * _nominalFPS;
             _currentFps = (deltatime == .0f) ? .0f : (10_000_000f / cast(float)(deltaTicks));
@@ -129,52 +235,54 @@ final class Dahu {
 
             // Màj
             while (accumulator >= 1f) {
-                InputEvent[] inputEvents = _input.pollEvents();
+                InputEvent[] inputEvents = _inputManager.pollEvents();
 
-                _ui.dispatch(inputEvents);
+                _uiManager.dispatch(inputEvents);
 
-                if (_grEngine) {
+                if (_engine) {
                     /*if (_inputEvent) {
                     foreach (InputEvent inputEvent; inputEvents) {
-                        _grEngine.callEvent(_inputEvent, [GrValue(inputEvent)]);
+                        _engine.callEvent(_inputEvent, [GrValue(inputEvent)]);
                     }
                 }*/
 
-                    if (_grEngine.hasTasks) {
-                        _grEngine.process();
+                    if (_engine.hasTasks) {
+                        _engine.process();
                     }
 
                     //remove!(a => a.isAccepted)(inputEvents);
 
-                    if (_grEngine.isPanicking) {
-                        string err = "panique: " ~ _grEngine.panicMessage ~ "\n";
-                        foreach (trace; _grEngine.stackTraces) {
+                    if (_engine.isPanicking) {
+                        string err = "panique: " ~ _engine.panicMessage ~ "\n";
+                        foreach (trace; _engine.stackTraces) {
                             err ~= "[" ~ to!string(
                                 trace.pc) ~ "] dans " ~ trace.name ~ " à " ~ trace.file ~ "(" ~ to!string(
                                 trace.line) ~ "," ~ to!string(trace.column) ~ ")\n";
                         }
-                        _grEngine = null;
+                        _engine = null;
                         writeln(err);
                         return;
                     }
                 }
 
-                _ui.update();
+                _sceneManager.update();
+                _uiManager.update();
 
                 accumulator -= 1f;
             }
 
             // Rendu
-            _ui.draw();
+            _sceneManager.draw();
+            _uiManager.draw();
 
             _renderer.render();
         }
     }
 
     void callEvent(GrEvent event, GrValue[] parameters = []) {
-        if (!_grEngine)
+        if (!_engine)
             return;
 
-        _grEngine.callEvent(event, parameters);
+        _engine.callEvent(event, parameters);
     }
 }

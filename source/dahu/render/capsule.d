@@ -12,14 +12,13 @@ import std.math : ceil, abs;
 import dahu.common;
 import dahu.core;
 
-import dahu.render.drawable;
 import dahu.render.image;
 import dahu.render.renderer;
 import dahu.render.writabletexture;
 
-final class Capsule : Image, Drawable {
+final class Capsule : Image {
     private {
-        float _sizeX = 0f, _sizeY = 0f;
+        Vec2f _size = Vec2f.zero;
         float _thickness = 1f;
         bool _filled = true;
         bool _isDirty;
@@ -28,28 +27,16 @@ final class Capsule : Image, Drawable {
     }
 
     @property {
-        float sizeX() const {
-            return _sizeX;
+        Vec2f size() const {
+            return _size;
         }
 
-        float sizeX(float sizeX_) {
-            if (_sizeX != sizeX_) {
-                _sizeX = sizeX_;
+        Vec2f size(Vec2f size_) {
+            if (_size != size_) {
+                _size = size_;
                 _isDirty = true;
             }
-            return _sizeX;
-        }
-
-        float sizeY() const {
-            return _sizeY;
-        }
-
-        float sizeY(float sizeY_) {
-            if (_sizeY != sizeY_) {
-                _sizeY = sizeY_;
-                _isDirty = true;
-            }
-            return _sizeY;
+            return _size;
         }
 
         bool filled() const {
@@ -77,9 +64,8 @@ final class Capsule : Image, Drawable {
         }
     }
 
-    this(float sizeX_, float sizeY_, bool filled_, float thickness_) {
-        _sizeX = sizeX_;
-        _sizeY = sizeY_;
+    this(Vec2f size_, bool filled_, float thickness_) {
+        _size = size_;
         _filled = filled_;
         _thickness = thickness_;
         _isDirty = true;
@@ -87,21 +73,20 @@ final class Capsule : Image, Drawable {
 
     this(Capsule capsule) {
         super(capsule);
-        _sizeX = capsule._sizeX;
-        _sizeY = capsule._sizeY;
+        _size = capsule._size;
         _filled = capsule._filled;
         _thickness = capsule._thickness;
         _isDirty = true;
     }
 
-    void update() {
+    override void update() {
     }
 
     private void _cacheTexture() {
         _isDirty = false;
 
-        _cache = (_sizeX >= 1f && _sizeY >= 1f) ? new WritableTexture(cast(uint) _sizeX,
-            cast(uint) _sizeY) : null;
+        _cache = (_size.x >= 1f && _size.y >= 1f) ? new WritableTexture(cast(uint) _size.x,
+            cast(uint) _size.y) : null;
 
         if (!_cache)
             return;
@@ -113,7 +98,7 @@ final class Capsule : Image, Drawable {
         }
 
         RasterData rasterData;
-        rasterData.radius = min(_sizeX, _sizeY) / 2f;
+        rasterData.radius = min(_size.x, _size.y) / 2f;
         rasterData.filled = _filled;
         rasterData.thickness = _thickness;
 
@@ -286,7 +271,17 @@ final class Capsule : Image, Drawable {
         }, &rasterData);
     }
 
-    void draw(float x, float y) {
+    /// Redimensionne l’image pour qu’elle puisse tenir dans une taille donnée
+    override void fit(Vec2f size_) {
+        size = to!Vec2f(clip.zw).fit(size_);
+    }
+
+    /// Redimensionne l’image pour qu’elle puisse contenir une taille donnée
+    override void contain(Vec2f size_) {
+        size = to!Vec2f(clip.zw).contain(size_);
+    }
+
+    override void draw(Vec2f origin = Vec2f.zero) {
         if (_isDirty)
             _cacheTexture();
 
@@ -296,21 +291,7 @@ final class Capsule : Image, Drawable {
         _cache.color = color;
         _cache.blend = blend;
         _cache.alpha = alpha;
-        _cache.draw(x, y, _sizeX, _sizeY, Vec4i(0, 0, _cache.width,
-                _cache.height), angle, pivotX, pivotY, flipX, flipY);
-    }
-
-    /// Redimensionne l’image pour qu’elle puisse tenir dans une taille donnée
-    override void fit(float x, float y) {
-        Vec2f size = to!Vec2f(clip.zw).fit(Vec2f(x, y));
-        sizeX = size.x;
-        sizeY = size.y;
-    }
-
-    /// Redimensionne l’image pour qu’elle puisse contenir une taille donnée
-    override void contain(float x, float y) {
-        Vec2f size = to!Vec2f(clip.zw).contain(Vec2f(x, y));
-        sizeX = size.x;
-        sizeY = size.y;
+        _cache.draw(origin + position, _size, Vec4i(0, 0, _cache.width,
+                _cache.height), angle, pivot, flipX, flipY);
     }
 }

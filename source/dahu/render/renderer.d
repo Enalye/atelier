@@ -83,8 +83,7 @@ final class Renderer {
         SDL_RenderClear(_sdlRenderer);
     }
 
-    void popCanvas(float x, float y, float w, float h, double angle, float pivotX,
-        float pivotY, Color color, float alpha) {
+    void popCanvas(Vec2f position, Vec2f size, double angle, Vec2f pivot, Color color, float alpha) {
         if (_idxContext < 0)
             return;
 
@@ -98,15 +97,15 @@ final class Renderer {
 
         context.canvas.color = color;
         context.canvas.alpha = alpha;
-        context.canvas.draw(x, y, w, h, context.clip, angle, pivotX, pivotY);
+        context.canvas.draw(position, size, context.clip, angle, pivot);
     }
 
-    void drawRect(float x, float y, float w, float h, Color color, float alpha, bool filled) {
+    void drawRect(Vec2f position, Vec2f size, Color color, float alpha, bool filled) {
         const auto sdlColor = color.toSDL();
         SDL_SetRenderDrawColor(_sdlRenderer, sdlColor.r, sdlColor.g,
             sdlColor.b, cast(ubyte)(clamp(alpha, 0f, 1f) * 255f));
 
-        const SDL_FRect rect = {x, y, w, h};
+        const SDL_FRect rect = {position.x, position.y, size.x, size.y};
 
         if (filled)
             SDL_RenderFillRectF(_sdlRenderer, &rect);

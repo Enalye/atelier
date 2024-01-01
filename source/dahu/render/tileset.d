@@ -13,13 +13,13 @@ import bindbc.sdl;
 
 import dahu.common;
 
-import dahu.render.image;
+import dahu.render.imagedata;
 import dahu.render.sprite;
 import dahu.render.texture;
 import dahu.render.util;
 
 /// Jeu de tuiles
-final class Tileset : Image, Resource!Tileset {
+/*final class Tileset : ImageData, Resource!Tileset {
     private {
         Texture _texture;
     }
@@ -133,18 +133,5 @@ final class Tileset : Image, Resource!Tileset {
         _texture.alpha = alpha;
         _texture.draw(x, y, sizeX, sizeY, currentClip, angle, 0f, 0f);
     }
-
-    /// Redimensionne l’image pour qu’elle puisse tenir dans une taille donnée
-    override void fit(float x, float y) {
-        Vec2f size = to!Vec2f(clip.zw).fit(Vec2f(x, y));
-        sizeX = size.x;
-        sizeY = size.y;
-    }
-
-    /// Redimensionne l’image pour qu’elle puisse contenir une taille donnée
-    override void contain(float x, float y) {
-        Vec2f size = to!Vec2f(clip.zw).contain(Vec2f(x, y));
-        sizeX = size.x;
-        sizeY = size.y;
-    }
 }
+*/

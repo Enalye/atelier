@@ -11,9 +11,8 @@ public {
     import dahu.render.canvas;
     import dahu.render.capsule;
     import dahu.render.circle;
-    import dahu.render.drawable;
     import dahu.render.image;
-    //import dahu.render.image;
+    import dahu.render.imagedata;
     import dahu.render.ninepatch;
     import dahu.render.rectangle;
     import dahu.render.renderer;

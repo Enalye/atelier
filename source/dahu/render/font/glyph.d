@@ -28,7 +28,7 @@ interface Glyph {
     }
 
     /// Render glyph
-    void draw(float x, float y, float, Color, float);
+    void draw(Vec2f position, float, Color, float);
 }
 
 /// Ditto
@@ -94,11 +94,11 @@ final class BasicGlyph : Glyph {
     }
 
     /// Render glyph
-    void draw(float x, float y, float scale, Color color, float alpha) {
+    void draw(Vec2f position, float scale, Color color, float alpha) {
         _texture.color = color;
         _texture.blend = Blend.alpha;
         _texture.alpha = alpha;
-        _texture.draw(x, y, _width * scale, _height * scale, Vec4i(_packX,
-                _packY, _packWidth, _packHeight), 0f);
+        _texture.draw(position, Vec2f(_width * scale, _height * scale),
+            Vec4i(_packX, _packY, _packWidth, _packHeight), 0f);
     }
 }

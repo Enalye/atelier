@@ -9,48 +9,32 @@ import grimoire;
 
 import dahu.common;
 import dahu.render;
+import dahu.script.util;
 
 package void loadLibRender_capsule(GrLibDefinition lib) {
     GrType capsuleType = lib.addNative("Capsule", [], "Image");
 
+    GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
+
     lib.addConstructor(&_ctor, capsuleType, [grFloat, grFloat, grBool, grFloat]);
 
-    lib.addFunction(&_setSize, "setSize", [capsuleType, grFloat, grFloat]);
-    lib.addProperty(&_sizeX!"get", &_sizeX!"set", "sizeX", capsuleType, grFloat);
-    lib.addProperty(&_sizeY!"get", &_sizeY!"set", "sizeY", capsuleType, grFloat);
-
+    lib.addProperty(&_size!"get", &_size!"set", "size", capsuleType, vec2fType);
     lib.addProperty(&_filled!"get", &_filled!"set", "filled", capsuleType, grBool);
     lib.addProperty(&_thickness!"get", &_thickness!"set", "thickness", capsuleType, grFloat);
 }
 
 private void _ctor(GrCall call) {
-    call.setNative(new Capsule(call.getFloat(0), call.getFloat(1),
+    call.setNative(new Capsule(Vec2f(call.getFloat(0), call.getFloat(1)),
             call.getBool(2), call.getFloat(3)));
 }
 
-private void _setSize(GrCall call) {
-    Capsule capsule = call.getNative!Capsule(0);
-
-    capsule.sizeX = call.getFloat(1);
-    capsule.sizeY = call.getFloat(2);
-}
-
-private void _sizeX(string op)(GrCall call) {
+private void _size(string op)(GrCall call) {
     Capsule capsule = call.getNative!Capsule(0);
 
     static if (op == "set") {
-        capsule.sizeX = call.getFloat(1);
+        capsule.size = call.getNative!SVec2f(1);
     }
-    call.setFloat(capsule.sizeX);
-}
-
-private void _sizeY(string op)(GrCall call) {
-    Capsule capsule = call.getNative!Capsule(0);
-
-    static if (op == "set") {
-        capsule.sizeY = call.getFloat(1);
-    }
-    call.setFloat(capsule.sizeY);
+    call.setNative(svec2(capsule.size));
 }
 
 private void _filled(string op)(GrCall call) {

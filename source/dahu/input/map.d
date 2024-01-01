@@ -1,8 +1,13 @@
-module dahu.input.inputmap;
+/** 
+ * Copyright: Enalye
+ * License: Zlib
+ * Authors: Enalye
+ */
+module dahu.input.map;
 
 import std.algorithm.mutation : remove;
 
-import dahu.input.inputevent;
+import dahu.input.event;
 
 /// Gère l’association de certaines entrés avec leurs actions correspondantes
 final class InputMap {
@@ -14,20 +19,17 @@ final class InputMap {
         /// Événements activant l’action
         InputEvent[] events;
 
-        /// Seuil d’activation de l’action
-        double deadzone;
-
         /// Init
-        this(string id_, double deadzone_ = .2f) {
+        this(string id_) {
             id = id_;
-            deadzone = deadzone_;
         }
 
         /// L’événement active-t’il cette action ?
         bool match(InputEvent event_) {
             foreach (InputEvent event; events) {
-                if (event_.match(event))
+                if (event.matchInput(event_)) {
                     return true;
+                }
             }
 
             return false;
@@ -38,18 +40,9 @@ final class InputMap {
         Action[string] _actions;
     }
 
-    @property {
-
-    }
-
-    /// Init
-    this() {
-
-    }
-
     /// Ajoute une nouvelle action
-    void addAction(string id, double deadzone) {
-        _actions[id] = new Action(id, deadzone);
+    void addAction(string id) {
+        _actions[id] = new Action(id);
     }
 
     /// Retire une action existante

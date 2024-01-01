@@ -1,4 +1,9 @@
-module dahu.input.inputdata;
+/** 
+ * Copyright: Enalye
+ * License: Zlib
+ * Authors: Enalye
+ */
+module dahu.input.data;
 
 package enum _gameControllerDb = "# Game Controller DB for SDL in 2.0.16 format
 # Source: https://github.com/gabomdq/SDL_GameControllerDB

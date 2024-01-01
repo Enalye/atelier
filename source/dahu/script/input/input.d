@@ -13,151 +13,167 @@ import dahu.input;
 import dahu.common;
 import dahu.core;
 
-void loadLibInput_input(GrLibDefinition lib) {
-    GrType keyButton = lib.addEnum("KeyButton", [
+void loadLibInput_input(GrLibDefinition library) {
+    GrType keyState = library.addEnum("KeyState", [
+            __traits(allMembers, KeyState)
+        ], cast(GrInt[])[EnumMembers!(KeyState)]);
+
+    GrType keyButton = library.addEnum("KeyButton", [
             __traits(allMembers, InputEvent.KeyButton.Button)
         ], cast(GrInt[])[EnumMembers!(InputEvent.KeyButton.Button)]);
 
-    GrType mouseButton = lib.addEnum("MouseButton", [
+    GrType mouseButton = library.addEnum("MouseButton", [
             __traits(allMembers, InputEvent.MouseButton.Button)
         ], cast(GrInt[])[EnumMembers!(InputEvent.MouseButton.Button)]);
 
-    GrType controllerButton = lib.addEnum("ControllerButton", [
+    GrType controllerButton = library.addEnum("ControllerButton", [
             __traits(allMembers, InputEvent.ControllerButton.Button)
         ], cast(GrInt[])[EnumMembers!(InputEvent.ControllerButton.Button)]);
 
-    GrType controllerAxis = lib.addEnum("ControllerAxis", [
+    GrType controllerAxis = library.addEnum("ControllerAxis", [
             __traits(allMembers, InputEvent.ControllerAxis.Axis)
         ], cast(GrInt[])[EnumMembers!(InputEvent.ControllerAxis.Axis)]);
 
-    GrType inputEventType = lib.addEnum("InputEventType", [
-            __traits(allMembers, InputEvent.Type)
-        ]);
+    GrType inputEventType = library.addEnum("InputEventType",
+        [__traits(allMembers, InputEvent.Type)]);
 
-    GrType inputEvent = lib.addNative("InputEvent");
-    GrType inputEventKeyButton = lib.addNative("InputEventKeyButton");
-    GrType inputEventMouseButton = lib.addNative("InputEventMouseButton");
-    GrType inputEventMouseMotion = lib.addNative("InputEventMouseMotion");
-    GrType inputEventMouseWheel = lib.addNative("InputEventMouseWheel");
-    GrType inputEventControllerButton = lib.addNative("InputEventControllerButton");
-    GrType inputEventControllerAxis = lib.addNative("InputEventControllerAxis");
-    GrType inputEventTextInput = lib.addNative("InputEventTextInput");
-    GrType inputEventDropFile = lib.addNative("InputEventDropFile");
+    GrType inputEvent = library.addNative("InputEvent");
+    GrType inputEventKeyButton = library.addNative("InputEventKeyButton");
+    GrType inputEventMouseButton = library.addNative("InputEventMouseButton");
+    GrType inputEventMouseMotion = library.addNative("InputEventMouseMotion");
+    GrType inputEventMouseWheel = library.addNative("InputEventMouseWheel");
+    GrType inputEventControllerButton = library.addNative("InputEventControllerButton");
+    GrType inputEventControllerAxis = library.addNative("InputEventControllerAxis");
+    GrType inputEventTextInput = library.addNative("InputEventTextInput");
+    GrType inputEventDropFile = library.addNative("InputEventDropFile");
 
     // InputEvent
-    lib.addCast(&_asString, inputEvent, grString);
-    lib.addProperty(&_type, null, "type", inputEvent, inputEventType);
-    lib.addFunction(&_inputEvent_isPressed, "isPressed", [inputEvent], [grBool]);
-    lib.addFunction(&_inputEvent_isEcho, "isEcho", [inputEvent], [grBool]);
+    library.addCast(&_asString, inputEvent, grString);
+    library.addProperty(&_type, null, "type", inputEvent, inputEventType);
+    library.addFunction(&_inputEvent_isPressed, "isPressed", [inputEvent], [
+            grBool
+        ]);
+    library.addFunction(&_inputEvent_echo, "echo", [inputEvent], [grBool]);
 
-    lib.addProperty(&_keyButton, null, "keyButton", inputEvent, grOptional(inputEventKeyButton));
-    lib.addProperty(&_mouseButton, null, "mouseButton", inputEvent,
+    library.addProperty(&_keyButton, null, "keyButton", inputEvent,
+        grOptional(inputEventKeyButton));
+    library.addProperty(&_mouseButton, null, "mouseButton", inputEvent,
         grOptional(inputEventMouseButton));
-    lib.addProperty(&_mouseMotion, null, "mouseMotion", inputEvent,
+    library.addProperty(&_mouseMotion, null, "mouseMotion", inputEvent,
         grOptional(inputEventMouseMotion));
-    lib.addProperty(&_mouseWheel, null, "mouseWheel", inputEvent,
+    library.addProperty(&_mouseWheel, null, "mouseWheel", inputEvent,
         grOptional(inputEventMouseWheel));
-    lib.addProperty(&_controllerButton, null, "controllerButton", inputEvent,
-        grOptional(inputEventControllerButton));
-    lib.addProperty(&_controllerAxis, null, "controllerAxis", inputEvent,
+    library.addProperty(&_controllerButton, null, "controllerButton",
+        inputEvent, grOptional(inputEventControllerButton));
+    library.addProperty(&_controllerAxis, null, "controllerAxis", inputEvent,
         grOptional(inputEventControllerAxis));
-    lib.addProperty(&_textInput, null, "textInput", inputEvent, grOptional(inputEventTextInput));
-    lib.addProperty(&_dropFile, null, "dropFile", inputEvent, grOptional(inputEventDropFile));
+    library.addProperty(&_textInput, null, "textInput", inputEvent,
+        grOptional(inputEventTextInput));
+    library.addProperty(&_dropFile, null, "dropFile", inputEvent, grOptional(inputEventDropFile));
 
-    lib.addFunction(&_accept, "accept", [inputEvent]);
-    lib.addFunction(&_print, "print", [inputEvent]);
+    library.addFunction(&_accept, "accept", [inputEvent]);
+    library.addFunction(&_print, "print", [inputEvent]);
 
     // KeyButton
-    lib.addProperty(&_KeyButton_button, null, "button", inputEventKeyButton, keyButton);
-    lib.addProperty(&_KeyButton_pressed, null, "pressed", inputEventKeyButton, grBool);
-    lib.addProperty(&_KeyButton_isEcho, null, "isEcho", inputEventKeyButton, grBool);
+    library.addProperty(&_KeyButton_button, null, "button", inputEventKeyButton, keyButton);
+    library.addProperty(&_KeyButton_state, null, "state", inputEventKeyButton, keyState);
+    library.addProperty(&_KeyButton_echo, null, "echo", inputEventKeyButton, grBool);
 
     // MouseButton
-    lib.addProperty(&_MouseButton_button, null, "button", inputEventMouseButton, keyButton);
-    lib.addProperty(&_MouseButton_pressed, null, "pressed", inputEventMouseButton, grBool);
-    lib.addProperty(&_MouseButton_clicks, null, "clicks", inputEventMouseButton, grInt);
-    lib.addProperty(&_MouseButton_x, null, "x", inputEventMouseButton, grFloat);
-    lib.addProperty(&_MouseButton_y, null, "y", inputEventMouseButton, grFloat);
+    library.addProperty(&_MouseButton_button, null, "button", inputEventMouseButton, keyButton);
+    library.addProperty(&_MouseButton_state, null, "state", inputEventMouseButton, keyState);
+    library.addProperty(&_MouseButton_clicks, null, "clicks", inputEventMouseButton, grInt);
+    library.addProperty(&_MouseButton_globalX, null, "globalX", inputEventMouseButton, grInt);
+    library.addProperty(&_MouseButton_globalY, null, "globalY", inputEventMouseButton, grInt);
+    library.addProperty(&_MouseButton_relativeX, null, "relativeX", inputEventMouseButton, grInt);
+    library.addProperty(&_MouseButton_relativeY, null, "relativeY", inputEventMouseButton, grInt);
 
     // MouseMotion
-    lib.addProperty(&_MouseMotion_x, null, "x", inputEventMouseMotion, grFloat);
-    lib.addProperty(&_MouseMotion_y, null, "y", inputEventMouseMotion, grFloat);
-    lib.addProperty(&_MouseMotion_deltaX, null, "deltaX", inputEventMouseMotion, grFloat);
-    lib.addProperty(&_MouseMotion_deltaY, null, "deltaY", inputEventMouseMotion, grFloat);
+    library.addProperty(&_MouseMotion_globalX, null, "globalX", inputEventMouseMotion, grInt);
+    library.addProperty(&_MouseMotion_globalY, null, "globalY", inputEventMouseMotion, grInt);
+    library.addProperty(&_MouseMotion_relativeX, null, "relativeX", inputEventMouseMotion, grInt);
+    library.addProperty(&_MouseMotion_relativeY, null, "relativeY", inputEventMouseMotion, grInt);
 
     // MouseWheel
-    lib.addProperty(&_MouseWheel_x, null, "x", inputEventMouseWheel, grFloat);
-    lib.addProperty(&_MouseWheel_y, null, "y", inputEventMouseWheel, grFloat);
+    library.addProperty(&_MouseWheel_x, null, "x", inputEventMouseWheel, grInt);
+    library.addProperty(&_MouseWheel_y, null, "y", inputEventMouseWheel, grInt);
 
     // ControllerButton
-    lib.addProperty(&_ControllerButton_button, null, "button",
+    library.addProperty(&_ControllerButton_button, null, "button",
         inputEventControllerButton, controllerButton);
-    lib.addProperty(&_ControllerButton_pressed, null, "pressed",
-        inputEventControllerButton, grBool);
+    library.addProperty(&_ControllerButton_state, null, "state",
+        inputEventControllerButton, keyState);
 
     // ControllerAxis
-    lib.addProperty(&_ControllerAxis_axis, null, "axis",
+    library.addProperty(&_ControllerAxis_axis, null, "axis",
         inputEventControllerAxis, controllerButton);
-    lib.addProperty(&_ControllerAxis_value, null, "value", inputEventControllerAxis, grFloat);
+    library.addProperty(&_ControllerAxis_value, null, "value", inputEventControllerAxis, grFloat);
 
     // TextInput
-    lib.addProperty(&_TextInput_text, null, "text", inputEventTextInput, grString);
+    library.addProperty(&_TextInput_text, null, "text", inputEventTextInput, grString);
 
     // DropFile
-    lib.addProperty(&_DropFile_path, null, "path", inputEventDropFile, grString);
+    library.addProperty(&_DropFile_path, null, "path", inputEventDropFile, grString);
 
     // Input
 
-    lib.addStatic(&_makeKeyButton, inputEvent, "keyButton", [
-            keyButton, grBool, grBool
+    library.addStatic(&_makeKeyButton1, inputEvent, "keyButton", [
+            keyButton, keyState
         ], [inputEvent]);
 
-    lib.addStatic(&_makeMouseButton, inputEvent, "mouseButton", [
-            mouseButton, grBool, grInt, grInt, grInt, grInt, grInt
+    library.addStatic(&_makeKeyButton2, inputEvent, "keyButton", [
+            keyButton, keyState, grBool
         ], [inputEvent]);
 
-    lib.addStatic(&_makeMouseMotion, inputEvent, "mouseMotion", [
+    library.addStatic(&_makeMouseButton, inputEvent, "mouseButton",
+        [mouseButton, keyState, grInt, grInt, grInt, grInt, grInt], [inputEvent]);
+
+    library.addStatic(&_makeMouseMotion, inputEvent, "mouseMotion", [
             grInt, grInt, grInt, grInt
         ], [inputEvent]);
 
-    lib.addStatic(&_makeMouseWheel, inputEvent, "mouseWheel", [grInt, grInt], [
+    library.addStatic(&_makeMouseWheel, inputEvent, "mouseWheel", [grInt, grInt], [
             inputEvent
         ]);
 
-    lib.addStatic(&_makeControllerButton, inputEvent, "controllerButton",
-        [controllerButton, grBool], [inputEvent]);
+    library.addStatic(&_makeControllerButton, inputEvent, "controllerButton",
+        [controllerButton, keyState], [inputEvent]);
 
-    lib.addStatic(&_makeControllerAxis, inputEvent, "controllerAxis",
+    library.addStatic(&_makeControllerAxis, inputEvent, "controllerAxis",
         [controllerAxis, grFloat], [inputEvent]);
 
-    lib.addStatic(&_makeTextInput, inputEvent, "textInput", [grString], [
+    library.addStatic(&_makeTextInput, inputEvent, "textInput", [grString], [
             inputEvent
         ]);
 
-    lib.addStatic(&_makeDropFile, inputEvent, "dropFile", [grString], [
+    library.addStatic(&_makeDropFile, inputEvent, "dropFile", [grString], [
             inputEvent
         ]);
 
-    lib.addFunction(&_isPressed!(InputEvent.KeyButton.Button), "isPressed",
-        [keyButton], [grBool]);
-    lib.addFunction(&_isPressed!(InputEvent.MouseButton.Button), "isPressed",
-        [mouseButton], [grBool]);
-    lib.addFunction(&_isPressed!(InputEvent.ControllerButton.Button),
+    library.addFunction(&_isPressed!(InputEvent.KeyButton.Button),
+        "isPressed", [keyButton], [grBool]);
+    library.addFunction(&_isPressed!(InputEvent.MouseButton.Button),
+        "isPressed", [mouseButton], [grBool]);
+    library.addFunction(&_isPressed!(InputEvent.ControllerButton.Button),
         "isPressed", [controllerButton], [grBool]);
 
     // Action
 
-    lib.addFunction(&_addAction, "addAction", [grString, grFloat]);
-    lib.addFunction(&_removeAction, "removeAction", [grString]);
-    lib.addFunction(&_hasAction, "hasAction", [grString], [grBool]);
-    lib.addFunction(&_isAction, "isAction", [inputEvent, grString], [grBool]);
-    lib.addFunction(&_addActionEvent, "addActionEvent", [grString, inputEvent]);
-    lib.addFunction(&_removeActionEvents, "removeActionEvents", [grString]);
-    lib.addFunction(&_isActionPressed, "isActionPressed", [grString], [grBool]);
-    lib.addFunction(&_getActionStrength, "getActionStrength", [grString], [
+    library.addFunction(&_addAction, "addAction", [grString]);
+    library.addFunction(&_removeAction, "removeAction", [grString]);
+    library.addFunction(&_hasAction, "hasAction", [grString], [grBool]);
+    library.addFunction(&_isAction, "isAction", [inputEvent, grString], [grBool]);
+    library.addFunction(&_addActionEvent, "addActionEvent", [
+            grString, inputEvent
+        ]);
+    library.addFunction(&_removeActionEvents, "removeActionEvents", [grString]);
+    library.addFunction(&_isActionActivated, "isActionActivated", [grString], [
+            grBool
+        ]);
+    library.addFunction(&_getActionStrength, "getActionStrength", [grString], [
             grFloat
         ]);
-    lib.addFunction(&_getActionAxis, "getActionAxis", [grString, grString], [
+    library.addFunction(&_getActionAxis, "getActionAxis", [grString, grString], [
             grFloat
         ]);
 
@@ -172,11 +188,11 @@ private void _type(GrCall call) {
 }
 
 private void _inputEvent_isPressed(GrCall call) {
-    call.setBool(call.getNative!InputEvent(0).isPressed());
+    call.setBool(call.getNative!InputEvent(0).pressed);
 }
 
-private void _inputEvent_isEcho(GrCall call) {
-    call.setBool(call.getNative!InputEvent(0).isEcho());
+private void _inputEvent_echo(GrCall call) {
+    call.setBool(call.getNative!InputEvent(0).echo);
 }
 
 private void _keyButton(GrCall call) {
@@ -257,12 +273,12 @@ private void _KeyButton_button(GrCall call) {
     call.setEnum(call.getNative!(InputEvent.KeyButton)(0).button);
 }
 
-private void _KeyButton_pressed(GrCall call) {
-    call.setBool(call.getNative!(InputEvent.KeyButton)(0).pressed);
+private void _KeyButton_state(GrCall call) {
+    call.setEnum(call.getNative!(InputEvent.KeyButton)(0).state);
 }
 
-private void _KeyButton_isEcho(GrCall call) {
-    call.setBool(call.getNative!(InputEvent.KeyButton)(0).isEcho);
+private void _KeyButton_echo(GrCall call) {
+    call.setBool(call.getNative!(InputEvent.KeyButton)(0).echo);
 }
 
 // MouseButton
@@ -271,48 +287,56 @@ private void _MouseButton_button(GrCall call) {
     call.setEnum(call.getNative!(InputEvent.MouseButton)(0).button);
 }
 
-private void _MouseButton_pressed(GrCall call) {
-    call.setBool(call.getNative!(InputEvent.MouseButton)(0).pressed);
+private void _MouseButton_state(GrCall call) {
+    call.setEnum(call.getNative!(InputEvent.MouseButton)(0).state);
 }
 
 private void _MouseButton_clicks(GrCall call) {
     call.setInt(call.getNative!(InputEvent.MouseButton)(0).clicks);
 }
 
-private void _MouseButton_x(GrCall call) {
-    call.setFloat(call.getNative!(InputEvent.MouseButton)(0).x);
+private void _MouseButton_globalX(GrCall call) {
+    call.setInt(call.getNative!(InputEvent.MouseButton)(0).globalPosition.x);
 }
 
-private void _MouseButton_y(GrCall call) {
-    call.setFloat(call.getNative!(InputEvent.MouseButton)(0).y);
+private void _MouseButton_globalY(GrCall call) {
+    call.setInt(call.getNative!(InputEvent.MouseButton)(0).globalPosition.y);
+}
+
+private void _MouseButton_relativeX(GrCall call) {
+    call.setInt(call.getNative!(InputEvent.MouseButton)(0).relativePosition.x);
+}
+
+private void _MouseButton_relativeY(GrCall call) {
+    call.setInt(call.getNative!(InputEvent.MouseButton)(0).relativePosition.y);
 }
 
 // MouseMotion
 
-private void _MouseMotion_x(GrCall call) {
-    call.setFloat(call.getNative!(InputEvent.MouseMotion)(0).x);
+private void _MouseMotion_globalX(GrCall call) {
+    call.setInt(call.getNative!(InputEvent.MouseMotion)(0).globalPosition.x);
 }
 
-private void _MouseMotion_y(GrCall call) {
-    call.setFloat(call.getNative!(InputEvent.MouseMotion)(0).y);
+private void _MouseMotion_globalY(GrCall call) {
+    call.setInt(call.getNative!(InputEvent.MouseMotion)(0).globalPosition.y);
 }
 
-private void _MouseMotion_deltaX(GrCall call) {
-    call.setFloat(call.getNative!(InputEvent.MouseMotion)(0).deltaX);
+private void _MouseMotion_relativeX(GrCall call) {
+    call.setInt(call.getNative!(InputEvent.MouseMotion)(0).relativePosition.x);
 }
 
-private void _MouseMotion_deltaY(GrCall call) {
-    call.setFloat(call.getNative!(InputEvent.MouseMotion)(0).deltaY);
+private void _MouseMotion_relativeY(GrCall call) {
+    call.setInt(call.getNative!(InputEvent.MouseMotion)(0).relativePosition.y);
 }
 
 // MouseWheel
 
 private void _MouseWheel_x(GrCall call) {
-    call.setFloat(call.getNative!(InputEvent.MouseWheel)(0).x);
+    call.setInt(call.getNative!(InputEvent.MouseWheel)(0).wheel.x);
 }
 
 private void _MouseWheel_y(GrCall call) {
-    call.setFloat(call.getNative!(InputEvent.MouseWheel)(0).y);
+    call.setInt(call.getNative!(InputEvent.MouseWheel)(0).wheel.y);
 }
 
 // ControllerButton
@@ -321,8 +345,8 @@ private void _ControllerButton_button(GrCall call) {
     call.setEnum(call.getNative!(InputEvent.ControllerButton)(0).button);
 }
 
-private void _ControllerButton_pressed(GrCall call) {
-    call.setBool(call.getNative!(InputEvent.ControllerButton)(0).pressed);
+private void _ControllerButton_state(GrCall call) {
+    call.setEnum(call.getNative!(InputEvent.ControllerButton)(0).state);
 }
 
 // ControllerButton
@@ -349,28 +373,34 @@ private void _DropFile_path(GrCall call) {
 
 // Input
 
-private void _makeKeyButton(GrCall call) {
+private void _makeKeyButton1(GrCall call) {
     call.setNative(InputEvent.keyButton(call.getEnum!(InputEvent.KeyButton.Button)(0),
-            call.getBool(1), call.getBool(2)));
+                   InputState(call.getEnum!KeyState(1))));
+}
+
+private void _makeKeyButton2(GrCall call) {
+    call.setNative(InputEvent.keyButton(call.getEnum!(InputEvent.KeyButton.Button)(0),
+                   InputState(call.getEnum!KeyState(1)), call.getBool(2)));
 }
 
 private void _makeMouseButton(GrCall call) {
     call.setNative(InputEvent.mouseButton(call.getEnum!(InputEvent.MouseButton.Button)(0),
-            call.getBool(1), call.getInt(2), call.getInt(3), call.getInt(4)));
+            InputState(call.getEnum!KeyState(1)), call.getInt(2), Vec2i(call.getInt(3),
+            call.getInt(4)), Vec2i(call.getInt(5), call.getInt(6))));
 }
 
 private void _makeMouseMotion(GrCall call) {
-    call.setNative(InputEvent.mouseMotion(call.getInt(0), call.getInt(1),
-            call.getInt(2), call.getInt(3)));
+    call.setNative(InputEvent.mouseMotion(Vec2i(call.getInt(0),
+            call.getInt(1)), Vec2i(call.getInt(2), call.getInt(3))));
 }
 
 private void _makeMouseWheel(GrCall call) {
-    call.setNative(InputEvent.mouseWheel(call.getInt(0), call.getInt(1)));
+    call.setNative(InputEvent.mouseWheel(Vec2i(call.getInt(0), call.getInt(1))));
 }
 
 private void _makeControllerButton(GrCall call) {
     call.setNative(InputEvent.controllerButton(
-            call.getEnum!(InputEvent.ControllerButton.Button)(0), call.getBool(1)));
+            call.getEnum!(InputEvent.ControllerButton.Button)(0), InputState(call.getEnum!KeyState(1))));
 }
 
 private void _makeControllerAxis(GrCall call) {
@@ -397,7 +427,7 @@ private void _getAxis(GrCall call) {
 // Action
 
 private void _addAction(GrCall call) {
-    Dahu.input.addAction(call.getString(0), call.getFloat(1));
+    Dahu.input.addAction(call.getString(0));
 }
 
 private void _removeAction(GrCall call) {
@@ -420,8 +450,8 @@ private void _removeActionEvents(GrCall call) {
     Dahu.input.removeActionEvents(call.getString(0));
 }
 
-private void _isActionPressed(GrCall call) {
-    call.setBool(Dahu.input.isPressed(call.getString(0)));
+private void _isActionActivated(GrCall call) {
+    call.setBool(Dahu.input.activated(call.getString(0)));
 }
 
 private void _getActionStrength(GrCall call) {

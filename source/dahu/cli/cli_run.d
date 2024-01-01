@@ -65,8 +65,9 @@ void cliRun(Cli.Result cli) {
                 enforce(exists(resFolder), "le dossier de ressources `" ~ resFolder ~
                         "` référencé dans `" ~ Dahu_Project_File ~ "` n’existe pas");
 
-                archives ~= resName;
+                archives ~= resFolder;
             }
+            writeln(sourceFile, ", ", archives);
 
             Json windowNode = configNode.getObject(Dahu_Project_Window_Node);
             string windowTitle = windowNode.getString(Dahu_Project_Window_Title_Node, configName);
@@ -96,8 +97,14 @@ void cliRun(Cli.Result cli) {
             enforce(bytecode, compiler.getError().prettify(GrLocale.fr_FR));
 
             Dahu dahu = new Dahu(bytecode, libraries, windowWidth, windowHeight, windowTitle);
+
+            foreach (string archive; archives) {
+                dahu.loadResources(archive);
+            }
+
             if (windowIcon)
                 dahu.window.setIcon(windowIcon);
+
             dahu.run();
 
             /*if (windowIcon.length) {

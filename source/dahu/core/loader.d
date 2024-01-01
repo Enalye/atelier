@@ -47,6 +47,7 @@ private void _compileSprite(string path, Json json, OutStream stream) {
 
 private void _loadSprite(InStream stream) {
     string file = stream.read!string();
+    writeln("CHARGEMENT: ", file);
     Texture texture = new Texture(file);
 
     uint nbSprites = stream.read!uint();

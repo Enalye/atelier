@@ -23,6 +23,18 @@ event app {
     };
     appendUI(btn);
 
+
+    var scene = @Scene;
+    addScene(scene);
+
+    var player = @Entity;
+    player.position = @Vec2f(100, 100);
+
+    var spr = @Sprite("alice");
+    player.addImage(spr);
+
+    scene.addEntity(player);
+
     /*task(btn: Button) {
         while yield(btn.alive) {
             var msg = <- btn.message;

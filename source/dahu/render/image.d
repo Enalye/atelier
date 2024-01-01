@@ -13,13 +13,15 @@ import dahu.render.util;
 abstract class Image {
     Vec4i clip;
 
+    Vec2f position = Vec2f.zero;
+
     double angle = 0.0;
 
     bool flipX, flipY;
 
-    float anchorX = .5f, anchorY = .5f;
+    Vec2f anchor = Vec2f.half;
 
-    float pivotX = 0f, pivotY = 0f;
+    Vec2f pivot = Vec2f.zero;
 
     Blend blend = Blend.alpha;
 
@@ -27,26 +29,33 @@ abstract class Image {
 
     float alpha = 1f;
 
+    int zOrder;
+
+    bool isAlive = true;
+
     this() {
     }
 
-    this(Image drawable) {
-        clip = drawable.clip;
-        angle = drawable.angle;
-        flipX = drawable.flipX;
-        flipY = drawable.flipY;
-        anchorX = drawable.anchorX;
-        anchorY = drawable.anchorY;
-        pivotX = drawable.pivotX;
-        pivotY = drawable.pivotY;
-        blend = drawable.blend;
-        color = drawable.color;
-        alpha = drawable.alpha;
+    this(Image image) {
+        position = image.position;
+        clip = image.clip;
+        angle = image.angle;
+        flipX = image.flipX;
+        flipY = image.flipY;
+        anchor = image.anchor;
+        pivot = image.pivot;
+        blend = image.blend;
+        color = image.color;
+        alpha = image.alpha;
     }
 
     /// Redimensionne l’image pour qu’elle puisse tenir dans une taille donnée
-    abstract void fit(float x, float y);
+    abstract void fit(Vec2f size_);
 
     /// Redimensionne l’image pour qu’elle puisse contenir une taille donnée
-    abstract void contain(float x, float y);
+    abstract void contain(Vec2f size_);
+
+    abstract void update();
+
+    abstract void draw(Vec2f origin = Vec2f.zero);
 }

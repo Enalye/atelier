@@ -14,14 +14,13 @@ import bindbc.sdl;
 import dahu.common;
 import dahu.core;
 
-import dahu.render.drawable;
 import dahu.render.image;
 import dahu.render.texture;
 import dahu.render.writabletexture;
 import dahu.render.util;
 
 /// Render a resizable repeated sprite with borders. (ex: bubble speech).
-final class NinePatch : Image, Drawable, Resource!NinePatch {
+final class NinePatch : Image, Resource!NinePatch {
     private {
         SDL_Surface* _surface;
         int _surfaceWidth, _surfaceHeight;
@@ -31,7 +30,7 @@ final class NinePatch : Image, Drawable, Resource!NinePatch {
         bool _isDirty = true;
         bool _ownSurface;
 
-        float _sizeX = 0f, _sizeY = 0f;
+        Vec2f _size = Vec2f.zero;
     }
 
     @property {
@@ -43,28 +42,17 @@ final class NinePatch : Image, Drawable, Resource!NinePatch {
             return _cache.height;
         }
 
-        pragma(inline) float sizeX() const {
-            return _sizeX;
+        pragma(inline) Vec2f size() const {
+            return _size;
         }
 
-        pragma(inline) float sizeX(float sizeX_) {
-            if ((cast(int) _sizeX) != (cast(int) sizeX_)) {
+        pragma(inline) Vec2f size(Vec2f size_) {
+            if ((cast(int) _size.x) != (cast(int) size_.x) ||
+                (cast(int) _size.y) != (cast(int) size_.y)) {
                 _isDirty = true;
             }
-            _sizeX = sizeX_;
-            return _sizeX;
-        }
-
-        pragma(inline) float sizeY() const {
-            return _sizeY;
-        }
-
-        pragma(inline) float sizeY(float sizeY_) {
-            if ((cast(int) _sizeY) != (cast(int) sizeY_)) {
-                _isDirty = true;
-            }
-            _sizeY = sizeY_;
-            return _sizeY;
+            _size = size_;
+            return _size;
         }
 
         /// Texture's region used.
@@ -162,8 +150,7 @@ final class NinePatch : Image, Drawable, Resource!NinePatch {
         _bottom = bottom_;
         _left = left_;
         _right = right_;
-        sizeX = _clip.z;
-        sizeY = _clip.w;
+        _size = to!Vec2f(_clip.zw);
         _isDirty = true;
     }
 
@@ -171,8 +158,7 @@ final class NinePatch : Image, Drawable, Resource!NinePatch {
     this(NinePatch ninePatch) {
         super(ninePatch);
         _surface = ninePatch._surface;
-        _sizeX = ninePatch._sizeX;
-        _sizeY = ninePatch._sizeY;
+        _size = ninePatch._size;
         _surfaceWidth = ninePatch._surfaceWidth;
         _surfaceHeight = ninePatch._surfaceHeight;
         _ownSurface = false;
@@ -194,7 +180,7 @@ final class NinePatch : Image, Drawable, Resource!NinePatch {
         return new NinePatch(this);
     }
 
-    void update() {
+    override void update() {
     }
 
     /// Render to the canvas.
@@ -203,8 +189,8 @@ final class NinePatch : Image, Drawable, Resource!NinePatch {
         if (_surface is null || _clip.z <= (_left + _right) || _clip.w <= (_top + _bottom))
             return;
 
-        _cache = (_sizeX >= 1f && _sizeY >= 1f) ? new WritableTexture(cast(uint) _sizeX,
-            cast(uint) _sizeY) : null;
+        _cache = (_size.x >= 1f && _size.y >= 1f) ? new WritableTexture(cast(uint) _size.x,
+            cast(uint) _size.y) : null;
 
         if (!_cache)
             return;
@@ -324,8 +310,18 @@ final class NinePatch : Image, Drawable, Resource!NinePatch {
         }, &rasterData);
     }
 
+    /// Redimensionne l’image pour qu’elle puisse tenir dans une taille donnée
+    override void fit(Vec2f size_) {
+        size = to!Vec2f(clip.zw).fit(size_);
+    }
+
+    /// Redimensionne l’image pour qu’elle puisse contenir une taille donnée
+    override void contain(Vec2f size_) {
+        size = to!Vec2f(clip.zw).contain(size_);
+    }
+
     /// Render the NinePatch in this position.
-    void draw(float x, float y) {
+    override void draw(Vec2f origin = Vec2f.zero) {
         if (_isDirty)
             _cacheTexture();
 
@@ -335,21 +331,7 @@ final class NinePatch : Image, Drawable, Resource!NinePatch {
         _cache.color = color;
         _cache.blend = blend;
         _cache.alpha = alpha;
-        _cache.draw(x, y, _sizeX, _sizeY, Vec4i(0, 0, _cache.width,
-                _cache.height), angle, pivotX, pivotY, flipX, flipY);
-    }
-
-    /// Redimensionne l’image pour qu’elle puisse tenir dans une taille donnée
-    override void fit(float x, float y) {
-        Vec2f size = to!Vec2f(clip.zw).fit(Vec2f(x, y));
-        sizeX = size.x;
-        sizeY = size.y;
-    }
-
-    /// Redimensionne l’image pour qu’elle puisse contenir une taille donnée
-    override void contain(float x, float y) {
-        Vec2f size = to!Vec2f(clip.zw).contain(Vec2f(x, y));
-        sizeX = size.x;
-        sizeY = size.y;
+        _cache.draw(origin + position, _size, Vec4i(0, 0, _cache.width,
+                _cache.height), angle, pivot, flipX, flipY);
     }
 }

@@ -10,7 +10,7 @@ import dahu.render;
 abstract class UIElement {
     public {
         UIElement[] _children;
-        Drawable[] _drawables;
+        Image[] _images;
     }
 
     private {

@@ -73,7 +73,7 @@ final class Label : UIElement {
                 float x = pos.x + metrics.offsetX * _charScale;
                 float y = pos.y - metrics.offsetY * _charScale;
 
-                metrics.draw(x, y, _charScale, Color.white, 1f);
+                metrics.draw(Vec2f(x, y), _charScale, Color.white, 1f);
                 pos.x += (metrics.advance + _charSpacing) * _charScale;
                 prevChar = ch;
             }

@@ -12,12 +12,11 @@ import std.math : ceil, abs;
 import dahu.common;
 import dahu.core;
 
-import dahu.render.drawable;
 import dahu.render.image;
 import dahu.render.renderer;
 import dahu.render.writabletexture;
 
-final class Circle : Image, Drawable {
+final class Circle : Image {
     private {
         float _radius = 0f;
         float _thickness = 1f;
@@ -82,7 +81,7 @@ final class Circle : Image, Drawable {
         _isDirty = true;
     }
 
-    void update() {
+    override void update() {
     }
 
     void cache() {
@@ -136,7 +135,17 @@ final class Circle : Image, Drawable {
         }, &rasterData);
     }
 
-    void draw(float x, float y) {
+    /// Redimensionne l’image pour qu’elle puisse tenir dans une taille donnée
+    override void fit(Vec2f size_) {
+        _radius = min(size_.x, size_.y);
+    }
+
+    /// Redimensionne l’image pour qu’elle puisse contenir une taille donnée
+    override void contain(Vec2f size_) {
+        _radius = max(size_.x, size_.y);
+    }
+
+    override void draw(Vec2f origin = Vec2f.zero) {
         if (_isDirty && !noCache)
             cache();
 
@@ -146,18 +155,7 @@ final class Circle : Image, Drawable {
         _cache.color = color;
         _cache.blend = blend;
         _cache.alpha = alpha;
-        _cache.draw(x - (anchorX * _radius), y - (anchorY * _radius), _radius,
-            _radius, Vec4i(0, 0, _cache.width, _cache.height), angle, pivotX,
-            pivotY, flipX, flipY);
-    }
-
-    /// Redimensionne l’image pour qu’elle puisse tenir dans une taille donnée
-    override void fit(float x, float y) {
-        _radius = min(x, y);
-    }
-
-    /// Redimensionne l’image pour qu’elle puisse contenir une taille donnée
-    override void contain(float x, float y) {
-        _radius = max(x, y);
+        _cache.draw(origin + position - (anchor * _radius), Vec2f(_radius,
+                _radius), Vec4i(0, 0, _cache.width, _cache.height), angle, pivot, flipX, flipY);
     }
 }

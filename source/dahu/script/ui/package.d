@@ -22,13 +22,13 @@ package(dahu.script) GrLibLoader[] getLibLoaders_ui() {
 import dahu.ui;
 
 private void loadLibUI(GrLibDefinition lib) {
-    GrType uiType = lib.addNative("UI");
+    GrType uiType = lib.addNative("UIManager");
 
     lib.addProperty(&_isDebug!"get", &_isDebug!"set", "isDebug", uiType, grBool);
 }
 
 private void _isDebug(string op)(GrCall call) {
-    UI ui = call.getNative!UI(0);
+    UIManager ui = call.getNative!UIManager(0);
 
     static if (op == "set") {
         ui.isDebug = call.getBool(1);

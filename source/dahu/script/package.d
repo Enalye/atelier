@@ -11,6 +11,7 @@ import dahu.script.common;
 import dahu.script.core;
 import dahu.script.input;
 import dahu.script.render;
+import dahu.script.scene;
 import dahu.script.ui;
 
 /// Charge la bibliothèque
@@ -30,7 +31,7 @@ GrLibLoader[] getLibraryLoaders() {
 
     static foreach (pack; [
             &getLibLoaders_common, &getLibLoaders_core, &getLibLoaders_input,
-            &getLibLoaders_render, &getLibLoaders_ui,
+            &getLibLoaders_render, &getLibLoaders_scene, &getLibLoaders_ui,
         ]) {
         loaders ~= pack();
     }

@@ -33,7 +33,7 @@ final class IArray(T, size_t _capacity, bool _useParallelism = false) {
         }
 
         /// Liste des éléments contenus
-        ref T[_capacity] data() {
+        ref T[_capacity] array() {
             return _dataTable;
         }
 
@@ -97,7 +97,7 @@ final class IArray(T, size_t _capacity, bool _useParallelism = false) {
     }
 
     /// Vide la liste
-    void reset() {
+    void clear() {
         _dataTop = 0u;
         _availableIndexesTop = 0u;
         _removeTop = 0u;
@@ -219,6 +219,19 @@ final class IArray(T, size_t _capacity, bool _useParallelism = false) {
         return result;
     }
 
+    /// Opérateur ~
+    typeof(this) opBinary(string op: "~")(T value) const {
+        typeof(this) result = new typeof(this);
+        result ~= value;
+        return result;
+    }
+
+    /// Opérateur ~=
+    typeof(this) opOpAssign(string op: "~")(T value) {
+        push(value);
+        return this;
+    }
+
     /// Accède à un élément
     T opIndex(size_t index) {
         return _dataTable[_translationTable[index]];
@@ -270,7 +283,7 @@ final class Array(T, bool _useParallelism = false) {
         }
 
         /// Liste des éléments contenus
-        ref T[] data() {
+        ref T[] array() {
             return _dataTable;
         }
 
@@ -301,7 +314,7 @@ final class Array(T, bool _useParallelism = false) {
     }
 
     /// Vide la liste
-    void reset() {
+    void clear() {
         _dataTable.length = 0u;
         _removeTable.length = 0u;
     }
@@ -419,6 +432,19 @@ final class Array(T, bool _useParallelism = false) {
         }
 
         return result;
+    }
+
+    /// Opérateur ~
+    typeof(this) opBinary(string op: "~")(T value) const {
+        typeof(this) result = new typeof(this);
+        result ~= value;
+        return result;
+    }
+
+    /// Opérateur ~=
+    typeof(this) opOpAssign(string op: "~")(T value) {
+        push(value);
+        return this;
     }
 
     /// Accède à un élément

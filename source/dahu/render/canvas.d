@@ -200,11 +200,11 @@ final class Canvas : ImageData {
     }
 
     /// Dessine le canvas
-    override void draw(float x, float y, float w, float h, Vec4i clip, double angle, float pivotX,
-        float pivotY, bool flipX = false, bool flipY = false) {
+    override void draw(Vec2f position, Vec2f size, Vec4i clip, double angle,
+        Vec2f pivot = Vec2f.zero, bool flipX = false, bool flipY = false) {
         SDL_Rect sdlSrc = clip.toSdlRect();
-        SDL_FRect sdlDest = {x, y, w, h};
-        SDL_FPoint sdlPivot = {pivotX, pivotY};
+        SDL_FRect sdlDest = {position.x, position.y, size.x, size.y};
+        SDL_FPoint sdlPivot = {pivot.x, pivot.y};
 
         SDL_RenderCopyExF(sdlRenderer, _texture, &sdlSrc, //
             &sdlDest, angle, &sdlPivot, //

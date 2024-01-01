@@ -9,50 +9,34 @@ import grimoire;
 
 import dahu.common;
 import dahu.render;
+import dahu.script.util;
 
 package void loadLibRender_rectangle(GrLibDefinition lib) {
     GrType rectangleType = lib.addNative("Rectangle", [], "Image");
+
+    GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
 
     lib.addConstructor(&_ctor, rectangleType, [
             grFloat, grFloat, grBool, grFloat
         ]);
 
-    lib.addFunction(&_setSize, "setSize", [rectangleType, grFloat, grFloat]);
-    lib.addProperty(&_sizeX!"get", &_sizeX!"set", "sizeX", rectangleType, grFloat);
-    lib.addProperty(&_sizeY!"get", &_sizeY!"set", "sizeY", rectangleType, grFloat);
-
+    lib.addProperty(&_size!"get", &_size!"set", "size", rectangleType, vec2fType);
     lib.addProperty(&_filled!"get", &_filled!"set", "filled", rectangleType, grBool);
     lib.addProperty(&_thickness!"get", &_thickness!"set", "thickness", rectangleType, grFloat);
 }
 
 private void _ctor(GrCall call) {
-    call.setNative(new Rectangle(call.getFloat(0), call.getFloat(1),
+    call.setNative(new Rectangle(Vec2f(call.getFloat(0), call.getFloat(1)),
             call.getBool(2), call.getFloat(3)));
 }
 
-private void _setSize(GrCall call) {
-    Rectangle circle = call.getNative!Rectangle(0);
-
-    circle.sizeX = call.getFloat(1);
-    circle.sizeY = call.getFloat(2);
-}
-
-private void _sizeX(string op)(GrCall call) {
-    Rectangle circle = call.getNative!Rectangle(0);
+private void _size(string op)(GrCall call) {
+    Rectangle rectangle = call.getNative!Rectangle(0);
 
     static if (op == "set") {
-        circle.sizeX = call.getFloat(1);
+        rectangle.size = call.getNative!SVec2f(1);
     }
-    call.setFloat(circle.sizeX);
-}
-
-private void _sizeY(string op)(GrCall call) {
-    Rectangle circle = call.getNative!Rectangle(0);
-
-    static if (op == "set") {
-        circle.sizeY = call.getFloat(1);
-    }
-    call.setFloat(circle.sizeY);
+    call.setNative(svec2(rectangle.size));
 }
 
 private void _filled(string op)(GrCall call) {

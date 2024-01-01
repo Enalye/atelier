@@ -115,13 +115,13 @@ final class RippleEffect {
         foreach (ripple; _ripples) {
             _circle.radius = ripple.radius;
             _circle.alpha = ripple.alpha;
-            _circle.draw(ripple.x, ripple.y);
+            _circle.draw(Vec2f(ripple.x, ripple.y));
         }
 
         if (_isPressed) {
             _circle.radius = _pressedRipple.radius;
             _circle.alpha = _pressedRipple.alpha;
-            _circle.draw(_pressedRipple.x, _pressedRipple.y);
+            _circle.draw(Vec2f(_pressedRipple.x, _pressedRipple.y));
         }
     }
 }
@@ -138,13 +138,11 @@ final class ButtonFx {
 
     this(UIElement ui) {
         _ui = ui;
-        _background = new RoundedRectangle(_ui.sizeX, _ui.sizeY, 8f, true, 0f);
-        _background.anchorX = 0f;
-        _background.anchorY = 0f;
+        _background = new RoundedRectangle(Vec2f(_ui.sizeX, _ui.sizeY), 8f, true, 0f);
+        _background.anchor = Vec2f.zero;
 
-        _mask = new RoundedRectangle(_ui.sizeX, _ui.sizeY, 8f, true, 0f);
-        _mask.anchorX = 0f;
-        _mask.anchorY = 0f;
+        _mask = new RoundedRectangle(Vec2f(_ui.sizeX, _ui.sizeY), 8f, true, 0f);
+        _mask.anchor = Vec2f.zero;
         _mask.blend = Blend.mask;
 
         _rippleEffect = new RippleEffect(_ui.sizeX);
@@ -177,7 +175,7 @@ final class ButtonFx {
         _background.blend = Blend.alpha;
         _background.color = color;
         _background.alpha = _alpha;
-        _background.draw(0f, 0f);
+        _background.draw(Vec2f.zero);
 
         Dahu.renderer.pushCanvas(cast(int) _ui.sizeX, cast(int) _ui.sizeY);
 
@@ -186,9 +184,9 @@ final class ButtonFx {
         _background.blend = Blend.mask;
         _background.color = Color.white;
         _background.alpha = 1f;
-        _background.draw(0f, 0f);
+        _background.draw(Vec2f.zero);
 
-        Dahu.renderer.popCanvas(0f, 0f, _ui.sizeX, _ui.sizeY, 0f, 0f, 0f, color, 1f);
+        Dahu.renderer.popCanvas(Vec2f.zero, Vec2f(_ui.sizeX, _ui.sizeY), 0f, Vec2f.zero, color, 1f);
     }
 
     void onPress(bool pressed) {
@@ -217,8 +215,8 @@ final class FilledButton : UIElement {
 
         _fx = new ButtonFx(this);
 
-        _background = new RoundedRectangle(sizeX, sizeY, 8f, true, 0f);
-        _drawables ~= _background;
+        _background = new RoundedRectangle(Vec2f(sizeX, sizeY), 8f, true, 0f);
+        _images ~= _background;
 
         enabled = true;
     }
@@ -270,8 +268,8 @@ final class OutlinedButton : UIElement {
 
         _fx = new ButtonFx(this);
 
-        _background = new RoundedRectangle(sizeX, sizeY, 8f, false, 1f);
-        _drawables ~= _background;
+        _background = new RoundedRectangle(Vec2f(sizeX, sizeY), 8f, false, 1f);
+        _images ~= _background;
 
         enabled = true;
     }

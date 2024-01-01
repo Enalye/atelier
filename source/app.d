@@ -3,10 +3,10 @@
  * License: Zlib
  * Authors: Enalye
  */
-import dahu.cli;
+import atelier.cli;
 
 void main(string[] args) {
-    version (DahuDev) {
+    version (AtelierDev) {
         args = args[0] ~ ["run", "test"];
     }
 

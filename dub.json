@@ -5,9 +5,9 @@
     "copyright": "Copyright © 2023, Enalye",
     "description": "Framework 2D pour Grimoire",
     "license": "Zlib",
-    "name": "dahu",
+    "name": "atelier",
     "targetType": "executable",
-    "targetName": "dahu",
+    "targetName": "atelier",
     "targetPath": "bin",
     "workingDirectory": ".",
     "dependencies": {
@@ -51,29 +51,29 @@
     ],
     "configurations": [
         {
-            "name": "dahu_debug",
+            "name": "atelier_debug",
             "targetPath": "bin",
             "dflags": ["-gf"],
             "versions": [
-                "DahuDev",
-                "DahuDebug"
+                "AtelierDev",
+                "AtelierDebug"
             ]
         },
         {
-            "name": "dahu_dev",
+            "name": "atelier_dev",
             "versions": [
-                "DahuDev"
+                "AtelierDev"
             ],
             "targetPath": "export",
-            "targetName": "dahu"
+            "targetName": "atelier"
         },
         {
-            "name": "dahu_rt",
+            "name": "atelier_rt",
             "versions": [
-                "DahuRT"
+                "AtelierRT"
             ],
             "targetPath": "export",
-            "targetName": "dahurt"
+            "targetName": "atelierrt"
         }
     ]
 }

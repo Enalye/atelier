@@ -1,4 +1,4 @@
-Dahu
+Atelier
 Copyright (c) 2023 Enalye
 
 This software is provided 'as-is', without any express or implied warranty.

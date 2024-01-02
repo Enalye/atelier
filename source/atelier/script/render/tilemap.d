@@ -22,7 +22,6 @@ void loadLibRender_tilemap(GrLibDefinition library) {
     library.addConstructor(&_ctor, tilemapType, [tilesetType, grInt, grInt]);
 
     library.addProperty(&_size!"get", &_size!"set", "size", tilemapType, vec2fType);
-    library.addProperty(&_frameTime!"get", &_frameTime!"set", "frameTime", tilemapType, grInt);
 
     library.addFunction(&_setTile, "setTile", [tilemapType, grInt, grInt, grInt]);
 }
@@ -38,15 +37,6 @@ private void _size(string op)(GrCall call) {
         tilemap.size = call.getNative!SVec2f(1);
     }
     call.setNative(svec2(tilemap.size));
-}
-
-private void _frameTime(string op)(GrCall call) {
-    Tilemap tilemap = call.getNative!Tilemap(0);
-
-    static if (op == "set") {
-        tilemap.frameTime = call.getInt(1);
-    }
-    call.setInt(tilemap.frameTime);
 }
 
 private void _setTile(GrCall call) {

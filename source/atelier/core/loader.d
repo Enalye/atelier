@@ -75,6 +75,8 @@ private void _compileImage(string path, Json json, OutStream stream) {
             stream.write!int(elementNode.getInt("columns", 1));
             stream.write!int(elementNode.getInt("lines", 1));
             stream.write!int(elementNode.getInt("maxCount", 0));
+            stream.write!(int[])(elementNode.getInts("tileFrames", []));
+            stream.write!int(elementNode.getInt("frameTime", 1));
             break;
         default:
             break;
@@ -149,9 +151,17 @@ private void _loadImage(InStream stream) {
             int columns = stream.read!int();
             int lines = stream.read!int();
             int maxCount = stream.read!int();
+            int[] tileFrames = stream.read!(int[])();
+            int frameTime = stream.read!int();
 
             Atelier.res.store(name, {
                 Tileset tileset = new Tileset(texture, clip, columns, lines, maxCount);
+                tileset.frameTime = frameTime;
+
+                for (int tileId; tileId < tileFrames.length; tileId += 2) {
+                    tileset.setTileFrame(cast(short) tileFrames[tileId],
+                        cast(short) tileFrames[tileId + 1]);
+                }
                 return tileset;
             });
             break;

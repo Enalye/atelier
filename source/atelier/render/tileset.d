@@ -22,11 +22,14 @@ import atelier.render.util;
 final class Tileset : Resource!Tileset {
     private {
         Texture _texture;
+        short[short] _tileFrames;
     }
 
     Vec4i clip;
     int columns, lines, maxCount;
     Vec2i margin;
+
+    int frameTime;
 
     Color color = Color.white;
     float alpha = 1f;
@@ -58,10 +61,21 @@ final class Tileset : Resource!Tileset {
         columns = tileset.columns;
         lines = tileset.lines;
         maxCount = tileset.maxCount;
+        frameTime = tileset.frameTime;
+        _tileFrames = tileset._tileFrames;
         margin = tileset.margin;
         color = tileset.color;
         alpha = tileset.alpha;
         blend = tileset.blend;
+    }
+
+    void setTileFrame(short previousTile, short nextTile) {
+        _tileFrames[previousTile] = nextTile;
+    }
+
+    short getTileFrame(short previousTile) {
+        auto p = previousTile in _tileFrames;
+        return p ? *p : previousTile;
     }
 
     /// Récupère une image correspondant à la tuile

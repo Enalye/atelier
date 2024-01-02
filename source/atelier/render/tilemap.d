@@ -21,8 +21,6 @@ final class Tilemap : Image {
 
     Vec2f size = Vec2f.zero;
 
-    int frameTime;
-
     this(Tileset tileset, int width, int height) {
         _tileset = tileset;
         _width = width;
@@ -43,7 +41,6 @@ final class Tilemap : Image {
         _height = tilemap._height;
         _tiles = tilemap._tiles;
         size = tilemap.size;
-        frameTime = tilemap.frameTime;
     }
 
     void setTile(int x, int y, int tile) {
@@ -65,14 +62,11 @@ final class Tilemap : Image {
 
     override void update() {
         _currentTick++;
-        if (_currentTick >= frameTime) {
+        if (_currentTick >= _tileset.frameTime) {
             _currentTick = 0;
-            /*foreach (ref tile; _tiles) {
-                auto p = tile in _tileset.animatedTiles;
-                if (p) {
-                    tile = *p;
-                }
-            }*/
+            foreach (ref tile; _tiles) {
+                tile = _tileset.getTileFrame(tile);
+            }
         }
     }
 

@@ -71,7 +71,7 @@ final class Entity {
         }
 
         foreach (idx, image; _images) {
-            //image.update();
+            image.update();
             if (!image.isAlive) {
                 _images.mark(idx);
                 isImagesDirty = true;

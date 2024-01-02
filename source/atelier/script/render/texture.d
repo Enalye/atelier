@@ -12,7 +12,7 @@ import atelier.core;
 import atelier.input;
 import atelier.render;
 
-void loadLibRender_texture(GrLibDefinition lib) {
-    GrType textureType = lib.addNative("Texture");
+void loadLibRender_texture(GrLibDefinition library) {
+    GrType textureType = library.addNative("Texture");
     
 }

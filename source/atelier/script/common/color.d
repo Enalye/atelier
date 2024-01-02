@@ -11,13 +11,13 @@ import atelier.common;
 
 import atelier.script.util;
 
-package void loadLibCommon_color(GrLibDefinition lib) {
-    GrType colorType = lib.addNative("Color");
+package void loadLibCommon_color(GrLibDefinition library) {
+    GrType colorType = library.addNative("Color");
 
-    lib.addConstructor(&_ctor, colorType, [grFloat, grFloat, grFloat]);
+    library.addConstructor(&_ctor, colorType, [grFloat, grFloat, grFloat]);
 
     static foreach (field; ["r", "g", "b"]) {
-        lib.addProperty(&_property!(field, "get"), &_property!(field,
+        library.addProperty(&_property!(field, "get"), &_property!(field,
                 "set"), field, colorType, grFloat);
     }
 
@@ -26,7 +26,7 @@ package void loadLibCommon_color(GrLibDefinition lib) {
             "silver", "gray", "grey", "maroon", "olive", "green", "purple",
             "teal", "pink", "orange"
         ]) {
-        lib.addStatic(&_color!c, colorType, c, [], [colorType]);
+        library.addStatic(&_color!c, colorType, c, [], [colorType]);
     }
 }
 

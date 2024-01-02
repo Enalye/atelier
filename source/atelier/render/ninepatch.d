@@ -136,13 +136,11 @@ final class NinePatch : Image, Resource!NinePatch {
     }
 
     /// Ctor
-    this(string name, Vec4i clip_, int top_, int bottom_, int left_, int right_) {
-        Texture tex = Atelier.res.get!Texture(name);
-
-        _surface = SDL_ConvertSurfaceFormat(tex.surface, SDL_PIXELFORMAT_RGBA8888, 0);
+    this(Texture texture, Vec4i clip_, int top_, int bottom_, int left_, int right_) {
+        _surface = SDL_ConvertSurfaceFormat(texture.surface, SDL_PIXELFORMAT_RGBA8888, 0);
         enforce(_surface, "can't format surface");
-        _surfaceWidth = tex.width;
-        _surfaceHeight = tex.height;
+        _surfaceWidth = texture.width;
+        _surfaceHeight = texture.height;
         _ownSurface = true;
 
         _clip = clip_;

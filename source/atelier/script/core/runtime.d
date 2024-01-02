@@ -9,12 +9,12 @@ import grimoire;
 
 import atelier.core;
 
-package void loadLibCore_runtime(GrLibDefinition lib) {
-    //GrType appType = lib.addNative("Atelier");
+package void loadLibCore_runtime(GrLibDefinition library) {
+    //GrType appType = library.addNative("Atelier");
     //GrType uiType = grGetNativeType("UI");
 
-    //lib.addVariable("app", appType);
-    //lib.addProperty(&_ui, null, "ui", appType, uiType);
+    //library.addVariable("app", appType);
+    //library.addProperty(&_ui, null, "ui", appType, uiType);
 }
 /*
 private void _ui(GrCall call) {

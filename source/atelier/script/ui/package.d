@@ -21,10 +21,10 @@ package(atelier.script) GrLibLoader[] getLibLoaders_ui() {
 
 import atelier.ui;
 
-private void loadLibUI(GrLibDefinition lib) {
-    GrType uiType = lib.addNative("UIManager");
+private void loadLibUI(GrLibDefinition library) {
+    GrType uiType = library.addNative("UIManager");
 
-    lib.addProperty(&_isDebug!"get", &_isDebug!"set", "isDebug", uiType, grBool);
+    library.addProperty(&_isDebug!"get", &_isDebug!"set", "isDebug", uiType, grBool);
 }
 
 private void _isDebug(string op)(GrCall call) {

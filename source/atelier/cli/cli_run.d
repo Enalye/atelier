@@ -67,7 +67,6 @@ void cliRun(Cli.Result cli) {
 
                 archives ~= resFolder;
             }
-            writeln(sourceFile, ", ", archives);
 
             Json windowNode = configNode.getObject(Atelier_Project_Window_Node);
             string windowTitle = windowNode.getString(Atelier_Project_Window_Title_Node, configName);

@@ -11,17 +11,17 @@ import atelier.common;
 import atelier.core;
 import atelier.ui;
 
-package void loadLibUI_button(GrLibDefinition lib) {
-    GrType buttonType = lib.addNative("Button", [], "UIElement");
-    GrType filledButtonType = lib.addNative("FilledButton", [], "UIElement");
-    GrType outlinedButtonType = lib.addNative("OutlinedButton", [], "Button");
-    GrType textButtonType = lib.addNative("TextButton", [], "Button");
+package void loadLibUI_button(GrLibDefinition library) {
+    GrType buttonType = library.addNative("Button", [], "UIElement");
+    GrType filledButtonType = library.addNative("FilledButton", [], "UIElement");
+    GrType outlinedButtonType = library.addNative("OutlinedButton", [], "Button");
+    GrType textButtonType = library.addNative("TextButton", [], "Button");
 
-    //GrType buttonStyleType = lib.addEnum("ButtonStyle", grNativeEnum!(Button.Style));
+    //GrType buttonStyleType = library.addEnum("ButtonStyle", grNativeEnum!(Button.Style));
 
-    lib.addConstructor(&_filledBtn_ctor, filledButtonType, [grString]);
-    lib.addConstructor(&_outlinedBtn_ctor, outlinedButtonType, [grString]);
-    lib.addConstructor(&_textBtn_ctor, textButtonType, [grString]);
+    library.addConstructor(&_filledBtn_ctor, filledButtonType, [grString]);
+    library.addConstructor(&_outlinedBtn_ctor, outlinedButtonType, [grString]);
+    library.addConstructor(&_textBtn_ctor, textButtonType, [grString]);
 }
 
 private void _filledBtn_ctor(GrCall call) {

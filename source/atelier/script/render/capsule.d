@@ -11,16 +11,16 @@ import atelier.common;
 import atelier.render;
 import atelier.script.util;
 
-package void loadLibRender_capsule(GrLibDefinition lib) {
-    GrType capsuleType = lib.addNative("Capsule", [], "Image");
+package void loadLibRender_capsule(GrLibDefinition library) {
+    GrType capsuleType = library.addNative("Capsule", [], "Image");
 
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
 
-    lib.addConstructor(&_ctor, capsuleType, [grFloat, grFloat, grBool, grFloat]);
+    library.addConstructor(&_ctor, capsuleType, [grFloat, grFloat, grBool, grFloat]);
 
-    lib.addProperty(&_size!"get", &_size!"set", "size", capsuleType, vec2fType);
-    lib.addProperty(&_filled!"get", &_filled!"set", "filled", capsuleType, grBool);
-    lib.addProperty(&_thickness!"get", &_thickness!"set", "thickness", capsuleType, grFloat);
+    library.addProperty(&_size!"get", &_size!"set", "size", capsuleType, vec2fType);
+    library.addProperty(&_filled!"get", &_filled!"set", "filled", capsuleType, grBool);
+    library.addProperty(&_thickness!"get", &_thickness!"set", "thickness", capsuleType, grFloat);
 }
 
 private void _ctor(GrCall call) {

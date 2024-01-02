@@ -16,54 +16,56 @@ import atelier.core;
 import atelier.render;
 import atelier.ui;
 
-package void loadLibUI_element(GrLibDefinition lib) {
-    GrType alignXType = lib.addEnum("AlignX", ["left", "center", "right"]);
-    GrType alignYType = lib.addEnum("AlignY", ["top", "center", "bottom"]);
+package void loadLibUI_element(GrLibDefinition library) {
+    GrType alignXType = library.addEnum("AlignX", ["left", "center", "right"]);
+    GrType alignYType = library.addEnum("AlignY", ["top", "center", "bottom"]);
     GrType stateType = grGetNativeType("UIState");
 
-    GrType uiType = lib.addNative("UIElement");
+    GrType uiType = library.addNative("UIElement");
 
     GrType imageType = grGetNativeType("Image");
 
-    lib.addFunction(&_setPos, "setPos", [uiType, grFloat, grFloat]);
-    lib.addProperty(&_posX!"get", &_posX!"set", "posX", uiType, grFloat);
-    lib.addProperty(&_posY!"get", &_posY!"set", "posY", uiType, grFloat);
+    library.addFunction(&_setPos, "setPos", [uiType, grFloat, grFloat]);
+    library.addProperty(&_posX!"get", &_posX!"set", "posX", uiType, grFloat);
+    library.addProperty(&_posY!"get", &_posY!"set", "posY", uiType, grFloat);
 
-    lib.addFunction(&_setSize, "setSize", [uiType, grFloat, grFloat]);
-    lib.addProperty(&_sizeX!"get", &_sizeX!"set", "sizeX", uiType, grFloat);
-    lib.addProperty(&_sizeY!"get", &_sizeY!"set", "sizeY", uiType, grFloat);
+    library.addFunction(&_setSize, "setSize", [uiType, grFloat, grFloat]);
+    library.addProperty(&_sizeX!"get", &_sizeX!"set", "sizeX", uiType, grFloat);
+    library.addProperty(&_sizeY!"get", &_sizeY!"set", "sizeY", uiType, grFloat);
 
-    lib.addFunction(&_setScale, "setScale", [uiType, grFloat, grFloat]);
-    lib.addProperty(&_scaleX!"get", &_scaleX!"set", "scaleX", uiType, grFloat);
-    lib.addProperty(&_scaleY!"get", &_scaleY!"set", "scaleY", uiType, grFloat);
+    library.addFunction(&_setScale, "setScale", [uiType, grFloat, grFloat]);
+    library.addProperty(&_scaleX!"get", &_scaleX!"set", "scaleX", uiType, grFloat);
+    library.addProperty(&_scaleY!"get", &_scaleY!"set", "scaleY", uiType, grFloat);
 
-    lib.addFunction(&_setPivot, "setPivot", [uiType, grFloat, grFloat]);
-    lib.addProperty(&_pivotX!"get", &_pivotX!"set", "pivotX", uiType, grFloat);
-    lib.addProperty(&_pivotY!"get", &_pivotY!"set", "pivotY", uiType, grFloat);
+    library.addFunction(&_setPivot, "setPivot", [uiType, grFloat, grFloat]);
+    library.addProperty(&_pivotX!"get", &_pivotX!"set", "pivotX", uiType, grFloat);
+    library.addProperty(&_pivotY!"get", &_pivotY!"set", "pivotY", uiType, grFloat);
 
-    lib.addProperty(&_angle!"get", &_angle!"set", "angle", uiType, grDouble);
+    library.addProperty(&_angle!"get", &_angle!"set", "angle", uiType, grDouble);
 
-    lib.addProperty(&_alpha!"get", &_alpha!"set", "alpha", uiType, grFloat);
+    library.addProperty(&_alpha!"get", &_alpha!"set", "alpha", uiType, grFloat);
 
-    lib.addFunction(&_setAlign, "setAlign", [uiType, alignXType, alignYType]);
-    lib.addProperty(&_alignX!"get", &_alignX!"set", "alignX", uiType, alignXType);
-    lib.addProperty(&_alignY!"get", &_alignY!"set", "alignY", uiType, alignYType);
+    library.addFunction(&_setAlign, "setAlign", [uiType, alignXType, alignYType]);
+    library.addProperty(&_alignX!"get", &_alignX!"set", "alignX", uiType, alignXType);
+    library.addProperty(&_alignY!"get", &_alignY!"set", "alignY", uiType, alignYType);
 
-    lib.addProperty(&_hovered, null, "hovered", uiType, grBool);
-    lib.addProperty(&_focused, null, "focused", uiType, grBool);
-    lib.addProperty(&_pressed, null, "pressed", uiType, grBool);
+    library.addProperty(&_hovered, null, "hovered", uiType, grBool);
+    library.addProperty(&_focused, null, "focused", uiType, grBool);
+    library.addProperty(&_pressed, null, "pressed", uiType, grBool);
 
-    lib.addProperty(&_onPress!"get", &_onPress!"set", "onSubmit",
+    library.addProperty(&_onPress!"get", &_onPress!"set", "onSubmit",
         uiType, grOptional(grEvent()));
 
-    lib.addFunction(&_addState, "addState", [uiType, stateType]);
-    lib.addFunction(&_setState, "setState", [uiType, grString]);
-    lib.addFunction(&_runState, "runState", [uiType, grString]);
+    library.addFunction(&_addState, "addState", [uiType, stateType]);
+    library.addFunction(&_setState, "setState", [uiType, grString]);
+    library.addFunction(&_runState, "runState", [uiType, grString]);
 
-    lib.addFunction(&_addImage, "addImage", [uiType, imageType]);
+    library.addFunction(&_addImage, "addImage", [uiType, imageType]);
 
-    lib.addFunction(&_append_root, "appendUI", [uiType]);
-    lib.addFunction(&_append_child, "append", [uiType, uiType]);
+    library.addFunction(&_addUI, "addUI", [uiType]);
+    library.addFunction(&_addChild, "addChild", [uiType, uiType]);
+
+    library.addFunction(&_remove, "remove", [uiType]);
 }
 
 private void _setPos(GrCall call) {
@@ -297,15 +299,20 @@ private void _addImage(GrCall call) {
     ui._images ~= image;
 }
 
-private void _append_root(GrCall call) {
+private void _addUI(GrCall call) {
     UIElement ui = call.getNative!UIElement(0);
 
     Atelier.ui.appendRoot(ui);
 }
 
-private void _append_child(GrCall call) {
+private void _addChild(GrCall call) {
     UIElement uiParent = call.getNative!UIElement(0);
     UIElement uiChild = call.getNative!UIElement(1);
 
     uiParent._children ~= uiChild;
+}
+
+private void _remove(GrCall call) {
+    UIElement ui = call.getNative!UIElement(0);
+    ui.alive = false;
 }

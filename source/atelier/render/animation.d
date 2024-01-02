@@ -55,8 +55,8 @@ final class Animation : Image, Resource!Animation {
     }
 
     /// Ctor
-    this(string name, Vec4i clip_, uint columns_, uint lines_, uint maxCount_ = 0) {
-        _texture = Atelier.res.get!Texture(name);
+    this(Texture texture, Vec4i clip_, uint columns_, uint lines_, uint maxCount_ = 0) {
+        _texture = texture;
         clip = clip_;
         size = to!Vec2f(clip_.zw);
         columns = columns_;

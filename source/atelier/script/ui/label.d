@@ -11,11 +11,11 @@ import atelier.common;
 import atelier.core;
 import atelier.ui;
 
-package void loadLibUI_label(GrLibDefinition lib) {
-    GrType labelType = lib.addNative("Label", [], "UIElement");
+package void loadLibUI_label(GrLibDefinition library) {
+    GrType labelType = library.addNative("Label", [], "UIElement");
 
-    lib.addConstructor(&_ctor, labelType, [grString]);
-    lib.addFunction(&_text, "text", [labelType, grString]);
+    library.addConstructor(&_ctor, labelType, [grString]);
+    library.addFunction(&_text, "text", [labelType, grString]);
 }
 
 private void _ctor(GrCall call) {

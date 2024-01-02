@@ -11,22 +11,22 @@ import atelier.common;
 
 import atelier.script.util;
 
-package void loadLibCommon_vec(GrLibDefinition lib) {
+package void loadLibCommon_vec(GrLibDefinition library) {
     static foreach (dimension; [2, 3, 4]) {
-        _loadVec!dimension(lib);
+        _loadVec!dimension(library);
     }
 }
 
-private void _loadVec(int dimension)(GrLibDefinition lib) {
-    mixin("GrType vecType = lib.addNative(\"Vec", dimension, "\", [\"T\"]);");
+private void _loadVec(int dimension)(GrLibDefinition library) {
+    mixin("GrType vecType = library.addNative(\"Vec", dimension, "\", [\"T\"]);");
 
-    mixin("GrType vecFloatType = lib.addAlias(\"Vec", dimension,
+    mixin("GrType vecFloatType = library.addAlias(\"Vec", dimension,
         "f\", grGetNativeType(\"Vec", dimension, "\", [grFloat]));");
-    mixin("GrType vecDoubleType = lib.addAlias(\"Vec", dimension,
+    mixin("GrType vecDoubleType = library.addAlias(\"Vec", dimension,
         "d\", grGetNativeType(\"Vec", dimension, "\", [grDouble]));");
-    mixin("GrType vecIntType = lib.addAlias(\"Vec", dimension,
+    mixin("GrType vecIntType = library.addAlias(\"Vec", dimension,
         "i\", grGetNativeType(\"Vec", dimension, "\", [grInt]));");
-    mixin("GrType vecUIntType = lib.addAlias(\"Vec", dimension,
+    mixin("GrType vecUIntType = library.addAlias(\"Vec", dimension,
         "u\", grGetNativeType(\"Vec", dimension, "\", [grUInt]));");
 
     static if (dimension == 4) {
@@ -45,21 +45,21 @@ private void _loadVec(int dimension)(GrLibDefinition lib) {
     static foreach (type; ["Float", "Double", "Int", "UInt"]) {
         // Constructeurs
         static if (dimension == 4) {
-            mixin("lib.addConstructor(&_ctor!(dimension, type, fields), vec", type,
+            mixin("library.addConstructor(&_ctor!(dimension, type, fields), vec", type,
                 "Type, [gr", type, ", gr", type, ", gr", type, ", gr", type, "]);");
         }
         else static if (dimension == 3) {
-            mixin("lib.addConstructor(&_ctor!(dimension, type, fields), vec",
+            mixin("library.addConstructor(&_ctor!(dimension, type, fields), vec",
                 type, "Type, [gr", type, ", gr", type, ", gr", type, "]);");
         }
         else static if (dimension == 2) {
-            mixin("lib.addConstructor(&_ctor!(dimension, type, fields), vec",
+            mixin("library.addConstructor(&_ctor!(dimension, type, fields), vec",
                 type, "Type, [gr", type, ", gr", type, "]);");
         }
 
         // Champs
         static foreach (field; fields) {
-            mixin("lib.addProperty(
+            mixin("library.addProperty(
                 &_property!(dimension, \"", field, "\", \"get\", type),
                 &_property!(dimension, \"", field, "\", \"set\", type),
                 \"", field, "\", vec", type, "Type, gr", type, ");");
@@ -67,36 +67,36 @@ private void _loadVec(int dimension)(GrLibDefinition lib) {
 
         // Opérateurs unaires
         static foreach (op; ["+", "-"]) {
-            mixin("lib.addOperator(&_unaryOp!(dimension, op, type), op, [vec",
+            mixin("library.addOperator(&_unaryOp!(dimension, op, type), op, [vec",
                 type, "Type], vec", type, "Type);");
         }
 
         // Opérateurs binaires
         static foreach (op; ["+", "-", "*", "/", "%"]) {
             // Vectoriels
-            mixin("lib.addOperator(&_binaryOp!(dimension, op, type), op, [vec",
+            mixin("library.addOperator(&_binaryOp!(dimension, op, type), op, [vec",
                 type, "Type, vec", type, "Type], vec", type, "Type);");
 
             // Scalaires
-            mixin("lib.addOperator(&_scalarRightOp!(dimension, op, type), op, [vec",
+            mixin("library.addOperator(&_scalarRightOp!(dimension, op, type), op, [vec",
                 type, "Type, gr", type, "], vec", type, "Type);");
-            mixin("lib.addOperator(&_scalarLeftOp!(dimension, op, type), op, [gr",
+            mixin("library.addOperator(&_scalarLeftOp!(dimension, op, type), op, [gr",
                 type, ", vec", type, "Type], vec", type, "Type);");
         }
 
         // Angle
         /*static if (dimension == 2 || dimension == 3) {
-            mixin("lib.addFunction(&_angle!(dimension, type), \"angle\", [vec",
+            mixin("library.addFunction(&_angle!(dimension, type), \"angle\", [vec",
                 type, "Type, vec", type, "Type], [grFloat]);");
         }*/
 
         // Rotate
         static if (dimension == 2) {
-            /*mixin("lib.addFunction(&_rotate2!(type), \"rotate\", [vec",
+            /*mixin("library.addFunction(&_rotate2!(type), \"rotate\", [vec",
                 type, "Type, "Type, grFloat], [grFloat]);");*/
         }
         /*else static if (dimension == 3) {
-            mixin("lib.addFunction(&_rotate3!(type), \"rotate\", [vec",
+            mixin("library.addFunction(&_rotate3!(type), \"rotate\", [vec",
                 type, "Type, vec", type, "Type, grFloat], [vecFloatType]);");
         }*/
     }

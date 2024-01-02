@@ -7,8 +7,8 @@ module atelier.script.common.spline;
 
 import grimoire;
 
-package void loadLibCommon_spline(GrLibDefinition lib) {
-    lib.addEnum("Spline", [
+package void loadLibCommon_spline(GrLibDefinition library) {
+    library.addEnum("Spline", [
             "linear", "sineIn", "sineOut", "sineInOut", "quadIn", "quadOut",
             "quadInOut", "cubicIn", "cubicOut", "cubicInOut", "quartIn",
             "quartOut", "quartInOut", "quintIn", "quintOut", "quintInOut",

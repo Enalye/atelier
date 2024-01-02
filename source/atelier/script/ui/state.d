@@ -15,35 +15,35 @@ import atelier.common;
 import atelier.core;
 import atelier.ui;
 
-package void loadLibUI_state(GrLibDefinition lib) {
+package void loadLibUI_state(GrLibDefinition library) {
     GrType splineType = grGetEnumType("Spline");
-    GrType stateType = lib.addNative("UIState");
+    GrType stateType = library.addNative("UIState");
 
-    lib.addConstructor(&_ui_state_new, stateType, [grString]);
+    library.addConstructor(&_ui_state_new, stateType, [grString]);
 
-    lib.addFunction(&_ui_state_setOffset, "setOffset", [
+    library.addFunction(&_ui_state_setOffset, "setOffset", [
             stateType, grFloat, grFloat
         ]);
-    lib.addProperty(&_ui_state_offsetX!"get", &_ui_state_offsetX!"set",
+    library.addProperty(&_ui_state_offsetX!"get", &_ui_state_offsetX!"set",
         "offsetX", stateType, grFloat);
-    lib.addProperty(&_ui_state_offsetY!"get", &_ui_state_offsetY!"set",
+    library.addProperty(&_ui_state_offsetY!"get", &_ui_state_offsetY!"set",
         "offsetY", stateType, grFloat);
 
-    lib.addFunction(&_ui_state_setScale, "setScale", [
+    library.addFunction(&_ui_state_setScale, "setScale", [
             stateType, grFloat, grFloat
         ]);
-    lib.addProperty(&_ui_state_scaleX!"get", &_ui_state_scaleX!"set",
+    library.addProperty(&_ui_state_scaleX!"get", &_ui_state_scaleX!"set",
         "scaleX", stateType, grFloat);
-    lib.addProperty(&_ui_state_scaleY!"get", &_ui_state_scaleY!"set",
+    library.addProperty(&_ui_state_scaleY!"get", &_ui_state_scaleY!"set",
         "scaleY", stateType, grFloat);
 
-    lib.addProperty(&_ui_state_angle!"get", &_ui_state_angle!"set",
+    library.addProperty(&_ui_state_angle!"get", &_ui_state_angle!"set",
         "angle", stateType, grDouble);
-    lib.addProperty(&_ui_state_alpha!"get", &_ui_state_alpha!"set",
+    library.addProperty(&_ui_state_alpha!"get", &_ui_state_alpha!"set",
         "alpha", stateType, grFloat);
 
-    lib.addProperty(&_ui_state_time!"get", &_ui_state_time!"set", "time", stateType, grInt);
-    lib.addProperty(&_ui_state_spline!"get", &_ui_state_spline!"set",
+    library.addProperty(&_ui_state_time!"get", &_ui_state_time!"set", "time", stateType, grInt);
+    library.addProperty(&_ui_state_spline!"get", &_ui_state_spline!"set",
         "spline", stateType, splineType);
 
 }

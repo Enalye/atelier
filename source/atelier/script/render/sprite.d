@@ -13,14 +13,14 @@ import atelier.input;
 import atelier.render;
 import atelier.script.util;
 
-void loadLibRender_sprite(GrLibDefinition lib) {
-    GrType spriteType = lib.addNative("Sprite", [], "Image");
+void loadLibRender_sprite(GrLibDefinition library) {
+    GrType spriteType = library.addNative("Sprite", [], "Image");
 
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
 
-    lib.addConstructor(&_sprite, spriteType, [grString]);
+    library.addConstructor(&_sprite, spriteType, [grString]);
 
-    lib.addProperty(&_size!"get", &_size!"set", "size", spriteType, vec2fType);
+    library.addProperty(&_size!"get", &_size!"set", "size", spriteType, vec2fType);
 }
 
 private void _sprite(GrCall call) {

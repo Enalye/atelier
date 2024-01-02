@@ -12,20 +12,30 @@ import atelier.render;
 
 import atelier.script.util;
 
-package void loadLibRender_image(GrLibDefinition lib) {
-    GrType imageType = lib.addNative("Image");
+package void loadLibRender_image(GrLibDefinition library) {
+    GrType imageType = library.addNative("Image");
     GrType colorType = grGetNativeType("Color");
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
     GrType vec4iType = grGetNativeType("Vec4", [grInt]);
 
-    lib.addProperty(&_anchor!"get", &_anchor!"set", "anchor", imageType, vec2fType);
-    lib.addProperty(&_pivot!"get", &_pivot!"set", "pivot", imageType, vec2fType);
-    lib.addProperty(&_angle!"get", &_angle!"set", "angle", imageType, grDouble);
-    lib.addProperty(&_color!"get", &_color!"set", "color", imageType, colorType);
-    lib.addProperty(&_alpha!"get", &_alpha!"set", "alpha", imageType, grFloat);
+    library.addProperty(&_position!"get", &_position!"set", "position", imageType, vec2fType);
+    library.addProperty(&_anchor!"get", &_anchor!"set", "anchor", imageType, vec2fType);
+    library.addProperty(&_pivot!"get", &_pivot!"set", "pivot", imageType, vec2fType);
+    library.addProperty(&_angle!"get", &_angle!"set", "angle", imageType, grDouble);
+    library.addProperty(&_color!"get", &_color!"set", "color", imageType, colorType);
+    library.addProperty(&_alpha!"get", &_alpha!"set", "alpha", imageType, grFloat);
 
-    lib.addFunction(&_fit, "fit", [imageType, grFloat, grFloat]);
-    lib.addFunction(&_contain, "contain", [imageType, grFloat, grFloat]);
+    library.addFunction(&_fit, "fit", [imageType, grFloat, grFloat]);
+    library.addFunction(&_contain, "contain", [imageType, grFloat, grFloat]);
+}
+
+private void _position(string op)(GrCall call) {
+    Image image = call.getNative!Image(0);
+
+    static if (op == "set") {
+        image.position = call.getNative!SVec2f(1);
+    }
+    call.setNative(svec2(image.position));
 }
 
 private void _anchor(string op)(GrCall call) {

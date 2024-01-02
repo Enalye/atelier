@@ -19,14 +19,18 @@ import atelier.render.texture;
 import atelier.render.util;
 
 /// Jeu de tuiles
-/*final class Tileset : ImageData, Resource!Tileset {
+final class Tileset : Resource!Tileset {
     private {
         Texture _texture;
     }
 
-    float sizeX = 0f, sizeY = 0f;
+    Vec4i clip;
     int columns, lines, maxCount;
-    int marginX, marginY;
+    Vec2i margin;
+
+    Color color = Color.white;
+    float alpha = 1f;
+    Blend blend = Blend.alpha;
 
     @property {
         pragma(inline) uint width() const {
@@ -42,8 +46,6 @@ import atelier.render.util;
     this(Texture texture, Vec4i clip_, uint columns_, uint lines_, uint maxCount_ = 0) {
         _texture = texture;
         clip = clip_;
-        sizeX = clip_.z;
-        sizeY = clip_.w;
         columns = columns_;
         lines = lines_;
         maxCount = maxCount_;
@@ -51,15 +53,15 @@ import atelier.render.util;
 
     /// Copie
     this(Tileset tileset) {
-        super(tileset);
         _texture = tileset._texture;
-        sizeX = tileset.sizeX;
-        sizeY = tileset.sizeY;
+        clip = tileset.clip;
         columns = tileset.columns;
         lines = tileset.lines;
         maxCount = tileset.maxCount;
-        marginX = tileset.marginX;
-        marginY = tileset.marginY;
+        margin = tileset.margin;
+        color = tileset.color;
+        alpha = tileset.alpha;
+        blend = tileset.blend;
     }
 
     /// Récupère une image correspondant à la tuile
@@ -75,22 +77,10 @@ import atelier.render.util;
             id = 0;
 
         Vec2i coord = Vec2i(id % columns, id / columns);
-        Vec4i imageClip = Vec4i(clip.x + coord.x * (clip.z + marginX),
-            clip.y + coord.y * (clip.w + marginY), clip.z, clip.w);
+        Vec4i imageClip = Vec4i(clip.x + coord.x * (clip.z + margin.x),
+            clip.y + coord.y * (clip.w + margin.y), clip.z, clip.w);
 
-        Sprite image = new Sprite(_texture);
-        image.clip = imageClip;
-        image.blend = blend;
-        image.color = color;
-        image.alpha = alpha;
-        image.anchorX = anchorX;
-        image.anchorY = anchorY;
-        image.pivotX = pivotX;
-        image.pivotY = pivotY;
-        image.angle = angle;
-        image.sizeX = sizeX;
-        image.sizeY = sizeY;
-        return image;
+        return new Sprite(_texture, imageClip);
     }
 
     /// Accès à la ressource
@@ -111,7 +101,7 @@ import atelier.render.util;
     }
 
     /// Dessine une tuile
-    void draw(int id, float x, float y) {
+    void draw(int id, Vec2f position, Vec2f size, float angle = 0f) {
         columns = max(columns, 1);
         lines = max(lines, 1);
         uint count = maxCount > 0 ? maxCount : columns * lines;
@@ -125,13 +115,12 @@ import atelier.render.util;
         Vec2i coord = Vec2i(id % columns, id / columns);
         enforce(coord.y <= lines, "tileset id out of bounds");
 
-        Vec4i currentClip = Vec4i(clip.x + coord.x * (clip.z + marginX),
-            clip.y + coord.y * (clip.w + marginY), clip.z, clip.w);
+        Vec4i currentClip = Vec4i(clip.x + coord.x * (clip.z + margin.x),
+            clip.y + coord.y * (clip.w + margin.y), clip.z, clip.w);
 
         _texture.color = color;
         _texture.blend = blend;
         _texture.alpha = alpha;
-        _texture.draw(x, y, sizeX, sizeY, currentClip, angle, 0f, 0f);
+        _texture.draw(position, size, currentClip, angle);
     }
 }
-*/

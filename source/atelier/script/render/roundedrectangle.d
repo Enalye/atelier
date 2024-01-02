@@ -11,19 +11,19 @@ import atelier.common;
 import atelier.render;
 import atelier.script.util;
 
-package void loadLibRender_roundedRectangle(GrLibDefinition lib) {
-    GrType rrectType = lib.addNative("RoundedRectangle", [], "Image");
+package void loadLibRender_roundedRectangle(GrLibDefinition library) {
+    GrType rrectType = library.addNative("RoundedRectangle", [], "Image");
 
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
 
-    lib.addConstructor(&_ctor, rrectType, [
+    library.addConstructor(&_ctor, rrectType, [
             grFloat, grFloat, grFloat, grBool, grFloat
         ]);
 
-    lib.addProperty(&_size!"get", &_size!"set", "size", rrectType, vec2fType);
-    lib.addProperty(&_radius!"get", &_radius!"set", "radius", rrectType, grFloat);
-    lib.addProperty(&_filled!"get", &_filled!"set", "filled", rrectType, grBool);
-    lib.addProperty(&_thickness!"get", &_thickness!"set", "thickness", rrectType, grFloat);
+    library.addProperty(&_size!"get", &_size!"set", "size", rrectType, vec2fType);
+    library.addProperty(&_radius!"get", &_radius!"set", "radius", rrectType, grFloat);
+    library.addProperty(&_filled!"get", &_filled!"set", "filled", rrectType, grBool);
+    library.addProperty(&_thickness!"get", &_thickness!"set", "thickness", rrectType, grFloat);
 }
 
 private void _ctor(GrCall call) {

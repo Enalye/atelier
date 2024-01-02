@@ -10,14 +10,14 @@ import grimoire;
 import atelier.common;
 import atelier.render;
 
-package void loadLibRender_circle(GrLibDefinition lib) {
-    GrType circleType = lib.addNative("Circle", [], "Image");
+package void loadLibRender_circle(GrLibDefinition library) {
+    GrType circleType = library.addNative("Circle", [], "Image");
 
-    lib.addConstructor(&_ctor, circleType, [grFloat, grBool, grFloat]);
+    library.addConstructor(&_ctor, circleType, [grFloat, grBool, grFloat]);
 
-    lib.addProperty(&_radius!"get", &_radius!"set", "radius", circleType, grFloat);
-    lib.addProperty(&_filled!"get", &_filled!"set", "filled", circleType, grBool);
-    lib.addProperty(&_thickness!"get", &_thickness!"set", "thickness", circleType, grFloat);
+    library.addProperty(&_radius!"get", &_radius!"set", "radius", circleType, grFloat);
+    library.addProperty(&_filled!"get", &_filled!"set", "filled", circleType, grBool);
+    library.addProperty(&_thickness!"get", &_thickness!"set", "thickness", circleType, grFloat);
 }
 
 private void _ctor(GrCall call) {

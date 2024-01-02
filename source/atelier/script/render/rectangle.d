@@ -11,18 +11,18 @@ import atelier.common;
 import atelier.render;
 import atelier.script.util;
 
-package void loadLibRender_rectangle(GrLibDefinition lib) {
-    GrType rectangleType = lib.addNative("Rectangle", [], "Image");
+package void loadLibRender_rectangle(GrLibDefinition library) {
+    GrType rectangleType = library.addNative("Rectangle", [], "Image");
 
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
 
-    lib.addConstructor(&_ctor, rectangleType, [
+    library.addConstructor(&_ctor, rectangleType, [
             grFloat, grFloat, grBool, grFloat
         ]);
 
-    lib.addProperty(&_size!"get", &_size!"set", "size", rectangleType, vec2fType);
-    lib.addProperty(&_filled!"get", &_filled!"set", "filled", rectangleType, grBool);
-    lib.addProperty(&_thickness!"get", &_thickness!"set", "thickness", rectangleType, grFloat);
+    library.addProperty(&_size!"get", &_size!"set", "size", rectangleType, vec2fType);
+    library.addProperty(&_filled!"get", &_filled!"set", "filled", rectangleType, grBool);
+    library.addProperty(&_thickness!"get", &_thickness!"set", "thickness", rectangleType, grFloat);
 }
 
 private void _ctor(GrCall call) {

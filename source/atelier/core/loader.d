@@ -47,7 +47,6 @@ private void _compileSprite(string path, Json json, OutStream stream) {
 
 private void _loadSprite(InStream stream) {
     string file = stream.read!string();
-    writeln("CHARGEMENT: ", file);
     Texture texture = new Texture(file);
 
     uint nbSprites = stream.read!uint();
@@ -70,9 +69,8 @@ private void _loadSprite(InStream stream) {
             clip.w = texture.height;
 
         Atelier.res.store(name, {
-            Sprite img = new Sprite(texture);
-            img.clip = clip;
-            return img;
+            Sprite sprite = new Sprite(texture, clip);
+            return sprite;
         });
     }
 }

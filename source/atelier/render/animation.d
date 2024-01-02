@@ -166,6 +166,6 @@ final class Animation : Image, Resource!Animation {
         _texture.color = color;
         _texture.blend = blend;
         _texture.alpha = alpha;
-        _texture.draw(origin + position, size, imageClip, angle, pivot, flipX, flipY);
+        _texture.draw(origin + (position - anchor * size), size, imageClip, angle, pivot, flipX, flipY);
     }
 }

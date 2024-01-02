@@ -56,7 +56,7 @@ void parseCli(string[] args) {
             displayHelp(args[1 .. $]);
             break;
         case "version":
-            writeln(DH_VERSION);
+            writeln(Atelier_Version_Display);
             break;
         case "init":
             initProject();

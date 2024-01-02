@@ -9,11 +9,9 @@ import std.stdio;
 
 import atelier.common;
 
-enum DH_Version = "0.1";
-
 void cliDefault(Cli.Result cli) {
     if (cli.hasOption("version")) {
-        writeln("Atelier version " ~ DH_Version);
+        writeln("Atelier version " ~ Atelier_Version_Display);
     } else if (cli.hasOption("help")) {
         if (cli.optionalParamCount() >= 1)
             writeln(cli.getHelp(cli.getOptionalParam(0)));
@@ -23,7 +21,7 @@ void cliDefault(Cli.Result cli) {
 }
 
 void cliVersion(Cli.Result cli) {
-    writeln("Atelier version " ~ DH_Version);
+    writeln("Atelier version " ~ Atelier_Version_Display);
 }
 
 void cliHelp(Cli.Result cli) {

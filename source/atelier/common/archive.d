@@ -62,12 +62,14 @@ final class Archive : IArchive {
                         Directory subDir = new Directory(entryPath, entryName);
                         subDir.pack(entry.name);
                         _dirs ~= subDir;
-                    } else if (entry.isFile) {
+                    }
+                    else if (entry.isFile) {
                         File file = new File(entryPath, entryName);
                         file.pack(entry.name);
                         _files ~= file;
                     }
-                } catch (Exception e) {
+                }
+                catch (Exception e) {
                     writeln("Erreur d’archivage: ", entry.name, " - ", e.msg);
                 }
             }
@@ -215,6 +217,10 @@ final class Archive : IArchive {
 
         private void save(OutStream stream) {
             stream.write!(ubyte[])(_data);
+        }
+
+        void setRoot(string dir) {
+            _path = dir;
         }
     }
 

@@ -216,6 +216,7 @@ final class FilledButton : UIElement {
         _fx = new ButtonFx(this);
 
         _background = new RoundedRectangle(Vec2f(sizeX, sizeY), 8f, true, 0f);
+        _background.anchor = Vec2f.zero;
         _images ~= _background;
 
         enabled = true;
@@ -269,6 +270,7 @@ final class OutlinedButton : UIElement {
         _fx = new ButtonFx(this);
 
         _background = new RoundedRectangle(Vec2f(sizeX, sizeY), 8f, false, 1f);
+        _background.anchor = Vec2f.zero;
         _images ~= _background;
 
         enabled = true;

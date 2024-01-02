@@ -162,7 +162,7 @@ final class Rectangle : Image {
         _cache.color = color;
         _cache.blend = blend;
         _cache.alpha = alpha;
-        _cache.draw(origin + position, _size, Vec4i(0, 0, _cache.width, _cache.height),
+        _cache.draw(origin + (position - anchor * size), _size, Vec4i(0, 0, _cache.width, _cache.height),
             angle, pivot, flipX, flipY);
     }
 }

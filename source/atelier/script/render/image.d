@@ -18,6 +18,7 @@ package void loadLibRender_image(GrLibDefinition lib) {
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
     GrType vec4iType = grGetNativeType("Vec4", [grInt]);
 
+    lib.addProperty(&_anchor!"get", &_anchor!"set", "anchor", imageType, vec2fType);
     lib.addProperty(&_pivot!"get", &_pivot!"set", "pivot", imageType, vec2fType);
     lib.addProperty(&_angle!"get", &_angle!"set", "angle", imageType, grDouble);
     lib.addProperty(&_color!"get", &_color!"set", "color", imageType, colorType);
@@ -25,6 +26,15 @@ package void loadLibRender_image(GrLibDefinition lib) {
 
     lib.addFunction(&_fit, "fit", [imageType, grFloat, grFloat]);
     lib.addFunction(&_contain, "contain", [imageType, grFloat, grFloat]);
+}
+
+private void _anchor(string op)(GrCall call) {
+    Image image = call.getNative!Image(0);
+
+    static if (op == "set") {
+        image.anchor = call.getNative!SVec2f(1);
+    }
+    call.setNative(svec2(image.anchor));
 }
 
 private void _pivot(string op)(GrCall call) {

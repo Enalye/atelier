@@ -84,7 +84,7 @@ void cliRun(Cli.Result cli) {
 
             GrLibrary[] libraries = [grLoadStdLibrary(), loadLibrary()];
 
-            GrCompiler compiler = new GrCompiler;
+            GrCompiler compiler = new GrCompiler(Atelier_Version_ID);
             foreach (library; libraries) {
                 compiler.addLibrary(library);
             }

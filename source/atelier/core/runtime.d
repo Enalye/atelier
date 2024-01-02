@@ -204,9 +204,11 @@ final class Atelier {
             const string ext = extension(file.name);
             switch (ext) {
             case Atelier_Resource_Extension:
+                file.setRoot(path);
                 _resourceFiles ~= file;
                 break;
             case Atelier_Resource_Compiled_Extension:
+                file.setRoot(path);
                 _compiledResourceFiles ~= file;
                 break;
             default:

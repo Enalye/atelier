@@ -6,7 +6,7 @@
 import atelier.cli;
 
 void main(string[] args) {
-    version (AtelierDev) {
+    version (AtelierDebug) {
         args = args[0] ~ ["run", "test"];
     }
 

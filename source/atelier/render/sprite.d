@@ -32,13 +32,13 @@ final class Sprite : Image, Resource!Sprite {
     }
 
     this(Texture texture) {
-        this(texture, Vec4i(0, 0, _texture.width, _texture.height));
+        this(texture, Vec4i(0, 0, texture.width, texture.height));
     }
 
     this(Texture texture, Vec4i clip_) {
         _texture = texture;
         clip = clip_;
-        size = Vec2f(_texture.width, _texture.height);
+        size = cast(Vec2f) clip_.zw;
     }
 
     this(Sprite sprite) {
@@ -69,6 +69,6 @@ final class Sprite : Image, Resource!Sprite {
         _texture.color = color;
         _texture.blend = blend;
         _texture.alpha = alpha;
-        _texture.draw(origin + position, size, clip, angle, pivot, flipX, flipY);
+        _texture.draw(origin + (position - anchor * size), size, clip, angle, pivot, flipX, flipY);
     }
 }

@@ -36,20 +36,20 @@ final class WritableTexture : ImageData {
         }
 
         /// Width in texels.
-        uint width() const {
+        pragma(inline) override uint width() const {
             return _width;
         }
         /// Height in texels.
-        uint height() const {
+        pragma(inline) override uint height() const {
             return _height;
         }
 
         /// Color added to the canvas.
-        Color color() const {
+        override Color color() const {
             return _color;
         }
         /// Ditto
-        Color color(Color color_) {
+        override Color color(Color color_) {
             _color = color_;
             auto sdlColor = _color.toSDL();
             SDL_SetTextureColorMod(_texture, sdlColor.r, sdlColor.g, sdlColor.b);
@@ -57,22 +57,22 @@ final class WritableTexture : ImageData {
         }
 
         /// Alpha
-        float alpha() const {
+        override float alpha() const {
             return _alpha;
         }
         /// Ditto
-        float alpha(float alpha_) {
+        override float alpha(float alpha_) {
             _alpha = alpha_;
             SDL_SetTextureAlphaMod(_texture, cast(ubyte)(clamp(_alpha, 0f, 1f) * 255f));
             return _alpha;
         }
 
         /// Blending algorithm.
-        Blend blend() const {
+        override Blend blend() const {
             return _blend;
         }
         /// Ditto
-        Blend blend(Blend blend_) {
+        override Blend blend(Blend blend_) {
             _blend = blend_;
             SDL_SetTextureBlendMode(_texture, getSDLBlend(_blend));
             return _blend;
@@ -82,8 +82,6 @@ final class WritableTexture : ImageData {
             return cast(uint*) _surface.pixels;
         }
     }
-
-    float sizeX = 0f, sizeY = 0f;
 
     /// Ctor
     this(const Texture texture) {

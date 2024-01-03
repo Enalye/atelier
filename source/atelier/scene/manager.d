@@ -8,12 +8,26 @@ module atelier.scene.manager;
 import std.algorithm;
 
 import atelier.common;
+import atelier.core;
+import atelier.render;
 import atelier.scene.scene;
 
 /// Gère les différentes scènes
 final class SceneManager {
     private {
         Array!Scene _scenes;
+        Vec4f _cameraClip;
+        bool _isOnScene;
+    }
+
+    @property {
+        bool isOnScene() const {
+            return _isOnScene;
+        }
+
+        Vec4f cameraClip() const {
+            return _cameraClip;
+        }
     }
 
     this() {
@@ -48,7 +62,22 @@ final class SceneManager {
 
     void draw() {
         foreach (scene; _scenes) {
-            scene.draw();
+            Canvas canvas = scene.canvas;
+            Vec2f position = scene.position;
+
+            _cameraClip = Vec4f(position.x, position.y,
+                position.x + canvas.width, position.y + canvas.height);
+
+            _isOnScene = true;
+
+            Atelier.renderer.pushCanvas(canvas);
+            scene.render();
+            Atelier.renderer.popCanvas();
+
+            _isOnScene = false;
+
+            if (scene.isVisible)
+                scene.draw(Vec2f(400, 300));
         }
     }
 }

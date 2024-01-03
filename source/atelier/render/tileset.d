@@ -15,13 +15,13 @@ import atelier.common;
 
 import atelier.render.imagedata;
 import atelier.render.sprite;
-import atelier.render.texture;
+import atelier.render.imagedata;
 import atelier.render.util;
 
 /// Jeu de tuiles
 final class Tileset : Resource!Tileset {
     private {
-        Texture _texture;
+        ImageData _imageData;
         short[short] _tileFrames;
     }
 
@@ -37,17 +37,17 @@ final class Tileset : Resource!Tileset {
 
     @property {
         pragma(inline) uint width() const {
-            return _texture.width;
+            return _imageData.width;
         }
 
         pragma(inline) uint height() const {
-            return _texture.height;
+            return _imageData.height;
         }
     }
 
     /// Ctor
-    this(Texture texture, Vec4i clip_, uint columns_, uint lines_, uint maxCount_ = 0) {
-        _texture = texture;
+    this(ImageData texture, Vec4i clip_, uint columns_, uint lines_, uint maxCount_ = 0) {
+        _imageData = texture;
         clip = clip_;
         columns = columns_;
         lines = lines_;
@@ -56,7 +56,7 @@ final class Tileset : Resource!Tileset {
 
     /// Copie
     this(Tileset tileset) {
-        _texture = tileset._texture;
+        _imageData = tileset._imageData;
         clip = tileset.clip;
         columns = tileset.columns;
         lines = tileset.lines;
@@ -94,7 +94,7 @@ final class Tileset : Resource!Tileset {
         Vec4i imageClip = Vec4i(clip.x + coord.x * (clip.z + margin.x),
             clip.y + coord.y * (clip.w + margin.y), clip.z, clip.w);
 
-        return new Sprite(_texture, imageClip);
+        return new Sprite(_imageData, imageClip);
     }
 
     /// Accès à la ressource
@@ -132,9 +132,9 @@ final class Tileset : Resource!Tileset {
         Vec4i currentClip = Vec4i(clip.x + coord.x * (clip.z + margin.x),
             clip.y + coord.y * (clip.w + margin.y), clip.z, clip.w);
 
-        _texture.color = color;
-        _texture.blend = blend;
-        _texture.alpha = alpha;
-        _texture.draw(position, size, currentClip, angle);
+        _imageData.color = color;
+        _imageData.blend = blend;
+        _imageData.alpha = alpha;
+        _imageData.draw(position, size, currentClip, angle);
     }
 }

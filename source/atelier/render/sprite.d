@@ -11,39 +11,39 @@ import atelier.common;
 import atelier.core;
 
 import atelier.render.image;
-import atelier.render.texture;
+import atelier.render.imagedata;
 import atelier.render.util;
 
 final class Sprite : Image, Resource!Sprite {
     private {
-        Texture _texture;
+        ImageData _imageData;
     }
 
     Vec2f size = Vec2f.zero;
 
     @property {
         pragma(inline) uint width() const {
-            return _texture.width;
+            return _imageData.width;
         }
 
         pragma(inline) uint height() const {
-            return _texture.height;
+            return _imageData.height;
         }
     }
 
-    this(Texture texture) {
-        this(texture, Vec4i(0, 0, texture.width, texture.height));
+    this(ImageData imagedata) {
+        this(imagedata, Vec4i(0, 0, imagedata.width, imagedata.height));
     }
 
-    this(Texture texture, Vec4i clip_) {
-        _texture = texture;
+    this(ImageData imagedata, Vec4i clip_) {
+        _imageData = imagedata;
         clip = clip_;
         size = cast(Vec2f) clip_.zw;
     }
 
     this(Sprite sprite) {
         super(sprite);
-        _texture = sprite._texture;
+        _imageData = sprite._imageData;
         size = sprite.size;
     }
 
@@ -65,10 +65,10 @@ final class Sprite : Image, Resource!Sprite {
         size = to!Vec2f(clip.zw).contain(size_);
     }
 
-    override void draw(Vec2f origin) {
-        _texture.color = color;
-        _texture.blend = blend;
-        _texture.alpha = alpha;
-        _texture.draw(origin + (position - anchor * size), size, clip, angle, pivot, flipX, flipY);
+    override void draw(Vec2f origin = Vec2f.zero) {
+        _imageData.color = color;
+        _imageData.blend = blend;
+        _imageData.alpha = alpha;
+        _imageData.draw(origin + (position - anchor * size), size, clip, angle, pivot, flipX, flipY);
     }
 }

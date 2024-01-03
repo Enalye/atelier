@@ -8,14 +8,19 @@ module atelier.scene.scene;
 import std.algorithm;
 
 import atelier.common;
+import atelier.core;
+import atelier.render;
 import atelier.scene.entity;
 
 /// Représente un contexte contenant des entités
 final class Scene {
     private {
+        Canvas _canvas;
+        Sprite _sprite;
         Array!Entity _entities;
         int _zOrder;
         bool _isAlive = true;
+        bool _isVisible = true;
     }
 
     @property {
@@ -26,10 +31,27 @@ final class Scene {
         bool isAlive() const {
             return _isAlive;
         }
+
+        Canvas canvas() {
+            return _canvas;
+        }
+
+        bool isVisible() const {
+            return _isVisible;
+        }
+
+        bool isVisible(bool isVisible_) {
+            return _isVisible = isVisible_;
+        }
     }
+
+    Vec2f position = Vec2f.zero;
 
     this() {
         _entities = new Array!Entity;
+        _canvas = new Canvas(800, 600);
+        _sprite = new Sprite(_canvas);
+        _sprite.anchor = Vec2f.half;
     }
 
     private void _sortEntities() {
@@ -57,9 +79,15 @@ final class Scene {
         }
     }
 
-    void draw() {
+    void render() {
         foreach (entity; _entities) {
-            entity.draw();
+            entity.draw(_sprite.size / 2f - position);
+        }
+    }
+
+    void draw(Vec2f origin) {
+        if (_isVisible) {
+            _sprite.draw(origin);
         }
     }
 }

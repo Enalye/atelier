@@ -332,7 +332,7 @@ class UIManager {
 
         float sizeX = element.scaleX * element.sizeX;
         float sizeY = element.scaleY * element.sizeY;
-        Atelier.renderer.popCanvas(pos, Vec2f(sizeX, sizeY), element.angle,
+        Atelier.renderer.popCanvasAndDraw(pos, Vec2f(sizeX, sizeY), element.angle,
             Vec2f(element.pivotX * sizeX, element.pivotY * sizeY), element.color, element.alpha);
 
         if (isDebug)

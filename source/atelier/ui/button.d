@@ -186,7 +186,7 @@ final class ButtonFx {
         _background.alpha = 1f;
         _background.draw(Vec2f.zero);
 
-        Atelier.renderer.popCanvas(Vec2f.zero, Vec2f(_ui.sizeX, _ui.sizeY), 0f, Vec2f.zero, color, 1f);
+        Atelier.renderer.popCanvasAndDraw(Vec2f.zero, Vec2f(_ui.sizeX, _ui.sizeY), 0f, Vec2f.zero, color, 1f);
     }
 
     void onPress(bool pressed) {

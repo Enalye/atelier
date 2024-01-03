@@ -84,15 +84,15 @@ final class Entity {
         }
     }
 
-    void draw(Vec2f origin = Vec2f.zero) {
-        Vec2f pos = origin + position;
+    void draw(Vec2f origin) {
+        Vec2f absolutePosition = origin + position;
 
         foreach (image; _images) {
-            image.draw(pos);
+            image.draw(absolutePosition);
         }
 
         foreach (entity; _children) {
-            entity.draw(pos);
+            entity.draw(absolutePosition);
         }
     }
 }

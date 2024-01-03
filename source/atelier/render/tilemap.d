@@ -6,8 +6,12 @@
 module atelier.render.tilemap;
 
 import std.conv : to;
+import std.math : floor, ceil;
+import std.algorithm.comparison : min, max;
 
 import atelier.common;
+import atelier.core;
+import atelier.scene;
 import atelier.render.image;
 import atelier.render.tileset;
 
@@ -30,7 +34,7 @@ final class Tilemap : Image {
 
         _tiles.length = _width * _height;
         foreach (ref short tile; _tiles) {
-            tile = -1;
+            tile = 5;
         }
     }
 
@@ -70,29 +74,39 @@ final class Tilemap : Image {
         }
     }
 
-    override void draw(Vec2f origin) {
+    override void draw(Vec2f origin = Vec2f.zero) {
         _tileset.color = color;
         _tileset.alpha = alpha;
         _tileset.blend = blend;
 
         Vec2f startPos = origin + position - (size * anchor);
+
+        int minX = 0;
+        int minY = 0;
+        int maxX = _width;
+        int maxY = _height;
+
+        if (Atelier.scene.isOnScene) {
+            Vec4f cameraClip = Atelier.scene.cameraClip;
+            minX = max(0, cast(int) floor((cameraClip.x - startPos.x) / size.x));
+            minY = max(0, cast(int) floor((cameraClip.y - startPos.y) / size.y));
+            maxX = min(_width, cast(int) ceil((cameraClip.z - startPos.x) / size.x));
+            maxY = min(_height, cast(int) ceil((cameraClip.w - startPos.y) / size.y));
+        }
+
         Vec2f tilePos;
+        int renderedTiles;
+        for (int y = minY; y < maxY; y++) {
+            for (int x = minX; x < maxX; x++) {
+                tilePos = startPos;
+                tilePos.x += x * size.x;
+                tilePos.y += y * size.y;
 
-        uint column, line;
-        foreach (tile; _tiles) {
-            tilePos = startPos;
-            tilePos.x += column * size.x;
-            tilePos.y += line * size.y;
+                int tileId = _tiles[x * _width + y];
+                renderedTiles++;
 
-            if (tile >= 0)
-                _tileset.draw(tile, tilePos, size, angle);
-
-            if ((column + 1) == _width) {
-                column = 0;
-                line++;
-            }
-            else {
-                column++;
+                if (tileId >= 0)
+                    _tileset.draw(tileId, tilePos, size, angle);
             }
         }
     }

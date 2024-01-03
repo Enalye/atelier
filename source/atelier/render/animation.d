@@ -15,13 +15,13 @@ import atelier.core;
 
 import atelier.render.image;
 import atelier.render.sprite;
-import atelier.render.texture;
+import atelier.render.imagedata;
 import atelier.render.tileset;
 
 /// Série d’images joués séquenciellement
 final class Animation : Image, Resource!Animation {
     private {
-        Texture _texture;
+        ImageData _imageData;
         int _frame;
         uint _currentTick;
         bool _isRunning = true;
@@ -41,11 +41,11 @@ final class Animation : Image, Resource!Animation {
 
     @property {
         pragma(inline) uint width() const {
-            return _texture.width;
+            return _imageData.width;
         }
 
         pragma(inline) uint height() const {
-            return _texture.height;
+            return _imageData.height;
         }
 
         /// L’animation est en cours de lecture ?
@@ -55,8 +55,8 @@ final class Animation : Image, Resource!Animation {
     }
 
     /// Ctor
-    this(Texture texture, Vec4i clip_, uint columns_, uint lines_, uint maxCount_ = 0) {
-        _texture = texture;
+    this(ImageData imageData, Vec4i clip_, uint columns_, uint lines_, uint maxCount_ = 0) {
+        _imageData = imageData;
         clip = clip_;
         size = to!Vec2f(clip_.zw);
         columns = columns_;
@@ -67,7 +67,7 @@ final class Animation : Image, Resource!Animation {
     /// Copie
     this(Animation anim) {
         super(anim);
-        _texture = anim._texture;
+        _imageData = anim._imageData;
         _frame = anim._frame;
         _currentTick = anim._currentTick;
         _isRunning = anim._isRunning;
@@ -163,9 +163,9 @@ final class Animation : Image, Resource!Animation {
         Vec4i imageClip = Vec4i(clip.x + coord.x * (clip.z + margin.x),
             clip.y + coord.y * (clip.w + margin.y), clip.z, clip.w);
 
-        _texture.color = color;
-        _texture.blend = blend;
-        _texture.alpha = alpha;
-        _texture.draw(origin + (position - anchor * size), size, imageClip, angle, pivot, flipX, flipY);
+        _imageData.color = color;
+        _imageData.blend = blend;
+        _imageData.alpha = alpha;
+        _imageData.draw(origin + (position - anchor * size), size, imageClip, angle, pivot, flipX, flipY);
     }
 }

@@ -54,6 +54,30 @@ final class Renderer {
         SDL_RenderClear(_sdlRenderer);
     }
 
+    void pushCanvas(Canvas canvas) {
+        CanvasContext context;
+        _idxContext++;
+
+        enforce(_idxContext < 128, "canvas stack limit");
+
+        if (_idxContext == _canvases.length) {
+            context = new CanvasContext;
+            _canvases ~= context;
+        }
+        else {
+            context = _canvases[_idxContext];
+        }
+
+        context.canvas = canvas;
+        context.clip = Vec4i(0, 0, canvas.width, canvas.height);
+
+        SDL_Color sdlColor = context.canvas.color.toSDL();
+
+        SDL_SetRenderTarget(_sdlRenderer, context.canvas.target);
+        SDL_SetRenderDrawColor(_sdlRenderer, sdlColor.r, sdlColor.g, sdlColor.b, 0);
+        SDL_RenderClear(_sdlRenderer);
+    }
+
     void pushCanvas(uint width, uint height) {
         CanvasContext context;
         _idxContext++;
@@ -83,7 +107,19 @@ final class Renderer {
         SDL_RenderClear(_sdlRenderer);
     }
 
-    void popCanvas(Vec2f position, Vec2f size, double angle, Vec2f pivot, Color color, float alpha) {
+    void popCanvas() {
+        if (_idxContext < 0)
+            return;
+
+        _idxContext--;
+        if (_idxContext >= 0)
+            SDL_SetRenderTarget(_sdlRenderer, _canvases[_idxContext].canvas.target);
+        else
+            SDL_SetRenderTarget(_sdlRenderer, null);
+    }
+
+    void popCanvasAndDraw(Vec2f position, Vec2f size, double angle, Vec2f pivot,
+        Color color, float alpha) {
         if (_idxContext < 0)
             return;
 

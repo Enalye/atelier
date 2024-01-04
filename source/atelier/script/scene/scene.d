@@ -24,7 +24,7 @@ package void loadLibScene_scene(GrLibDefinition library) {
 
     library.addProperty(&_position!"get", &_position!"set", "position", sceneType, vec2fType);
     library.addProperty(&_isVisible!"get", &_isVisible!"set", "isVisible", entityType, grBool);
-    library.addProperty(&_canvas, null, "isVisible", entityType, canvasType);
+    library.addProperty(&_canvas, null, "canvas", entityType, canvasType);
 
     library.addFunction(&_addScene, "addScene", [sceneType]);
     library.addFunction(&_addEntity, "addEntity", [sceneType, entityType]);

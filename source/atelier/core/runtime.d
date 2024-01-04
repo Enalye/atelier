@@ -103,6 +103,8 @@ final class Atelier {
         // Initialisation des modules
         _window = new Window(windowWidth, windowHeight);
         _renderer = new Renderer(_window);
+        _renderer.setupKernel();
+
         _uiManager = new UIManager();
         _inputManager = new InputManager();
         _audioManager = new AudioManager();
@@ -239,6 +241,8 @@ final class Atelier {
             while (accumulator >= 1f) {
                 InputEvent[] inputEvents = _inputManager.pollEvents();
 
+                _window.update();
+
                 _uiManager.dispatch(inputEvents);
 
                 if (_engine) {
@@ -274,10 +278,10 @@ final class Atelier {
             }
 
             // Rendu
-            _sceneManager.draw();
+            _renderer.startRenderPass();
+            _sceneManager.draw(cast(Vec2f) _renderer.center);
             _uiManager.draw();
-
-            _renderer.render();
+            _renderer.endRenderPass();
         }
     }
 

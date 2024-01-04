@@ -18,21 +18,40 @@ void loadLibRender_animation(GrLibDefinition library) {
 
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
     GrType vec2iType = grGetNativeType("Vec2", [grInt]);
+    GrType vec4iType = grGetNativeType("Vec4", [grInt]);
+    GrType imageDataType = grGetNativeType("ImageData");
 
-    library.addConstructor(&_animation, animationType, [grString]);
+    library.addConstructor(&_ctor_str, animationType, [grString]);
+    library.addConstructor(&_ctor_imageData_2, animationType, [
+            imageDataType, vec4iType, grInt, grInt
+        ]);
+    library.addConstructor(&_ctor_imageData_3, animationType, [
+            imageDataType, vec4iType, grInt, grInt, grInt
+        ]);
 
     library.addProperty(&_size!"get", &_size!"set", "size", animationType, vec2fType);
     library.addProperty(&_margin!"get", &_margin!"set", "margin", animationType, vec2iType);
     library.addProperty(&_repeat!"get", &_repeat!"set", "repeat", animationType, grBool);
-    library.addProperty(&_frameTime!"get", &_frameTime!"set", "frameTime", animationType, grInt);
+    library.addProperty(&_frameTime!"get", &_frameTime!"set", "frameTime",
+        animationType, grInt);
     library.addProperty(&_frames!"get", &_frames!"set", "frames", animationType, grList(grInt));
     library.addProperty(&_columns!"get", &_columns!"set", "columns", animationType, grUInt);
     library.addProperty(&_lines!"get", &_lines!"set", "lines", animationType, grUInt);
     library.addProperty(&_maxCount!"get", &_maxCount!"set", "maxCount", animationType, grUInt);
 }
 
-private void _animation(GrCall call) {
+private void _ctor_str(GrCall call) {
     call.setNative(Atelier.res.get!Animation(call.getString(0)));
+}
+
+private void _ctor_imageData_2(GrCall call) {
+    call.setNative(new Animation(call.getNative!ImageData(0),
+            call.getNative!SVec4i(1), call.getInt(1), call.getInt(2)));
+}
+
+private void _ctor_imageData_3(GrCall call) {
+    call.setNative(new Animation(call.getNative!ImageData(0),
+            call.getNative!SVec4i(1), call.getInt(1), call.getInt(2), call.getInt(3)));
 }
 
 private void _size(string op)(GrCall call) {

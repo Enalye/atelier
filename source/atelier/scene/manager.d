@@ -60,7 +60,7 @@ final class SceneManager {
         }
     }
 
-    void draw() {
+    void draw(Vec2f origin) {
         foreach (scene; _scenes) {
             Canvas canvas = scene.canvas;
             Vec2f position = scene.position;
@@ -77,7 +77,7 @@ final class SceneManager {
             _isOnScene = false;
 
             if (scene.isVisible)
-                scene.draw(Vec2f(400, 300));
+                scene.draw(origin);
         }
     }
 }

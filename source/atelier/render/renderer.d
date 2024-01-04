@@ -12,19 +12,12 @@ import bindbc.sdl;
 import atelier.common, atelier.core;
 
 import atelier.render.canvas;
-
-private {
-    SDL_Renderer* _sdlRenderer;
-}
-
-@property pragma(inline) {
-    SDL_Renderer* sdlRenderer() {
-        return _sdlRenderer;
-    }
-}
+import atelier.render.sprite;
 
 final class Renderer {
     private {
+        SDL_Renderer* _sdlRenderer;
+
         final class CanvasContext {
             Canvas canvas;
             Vec4i clip;
@@ -32,6 +25,41 @@ final class Renderer {
 
         CanvasContext[] _canvases;
         int _idxContext = -1;
+
+        Vec2i _windowSize;
+
+        Vec2i _kernelSize;
+        Canvas _kernelCanvas;
+        Sprite _kernelSprite;
+        int _pixelSharpness = 1;
+        Canvas _scaledCanvas;
+        Sprite _scaledSprite;
+
+        Scaling _scaling = Scaling.stretch;
+        Vec2f _scaledSizeStart = Vec2f.zero, _scaledSizeEnd = Vec2f.zero;
+        Timer _scaleTimer;
+    }
+
+    enum Scaling {
+        none,
+        integer,
+        fit,
+        contain,
+        stretch
+    }
+
+    @property {
+        Vec2i center() {
+            return _kernelSize / 2;
+        }
+
+        Vec2i size() {
+            return _kernelSize;
+        }
+
+        package pragma(inline) SDL_Renderer* sdlRenderer() {
+            return _sdlRenderer;
+        }
     }
 
     Color color = Color.white;
@@ -42,11 +70,113 @@ final class Renderer {
         enforce(_sdlRenderer, "renderer creation failure");
     }
 
+    void setupKernel() {
+        _kernelSize = Vec2i(Atelier.window.width, Atelier.window.height);
+        _kernelCanvas = new Canvas(_kernelSize.x, _kernelSize.y);
+        _kernelSprite = new Sprite(_kernelCanvas);
+        _kernelSprite.anchor = Vec2f.half;
+
+        _scaledCanvas = new Canvas(_kernelSize.x * _pixelSharpness,
+            _kernelSize.y * _pixelSharpness, true);
+        _scaledSprite = new Sprite(_scaledCanvas);
+        _scaledSprite.anchor = Vec2f.half;
+
+        _updateScaling();
+        _updateSharpness();
+    }
+
     void close() {
         SDL_DestroyRenderer(_sdlRenderer);
     }
 
-    void render() {
+    Vec2f getLogicalPosition(Vec2f position) const {
+        Vec2f windowSize = Vec2f(Atelier.window.width, Atelier.window.height);
+        Vec2f ratio = (cast(Vec2f) _kernelSize) / windowSize;
+        return position * ratio;
+    }
+
+    private void _updateScaling() {
+        Vec2f windowSize = Vec2f(Atelier.window.width, Atelier.window.height);
+        Vec2f scaledKernelSize = cast(Vec2f)(_kernelSize * _pixelSharpness);
+
+        float time = easeInOutQuad(_scaleTimer.value01);
+        _scaledSizeStart = _scaledSizeStart.lerp(_scaledSizeEnd, time);
+
+        final switch (_scaling) with (Scaling) {
+        case none:
+            _scaledSizeEnd = cast(Vec2f) _kernelSize;
+            break;
+        case integer:
+            _scaledSizeEnd = scaledKernelSize;
+            break;
+        case fit:
+            _scaledSizeEnd = scaledKernelSize.fit(windowSize);
+            break;
+        case contain:
+            _scaledSizeEnd = scaledKernelSize.contain(windowSize);
+            break;
+        case stretch:
+            _scaledSizeEnd = windowSize;
+            break;
+        }
+
+        _scaleTimer.start(15);
+    }
+
+    private void _updateSharpness() {
+        _scaledCanvas.setSize(_kernelSize.x * _pixelSharpness, _kernelSize.y * _pixelSharpness);
+        _scaledSprite.clip = Vec4i(0, 0, _scaledCanvas.width, _scaledCanvas.height);
+        _kernelSprite.size = cast(Vec2f)(_kernelSize * _pixelSharpness);
+    }
+
+    void setScaling(Scaling scaling) {
+        if (_scaling == scaling)
+            return;
+
+        _scaling = scaling;
+        _updateScaling();
+    }
+
+    void setPixelSharpness(int sharpness) {
+        if (sharpness < 1)
+            sharpness = 1;
+
+        if (_pixelSharpness == sharpness)
+            return;
+
+        _pixelSharpness = sharpness;
+        _updateSharpness();
+        _updateScaling();
+    }
+
+    void setWindowSize(Vec2i windowSize) {
+        if (_windowSize == windowSize)
+            return;
+
+        _windowSize = windowSize;
+        _updateScaling();
+    }
+
+    void startRenderPass() {
+        pushCanvas(_kernelCanvas);
+    }
+
+    void endRenderPass() {
+        popCanvas();
+
+        pushCanvas(_scaledCanvas);
+        _kernelSprite.draw(_kernelSprite.size / 2f);
+        popCanvas();
+
+        _scaleTimer.update();
+
+        Vec2f scaledSize = Vec2f.zero;
+        float time = easeInOutQuad(_scaleTimer.value01);
+        scaledSize = _scaledSizeStart.lerp(_scaledSizeEnd, time);
+
+        _scaledSprite.size = scaledSize;
+        _scaledSprite.draw(Vec2f(Atelier.window.width, Atelier.window.height) / 2f);
+
         SDL_Color sdlColor = color.toSDL();
 
         SDL_RenderPresent(_sdlRenderer);

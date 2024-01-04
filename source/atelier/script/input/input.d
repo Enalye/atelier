@@ -12,8 +12,11 @@ import grimoire;
 import atelier.input;
 import atelier.common;
 import atelier.core;
+import atelier.script.util;
 
 void loadLibInput_input(GrLibDefinition library) {
+    GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
+
     GrType keyState = library.addEnum("KeyState", [
             __traits(allMembers, KeyState)
         ], cast(GrInt[])[EnumMembers!(KeyState)]);
@@ -83,16 +86,16 @@ void loadLibInput_input(GrLibDefinition library) {
     library.addProperty(&_MouseButton_button, null, "button", inputEventMouseButton, keyButton);
     library.addProperty(&_MouseButton_state, null, "state", inputEventMouseButton, keyState);
     library.addProperty(&_MouseButton_clicks, null, "clicks", inputEventMouseButton, grInt);
-    library.addProperty(&_MouseButton_globalX, null, "globalX", inputEventMouseButton, grInt);
-    library.addProperty(&_MouseButton_globalY, null, "globalY", inputEventMouseButton, grInt);
-    library.addProperty(&_MouseButton_relativeX, null, "relativeX", inputEventMouseButton, grInt);
-    library.addProperty(&_MouseButton_relativeY, null, "relativeY", inputEventMouseButton, grInt);
+    library.addProperty(&_MouseButton_position, null, "position",
+        inputEventMouseButton, vec2fType);
+    library.addProperty(&_MouseButton_deltaPosition, null, "deltaPosition",
+        inputEventMouseButton, vec2fType);
 
     // MouseMotion
-    library.addProperty(&_MouseMotion_globalX, null, "globalX", inputEventMouseMotion, grInt);
-    library.addProperty(&_MouseMotion_globalY, null, "globalY", inputEventMouseMotion, grInt);
-    library.addProperty(&_MouseMotion_relativeX, null, "relativeX", inputEventMouseMotion, grInt);
-    library.addProperty(&_MouseMotion_relativeY, null, "relativeY", inputEventMouseMotion, grInt);
+    library.addProperty(&_MouseMotion_position, null, "position",
+        inputEventMouseMotion, vec2fType);
+    library.addProperty(&_MouseMotion_deltaPosition, null, "deltaPosition",
+        inputEventMouseMotion, vec2fType);
 
     // MouseWheel
     library.addProperty(&_MouseWheel_x, null, "x", inputEventMouseWheel, grInt);
@@ -126,11 +129,10 @@ void loadLibInput_input(GrLibDefinition library) {
         ], [inputEvent]);
 
     library.addStatic(&_makeMouseButton, inputEvent, "mouseButton",
-        [mouseButton, keyState, grInt, grInt, grInt, grInt, grInt], [inputEvent]);
+        [mouseButton, keyState, grInt, vec2fType, vec2fType], [inputEvent]);
 
-    library.addStatic(&_makeMouseMotion, inputEvent, "mouseMotion", [
-            grInt, grInt, grInt, grInt
-        ], [inputEvent]);
+    library.addStatic(&_makeMouseMotion, inputEvent, "mouseMotion",
+        [vec2fType, vec2fType], [inputEvent]);
 
     library.addStatic(&_makeMouseWheel, inputEvent, "mouseWheel", [grInt, grInt], [
             inputEvent
@@ -295,38 +297,22 @@ private void _MouseButton_clicks(GrCall call) {
     call.setInt(call.getNative!(InputEvent.MouseButton)(0).clicks);
 }
 
-private void _MouseButton_globalX(GrCall call) {
-    call.setInt(call.getNative!(InputEvent.MouseButton)(0).globalPosition.x);
+private void _MouseButton_position(GrCall call) {
+    call.setNative(svec2(call.getNative!(InputEvent.MouseButton)(0).position));
 }
 
-private void _MouseButton_globalY(GrCall call) {
-    call.setInt(call.getNative!(InputEvent.MouseButton)(0).globalPosition.y);
-}
-
-private void _MouseButton_relativeX(GrCall call) {
-    call.setInt(call.getNative!(InputEvent.MouseButton)(0).relativePosition.x);
-}
-
-private void _MouseButton_relativeY(GrCall call) {
-    call.setInt(call.getNative!(InputEvent.MouseButton)(0).relativePosition.y);
+private void _MouseButton_deltaPosition(GrCall call) {
+    call.setNative(svec2(call.getNative!(InputEvent.MouseButton)(0).deltaPosition));
 }
 
 // MouseMotion
 
-private void _MouseMotion_globalX(GrCall call) {
-    call.setInt(call.getNative!(InputEvent.MouseMotion)(0).globalPosition.x);
+private void _MouseMotion_position(GrCall call) {
+    call.setNative(svec2(call.getNative!(InputEvent.MouseMotion)(0).position));
 }
 
-private void _MouseMotion_globalY(GrCall call) {
-    call.setInt(call.getNative!(InputEvent.MouseMotion)(0).globalPosition.y);
-}
-
-private void _MouseMotion_relativeX(GrCall call) {
-    call.setInt(call.getNative!(InputEvent.MouseMotion)(0).relativePosition.x);
-}
-
-private void _MouseMotion_relativeY(GrCall call) {
-    call.setInt(call.getNative!(InputEvent.MouseMotion)(0).relativePosition.y);
+private void _MouseMotion_deltaPosition(GrCall call) {
+    call.setNative(svec2(call.getNative!(InputEvent.MouseMotion)(0).deltaPosition));
 }
 
 // MouseWheel
@@ -375,23 +361,22 @@ private void _DropFile_path(GrCall call) {
 
 private void _makeKeyButton1(GrCall call) {
     call.setNative(InputEvent.keyButton(call.getEnum!(InputEvent.KeyButton.Button)(0),
-                   InputState(call.getEnum!KeyState(1))));
+            InputState(call.getEnum!KeyState(1))));
 }
 
 private void _makeKeyButton2(GrCall call) {
     call.setNative(InputEvent.keyButton(call.getEnum!(InputEvent.KeyButton.Button)(0),
-                   InputState(call.getEnum!KeyState(1)), call.getBool(2)));
+            InputState(call.getEnum!KeyState(1)), call.getBool(2)));
 }
 
 private void _makeMouseButton(GrCall call) {
     call.setNative(InputEvent.mouseButton(call.getEnum!(InputEvent.MouseButton.Button)(0),
-            InputState(call.getEnum!KeyState(1)), call.getInt(2), Vec2i(call.getInt(3),
-            call.getInt(4)), Vec2i(call.getInt(5), call.getInt(6))));
+            InputState(call.getEnum!KeyState(1)), call.getInt(2),
+            call.getNative!SVec2f(3), call.getNative!SVec2f(4)));
 }
 
 private void _makeMouseMotion(GrCall call) {
-    call.setNative(InputEvent.mouseMotion(Vec2i(call.getInt(0),
-            call.getInt(1)), Vec2i(call.getInt(2), call.getInt(3))));
+    call.setNative(InputEvent.mouseMotion(call.getNative!SVec2f(0), call.getNative!SVec2f(1)));
 }
 
 private void _makeMouseWheel(GrCall call) {
@@ -399,8 +384,8 @@ private void _makeMouseWheel(GrCall call) {
 }
 
 private void _makeControllerButton(GrCall call) {
-    call.setNative(InputEvent.controllerButton(
-            call.getEnum!(InputEvent.ControllerButton.Button)(0), InputState(call.getEnum!KeyState(1))));
+    call.setNative(InputEvent.controllerButton(call.getEnum!(InputEvent.ControllerButton.Button)(0),
+            InputState(call.getEnum!KeyState(1))));
 }
 
 private void _makeControllerAxis(GrCall call) {

@@ -11,20 +11,35 @@ import atelier.common;
 import atelier.core;
 import atelier.input;
 import atelier.render;
+import atelier.scene;
 import atelier.script.util;
 
 void loadLibRender_sprite(GrLibDefinition library) {
     GrType spriteType = library.addNative("Sprite", [], "Image");
 
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
+    GrType imageDataType = grGetNativeType("ImageData");
+    GrType sceneType = grGetNativeType("Scene");
 
-    library.addConstructor(&_sprite, spriteType, [grString]);
+    library.addConstructor(&_ctor_str, spriteType, [grString]);
+
+    library.addConstructor(&_ctor_imageData, spriteType, [imageDataType]);
+
+    library.addConstructor(&_ctor_scene, spriteType, [sceneType]);
 
     library.addProperty(&_size!"get", &_size!"set", "size", spriteType, vec2fType);
 }
 
-private void _sprite(GrCall call) {
+private void _ctor_str(GrCall call) {
     call.setNative(Atelier.res.get!Sprite(call.getString(0)));
+}
+
+private void _ctor_imageData(GrCall call) {
+    call.setNative(new Sprite(call.getNative!ImageData(0)));
+}
+
+private void _ctor_scene(GrCall call) {
+    call.setNative(new Sprite(call.getNative!Scene(0).canvas));
 }
 
 private void _size(string op)(GrCall call) {

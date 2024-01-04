@@ -22,6 +22,7 @@ import std.stdio;
 import bindbc.sdl;
 
 import atelier.common;
+import atelier.core;
 import atelier.render;
 
 import atelier.input.event;
@@ -45,7 +46,8 @@ final class InputManager {
         InputMap _map;
         Controller[] _controllers;
 
-        Vec2i _globalMousePosition, _relativeMousePosition, _mouseWheel;
+        Vec2f _mousePosition = Vec2f.zero, _deltaMousePosition = Vec2f.zero;
+        Vec2i _mouseWheel;
 
         KeyState[InputEvent.KeyButton.Button.max + 1] _keyButtonStates;
         KeyState[InputEvent.MouseButton.Button.max + 1] _mouseButtonStates;
@@ -80,8 +82,8 @@ final class InputManager {
     /// Init
     this() {
         signal(SIGINT, &_signalHandler);
-        _globalMousePosition = Vec2i.zero;
-        _relativeMousePosition = Vec2i.zero;
+        _mousePosition = Vec2f.zero;
+        _deltaMousePosition = Vec2f.zero;
 
         // Ouvre la base de donnée des manettes
         foreach (string line; _gameControllerDb.splitLines()) {
@@ -171,11 +173,13 @@ final class InputManager {
                 events ~= event;
                 break;
             case SDL_MOUSEMOTION:
-                _globalMousePosition = Vec2i(sdlEvent.motion.x, sdlEvent.motion.y);
-                _relativeMousePosition = Vec2i(sdlEvent.motion.xrel, sdlEvent.motion.yrel);
+                _mousePosition = Atelier.renderer.getLogicalPosition(Vec2f(sdlEvent.motion.x,
+                        sdlEvent.motion.y));
+                _deltaMousePosition = Atelier.renderer.getLogicalPosition(Vec2f(sdlEvent.motion.xrel,
+                        sdlEvent.motion.yrel));
                 InputEvent event = InputEvent.mouseMotion( //
-                    _globalMousePosition, //
-                    _relativeMousePosition);
+                    _mousePosition, //
+                    _deltaMousePosition);
 
                 events ~= event;
                 break;
@@ -186,15 +190,16 @@ final class InputManager {
                 if (button > InputEvent.MouseButton.Button.max)
                     break;
 
-                _globalMousePosition = Vec2i(sdlEvent.button.x, sdlEvent.button.y);
+                _mousePosition = Atelier.renderer.getLogicalPosition(Vec2f(sdlEvent.button.x,
+                        sdlEvent.button.y));
 
                 if (_mouseButtonStates[button] == KeyState.none) {
                     _mouseButtonStates[button] = KeyState.down;
                 }
 
                 InputState state = InputState(_mouseButtonStates[button]);
-                events ~= InputEvent.mouseButton(button, state, sdlEvent.button.clicks,
-                    _globalMousePosition, _relativeMousePosition);
+                events ~= InputEvent.mouseButton(button, state,
+                    sdlEvent.button.clicks, _mousePosition, _deltaMousePosition);
                 break;
             case SDL_MOUSEBUTTONUP:
                 InputEvent.MouseButton.Button button = cast(
@@ -203,12 +208,13 @@ final class InputManager {
                 if (button > InputEvent.MouseButton.Button.max)
                     break;
 
-                _globalMousePosition = Vec2i(sdlEvent.button.x, sdlEvent.button.y);
+                _mousePosition = Atelier.renderer.getLogicalPosition(Vec2f(sdlEvent.button.x,
+                        sdlEvent.button.y));
                 _mouseButtonStates[button] = KeyState.up;
 
                 InputState state = InputState(_mouseButtonStates[button]);
-                events ~= InputEvent.mouseButton(button, state, sdlEvent.button.clicks,
-                    _globalMousePosition, _relativeMousePosition);
+                events ~= InputEvent.mouseButton(button, state,
+                    sdlEvent.button.clicks, _mousePosition, _deltaMousePosition);
                 break;
             case SDL_MOUSEWHEEL:
                 _mouseWheel = Vec2i(sdlEvent.wheel.x, sdlEvent.wheel.y);
@@ -263,11 +269,11 @@ final class InputManager {
                 events ~= InputEvent.controllerButton(button, state);
                 break;
             case SDL_WINDOWEVENT:
+                import std.stdio;
                 switch (sdlEvent.window.event) {
                 case SDL_WINDOWEVENT_RESIZED:
-                    //Atelier.window.resizeWindow(vec2u(sdlEvent.window.data1, sdlEvent.window.data2));
-                    break;
                 case SDL_WINDOWEVENT_SIZE_CHANGED:
+                    Atelier.window.onSize(sdlEvent.window.data1, sdlEvent.window.data2);
                     break;
                 default:
                     break;

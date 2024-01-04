@@ -21,9 +21,18 @@ final class Scene {
         int _zOrder;
         bool _isAlive = true;
         bool _isVisible = true;
+        int _width, _height;
     }
 
     @property {
+        int width() const {
+            return _width;
+        }
+
+        int height() const {
+            return _height;
+        }
+
         int zOrder() const {
             return _zOrder;
         }
@@ -47,9 +56,11 @@ final class Scene {
 
     Vec2f position = Vec2f.zero;
 
-    this() {
+    this(int width_, int height_) {
+        _width = width_;
+        _height = height_;
         _entities = new Array!Entity;
-        _canvas = new Canvas(800, 600);
+        _canvas = new Canvas(_width, _height);
         _sprite = new Sprite(_canvas);
         _sprite.anchor = Vec2f.half;
     }

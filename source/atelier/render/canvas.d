@@ -98,8 +98,8 @@ final class Canvas : ImageData {
         if (_isSmooth)
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
 
-        _texture = SDL_CreateTexture(sdlRenderer(), SDL_PIXELFORMAT_RGBA8888,
-            SDL_TEXTUREACCESS_TARGET, _width, _height);
+        _texture = SDL_CreateTexture(Atelier.renderer.sdlRenderer,
+            SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, _width, _height);
 
         if (_isSmooth)
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
@@ -119,8 +119,8 @@ final class Canvas : ImageData {
         if (_isSmooth)
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
 
-        _texture = SDL_CreateTexture(sdlRenderer(), SDL_PIXELFORMAT_RGBA8888,
-            SDL_TEXTUREACCESS_TARGET, _width, _height);
+        _texture = SDL_CreateTexture(Atelier.renderer.sdlRenderer,
+            SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, _width, _height);
 
         if (_isSmooth)
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
@@ -148,8 +148,8 @@ final class Canvas : ImageData {
         if (_isSmooth)
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
 
-        _texture = SDL_CreateTexture(sdlRenderer(), SDL_PIXELFORMAT_RGBA8888,
-            SDL_TEXTUREACCESS_TARGET, _width, _height);
+        _texture = SDL_CreateTexture(Atelier.renderer.sdlRenderer,
+            SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, _width, _height);
 
         if (_isSmooth)
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
@@ -175,8 +175,8 @@ final class Canvas : ImageData {
         if (_isSmooth)
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
 
-        _texture = SDL_CreateTexture(sdlRenderer(), SDL_PIXELFORMAT_RGBA8888,
-            SDL_TEXTUREACCESS_TARGET, _width, _height);
+        _texture = SDL_CreateTexture(Atelier.renderer.sdlRenderer,
+            SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, _width, _height);
 
         if (_isSmooth)
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
@@ -206,9 +206,10 @@ final class Canvas : ImageData {
         SDL_FRect sdlDest = {position.x, position.y, size.x, size.y};
         SDL_FPoint sdlPivot = {pivot.x, pivot.y};
 
-        SDL_RenderCopyExF(sdlRenderer, _texture, &sdlSrc, //
+        SDL_RenderCopyExF(Atelier.renderer.sdlRenderer, _texture, &sdlSrc, //
             &sdlDest, angle, &sdlPivot, //
-            (flipX ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE) | //
+            (flipX ? SDL_FLIP_HORIZONTAL
+                : SDL_FLIP_NONE) | //
             (flipY ? SDL_FLIP_VERTICAL : SDL_FLIP_NONE));
     }
 }

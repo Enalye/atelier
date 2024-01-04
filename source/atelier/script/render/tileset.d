@@ -16,6 +16,9 @@ import atelier.script.util;
 void loadLibRender_tileset(GrLibDefinition library) {
     GrType tilesetType = library.addNative("Tileset");
 
+    GrType imageDataType = grGetNativeType("ImageData");
+    GrType sceneType = grGetNativeType("Scene");
+
     library.addConstructor(&_ctor, tilesetType, [grString]);
 
     library.addProperty(&_frameTime!"get", &_frameTime!"set", "frameTime", tilesetType, grInt);

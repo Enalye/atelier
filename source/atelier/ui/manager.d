@@ -68,8 +68,8 @@ class UIManager {
                     _pressedElement = null;
 
                     foreach (UIElement element; _roots) {
-                        dispatchMouseDownEvent(mouseButtonEvent.globalPosition.x,
-                            mouseButtonEvent.globalPosition.y, element);
+                        dispatchMouseDownEvent(mouseButtonEvent.position.x,
+                            mouseButtonEvent.position.y, element);
                     }
 
                     if (_tempGrabbedUI) {
@@ -84,8 +84,8 @@ class UIManager {
                     _grabbedUI = null;
 
                     foreach (UIElement element; _roots) {
-                        dispatchMouseUpEvent(mouseButtonEvent.globalPosition.x,
-                            mouseButtonEvent.globalPosition.y, element);
+                        dispatchMouseUpEvent(mouseButtonEvent.position.x,
+                            mouseButtonEvent.position.y, element);
                     }
 
                     if (_focusedElement && _focusedElement != _pressedElement) {
@@ -106,8 +106,8 @@ class UIManager {
             case mouseMotion:
                 auto mouseMotionEvent = event.asMouseMotion();
                 foreach (UIElement element; _roots) {
-                    dispatchMouseUpdateEvent(mouseMotionEvent.globalPosition.x,
-                        mouseMotionEvent.globalPosition.y, element);
+                    dispatchMouseUpdateEvent(mouseMotionEvent.position.x,
+                        mouseMotionEvent.position.y, element);
                 }
 
                 if (_hoveredElement && !_elementAlreadyhovered) {
@@ -280,8 +280,8 @@ class UIManager {
         float x = element.posX + element.offsetX;
         float y = element.posY + element.offsetY;
 
-        const float parentW = parent ? parent.sizeX : cast(float) getWindow().width();
-        const float parentH = parent ? parent.sizeY : cast(float) getWindow().height();
+        const float parentW = parent ? parent.sizeX : cast(float) Atelier.renderer.size.x;
+        const float parentH = parent ? parent.sizeY : cast(float) Atelier.renderer.size.y;
 
         final switch (element.alignX) with (UIElement.AlignX) {
         case left:

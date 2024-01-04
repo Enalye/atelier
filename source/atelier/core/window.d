@@ -10,17 +10,9 @@ import std.string : toStringz, fromStringz;
 
 import bindbc.sdl;
 
+import atelier.common;
 import atelier.render;
-
-private {
-    Window _window;
-}
-
-@property {
-    pragma(inline) Window getWindow() {
-        return _window;
-    }
-}
+import atelier.core.runtime;
 
 final class Window {
     enum Display {
@@ -33,7 +25,7 @@ final class Window {
         SDL_Window* _sdlWindow;
         SDL_Surface* _icon;
         string _title;
-        uint _width, _height;
+        int _width, _height;
     }
 
     @property {
@@ -52,16 +44,16 @@ final class Window {
             return _title;
         }
 
-        uint width() const {
+        int width() const {
             return _width;
         }
 
-        uint height() const {
+        int height() const {
             return _height;
         }
     }
 
-    this(uint width_, uint height_) {
+    this(int width_, int height_) {
         _width = width_;
         _height = height_;
 
@@ -73,8 +65,10 @@ final class Window {
         _sdlWindow = SDL_CreateWindow(toStringz("atelier"), SDL_WINDOWPOS_CENTERED,
             SDL_WINDOWPOS_CENTERED, _width, _height, SDL_WINDOW_RESIZABLE);
         enforce(_sdlWindow, "window initialisation failure");
+    }
 
-        _window = this;
+    void update() {
+        SDL_GetWindowSize(_sdlWindow, &_width, &_height);
     }
 
     void close() {
@@ -90,5 +84,14 @@ final class Window {
         _icon = IMG_Load(toStringz(path));
 
         SDL_SetWindowIcon(_sdlWindow, _icon);
+    }
+
+    void onSize(int width_, int height_) {
+        if (_width == width_ && _height == height_)
+            return;
+
+        _width = width_;
+        _height = height_;
+        Atelier.renderer.setWindowSize(Vec2i(_width, _height));
     }
 }

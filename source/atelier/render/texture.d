@@ -12,6 +12,7 @@ import std.algorithm.comparison : clamp;
 import bindbc.sdl;
 
 import atelier.common;
+import atelier.core;
 import atelier.render.imagedata;
 import atelier.render.renderer;
 import atelier.render.util;
@@ -137,7 +138,7 @@ final class Texture : ImageData, Resource!Texture {
         _surface = surface_;
 
         enforce(_surface, "invalid surface");
-        enforce(sdlRenderer, "the renderer does not exist");
+        enforce(Atelier.renderer.sdlRenderer, "the renderer does not exist");
 
         if (_texture)
             SDL_DestroyTexture(_texture);
@@ -145,7 +146,7 @@ final class Texture : ImageData, Resource!Texture {
         if (_isSmooth)
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
 
-        _texture = SDL_CreateTextureFromSurface(sdlRenderer, _surface);
+        _texture = SDL_CreateTextureFromSurface(Atelier.renderer.sdlRenderer, _surface);
 
         if (_isSmooth)
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
@@ -168,12 +169,12 @@ final class Texture : ImageData, Resource!Texture {
         _surface = IMG_Load(toStringz(path));
 
         enforce(_surface, "can't load image file `" ~ path ~ "`");
-        enforce(sdlRenderer, "the renderer does not exist");
+        enforce(Atelier.renderer.sdlRenderer, "the renderer does not exist");
 
         if (_isSmooth)
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
 
-        _texture = SDL_CreateTextureFromSurface(sdlRenderer, _surface);
+        _texture = SDL_CreateTextureFromSurface(Atelier.renderer.sdlRenderer, _surface);
 
         if (_isSmooth)
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
@@ -218,10 +219,10 @@ final class Texture : ImageData, Resource!Texture {
         SDL_FRect sdlDest = {position.x, position.y, size.x, size.y};
         SDL_FPoint sdlPivot = {pivot.x, pivot.y};
 
-        SDL_RenderCopyExF(sdlRenderer, _texture, &sdlSrc, //
+        SDL_RenderCopyExF(Atelier.renderer.sdlRenderer, _texture, &sdlSrc, //
             &sdlDest, angle, null, //
-            (flipX ?
-    SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE) | //
+            (flipX ? SDL_FLIP_HORIZONTAL
+                : SDL_FLIP_NONE) | //
             (flipY ? SDL_FLIP_VERTICAL : SDL_FLIP_NONE));
     }
 }

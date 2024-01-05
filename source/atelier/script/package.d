@@ -7,6 +7,7 @@ module atelier.script;
 
 import grimoire;
 
+import atelier.script.audio;
 import atelier.script.common;
 import atelier.script.core;
 import atelier.script.input;
@@ -30,8 +31,9 @@ GrLibLoader[] getLibraryLoaders() {
     GrLibLoader[] loaders;
 
     static foreach (pack; [
-            &getLibLoaders_common, &getLibLoaders_core, &getLibLoaders_input,
-            &getLibLoaders_render, &getLibLoaders_scene, &getLibLoaders_ui,
+            &getLibLoaders_audio, &getLibLoaders_common, &getLibLoaders_core,
+            &getLibLoaders_input, &getLibLoaders_render,
+            &getLibLoaders_scene, &getLibLoaders_ui,
         ]) {
         loaders ~= pack();
     }

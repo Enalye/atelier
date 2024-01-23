@@ -118,7 +118,7 @@ final class TrueTypeFont : Font {
             SDL_Surface* surface = TTF_RenderGlyph32_Blended(_trueTypeFont, ch,
                 aa);
             assert(surface);
-            Texture texture = new Texture(surface, false, _isSmooth);
+            Texture texture = new Texture(surface, _isSmooth);
             assert(texture);
 
             Glyph metrics = new BasicGlyph(true, advance, 0, 0, texture.width,
@@ -147,7 +147,7 @@ final class TrueTypeFont : Font {
 
             SDL_BlitSurface(surface, &srcRect, surfaceOutline, &dstRect);
 
-            Texture texture = new Texture(surfaceOutline, false, _isSmooth);
+            Texture texture = new Texture(surfaceOutline, _isSmooth);
             assert(texture);
             SDL_FreeSurface(surface);
             Glyph metrics = new BasicGlyph(true, advance, 0, 0, texture.width,

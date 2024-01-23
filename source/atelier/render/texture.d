@@ -20,7 +20,7 @@ import atelier.render.util;
 /// Base rendering class.
 final class Texture : ImageData, Resource!Texture {
     private {
-        bool _isLoaded = false, _ownData, _isSmooth;
+        bool _isSmooth;
         SDL_Texture* _texture = null;
         SDL_Surface* _surface = null;
         uint _width, _height;
@@ -30,10 +30,6 @@ final class Texture : ImageData, Resource!Texture {
     }
 
     @property {
-        /// loaded ?
-        bool isLoaded() const {
-            return _isLoaded;
-        }
         /// Width in texels.
         pragma(inline) override uint width() const {
             return _width;
@@ -85,7 +81,6 @@ final class Texture : ImageData, Resource!Texture {
 
     /// Ctor
     this(const Texture texture) {
-        _isLoaded = texture._isLoaded;
         _texture = cast(SDL_Texture*) texture._texture;
         _surface = cast(SDL_Surface*) texture._surface;
         _width = texture._width;
@@ -94,32 +89,18 @@ final class Texture : ImageData, Resource!Texture {
         _blend = texture._blend;
         _color = texture._color;
         _alpha = texture._alpha;
-        _ownData = false;
     }
 
     /// Ctor
-    this(SDL_Surface* surface_, bool preload_ = false, bool isSmooth_ = false) {
+    this(SDL_Surface* surface_, bool isSmooth_ = false) {
         _isSmooth = isSmooth_;
-        if (preload_) {
-            _surface = surface_;
-            _width = _surface.w;
-            _height = _surface.h;
-        }
-        else
-            load(surface_);
+        load(surface_);
     }
 
     /// Ctor
-    this(string path, bool preload_ = false, bool isSmooth_ = false) {
+    this(string filePath, bool isSmooth_ = false) {
         _isSmooth = isSmooth_;
-        if (preload_) {
-            _surface = IMG_Load(toStringz(path));
-            _width = _surface.w;
-            _height = _surface.h;
-            _ownData = true;
-        }
-        else
-            load(path);
+        load(filePath);
     }
 
     ~this() {
@@ -132,13 +113,13 @@ final class Texture : ImageData, Resource!Texture {
     }
 
     package void load(SDL_Surface* surface_) {
-        if (_surface && _ownData)
+        if (_surface)
             SDL_FreeSurface(_surface);
 
         _surface = surface_;
 
         enforce(_surface, "invalid surface");
-        enforce(Atelier.renderer.sdlRenderer, "the renderer does not exist");
+        enforce(Atelier.renderer.sdlRenderer, "le module de rendu n’est pas initialisé");
 
         if (_texture)
             SDL_DestroyTexture(_texture);
@@ -151,25 +132,24 @@ final class Texture : ImageData, Resource!Texture {
         if (_isSmooth)
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 
-        enforce(_texture, "error occurred while converting a surface to a texture format.");
+        enforce(_texture, "erreur lors de la conversion d’une surface en format de texture");
         updateSettings();
 
         _width = _surface.w;
         _height = _surface.h;
-
-        _isLoaded = true;
-        _ownData = true;
     }
 
     /// Load from file
-    void load(string path) {
-        if (_surface && _ownData)
+    void load(string filePath) {
+        if (_surface)
             SDL_FreeSurface(_surface);
 
-        _surface = IMG_Load(toStringz(path));
+        const(ubyte)[] data = Atelier.res.read(filePath);
+        SDL_RWops* rw = SDL_RWFromConstMem(cast(const(void)*) data.ptr, cast(int) data.length);
+        _surface = IMG_Load_RW(rw, 1);
 
-        enforce(_surface, "can't load image file `" ~ path ~ "`");
-        enforce(Atelier.renderer.sdlRenderer, "the renderer does not exist");
+        enforce(_surface, "impossible d’ouvrir le fichier `" ~ filePath ~ "`");
+        enforce(Atelier.renderer.sdlRenderer, "le module de rendu n’est pas initialisé");
 
         if (_isSmooth)
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
@@ -179,28 +159,20 @@ final class Texture : ImageData, Resource!Texture {
         if (_isSmooth)
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 
-        enforce(_texture, "error occurred while converting `" ~ path ~ "` to a texture format.");
+        enforce(_texture, "erreur lors de la conversion de `" ~ filePath ~ "` en format de texture");
         updateSettings();
 
         _width = _surface.w;
         _height = _surface.h;
-
-        _isLoaded = true;
-        _ownData = true;
     }
 
     /// Free image data
     void unload() {
-        if (!_ownData)
-            return;
-
         if (_surface)
             SDL_FreeSurface(_surface);
 
         if (_texture)
             SDL_DestroyTexture(_texture);
-
-        _isLoaded = false;
     }
 
     private void updateSettings() {
@@ -213,7 +185,6 @@ final class Texture : ImageData, Resource!Texture {
     /// Dessine la texture
     override void draw(Vec2f position, Vec2f size, Vec4i clip, double angle,
         Vec2f pivot = Vec2f.zero, bool flipX = false, bool flipY = false) {
-        enforce(_isLoaded, "can't render the texture: asset not loaded");
 
         SDL_Rect sdlSrc = clip.toSdlRect();
         SDL_FRect sdlDest = {position.x, position.y, size.x, size.y};

@@ -47,35 +47,6 @@ void parseCli(string[] args) {
     cli.addCommand(&cliExport, "export", "Exporte un projet", [], ["name"]);
     cli.addCommandOption("export", "h", "help", "Affiche l’aide de la commande");
     cli.parse(args);
-/*
-    if (args.length > 1) {
-        args = args[1 .. $];
-
-        switch (args[0]) {
-        case "help":
-            displayHelp(args[1 .. $]);
-            break;
-        case "version":
-            writeln(Atelier_Version_Display);
-            break;
-        case "init":
-            initProject();
-            break;
-        case "run":
-            runProject();
-            break;
-        case "build":
-            buildProject();
-            break;
-        default:
-            displayHelp();
-            writeln("Unknown command `", args[0], "`.");
-            break;
-        }
-    }
-    else {
-        runProject();
-    }*/
 }
 
 void displayHelp(string[] args = []) {
@@ -132,19 +103,3 @@ void displayHelp(string[] args = []) {
 
     writeln(txt);
 }
-/*
-void runProject() {
-    writeln("running app");
-
-    Atelier rt = new Atelier();
-    rt.run();
-}
-
-void initProject() {
-    writeln("initializing app");
-}
-
-void buildProject() {
-    writeln("building app");
-}
-*/

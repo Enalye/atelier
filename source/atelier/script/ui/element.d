@@ -62,7 +62,6 @@ package void loadLibUI_element(GrLibDefinition library) {
 
     library.addFunction(&_addImage, "addImage", [uiType, imageType]);
 
-    library.addFunction(&_addUI, "addUI", [uiType]);
     library.addFunction(&_addChild, "addChild", [uiType, uiType]);
 
     library.addFunction(&_remove, "remove", [uiType]);
@@ -297,12 +296,6 @@ private void _addImage(GrCall call) {
     Image image = call.getNative!Image(1);
 
     ui._images ~= image;
-}
-
-private void _addUI(GrCall call) {
-    UIElement ui = call.getNative!UIElement(0);
-
-    Atelier.ui.appendRoot(ui);
 }
 
 private void _addChild(GrCall call) {

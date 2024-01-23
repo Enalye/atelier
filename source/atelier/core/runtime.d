@@ -206,11 +206,9 @@ final class Atelier {
             const string ext = extension(file.name);
             switch (ext) {
             case Atelier_Resource_Extension:
-                file.setRoot(path);
                 _resourceFiles ~= file;
                 break;
             case Atelier_Resource_Compiled_Extension:
-                file.setRoot(path);
                 _compiledResourceFiles ~= file;
                 break;
             default:
@@ -241,6 +239,8 @@ final class Atelier {
             while (accumulator >= 1f) {
                 InputEvent[] inputEvents = _inputManager.pollEvents();
 
+                _audioManager.update();
+                
                 _window.update();
 
                 _uiManager.dispatch(inputEvents);

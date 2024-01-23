@@ -70,7 +70,7 @@ final class BitmapFont : Font {
     this(string name_, string texturePath, Metrics metrics) {
         _name = name_;
         _metrics = metrics;
-        _texture = new Texture(texturePath, true);
+        _texture = new Texture(texturePath);
     }
 
     /// Copy ctor

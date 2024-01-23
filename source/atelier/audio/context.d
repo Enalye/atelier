@@ -7,6 +7,7 @@ import bindbc.openal;
 import atelier.common;
 import atelier.core;
 import atelier.render;
+import atelier.scene;
 
 import atelier.audio.device;
 import atelier.audio.sound;
@@ -21,6 +22,7 @@ final class AudioContext {
         Vec2f _position = Vec2f.zero, _lastPosition;
         //Vec2f _forward = Vec2f(0f, 0f, 1.0f);
         //Vec2f _up = Vec2f(0f, 0f, 0f);
+        bool _isAlive = true;
     }
 
     @property {
@@ -28,10 +30,14 @@ final class AudioContext {
         Vec2f position() const {
             return _position;
         }
+
+        bool isAlive() const {
+            return _isAlive;
+        }
     }
 
     /// Init
-    this(AudioDevice device) {
+    package this(AudioDevice device, Scene scene = null) {
         _voices = new Array!(VoiceBase);
         _lastPosition = _position;
 
@@ -40,16 +46,20 @@ final class AudioContext {
         enforce(_context, "[Audio] impossible de créer le contexte");
     }
 
-    /// Update
-    void update() {
+    package void setCurrent() {
         enforce(alcMakeContextCurrent(_context) == ALC_TRUE,
             "[Audio] impossible de mettre à jour le contexte");
         _assertAlc();
+    }
+
+    /// Update
+    package void update() {
+        setCurrent();
 
         alListener3f(AL_POSITION, _position.x, _position.y, _position.y);
         Vec2f deltaPosition = (_position - _lastPosition) * 60f;
         _lastPosition = _position;
-/*
+        /*
         const Vec2f forward = _forward;
         const Vec2f up = _up;
 
@@ -73,8 +83,28 @@ final class AudioContext {
         _assertAlc();
     }
 
+    void remove() {
+        if (!_isAlive)
+            return;
+        _isAlive = false;
+        foreach (voice; _voices) {
+            voice.remove();
+        }
+        _voices.clear();
+        alcDestroyContext(_context);
+    }
+
     /// Joue le son
-    void play(VoiceBase voice) {
+    void play(Sound sound) {
+        setCurrent();
+        Voice voice = new Voice(sound);
+        _voices.push(voice);
+        _assertAlc();
+    }
+
+    void play(Sound sound, Entity entity) {
+        setCurrent();
+        VoiceEntity voice = new VoiceEntity(sound, entity);
         _voices.push(voice);
         _assertAlc();
     }

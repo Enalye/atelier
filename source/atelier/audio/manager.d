@@ -1,54 +1,92 @@
 module atelier.audio.manager;
 
 import std.exception : enforce;
+import bindbc.openal;
 
+import atelier.common;
+import atelier.scene;
 import atelier.audio.device;
 import atelier.audio.context;
 import atelier.audio.sound;
 import atelier.audio.source;
+import atelier.audio.trackplayer;
 import atelier.audio.voice;
 
 /// Gestionnaire audio
 final class AudioManager {
     private {
         AudioDevice _device;
-        AudioContext _context;
+        TrackPlayer _trackContext;
+        AudioContext _globalContext;
+        Array!AudioContext _sceneContextes;
     }
 
     /// Init
     this() {
         _device = new AudioDevice();
-        _context = new AudioContext(_device);
+        _globalContext = new AudioContext(_device, null);
+        _trackContext = new TrackPlayer(_device);
+        _sceneContextes = new Array!AudioContext;
+    }
+
+    AudioContext createContext(Scene scene) {
+        AudioContext context = new AudioContext(_device, scene);
+        _sceneContextes ~= context;
+        return context;
     }
 
     /// Màj
     void update() {
-        _context.update();
+        _globalContext.update();
+
+        foreach (i, context; _sceneContextes) {
+            context.update();
+        }
+
+        _trackContext.update();
+        _globalContext.setCurrent();
     }
 
-    /// TODO: Temporaire
+    /// Joue un son
     void play(Sound sound) {
-        Voice voice = new Voice(sound);
-        _context.play(voice);
-    }
-/*
-    void play2D(Sound sound, vec2 position) {
-        Voice2D voice = new Voice2D(sound, position);
-        _context.play(voice);
+        _globalContext.play(sound);
     }
 
-    void play2D(Sound sound, Instance2D target) {
-        VoiceTarget2D voice = new VoiceTarget2D(sound, target);
-        _context.play(voice);
+    /// Joue un son
+    void play(Sound sound, Entity entity) {
+        if (entity.scene) {
+            entity.scene.audio.play(sound, entity);
+        }
+        else {
+            play(sound);
+        }
     }
 
-    void play3D(Sound sound, vec3 position) {
-        Voice3D voice = new Voice3D(sound, position);
-        _context.play(voice);
+    void playMusic(Sound sound) {
+        _trackContext.play(sound);
     }
 
-    void play3D(Sound sound, Instance3D target) {
-        VoiceTarget3D voice = new VoiceTarget3D(sound, target);
-        _context.play(voice);
-    }*/
+    void stopMusic() {
+        _trackContext.stop();
+    }
+
+    void pushMusic(Sound sound) {
+        _trackContext.push(sound);
+    }
+
+    void popMusic() {
+        _trackContext.pop();
+    }
+
+    void pauseMusic() {
+        _trackContext.pause();
+    }
+
+    void resumeMusic() {
+        _trackContext.resume();
+    }
+
+    void playInBetween(Sound sound) {
+        _trackContext.playInBetween(sound);
+    }
 }

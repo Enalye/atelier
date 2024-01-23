@@ -79,6 +79,7 @@ final class Sound : Resource!Sound {
     void toMono() {
         if (_channels != 2)
             return;
+        _channels = 1;
 
         float[] buffer = new float[cast(size_t) _samples];
         for (size_t i; i < _samples; ++i) {
@@ -94,6 +95,7 @@ final class Sound : Resource!Sound {
     void toStereo() {
         if (_channels != 1)
             return;
+        _channels = 2;
 
         float[] buffer = new float[cast(size_t)(_samples << 1)];
         for (size_t i; i < _samples; ++i) {

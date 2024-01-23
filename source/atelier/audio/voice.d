@@ -1,10 +1,11 @@
 module atelier.audio.voice;
 
-import std.algorithm.comparison: clamp;
+import std.algorithm.comparison : clamp;
 import bindbc.openal;
 
+import atelier.common;
 import atelier.core;
-import atelier.core;
+import atelier.scene;
 
 import atelier.audio.context;
 import atelier.audio.sound;
@@ -15,6 +16,7 @@ abstract class VoiceBase {
     private {
         ALuint _id;
         float _volume = 1f;
+        bool _isAlive = true;
     }
 
     @property {
@@ -27,6 +29,10 @@ abstract class VoiceBase {
             int value = void;
             alGetSourcei(_id, AL_SOURCE_STATE, &value);
             return value != AL_STOPPED;
+        }
+
+        bool isAlive() const {
+            return _isAlive;
         }
 
         /// Volume entre 0 et 1
@@ -55,6 +61,14 @@ abstract class VoiceBase {
 
     /// Màj
     void update(AudioContext);
+
+    void remove() {
+        if (!_isAlive)
+            return;
+        _isAlive = false;
+        alSourceStop(_id);
+        alDeleteSources(cast(ALuint) 1, &_id);
+    }
 }
 
 /// Instance d’un son
@@ -64,6 +78,69 @@ final class Voice : VoiceBase {
         alSourcei(_id, AL_BUFFER, sound.id);
         volume = sound.volume;
 
+        alSourcePlay(_id);
+    }
+
+    /// Màj
+    override void update(AudioContext context) {
+
+    }
+}
+
+/// Instance d’un son
+final class VoiceEntity : VoiceBase {
+    private {
+        Entity _entity;
+    }
+
+    /// Init
+    this(Sound sound, Entity entity) {
+        _entity = entity;
+
+        alSourcei(_id, AL_BUFFER, sound.id);
+        volume = sound.volume;
+
+        alSourcePlay(_id);
+    }
+
+    /// Màj
+    override void update(AudioContext context) {
+        _entity.scenePosition;
+    }
+}
+
+/// Instance d’un son
+final class TrackVoice : VoiceBase {
+    private {
+        enum State {
+            playing,
+            stopped,
+            paused
+        }
+
+        State _state, _nextState;
+        Timer _timer;
+    }
+
+    /// Init
+    this(Sound sound) {
+        alSourcei(_id, AL_BUFFER, sound.id);
+        volume = sound.volume;
+    }
+
+    void play(int fadeIn = 0, int delay = 0) {
+        alSourcePlay(_id);
+    }
+
+    void stop(int fadeOut = 0) {
+        alSourceStop(_id);
+    }
+
+    void pause(int fadeOut = 0) {
+        alSourcePause(_id);
+    }
+
+    void resume(int fadeIn = 0) {
         alSourcePlay(_id);
     }
 

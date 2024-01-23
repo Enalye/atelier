@@ -5,6 +5,9 @@
  */
 import atelier.cli;
 
+import std.stdio;
+import grimoire;
+
 void main(string[] args) {
     version (AtelierDebug) {
         args = args[0] ~ ["run", "test"];
@@ -19,9 +22,10 @@ void main(string[] args) {
     try {
         parseCli(args);
     }
+    catch (GrCompilerException e) {
+        writeln(e.msg);
+    }
     catch (Exception e) {
-        import std.stdio;
-
         writeln("Erreur: ", e.msg);
         foreach (trace; e.info) {
             writeln("at: ", trace);

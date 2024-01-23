@@ -15,156 +15,97 @@ import atelier.common;
 import atelier.core;
 import atelier.render;
 import atelier.ui;
+import atelier.script.util;
 
 package void loadLibUI_element(GrLibDefinition library) {
-    GrType alignXType = library.addEnum("AlignX", ["left", "center", "right"]);
-    GrType alignYType = library.addEnum("AlignY", ["top", "center", "bottom"]);
+    GrType alignXType = library.addEnum("UIAlignX", ["left", "center", "right"]);
+    GrType alignYType = library.addEnum("UIAlignY", ["top", "center", "bottom"]);
     GrType stateType = grGetNativeType("UIState");
 
-    GrType uiType = library.addNative("UIElement");
+    GrType elementType = library.addNative("UIElement");
 
     GrType imageType = grGetNativeType("Image");
+    GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
 
-    library.addFunction(&_setPos, "setPos", [uiType, grFloat, grFloat]);
-    library.addProperty(&_posX!"get", &_posX!"set", "posX", uiType, grFloat);
-    library.addProperty(&_posY!"get", &_posY!"set", "posY", uiType, grFloat);
+    library.addConstructor(&_ctor, elementType);
 
-    library.addFunction(&_setSize, "setSize", [uiType, grFloat, grFloat]);
-    library.addProperty(&_sizeX!"get", &_sizeX!"set", "sizeX", uiType, grFloat);
-    library.addProperty(&_sizeY!"get", &_sizeY!"set", "sizeY", uiType, grFloat);
+    library.addProperty(&_position!"get", &_position!"set", "position", elementType, vec2fType);
+    library.addProperty(&_size!"get", &_size!"set", "size", elementType, vec2fType);
+    library.addProperty(&_scale!"get", &_scale!"set", "scaleX", elementType, vec2fType);
+    library.addProperty(&_pivot!"get", &_pivot!"set", "pivot", elementType, vec2fType);
 
-    library.addFunction(&_setScale, "setScale", [uiType, grFloat, grFloat]);
-    library.addProperty(&_scaleX!"get", &_scaleX!"set", "scaleX", uiType, grFloat);
-    library.addProperty(&_scaleY!"get", &_scaleY!"set", "scaleY", uiType, grFloat);
+    library.addProperty(&_angle!"get", &_angle!"set", "angle", elementType, grDouble);
 
-    library.addFunction(&_setPivot, "setPivot", [uiType, grFloat, grFloat]);
-    library.addProperty(&_pivotX!"get", &_pivotX!"set", "pivotX", uiType, grFloat);
-    library.addProperty(&_pivotY!"get", &_pivotY!"set", "pivotY", uiType, grFloat);
+    library.addProperty(&_alpha!"get", &_alpha!"set", "alpha", elementType, grFloat);
 
-    library.addProperty(&_angle!"get", &_angle!"set", "angle", uiType, grDouble);
-
-    library.addProperty(&_alpha!"get", &_alpha!"set", "alpha", uiType, grFloat);
-
-    library.addFunction(&_setAlign, "setAlign", [uiType, alignXType, alignYType]);
-    library.addProperty(&_alignX!"get", &_alignX!"set", "alignX", uiType, alignXType);
-    library.addProperty(&_alignY!"get", &_alignY!"set", "alignY", uiType, alignYType);
-
-    library.addProperty(&_hovered, null, "hovered", uiType, grBool);
-    library.addProperty(&_focused, null, "focused", uiType, grBool);
-    library.addProperty(&_pressed, null, "pressed", uiType, grBool);
+    library.addFunction(&_setAlign, "setAlign", [
+            elementType, alignXType, alignYType
+        ]);
+    library.addProperty(&_alignX!"get", &_alignX!"set", "alignX", elementType, alignXType);
+    library.addProperty(&_alignY!"get", &_alignY!"set", "alignY", elementType, alignYType);
+    /*
+    library.addProperty(&_hovered, null, "hovered", elementType, grBool);
+    library.addProperty(&_focused, null, "focused", elementType, grBool);
+    library.addProperty(&_pressed, null, "pressed", elementType, grBool);
 
     library.addProperty(&_onPress!"get", &_onPress!"set", "onSubmit",
-        uiType, grOptional(grEvent()));
+        elementType, grOptional(grEvent()));*/
 
-    library.addFunction(&_addState, "addState", [uiType, stateType]);
-    library.addFunction(&_setState, "setState", [uiType, grString]);
-    library.addFunction(&_runState, "runState", [uiType, grString]);
+    library.addFunction(&_addState, "addState", [elementType, stateType]);
+    library.addFunction(&_setState, "setState", [elementType, grString]);
+    library.addFunction(&_runState, "runState", [elementType, grString]);
 
-    library.addFunction(&_addImage, "addImage", [uiType, imageType]);
+    library.addFunction(&_addImage, "addImage", [elementType, imageType]);
 
-    library.addFunction(&_addChild, "addChild", [uiType, uiType]);
+    library.addFunction(&_addElement, "addElement", [elementType, elementType]);
 
-    library.addFunction(&_remove, "remove", [uiType]);
+    library.addFunction(&_addEventListener, "addEventListener", [
+            elementType, grString, grEvent()
+        ]);
+    library.addFunction(&_removeEventListener, "removeEventListener",
+        [elementType, grString, grEvent()]);
+
+    library.addFunction(&_remove, "remove", [elementType]);
 }
 
-private void _setPos(GrCall call) {
-    UIElement ui = call.getNative!UIElement(0);
-
-    ui.posX = call.getFloat(1);
-    ui.posY = call.getFloat(2);
+private void _ctor(GrCall call) {
+    call.setNative(new UIElement);
 }
 
-private void _posX(string op)(GrCall call) {
-    UIElement ui = call.getNative!UIElement(0);
-
-    static if (op == "set") {
-        ui.posX = call.getFloat(1);
-    }
-    call.setFloat(ui.posX);
-}
-
-private void _posY(string op)(GrCall call) {
+private void _position(string op)(GrCall call) {
     UIElement ui = call.getNative!UIElement(0);
 
     static if (op == "set") {
-        ui.posY = call.getFloat(1);
+        ui.setPosition(call.getNative!SVec2f(1));
     }
-    call.setFloat(ui.posY);
+    call.setNative(svec2(ui.getPosition()));
 }
 
-private void _setSize(GrCall call) {
-    UIElement ui = call.getNative!UIElement(0);
-
-    ui.sizeX = call.getFloat(1);
-    ui.sizeY = call.getFloat(2);
-}
-
-private void _sizeX(string op)(GrCall call) {
+private void _size(string op)(GrCall call) {
     UIElement ui = call.getNative!UIElement(0);
 
     static if (op == "set") {
-        ui.sizeX = call.getFloat(1);
+        ui.setSize(call.getNative!SVec2f(1));
     }
-    call.setFloat(ui.sizeX);
+    call.setNative(svec2(ui.getSize()));
 }
 
-private void _sizeY(string op)(GrCall call) {
+private void _scale(string op)(GrCall call) {
     UIElement ui = call.getNative!UIElement(0);
 
     static if (op == "set") {
-        ui.sizeY = call.getFloat(1);
+        ui.scale = call.getNative!SVec2f(1);
     }
-    call.setFloat(ui.sizeY);
+    call.setNative(svec2(ui.scale));
 }
 
-private void _setScale(GrCall call) {
-    UIElement ui = call.getNative!UIElement(0);
-
-    ui.scaleX = call.getFloat(1);
-    ui.scaleY = call.getFloat(2);
-}
-
-private void _scaleX(string op)(GrCall call) {
+private void _pivot(string op)(GrCall call) {
     UIElement ui = call.getNative!UIElement(0);
 
     static if (op == "set") {
-        ui.scaleX = call.getFloat(1);
+        ui.setPivot(call.getNative!SVec2f(1));
     }
-    call.setFloat(ui.scaleX);
-}
-
-private void _scaleY(string op)(GrCall call) {
-    UIElement ui = call.getNative!UIElement(0);
-
-    static if (op == "set") {
-        ui.scaleY = call.getFloat(1);
-    }
-    call.setFloat(ui.scaleY);
-}
-
-private void _setPivot(GrCall call) {
-    UIElement ui = call.getNative!UIElement(0);
-
-    ui.pivotX = call.getFloat(1);
-    ui.pivotY = call.getFloat(2);
-}
-
-private void _pivotX(string op)(GrCall call) {
-    UIElement ui = call.getNative!UIElement(0);
-
-    static if (op == "set") {
-        ui.pivotX = call.getFloat(1);
-    }
-    call.setFloat(ui.pivotX);
-}
-
-private void _pivotY(string op)(GrCall call) {
-    UIElement ui = call.getNative!UIElement(0);
-
-    static if (op == "set") {
-        ui.pivotY = call.getFloat(1);
-    }
-    call.setFloat(ui.pivotY);
+    call.setNative(svec2(ui.getPivot()));
 }
 
 private void _angle(string op)(GrCall call) {
@@ -188,28 +129,27 @@ private void _alpha(string op)(GrCall call) {
 private void _setAlign(GrCall call) {
     UIElement ui = call.getNative!UIElement(0);
 
-    ui.alignX = call.getEnum!(UIElement.AlignX)(1);
-    ui.alignY = call.getEnum!(UIElement.AlignY)(2);
+    ui.setAlign(call.getEnum!(UIAlignX)(1), call.getEnum!(UIAlignY)(2));
 }
 
 private void _alignX(string op)(GrCall call) {
     UIElement ui = call.getNative!UIElement(0);
 
     static if (op == "set") {
-        ui.alignX = call.getEnum!(UIElement.AlignX)(1);
+        ui.setAlign(call.getEnum!(UIAlignX)(1), ui.getAlignY());
     }
-    call.setEnum!(UIElement.AlignX)(ui.alignX);
+    call.setEnum!UIAlignX(ui.getAlignX());
 }
 
 private void _alignY(string op)(GrCall call) {
     UIElement ui = call.getNative!UIElement(0);
 
     static if (op == "set") {
-        ui.alignY = call.getEnum!(UIElement.AlignY)(1);
+        ui.setAlign(ui.getAlignX(), call.getEnum!(UIAlignY)(2));
     }
-    call.setEnum!(UIElement.AlignY)(ui.alignY);
+    call.setEnum!UIAlignY(ui.getAlignY());
 }
-
+/*
 private void _hovered(GrCall call) {
     UIElement ui = call.getNative!UIElement(0);
 
@@ -239,7 +179,7 @@ private void _onPress(string op)(GrCall call) {
         call.setEvent(ui.onSubmitEvent);
     else
         call.setNull();
-}
+}*/
 
 private void _addState(GrCall call) {
     UIElement ui = call.getNative!UIElement(0);
@@ -260,10 +200,8 @@ private void _setState(GrCall call) {
     ui.currentStateName = ptr.name;
     ui.initState = null;
     ui.targetState = null;
-    ui.offsetX = ptr.offsetX;
-    ui.offsetY = ptr.offsetY;
-    ui.scaleX = ptr.scaleX;
-    ui.scaleX = ptr.scaleX;
+    ui.offset = ptr.offset;
+    ui.scale = ptr.scale;
     ui.angle = ptr.angle;
     ui.alpha = ptr.alpha;
     ui.timer.stop();
@@ -280,10 +218,8 @@ private void _runState(GrCall call) {
 
     ui.currentStateName = ptr.name;
     ui.initState = new UIElement.State;
-    ui.initState.offsetX = ui.offsetX;
-    ui.initState.offsetY = ui.offsetY;
-    ui.initState.scaleX = ui.scaleX;
-    ui.initState.scaleY = ui.scaleY;
+    ui.initState.offset = ui.offset;
+    ui.initState.scale = ui.scale;
     ui.initState.angle = ui.angle;
     ui.initState.alpha = ui.alpha;
     ui.initState.time = ui.timer.duration;
@@ -295,17 +231,33 @@ private void _addImage(GrCall call) {
     UIElement ui = call.getNative!UIElement(0);
     Image image = call.getNative!Image(1);
 
-    ui._images ~= image;
+    ui.addImage(image);
 }
 
-private void _addChild(GrCall call) {
+private void _addElement(GrCall call) {
     UIElement uiParent = call.getNative!UIElement(0);
     UIElement uiChild = call.getNative!UIElement(1);
 
-    uiParent._children ~= uiChild;
+    uiParent.addElement(uiChild);
+}
+
+private void _addEventListener(GrCall call) {
+    UIElement ui = call.getNative!UIElement(0);
+    string key = call.getString(1).str();
+    GrEvent event = call.getEvent(2);
+
+    ui.addEventListener(key, event);
+}
+
+private void _removeEventListener(GrCall call) {
+    UIElement ui = call.getNative!UIElement(0);
+    string key = call.getString(1).str();
+    GrEvent event = call.getEvent(2);
+
+    ui.removeEventListener(key, event);
 }
 
 private void _remove(GrCall call) {
     UIElement ui = call.getNative!UIElement(0);
-    ui.alive = false;
+    ui.remove();
 }

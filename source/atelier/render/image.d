@@ -33,6 +33,8 @@ abstract class Image {
 
     bool isAlive = true;
 
+    bool isVisible = true;
+
     this() {
     }
 

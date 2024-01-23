@@ -6,50 +6,58 @@ import atelier.common;
 import atelier.core;
 import atelier.render;
 
-/// Abstract class representing an UI element
-abstract class UIElement {
-    public {
-        UIElement[] _children;
-        Image[] _images;
-    }
+/// Alignement horizontal
+enum UIAlignX {
+    left,
+    center,
+    right
+}
 
+/// Alignement vertical
+enum UIAlignY {
+    top,
+    center,
+    bottom
+}
+
+/// Élément d’interface
+class UIElement {
     private {
-        bool _hovered, _focused, _pressed, _selected, _activated, _grabbed;
-        bool _enabled;
+        alias NativeEventListener = void delegate();
+
+        UIElement _parent;
+        Array!UIElement _children;
+        Array!Image _images;
+        Array!NativeEventListener[string] _nativeEventListeners;
+        Array!GrEvent[string] _scriptEventListeners;
+
+        UIAlignX _alignX = UIAlignX.center;
+        UIAlignY _alignY = UIAlignY.center;
+
+        Vec2f _position = Vec2f.zero;
+        Vec2f _size = Vec2f.zero;
+        Vec2f _pivot = Vec2f.half;
+        Vec2f _mousePosition = Vec2f.zero;
+
+        bool _isHovered, _hasFocus, _isPressed, _isSelected, _isActive, _isGrabbed;
+        bool _isEnabled = true;
+        bool _isAlive = true;
     }
 
-    float posX = 0f, posY = 0f;
-    float sizeX = 0f, sizeY = 0f;
-    float pivotX = .5f, pivotY = .5f;
-
-    /// X alignment
-    enum AlignX {
-        left,
-        center,
-        right
-    }
-
-    /// Y alignment
-    enum AlignY {
-        top,
-        center,
-        bottom
-    }
-
-    AlignX alignX = AlignX.center;
-    AlignY alignY = AlignY.center;
+    /// Ordenancement
+    int zOrder = 0;
 
     /// Transitions
-    float offsetX = 0f, offsetY = 0f;
-    float scaleX = 1f, scaleY = 1f;
+    Vec2f offset = Vec2f.zero;
+    Vec2f scale = Vec2f.one;
     Color color = Color.white;
     float alpha = 1f;
     double angle = 0.0;
 
     static final class State {
         string name;
-        float offsetX = 0f, offsetY = 0f;
-        float scaleX = 1f, scaleY = 1f;
+        Vec2f offset = Vec2f.zero;
+        Vec2f scale = Vec2f.one;
         Color color = Color.white;
         float alpha = 1f;
         double angle = 0.0;
@@ -63,129 +71,270 @@ abstract class UIElement {
     Timer timer;
 
     // Propriétés
-
     @property {
-        bool hovered() const {
-            return _hovered;
+        package final bool isAlive() const {
+            return _isAlive;
         }
 
-        bool hovered(bool hovered_) {
-            if (_hovered != hovered_) {
-                _hovered = hovered_;
-                onHover();
+        final bool isHovered() const {
+            return _isHovered;
+        }
+
+        package final bool isHovered(bool isHovered_) {
+            if (_isHovered != isHovered_) {
+                _isHovered = isHovered_;
+                dispatchEvent(_isHovered ? "mouseenter" : "mouseleave", false);
             }
-            return _hovered;
+            return _isHovered;
         }
 
-        bool focused() const {
-            return _focused;
+        final bool hasFocus() const {
+            return _hasFocus;
         }
 
-        bool focused(bool focused_) {
-            if (_focused != focused_) {
-                _focused = focused_;
-                onFocus();
+        final bool hasFocus(bool hasFocus_) {
+            if (_hasFocus != hasFocus_) {
+                _hasFocus = hasFocus_;
+                dispatchEvent(_hasFocus ? "focus" : "unfocus", false);
             }
-            return _focused;
+            return _hasFocus;
         }
 
-        bool pressed() const {
-            return _pressed;
+        final bool isPressed() const {
+            return _isPressed;
         }
 
-        bool pressed(bool pressed_) {
-            if (_pressed != pressed_) {
-                _pressed = pressed_;
-                onPress();
+        package final bool isPressed(bool isPressed_) {
+            if (_isPressed != isPressed_) {
+                _isPressed = isPressed_;
+                dispatchEvent(_isPressed ? "press" : "unpress", true);
             }
-            return _pressed;
+            return _isPressed;
         }
 
-        bool selected() const {
-            return _selected;
+        final bool isSelected() const {
+            return _isSelected;
         }
 
-        bool selected(bool selected_) {
-            if (_selected != selected_) {
-                _selected = selected_;
-                onSelect();
+        final bool isSelected(bool isSelected_) {
+            if (_isSelected != isSelected_) {
+                _isSelected = isSelected_;
+                dispatchEvent(_isSelected ? "select" : "deselect", false);
             }
-            return _selected;
+            return _isSelected;
         }
 
-        bool activated() const {
-            return _activated;
+        final bool isActive() const {
+            return _isActive;
         }
 
-        bool activated(bool activated_) {
-            if (_activated != activated_) {
-                _activated = activated_;
-                onActive();
+        final bool isActive(bool isActive_) {
+            if (_isActive != isActive_) {
+                _isActive = isActive_;
+                dispatchEvent(_isActive ? "active" : "inactive", false);
             }
-            return _activated;
+            return _isActive;
         }
 
-        bool grabbed() const {
-            return _grabbed;
+        final bool isGrabbed() const {
+            return _isGrabbed;
         }
 
-        bool grabbed(bool grabbed_) {
-            if (_grabbed != grabbed_) {
-                _grabbed = grabbed_;
-                onGrab();
+        package final bool isGrabbed(bool isGrabbed_) {
+            if (_isGrabbed != isGrabbed_) {
+                _isGrabbed = isGrabbed_;
+                dispatchEvent(_isGrabbed ? "grab" : "ungrab", false);
             }
-            return _grabbed;
+            return _isGrabbed;
         }
 
-        bool enabled() const {
-            return _enabled;
+        final bool isEnabled() const {
+            return _isEnabled;
         }
 
-        bool enabled(bool enabled_) {
-            if (_enabled != enabled_) {
-                _enabled = enabled_;
-                onEnable();
+        final bool isEnabled(bool isEnabled_) {
+            if (_isEnabled != isEnabled_) {
+                _isEnabled = isEnabled_;
+                dispatchEvent(_isEnabled ? "enable" : "disable", false);
             }
-            return _enabled;
+            return _isEnabled;
         }
     }
 
     bool focusable, movable;
 
-    GrEvent onSubmitEvent;
-
-    bool alive = true;
-
-    void update() {
+    this() {
+        _children = new Array!UIElement;
+        _images = new Array!Image;
     }
 
-    void draw() {
+    final UIElement getParent() {
+        return _parent;
     }
 
-    void onHover() {
+    final Array!UIElement getChildren() {
+        return _children;
     }
 
-    void onFocus() {
+    final Array!Image getImages() {
+        return _images;
     }
 
-    void onPress() {
+    final Vec2f getMousePosition() const {
+        return _mousePosition;
     }
 
-    void onSelect() {
+    final package Vec2f setMousePosition(Vec2f mousePosition) {
+        return _mousePosition = mousePosition;
     }
 
-    void onActive() {
+    final void setAlign(UIAlignX alignX, UIAlignY alignY) {
+        _alignX = alignX;
+        _alignY = alignY;
     }
 
-    void onGrab() {
+    final UIAlignX getAlignX() {
+        return _alignX;
     }
 
-    void onSubmit() {
-        if (onSubmitEvent) {
-            Atelier.vm.callEvent(onSubmitEvent);
+    final UIAlignY getAlignY() {
+        return _alignY;
+    }
+
+    final Vec2f getPosition() const {
+        return _position;
+    }
+
+    final void setPosition(Vec2f position_) {
+        if (_position == position_)
+            return;
+        _position = position_;
+        dispatchEvent("position");
+    }
+
+    final Vec2f getSize() const {
+        return _size;
+    }
+
+    final float getWidth() const {
+        return _size.x;
+    }
+
+    final float getHeight() const {
+        return _size.y;
+    }
+
+    final void setSize(Vec2f size_) {
+        if (_size == size_)
+            return;
+        _size = size_;
+        dispatchEvent("size");
+    }
+
+    final Vec2f getCenter() const {
+        return _size / 2f;
+    }
+
+    final Vec2f getPivot() const {
+        return _pivot;
+    }
+
+    final void setPivot(Vec2f pivot_) {
+        if (_pivot == pivot_)
+            return;
+        _pivot = pivot_;
+        dispatchEvent("pivot");
+    }
+
+    final void addEventListener(string type, NativeEventListener listener) {
+        _nativeEventListeners.update(type, {
+            Array!NativeEventListener evllist = new Array!NativeEventListener;
+            evllist ~= listener;
+            return evllist;
+        }, (Array!NativeEventListener evllist) { evllist ~= listener; });
+    }
+
+    final void addEventListener(string type, GrEvent listener) {
+        _scriptEventListeners.update(type, {
+            Array!GrEvent evllist = new Array!GrEvent;
+            evllist ~= listener;
+            return evllist;
+        }, (Array!GrEvent evllist) { evllist ~= listener; });
+    }
+
+    final void removeEventListener(string type, NativeEventListener listener) {
+        _nativeEventListeners.update(type, {
+            return new Array!NativeEventListener;
+        }, (Array!NativeEventListener evllist) {
+            foreach (i, eventListener; evllist) {
+                if (eventListener == listener)
+                    evllist.mark(i);
+            }
+            evllist.sweep();
+        });
+    }
+
+    final void removeEventListener(string type, GrEvent listener) {
+        _scriptEventListeners.update(type, { return new Array!GrEvent; }, (Array!GrEvent evllist) {
+            foreach (i, eventListener; evllist) {
+                if (eventListener == listener)
+                    evllist.mark(i);
+            }
+            evllist.sweep();
+        });
+    }
+
+    final void dispatchEvent(string type, bool bubbling = true) {
+        { // Natifs
+            auto p = type in _nativeEventListeners;
+            if (p) {
+                Array!NativeEventListener evllist = *p;
+                foreach (listener; evllist) {
+                    listener();
+                }
+            }
+        }
+        
+        { // Scripts
+            auto p = type in _scriptEventListeners;
+            if (p) {
+                Array!GrEvent evllist = *p;
+                foreach (listener; evllist) {
+                    Atelier.vm.callEvent(listener);
+                }
+            }
+        }
+
+        if (bubbling && _parent) {
+            _parent.dispatchEvent(type);
         }
     }
 
-    void onEnable() {
+    final void addElement(UIElement element) {
+        element._parent = this;
+        _children ~= element;
+    }
+
+    final void clearChildren() {
+        foreach (child; _children) {
+            child._parent = null;
+            child.remove();
+        }
+        _children.clear();
+    }
+
+    final void addImage(Image image) {
+        _images ~= image;
+    }
+
+    final void clearImages() {
+        _images.clear();
+    }
+
+    final void remove() {
+        _isAlive = false;
+        _parent = null;
+        clearChildren();
+        clearImages();
     }
 }

@@ -69,7 +69,8 @@ void cliRun(Cli.Result cli) {
             }
 
             Json windowNode = configNode.getObject(Atelier_Project_Window_Node);
-            string windowTitle = windowNode.getString(Atelier_Project_Window_Title_Node, configName);
+            string windowTitle = windowNode.getString(Atelier_Project_Window_Title_Node,
+                configName);
             int windowWidth = windowNode.getInt(Atelier_Project_Window_Width_Node,
                 Atelier_Window_Width_Default);
             int windowHeight = windowNode.getInt(Atelier_Project_Window_Height_Node,
@@ -93,9 +94,10 @@ void cliRun(Cli.Result cli) {
             GrBytecode bytecode = compiler.compile(
                 GrOption.safe | GrOption.profile | GrOption.symbols, GrLocale.fr_FR);
 
-            enforce(bytecode, compiler.getError().prettify(GrLocale.fr_FR));
+            enforce!GrCompilerException(bytecode, compiler.getError().prettify(GrLocale.fr_FR));
 
-            Atelier atelier = new Atelier(bytecode, libraries, windowWidth, windowHeight, windowTitle);
+            Atelier atelier = new Atelier(bytecode, libraries, windowWidth,
+                windowHeight, windowTitle);
 
             foreach (string archive; archives) {
                 atelier.loadResources(archive);
@@ -137,6 +139,6 @@ void cliRun(Cli.Result cli) {
         }
     }
 
-    enforce(false, "aucune configuration `" ~ configName ~ "` défini dans `" ~
-            Atelier_Project_File ~ "`");
+    enforce(false,
+        "aucune configuration `" ~ configName ~ "` défini dans `" ~ Atelier_Project_File ~ "`");
 }

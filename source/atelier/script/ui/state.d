@@ -14,38 +14,27 @@ import grimoire;
 import atelier.common;
 import atelier.core;
 import atelier.ui;
+import atelier.script.util;
 
 package void loadLibUI_state(GrLibDefinition library) {
     GrType splineType = grGetEnumType("Spline");
     GrType stateType = library.addNative("UIState");
 
+    GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
+
     library.addConstructor(&_ui_state_new, stateType, [grString]);
 
-    library.addFunction(&_ui_state_setOffset, "setOffset", [
-            stateType, grFloat, grFloat
-        ]);
-    library.addProperty(&_ui_state_offsetX!"get", &_ui_state_offsetX!"set",
-        "offsetX", stateType, grFloat);
-    library.addProperty(&_ui_state_offsetY!"get", &_ui_state_offsetY!"set",
-        "offsetY", stateType, grFloat);
-
-    library.addFunction(&_ui_state_setScale, "setScale", [
-            stateType, grFloat, grFloat
-        ]);
-    library.addProperty(&_ui_state_scaleX!"get", &_ui_state_scaleX!"set",
-        "scaleX", stateType, grFloat);
-    library.addProperty(&_ui_state_scaleY!"get", &_ui_state_scaleY!"set",
-        "scaleY", stateType, grFloat);
-
+    library.addProperty(&_ui_state_offset!"get", &_ui_state_offset!"set",
+        "offset", stateType, vec2fType);
+    library.addProperty(&_ui_state_scale!"get", &_ui_state_scale!"set",
+        "scale", stateType, vec2fType);
     library.addProperty(&_ui_state_angle!"get", &_ui_state_angle!"set",
         "angle", stateType, grDouble);
     library.addProperty(&_ui_state_alpha!"get", &_ui_state_alpha!"set",
         "alpha", stateType, grFloat);
-
     library.addProperty(&_ui_state_time!"get", &_ui_state_time!"set", "time", stateType, grInt);
     library.addProperty(&_ui_state_spline!"get", &_ui_state_spline!"set",
         "spline", stateType, splineType);
-
 }
 
 private void _ui_state_new(GrCall call) {
@@ -55,54 +44,22 @@ private void _ui_state_new(GrCall call) {
     call.setNative(state);
 }
 
-private void _ui_state_setOffset(GrCall call) {
-    UIElement.State state = call.getNative!(UIElement.State)(0);
-
-    state.offsetX = call.getFloat(1);
-    state.offsetY = call.getFloat(2);
-}
-
-private void _ui_state_offsetX(string op)(GrCall call) {
+private void _ui_state_offset(string op)(GrCall call) {
     UIElement.State state = call.getNative!(UIElement.State)(0);
 
     static if (op == "set") {
-        state.offsetX = call.getFloat(1);
+        state.offset = call.getNative!SVec2f(1);
     }
-    call.setFloat(state.offsetX);
+    call.setNative(svec2(state.offset));
 }
 
-private void _ui_state_offsetY(string op)(GrCall call) {
+private void _ui_state_scale(string op)(GrCall call) {
     UIElement.State state = call.getNative!(UIElement.State)(0);
 
     static if (op == "set") {
-        state.offsetY = call.getFloat(1);
+        state.scale = call.getNative!SVec2f(1);
     }
-    call.setFloat(state.offsetY);
-}
-
-private void _ui_state_setScale(GrCall call) {
-    UIElement.State state = call.getNative!(UIElement.State)(0);
-
-    state.scaleX = call.getFloat(1);
-    state.scaleY = call.getFloat(2);
-}
-
-private void _ui_state_scaleX(string op)(GrCall call) {
-    UIElement.State state = call.getNative!(UIElement.State)(0);
-
-    static if (op == "set") {
-        state.scaleX = call.getFloat(1);
-    }
-    call.setFloat(state.scaleX);
-}
-
-private void _ui_state_scaleY(string op)(GrCall call) {
-    UIElement.State state = call.getNative!(UIElement.State)(0);
-
-    static if (op == "set") {
-        state.scaleY = call.getFloat(1);
-    }
-    call.setFloat(state.scaleY);
+    call.setNative(svec2(state.scale));
 }
 
 private void _ui_state_angle(string op)(GrCall call) {
@@ -160,10 +117,8 @@ private void _ui_setState(GrCall call) {
     ui.currentStateName = ptr.name;
     ui.initState = null;
     ui.targetState = null;
-    ui.offsetX = ptr.offsetX;
-    ui.offsetY = ptr.offsetY;
-    ui.scaleX = ptr.scaleX;
-    ui.scaleX = ptr.scaleX;
+    ui.offset = ptr.offset;
+    ui.scale = ptr.scale;
     ui.angle = ptr.angle;
     ui.alpha = ptr.alpha;
     ui.timer.stop();

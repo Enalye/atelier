@@ -11,7 +11,6 @@ import std.math : ceil, abs;
 
 import atelier.common;
 import atelier.core;
-
 import atelier.render.image;
 import atelier.render.renderer;
 import atelier.render.writabletexture;
@@ -217,7 +216,7 @@ final class RoundedRectangle : Image {
                     for (int ix; ix < corner; ++ix) {
                         Vec2f point = Vec2f(ix, iy);
                         float dist = point.distance(Vec2f(corner, corner));
-                        float value = clamp(abs((dist + halfThickness) - data.radius) - halfThickness,
+                        float value = clamp(abs((dist + halfThickness) - data.radius) - (halfThickness + 0.25f),
                             0f, 1f);
 
                         dest[iy * texWidth + ix] = 0xFFFFFF00 | (cast(ubyte) lerp(255f, 0f, value));
@@ -227,7 +226,7 @@ final class RoundedRectangle : Image {
                     for (int ix; ix < corner; ++ix) {
                         Vec2f point = Vec2f(ix + 1f, iy);
                         float dist = point.distance(Vec2f(0f, corner));
-                        float value = clamp(abs((dist + halfThickness) - data.radius) - halfThickness,
+                        float value = clamp(abs((dist + halfThickness) - data.radius) - (halfThickness + 0.25f),
                             0f, 1f);
 
                         dest[(iy + 1) * texWidth + (ix - corner)] = 0xFFFFFF00 | (cast(ubyte) lerp(255f,
@@ -241,7 +240,7 @@ final class RoundedRectangle : Image {
                     for (int ix; ix < corner; ++ix) {
                         Vec2f point = Vec2f(ix, iy + 1f);
                         float dist = point.distance(Vec2f(corner, 0f));
-                        float value = clamp(abs((dist + halfThickness) - data.radius) - halfThickness,
+                        float value = clamp(abs((dist + halfThickness) - data.radius) - (halfThickness + 0.25f),
                             0f, 1f);
 
                         dest[iy * texWidth + ix + offsetY] = 0xFFFFFF00 | (cast(ubyte) lerp(255f,
@@ -252,7 +251,7 @@ final class RoundedRectangle : Image {
                     for (int ix; ix < corner; ++ix) {
                         Vec2f point = Vec2f(ix + 1f, iy + 1f);
                         float dist = point.distance(Vec2f.zero);
-                        float value = clamp(abs((dist + halfThickness) - data.radius) - halfThickness,
+                        float value = clamp(abs((dist + halfThickness) - data.radius) - (halfThickness + 0.25f),
                             0f, 1f);
 
                         dest[(iy + 1) * texWidth + ix + offsetY - corner] = 0xFFFFFF00 | (cast(ubyte) lerp(255f,

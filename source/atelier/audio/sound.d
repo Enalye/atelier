@@ -1,31 +1,24 @@
 module atelier.audio.sound;
 
+import std.stdio;
 import audioformats;
+import bindbc.sdl;
 
-import bindbc.openal;
-
-import atelier.audio.context;
-import atelier.audio.voice;
 import atelier.common;
 import atelier.core;
+import atelier.audio.voice;
 
 /// Représente les données d’un son
 final class Sound : Resource!Sound {
     private {
-        ALuint _id;
         float[] _buffer;
-        int _channels;
+        ubyte _channels;
         ulong _samples;
         int _sampleRate;
         float _volume = 1f;
     }
 
     @property {
-        /// Indice du son
-        ALuint id() const {
-            return _id;
-        }
-
         /// Volume entre 0 et 1
         float volume() const {
             return _volume;
@@ -35,6 +28,22 @@ final class Sound : Resource!Sound {
         float volume(float volume_) {
             return _volume = clamp(volume_, 0f, 1f);
         }
+
+        const(float[]) buffer() const {
+            return _buffer;
+        }
+
+        ubyte channels() const {
+            return _channels;
+        }
+
+        ulong samples() const {
+            return _samples;
+        }
+
+        int sampleRate() const {
+            return _sampleRate;
+        }
     }
 
     /// Charge depuis un fichier
@@ -43,7 +52,7 @@ final class Sound : Resource!Sound {
         const(ubyte)[] data = Atelier.res.read(filePath);
         stream.openFromMemory(data);
 
-        _channels = stream.getNumChannels();
+        _channels = cast(ubyte) stream.getNumChannels();
         _samples = stream.getLengthInFrames();
         assert(_samples != audiostreamUnknownLength);
 
@@ -53,21 +62,15 @@ final class Sound : Resource!Sound {
         assert(framesRead == stream.getLengthInFrames());
         _sampleRate = cast(int) stream.getSamplerate();
 
-        alGenBuffers(cast(ALuint) 1, &_id);
-        alBufferData(_id, AL_FORMAT_STEREO_FLOAT32, _buffer.ptr,
-            cast(int)(_buffer.length * float.sizeof), _sampleRate);
+        toStereo();
     }
 
     /// Copie
     this(Sound sound) {
-        _id = sound._id;
         _buffer = sound._buffer;
         _channels = sound._channels;
         _samples = sound._samples;
         _sampleRate = sound._sampleRate;
-    }
-
-    private this(AudioStream stream) {
     }
 
     /// Accès à la ressource
@@ -86,9 +89,6 @@ final class Sound : Resource!Sound {
             buffer[i] = (_buffer[i << 1] + _buffer[(i << 1) + 1]) / 2f;
         }
         _buffer = buffer;
-
-        alBufferData(_id, AL_FORMAT_MONO_FLOAT32, _buffer.ptr,
-            cast(int)(_buffer.length * float.sizeof), _sampleRate);
     }
 
     /// Convertir en stereo
@@ -102,8 +102,9 @@ final class Sound : Resource!Sound {
             buffer[i << 1] = buffer[(i << 1) + 1] = _buffer[i];
         }
         _buffer = buffer;
+    }
 
-        alBufferData(_id, AL_FORMAT_STEREO_FLOAT32, _buffer.ptr,
-            cast(int)(_buffer.length * float.sizeof), _sampleRate);
+    Voice play() {
+        return new SoundVoice(this);
     }
 }

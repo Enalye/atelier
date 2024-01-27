@@ -1,151 +1,70 @@
 module atelier.audio.voice;
 
-import std.algorithm.comparison : clamp;
-import bindbc.openal;
+import std.stdio;
+import audioformats;
+import bindbc.sdl;
 
 import atelier.common;
 import atelier.core;
-import atelier.scene;
-
-import atelier.audio.context;
 import atelier.audio.sound;
-import atelier.audio.source;
 
-/// Instance d’un son
-abstract class VoiceBase {
+interface Voice {
+    @property {
+        bool isAlive() const;
+    }
+
+    void render(float*, size_t);
+}
+
+final class SoundVoice : Voice {
     private {
-        ALuint _id;
-        float _volume = 1f;
+        Sound _sound;
+        size_t _position;
+        SDL_AudioStream* _stream;
         bool _isAlive = true;
     }
 
     @property {
-        protected ALuint id() const {
-            return _id;
-        }
-
-        /// Le son est-il en train de se jouer ?
-        bool isPlaying() const {
-            int value = void;
-            alGetSourcei(_id, AL_SOURCE_STATE, &value);
-            return value != AL_STOPPED;
-        }
-
         bool isAlive() const {
             return _isAlive;
         }
-
-        /// Volume entre 0 et 1
-        float volume() const {
-            return _volume;
-        }
-
-        /// Ditto
-        float volume(float volume_) {
-            _volume = clamp(volume_, 0f, 1f);
-            alSourcef(_id, AL_GAIN, _volume);
-            return _volume;
-        }
     }
 
-    /// Init
-    this() {
-        alGenSources(cast(ALuint) 1, &_id);
-
-        alSourcef(_id, AL_PITCH, 1f);
-        alSourcef(_id, AL_GAIN, 1f);
-        alSource3f(_id, AL_POSITION, 0f, 0f, 0f);
-        alSource3f(_id, AL_VELOCITY, 0f, 0f, 0f);
-        alSourcei(_id, AL_LOOPING, AL_FALSE);
-    }
-
-    /// Màj
-    void update(AudioContext);
-
-    void remove() {
-        if (!_isAlive)
-            return;
-        _isAlive = false;
-        alSourceStop(_id);
-        alDeleteSources(cast(ALuint) 1, &_id);
-    }
-}
-
-/// Instance d’un son
-final class Voice : VoiceBase {
-    /// Init
     this(Sound sound) {
-        alSourcei(_id, AL_BUFFER, sound.id);
-        volume = sound.volume;
-
-        alSourcePlay(_id);
+        _sound = sound;
+        _stream = SDL_NewAudioStream(AUDIO_F32, _sound.channels,
+            _sound.sampleRate, AUDIO_F32, 2, 48_000);
+        const int rc = SDL_AudioStreamPut(_stream, _sound.buffer.ptr,
+            cast(int)(_sound.buffer.length * float.sizeof));
+        if (rc < 0) {
+            _isAlive = false;
+        }
     }
 
-    /// Màj
-    override void update(AudioContext context) {
+    void render(float* buffer, size_t len) {
+        float[] converted = new float[len];
 
-    }
-}
+        int gotten = SDL_AudioStreamGet(_stream, converted.ptr, cast(int)(float.sizeof * len));
+        gotten >>= 2;
 
-/// Instance d’un son
-final class VoiceEntity : VoiceBase {
-    private {
-        Entity _entity;
-    }
-
-    /// Init
-    this(Sound sound, Entity entity) {
-        _entity = entity;
-
-        alSourcei(_id, AL_BUFFER, sound.id);
-        volume = sound.volume;
-
-        alSourcePlay(_id);
-    }
-
-    /// Màj
-    override void update(AudioContext context) {
-        _entity.scenePosition;
-    }
-}
-
-/// Instance d’un son
-final class TrackVoice : VoiceBase {
-    private {
-        enum State {
-            playing,
-            stopped,
-            paused
+        if (gotten <= 0) {
+            _isAlive = false;
+        }
+        else {
+            for (size_t i; i < gotten; i++) {
+                buffer[i] += converted[i];
+            }
         }
 
-        State _state, _nextState;
-        Timer _timer;
-    }
+        /*
+        for (size_t i; (i < len) && (i + _position < _sound._buffer.length); i++) {
+            buffer[i] += _sound._buffer[i + _position];
+        }
+        _position += len;
 
-    /// Init
-    this(Sound sound) {
-        alSourcei(_id, AL_BUFFER, sound.id);
-        volume = sound.volume;
-    }
-
-    void play(int fadeIn = 0, int delay = 0) {
-        alSourcePlay(_id);
-    }
-
-    void stop(int fadeOut = 0) {
-        alSourceStop(_id);
-    }
-
-    void pause(int fadeOut = 0) {
-        alSourcePause(_id);
-    }
-
-    void resume(int fadeIn = 0) {
-        alSourcePlay(_id);
-    }
-
-    /// Màj
-    override void update(AudioContext context) {
-
+        if (_position >= _sound._buffer.length) {
+            _isAlive = false;
+            writeln("END OF SOUND: ", _position, ", ", _sound._buffer.length, ", ", len);
+        }*/
     }
 }

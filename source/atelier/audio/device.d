@@ -1,30 +1,28 @@
 module atelier.audio.device;
 
+import core.thread;
 import std.exception : enforce;
-
 import std.stdio;
 import std.string;
+import bindbc.sdl;
 
-import bindbc.openal;
-
-import atelier.audio.util;
+import atelier.audio.bus;
 
 /// Représente un périphérique audio
 final class AudioDevice {
     private {
         /// Représente le périphérique audio
-        ALCdevice* _device;
+        SDL_AudioDeviceID _deviceId;
+        AudioBus _masterBus;
     }
 
     @property {
-        package ALCdevice* handle() {
-            return _device;
-        }
     }
 
     /// Init
-    this(string deviceName = "") {
-        _openAudio(deviceName);
+    this(AudioBus masterBus, int frequency, ushort bufferSize, string deviceName = "") {
+        _masterBus = masterBus;
+        _openAudio(deviceName, frequency, bufferSize);
     }
 
     /// Déinit
@@ -33,73 +31,54 @@ final class AudioDevice {
     }
 
     /// Initialise le module audio
-    private void _openAudio(string deviceName) {
-        ALSupport alSupport = loadOpenAL();
-        final switch (alSupport) with (ALSupport) {
-        case al11:
-            break;
-        case noLibrary:
-            throw new Exception("[Audio] aucune bibliothèque de trouvée");
-        case badLibrary:
-            throw new Exception("[Audio] mauvaise bibliothèque de trouvée");
-        }
+    private void _openAudio(string deviceName, int frequency, ushort bufferSize) {
+        SDL_AudioSpec desired, obtained;
 
-        enforce(alcIsExtensionPresent(null, "ALC_ENUMERATION_EXT") == AL_TRUE,
-            "[Audio] ALC_ENUMERATION_EXT n’est pas disponible");
+        desired.freq = frequency;
+        desired.channels = 2;
+        desired.samples = bufferSize;
+        desired.format = AUDIO_F32;
+        desired.callback = &_callback;
+        desired.userdata = cast(void*) _masterBus;
 
-        if (!deviceName.length)
-            _device = alcOpenDevice(null);
-        else {
+        if (deviceName.length) {
             const(char)* deviceCStr = toStringz(deviceName);
-            writeln("OPENING ", deviceName);
-            _device = alcOpenDevice(deviceCStr);
+            _deviceId = SDL_OpenAudioDevice(deviceCStr, 0, &desired, &obtained, 0);
         }
-
-        enforce(_device, "[Audio] impossible de charger le périphérique " ~ deviceName);
-
-        //writeln(getDevices());
+        else {
+            _deviceId = SDL_OpenAudioDevice(null, 0, &desired, &obtained, 0);
+        }
+        play();
     }
 
     /// Ferme le module audio
     private void _closeAudio() {
-        alcCloseDevice(_device);
-        _device = null;
+        SDL_CloseAudioDevice(_deviceId);
+        _deviceId = 0;
     }
 
-    string[] getDevices() {
-        const(ALchar)* deviceSpecifier;
-        deviceSpecifier = alcGetString(null, ALC_ALL_DEVICES_SPECIFIER);
-        size_t i;
-        bool wasNull;
-        string[] devices;
-        string currentDevice;
-        for (;;) {
-            if (deviceSpecifier[i] == '\0') {
-                if (wasNull)
-                    break;
-                wasNull = true;
-                devices ~= currentDevice.replace("OpenAL Soft on ", "");
-                currentDevice.length = 0;
-            } else {
-                wasNull = false;
-                currentDevice ~= deviceSpecifier[i];
-            }
-            i++;
+    void play() {
+        SDL_PauseAudioDevice(_deviceId, 0);
+    }
+
+    void stop() {
+        SDL_PauseAudioDevice(_deviceId, 1);
+    }
+
+    static private extern (C) void _callback(void* userData, ubyte* stream, int len) nothrow {
+        len >>= 2; // 8 bit -> 32 bit
+        float* buffer = cast(float*) stream;
+
+        AudioBus masterBus = cast(AudioBus) userData;
+
+        for (int i; i < len; i++) {
+            buffer[i] = 0f;
         }
-        return devices;
-    }
 
-    string getCurrentDevice() {
-        const(ALchar)* deviceSpecifier;
-        deviceSpecifier = alcGetString(null, ALC_DEFAULT_ALL_DEVICES_SPECIFIER);
-        size_t i;
-        string currentDevice;
-        for (;;) {
-            if (deviceSpecifier[i] == '\0') {
-                return currentDevice.replace("OpenAL Soft on ", "");
-            }
-            currentDevice ~= deviceSpecifier[i];
-            i++;
+        try {
+            masterBus.render(buffer, len);
+        }
+        catch (Exception e) {
         }
     }
 }

@@ -16,6 +16,7 @@ package void loadLibAudio_sound(GrLibDefinition library) {
     GrType soundType = library.addNative("Sound");
 
     library.addConstructor(&_ctor, soundType, [grString]);
+    library.addFunction(&_play, "play", [soundType]);
 
     //library.addProperty(&_volume!"get", &_volume!"set", "volume", soundType, grFloat);
 }
@@ -23,6 +24,11 @@ package void loadLibAudio_sound(GrLibDefinition library) {
 private void _ctor(GrCall call) {
     Sound sound = Atelier.res.get!Sound(call.getString(0));
     call.setNative(sound);
+}
+
+private void _play(GrCall call) {
+    Sound sound = call.getNative!Sound(0);
+    Atelier.audio.play(sound);
 }
 /*
 private void _volume(string op)(GrCall call) {

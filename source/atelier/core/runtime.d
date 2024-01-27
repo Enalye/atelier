@@ -51,7 +51,7 @@ final class Atelier {
         UIManager _uiManager;
         InputManager _inputManager;
         ResourceManager _resourceManager;
-        AudioManager _audioManager;
+        AudioMixer _audioMixer;
         SceneManager _sceneManager;
     }
 
@@ -75,8 +75,8 @@ final class Atelier {
         }
 
         /// Le gestionnaire audio
-        AudioManager audio() {
-            return _audioManager;
+        AudioMixer audio() {
+            return _audioMixer;
         }
 
         /// Le gestionnaire d’entrés
@@ -107,7 +107,7 @@ final class Atelier {
 
         _uiManager = new UIManager();
         _inputManager = new InputManager();
-        _audioManager = new AudioManager();
+        _audioMixer = new AudioMixer();
         _sceneManager = new SceneManager();
         _resourceManager = new ResourceManager();
 
@@ -239,7 +239,7 @@ final class Atelier {
             while (accumulator >= 1f) {
                 InputEvent[] inputEvents = _inputManager.pollEvents();
 
-                _audioManager.update();
+                _audioMixer.update();
                 
                 _window.update();
 
@@ -283,6 +283,8 @@ final class Atelier {
             _uiManager.draw();
             _renderer.endRenderPass();
         }
+
+        _audioMixer.close();
     }
 
     void callEvent(GrEvent event, GrValue[] parameters = []) {

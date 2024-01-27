@@ -1,3 +1,8 @@
+/** 
+ * Copyright: Enalye
+ * License: Zlib
+ * Authors: Enalye
+ */
 module atelier.audio.voice;
 
 import std.stdio;
@@ -7,13 +12,14 @@ import bindbc.sdl;
 import atelier.common;
 import atelier.core;
 import atelier.audio.sound;
+import atelier.audio.config;
 
 interface Voice {
     @property {
         bool isAlive() const;
     }
 
-    void render(float*, size_t);
+    size_t process(out float[Atelier_Audio_BufferSize]);
 }
 
 final class SoundVoice : Voice {
@@ -41,20 +47,21 @@ final class SoundVoice : Voice {
         }
     }
 
-    void render(float* buffer, size_t len) {
-        float[] converted = new float[len];
-
-        int gotten = SDL_AudioStreamGet(_stream, converted.ptr, cast(int)(float.sizeof * len));
+    size_t process(out float[Atelier_Audio_BufferSize] buffer) {
+        int gotten = SDL_AudioStreamGet(_stream, buffer.ptr,
+            cast(int)(float.sizeof * Atelier_Audio_BufferSize));
         gotten >>= 2;
 
         if (gotten <= 0) {
             _isAlive = false;
         }
         else {
-            for (size_t i; i < gotten; i++) {
-                buffer[i] += converted[i];
-            }
+            /*for (size_t i; i < gotten; i++) {
+                buffer[i] = converted[i];
+            }*/
         }
+
+        return gotten;
 
         /*
         for (size_t i; (i < len) && (i + _position < _sound._buffer.length); i++) {

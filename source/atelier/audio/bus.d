@@ -1,3 +1,8 @@
+/** 
+ * Copyright: Enalye
+ * License: Zlib
+ * Authors: Enalye
+ */
 module atelier.audio.bus;
 
 import std.stdio;
@@ -5,6 +10,7 @@ import bindbc.sdl;
 
 import atelier.common;
 import atelier.core;
+import atelier.audio.config;
 import atelier.audio.voice;
 
 final class AudioBus {
@@ -13,19 +19,22 @@ final class AudioBus {
         AudioBus _parentBus;
         Array!AudioBus _busses;
         Array!Voice _voices;
-        bool _isAlive = true;
+
+        static bool _hasMaster;
+        __gshared AudioBus _masterBus;
     }
 
-    @property {
-        bool isAlive() const {
-            return _isAlive;
+    static AudioBus getMaster() {
+        if (!_hasMaster) {
+            synchronized (AudioBus.classinfo) {
+                if (!_masterBus) {
+                    _masterBus = new AudioBus;
+                    _masterBus._isMaster = true;
+                }
+                _hasMaster = true;
+            }
         }
-    }
-
-    package static AudioBus createMaster() {
-        AudioBus masterBus = new AudioBus;
-        masterBus._isMaster = true;
-        return masterBus;
+        return _masterBus;
     }
 
     this() {
@@ -41,7 +50,7 @@ final class AudioBus {
         if (_isMaster)
             return;
 
-        connectTo(Atelier.audio.master);
+        connectTo(getMaster());
     }
 
     void connectTo(AudioBus bus) {
@@ -68,17 +77,26 @@ final class AudioBus {
         }
     }
 
-    void render(float* buffer, size_t len) {
+    void process(out float[Atelier_Audio_BufferSize] buffer) {
+        float[Atelier_Audio_BufferSize] mixBuffer;
+        float[Atelier_Audio_BufferSize] samples;
+
+        mixBuffer[] = 0f;
+
         foreach (bus; _busses) {
-            bus.render(buffer, len);
+            bus.process(samples);
+            mixBuffer[] += samples[];
         }
 
         foreach (i, voice; _voices) {
-            voice.render(buffer, len);
+            size_t count = voice.process(samples);
+            mixBuffer[0 .. count] += samples[0 .. count];
 
             if (!voice.isAlive)
                 _voices.mark(i);
         }
+
+        buffer[] = mixBuffer[];
 
         _voices.sweep();
     }

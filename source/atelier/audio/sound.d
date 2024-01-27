@@ -1,3 +1,8 @@
+/** 
+ * Copyright: Enalye
+ * License: Zlib
+ * Authors: Enalye
+ */
 module atelier.audio.sound;
 
 import std.stdio;
@@ -6,7 +11,6 @@ import bindbc.sdl;
 
 import atelier.common;
 import atelier.core;
-import atelier.audio.voice;
 
 /// Représente les données d’un son
 final class Sound : Resource!Sound {
@@ -102,9 +106,5 @@ final class Sound : Resource!Sound {
             buffer[i << 1] = buffer[(i << 1) + 1] = _buffer[i];
         }
         _buffer = buffer;
-    }
-
-    Voice play() {
-        return new SoundVoice(this);
     }
 }

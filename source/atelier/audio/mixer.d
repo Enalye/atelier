@@ -1,3 +1,8 @@
+/** 
+ * Copyright: Enalye
+ * License: Zlib
+ * Authors: Enalye
+ */
 module atelier.audio.mixer;
 
 import std.stdio;
@@ -8,14 +13,16 @@ import bindbc.sdl;
 
 import atelier.common;
 import atelier.scene;
-import atelier.audio.device;
-import atelier.audio.sound;
 import atelier.audio.bus;
+import atelier.audio.config;
+import atelier.audio.output;
+import atelier.audio.sound;
+import atelier.audio.voice;
 
 /// Gestionnaire audio
 final class AudioMixer {
     private {
-        AudioDevice _device;
+        AudioOutput _output;
         AudioBus _masterBus;
     }
 
@@ -27,8 +34,8 @@ final class AudioMixer {
 
     /// Init
     this() {
-        _masterBus = AudioBus.createMaster();
-        _device = new AudioDevice(_masterBus, 48_000, 128);
+        _masterBus = AudioBus.getMaster();
+        _output = new AudioOutput(_masterBus);
 
         writeln(getDevices(false));
         writeln(getDevices(true));
@@ -57,13 +64,13 @@ final class AudioMixer {
 
     /// Màj
     void update() {
-        //writeln("Mixer: ", _mixer.frame, " Device: ", _device.frame, " success: ",
-        //    _device.frameSuccess, " failure: ", _device.frameFailure, " wait: ", _device.waitFrame);
+        //writeln("Mixer: ", _mixer.frame, " Device: ", _output.frame, " success: ",
+        //    _output.frameSuccess, " failure: ", _output.frameFailure, " wait: ", _output.waitFrame);
     }
 
     /// Joue un son
     void play(Sound sound) {
-        _masterBus.play(sound.play());
+        _masterBus.play(new SoundVoice(sound));
     }
 
     /// Joue un son

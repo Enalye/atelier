@@ -17,7 +17,7 @@ import atelier.audio.voice;
 final class MusicVoice : Voice {
     private {
         Music _music;
-        size_t _position;
+        int _currentFrame, _startLoopFrame, _endLoopFrame;
         SDL_AudioStream* _stream;
         bool _isAlive = true;
         AudioStream _decoder;
@@ -33,8 +33,25 @@ final class MusicVoice : Voice {
     this(Music music) {
         _music = music;
         _stream = SDL_NewAudioStream(AUDIO_F32, _music.channels, _music.sampleRate,
-            AUDIO_F32, Atelier_Audio_Channels, Atelier_Audio_Frequency);
+            AUDIO_F32, Atelier_Audio_Channels, Atelier_Audio_SampleRate);
         _decoderBuffer = new float[cast(size_t)(Atelier_Audio_FrameSize * _music.channels)];
+
+        _startLoopFrame = 0;
+        _endLoopFrame = cast(int) _music.samples;
+
+        if (_music.loopStart > 0f) {
+            _startLoopFrame = clamp(cast(int)(_music.loopStart * _music.sampleRate),
+                0, cast(int) _music.samples);
+        }
+
+        if (_music.loopEnd > 0f) {
+            _endLoopFrame = clamp(cast(int)(_music.loopEnd * _music.sampleRate),
+                _startLoopFrame, cast(int) _music.samples);
+        }
+
+        if (_startLoopFrame >= _endLoopFrame) {
+            _startLoopFrame = 0;
+        }
 
         _initDecoder();
     }
@@ -48,10 +65,21 @@ final class MusicVoice : Voice {
         int framesToRead = Atelier_Audio_FrameSize;
 
         for (;;) {
-            framesRead = _decoder.readSamplesFloat(_decoderBuffer);
+            if (_currentFrame >= _endLoopFrame) {
+                _initDecoder();
+                _decoder.seekPosition(_startLoopFrame);
+                _currentFrame = _startLoopFrame;
+            }
+            else if (_currentFrame + framesToRead > _endLoopFrame) {
+                framesToRead = _endLoopFrame - _currentFrame;
+            }
+
+            framesRead = _decoder.readSamplesFloat(_decoderBuffer.ptr, framesToRead);
 
             if (framesRead == 0) {
                 _initDecoder();
+                _decoder.seekPosition(_startLoopFrame);
+                _currentFrame = _startLoopFrame;
                 continue;
             }
 
@@ -61,6 +89,7 @@ final class MusicVoice : Voice {
                 _isAlive = false;
             }
 
+            _currentFrame += framesRead;
             framesToRead -= framesRead;
 
             if (framesToRead <= 0)
@@ -77,23 +106,7 @@ final class MusicVoice : Voice {
         if (gotten <= 0) {
             _isAlive = false;
         }
-        else {
-            /*for (size_t i; i < gotten; i++) {
-                buffer[i] = converted[i];
-            }*/
-        }
 
         return gotten;
-
-        /*
-        for (size_t i; (i < len) && (i + _position < _sound._buffer.length); i++) {
-            buffer[i] += _sound._buffer[i + _position];
-        }
-        _position += len;
-
-        if (_position >= _sound._buffer.length) {
-            _isAlive = false;
-            writeln("END OF SOUND: ", _position, ", ", _sound._buffer.length, ", ", len);
-        }*/
     }
 }

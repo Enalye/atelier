@@ -76,6 +76,7 @@ final class Sound : Resource!Sound {
         _channels = sound._channels;
         _samples = sound._samples;
         _sampleRate = sound._sampleRate;
+        _volume = sound._volume;
     }
 
     /// Accès à la ressource

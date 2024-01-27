@@ -17,7 +17,6 @@ import atelier.audio.voice;
 final class SoundVoice : Voice {
     private {
         Sound _sound;
-        size_t _position;
         SDL_AudioStream* _stream;
         bool _isAlive = true;
     }
@@ -31,7 +30,7 @@ final class SoundVoice : Voice {
     this(Sound sound) {
         _sound = sound;
         _stream = SDL_NewAudioStream(AUDIO_F32, _sound.channels, _sound.sampleRate,
-            AUDIO_F32, Atelier_Audio_Channels, Atelier_Audio_Frequency);
+            AUDIO_F32, Atelier_Audio_Channels, Atelier_Audio_SampleRate);
         const int rc = SDL_AudioStreamPut(_stream, _sound.buffer.ptr,
             cast(int)(_sound.buffer.length * float.sizeof));
         if (rc < 0) {
@@ -47,23 +46,6 @@ final class SoundVoice : Voice {
         if (gotten <= 0) {
             _isAlive = false;
         }
-        else {
-            /*for (size_t i; i < gotten; i++) {
-                buffer[i] = converted[i];
-            }*/
-        }
-
         return gotten;
-
-        /*
-        for (size_t i; (i < len) && (i + _position < _sound._buffer.length); i++) {
-            buffer[i] += _sound._buffer[i + _position];
-        }
-        _position += len;
-
-        if (_position >= _sound._buffer.length) {
-            _isAlive = false;
-            writeln("END OF SOUND: ", _position, ", ", _sound._buffer.length, ", ", len);
-        }*/
     }
 }

@@ -196,17 +196,22 @@ private void _compileMusic(string path, Json json, OutStream stream) {
     stream.write!string(json.getString("name"));
     stream.write!string(path ~ Archive.Separator ~ json.getString("file"));
     stream.write!float(json.getFloat("volume", 1f));
+    stream.write!float(json.getFloat("loopStart", -1f));
+    stream.write!float(json.getFloat("loopEnd", -1f));
 }
 
 private void _loadMusic(InStream stream) {
     string name = stream.read!string();
     string file = stream.read!string();
     float volume = stream.read!float();
+    float loopStart = stream.read!float();
+    float loopEnd = stream.read!float();
 
     Atelier.res.store(name, {
         Music music = new Music(file);
         music.volume = volume;
+        music.loopStart = loopStart;
+        music.loopEnd = loopEnd;
         return music;
     });
 }
-

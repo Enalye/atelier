@@ -21,6 +21,8 @@ final class Music : Resource!Music {
         ulong _samples;
         int _sampleRate;
         float _volume = 1f;
+        float _loopStart = 1f;
+        float _loopEnd = 1f;
     }
 
     @property {
@@ -32,6 +34,26 @@ final class Music : Resource!Music {
         /// Ditto
         float volume(float volume_) {
             return _volume = clamp(volume_, 0f, 1f);
+        }
+
+        /// Début de la boucle
+        float loopStart() const {
+            return _loopStart;
+        }
+
+        /// Ditto
+        float loopStart(float loopStart_) {
+            return _loopStart = loopStart_;
+        }
+
+        /// Fin de la boucle
+        float loopEnd() const {
+            return _loopEnd;
+        }
+
+        /// Ditto
+        float loopEnd(float loopEnd_) {
+            return _loopEnd = loopEnd_;
         }
 
         const(ubyte)[] data() const {
@@ -65,11 +87,14 @@ final class Music : Resource!Music {
     }
 
     /// Copie
-    this(Music sound) {
-        _data = sound._data;
-        _channels = sound._channels;
-        _samples = sound._samples;
-        _sampleRate = sound._sampleRate;
+    this(Music music) {
+        _data = music._data;
+        _channels = music._channels;
+        _samples = music._samples;
+        _sampleRate = music._sampleRate;
+        _volume = music._volume;
+        _loopStart = music._loopStart;
+        _loopEnd = music._loopEnd;
     }
 
     /// Accès à la ressource

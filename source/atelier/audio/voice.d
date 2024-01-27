@@ -40,7 +40,7 @@ final class SoundVoice : Voice {
     this(Sound sound) {
         _sound = sound;
         _stream = SDL_NewAudioStream(AUDIO_F32, _sound.channels, _sound.sampleRate,
-            AUDIO_F32, Atelier_Audio_Channels, Atelier_Audio_Frequency);
+            AUDIO_F32, Atelier_Audio_Channels, Atelier_Audio_SampleRate);
         const int rc = SDL_AudioStreamPut(_stream, _sound.buffer.ptr,
             cast(int)(_sound.buffer.length * float.sizeof));
         if (rc < 0) {
@@ -96,7 +96,7 @@ final class MusicVoice : Voice {
     this(Music music) {
         _music = music;
         _stream = SDL_NewAudioStream(AUDIO_F32, _music.channels, _music.sampleRate,
-            AUDIO_F32, Atelier_Audio_Channels, Atelier_Audio_Frequency);
+            AUDIO_F32, Atelier_Audio_Channels, Atelier_Audio_SampleRate);
         _decoderBuffer = new float[cast(size_t)(Atelier_Audio_FrameSize * _music.channels)];
 
         _initDecoder();

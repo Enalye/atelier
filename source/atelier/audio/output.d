@@ -40,7 +40,7 @@ final class AudioOutput {
     private void _openAudio(string deviceName) {
         SDL_AudioSpec desired, obtained;
 
-        desired.freq = Atelier_Audio_Frequency;
+        desired.freq = Atelier_Audio_SampleRate;
         desired.channels = Atelier_Audio_Channels;
         desired.samples = Atelier_Audio_FrameSize;
         desired.format = AUDIO_F32;

@@ -18,6 +18,7 @@ void setupDefaultResourceLoaders(ResourceManager res) {
     initFont();
     res.setLoader("image", &_compileImage, &_loadImage);
     res.setLoader("sound", &_compileSound, &_loadSound);
+    res.setLoader("music", &_compileMusic, &_loadMusic);
 }
 
 /// Crée des sprites
@@ -189,3 +190,23 @@ private void _loadSound(InStream stream) {
         return sound;
     });
 }
+
+/// Crée une musique
+private void _compileMusic(string path, Json json, OutStream stream) {
+    stream.write!string(json.getString("name"));
+    stream.write!string(path ~ Archive.Separator ~ json.getString("file"));
+    stream.write!float(json.getFloat("volume", 1f));
+}
+
+private void _loadMusic(InStream stream) {
+    string name = stream.read!string();
+    string file = stream.read!string();
+    float volume = stream.read!float();
+
+    Atelier.res.store(name, {
+        Music music = new Music(file);
+        music.volume = volume;
+        return music;
+    });
+}
+

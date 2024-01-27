@@ -3,7 +3,7 @@
  * License: Zlib
  * Authors: Enalye
  */
-module atelier.audio.sound;
+module atelier.audio.music;
 
 import std.stdio;
 import audioformats;
@@ -11,12 +11,12 @@ import bindbc.sdl;
 
 import atelier.common;
 import atelier.core;
-import atelier.audio.soundvoice;
+import atelier.audio.musicvoice;
 
 /// Représente les données d’un son
-final class Sound : Resource!Sound {
+final class Music : Resource!Music {
     private {
-        float[] _buffer;
+        const(ubyte)[] _data;
         ubyte _channels;
         ulong _samples;
         int _sampleRate;
@@ -34,8 +34,8 @@ final class Sound : Resource!Sound {
             return _volume = clamp(volume_, 0f, 1f);
         }
 
-        const(float[]) buffer() const {
-            return _buffer;
+        const(ubyte)[] data() const {
+            return _data;
         }
 
         ubyte channels() const {
@@ -54,62 +54,30 @@ final class Sound : Resource!Sound {
     /// Charge depuis un fichier
     this(string filePath) {
         AudioStream stream;
-        const(ubyte)[] data = Atelier.res.read(filePath);
-        stream.openFromMemory(data);
+        _data = Atelier.res.read(filePath);
+        stream.openFromMemory(_data);
 
         _channels = cast(ubyte) stream.getNumChannels();
         _samples = stream.getLengthInFrames();
         assert(_samples != audiostreamUnknownLength);
 
-        _buffer = new float[cast(size_t)(_samples * _channels)];
-
-        const int framesRead = stream.readSamplesFloat(_buffer);
-        assert(framesRead == stream.getLengthInFrames());
         _sampleRate = cast(int) stream.getSamplerate();
-
-        toStereo();
     }
 
     /// Copie
-    this(Sound sound) {
-        _buffer = sound._buffer;
+    this(Music sound) {
+        _data = sound._data;
         _channels = sound._channels;
         _samples = sound._samples;
         _sampleRate = sound._sampleRate;
     }
 
     /// Accès à la ressource
-    Sound fetch() {
+    Music fetch() {
         return this;
     }
 
-    /// Convertir en mono
-    void toMono() {
-        if (_channels != 2)
-            return;
-        _channels = 1;
-
-        float[] buffer = new float[cast(size_t) _samples];
-        for (size_t i; i < _samples; ++i) {
-            buffer[i] = (_buffer[i << 1] + _buffer[(i << 1) + 1]) / 2f;
-        }
-        _buffer = buffer;
-    }
-
-    /// Convertir en stereo
-    void toStereo() {
-        if (_channels != 1)
-            return;
-        _channels = 2;
-
-        float[] buffer = new float[cast(size_t)(_samples << 1)];
-        for (size_t i; i < _samples; ++i) {
-            buffer[i << 1] = buffer[(i << 1) + 1] = _buffer[i];
-        }
-        _buffer = buffer;
-    }
-
-    SoundVoice createVoice() {
-        return new SoundVoice(this);
+    MusicVoice createVoice() {
+        return new MusicVoice(this);
     }
 }

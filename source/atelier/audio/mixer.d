@@ -17,6 +17,7 @@ import atelier.audio.bus;
 import atelier.audio.config;
 import atelier.audio.output;
 import atelier.audio.sound;
+import atelier.audio.music;
 import atelier.audio.voice;
 
 /// Gestionnaire audio
@@ -70,14 +71,15 @@ final class AudioMixer {
 
     /// Joue un son
     void play(Sound sound) {
-        _masterBus.play(new SoundVoice(sound));
+        _masterBus.play(sound.createVoice());
     }
 
     /// Joue un son
     void play(Sound sound, Entity entity) {
     }
 
-    void playMusic(Sound sound) {
+    void play(Music music) {
+        _masterBus.play(music.createVoice());
     }
 
     void stopMusic() {

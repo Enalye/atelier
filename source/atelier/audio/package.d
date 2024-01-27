@@ -8,5 +8,6 @@ module atelier.audio;
 public {
     import atelier.audio.config;
     import atelier.audio.mixer;
+    import atelier.audio.music;
     import atelier.audio.sound;
 }

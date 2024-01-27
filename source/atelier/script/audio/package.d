@@ -8,11 +8,13 @@ module atelier.script.audio;
 import grimoire;
 
 import atelier.script.audio.manager;
+import atelier.script.audio.music;
 import atelier.script.audio.sound;
 
 package(atelier.script) GrLibLoader[] getLibLoaders_audio() {
     return [
         &loadLibAudio_manager,
+        &loadLibAudio_music,
         &loadLibAudio_sound
     ];
 }

@@ -21,8 +21,8 @@ final class Music : Resource!Music {
         ulong _samples;
         int _sampleRate;
         float _volume = 1f;
-        float _loopStart = 1f;
-        float _loopEnd = 1f;
+        float _loopStart = -1f;
+        float _loopEnd = -1f;
     }
 
     @property {

@@ -19,8 +19,7 @@ package void loadLibAudio_manager(GrLibDefinition library) {
 
     library.addFunction(&_playSound, "playSound", [soundType]);
     //library.addFunction(&_playSoundEntity, "playSound", [entityType, soundType]);
-    library.addFunction(&_playMusic, "playMusic", [soundType]);
-    library.addFunction(&_stopMusic, "stopMusic");
+
     //library.addFunction(&_pauseMusic, "pauseMusic");
     //library.addFunction(&_resumeMusic, "resumeMusic");
     //library.addFunction(&_pushMusic, "pushMusic", [soundType]);

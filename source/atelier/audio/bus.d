@@ -11,6 +11,7 @@ import bindbc.sdl;
 import atelier.common;
 import atelier.core;
 import atelier.audio.config;
+import atelier.audio.effect;
 import atelier.audio.voice;
 
 final class AudioBus {
@@ -18,6 +19,7 @@ final class AudioBus {
         bool _isMaster;
         AudioBus _parentBus;
         Array!AudioBus _busses;
+        Array!AudioEffect _effects;
         Array!Voice _voices;
 
         static bool _hasMaster;
@@ -39,11 +41,16 @@ final class AudioBus {
 
     this() {
         _busses = new Array!AudioBus;
+        _effects = new Array!AudioEffect;
         _voices = new Array!Voice;
     }
 
     void play(Voice voice) {
         _voices ~= voice;
+    }
+
+    void addEffect(AudioEffect effect) {
+        _effects ~= effect;
     }
 
     void connectToMaster() {
@@ -95,9 +102,16 @@ final class AudioBus {
             if (!voice.isAlive)
                 _voices.mark(i);
         }
+        _voices.sweep();
+
+        foreach (i, effect; _effects) {
+            effect.process(mixBuffer);
+
+            if (!effect.isAlive)
+                _effects.mark(i);
+        }
+        _effects.sweep();
 
         buffer[] = mixBuffer[];
-
-        _voices.sweep();
     }
 }

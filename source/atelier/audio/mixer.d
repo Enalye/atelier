@@ -18,13 +18,17 @@ import atelier.audio.config;
 import atelier.audio.output;
 import atelier.audio.sound;
 import atelier.audio.music;
+import atelier.audio.musicvoice;
+import atelier.audio.soundvoice;
 import atelier.audio.voice;
+import atelier.audio.effect;
 
 /// Gestionnaire audio
 final class AudioMixer {
     private {
         AudioOutput _output;
-        AudioBus _masterBus;
+        AudioBus _masterBus, _trackBus;
+        MusicVoice[] _tracks;
     }
 
     @property {
@@ -36,6 +40,9 @@ final class AudioMixer {
     /// Init
     this() {
         _masterBus = AudioBus.getMaster();
+        _trackBus = new AudioBus();
+        _trackBus.connectTo(_masterBus);
+
         _output = new AudioOutput(_masterBus);
 
         writeln(getDevices(false));
@@ -71,32 +78,75 @@ final class AudioMixer {
 
     /// Joue un son
     void play(Sound sound) {
-        _masterBus.play(sound.createVoice());
+        _masterBus.play(new SoundVoice(sound));
     }
 
-    /// Joue un son
-    void play(Sound sound, Entity entity) {
-    }
-
+    /// Joue une musique
     void play(Music music) {
-        _masterBus.play(music.createVoice());
+        _masterBus.play(new MusicVoice(music));
     }
 
-    void stopMusic() {
+    void playTrack(Music music, float fadeOut) {
+        if (_tracks.length) {
+            MusicVoice oldVoice = _tracks[$ - 1];
+            _tracks.length--;
+            oldVoice.addEffect(new AudioFader(false, fadeOut, getSplineFunc(Spline.linear), 0f));
+            oldVoice.stop(fadeOut);
+        }
+        else {
+            fadeOut = 0f;
+        }
+        MusicVoice voice = new MusicVoice(music, fadeOut);
+        _tracks ~= voice;
+        _trackBus.play(voice);
     }
 
-    void pushMusic(Sound sound) {
+    void stopTrack(float fadeOut) {
+        if (_tracks.length) {
+            MusicVoice oldVoice = _tracks[$ - 1];
+            _tracks.length--;
+            oldVoice.addEffect(new AudioFader(false, fadeOut, getSplineFunc(Spline.linear), 0f));
+            oldVoice.stop(fadeOut);
+        }
     }
 
-    void popMusic() {
+    void pushTrack(Music music, float fadeOut) {
+        pauseTrack(fadeOut);
+
+        MusicVoice voice = new MusicVoice(music, fadeOut);
+        _tracks ~= voice;
+        _trackBus.play(voice);
     }
 
-    void pauseMusic() {
+    void popTrack(float fadeOut, float fadeIn) {
+        stopTrack(fadeOut);
+
+        if (!_tracks.length)
+            return;
+
+        MusicVoice voice = _tracks[$ - 1];
+        voice.addEffect(new AudioFader(true, fadeIn, getSplineFunc(Spline.linear), 0f));
+        voice.resume(0f);
     }
 
-    void resumeMusic() {
+    void pauseTrack(float fadeOut) {
+        if (!_tracks.length)
+            return;
+
+        MusicVoice voice = _tracks[$ - 1];
+        voice.addEffect(new AudioFader(false, fadeOut, getSplineFunc(Spline.linear), 0f));
+        voice.pause(fadeOut);
     }
 
-    void playInBetween(Sound sound) {
+    void resumeTrack(float fadeIn) {
+        if (!_tracks.length)
+            return;
+
+        MusicVoice voice = _tracks[$ - 1];
+        voice.addEffect(new AudioFader(true, fadeIn, getSplineFunc(Spline.linear), 0f));
+        voice.resume();
+    }
+
+    void playTrackInBetween(Music music, float fadeOut = 2f) {
     }
 }

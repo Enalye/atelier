@@ -16,12 +16,40 @@ import atelier.audio.config;
 import atelier.audio.music;
 import atelier.audio.sound;
 
-interface Voice {
-    @property {
-        bool isAlive() const;
+abstract class Voice {
+    private {
+        Array!AudioEffect _effects;
+        bool _isAlive = true;
+
     }
 
-    size_t process(out float[Atelier_Audio_BufferSize]);
+    @property {
+        final bool isAlive() const {
+            return _isAlive;
+        }
+    }
 
-    void addEffect(AudioEffect);
+    this() {
+        _effects = new Array!AudioEffect;
+    }
+
+    final void addEffect(AudioEffect effect) {
+        _effects ~= effect;
+    }
+
+    final void remove() {
+        _isAlive = false;
+    }
+
+    package final void processEffects(ref float[Atelier_Audio_BufferSize] buffer) {
+        foreach (i, effect; _effects) {
+            effect.process(buffer);
+
+            if (!effect.isAlive)
+                _effects.mark(i);
+        }
+        _effects.sweep();
+    }
+
+    abstract size_t process(out float[Atelier_Audio_BufferSize]);
 }

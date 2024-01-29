@@ -97,6 +97,7 @@ final class AudioBus {
 
         foreach (i, voice; _voices) {
             size_t count = voice.process(samples);
+            voice.processEffects(samples);
             mixBuffer[0 .. count] += samples[0 .. count];
 
             if (!voice.isAlive)

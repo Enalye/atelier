@@ -22,6 +22,7 @@ import atelier.audio.musicvoice;
 import atelier.audio.soundvoice;
 import atelier.audio.voice;
 import atelier.audio.effect;
+import atelier.audio.oscillator;
 
 /// Gestionnaire audio
 final class AudioMixer {
@@ -44,9 +45,6 @@ final class AudioMixer {
         _trackBus.connectTo(_masterBus);
 
         _output = new AudioOutput(_masterBus);
-
-        writeln(getDevices(false));
-        writeln(getDevices(true));
     }
 
     ~this() {
@@ -118,15 +116,15 @@ final class AudioMixer {
         _trackBus.play(voice);
     }
 
-    void popTrack(float fadeOut, float fadeIn) {
+    void popTrack(float fadeOut, float delay, float fadeIn) {
         stopTrack(fadeOut);
 
         if (!_tracks.length)
             return;
 
         MusicVoice voice = _tracks[$ - 1];
-        voice.addEffect(new AudioFader(true, fadeIn, getSplineFunc(Spline.linear), 0f));
-        voice.resume(0f);
+        voice.addEffect(new AudioFader(true, fadeIn, getSplineFunc(Spline.linear), delay));
+        voice.resume(delay);
     }
 
     void pauseTrack(float fadeOut) {

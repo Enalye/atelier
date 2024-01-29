@@ -18,24 +18,15 @@ import atelier.audio.voice;
 final class MusicVoice : Voice {
     private {
         Music _music;
-        Array!AudioEffect _effects;
         int _currentFrame, _startLoopFrame, _endLoopFrame;
         int _delayStartFrame, _delayPauseFrame, _delayStopFrame;
         SDL_AudioStream* _stream;
-        bool _isAlive = true;
         AudioStream _decoder;
         float[] _decoderBuffer;
     }
 
-    @property {
-        bool isAlive() const {
-            return _isAlive;
-        }
-    }
-
     this(Music music, float delay = 0f) {
         _music = music;
-        _effects = new Array!AudioEffect;
         _stream = SDL_NewAudioStream(AUDIO_F32, _music.channels, _music.sampleRate,
             AUDIO_F32, Atelier_Audio_Channels, Atelier_Audio_SampleRate);
         _decoderBuffer = new float[cast(size_t)(Atelier_Audio_FrameSize * _music.channels)];
@@ -62,10 +53,6 @@ final class MusicVoice : Voice {
         }
 
         _initDecoder();
-    }
-
-    void addEffect(AudioEffect effect) {
-        _effects ~= effect;
     }
 
     void resume(float delay = 0f) {
@@ -95,7 +82,7 @@ final class MusicVoice : Voice {
         _delayPauseFrame = -1;
 
         if (delay == 0f) {
-            _isAlive = false;
+            remove();
             _delayStopFrame = 0;
         }
         else {
@@ -132,7 +119,7 @@ final class MusicVoice : Voice {
             const int rc = SDL_AudioStreamPut(_stream, _decoderBuffer.ptr,
                 cast(int)(framesRead * _music.channels * float.sizeof));
             if (rc < 0) {
-                _isAlive = false;
+                remove();
             }
 
             _currentFrame += framesRead;
@@ -143,7 +130,7 @@ final class MusicVoice : Voice {
         }
     }
 
-    size_t process(out float[Atelier_Audio_BufferSize] buffer) {
+    override size_t process(out float[Atelier_Audio_BufferSize] buffer) {
         int framesToRead = Atelier_Audio_FrameSize;
 
         if (_delayStopFrame >= 0) {
@@ -152,7 +139,7 @@ final class MusicVoice : Voice {
             }
             else {
                 framesToRead = _delayStopFrame;
-                _isAlive = false;
+                remove();
 
                 if (framesToRead == 0)
                     return 0;
@@ -171,38 +158,31 @@ final class MusicVoice : Voice {
             }
         }
 
-        if (_delayStartFrame >= 0) {
+        if (_delayStartFrame > 0) {
             if (_delayStartFrame >= framesToRead) {
                 _delayStartFrame -= framesToRead;
                 return 0;
             }
             framesToRead -= _delayStartFrame;
+            _delayStartFrame = 0;
         }
 
         _decode(framesToRead);
-        int gotten = SDL_AudioStreamGet(_stream, buffer.ptr + (_delayStartFrame * (float*)
+        int framesRead = SDL_AudioStreamGet(_stream, buffer.ptr + (Atelier_Audio_Channels * _delayStartFrame * (float*)
                 .sizeof), cast(int)(float.sizeof * Atelier_Audio_Channels * framesToRead));
-        gotten >>= 2;
+        framesRead >>= 2;
 
         const float volume = _music.volume;
-        for (int i = _delayStartFrame; i < (_delayStartFrame + Atelier_Audio_Channels * framesToRead);
-            i += 2) {
+        for (int i = _delayStartFrame * Atelier_Audio_Channels; i < (
+                (_delayStartFrame + framesToRead) * Atelier_Audio_Channels); i += 2) {
             buffer[i] *= volume;
             buffer[i + 1] *= volume;
         }
 
-        foreach (i, effect; _effects) {
-            effect.process(buffer);
-
-            if (!effect.isAlive)
-                _effects.mark(i);
-        }
-        _effects.sweep();
-
-        if (gotten <= 0) {
-            _isAlive = false;
+        if (framesRead <= 0) {
+            remove();
         }
 
-        return gotten;
+        return framesRead;
     }
 }

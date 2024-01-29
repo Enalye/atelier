@@ -23,7 +23,7 @@ package void loadLibAudio_music(GrLibDefinition library) {
     library.addFunction(&_pauseTrack, "pauseTrack", [grFloat]);
     library.addFunction(&_resumeTrack, "resumeTrack", [grFloat]);
     library.addFunction(&_pushTrack, "pushTrack", [musicType, grFloat]);
-    library.addFunction(&_popTrack, "popTrack", [grFloat, grFloat]);
+    library.addFunction(&_popTrack, "popTrack", [grFloat, grFloat, grFloat]);
 
     //library.addProperty(&_volume!"get", &_volume!"set", "volume", musicType, grFloat);
 }
@@ -67,8 +67,9 @@ private void _pushTrack(GrCall call) {
 
 private void _popTrack(GrCall call) {
     float fadeOut = call.getFloat(0);
-    float fadeIn = call.getFloat(1);
-    Atelier.audio.popTrack(fadeOut, fadeIn);
+    float delay = call.getFloat(1);
+    float fadeIn = call.getFloat(2);
+    Atelier.audio.popTrack(fadeOut, delay, fadeIn);
 }
 
 /*

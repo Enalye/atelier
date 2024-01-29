@@ -50,6 +50,12 @@ final class SoundVoice : Voice {
             cast(int)(float.sizeof * Atelier_Audio_BufferSize));
         gotten >>= 2;
 
+        const float volume = _sound.volume;
+        for (int i; i < Atelier_Audio_BufferSize; i += 2) {
+            buffer[i] *= volume;
+            buffer[i + 1] *= volume;
+        }
+
         foreach (i, effect; _effects) {
             effect.process(buffer);
 

@@ -184,6 +184,13 @@ final class MusicVoice : Voice {
                 .sizeof), cast(int)(float.sizeof * Atelier_Audio_Channels * framesToRead));
         gotten >>= 2;
 
+        const float volume = _music.volume;
+        for (int i = _delayStartFrame; i < (_delayStartFrame + Atelier_Audio_Channels * framesToRead);
+            i += 2) {
+            buffer[i] *= volume;
+            buffer[i + 1] *= volume;
+        }
+
         foreach (i, effect; _effects) {
             effect.process(buffer);
 

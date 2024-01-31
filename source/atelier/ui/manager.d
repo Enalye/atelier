@@ -270,7 +270,7 @@ class UIManager {
 
         if (element.angle != 0.0) {
             Vec2f mouseDelta = position - pivot;
-            mouseDelta.rotate(degToRad * -element.angle);
+            mouseDelta.rotate(degToRad(-element.angle));
             position = mouseDelta + pivot;
         }
         position -= elementPos;

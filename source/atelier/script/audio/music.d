@@ -35,7 +35,7 @@ private void _ctor(GrCall call) {
 
 private void _play(GrCall call) {
     Music music = call.getNative!Music(0);
-    Atelier.audio.play(music);
+    Atelier.audio.play(new MusicPlayer(music));
 }
 
 private void _playTrack(GrCall call) {

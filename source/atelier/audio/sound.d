@@ -11,7 +11,6 @@ import bindbc.sdl;
 
 import atelier.common;
 import atelier.core;
-import atelier.audio.soundvoice;
 
 /// Représente les données d’un son
 final class Sound : Resource!Sound {
@@ -108,9 +107,5 @@ final class Sound : Resource!Sound {
             buffer[i << 1] = buffer[(i << 1) + 1] = _buffer[i];
         }
         _buffer = buffer;
-    }
-
-    SoundVoice createVoice() {
-        return new SoundVoice(this);
     }
 }

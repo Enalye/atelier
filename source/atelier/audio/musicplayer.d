@@ -3,7 +3,7 @@
  * License: Zlib
  * Authors: Enalye
  */
-module atelier.audio.musicvoice;
+module atelier.audio.musicplayer;
 
 import audioformats;
 import bindbc.sdl;
@@ -13,9 +13,9 @@ import atelier.core;
 import atelier.audio.config;
 import atelier.audio.effect;
 import atelier.audio.music;
-import atelier.audio.voice;
+import atelier.audio.player;
 
-final class MusicVoice : Voice {
+final class MusicPlayer : AudioPlayer {
     private {
         Music _music;
         int _currentFrame, _startLoopFrame, _endLoopFrame;

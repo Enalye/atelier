@@ -12,11 +12,9 @@ import bindbc.sdl;
 import atelier.common;
 import atelier.core;
 import atelier.audio.config;
-import atelier.audio.effect;
-import atelier.audio.sound;
-import atelier.audio.voice;
+import atelier.audio.player;
 
-final class Oscillator : Voice {
+final class Oscillator : AudioPlayer {
     private {
         int _currentFrame;
         float _frequency;

@@ -12,7 +12,7 @@ import atelier.common;
 import atelier.core;
 import atelier.audio.config;
 import atelier.audio.effect;
-import atelier.audio.voice;
+import atelier.audio.player;
 
 final class AudioBus {
     private {
@@ -20,7 +20,7 @@ final class AudioBus {
         AudioBus _parentBus;
         Array!AudioBus _busses;
         Array!AudioEffect _effects;
-        Array!Voice _voices;
+        Array!AudioPlayer _players;
 
         static bool _hasMaster;
         __gshared AudioBus _masterBus;
@@ -42,11 +42,11 @@ final class AudioBus {
     this() {
         _busses = new Array!AudioBus;
         _effects = new Array!AudioEffect;
-        _voices = new Array!Voice;
+        _players = new Array!AudioPlayer;
     }
 
-    void play(Voice voice) {
-        _voices ~= voice;
+    void play(AudioPlayer player) {
+        _players ~= player;
     }
 
     void addEffect(AudioEffect effect) {
@@ -95,15 +95,15 @@ final class AudioBus {
             mixBuffer[] += samples[];
         }
 
-        foreach (i, voice; _voices) {
+        foreach (i, voice; _players) {
             size_t count = voice.process(samples);
             voice.processEffects(samples);
             mixBuffer[0 .. count] += samples[0 .. count];
 
             if (!voice.isAlive)
-                _voices.mark(i);
+                _players.mark(i);
         }
-        _voices.sweep();
+        _players.sweep();
 
         foreach (i, effect; _effects) {
             effect.process(mixBuffer);

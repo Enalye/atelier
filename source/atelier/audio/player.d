@@ -3,7 +3,7 @@
  * License: Zlib
  * Authors: Enalye
  */
-module atelier.audio.voice;
+module atelier.audio.player;
 
 import std.stdio;
 import audioformats;
@@ -16,7 +16,7 @@ import atelier.audio.config;
 import atelier.audio.music;
 import atelier.audio.sound;
 
-abstract class Voice {
+abstract class AudioPlayer {
     private {
         Array!AudioEffect _effects;
         bool _isAlive = true;

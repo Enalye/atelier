@@ -3,7 +3,7 @@
  * License: Zlib
  * Authors: Enalye
  */
-module atelier.audio.soundvoice;
+module atelier.audio.soundplayer;
 
 import audioformats;
 import bindbc.sdl;
@@ -12,10 +12,10 @@ import atelier.common;
 import atelier.core;
 import atelier.audio.config;
 import atelier.audio.effect;
+import atelier.audio.player;
 import atelier.audio.sound;
-import atelier.audio.voice;
 
-final class SoundVoice : Voice {
+final class SoundPlayer : AudioPlayer {
     private {
         Sound _sound;
         SDL_AudioStream* _stream;

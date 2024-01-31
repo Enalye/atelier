@@ -11,7 +11,7 @@ import bindbc.sdl;
 
 import atelier.common;
 import atelier.core;
-import atelier.audio.musicvoice;
+import atelier.audio.musicplayer;
 
 /// Représente les données d’un son
 final class Music : Resource!Music {
@@ -100,9 +100,5 @@ final class Music : Resource!Music {
     /// Accès à la ressource
     Music fetch() {
         return this;
-    }
-
-    MusicVoice createVoice() {
-        return new MusicVoice(this);
     }
 }

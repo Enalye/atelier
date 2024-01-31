@@ -3,7 +3,7 @@
  * License: Zlib
  * Authors: Enalye
  */
-module atelier.script.audio.sound;
+module atelier.script.audio.soundplayer;
 
 import grimoire;
 
@@ -12,23 +12,18 @@ import atelier.common;
 import atelier.core;
 import atelier.script.util;
 
-package void loadLibAudio_sound(GrLibDefinition library) {
-    GrType soundType = library.addNative("Sound");
+package void loadLibAudio_soundPlayer(GrLibDefinition library) {
+    GrType soundPlayerType = library.addNative("SoundPlayer", [], "AudioPlayer");
+    GrType soundType = grGetNativeType("Sound");
 
-    library.addConstructor(&_ctor, soundType, [grString]);
-    library.addFunction(&_play, "play", [soundType]);
+    library.addConstructor(&_ctor, soundPlayerType, [soundType]);
 
     //library.addProperty(&_volume!"get", &_volume!"set", "volume", soundType, grFloat);
 }
 
 private void _ctor(GrCall call) {
-    Sound sound = Atelier.res.get!Sound(call.getString(0));
-    call.setNative(sound);
-}
-
-private void _play(GrCall call) {
     Sound sound = call.getNative!Sound(0);
-    Atelier.audio.play(new SoundPlayer(sound));
+    call.setNative(new SoundPlayer(sound));
 }
 /*
 private void _volume(string op)(GrCall call) {

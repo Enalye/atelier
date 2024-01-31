@@ -40,7 +40,7 @@ final class Entity {
             if (_parent)
                 return _parent.scenePosition + position;
             else if (_scene)
-                return _scene.position + position;
+                return position - _scene.position;
             return position;
         }
 

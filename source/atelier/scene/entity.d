@@ -7,8 +7,10 @@ module atelier.scene.entity;
 
 import std.algorithm;
 
+import atelier.audio;
 import atelier.common;
 import atelier.render;
+import atelier.scene.component;
 import atelier.scene.scene;
 
 /// Entité présente dans une scène
@@ -16,6 +18,7 @@ final class Entity {
     private {
         Scene _scene;
         Entity _parent;
+        EntityComponent[string] _components;
         Array!Entity _children;
         Array!Image _images;
         int _zOrder;
@@ -118,6 +121,10 @@ final class Entity {
             _images.sweep();
             _sortImages();
         }
+
+        foreach (component; _components) {
+            component.update();
+        }
     }
 
     void draw(Vec2f origin) {
@@ -130,5 +137,25 @@ final class Entity {
         foreach (entity; _children) {
             entity.draw(absolutePosition);
         }
+    }
+
+    T getComponent(T : EntityComponent)() {
+        return cast(T) _components.require(T.stringof, {
+            T component = new T;
+            component.entity = this;
+            return component;
+        }());
+    }
+
+    void addComponent(T : EntityComponent)() {
+        if (T.stringof in _components)
+            return;
+        T component = new T;
+        component.entity = this;
+        _components[T.stringof] = component;
+    }
+
+    void removeComponent(T : EntityComponent)() {
+        _components.remove(T.stringof);
     }
 }

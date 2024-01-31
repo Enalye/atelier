@@ -19,4 +19,5 @@ public {
     import atelier.audio.oscillator;
     import atelier.audio.sound;
     import atelier.audio.soundplayer;
+    import atelier.audio.spacializer;
 }

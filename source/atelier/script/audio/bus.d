@@ -25,6 +25,9 @@ package void loadLibAudio_bus(GrLibDefinition library) {
     library.addFunction(&_playSound, "play", [busType, soundType]);
     library.addFunction(&_playMusic, "play", [busType, musicType]);
     library.addFunction(&_addEffect, "addEffect", [busType, effectType]);
+    library.addFunction(&_connectTo, "connectTo", [busType, busType]);
+    library.addFunction(&_connectToMaster, "connectToMaster", [busType]);
+    library.addFunction(&_disconnect, "disconnect", [busType]);
 }
 
 private void _ctor(GrCall call) {
@@ -55,4 +58,20 @@ private void _addEffect(GrCall call) {
     AudioBus bus = call.getNative!AudioBus(0);
     AudioEffect effect = call.getNative!AudioEffect(1);
     bus.addEffect(effect);
+}
+
+private void _connectTo(GrCall call) {
+    AudioBus bus1 = call.getNative!AudioBus(0);
+    AudioBus bus2 = call.getNative!AudioBus(1);
+    bus1.connectTo(bus2);
+}
+
+private void _connectToMaster(GrCall call) {
+    AudioBus bus = call.getNative!AudioBus(0);
+    bus.connectToMaster();
+}
+
+private void _disconnect(GrCall call) {
+    AudioBus bus = call.getNative!AudioBus(0);
+    bus.disconnect();
 }

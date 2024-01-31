@@ -6,11 +6,13 @@
 module atelier.script.scene;
 
 import grimoire;
+import atelier.script.scene.component;
 import atelier.script.scene.entity;
 import atelier.script.scene.scene;
 
 package(atelier.script) GrLibLoader[] getLibLoaders_scene() {
     return [
+        &loadLibScene_component,
         &loadLibScene_entity,
         &loadLibScene_scene
     ];

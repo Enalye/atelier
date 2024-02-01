@@ -1,5 +1,5 @@
 <p align="center" >
-<img src="https://raw.githubusercontent.com/enalye/grimoire/master/docs/_media/logo.svg" alt="Atelier" title="Atelier">
+<img src="https://raw.githubusercontent.com/Enalye/atelier/main/docs/_media/logo128.png" alt="Atelier" title="Atelier">
 </p>
 
 

@@ -3,7 +3,7 @@
         "enalye"
     ],
     "copyright": "Copyright © 2023, Enalye",
-    "description": "Framework 2D pour Grimoire",
+    "description": "Moteur 2D pour Grimoire",
     "license": "Zlib",
     "name": "atelier",
     "targetType": "executable",
@@ -15,8 +15,8 @@
             "path": "grimoire"
         },
         "bindbc-sdl": "~>1.4.2",
-		"audio-formats": "~>3.0.1",
-		"bindbc-openal": "~>1.1.0"
+        "audio-formats": "~>3.0.1",
+        "bindbc-openal": "~>1.1.0"
     },
     "versions": [
         "BindSDL_Static",
@@ -31,14 +31,14 @@
         "libs/$PLATFORM/$ARCH/SDL2",
         "libs/$PLATFORM/$ARCH/SDL2_image",
         "libs/$PLATFORM/$ARCH/SDL2_ttf",
-		"libs/$PLATFORM/$ARCH/OpenAL32"
+        "libs/$PLATFORM/$ARCH/OpenAL32"
     ],
-	"copyFiles-windows": [
-		"libs/$PLATFORM/$ARCH/SDL2.dll",
-		"libs/$PLATFORM/$ARCH/SDL2_image.dll",
-		"libs/$PLATFORM/$ARCH/SDL2_ttf.dll",
-		"libs/$PLATFORM/$ARCH/OpenAL32.dll"
-	],
+    "copyFiles-windows": [
+        "libs/$PLATFORM/$ARCH/SDL2.dll",
+        "libs/$PLATFORM/$ARCH/SDL2_image.dll",
+        "libs/$PLATFORM/$ARCH/SDL2_ttf.dll",
+        "libs/$PLATFORM/$ARCH/OpenAL32.dll"
+    ],
     "lflags-posix": [
         "-L-Llibs/$PLATFORM/$ARCH/",
         "-L-lz"
@@ -47,13 +47,15 @@
         "SDL2",
         "SDL2_image",
         "SDL2_ttf",
-		"OpenAL32"
+        "OpenAL32"
     ],
     "configurations": [
         {
             "name": "atelier_debug",
             "targetPath": "bin",
-            "dflags": ["-gf"],
+            "dflags": [
+                "-gf"
+            ],
             "versions": [
                 "AtelierDev",
                 "AtelierDebug"
@@ -74,6 +76,16 @@
             ],
             "targetPath": "export",
             "targetName": "atelier"
+        },
+        {
+            "name": "atelier_doc",
+            "targetPath": "bin",
+            "dflags": [
+                "-gf"
+            ],
+            "versions": [
+                "AtelierDoc"
+            ]
         }
     ]
 }

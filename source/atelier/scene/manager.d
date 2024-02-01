@@ -63,7 +63,7 @@ final class SceneManager {
     void draw(Vec2f origin) {
         foreach (scene; _scenes) {
             Canvas canvas = scene.canvas;
-            Vec2f cameraOffset = -scene.cameraOffset;
+            Vec2f cameraOffset = -scene.position;
 
             _cameraClip = Vec4f(cameraOffset.x, cameraOffset.y,
                 cameraOffset.x + canvas.width, cameraOffset.y + canvas.height);

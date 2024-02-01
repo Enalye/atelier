@@ -20,7 +20,14 @@ void main(string[] args) {
     }
 
     try {
-        parseCli(args);
+        version (AtelierDoc) {
+            import atelier.doc : generateDoc;
+
+            generateDoc();
+        }
+        else {
+            parseCli(args);
+        }
     }
     catch (GrCompilerException e) {
         writeln(e.msg);

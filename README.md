@@ -1,7 +1,16 @@
-# Atelier
+<p align="center" >
+<img src="https://raw.githubusercontent.com/enalye/grimoire/master/docs/_media/logo.svg" alt="Atelier" title="Atelier">
+</p>
+
 
 Atelier est un moteur 2D basé sur [Grimoire](https://github.com/Enalye/grimoire)
 
+# Documentation
+
+* [Atelier](https://enalye.github.io/atelier)
+* [Grimoire](https://enalye.github.io/grimoire)
+
+# Usage
 Usage: atelier <commande>
 
 Options:

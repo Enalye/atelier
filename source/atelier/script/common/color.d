@@ -12,6 +12,9 @@ import atelier.common;
 import atelier.script.util;
 
 package void loadLibCommon_color(GrLibDefinition library) {
+    library.setModule("common.color");
+    library.setModuleInfo(GrLocale.fr_FR, "Représentation d’une couleur dans l’espace RVB");
+
     GrType colorType = library.addNative("Color");
 
     library.addConstructor(&_ctor, colorType, [grFloat, grFloat, grFloat]);

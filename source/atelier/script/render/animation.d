@@ -14,6 +14,9 @@ import atelier.render;
 import atelier.script.util;
 
 void loadLibRender_animation(GrLibDefinition library) {
+    library.setModule("render.animation");
+    library.setModuleInfo(GrLocale.fr_FR, "Animation");
+
     GrType animationType = library.addNative("Animation", [], "Image");
 
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);

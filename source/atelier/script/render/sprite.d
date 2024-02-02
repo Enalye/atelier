@@ -15,6 +15,9 @@ import atelier.scene;
 import atelier.script.util;
 
 void loadLibRender_sprite(GrLibDefinition library) {
+    library.setModule("render.sprite");
+    library.setModuleInfo(GrLocale.fr_FR, "Élément d’une texture");
+
     GrType spriteType = library.addNative("Sprite", [], "Image");
 
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);

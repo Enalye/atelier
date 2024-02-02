@@ -13,6 +13,9 @@ import atelier.core;
 import atelier.script.util;
 
 package void loadLibAudio_panner(GrLibDefinition library) {
+    library.setModule("audio.panner");
+    library.setModuleInfo(GrLocale.fr_FR, "Règle la stéréo de l’audio");
+
     GrType pannerType = library.addNative("AudioPanner", [], "AudioEffect");
 
     library.addConstructor(&_ctor, pannerType);

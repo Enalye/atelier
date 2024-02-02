@@ -12,6 +12,9 @@ import atelier.core;
 import atelier.ui;
 
 package void loadLibUI_label(GrLibDefinition library) {
+    library.setModule("ui.label");
+    library.setModuleInfo(GrLocale.fr_FR, "Texte");
+
     GrType labelType = library.addNative("Label", [], "UIElement");
 
     library.addConstructor(&_ctor, labelType, [grString]);

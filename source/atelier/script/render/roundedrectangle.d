@@ -12,6 +12,9 @@ import atelier.render;
 import atelier.script.util;
 
 package void loadLibRender_roundedRectangle(GrLibDefinition library) {
+    library.setModule("render.roundedrectangle");
+    library.setModuleInfo(GrLocale.fr_FR, "Rectangle avec bords arrondis");
+
     GrType rrectType = library.addNative("RoundedRectangle", [], "Image");
 
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);

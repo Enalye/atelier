@@ -11,6 +11,9 @@ import atelier.common;
 import atelier.render;
 
 package void loadLibRender_circle(GrLibDefinition library) {
+    library.setModule("render.circle");
+    library.setModuleInfo(GrLocale.fr_FR, "Cercle");
+
     GrType circleType = library.addNative("Circle", [], "Image");
 
     library.addConstructor(&_ctor, circleType, [grFloat, grBool, grFloat]);

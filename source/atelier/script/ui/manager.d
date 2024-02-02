@@ -12,6 +12,9 @@ import atelier.core;
 import atelier.ui;
 
 package void loadLibUI_manager(GrLibDefinition library) {
+    library.setModule("ui.manager");
+    library.setModuleInfo(GrLocale.fr_FR, "Gestionnaire d’interface");
+
     GrType uiType = grGetNativeType("UIElement");
 
     library.addFunction(&_setDebugUI, "setDebugUI", [grBool]);

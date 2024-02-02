@@ -14,6 +14,9 @@ import atelier.render;
 import atelier.script.util;
 
 void loadLibRender_tilemap(GrLibDefinition library) {
+    library.setModule("render.tilemap");
+    library.setModuleInfo(GrLocale.fr_FR, "Grille de tuiles alignées");
+
     GrType tilemapType = library.addNative("Tilemap", [], "Image");
 
     GrType tilesetType = grGetNativeType("Tileset");

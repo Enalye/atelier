@@ -13,6 +13,9 @@ import atelier.core;
 import atelier.script.util;
 
 package void loadLibAudio_gain(GrLibDefinition library) {
+    library.setModule("audio.gain");
+    library.setModuleInfo(GrLocale.fr_FR, "Amplifie l’audio");
+
     GrType gainType = library.addNative("AudioGain", [], "AudioEffect");
 
     library.addConstructor(&_ctor, gainType);

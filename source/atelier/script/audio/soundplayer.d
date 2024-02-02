@@ -13,6 +13,9 @@ import atelier.core;
 import atelier.script.util;
 
 package void loadLibAudio_soundPlayer(GrLibDefinition library) {
+    library.setModule("audio.soundplayer");
+    library.setModuleInfo(GrLocale.fr_FR, "Instance d’un son");
+
     GrType soundPlayerType = library.addNative("SoundPlayer", [], "AudioPlayer");
     GrType soundType = grGetNativeType("Sound");
 

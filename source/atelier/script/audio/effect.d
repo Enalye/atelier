@@ -13,8 +13,13 @@ import atelier.core;
 import atelier.script.util;
 
 package void loadLibAudio_effect(GrLibDefinition library) {
+    library.setModule("audio.effect");
+    library.setModuleInfo(GrLocale.fr_FR, "Effet audio de base");
+
     GrType effectType = library.addNative("AudioEffect");
 
+    library.setDescription(GrLocale.fr_FR, "Retire l’effet de la chaîne d’effet.");
+    library.setParameters(GrLocale.fr_FR, ["effect"]);
     library.addFunction(&_remove, "remove", [effectType]);
 }
 

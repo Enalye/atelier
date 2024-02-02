@@ -14,6 +14,9 @@ import atelier.scene;
 import atelier.script.util;
 
 package void loadLibScene_scene(GrLibDefinition library) {
+    library.setModule("scene.scene");
+    library.setModuleInfo(GrLocale.fr_FR, "Défini une caméra où évolue des entités");
+
     GrType sceneType = library.addNative("Scene");
 
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);

@@ -13,6 +13,9 @@ import atelier.core;
 import atelier.script.util;
 
 package void loadLibAudio_fader(GrLibDefinition library) {
+    library.setModule("audio.fader");
+    library.setModuleInfo(GrLocale.fr_FR, "Applique un fondu audio");
+
     GrType faderType = library.addNative("AudioFader", [], "AudioEffect");
     GrType splineType = grGetEnumType("Spline");
 

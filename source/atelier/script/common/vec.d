@@ -12,6 +12,9 @@ import atelier.common;
 import atelier.script.util;
 
 package void loadLibCommon_vec(GrLibDefinition library) {
+    library.setModule("common.vec");
+    library.setModuleInfo(GrLocale.fr_FR, "Calcul vectoriel");
+
     static foreach (dimension; [2, 3, 4]) {
         _loadVec!dimension(library);
     }

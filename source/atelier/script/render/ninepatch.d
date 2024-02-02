@@ -15,6 +15,10 @@ import atelier.render;
 import atelier.script.util;
 
 void loadLibRender_ninepatch(GrLibDefinition library) {
+    library.setModule("render.ninepatch");
+    library.setModuleInfo(GrLocale.fr_FR,
+        "Image divisé en 9 sections pouvant se mettre à l’échelle sans être étiré");
+
     GrType ninepatchType = library.addNative("NinePatch", [], "Image");
 
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);

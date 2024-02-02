@@ -15,6 +15,9 @@ import atelier.render;
 import atelier.script.util;
 
 package void loadLibScene_entity(GrLibDefinition library) {
+    library.setModule("scene.entity");
+    library.setModuleInfo(GrLocale.fr_FR, "Élément d’une scène");
+
     GrType entityType = library.addNative("Entity");
     GrType imageType = grGetNativeType("Image");
     GrType audioComponentType = grGetNativeType("AudioComponent");

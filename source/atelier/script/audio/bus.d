@@ -13,7 +13,11 @@ import atelier.core;
 import atelier.script.util;
 
 package void loadLibAudio_bus(GrLibDefinition library) {
+    library.setModule("audio.bus");
+    library.setModuleInfo(GrLocale.fr_FR, "Route les sons et leur applique des effets");
+
     GrType busType = library.addNative("AudioBus");
+
     GrType playerType = grGetNativeType("AudioPlayer");
     GrType soundType = grGetNativeType("Sound");
     GrType musicType = grGetNativeType("Music");
@@ -21,12 +25,26 @@ package void loadLibAudio_bus(GrLibDefinition library) {
 
     library.addConstructor(&_ctor, busType);
 
+    library.setDescription(GrLocale.fr_FR, "Joue le son sur le bus.");
+    library.setParameters(GrLocale.fr_FR, ["bus", "player"]);
     library.addFunction(&_play, "play", [busType, playerType]);
     library.addFunction(&_playSound, "play", [busType, soundType]);
     library.addFunction(&_playMusic, "play", [busType, musicType]);
+
+    library.setDescription(GrLocale.fr_FR, "Ajoute un effet.");
+    library.setParameters(GrLocale.fr_FR, ["bus", "effect"]);
     library.addFunction(&_addEffect, "addEffect", [busType, effectType]);
+
+    library.setDescription(GrLocale.fr_FR, "Connecte le bus à un bus destinataire.");
+    library.setParameters(GrLocale.fr_FR, ["sourceBus", "destBus"]);
     library.addFunction(&_connectTo, "connectTo", [busType, busType]);
+
+    library.setDescription(GrLocale.fr_FR, "Connecte le bus au bus maître.");
+    library.setParameters(GrLocale.fr_FR, ["bus"]);
     library.addFunction(&_connectToMaster, "connectToMaster", [busType]);
+
+    library.setDescription(GrLocale.fr_FR, "Déconnecte le bus de toute destination.");
+    library.setParameters(GrLocale.fr_FR, ["sourceBus", "destBus"]);
     library.addFunction(&_disconnect, "disconnect", [busType]);
 }
 

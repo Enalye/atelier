@@ -17,6 +17,9 @@ import atelier.ui;
 import atelier.script.util;
 
 package void loadLibUI_state(GrLibDefinition library) {
+    library.setModule("ui.state");
+    library.setModuleInfo(GrLocale.fr_FR, "État d’un élément d’interface");
+
     GrType splineType = grGetEnumType("Spline");
     GrType stateType = library.addNative("UIState");
 

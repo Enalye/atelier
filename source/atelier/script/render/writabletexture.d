@@ -13,6 +13,9 @@ import atelier.input;
 import atelier.render;
 
 void loadLibRender_writableTexture(GrLibDefinition library) {
+    library.setModule("render.writabletexture");
+    library.setModuleInfo(GrLocale.fr_FR, "Texture générée procéduralement");
+
     GrType wtextureType = library.addNative("WritableTexture", [], "ImageData");
 
 }

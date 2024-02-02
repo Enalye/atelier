@@ -13,6 +13,9 @@ import atelier.render;
 import atelier.script.util;
 
 package void loadLibRender_image(GrLibDefinition library) {
+    library.setModule("render.image");
+    library.setModuleInfo(GrLocale.fr_FR, "Image");
+
     GrType imageType = library.addNative("Image");
     GrType colorType = grGetNativeType("Color");
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);

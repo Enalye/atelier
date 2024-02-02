@@ -14,6 +14,9 @@ import atelier.render;
 import atelier.script.util;
 
 void loadLibRender_tileset(GrLibDefinition library) {
+    library.setModule("render.tileset");
+    library.setModuleInfo(GrLocale.fr_FR, "Jeu de tuiles");
+
     GrType tilesetType = library.addNative("Tileset");
 
     GrType imageDataType = grGetNativeType("ImageData");

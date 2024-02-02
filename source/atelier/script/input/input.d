@@ -15,6 +15,9 @@ import atelier.core;
 import atelier.script.util;
 
 void loadLibInput_input(GrLibDefinition library) {
+    library.setModule("input.input");
+    library.setModuleInfo(GrLocale.fr_FR, "Entrées utilisateur");
+
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
 
     GrType keyState = library.addEnum("KeyState", [

@@ -12,6 +12,9 @@ import atelier.render;
 import atelier.script.util;
 
 package void loadLibCore_runtime(GrLibDefinition library) {
+    library.setModule("core.runtime");
+    library.setModuleInfo(GrLocale.fr_FR, "Informations système");
+
     GrType appType = library.addNative("App");
 
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);

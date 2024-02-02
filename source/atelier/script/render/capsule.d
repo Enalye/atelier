@@ -12,6 +12,9 @@ import atelier.render;
 import atelier.script.util;
 
 package void loadLibRender_capsule(GrLibDefinition library) {
+    library.setModule("render.capsule");
+    library.setModuleInfo(GrLocale.fr_FR, "Capsule");
+
     GrType capsuleType = library.addNative("Capsule", [], "Image");
 
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);

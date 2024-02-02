@@ -19,32 +19,27 @@ void generateDoc() {
     const GrLocale locale = GrLocale.fr_FR;
     auto startTime = MonoTime.currTime();
 
-    generate(GrLocale.fr_FR);
+    generate(locale);
 
     auto elapsedTime = MonoTime.currTime() - startTime;
-    writeln("Documentation générée en: \t", elapsedTime);
+    writeln("Documentation générée en ", elapsedTime);
 }
 
 alias LibLoader = void function(GrLibDefinition);
 void generate(GrLocale locale) {
     LibLoader[] libLoaders = getLibraryLoaders();
 
-    string[] libFileNames;
+    string[] modules;
 
     int i;
     foreach (libLoader; libLoaders) {
-        GrDoc doc = new GrDoc(["docgen" ~ to!string(i)]);
+        GrDoc doc = new GrDoc("docgen" ~ to!string(i));
         libLoader(doc);
 
         const string generatedText = doc.generate(locale);
 
-        string fileName;
-        foreach (part; doc.getModule()) {
-            if (fileName.length)
-                fileName ~= "_";
-            fileName ~= part;
-        }
-        libFileNames ~= fileName;
+        string fileName = doc.getModule();
+        modules ~= fileName;
         fileName ~= ".md";
         string folderName = to!string(locale);
         auto parts = folderName.split("_");
@@ -57,10 +52,10 @@ void generate(GrLocale locale) {
     { // Barre latérale
         string generatedText = "* [Accueil](/)\n";
         generatedText ~= "* [Bibliothèque](/lib/)\n";
-        foreach (fileName; libFileNames) {
+        foreach (fileName; modules) {
             string line;
 
-            line = "\t- [" ~ fileName ~ "](" ~ buildNormalizedPath("lib", fileName) ~ ")\n";
+            line = "\t- [" ~ fileName ~ "](" ~ "lib/" ~ fileName ~ ")\n";
 
             generatedText ~= line;
         }

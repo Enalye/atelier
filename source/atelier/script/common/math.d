@@ -9,6 +9,9 @@ import grimoire;
 import atelier.common;
 
 package void loadLibCommon_math(GrLibDefinition library) {
+    library.setModule("common.math");
+    library.setModuleInfo(GrLocale.fr_FR, "Functions mathématiques");
+
     library.addFunction(&_dbToVol, "dbToVol", [grFloat], [grFloat]);
     library.addFunction(&_volToDb, "volToDb", [grFloat], [grFloat]);
 }

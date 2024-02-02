@@ -18,6 +18,9 @@ import atelier.ui;
 import atelier.script.util;
 
 package void loadLibUI_element(GrLibDefinition library) {
+    library.setModule("ui.element");
+    library.setModuleInfo(GrLocale.fr_FR, "Élément d’interface");
+
     GrType alignXType = library.addEnum("UIAlignX", ["left", "center", "right"]);
     GrType alignYType = library.addEnum("UIAlignY", ["top", "center", "bottom"]);
     GrType stateType = grGetNativeType("UIState");

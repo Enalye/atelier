@@ -73,3 +73,14 @@ SColor scolor(Color color) {
     result = color;
     return result;
 }
+
+final class SHSLColor {
+    HSLColor _hslcolor;
+    alias _hslcolor this;
+}
+
+SHSLColor shslcolor(HSLColor hslcolor) {
+    SHSLColor result = new SHSLColor;
+    result = hslcolor;
+    return result;
+}

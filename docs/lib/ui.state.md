@@ -6,7 +6,7 @@
 ## Constructeurs
 |Fonction|Entrée|
 |-|-|
-|[@**UIState**](#ctor_0)|**string** *param0*|
+|[@**UIState**](#ctor_0)| *param0*: **string**|
 ## Propriétés
 |Propriété|Natif|Type|Accesseur|Modifieur|
 |-|-|-|-|-|

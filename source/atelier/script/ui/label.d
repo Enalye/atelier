@@ -18,6 +18,8 @@ package void loadLibUI_label(GrLibDefinition library) {
     GrType labelType = library.addNative("Label", [], "UIElement");
 
     library.addConstructor(&_ctor, labelType, [grString]);
+
+    library.setDescription(GrLocale.fr_FR, "Texte du label");
     library.addFunction(&_text, "text", [labelType, grString]);
 }
 

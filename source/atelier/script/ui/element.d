@@ -21,8 +21,12 @@ package void loadLibUI_element(GrLibDefinition library) {
     library.setModule("ui.element");
     library.setModuleInfo(GrLocale.fr_FR, "Élément d’interface");
 
+    library.setDescription(GrLocale.fr_FR, "Alignement horizontal");
     GrType alignXType = library.addEnum("UIAlignX", ["left", "center", "right"]);
+
+    library.setDescription(GrLocale.fr_FR, "Alignement vertical");
     GrType alignYType = library.addEnum("UIAlignY", ["top", "center", "bottom"]);
+
     GrType stateType = grGetNativeType("UIState");
 
     GrType elementType = library.addNative("UIElement");
@@ -34,16 +38,20 @@ package void loadLibUI_element(GrLibDefinition library) {
 
     library.addProperty(&_position!"get", &_position!"set", "position", elementType, vec2fType);
     library.addProperty(&_size!"get", &_size!"set", "size", elementType, vec2fType);
-    library.addProperty(&_scale!"get", &_scale!"set", "scaleX", elementType, vec2fType);
+    library.addProperty(&_scale!"get", &_scale!"set", "scale", elementType, vec2fType);
     library.addProperty(&_pivot!"get", &_pivot!"set", "pivot", elementType, vec2fType);
 
     library.addProperty(&_angle!"get", &_angle!"set", "angle", elementType, grDouble);
 
     library.addProperty(&_alpha!"get", &_alpha!"set", "alpha", elementType, grFloat);
 
+    library.setDescription(GrLocale.fr_FR, "Fixe l’alignement de l’interface.
+Détermine à partir d’où la position de l’interface sera calculé par rapport au parent.");
+    library.setParameters(["ui", "alignX", "alignY"]);
     library.addFunction(&_setAlign, "setAlign", [
             elementType, alignXType, alignYType
         ]);
+
     library.addProperty(&_alignX!"get", &_alignX!"set", "alignX", elementType, alignXType);
     library.addProperty(&_alignY!"get", &_alignY!"set", "alignY", elementType, alignYType);
     /*
@@ -54,20 +62,42 @@ package void loadLibUI_element(GrLibDefinition library) {
     library.addProperty(&_onPress!"get", &_onPress!"set", "onSubmit",
         elementType, grOptional(grEvent()));*/
 
+    library.setDescription(GrLocale.fr_FR, "Ajoute un état à l’interface");
+    library.setParameters(["ui", "state"]);
     library.addFunction(&_addState, "addState", [elementType, stateType]);
+
+    library.setDescription(GrLocale.fr_FR,
+        "Fixe l’état actuel de l’interface sans transition");
+    library.setParameters(["ui", "stateId"]);
     library.addFunction(&_setState, "setState", [elementType, grString]);
+
+    library.setDescription(GrLocale.fr_FR,
+        "Démarre la transition de l’interface de son état actuel vers son prochain état.");
+    library.setParameters(["ui", "stateId"]);
     library.addFunction(&_runState, "runState", [elementType, grString]);
 
+    library.setDescription(GrLocale.fr_FR, "Ajoute une image à l’interface");
+    library.setParameters(["ui", "image"]);
     library.addFunction(&_addImage, "addImage", [elementType, imageType]);
 
+    library.setDescription(GrLocale.fr_FR,
+        "Ajoute une interface en tant qu’enfant de cette interface");
     library.addFunction(&_addElement, "addElement", [elementType, elementType]);
 
+    library.setDescription(GrLocale.fr_FR, "Ajoute une fonction de rappel à un événement");
+    library.setParameters(["ui", "id", "callback"]);
     library.addFunction(&_addEventListener, "addEventListener", [
             elementType, grString, grEvent()
         ]);
+
+    library.setDescription(GrLocale.fr_FR,
+        "Supprime une fonction de rappel lié à un événement");
+    library.setParameters(["ui", "id", "callback"]);
     library.addFunction(&_removeEventListener, "removeEventListener",
         [elementType, grString, grEvent()]);
 
+    library.setDescription(GrLocale.fr_FR, "Retire l’interface de l’arborescence");
+    library.setParameters(["ui"]);
     library.addFunction(&_remove, "remove", [elementType]);
 }
 

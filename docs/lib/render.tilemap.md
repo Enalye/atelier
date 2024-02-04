@@ -7,7 +7,7 @@ Hérite de **Image**
 ## Constructeurs
 |Fonction|Entrée|
 |-|-|
-|[@**Tilemap**](#ctor_0)|**Tileset** *param0*, **int** *param1*, **int** *param2*|
+|[@**Tilemap**](#ctor_0)| *param0*: **Tileset**,  *param1*: **int**,  *param2*: **int**|
 ## Propriétés
 |Propriété|Natif|Type|Accesseur|Modifieur|
 |-|-|-|-|-|
@@ -22,5 +22,5 @@ Hérite de **Image**
 ## Description des fonctions
 
 <a id="func_0"></a>
-> setTile (*param0*: **Tilemap**, *param1*: **int**, *param2*: **int**, *param3*: **int**)
+> setTile(*param0*: **Tilemap**, *param1*: **int**, *param2*: **int**, *param3*: **int**)
 

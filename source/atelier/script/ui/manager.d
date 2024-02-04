@@ -17,8 +17,13 @@ package void loadLibUI_manager(GrLibDefinition library) {
 
     GrType uiType = grGetNativeType("UIElement");
 
+    library.setDescription(GrLocale.fr_FR, "Montre les bordures des interfaces");
     library.addFunction(&_setDebugUI, "setDebugUI", [grBool]);
+
+    library.setDescription(GrLocale.fr_FR, "Ajoute une interface au sommet de la hiérarchie");
     library.addFunction(&_addElement, "addUIElement", [uiType]);
+
+    library.setDescription(GrLocale.fr_FR, "Supprime toutes les interfaces");
     library.addFunction(&_clearElements, "clearUIElements");
 }
 

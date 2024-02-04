@@ -29,7 +29,12 @@ package void loadLibScene_scene(GrLibDefinition library) {
     library.addProperty(&_isVisible!"get", &_isVisible!"set", "isVisible", entityType, grBool);
     library.addProperty(&_canvas, null, "canvas", entityType, canvasType);
 
+    library.setDescription(GrLocale.fr_FR, "Ajoute une scène à l’application");
+    library.setParameters(["scene"]);
     library.addFunction(&_addScene, "addScene", [sceneType]);
+
+    library.setDescription(GrLocale.fr_FR, "Ajoute une entité à la scène");
+    library.setParameters(["scene", "entity"]);
     library.addFunction(&_addEntity, "addEntity", [sceneType, entityType]);
 }
 

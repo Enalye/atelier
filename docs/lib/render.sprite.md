@@ -7,9 +7,9 @@ Hérite de **Image**
 ## Constructeurs
 |Fonction|Entrée|
 |-|-|
-|[@**Sprite**](#ctor_0)|**string** *param0*|
-|[@**Sprite**](#ctor_1)|**ImageData** *param0*|
-|[@**Sprite**](#ctor_2)|**Scene** *param0*|
+|[@**Sprite**](#ctor_0)| *param0*: **string**|
+|[@**Sprite**](#ctor_1)| *param0*: **ImageData**|
+|[@**Sprite**](#ctor_2)| *param0*: **Scene**|
 ## Propriétés
 |Propriété|Natif|Type|Accesseur|Modifieur|
 |-|-|-|-|-|

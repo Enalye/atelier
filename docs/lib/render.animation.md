@@ -7,9 +7,9 @@ Hérite de **Image**
 ## Constructeurs
 |Fonction|Entrée|
 |-|-|
-|[@**Animation**](#ctor_0)|**string** *param0*|
-|[@**Animation**](#ctor_1)|**ImageData** *param0*, **Vec4\<int>** *param1*, **int** *param2*, **int** *param3*|
-|[@**Animation**](#ctor_2)|**ImageData** *param0*, **Vec4\<int>** *param1*, **int** *param2*, **int** *param3*, **int** *param4*|
+|[@**Animation**](#ctor_0)| *name*: **string**|
+|[@**Animation**](#ctor_1)| *imageData*: **ImageData**,  *clip*: **Vec4\<int>**,  *columns*: **int**,  *lines*: **int**|
+|[@**Animation**](#ctor_2)| *imageData*: **ImageData**,  *clip*: **Vec4\<int>**,  *columns*: **int**,  *lines*: **int**,  *maxCount*: **int**|
 ## Propriétés
 |Propriété|Natif|Type|Accesseur|Modifieur|
 |-|-|-|-|-|

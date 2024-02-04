@@ -4,10 +4,11 @@
 ## Énumérations
 |Énumération|Valeurs|Description|
 |-|-|-|
-|UIAlignX|{, left, center, right}||
-|UIAlignY|{, top, center, bottom}||
+|UIAlignX|{left, center, right}|Alignement horizontal|
+|UIAlignY|{top, center, bottom}|Alignement vertical|
 ## Natifs
 ### UIElement
+Alignement vertical
 ## Constructeurs
 |Fonction|Entrée|
 |-|-|
@@ -21,49 +22,69 @@
 |angle|**UIElement**|**double**|oui|oui|
 |pivot|**UIElement**|**Vec2\<float>**|oui|oui|
 |position|**UIElement**|**Vec2\<float>**|oui|oui|
-|scaleX|**UIElement**|**Vec2\<float>**|oui|oui|
+|scale|**UIElement**|**Vec2\<float>**|oui|oui|
 |size|**UIElement**|**Vec2\<float>**|oui|oui|
 ## Fonctions
 |Fonction|Entrée|Sortie|
 |-|-|-|
-|[addElement](#func_0)|*param0*: **UIElement**, *param1*: **UIElement**||
-|[addEventListener](#func_1)|*param0*: **UIElement**, *param1*: **string**, *param2*: **event()**||
-|[addImage](#func_2)|*param0*: **UIElement**, *param1*: **Image**||
-|[addState](#func_3)|*param0*: **UIElement**, *param1*: **UIState**||
-|[remove](#func_4)|*param0*: **UIElement**||
-|[removeEventListener](#func_5)|*param0*: **UIElement**, *param1*: **string**, *param2*: **event()**||
-|[runState](#func_6)|*param0*: **UIElement**, *param1*: **string**||
-|[setAlign](#func_7)|*param0*: **UIElement**, *param1*: **UIAlignX**, *param2*: **UIAlignY**||
-|[setState](#func_8)|*param0*: **UIElement**, *param1*: **string**||
+|[addElement](#func_0)|*ui*: **UIElement**, *image*: **UIElement**||
+|[addEventListener](#func_1)|*ui*: **UIElement**, *id*: **string**, *callback*: **event()**||
+|[addImage](#func_2)|*ui*: **UIElement**, *image*: **Image**||
+|[addState](#func_3)|*ui*: **UIElement**, *state*: **UIState**||
+|[remove](#func_4)|*ui*: **UIElement**||
+|[removeEventListener](#func_5)|*ui*: **UIElement**, *id*: **string**, *callback*: **event()**||
+|[runState](#func_6)|*ui*: **UIElement**, *stateId*: **string**||
+|[setAlign](#func_7)|*ui*: **UIElement**, *alignX*: **UIAlignX**, *alignY*: **UIAlignY**||
+|[setState](#func_8)|*ui*: **UIElement**, *stateId*: **string**||
 
 
 ***
 ## Description des fonctions
 
 <a id="func_0"></a>
-> addElement (*param0*: **UIElement**, *param1*: **UIElement**)
+> addElement(*ui*: **UIElement**, *image*: **UIElement**)
+
+Ajoute une interface en tant qu’enfant de cette interface
 
 <a id="func_1"></a>
-> addEventListener (*param0*: **UIElement**, *param1*: **string**, *param2*: **event()**)
+> addEventListener(*ui*: **UIElement**, *id*: **string**, *callback*: **event()**)
+
+Ajoute une fonction de rappel à un événement
 
 <a id="func_2"></a>
-> addImage (*param0*: **UIElement**, *param1*: **Image**)
+> addImage(*ui*: **UIElement**, *image*: **Image**)
+
+Ajoute une image à l’interface
 
 <a id="func_3"></a>
-> addState (*param0*: **UIElement**, *param1*: **UIState**)
+> addState(*ui*: **UIElement**, *state*: **UIState**)
+
+Ajoute un état à l’interface
 
 <a id="func_4"></a>
-> remove (*param0*: **UIElement**)
+> remove(*ui*: **UIElement**)
+
+Retire l’interface de l’arborescence
 
 <a id="func_5"></a>
-> removeEventListener (*param0*: **UIElement**, *param1*: **string**, *param2*: **event()**)
+> removeEventListener(*ui*: **UIElement**, *id*: **string**, *callback*: **event()**)
+
+Supprime une fonction de rappel lié à un événement
 
 <a id="func_6"></a>
-> runState (*param0*: **UIElement**, *param1*: **string**)
+> runState(*ui*: **UIElement**, *stateId*: **string**)
+
+Démarre la transition de l’interface de son état actuel vers son prochain état.
 
 <a id="func_7"></a>
-> setAlign (*param0*: **UIElement**, *param1*: **UIAlignX**, *param2*: **UIAlignY**)
+> setAlign(*ui*: **UIElement**, *alignX*: **UIAlignX**, *alignY*: **UIAlignY**)
+
+Fixe l’alignement de l’interface.
+
+Détermine à partir d’où la position de l’interface sera calculé par rapport au parent.
 
 <a id="func_8"></a>
-> setState (*param0*: **UIElement**, *param1*: **string**)
+> setState(*ui*: **UIElement**, *stateId*: **string**)
+
+Fixe l’état actuel de l’interface sans transition
 

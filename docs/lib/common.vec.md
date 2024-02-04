@@ -230,18 +230,18 @@ Calcul vectoriel
 ## Constructeurs
 |Fonction|Entrée|
 |-|-|
-|[@**Vec2\<float>**](#ctor_0)|**float** *param0*, **float** *param1*|
-|[@**Vec2\<double>**](#ctor_1)|**double** *param0*, **double** *param1*|
-|[@**Vec2\<int>**](#ctor_2)|**int** *param0*, **int** *param1*|
-|[@**Vec2\<uint>**](#ctor_3)|**uint** *param0*, **uint** *param1*|
-|[@**Vec3\<float>**](#ctor_4)|**float** *param0*, **float** *param1*, **float** *param2*|
-|[@**Vec3\<double>**](#ctor_5)|**double** *param0*, **double** *param1*, **double** *param2*|
-|[@**Vec3\<int>**](#ctor_6)|**int** *param0*, **int** *param1*, **int** *param2*|
-|[@**Vec3\<uint>**](#ctor_7)|**uint** *param0*, **uint** *param1*, **uint** *param2*|
-|[@**Vec4\<float>**](#ctor_8)|**float** *param0*, **float** *param1*, **float** *param2*, **float** *param3*|
-|[@**Vec4\<double>**](#ctor_9)|**double** *param0*, **double** *param1*, **double** *param2*, **double** *param3*|
-|[@**Vec4\<int>**](#ctor_10)|**int** *param0*, **int** *param1*, **int** *param2*, **int** *param3*|
-|[@**Vec4\<uint>**](#ctor_11)|**uint** *param0*, **uint** *param1*, **uint** *param2*, **uint** *param3*|
+|[@**Vec2\<float>**](#ctor_0)| *param0*: **float**,  *param1*: **float**|
+|[@**Vec2\<double>**](#ctor_1)| *param0*: **double**,  *param1*: **double**|
+|[@**Vec2\<int>**](#ctor_2)| *param0*: **int**,  *param1*: **int**|
+|[@**Vec2\<uint>**](#ctor_3)| *param0*: **uint**,  *param1*: **uint**|
+|[@**Vec3\<float>**](#ctor_4)| *param0*: **float**,  *param1*: **float**,  *param2*: **float**|
+|[@**Vec3\<double>**](#ctor_5)| *param0*: **double**,  *param1*: **double**,  *param2*: **double**|
+|[@**Vec3\<int>**](#ctor_6)| *param0*: **int**,  *param1*: **int**,  *param2*: **int**|
+|[@**Vec3\<uint>**](#ctor_7)| *param0*: **uint**,  *param1*: **uint**,  *param2*: **uint**|
+|[@**Vec4\<float>**](#ctor_8)| *param0*: **float**,  *param1*: **float**,  *param2*: **float**,  *param3*: **float**|
+|[@**Vec4\<double>**](#ctor_9)| *param0*: **double**,  *param1*: **double**,  *param2*: **double**,  *param3*: **double**|
+|[@**Vec4\<int>**](#ctor_10)| *param0*: **int**,  *param1*: **int**,  *param2*: **int**,  *param3*: **int**|
+|[@**Vec4\<uint>**](#ctor_11)| *param0*: **uint**,  *param1*: **uint**,  *param2*: **uint**,  *param3*: **uint**|
 ## Propriétés
 |Propriété|Natif|Type|Accesseur|Modifieur|
 |-|-|-|-|-|

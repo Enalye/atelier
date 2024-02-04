@@ -29,7 +29,12 @@ package void loadLibScene_entity(GrLibDefinition library) {
 
     library.addProperty(&_audio, null, "audio", entityType, audioComponentType);
 
+    library.setDescription(GrLocale.fr_FR, "Ajoute une entité en tant qu’enfant de cette entité");
+    library.setParameters(["parent", "child"]);
     library.addFunction(&_addChild, "addChild", [entityType, entityType]);
+
+    library.setDescription(GrLocale.fr_FR, "Ajoute une image à l’entité");
+    library.setParameters(["entity", "image"]);
     library.addFunction(&_addImage, "addImage", [entityType, imageType]);
 }
 

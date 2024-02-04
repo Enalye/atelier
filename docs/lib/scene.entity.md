@@ -15,16 +15,20 @@
 ## Fonctions
 |Fonction|Entrée|Sortie|
 |-|-|-|
-|[addChild](#func_0)|*param0*: **Entity**, *param1*: **Entity**||
-|[addImage](#func_1)|*param0*: **Entity**, *param1*: **Image**||
+|[addChild](#func_0)|*parent*: **Entity**, *child*: **Entity**||
+|[addImage](#func_1)|*entity*: **Entity**, *image*: **Image**||
 
 
 ***
 ## Description des fonctions
 
 <a id="func_0"></a>
-> addChild (*param0*: **Entity**, *param1*: **Entity**)
+> addChild(*parent*: **Entity**, *child*: **Entity**)
+
+Ajoute une entité en tant qu’enfant de cette entité
 
 <a id="func_1"></a>
-> addImage (*param0*: **Entity**, *param1*: **Image**)
+> addImage(*entity*: **Entity**, *image*: **Image**)
+
+Ajoute une image à l’entité
 

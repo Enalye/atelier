@@ -7,7 +7,7 @@ Hérite de **UIElement**
 ## Constructeurs
 |Fonction|Entrée|
 |-|-|
-|[@**Label**](#ctor_0)|**string** *param0*|
+|[@**Label**](#ctor_0)| *param0*: **string**|
 ## Fonctions
 |Fonction|Entrée|Sortie|
 |-|-|-|
@@ -18,5 +18,7 @@ Hérite de **UIElement**
 ## Description des fonctions
 
 <a id="func_0"></a>
-> text (*param0*: **Label**, *param1*: **string**)
+> text(*param0*: **Label**, *param1*: **string**)
+
+Texte du label
 

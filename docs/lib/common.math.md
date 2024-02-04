@@ -4,16 +4,20 @@ Functions mathématiques
 ## Fonctions
 |Fonction|Entrée|Sortie|
 |-|-|-|
-|[dbToVol](#func_0)|*param0*: **float**|**float**|
-|[volToDb](#func_1)|*param0*: **float**|**float**|
+|[dbToVol](#func_0)|*volume*: **float**|**float**|
+|[volToDb](#func_1)|*db*: **float**|**float**|
 
 
 ***
 ## Description des fonctions
 
 <a id="func_0"></a>
-> dbToVol (*param0*: **float**) (**float**)
+> dbToVol(*volume*: **float**) (**float**)
+
+Convertit un volume en décibel vers une amplitude linéaire.
 
 <a id="func_1"></a>
-> volToDb (*param0*: **float**) (**float**)
+> volToDb(*db*: **float**) (**float**)
+
+Convertit un volume linéaire en décibels.
 

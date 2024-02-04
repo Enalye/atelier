@@ -20,12 +20,40 @@ package void loadLibAudio_music(GrLibDefinition library) {
 
     library.addConstructor(&_ctor, musicType, [grString]);
 
+    library.setDescription(GrLocale.fr_FR, "Lance directement la lecture d’une musique.");
+    library.setParameters(["music"]);
     library.addFunction(&_play, "play", [musicType]);
+
+    library.setDescription(GrLocale.fr_FR, "Joue une nouvelle piste musical.
+À la différence de `play` les fonctions comme `playTrack` et `pushTrack` sont limitées à une seule musique en même temps.
+Jouer une nouvelle musique remplacera celle en cours et s’occupera de faire la transition entre les deux musiques automatiquement durant `fadeOut` secondes (grace à `AudioFader`).
+Si aucune piste n’est en cours, la musique se lancera directement.");
+    library.setParameters(["music", "fadeOut"]);
     library.addFunction(&_playTrack, "playTrack", [musicType, grFloat]);
+
+    library.setDescription(GrLocale.fr_FR,
+        "Interromp la piste musicale en cours avec un fondu de `fadeOut` secondes.");
+    library.setParameters(["fadeOut"]);
     library.addFunction(&_stopTrack, "stopTrack", [grFloat]);
+
+    library.setDescription(GrLocale.fr_FR,
+        "Met en pause la piste musicale en cours avec un fondu de `fadeOut` secondes.");
+    library.setParameters(["fadeOut"]);
     library.addFunction(&_pauseTrack, "pauseTrack", [grFloat]);
+
+    library.setDescription(GrLocale.fr_FR,
+        "Redémarre la piste en cours là où elle s’était arrêtée avec un fondu de `fadeIn` secondes.");
+    library.setParameters(["fadeIn"]);
     library.addFunction(&_resumeTrack, "resumeTrack", [grFloat]);
+
+    library.setDescription(GrLocale.fr_FR, "Remplace temporairement la piste musicale en cours par une nouvelle musique avec un fondu de `fadeOut` secondes.
+Pour redémarrer l’ancienne piste à l’endroit où elle a été interrompu, il suffit d’appeler la fonction `popTrack`.");
+    library.setParameters(["music", "fadeOut"]);
     library.addFunction(&_pushTrack, "pushTrack", [musicType, grFloat]);
+
+    library.setDescription(GrLocale.fr_FR,
+        "Termine la piste musicale en cours et reprend la dernière piste musicale interrompu via `pushTrack`.");
+    library.setParameters(["fadeOut", "delay", "fadeIn"]);
     library.addFunction(&_popTrack, "popTrack", [grFloat, grFloat, grFloat]);
 
     //library.addProperty(&_volume!"get", &_volume!"set", "volume", musicType, grFloat);

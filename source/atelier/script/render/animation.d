@@ -24,10 +24,15 @@ void loadLibRender_animation(GrLibDefinition library) {
     GrType vec4iType = grGetNativeType("Vec4", [grInt]);
     GrType imageDataType = grGetNativeType("ImageData");
 
+    library.setParameters(["name"]);
     library.addConstructor(&_ctor_str, animationType, [grString]);
+
+    library.setParameters(["imageData", "clip", "columns", "lines"]);
     library.addConstructor(&_ctor_imageData_2, animationType, [
             imageDataType, vec4iType, grInt, grInt
         ]);
+
+    library.setParameters(["imageData", "clip", "columns", "lines", "maxCount"]);
     library.addConstructor(&_ctor_imageData_3, animationType, [
             imageDataType, vec4iType, grInt, grInt, grInt
         ]);

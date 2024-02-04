@@ -19,7 +19,7 @@ package void loadLibAudio_effect(GrLibDefinition library) {
     GrType effectType = library.addNative("AudioEffect");
 
     library.setDescription(GrLocale.fr_FR, "Retire l’effet de la chaîne d’effet.");
-    library.setParameters(GrLocale.fr_FR, ["effect"]);
+    library.setParameters(["effect"]);
     library.addFunction(&_remove, "remove", [effectType]);
 }
 

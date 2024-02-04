@@ -14,11 +14,16 @@ import atelier.script.util;
 
 package void loadLibAudio_sound(GrLibDefinition library) {
     library.setModule("audio.sound");
-    library.setModuleInfo(GrLocale.fr_FR, "Représente un fichier audio");
+    library.setModuleInfo(GrLocale.fr_FR, "Représente un fichier audio.
+Le son est entièrement décodé en mémoire.
+Il est recommandé de reserver cette classe pour des fichiers peu volumineux.");
 
     GrType soundType = library.addNative("Sound");
 
     library.addConstructor(&_ctor, soundType, [grString]);
+
+    library.setDescription(GrLocale.fr_FR, "Lance la lecture sur le bus `master`.");
+    library.setParameters(["sound"]);
     library.addFunction(&_play, "play", [soundType]);
 
     //library.addProperty(&_volume!"get", &_volume!"set", "volume", soundType, grFloat);

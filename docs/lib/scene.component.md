@@ -8,36 +8,50 @@ Hérite de **EntityComponent**
 ## Fonctions
 |Fonction|Entrée|Sortie|
 |-|-|-|
-|[addEffect](#func_0)|*param0*: **AudioComponent**, *param1*: **AudioEffect**||
-|[connectTo](#func_1)|*param0*: **AudioComponent**, *param1*: **AudioBus**||
-|[connectToMaster](#func_2)|*param0*: **AudioComponent**||
-|[disconnect](#func_3)|*param0*: **AudioComponent**||
-|[play](#func_4)|*param0*: **AudioComponent**, *param1*: **Sound**||
-|[play](#func_5)|*param0*: **AudioComponent**, *param1*: **Music**||
-|[play](#func_6)|*param0*: **AudioComponent**, *param1*: **AudioPlayer**||
+|[addEffect](#func_0)|*audio*: **AudioComponent**, *effect*: **AudioEffect**||
+|[connectTo](#func_1)|*audio*: **AudioComponent**, *bus*: **AudioBus**||
+|[connectToMaster](#func_2)|*audio*: **AudioComponent**||
+|[disconnect](#func_3)|*audio*: **AudioComponent**||
+|[play](#func_4)|*audio*: **AudioComponent**, *sound*: **Sound**||
+|[play](#func_5)|*audio*: **AudioComponent**, *music*: **Music**||
+|[play](#func_6)|*audio*: **AudioComponent**, *player*: **AudioPlayer**||
 
 
 ***
 ## Description des fonctions
 
 <a id="func_0"></a>
-> addEffect (*param0*: **AudioComponent**, *param1*: **AudioEffect**)
+> addEffect(*audio*: **AudioComponent**, *effect*: **AudioEffect**)
+
+Ajoute un effet audio au bus audio de l’entité
 
 <a id="func_1"></a>
-> connectTo (*param0*: **AudioComponent**, *param1*: **AudioBus**)
+> connectTo(*audio*: **AudioComponent**, *bus*: **AudioBus**)
+
+Connecte le bus audio de l’entité à un autre bus
 
 <a id="func_2"></a>
-> connectToMaster (*param0*: **AudioComponent**)
+> connectToMaster(*audio*: **AudioComponent**)
+
+Connecte le bus audio de l’entité au bus maître
 
 <a id="func_3"></a>
-> disconnect (*param0*: **AudioComponent**)
+> disconnect(*audio*: **AudioComponent**)
+
+Déconnecte le bus audio de l’entité
 
 <a id="func_4"></a>
-> play (*param0*: **AudioComponent**, *param1*: **Sound**)
+> play(*audio*: **AudioComponent**, *sound*: **Sound**)
+
+Joue un son spacialisé au niveau de l’entité
 
 <a id="func_5"></a>
-> play (*param0*: **AudioComponent**, *param1*: **Music**)
+> play(*audio*: **AudioComponent**, *music*: **Music**)
+
+Joue une musique spacialisée au niveau de l’entité
 
 <a id="func_6"></a>
-> play (*param0*: **AudioComponent**, *param1*: **AudioPlayer**)
+> play(*audio*: **AudioComponent**, *player*: **AudioPlayer**)
+
+Lance un lecteur audio spacialisé au niveau de l’entité
 

@@ -11,6 +11,7 @@
 	- [audio.sound](lib/audio.sound)
 	- [audio.soundplayer](lib/audio.soundplayer)
 	- [common.color](lib/common.color)
+	- [common.hslcolor](lib/common.hslcolor)
 	- [common.math](lib/common.math)
 	- [common.spline](lib/common.spline)
 	- [common.vec](lib/common.vec)

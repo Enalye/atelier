@@ -23,8 +23,8 @@ Image
 ## Description des fonctions
 
 <a id="func_0"></a>
-> contain (*param0*: **Image**, *param1*: **float**, *param2*: **float**)
+> contain(*param0*: **Image**, *param1*: **float**, *param2*: **float**)
 
 <a id="func_1"></a>
-> fit (*param0*: **Image**, *param1*: **float**, *param2*: **float**)
+> fit(*param0*: **Image**, *param1*: **float**, *param2*: **float**)
 

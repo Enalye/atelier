@@ -7,7 +7,7 @@ Hérite de **Image**
 ## Constructeurs
 |Fonction|Entrée|
 |-|-|
-|[@**RoundedRectangle**](#ctor_0)|**float** *param0*, **float** *param1*, **float** *param2*, **bool** *param3*, **float** *param4*|
+|[@**RoundedRectangle**](#ctor_0)| *param0*: **float**,  *param1*: **float**,  *param2*: **float**,  *param3*: **bool**,  *param4*: **float**|
 ## Propriétés
 |Propriété|Natif|Type|Accesseur|Modifieur|
 |-|-|-|-|-|

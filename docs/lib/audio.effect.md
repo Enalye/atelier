@@ -13,7 +13,7 @@ Effet audio de base
 ## Description des fonctions
 
 <a id="func_0"></a>
-> remove (*effect*: **AudioEffect**)
+> remove(*effect*: **AudioEffect**)
 
 Retire l’effet de la chaîne d’effet.
 

@@ -7,8 +7,8 @@ Hérite de **Image**
 ## Constructeurs
 |Fonction|Entrée|
 |-|-|
-|[@**NinePatch**](#ctor_0)|**string** *param0*|
-|[@**NinePatch**](#ctor_1)|**Texture** *param0*, **Vec4\<int>** *param1*, **int** *param2*, **int** *param3*, **int** *param4*, **int** *param5*|
+|[@**NinePatch**](#ctor_0)| *param0*: **string**|
+|[@**NinePatch**](#ctor_1)| *param0*: **Texture**,  *param1*: **Vec4\<int>**,  *param2*: **int**,  *param3*: **int**,  *param4*: **int**,  *param5*: **int**|
 ## Propriétés
 |Propriété|Natif|Type|Accesseur|Modifieur|
 |-|-|-|-|-|

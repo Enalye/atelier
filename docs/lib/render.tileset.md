@@ -6,7 +6,7 @@ Jeu de tuiles
 ## Constructeurs
 |Fonction|Entrée|
 |-|-|
-|[@**Tileset**](#ctor_0)|**string** *param0*|
+|[@**Tileset**](#ctor_0)| *param0*: **string**|
 ## Propriétés
 |Propriété|Natif|Type|Accesseur|Modifieur|
 |-|-|-|-|-|

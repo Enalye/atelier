@@ -213,7 +213,7 @@ final class NinePatch : Image, Resource!NinePatch {
         rasterData.texH = _surfaceHeight;
         rasterData.pixels = cast(uint*) _surface.pixels;
 
-        _cache.write(function(uint* dest, uint* src, uint texWidth, uint texHeight, void* data_) {
+        _cache.update(function(uint* dest, uint texWidth, uint texHeight, void* data_) {
             RasterData* data = cast(RasterData*) data_;
             const offsetY = (texHeight - data.bottom) * texWidth;
             const clipInternalH = data.clipH - (data.top + data.bottom);

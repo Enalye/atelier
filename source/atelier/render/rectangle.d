@@ -99,7 +99,7 @@ final class Rectangle : Image {
         rasterData.filled = _filled;
         rasterData.thickness = _thickness;
 
-        _cache.write(function(uint* dest, uint*, uint texWidth, uint texHeight, void* data_) {
+        _cache.update(function(uint* dest, uint texWidth, uint texHeight, void* data_) {
             RasterData* data = cast(RasterData*) data_;
 
             if (data.filled) {

@@ -120,7 +120,7 @@ final class RoundedRectangle : Image {
         rasterData.filled = _filled;
         rasterData.thickness = _thickness;
 
-        _cache.write(function(uint* dest, uint*, uint texWidth, uint texHeight, void* data_) {
+        _cache.update(function(uint* dest, uint texWidth, uint texHeight, void* data_) {
             RasterData* data = cast(RasterData*) data_;
             int corner = cast(int) data.radius;
             const offsetY = (texHeight - corner) * texWidth;
@@ -309,7 +309,7 @@ final class RoundedRectangle : Image {
         _cache.color = color;
         _cache.blend = blend;
         _cache.alpha = alpha;
-        _cache.draw(origin + (position - anchor * size), _size, Vec4i(0, 0, _cache.width,
-                _cache.height), angle, pivot, flipX, flipY);
+        _cache.draw(origin + (position - anchor * size), _size, Vec4i(0, 0,
+                _cache.width, _cache.height), angle, pivot, flipX, flipY);
     }
 }

@@ -12,6 +12,7 @@ import atelier.common;
 import atelier.core;
 import atelier.render;
 import atelier.scene.entity;
+import atelier.scene.particle;
 
 /// Représente un contexte contenant des entités
 final class Scene {
@@ -19,6 +20,7 @@ final class Scene {
         Canvas _canvas;
         Sprite _sprite;
         Array!Entity _entities;
+        Array!ParticleSource _particleSources;
         int _zOrder;
         bool _isAlive = true;
         bool _isVisible = true;
@@ -60,7 +62,10 @@ final class Scene {
     this(int width_, int height_) {
         _width = width_;
         _height = height_;
+
         _entities = new Array!Entity;
+        _particleSources = new Array!ParticleSource;
+
         _canvas = new Canvas(_width, _height);
         _sprite = new Sprite(_canvas);
         _sprite.anchor = Vec2f.half;
@@ -74,6 +79,10 @@ final class Scene {
         entity.setScene(this);
         _entities ~= entity;
         _sortEntities();
+    }
+
+    void addParticleSource(ParticleSource source) {
+        _particleSources ~= source;
     }
 
     void update() {
@@ -90,6 +99,15 @@ final class Scene {
             _entities.sweep();
             _sortEntities();
         }
+
+        foreach (idx, source; _particleSources) {
+            source.update();
+            if (!source.isAlive) {
+                _particleSources.mark(idx);
+                isEntitiesDirty = true;
+            }
+        }
+        _particleSources.sweep();
     }
 
     void remove() {
@@ -105,6 +123,10 @@ final class Scene {
     void render() {
         foreach (entity; _entities) {
             entity.draw(_sprite.size / 2f - position);
+        }
+
+        foreach (source; _particleSources) {
+            source.draw(_sprite.size / 2f - position);
         }
     }
 

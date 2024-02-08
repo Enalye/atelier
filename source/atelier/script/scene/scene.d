@@ -21,6 +21,7 @@ package void loadLibScene_scene(GrLibDefinition library) {
 
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
     GrType entityType = grGetNativeType("Entity");
+    GrType particleSourceType = grGetNativeType("ParticleSource");
     GrType canvasType = grGetNativeType("Canvas");
 
     library.addConstructor(&_ctor, sceneType, [grInt, grInt]);
@@ -36,6 +37,12 @@ package void loadLibScene_scene(GrLibDefinition library) {
     library.setDescription(GrLocale.fr_FR, "Ajoute une entité à la scène");
     library.setParameters(["scene", "entity"]);
     library.addFunction(&_addEntity, "addEntity", [sceneType, entityType]);
+
+    library.setDescription(GrLocale.fr_FR, "Ajoute une source de particules à la scène");
+    library.setParameters(["scene", "particleSource"]);
+    library.addFunction(&_addParticleSource, "addParticleSource", [
+            sceneType, particleSourceType
+        ]);
 }
 
 private void _ctor(GrCall call) {
@@ -74,4 +81,10 @@ private void _addEntity(GrCall call) {
     Scene scene = call.getNative!Scene(0);
     Entity entity = call.getNative!Entity(1);
     scene.addEntity(entity);
+}
+
+private void _addParticleSource(GrCall call) {
+    Scene scene = call.getNative!Scene(0);
+    ParticleSource source = call.getNative!ParticleSource(1);
+    scene.addParticleSource(source);
 }

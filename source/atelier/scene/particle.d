@@ -6,7 +6,9 @@
 module atelier.scene.particle;
 
 import std.random;
+import std.math;
 import atelier.common;
+import atelier.core;
 import atelier.render;
 import atelier.scene.entity;
 
@@ -18,15 +20,19 @@ private final class Particle {
     float speed = 0f;
 
     float angle = 0f;
-    float angleSpeed = 0f;
+    float spin = 0f;
 
     Vec2f pivot = Vec2f.zero;
     float pivotAngle = 0f;
-    float pivotAngleSpeed = 0f;
+    float pivotSpin = 0f;
     float pivotDistance = 0f;
 
+    Vec2f scale = Vec2f.one;
+    Color color = Color.white;
+    float alpha = 1f;
+
     void update() {
-        pivotAngle += pivotAngleSpeed;
+        pivotAngle += pivotSpin;
         if (pivotDistance) {
             pivot = Vec2f.angled(pivotAngle) * pivotDistance;
         }
@@ -40,22 +46,40 @@ private final class Particle {
     }
 }
 
-abstract class ParticleSource {
+enum ParticleMode {
+    spread,
+    rectangle,
+    ellipsis
+}
+
+final class ParticleSource {
     private {
         Array!Particle _particles;
         ParticleEffect[] _effects;
 
         Sprite _sprite;
+        Vec2f _spriteSize = Vec2f.one;
 
         bool _isAlive = true;
         bool _isRelativePosition;
-        Vec2f _position = Vec2f.zero;
         Entity _attachedEntity;
         uint _interval;
         int _emitterTime;
         uint _minCount, _maxCount;
         uint _minLifetime, _maxLifetime;
+
+        Blend _blend = Blend.alpha;
+        ParticleMode _mode = ParticleMode.rectangle;
+
+        // Spread
+        float _minAngle = 0f, _maxAngle = 0f, _spreadAngle = 0f;
+        float _minDistance = 0f, _maxDistance = 0f;
+
+        // Rect
+        Vec2f _area = Vec2f.zero;
     }
+
+    Vec2f position = Vec2f.zero;
 
     @property {
         bool isAlive() const {
@@ -82,7 +106,7 @@ abstract class ParticleSource {
 
         Vec2f origin;
         if (_isRelativePosition) {
-            origin = _position;
+            origin = position;
             if (_attachedEntity) {
                 origin += _attachedEntity.scenePosition();
             }
@@ -107,7 +131,7 @@ abstract class ParticleSource {
     }
 
     Vec2f getOrigin() {
-        Vec2f origin = _position;
+        Vec2f origin = position;
         if (_attachedEntity) {
             origin += _attachedEntity.scenePosition();
         }
@@ -118,59 +142,81 @@ abstract class ParticleSource {
         if (!_sprite)
             return;
 
+        _sprite.blend = _blend;
         foreach (particle; _particles) {
+            _sprite.color = particle.color;
+            _sprite.alpha = particle.alpha;
+            _sprite.size = particle.scale * _spriteSize;
             _sprite.draw(origin + particle.origin + particle.position + particle.pivot);
         }
     }
 
-    final void start(uint interval) {
+    void start(uint interval) {
         _interval = interval;
         _emitterTime = _interval;
         emit();
     }
 
-    final void stop() {
+    void stop() {
         _interval = 0;
         _emitterTime = 0;
     }
 
-    final void clear() {
+    void clear() {
         _particles.clear();
     }
 
-    final void remove() {
+    void remove() {
         _isAlive = false;
     }
 
-    void emit();
-
-    final void setSprite(Sprite sprite) {
-        _sprite = sprite;
+    void emit() {
+        final switch (_mode) with (ParticleMode) {
+        case spread:
+            _emitSpread();
+            break;
+        case rectangle:
+            _emitRectangle();
+            break;
+        case ellipsis:
+            _emitEllipsis();
+            break;
+        }
     }
 
-    final void setRelativePosition(bool isRelative) {
+    void setSprite(string id) {
+        _sprite = Atelier.res.get!Sprite(id);
+        _spriteSize = _sprite.size;
+    }
+
+    void setBlend(Blend blend) {
+        _blend = blend;
+    }
+
+    void setRelativePosition(bool isRelative) {
         _isRelativePosition = isRelative;
     }
 
-    final void setLifetime(uint minLifetime, uint maxLifetime) {
+    void setLifetime(uint minLifetime, uint maxLifetime) {
         _minLifetime = minLifetime;
         _maxLifetime = maxLifetime;
     }
 
-    final void setCount(uint minCount, uint maxCount) {
+    void setCount(uint minCount, uint maxCount) {
         _minCount = minCount;
         _maxCount = maxCount;
     }
 
-    final void attachTo(Entity entity) {
+    void attachTo(Entity entity) {
         _attachedEntity = entity;
     }
-}
 
-final class CircularParticleSource : ParticleSource {
-    private {
-        float _minAngle = 0f, _maxAngle = 0f, _spreadAngle = 0f;
-        float _minDistance = 0f, _maxDistance = 0f;
+    void setMode(ParticleMode mode) {
+        _mode = mode;
+    }
+
+    void setArea(float x, float y) {
+        _area = Vec2f(x, y);
     }
 
     void setDistance(float minDistance, float maxDistance) {
@@ -184,16 +230,64 @@ final class CircularParticleSource : ParticleSource {
         _spreadAngle = spreadAngle;
     }
 
-    override void emit() {
+    private void _emitSpread() {
         uint particleCount = uniform!"[]"(_minCount, _maxCount);
         float distance = uniform!"[]"(_minDistance, _maxDistance);
         float angle = uniform!"[]"(_minAngle, _maxAngle) - (_spreadAngle / 2f);
         float spreadPerParticle = _spreadAngle / particleCount;
 
+        Vec2f origin = getOrigin();
         for (int i; i < particleCount; ++i) {
             Particle particle = new Particle;
-            particle.origin = getOrigin();
+            particle.origin = origin;
             particle.position = Vec2f.angled(angle) * distance;
+            particle.angle = angle;
+            particle.pivotAngle = angle;
+            particle.ttl = uniform!"[]"(_minLifetime, _maxLifetime);
+            _particles ~= particle;
+
+            angle += spreadPerParticle;
+        }
+    }
+
+    private void _emitRectangle() {
+        uint particleCount = uniform!"[]"(_minCount, _maxCount);
+        float angle = uniform!"[]"(_minAngle, _maxAngle) - (_spreadAngle / 2f);
+        float spreadPerParticle = _spreadAngle / particleCount;
+
+        Vec2f origin = getOrigin();
+        Vec2f offset = -_area / 2f;
+        for (int i; i < particleCount; ++i) {
+            float x = uniform!"[]"(0f, 1f);
+            float y = uniform!"[]"(0f, 1f);
+
+            Particle particle = new Particle;
+            particle.origin = origin;
+            particle.position = Vec2f(x, y) * _area + offset;
+            particle.angle = angle;
+            particle.pivotAngle = angle;
+            particle.ttl = uniform!"[]"(_minLifetime, _maxLifetime);
+            _particles ~= particle;
+
+            angle += spreadPerParticle;
+        }
+    }
+
+    private void _emitEllipsis() {
+        uint particleCount = uniform!"[]"(_minCount, _maxCount);
+        float angle = uniform!"[]"(_minAngle, _maxAngle) - (_spreadAngle / 2f);
+        float spreadPerParticle = _spreadAngle / particleCount;
+
+        Vec2f origin = getOrigin();
+
+        for (int i; i < particleCount; ++i) {
+            float phi = uniform01() * PI * 2f;
+            float rho = uniform01();
+            Vec2f pos = sqrt(rho) * Vec2f.angled(phi);
+
+            Particle particle = new Particle;
+            particle.origin = origin;
+            particle.position = pos * _area / 2f;
             particle.angle = angle;
             particle.pivotAngle = angle;
             particle.ttl = uniform!"[]"(_minLifetime, _maxLifetime);
@@ -248,13 +342,13 @@ final class OnceParticleEffect(T, string FieldName) : ParticleEffect {
     }
 
     override void update(Particle particle) {
-        mixin("particle.", FieldName, " = uniform!\"[]\"(_minValue, _maxValue);");
+        mixin("particle.", FieldName, " = lerp(_minValue, _maxValue, uniform!\"[]\"(0f, 1f));");
     }
 }
 
 final class IntervalParticleEffect(T, string FieldName) : ParticleEffect {
     private {
-        float _startValue, _endValue;
+        T _startValue, _endValue;
         SplineFunc _splineFunc;
     }
 
@@ -274,11 +368,17 @@ alias SpeedParticleEffect = OnceParticleEffect!(float, "speed");
 alias SpeedIntervalParticleEffect = IntervalParticleEffect!(float, "speed");
 alias AngleParticleEffect = OnceParticleEffect!(float, "angle");
 alias AngleIntervalParticleEffect = IntervalParticleEffect!(float, "angle");
-alias AngleSpeedParticleEffect = OnceParticleEffect!(float, "angleSpeed");
-alias AngleSpeedIntervalParticleEffect = IntervalParticleEffect!(float, "angleSpeed");
+alias SpinParticleEffect = OnceParticleEffect!(float, "spin");
+alias SpinIntervalParticleEffect = IntervalParticleEffect!(float, "spin");
 alias PivotAngleParticleEffect = OnceParticleEffect!(float, "pivotAngle");
 alias PivotAngleIntervalParticleEffect = IntervalParticleEffect!(float, "pivotAngle");
-alias PivotAngleSpeedParticleEffect = OnceParticleEffect!(float, "pivotAngleSpeed");
-alias PivotAngleSpeedIntervalParticleEffect = IntervalParticleEffect!(float, "pivotAngleSpeed");
+alias PivotSpinParticleEffect = OnceParticleEffect!(float, "pivotSpin");
+alias PivotSpinIntervalParticleEffect = IntervalParticleEffect!(float, "pivotSpin");
 alias PivotDistanceParticleEffect = OnceParticleEffect!(float, "pivotDistance");
 alias PivotDistanceIntervalParticleEffect = IntervalParticleEffect!(float, "pivotDistance");
+alias ScaleParticleEffect = OnceParticleEffect!(Vec2f, "scale");
+alias ScaleIntervalParticleEffect = IntervalParticleEffect!(Vec2f, "scale");
+alias ColorParticleEffect = OnceParticleEffect!(Color, "color");
+alias ColorIntervalParticleEffect = IntervalParticleEffect!(Color, "color");
+alias AlphaParticleEffect = OnceParticleEffect!(float, "alpha");
+alias AlphaIntervalParticleEffect = IntervalParticleEffect!(float, "alpha");

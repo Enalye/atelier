@@ -11,6 +11,7 @@ import atelier.common;
 import atelier.core;
 import atelier.render;
 import atelier.scene.entity;
+import atelier.scene.scene;
 
 private final class Particle {
     int frame, ttl;
@@ -27,12 +28,16 @@ private final class Particle {
     float pivotSpin = 0f;
     float pivotDistance = 0f;
 
+    float rotation = 0f;
+    float rotationSpin = 0f;
+
     Vec2f scale = Vec2f.one;
     Color color = Color.white;
     float alpha = 1f;
 
     void update() {
         pivotAngle += pivotSpin;
+        rotation += rotationSpin;
         if (pivotDistance) {
             pivot = Vec2f.angled(pivotAngle) * pivotDistance;
         }
@@ -56,12 +61,15 @@ final class ParticleSource {
     private {
         Array!Particle _particles;
         ParticleEffect[] _effects;
+        Scene _scene;
 
         Sprite _sprite;
         Vec2f _spriteSize = Vec2f.one;
 
         bool _isAlive = true;
         bool _isRelativePosition;
+        bool _isRelativeRotation;
+        bool _isAttachedToScene;
         Entity _attachedEntity;
         uint _interval;
         int _emitterTime;
@@ -75,7 +83,7 @@ final class ParticleSource {
         float _minAngle = 0f, _maxAngle = 0f, _spreadAngle = 0f;
         float _minDistance = 0f, _maxDistance = 0f;
 
-        // Rect
+        // Zone
         Vec2f _area = Vec2f.zero;
     }
 
@@ -89,6 +97,10 @@ final class ParticleSource {
 
     this() {
         _particles = new Array!Particle;
+    }
+
+    package void setScene(Scene scene_) {
+        _scene = scene_;
     }
 
     void addEffect(ParticleEffect effect) {
@@ -109,6 +121,9 @@ final class ParticleSource {
             origin = position;
             if (_attachedEntity) {
                 origin += _attachedEntity.scenePosition();
+            }
+            else if (_isAttachedToScene && _scene) {
+                origin += _scene.position;
             }
         }
 
@@ -135,6 +150,9 @@ final class ParticleSource {
         if (_attachedEntity) {
             origin += _attachedEntity.scenePosition();
         }
+        else if (_isAttachedToScene && _scene) {
+            origin += _scene.position;
+        }
         return origin;
     }
 
@@ -147,6 +165,12 @@ final class ParticleSource {
             _sprite.color = particle.color;
             _sprite.alpha = particle.alpha;
             _sprite.size = particle.scale * _spriteSize;
+            if (_isRelativeRotation) {
+                _sprite.angle = radToDeg(particle.angle + particle.rotation);
+            }
+            else {
+                _sprite.angle = radToDeg(particle.rotation);
+            }
             _sprite.draw(origin + particle.origin + particle.position + particle.pivot);
         }
     }
@@ -197,6 +221,10 @@ final class ParticleSource {
         _isRelativePosition = isRelative;
     }
 
+    void setRelativeRotation(bool isRelative) {
+        _isRelativeRotation = isRelative;
+    }
+
     void setLifetime(uint minLifetime, uint maxLifetime) {
         _minLifetime = minLifetime;
         _maxLifetime = maxLifetime;
@@ -208,7 +236,13 @@ final class ParticleSource {
     }
 
     void attachTo(Entity entity) {
+        _isAttachedToScene = false;
         _attachedEntity = entity;
+    }
+
+    void attachToScene() {
+        _isAttachedToScene = true;
+        _attachedEntity = null;
     }
 
     void setMode(ParticleMode mode) {
@@ -376,6 +410,10 @@ alias PivotSpinParticleEffect = OnceParticleEffect!(float, "pivotSpin");
 alias PivotSpinIntervalParticleEffect = IntervalParticleEffect!(float, "pivotSpin");
 alias PivotDistanceParticleEffect = OnceParticleEffect!(float, "pivotDistance");
 alias PivotDistanceIntervalParticleEffect = IntervalParticleEffect!(float, "pivotDistance");
+alias RotationParticleEffect = OnceParticleEffect!(float, "rotation");
+alias RotationIntervalParticleEffect = IntervalParticleEffect!(float, "rotation");
+alias RotationSpinParticleEffect = OnceParticleEffect!(float, "rotationSpin");
+alias RotationSpinIntervalParticleEffect = IntervalParticleEffect!(float, "rotationSpin");
 alias ScaleParticleEffect = OnceParticleEffect!(Vec2f, "scale");
 alias ScaleIntervalParticleEffect = IntervalParticleEffect!(Vec2f, "scale");
 alias ColorParticleEffect = OnceParticleEffect!(Color, "color");

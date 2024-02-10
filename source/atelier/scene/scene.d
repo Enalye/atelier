@@ -82,6 +82,7 @@ final class Scene {
     }
 
     void addParticleSource(ParticleSource source) {
+        source.setScene(this);
         _particleSources ~= source;
     }
 
@@ -126,7 +127,7 @@ final class Scene {
         }
 
         foreach (source; _particleSources) {
-            source.draw(_sprite.size / 2f - position);
+                source.draw(_sprite.size / 2f - position);
         }
     }
 

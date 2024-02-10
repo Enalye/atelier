@@ -40,7 +40,11 @@ package void loadLibScene_particle(GrLibDefinition library) {
     library.addFunction(&_setRelativePosition, "setRelativePosition", [
             sourceType, grBool
         ]);
+    library.addFunction(&_setRelativeRotation, "setRelativeRotation", [
+            sourceType, grBool
+        ]);
     library.addFunction(&_attachTo, "attachTo", [sourceType, entityType]);
+    library.addFunction(&_attachToScene, "attachToScene", [sourceType]);
     library.addFunction(&_detach, "detach", [sourceType]);
     library.addFunction(&_setLifetime, "setLifetime", [
             sourceType, grUInt, grUInt
@@ -90,6 +94,20 @@ package void loadLibScene_particle(GrLibDefinition library) {
         "setPivotDistance", [sourceType, grUInt, grFloat, grFloat]);
     library.addFunction(&_setEffectInterval!("Float", "PivotDistance"),
         "setPivotDistanceInterval", [
+            sourceType, grUInt, grUInt, grFloat, grFloat, splineType
+        ]);
+
+    library.addFunction(&_setEffectOnce!("Float", "Rotation"), "setRotation",
+        [sourceType, grUInt, grFloat, grFloat]);
+    library.addFunction(&_setEffectInterval!("Float", "Rotation"),
+        "setRotationInterval", [
+            sourceType, grUInt, grUInt, grFloat, grFloat, splineType
+        ]);
+
+    library.addFunction(&_setEffectOnce!("Float", "RotationSpin"),
+        "setRotationSpin", [sourceType, grUInt, grFloat, grFloat]);
+    library.addFunction(&_setEffectInterval!("Float", "RotationSpin"),
+        "setRotationSpinInterval", [
             sourceType, grUInt, grUInt, grFloat, grFloat, splineType
         ]);
 
@@ -169,10 +187,21 @@ private void _setRelativePosition(GrCall call) {
     source.setRelativePosition(isRelative);
 }
 
+private void _setRelativeRotation(GrCall call) {
+    ParticleSource source = call.getNative!ParticleSource(0);
+    GrBool isRelative = call.getBool(1);
+    source.setRelativeRotation(isRelative);
+}
+
 private void _attachTo(GrCall call) {
     ParticleSource source = call.getNative!ParticleSource(0);
     Entity entity = call.getNative!Entity(1);
     source.attachTo(entity);
+}
+
+private void _attachToScene(GrCall call) {
+    ParticleSource source = call.getNative!ParticleSource(0);
+    source.attachToScene();
 }
 
 private void _detach(GrCall call) {

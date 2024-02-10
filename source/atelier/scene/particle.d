@@ -231,9 +231,9 @@ final class ParticleSource {
     }
 
     private void _emitSpread() {
-        uint particleCount = uniform!"[]"(_minCount, _maxCount);
-        float distance = uniform!"[]"(_minDistance, _maxDistance);
-        float angle = uniform!"[]"(_minAngle, _maxAngle) - (_spreadAngle / 2f);
+        uint particleCount = Atelier.rng.randi(_minCount, _maxCount);
+        float distance = Atelier.rng.randf(_minDistance, _maxDistance);
+        float angle = Atelier.rng.randf(_minAngle, _maxAngle) - (_spreadAngle / 2f);
         float spreadPerParticle = _spreadAngle / particleCount;
 
         Vec2f origin = getOrigin();
@@ -243,7 +243,7 @@ final class ParticleSource {
             particle.position = Vec2f.angled(angle) * distance;
             particle.angle = angle;
             particle.pivotAngle = angle;
-            particle.ttl = uniform!"[]"(_minLifetime, _maxLifetime);
+            particle.ttl = Atelier.rng.randi(_minLifetime, _maxLifetime);
             _particles ~= particle;
 
             angle += spreadPerParticle;
@@ -251,22 +251,22 @@ final class ParticleSource {
     }
 
     private void _emitRectangle() {
-        uint particleCount = uniform!"[]"(_minCount, _maxCount);
-        float angle = uniform!"[]"(_minAngle, _maxAngle) - (_spreadAngle / 2f);
+        uint particleCount = Atelier.rng.randu(_minCount, _maxCount);
+        float angle = Atelier.rng.randf(_minAngle, _maxAngle) - (_spreadAngle / 2f);
         float spreadPerParticle = _spreadAngle / particleCount;
 
         Vec2f origin = getOrigin();
         Vec2f offset = -_area / 2f;
         for (int i; i < particleCount; ++i) {
-            float x = uniform!"[]"(0f, 1f);
-            float y = uniform!"[]"(0f, 1f);
+            float x = Atelier.rng.randf();
+            float y = Atelier.rng.randf();
 
             Particle particle = new Particle;
             particle.origin = origin;
             particle.position = Vec2f(x, y) * _area + offset;
             particle.angle = angle;
             particle.pivotAngle = angle;
-            particle.ttl = uniform!"[]"(_minLifetime, _maxLifetime);
+            particle.ttl = Atelier.rng.randi(_minLifetime, _maxLifetime);
             _particles ~= particle;
 
             angle += spreadPerParticle;
@@ -274,15 +274,15 @@ final class ParticleSource {
     }
 
     private void _emitEllipsis() {
-        uint particleCount = uniform!"[]"(_minCount, _maxCount);
-        float angle = uniform!"[]"(_minAngle, _maxAngle) - (_spreadAngle / 2f);
+        uint particleCount = Atelier.rng.randi(_minCount, _maxCount);
+        float angle = Atelier.rng.randf(_minAngle, _maxAngle) - (_spreadAngle / 2f);
         float spreadPerParticle = _spreadAngle / particleCount;
 
         Vec2f origin = getOrigin();
 
         for (int i; i < particleCount; ++i) {
-            float phi = uniform01() * PI * 2f;
-            float rho = uniform01();
+            float phi = Atelier.rng.randf() * PI * 2f;
+            float rho = Atelier.rng.randf();
             Vec2f pos = sqrt(rho) * Vec2f.angled(phi);
 
             Particle particle = new Particle;
@@ -290,7 +290,7 @@ final class ParticleSource {
             particle.position = pos * _area / 2f;
             particle.angle = angle;
             particle.pivotAngle = angle;
-            particle.ttl = uniform!"[]"(_minLifetime, _maxLifetime);
+            particle.ttl = Atelier.rng.randi(_minLifetime, _maxLifetime);
             _particles ~= particle;
 
             angle += spreadPerParticle;
@@ -342,7 +342,7 @@ final class OnceParticleEffect(T, string FieldName) : ParticleEffect {
     }
 
     override void update(Particle particle) {
-        mixin("particle.", FieldName, " = lerp(_minValue, _maxValue, uniform!\"[]\"(0f, 1f));");
+        mixin("particle.", FieldName, " = lerp(_minValue, _maxValue, Atelier.rng.randf());");
     }
 }
 

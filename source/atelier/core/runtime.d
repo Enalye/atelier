@@ -53,6 +53,7 @@ final class Atelier {
         ResourceManager _resourceManager;
         AudioMixer _audioMixer;
         SceneManager _sceneManager;
+        RNG _rng;
     }
 
     static @property pragma(inline) {
@@ -89,6 +90,11 @@ final class Atelier {
             return _sceneManager;
         }
 
+        /// Générateur standard de pseudo-aléatoire
+        RNG rng() {
+            return _rng;
+        }
+
         /// La machine virtuelle Grimoire
         GrEngine vm() {
             return _engine;
@@ -110,6 +116,7 @@ final class Atelier {
         _audioMixer = new AudioMixer();
         _sceneManager = new SceneManager();
         _resourceManager = new ResourceManager();
+        _rng = new RNG();
 
         setupDefaultResourceLoaders(_resourceManager);
     }

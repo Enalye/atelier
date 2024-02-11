@@ -4,26 +4,26 @@ Gestionnaire d’interface
 ## Fonctions
 |Fonction|Entrée|Sortie|
 |-|-|-|
-|[addUIElement](#func_0)|*param0*: **UIElement**||
-|[clearUIElements](#func_1)|||
-|[setDebugUI](#func_2)|*param0*: **bool**||
+|[addUI](#func_0)|*ui*: **UIElement**||
+|[clearUI](#func_1)|||
+|[setDebugUI](#func_2)|*isDebug*: **bool**||
 
 
 ***
 ## Description des fonctions
 
 <a id="func_0"></a>
-> addUIElement(*param0*: **UIElement**)
+> addUI(*ui*: **UIElement**)
 
 Ajoute une interface au sommet de la hiérarchie
 
 <a id="func_1"></a>
-> clearUIElements()
+> clearUI()
 
 Supprime toutes les interfaces
 
 <a id="func_2"></a>
-> setDebugUI(*param0*: **bool**)
+> setDebugUI(*isDebug*: **bool**)
 
 Montre les bordures des interfaces
 

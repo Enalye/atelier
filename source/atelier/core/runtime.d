@@ -246,24 +246,16 @@ final class Atelier {
             while (accumulator >= 1f) {
                 InputEvent[] inputEvents = _inputManager.pollEvents();
 
-                _audioMixer.update();
-                
                 _window.update();
 
-                _uiManager.dispatch(inputEvents);
+                foreach (InputEvent event; inputEvents) {
+                    _uiManager.dispatch(event);
+                }
 
                 if (_engine) {
-                    /*if (_inputEvent) {
-                    foreach (InputEvent inputEvent; inputEvents) {
-                        _engine.callEvent(_inputEvent, [GrValue(inputEvent)]);
-                    }
-                }*/
-
                     if (_engine.hasTasks) {
                         _engine.process();
                     }
-
-                    //remove!(a => a.isAccepted)(inputEvents);
 
                     if (_engine.isPanicking) {
                         string err = "panique: " ~ _engine.panicMessage ~ "\n";
@@ -278,7 +270,7 @@ final class Atelier {
                     }
                 }
 
-                _sceneManager.update();
+                _sceneManager.update(inputEvents);
                 _uiManager.update();
 
                 accumulator -= 1f;

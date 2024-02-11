@@ -11,6 +11,7 @@ import atelier.common;
 import atelier.core;
 import atelier.render;
 import atelier.scene;
+import atelier.ui;
 import atelier.script.util;
 
 package void loadLibScene_scene(GrLibDefinition library) {
@@ -23,6 +24,7 @@ package void loadLibScene_scene(GrLibDefinition library) {
     GrType entityType = grGetNativeType("Entity");
     GrType particleSourceType = grGetNativeType("ParticleSource");
     GrType canvasType = grGetNativeType("Canvas");
+    GrType uiType = grGetNativeType("UIElement");
 
     library.addConstructor(&_ctor, sceneType, [grInt, grInt]);
 
@@ -39,10 +41,18 @@ package void loadLibScene_scene(GrLibDefinition library) {
     library.addFunction(&_addEntity, "addEntity", [sceneType, entityType]);
 
     library.setDescription(GrLocale.fr_FR, "Ajoute une source de particules à la scène");
-    library.setParameters(["scene", "particleSource"]);
+    library.setParameters(["scene", "source"]);
     library.addFunction(&_addParticleSource, "addParticleSource", [
             sceneType, particleSourceType
         ]);
+
+    library.setDescription(GrLocale.fr_FR, "Ajoute un élément d’interface à la scène");
+    library.setParameters(["scene", "ui"]);
+    library.addFunction(&_addUI, "addUI", [sceneType, uiType]);
+
+    library.setDescription(GrLocale.fr_FR, "Supprime les élements d’interface de la scène");
+    library.setParameters(["scene"]);
+    library.addFunction(&_clearUI, "clearUI", [sceneType]);
 }
 
 private void _ctor(GrCall call) {
@@ -87,4 +97,15 @@ private void _addParticleSource(GrCall call) {
     Scene scene = call.getNative!Scene(0);
     ParticleSource source = call.getNative!ParticleSource(1);
     scene.addParticleSource(source);
+}
+
+private void _addUI(GrCall call) {
+    Scene scene = call.getNative!Scene(0);
+    UIElement ui = call.getNative!UIElement(1);
+    scene.addUI(ui);
+}
+
+private void _clearUI(GrCall call) {
+    Scene scene = call.getNative!Scene(0);
+    scene.clearUI();
 }

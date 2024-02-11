@@ -28,8 +28,8 @@ private final class Particle {
     float pivotSpin = 0f;
     float pivotDistance = 0f;
 
-    float rotation = 0f;
-    float rotationSpin = 0f;
+    float spriteAngle = 0f;
+    float spriteSpin = 0f;
 
     Vec2f scale = Vec2f.one;
     Color color = Color.white;
@@ -37,7 +37,7 @@ private final class Particle {
 
     void update() {
         pivotAngle += pivotSpin;
-        rotation += rotationSpin;
+        spriteAngle += spriteSpin;
         if (pivotDistance) {
             pivot = Vec2f.angled(pivotAngle) * pivotDistance;
         }
@@ -68,7 +68,7 @@ final class ParticleSource {
 
         bool _isAlive = true;
         bool _isRelativePosition;
-        bool _isRelativeRotation;
+        bool _isRelativeSpriteAngle;
         bool _isAttachedToScene;
         Entity _attachedEntity;
         uint _interval;
@@ -165,11 +165,11 @@ final class ParticleSource {
             _sprite.color = particle.color;
             _sprite.alpha = particle.alpha;
             _sprite.size = particle.scale * _spriteSize;
-            if (_isRelativeRotation) {
-                _sprite.angle = radToDeg(particle.angle + particle.rotation);
+            if (_isRelativeSpriteAngle) {
+                _sprite.angle = radToDeg(particle.angle + particle.spriteAngle);
             }
             else {
-                _sprite.angle = radToDeg(particle.rotation);
+                _sprite.angle = radToDeg(particle.spriteAngle);
             }
             _sprite.draw(origin + particle.origin + particle.position + particle.pivot);
         }
@@ -221,8 +221,8 @@ final class ParticleSource {
         _isRelativePosition = isRelative;
     }
 
-    void setRelativeRotation(bool isRelative) {
-        _isRelativeRotation = isRelative;
+    void setRelativeSpriteAngle(bool isRelative) {
+        _isRelativeSpriteAngle = isRelative;
     }
 
     void setLifetime(uint minLifetime, uint maxLifetime) {
@@ -410,10 +410,10 @@ alias PivotSpinParticleEffect = OnceParticleEffect!(float, "pivotSpin");
 alias PivotSpinIntervalParticleEffect = IntervalParticleEffect!(float, "pivotSpin");
 alias PivotDistanceParticleEffect = OnceParticleEffect!(float, "pivotDistance");
 alias PivotDistanceIntervalParticleEffect = IntervalParticleEffect!(float, "pivotDistance");
-alias RotationParticleEffect = OnceParticleEffect!(float, "rotation");
-alias RotationIntervalParticleEffect = IntervalParticleEffect!(float, "rotation");
-alias RotationSpinParticleEffect = OnceParticleEffect!(float, "rotationSpin");
-alias RotationSpinIntervalParticleEffect = IntervalParticleEffect!(float, "rotationSpin");
+alias SpriteAngleParticleEffect = OnceParticleEffect!(float, "spriteAngle");
+alias SpriteAngleIntervalParticleEffect = IntervalParticleEffect!(float, "spriteAngle");
+alias SpriteSpinParticleEffect = OnceParticleEffect!(float, "spriteSpin");
+alias SpriteSpinIntervalParticleEffect = IntervalParticleEffect!(float, "spriteSpin");
 alias ScaleParticleEffect = OnceParticleEffect!(Vec2f, "scale");
 alias ScaleIntervalParticleEffect = IntervalParticleEffect!(Vec2f, "scale");
 alias ColorParticleEffect = OnceParticleEffect!(Color, "color");

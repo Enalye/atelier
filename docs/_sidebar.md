@@ -33,6 +33,7 @@
 	- [render.writabletexture](lib/render.writabletexture)
 	- [scene.component](lib/scene.component)
 	- [scene.entity](lib/scene.entity)
+	- [scene.particle](lib/scene.particle)
 	- [scene.scene](lib/scene.scene)
 	- [ui.element](lib/ui.element)
 	- [ui.label](lib/ui.label)

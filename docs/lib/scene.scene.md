@@ -17,7 +17,10 @@ Défini une caméra où évolue des entités
 |Fonction|Entrée|Sortie|
 |-|-|-|
 |[addEntity](#func_0)|*scene*: **Scene**, *entity*: **Entity**||
-|[addScene](#func_1)|*scene*: **Scene**||
+|[addParticleSource](#func_1)|*scene*: **Scene**, *source*: **ParticleSource**||
+|[addScene](#func_2)|*scene*: **Scene**||
+|[addUI](#func_3)|*scene*: **Scene**, *ui*: **UIElement**||
+|[clearUI](#func_4)|*scene*: **Scene**||
 
 
 ***
@@ -29,7 +32,22 @@ Défini une caméra où évolue des entités
 Ajoute une entité à la scène
 
 <a id="func_1"></a>
+> addParticleSource(*scene*: **Scene**, *source*: **ParticleSource**)
+
+Ajoute une source de particules à la scène
+
+<a id="func_2"></a>
 > addScene(*scene*: **Scene**)
 
 Ajoute une scène à l’application
+
+<a id="func_3"></a>
+> addUI(*scene*: **Scene**, *ui*: **UIElement**)
+
+Ajoute un élément d’interface à la scène
+
+<a id="func_4"></a>
+> clearUI(*scene*: **Scene**)
+
+Supprime les élements d’interface de la scène
 

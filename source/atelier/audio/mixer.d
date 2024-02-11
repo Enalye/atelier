@@ -68,12 +68,6 @@ final class AudioMixer {
         return devices;
     }
 
-    /// Màj
-    void update() {
-        //writeln("Mixer: ", _mixer.frame, " Device: ", _output.frame, " success: ",
-        //    _output.frameSuccess, " failure: ", _output.frameFailure, " wait: ", _output.waitFrame);
-    }
-
     /// Joue un son sur le bus maître
     void play(AudioPlayer player) {
         _masterBus.play(player);

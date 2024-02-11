@@ -18,6 +18,7 @@ package void loadLibScene_particle(GrLibDefinition library) {
     library.setModuleInfo(GrLocale.fr_FR, "Système de particules");
 
     GrType sourceType = library.addNative("ParticleSource");
+    library.setDescription(GrLocale.fr_FR, "Mode d’émission des particules");
     GrType modeType = library.addEnum("ParticleMode", grNativeEnum!ParticleMode());
 
     GrType splineType = grGetEnumType("Spline");
@@ -26,111 +27,231 @@ package void loadLibScene_particle(GrLibDefinition library) {
     GrType colorType = grGetNativeType("Color");
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
 
-    library.addConstructor(&_circular, sourceType);
+    library.addConstructor(&_ctor, sourceType);
 
     library.addProperty(&_position!"get", &_position!"set", "position", sourceType, vec2fType);
 
+    library.setDescription(GrLocale.fr_FR,
+        "Démarre l’émission de particules toutes les `interval` frames.");
+    library.setParameters(["source", "interval"]);
     library.addFunction(&_start, "start", [sourceType, grUInt]);
+
+    library.setDescription(GrLocale.fr_FR, "Interrompt l’émission de particules.");
+    library.setParameters(["source"]);
     library.addFunction(&_stop, "stop", [sourceType]);
+
+    library.setDescription(GrLocale.fr_FR, "Génère une seule fois des particules.");
+    library.setParameters(["source"]);
     library.addFunction(&_emit, "emit", [sourceType]);
+
+    library.setDescription(GrLocale.fr_FR, "Efface toutes les particules.");
+    library.setParameters(["source"]);
     library.addFunction(&_clear, "clear", [sourceType]);
+
+    library.setDescription(GrLocale.fr_FR, "Retire la source de la scène.");
+    library.setParameters(["source"]);
     library.addFunction(&_remove, "remove", [sourceType]);
+
+    library.setDescription(GrLocale.fr_FR, "Change le sprite des particules.");
+    library.setParameters(["source", "spriteId"]);
     library.addFunction(&_setSprite, "setSprite", [sourceType, grString]);
+
+    library.setDescription(GrLocale.fr_FR, "Type de blending");
+    library.setParameters(["source", "blend"]);
     library.addFunction(&_setBlend, "setBlend", [sourceType, blendType]);
+
+    library.setDescription(GrLocale.fr_FR,
+        "Si `true` les particules suivent la source, sinon elles sont laissées à la traine.");
+    library.setParameters(["source", "isRelative"]);
     library.addFunction(&_setRelativePosition, "setRelativePosition", [
             sourceType, grBool
         ]);
-    library.addFunction(&_setRelativeRotation, "setRelativeRotation", [
+
+    library.setDescription(GrLocale.fr_FR,
+        "Est-ce que l’orientation du sprite dépend de l’angle de la particule ?");
+    library.setParameters(["source", "isRelative"]);
+    library.addFunction(&_setRelativeSpriteAngle, "setRelativeSpriteAngle", [
             sourceType, grBool
         ]);
+
+    library.setDescription(GrLocale.fr_FR, "La source suit l’entité.");
+    library.setParameters(["source", "entity"]);
     library.addFunction(&_attachTo, "attachTo", [sourceType, entityType]);
+
+    library.setDescription(GrLocale.fr_FR, "La source suit la caméra de la scène.");
+    library.setParameters(["source"]);
     library.addFunction(&_attachToScene, "attachToScene", [sourceType]);
+
+    library.setDescription(GrLocale.fr_FR,
+        "Détache la source de l’entité/scène auquel elle était attaché.");
+    library.setParameters(["source"]);
     library.addFunction(&_detach, "detach", [sourceType]);
+
+    library.setDescription(GrLocale.fr_FR,
+        "Paramètre la durée de vie des particules (en frames).");
+    library.setParameters(["source", "minLifetime", "maxLifetime"]);
     library.addFunction(&_setLifetime, "setLifetime", [
             sourceType, grUInt, grUInt
         ]);
+
+    library.setDescription(GrLocale.fr_FR, "Le nombre de particule à émettre en même temps.");
+    library.setParameters(["source", "minCount", "maxCount"]);
     library.addFunction(&_setCount, "setCount", [sourceType, grUInt, grUInt]);
 
+    library.setDescription(GrLocale.fr_FR, "Le mode d’émission:
+ * ParticleMode.spread: réglé par `setDistance` et `setSpread`, projette les particules selon un arc de cercle.
+ * ParticleMode.rectangle: réglé par `setArea`, défini un rectangle autour de la position.
+ * ParticleMode.ellipsis: réglé par `setArea`, défini une ellipse autour de la position.");
+    library.setParameters(["source", "mode"]);
     library.addFunction(&_setMode, "setMode", [sourceType, modeType]);
+
+    library.setDescription(GrLocale.fr_FR, "Change la taille de la zone à émettre.");
+    library.setParameters(["source", "width", "height"]);
     library.addFunction(&_setArea, "setArea", [sourceType, grFloat, grFloat]);
+
+    library.setDescription(GrLocale.fr_FR,
+        "En mode `spread`, change la distance avec laquelle les particules sont émises.");
+    library.setParameters(["source", "minDistance", "maxDistance"]);
     library.addFunction(&_setDistance, "setDistance", [
             sourceType, grFloat, grFloat
         ]);
+
+    library.setDescription(GrLocale.fr_FR,
+        "En mode `spread`, change l’angle (en radians) où sont émises les particules.
+À chaque émission, un angle entre `minAngle` et `maxAngle` est choisi, les particules sont émises dans cet angle avec un écart de `spreadAngle`.");
+    library.setParameters(["source", "minAngle", "maxAngle", "spreadAngle"]);
     library.addFunction(&_setSpread, "setSpread", [
             sourceType, grFloat, grFloat, grFloat
         ]);
 
     // Effets
+    library.setDescription(GrLocale.fr_FR, "Change la vitesse des particules.");
+    library.setParameters(["source", "frame", "minSpeed", "maxSpeed"]);
     library.addFunction(&_setEffectOnce!("Float", "Speed"), "setSpeed",
         [sourceType, grUInt, grFloat, grFloat]);
+    library.setParameters([
+        "source", "startFrame", "endFrame", "startSpeed", "endSpeed", "spline"
+    ]);
     library.addFunction(&_setEffectInterval!("Float", "Speed"), "setSpeedInterval",
         [sourceType, grUInt, grUInt, grFloat, grFloat, splineType]);
 
+    library.setDescription(GrLocale.fr_FR, "Change l’angle des particules.");
+    library.setParameters(["source", "frame", "minAngle", "maxAngle"]);
     library.addFunction(&_setEffectOnce!("Float", "Angle"), "setAngle",
         [sourceType, grUInt, grFloat, grFloat]);
+    library.setParameters([
+        "source", "startFrame", "endFrame", "startAngle", "endAngle", "spline"
+    ]);
     library.addFunction(&_setEffectInterval!("Float", "Angle"), "setAngleInterval",
         [sourceType, grUInt, grUInt, grFloat, grFloat, splineType]);
 
+    library.setDescription(GrLocale.fr_FR, "Change la vitesse de rotation des particules.");
+    library.setParameters(["source", "frame", "minSpin", "maxSpin"]);
     library.addFunction(&_setEffectOnce!("Float", "Spin"), "setSpin",
         [sourceType, grUInt, grFloat, grFloat]);
+    library.setParameters([
+        "source", "startFrame", "endFrame", "startSpin", "endSpin", "spline"
+    ]);
     library.addFunction(&_setEffectInterval!("Float", "Spin"), "setSpinInterval",
         [sourceType, grUInt, grUInt, grFloat, grFloat, splineType]);
 
+    library.setDescription(GrLocale.fr_FR, "Change l’angle des particules autour de leur pivot.");
+    library.setParameters(["source", "frame", "minAngle", "maxAngle"]);
     library.addFunction(&_setEffectOnce!("Float", "PivotAngle"),
         "setPivotAngle", [sourceType, grUInt, grFloat, grFloat]);
+    library.setParameters([
+        "source", "startFrame", "endFrame", "startAngle", "endAngle", "spline"
+    ]);
     library.addFunction(&_setEffectInterval!("Float", "PivotAngle"),
         "setPivotAngleInterval", [
             sourceType, grUInt, grUInt, grFloat, grFloat, splineType
         ]);
 
+    library.setDescription(GrLocale.fr_FR,
+        "Change la vitesse de rotation des particules autour de leur pivot.");
+    library.setParameters(["source", "frame", "minSpin", "maxSpin"]);
     library.addFunction(&_setEffectOnce!("Float", "PivotSpin"),
         "setPivotSpin", [sourceType, grUInt, grFloat, grFloat]);
+    library.setParameters([
+        "source", "startFrame", "endFrame", "startSpin", "endSpin", "spline"
+    ]);
     library.addFunction(&_setEffectInterval!("Float", "PivotSpin"),
         "setPivotSpinInterval", [
             sourceType, grUInt, grUInt, grFloat, grFloat, splineType
         ]);
 
+    library.setDescription(GrLocale.fr_FR, "Change la distance des particules avec leur pivot.");
+    library.setParameters(["source", "frame", "minDistance", "maxDistance"]);
     library.addFunction(&_setEffectOnce!("Float", "PivotDistance"),
         "setPivotDistance", [sourceType, grUInt, grFloat, grFloat]);
+    library.setParameters([
+        "source", "startFrame", "endFrame", "startDistance", "endDistance",
+        "spline"
+    ]);
     library.addFunction(&_setEffectInterval!("Float", "PivotDistance"),
         "setPivotDistanceInterval", [
             sourceType, grUInt, grUInt, grFloat, grFloat, splineType
         ]);
 
-    library.addFunction(&_setEffectOnce!("Float", "Rotation"), "setRotation",
-        [sourceType, grUInt, grFloat, grFloat]);
-    library.addFunction(&_setEffectInterval!("Float", "Rotation"),
-        "setRotationInterval", [
+    library.setDescription(GrLocale.fr_FR, "Change la rotation de l’image des particules.");
+    library.setParameters(["source", "frame", "minAngle", "maxAngle"]);
+    library.addFunction(&_setEffectOnce!("Float", "SpriteAngle"),
+        "setSpriteAngle", [sourceType, grUInt, grFloat, grFloat]);
+    library.setParameters([
+        "source", "startFrame", "endFrame", "startAngle", "endAngle", "spline"
+    ]);
+    library.addFunction(&_setEffectInterval!("Float", "SpriteAngle"),
+        "setSpriteAngleInterval", [
             sourceType, grUInt, grUInt, grFloat, grFloat, splineType
         ]);
 
-    library.addFunction(&_setEffectOnce!("Float", "RotationSpin"),
-        "setRotationSpin", [sourceType, grUInt, grFloat, grFloat]);
-    library.addFunction(&_setEffectInterval!("Float", "RotationSpin"),
-        "setRotationSpinInterval", [
+    library.setDescription(GrLocale.fr_FR,
+        "Change la vitesse de rotation de l’image des particules.");
+    library.setParameters(["source", "frame", "minSpin", "maxSpin"]);
+    library.addFunction(&_setEffectOnce!("Float", "SpriteSpin"),
+        "setSpriteSpin", [sourceType, grUInt, grFloat, grFloat]);
+    library.setParameters([
+        "source", "startFrame", "endFrame", "startSpin", "endSpin", "spline"
+    ]);
+    library.addFunction(&_setEffectInterval!("Float", "SpriteSpin"),
+        "setSpriteSpinInterval", [
             sourceType, grUInt, grUInt, grFloat, grFloat, splineType
         ]);
 
+    library.setDescription(GrLocale.fr_FR, "Change la taille des particules.");
+    library.setParameters(["source", "frame", "minScale", "maxScale"]);
     library.addFunction(&_setEffectScaleOnce, "setScale", [
             sourceType, grUInt, vec2fType, vec2fType
         ]);
+    library.setParameters([
+        "source", "startFrame", "endFrame", "startScale", "endScale", "spline"
+    ]);
     library.addFunction(&_setEffectScaleInterval, "setScaleInterval",
         [sourceType, grUInt, grUInt, vec2fType, vec2fType, splineType]);
 
+    library.setDescription(GrLocale.fr_FR, "Change la couleur des particules.");
+    library.setParameters(["source", "frame", "minColor", "maxColor"]);
     library.addFunction(&_setEffectColorOnce, "setColor", [
             sourceType, grUInt, colorType, colorType
         ]);
+    library.setParameters([
+        "source", "startFrame", "endFrame", "startColor", "endColor", "spline"
+    ]);
     library.addFunction(&_setEffectColorInterval, "setColorInterval",
         [sourceType, grUInt, grUInt, colorType, colorType, splineType]);
 
+    library.setDescription(GrLocale.fr_FR, "Change l’opacité des particules.");
+    library.setParameters(["source", "frame", "minAlpha", "maxAlpha"]);
     library.addFunction(&_setEffectOnce!("Float", "Alpha"), "setAlpha",
         [sourceType, grUInt, grFloat, grFloat]);
+    library.setParameters([
+        "source", "startFrame", "endFrame", "startAlpha", "endAlpha", "spline"
+    ]);
     library.addFunction(&_setEffectInterval!("Float", "Alpha"), "setAlphaInterval",
         [sourceType, grUInt, grUInt, grFloat, grFloat, splineType]);
-
 }
 
-private void _circular(GrCall call) {
+private void _ctor(GrCall call) {
     ParticleSource source = new ParticleSource;
     call.setNative(source);
 }
@@ -187,10 +308,10 @@ private void _setRelativePosition(GrCall call) {
     source.setRelativePosition(isRelative);
 }
 
-private void _setRelativeRotation(GrCall call) {
+private void _setRelativeSpriteAngle(GrCall call) {
     ParticleSource source = call.getNative!ParticleSource(0);
     GrBool isRelative = call.getBool(1);
-    source.setRelativeRotation(isRelative);
+    source.setRelativeSpriteAngle(isRelative);
 }
 
 private void _attachTo(GrCall call) {

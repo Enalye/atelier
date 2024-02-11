@@ -10,7 +10,9 @@ import std.algorithm;
 import atelier.audio;
 import atelier.common;
 import atelier.core;
+import atelier.input;
 import atelier.render;
+import atelier.ui;
 import atelier.scene.entity;
 import atelier.scene.particle;
 
@@ -19,6 +21,7 @@ final class Scene {
     private {
         Canvas _canvas;
         Sprite _sprite;
+        UIManager _uiManager;
         Array!Entity _entities;
         Array!ParticleSource _particleSources;
         int _zOrder;
@@ -63,6 +66,8 @@ final class Scene {
         _width = width_;
         _height = height_;
 
+        _uiManager = new UIManager();
+        _uiManager.isSceneUI = true;
         _entities = new Array!Entity;
         _particleSources = new Array!ParticleSource;
 
@@ -86,7 +91,22 @@ final class Scene {
         _particleSources ~= source;
     }
 
+    void addUI(UIElement ui) {
+        _uiManager.addUI(ui);
+    }
+
+    void clearUI() {
+        _uiManager.clearUI();
+    }
+
+    void dispatch(InputEvent event) {
+        _uiManager.dispatch(event);
+    }
+
     void update() {
+        _uiManager.cameraPosition = _sprite.size / 2f - position;
+        _uiManager.update();
+
         bool isEntitiesDirty;
         foreach (idx, entity; _entities) {
             entity.update();
@@ -127,8 +147,10 @@ final class Scene {
         }
 
         foreach (source; _particleSources) {
-                source.draw(_sprite.size / 2f - position);
+            source.draw(_sprite.size / 2f - position);
         }
+
+        _uiManager.draw();
     }
 
     void draw(Vec2f origin) {

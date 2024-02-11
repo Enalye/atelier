@@ -18,7 +18,7 @@ import atelier.render;
 import atelier.ui.element;
 
 /// Gestionnaire d’interfaces
-class UIManager {
+final class UIManager {
     private {
         UIElement[] _elements;
 
@@ -50,74 +50,82 @@ class UIManager {
         }
     }
 
-    void dispatch(InputEvent[] events) {
-        foreach (InputEvent event; events) {
-            switch (event.type) with (InputEvent.Type) {
-            case mouseButton:
-                auto mouseButtonEvent = event.asMouseButton();
-                if (mouseButtonEvent.state.down()) {
-                    _tempGrabbedElement = null;
-                    _pressedElement = null;
+    void dispatch(InputEvent event) {
+        switch (event.type) with (InputEvent.Type) {
+        case mouseButton:
+            auto mouseButtonEvent = event.asMouseButton();
+            if (mouseButtonEvent.state.down()) {
+                _tempGrabbedElement = null;
+                _pressedElement = null;
 
+                if (!event.isAccepted) {
                     foreach (UIElement element; _elements) {
-                        dispatchMouseDownEvent(mouseButtonEvent.position, element);
-                    }
-
-                    if (_tempGrabbedElement) {
-                        _grabbedElement = _tempGrabbedElement;
-                    }
-
-                    if (_pressedElement) {
-                        _pressedElement.isPressed = true;
+                        if (dispatchMouseDownEvent(mouseButtonEvent.position, element)) {
+                            event.accept();
+                            break;
+                        }
                     }
                 }
-                else {
-                    _grabbedElement = null;
 
-                    foreach (UIElement element; _elements) {
-                        dispatchMouseUpEvent(mouseButtonEvent.position, element);
-                    }
-
-                    if (_focusedElement && _focusedElement != _pressedElement) {
-                        _focusedElement.hasFocus = false;
-                    }
-                    _focusedElement = null;
-
-                    if (_pressedElement) {
-                        _pressedElement.isPressed = false;
-                    }
-
-                    if (_pressedElement && _pressedElement.focusable) {
-                        _focusedElement = _pressedElement;
-                        _focusedElement.hasFocus = true;
-                    }
-                }
-                break;
-            case mouseMotion:
-                auto mouseMotionEvent = event.asMouseMotion();
-                foreach (UIElement element; _elements) {
-                    dispatchMouseUpdateEvent(mouseMotionEvent.position, element);
+                if (_tempGrabbedElement) {
+                    _grabbedElement = _tempGrabbedElement;
                 }
 
-                if (_hoveredElement && !_elementAlreadyHovered) {
-                    _hoveredElement.isHovered = true;
+                if (_pressedElement) {
+                    _pressedElement.isPressed = true;
                 }
-                break;
-            default:
-                break;
             }
+            else {
+                _grabbedElement = null;
+
+                if (!event.isAccepted) {
+                    foreach (UIElement element; _elements) {
+                        if (dispatchMouseUpEvent(mouseButtonEvent.position, element)) {
+                            event.accept();
+                            break;
+                        }
+                    }
+                }
+
+                if (_focusedElement && _focusedElement != _pressedElement) {
+                    _focusedElement.hasFocus = false;
+                }
+                _focusedElement = null;
+
+                if (_pressedElement) {
+                    _pressedElement.isPressed = false;
+                }
+
+                if (_pressedElement && _pressedElement.focusable) {
+                    _focusedElement = _pressedElement;
+                    _focusedElement.hasFocus = true;
+                }
+            }
+            break;
+        case mouseMotion:
+            auto mouseMotionEvent = event.asMouseMotion();
+            foreach (UIElement element; _elements) {
+                dispatchMouseUpdateEvent(mouseMotionEvent.position, element);
+            }
+
+            if (_hoveredElement && !_elementAlreadyHovered) {
+                _hoveredElement.isHovered = true;
+            }
+            break;
+        default:
+            break;
         }
     }
 
     /// Process a mouse down event down the tree.
-    private void dispatchMouseDownEvent(Vec2f position, UIElement element, UIElement parent = null) {
+    private bool dispatchMouseDownEvent(Vec2f position, UIElement element, UIElement parent = null) {
         position = _getPointInElement(position, element, parent);
         Vec2f elementSize = element.getSize() * element.scale;
         element.setMousePosition(position);
 
         bool isInside = position.isBetween(Vec2f.zero, elementSize);
         if (!element.isEnabled || !isInside) {
-            return;
+            return false;
         }
 
         _pressedElement = element;
@@ -134,17 +142,19 @@ class UIManager {
             dispatchMouseDownEvent(position, child, element);
 
         element.dispatchEvent("mousedown", false);
+
+        return true;
     }
 
     /// Process a mouse up event down the tree.
-    private void dispatchMouseUpEvent(Vec2f position, UIElement element, UIElement parent = null) {
+    private bool dispatchMouseUpEvent(Vec2f position, UIElement element, UIElement parent = null) {
         position = _getPointInElement(position, element, parent);
         Vec2f elementSize = element.getSize() * element.scale;
         element.setMousePosition(position);
 
         bool isInside = position.isBetween(Vec2f.zero, elementSize);
         if (!element.isEnabled || !isInside) {
-            return;
+            return false;
         }
 
         foreach (child; element.getChildren())
@@ -164,6 +174,8 @@ class UIManager {
 
             _pressedElement.dispatchEvent("click");
         }
+
+        return true;
     }
 
     /// Process a mouse update event down the tree.
@@ -277,8 +289,16 @@ class UIManager {
         return position;
     }
 
+    bool isSceneUI;
+    Vec2f cameraPosition = Vec2f.zero;
+
     pragma(inline) private Vec2f _getElementOrigin(UIElement element, UIElement parent = null) {
         Vec2f position = element.getPosition() + element.offset;
+
+        if (isSceneUI && !parent) {
+            return cameraPosition + position - element.getSize() * element.scale * 0.5f;
+        }
+
         const Vec2f parentSize = parent ? parent.getSize() : cast(Vec2f) Atelier.renderer.size;
 
         final switch (element.getAlignX()) with (UIAlignX) {
@@ -355,13 +375,13 @@ class UIManager {
         element.dispatchEvent(type);
     }
 
-    /// Ajoute un element
-    void addElement(UIElement element) {
-        _elements ~= element;
+    /// Ajoute un élément d’interface
+    void addUI(UIElement ui) {
+        _elements ~= ui;
     }
 
-    /// Supprime tous les children
-    void clearElements() {
+    /// Supprime toutes les interfaces
+    void clearUI() {
         _elements.length = 0;
     }
 }

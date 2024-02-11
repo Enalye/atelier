@@ -9,7 +9,9 @@ import std.algorithm;
 
 import atelier.common;
 import atelier.core;
+import atelier.input;
 import atelier.render;
+import atelier.ui;
 import atelier.scene.scene;
 
 /// Gère les différentes scènes
@@ -43,10 +45,12 @@ final class SceneManager {
         _sortScenes();
     }
 
-    void update() {
+    void update(InputEvent[] inputEvents) {
         bool isScenesDirty;
         foreach (idx, scene; _scenes) {
-            scene.update();
+            foreach (InputEvent event; inputEvents) {
+                scene.dispatch(event);
+            }
             scene.update();
             if (!scene.isAlive) {
                 _scenes.mark(idx);

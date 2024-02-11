@@ -294,7 +294,7 @@ class UIElement {
                 }
             }
         }
-        
+
         { // Scripts
             auto p = type in _scriptEventListeners;
             if (p) {
@@ -310,12 +310,12 @@ class UIElement {
         }
     }
 
-    final void addElement(UIElement element) {
-        element._parent = this;
-        _children ~= element;
+    final void addUI(UIElement ui) {
+        ui._parent = this;
+        _children ~= ui;
     }
 
-    final void clearChildren() {
+    final void clearUI() {
         foreach (child; _children) {
             child._parent = null;
             child.remove();
@@ -334,7 +334,7 @@ class UIElement {
     final void remove() {
         _isAlive = false;
         _parent = null;
-        clearChildren();
+        clearUI();
         clearImages();
     }
 }

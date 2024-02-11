@@ -62,12 +62,12 @@ Détermine à partir d’où la position de l’interface sera calculé par rapp
     library.addProperty(&_onPress!"get", &_onPress!"set", "onSubmit",
         elementType, grOptional(grEvent()));*/
 
-    library.setDescription(GrLocale.fr_FR, "Ajoute un état à l’interface");
+    library.setDescription(GrLocale.fr_FR, "Ajoute un état à l’interface.");
     library.setParameters(["ui", "state"]);
     library.addFunction(&_addState, "addState", [elementType, stateType]);
 
     library.setDescription(GrLocale.fr_FR,
-        "Fixe l’état actuel de l’interface sans transition");
+        "Fixe l’état actuel de l’interface sans transition.");
     library.setParameters(["ui", "stateId"]);
     library.addFunction(&_setState, "setState", [elementType, grString]);
 
@@ -76,27 +76,33 @@ Détermine à partir d’où la position de l’interface sera calculé par rapp
     library.setParameters(["ui", "stateId"]);
     library.addFunction(&_runState, "runState", [elementType, grString]);
 
-    library.setDescription(GrLocale.fr_FR, "Ajoute une image à l’interface");
+    library.setDescription(GrLocale.fr_FR, "Ajoute une image à l’interface.");
     library.setParameters(["ui", "image"]);
     library.addFunction(&_addImage, "addImage", [elementType, imageType]);
 
     library.setDescription(GrLocale.fr_FR,
-        "Ajoute une interface en tant qu’enfant de cette interface");
-    library.addFunction(&_addElement, "addElement", [elementType, elementType]);
+        "Ajoute une interface en tant qu’enfant de cette interface.");
+    library.setParameters(["parent", "child"]);
+    library.addFunction(&_addUI, "addUI", [elementType, elementType]);
 
-    library.setDescription(GrLocale.fr_FR, "Ajoute une fonction de rappel à un événement");
+    library.setDescription(GrLocale.fr_FR,
+        "Supprime les éléments d’interface enfants du parent.");
+    library.setParameters(["parent"]);
+    library.addFunction(&_clearUI, "clearUI", [elementType]);
+
+    library.setDescription(GrLocale.fr_FR, "Ajoute une fonction de rappel à un événement.");
     library.setParameters(["ui", "id", "callback"]);
     library.addFunction(&_addEventListener, "addEventListener", [
             elementType, grString, grEvent()
         ]);
 
     library.setDescription(GrLocale.fr_FR,
-        "Supprime une fonction de rappel lié à un événement");
+        "Supprime une fonction de rappel lié à un événement.");
     library.setParameters(["ui", "id", "callback"]);
     library.addFunction(&_removeEventListener, "removeEventListener",
         [elementType, grString, grEvent()]);
 
-    library.setDescription(GrLocale.fr_FR, "Retire l’interface de l’arborescence");
+    library.setDescription(GrLocale.fr_FR, "Retire l’interface de l’arborescence.");
     library.setParameters(["ui"]);
     library.addFunction(&_remove, "remove", [elementType]);
 }
@@ -267,11 +273,17 @@ private void _addImage(GrCall call) {
     ui.addImage(image);
 }
 
-private void _addElement(GrCall call) {
+private void _addUI(GrCall call) {
     UIElement uiParent = call.getNative!UIElement(0);
     UIElement uiChild = call.getNative!UIElement(1);
 
-    uiParent.addElement(uiChild);
+    uiParent.addUI(uiChild);
+}
+
+private void _clearUI(GrCall call) {
+    UIElement uiParent = call.getNative!UIElement(0);
+
+    uiParent.clearUI();
 }
 
 private void _addEventListener(GrCall call) {

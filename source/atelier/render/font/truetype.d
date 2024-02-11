@@ -11,15 +11,15 @@ import std.string : toStringz, fromStringz;
 import bindbc.sdl;
 
 import atelier.common;
+import atelier.core;
 
 import atelier.render.texture;
 import atelier.render.font.font, atelier.render.font.glyph;
 
 /// Font that load a TTF file.
-final class TrueTypeFont : Font {
+final class TrueTypeFont : Font, Resource!TrueTypeFont {
     private {
         TTF_Font* _trueTypeFont;
-        bool _ownData;
         string _name;
         int _size, _outline;
         Glyph[dchar] _cache;
@@ -55,34 +55,17 @@ final class TrueTypeFont : Font {
         _name = font._name;
         _size = font._size;
         _outline = font._outline;
-        _ownData = false;
     }
 
     /// Ctor
-    this(const string path, int size_ = 12u, int outline_ = 0) {
-        _size = size_;
-        _outline = outline_;
-        assert(_size != 0u, "can't render a font with no size");
-        if (null != _trueTypeFont && _ownData)
-            TTF_CloseFont(_trueTypeFont);
-
-        _trueTypeFont = TTF_OpenFont(toStringz(path), _size);
-        assert(_trueTypeFont, "can't load \'" ~ path ~ "\' font");
-
-        TTF_SetFontKerning(_trueTypeFont, 1);
-
-        _name = to!string(fromStringz(TTF_FontFaceFamilyName(_trueTypeFont)));
-        _ownData = true;
-    }
-
-    /// Init from buffer
-    this(const ubyte[] buffer, int size_ = 12u, int outline_ = 0) {
-        SDL_RWops* rw = SDL_RWFromConstMem(buffer.ptr, cast(int) buffer.length);
+    this(const string filePath, int size_ = 12u, int outline_ = 0) {
+        const(ubyte)[] data = Atelier.res.read(filePath);
+        SDL_RWops* rw = SDL_RWFromConstMem(cast(const(void)*) data.ptr, cast(int) data.length);
         _size = size_;
         _outline = outline_;
 
         assert(_size != 0u, "can't render a font with no size");
-        if (null != _trueTypeFont && _ownData)
+        if (null != _trueTypeFont)
             TTF_CloseFont(_trueTypeFont);
         _trueTypeFont = TTF_OpenFontRW(rw, 1, _size);
         assert(_trueTypeFont, "can't load font");
@@ -90,12 +73,15 @@ final class TrueTypeFont : Font {
         TTF_SetFontKerning(_trueTypeFont, 1);
 
         _name = to!string(fromStringz(TTF_FontFaceFamilyName(_trueTypeFont)));
-        _ownData = true;
     }
 
     ~this() {
-        if (null != _trueTypeFont && _ownData)
+        if (null != _trueTypeFont)
             TTF_CloseFont(_trueTypeFont);
+    }
+
+    TrueTypeFont fetch() {
+        return this;
     }
 
     /// Toggle the glyph smoothing
@@ -115,8 +101,7 @@ final class TrueTypeFont : Font {
             auto aa = Color.white.toSDL();
             aa.a = 0;
 
-            SDL_Surface* surface = TTF_RenderGlyph32_Blended(_trueTypeFont, ch,
-                aa);
+            SDL_Surface* surface = TTF_RenderGlyph32_Blended(_trueTypeFont, ch, aa);
             assert(surface);
             Texture texture = new Texture(surface, _isSmooth);
             assert(texture);

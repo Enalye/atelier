@@ -50,7 +50,7 @@ final class Label : UIElement {
     }
 
     /// Constructor
-    this(string text_ = "", Font font_ = getDefaultFont()) {
+    this(string text_ = "", Font font_) {
         _text = to!dstring(text_);
         _font = font_;
         _reload();

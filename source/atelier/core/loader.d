@@ -15,10 +15,10 @@ import atelier.audio;
 
 /// Initialise les ressources
 void setupDefaultResourceLoaders(ResourceManager res) {
-    initFont();
     res.setLoader("image", &_compileImage, &_loadImage);
     res.setLoader("sound", &_compileSound, &_loadSound);
     res.setLoader("music", &_compileMusic, &_loadMusic);
+    res.setLoader("truetype", &_compileTtf, &_loadTtf);
 }
 
 /// Crée des sprites
@@ -213,5 +213,24 @@ private void _loadMusic(InStream stream) {
         music.loopStart = loopStart;
         music.loopEnd = loopEnd;
         return music;
+    });
+}
+
+private void _compileTtf(string path, Json json, OutStream stream) {
+    stream.write!string(json.getString("name"));
+    stream.write!string(path ~ Archive.Separator ~ json.getString("file"));
+    stream.write!int(json.getInt("size"));
+    stream.write!int(json.getInt("outline", 0));
+}
+
+private void _loadTtf(InStream stream) {
+    string name = stream.read!string();
+    string file = stream.read!string();
+    int size = stream.read!int();
+    int outline = stream.read!int();
+
+    Atelier.res.store(name, {
+        TrueTypeFont font = new TrueTypeFont(file, size, outline);
+        return font;
     });
 }

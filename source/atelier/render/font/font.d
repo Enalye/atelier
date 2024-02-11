@@ -11,28 +11,6 @@ import atelier.render.texture;
 
 import atelier.render.font.glyph, atelier.render.font.truetype, atelier.render.font.vera;
 
-private {
-    Font _defaultFont, _veraFont;
-}
-
-/// Initialize the default font
-void initFont() {
-    _veraFont = new TrueTypeFont(veraFontData);
-    _defaultFont = _veraFont;
-}
-
-void setDefaultFont(Font font) {
-    if (!font) {
-        _defaultFont = _veraFont;
-        return;
-    }
-    _defaultFont = font;
-}
-
-Font getDefaultFont() {
-    return _defaultFont;
-}
-
 /// Font that renders text to texture.
 interface Font {
     @property {

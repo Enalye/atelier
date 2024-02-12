@@ -69,16 +69,16 @@ final class Label : UIElement {
                 prevChar = 0;
             }
             else {
-                Glyph metrics = _font.getMetrics(ch);
-                if (!metrics.exists)
+                Glyph glyph = _font.getGlyph(ch);
+                if (!glyph.exists)
                     continue;
                 pos.x += _font.getKerning(prevChar, ch) * _charScale;
 
-                float x = pos.x + metrics.offsetX * _charScale;
-                float y = pos.y - metrics.offsetY * _charScale;
+                float x = pos.x + glyph.offsetX * _charScale;
+                float y = pos.y - glyph.offsetY * _charScale;
 
-                metrics.draw(Vec2f(x, y), _charScale, Color.white, 1f);
-                pos.x += (metrics.advance + _charSpacing) * _charScale;
+                glyph.draw(Vec2f(x, y), _charScale, Color.white, 1f);
+                pos.x += (glyph.advance + _charSpacing) * _charScale;
                 prevChar = ch;
             }
         }
@@ -95,9 +95,9 @@ final class Label : UIElement {
                 totalSize_.y += _font.lineSkip * _charScale;
             }
             else {
-                const Glyph metrics = _font.getMetrics(ch);
+                const Glyph glyph = _font.getGlyph(ch);
                 lineWidth += _font.getKerning(prevChar, ch) * _charScale;
-                lineWidth += metrics.advance * _charScale;
+                lineWidth += glyph.advance * _charScale;
                 if (lineWidth > totalSize_.x)
                     totalSize_.x = lineWidth;
                 prevChar = ch;

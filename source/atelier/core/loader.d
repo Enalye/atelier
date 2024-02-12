@@ -9,16 +9,20 @@ import std.file;
 import std.path;
 import std.stdio;
 
-import atelier.common, atelier.render;
-import atelier.core.runtime;
 import atelier.audio;
+import atelier.common;
+import atelier.render;
+import atelier.core.data;
+import atelier.core.runtime;
 
 /// Initialise les ressources
 void setupDefaultResourceLoaders(ResourceManager res) {
+    loadInternalData(res);
     res.setLoader("image", &_compileImage, &_loadImage);
     res.setLoader("sound", &_compileSound, &_loadSound);
     res.setLoader("music", &_compileMusic, &_loadMusic);
     res.setLoader("truetype", &_compileTtf, &_loadTtf);
+    res.setLoader("bitmapfont", &_compileBitmapFont, &_loadBitmapFont);
 }
 
 /// Crée des sprites
@@ -231,6 +235,94 @@ private void _loadTtf(InStream stream) {
 
     Atelier.res.store(name, {
         TrueTypeFont font = new TrueTypeFont(file, size, outline);
+        return font;
+    });
+}
+
+private void _compileBitmapFont(string path, Json json, OutStream stream) {
+    stream.write!string(json.getString("name"));
+    stream.write!string(path ~ Archive.Separator ~ json.getString("file"));
+    stream.write!int(json.getInt("size"));
+    stream.write!int(json.getInt("ascent"));
+    stream.write!int(json.getInt("descent"));
+
+    Json[] charactersNode = json.getObjects("characters");
+    stream.write!int(cast(int) charactersNode.length);
+
+    foreach (Json characterNode; charactersNode) {
+        stream.write!dchar(characterNode.getInt("char"));
+        stream.write!int(characterNode.getInt("advance"));
+        stream.write!int(characterNode.getInt("offsetX"));
+        stream.write!int(characterNode.getInt("offsetY"));
+        stream.write!int(characterNode.getInt("width"));
+        stream.write!int(characterNode.getInt("height"));
+        stream.write!int(characterNode.getInt("posX"));
+        stream.write!int(characterNode.getInt("posY"));
+
+        Json[] kerningsNode = characterNode.getObjects("kerning");
+        stream.write!int(cast(int) kerningsNode.length);
+
+        foreach (Json kerningNode; kerningsNode) {
+            stream.write!dchar(kerningNode.getInt("char"));
+            stream.write!int(kerningNode.getInt("offset"));
+        }
+    }
+}
+
+private void _loadBitmapFont(InStream stream) {
+    string name = stream.read!string();
+    string file = stream.read!string();
+    int size = stream.read!int();
+    int ascent = stream.read!int();
+    int descent = stream.read!int();
+    int count = stream.read!int();
+
+    struct Metrics {
+        dchar ch;
+        int advance;
+        int offsetX;
+        int offsetY;
+        int width;
+        int height;
+        int posX;
+        int posY;
+        dchar[] kerningChar;
+        int[] kerningOffset;
+    }
+
+    dchar[] characters;
+    Metrics[] metricsList;
+
+    for (int i; i < count; ++i) {
+        Metrics metrics;
+        metrics.ch = stream.read!dchar();
+        metrics.advance = stream.read!int();
+        metrics.offsetX = stream.read!int();
+        metrics.offsetY = stream.read!int();
+        metrics.width = stream.read!int();
+        metrics.height = stream.read!int();
+        metrics.posX = stream.read!int();
+        metrics.posY = stream.read!int();
+
+        int kerningCount = stream.read!int();
+        for (int k; k < kerningCount; ++k) {
+            dchar ch = stream.read!dchar();
+            int offset = stream.read!int();
+            metrics.kerningChar ~= ch;
+            metrics.kerningOffset ~= offset;
+        }
+
+        metricsList ~= metrics;
+    }
+
+    Atelier.res.store(name, {
+        BitmapFont font = new BitmapFont(file, size, ascent, descent);
+
+        foreach (ref Metrics metrics; metricsList) {
+            font.addCharacter(metrics.ch, metrics.advance, metrics.offsetX,
+                metrics.offsetY, metrics.width, metrics.height, metrics.posX,
+                metrics.posY, metrics.kerningChar, metrics.kerningOffset);
+        }
         return font;
     });
 }

@@ -6,16 +6,13 @@
 module atelier.render.font.font;
 
 import atelier.common;
-
 import atelier.render.texture;
-
-import atelier.render.font.glyph, atelier.render.font.truetype, atelier.render.font.vera;
+import atelier.render.font.glyph;
+import atelier.render.font.truetype;
 
 /// Font that renders text to texture.
 interface Font {
     @property {
-        /// Font name
-        string name() const;
         /// Default font size
         int size() const;
         /// Where the top is above the baseline
@@ -28,5 +25,5 @@ interface Font {
 
     int getKerning(dchar prevChar, dchar currChar);
 
-    Glyph getMetrics(dchar character);
+    Glyph getGlyph(dchar character);
 }

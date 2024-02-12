@@ -76,12 +76,15 @@ final class Window {
             SDL_DestroyWindow(_sdlWindow);
     }
 
-    void setIcon(string path) {
+    void setIcon(string filePath) {
         if (_icon) {
             SDL_FreeSurface(_icon);
             _icon = null;
         }
-        _icon = IMG_Load(toStringz(path));
+
+        const(ubyte)[] data = Atelier.res.read(filePath);
+        SDL_RWops* rw = SDL_RWFromConstMem(cast(const(void)*) data.ptr, cast(int) data.length);
+        _icon = IMG_Load_RW(rw, 1);
 
         SDL_SetWindowIcon(_sdlWindow, _icon);
     }

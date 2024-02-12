@@ -21,6 +21,7 @@
 	- [render.canvas](lib/render.canvas)
 	- [render.capsule](lib/render.capsule)
 	- [render.circle](lib/render.circle)
+	- [render.font](lib/render.font)
 	- [render.image](lib/render.image)
 	- [render.imagedata](lib/render.imagedata)
 	- [render.ninepatch](lib/render.ninepatch)

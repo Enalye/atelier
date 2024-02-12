@@ -103,8 +103,12 @@ void cliRun(Cli.Result cli) {
                 atelier.loadResources(archive);
             }
 
-            if (windowIcon)
+            if (windowIcon.length) {
                 atelier.window.setIcon(windowIcon);
+            }
+            else {
+                atelier.window.setIcon("atelier:logo128");
+            }
 
             atelier.run();
 

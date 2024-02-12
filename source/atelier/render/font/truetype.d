@@ -20,17 +20,12 @@ import atelier.render.font.font, atelier.render.font.glyph;
 final class TrueTypeFont : Font, Resource!TrueTypeFont {
     private {
         TTF_Font* _trueTypeFont;
-        string _name;
         int _size, _outline;
         Glyph[dchar] _cache;
         bool _isSmooth;
     }
 
     @property {
-        /// Font name
-        string name() const {
-            return _name;
-        }
         /// Default font size
         int size() const {
             return TTF_FontHeight(_trueTypeFont);
@@ -52,7 +47,6 @@ final class TrueTypeFont : Font, Resource!TrueTypeFont {
     /// Copy ctor
     this(TrueTypeFont font) {
         _trueTypeFont = font._trueTypeFont;
-        _name = font._name;
         _size = font._size;
         _outline = font._outline;
     }
@@ -71,8 +65,6 @@ final class TrueTypeFont : Font, Resource!TrueTypeFont {
         assert(_trueTypeFont, "can't load font");
 
         TTF_SetFontKerning(_trueTypeFont, 1);
-
-        _name = to!string(fromStringz(TTF_FontFaceFamilyName(_trueTypeFont)));
     }
 
     ~this() {
@@ -91,7 +83,7 @@ final class TrueTypeFont : Font, Resource!TrueTypeFont {
         _isSmooth = isSmooth_;
     }
 
-    private Glyph cache(dchar ch) {
+    private Glyph _cacheGlyph(dchar ch) {
         int xmin, xmax, ymin, ymax, advance;
         if (_outline == 0) {
             if (-1 == TTF_GlyphMetrics32(_trueTypeFont, ch, &xmin, &xmax,
@@ -146,10 +138,10 @@ final class TrueTypeFont : Font, Resource!TrueTypeFont {
         return TTF_GetFontKerningSizeGlyphs32(_trueTypeFont, prevChar, currChar);
     }
 
-    Glyph getMetrics(dchar ch) {
-        Glyph* metrics = ch in _cache;
-        if (metrics)
-            return *metrics;
-        return cache(ch);
+    Glyph getGlyph(dchar ch) {
+        Glyph* glyph = ch in _cache;
+        if (glyph)
+            return *glyph;
+        return _cacheGlyph(ch);
     }
 }

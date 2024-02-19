@@ -1,12 +1,13 @@
 {
 	"fileVersion": 1,
 	"versions": {
-		"audio-formats": "3.0.1",
+		"audio-formats": "3.0.2",
 		"bindbc-common": "0.1.2",
 		"bindbc-loader": "1.1.4",
 		"bindbc-openal": "1.1.0",
 		"bindbc-sdl": "1.4.5",
 		"dplug": "13.8.1",
+		"farfadet": {"path":"farfadet"},
 		"game-mixer": "1.1.2",
 		"grimoire": {"path":"grimoire"},
 		"intel-intrinsics": "1.11.18",

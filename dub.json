@@ -14,6 +14,9 @@
         "grimoire": {
             "path": "grimoire"
         },
+        "farfadet": {
+            "path": "farfadet"
+        },
         "bindbc-sdl": "~>1.4.2",
         "audio-formats": "~>3.0.1",
         "bindbc-openal": "~>1.1.0"
@@ -30,14 +33,12 @@
     "libs-windows": [
         "libs/$PLATFORM/$ARCH/SDL2",
         "libs/$PLATFORM/$ARCH/SDL2_image",
-        "libs/$PLATFORM/$ARCH/SDL2_ttf",
-        "libs/$PLATFORM/$ARCH/OpenAL32"
+        "libs/$PLATFORM/$ARCH/SDL2_ttf"
     ],
     "copyFiles-windows": [
         "libs/$PLATFORM/$ARCH/SDL2.dll",
         "libs/$PLATFORM/$ARCH/SDL2_image.dll",
-        "libs/$PLATFORM/$ARCH/SDL2_ttf.dll",
-        "libs/$PLATFORM/$ARCH/OpenAL32.dll"
+        "libs/$PLATFORM/$ARCH/SDL2_ttf.dll"
     ],
     "lflags-posix": [
         "-L-Llibs/$PLATFORM/$ARCH/",
@@ -46,8 +47,7 @@
     "libs-posix": [
         "SDL2",
         "SDL2_image",
-        "SDL2_ttf",
-        "OpenAL32"
+        "SDL2_ttf"
     ],
     "configurations": [
         {

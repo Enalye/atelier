@@ -1,3 +1,6 @@
 [submodule "grimoire"]
 	path = grimoire
 	url = https://github.com/Enalye/grimoire
+[submodule "farfadet"]
+	path = farfadet
+	url = https://github.com/Enalye/farfadet

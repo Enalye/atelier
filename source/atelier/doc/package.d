@@ -6,6 +6,7 @@
 module atelier.doc;
 
 import std.stdio : writeln, write;
+import std.algorithm : min;
 import std.string;
 import std.datetime;
 import std.conv : to;
@@ -51,11 +52,56 @@ void generate(GrLocale locale) {
 
     { // Barre latérale
         string generatedText = "* [Accueil](/)\n";
+        generatedText ~= "* [Ressources](/resources)\n";
         generatedText ~= "* [Bibliothèque](/lib/)\n";
+
+        string[] oldParts;
         foreach (fileName; modules) {
             string line;
 
-            line = "\t- [" ~ fileName ~ "](" ~ "lib/" ~ fileName ~ ")\n";
+            string[] parts = fileName.split(".");
+
+            if (parts.length > 1) {
+                if (parts.length > oldParts.length) {
+                    for (int k = 1; k < parts.length; k++) {
+                        generatedText ~= "\t";
+                    }
+
+                    int count = (cast(int) parts.length) - (cast(int) oldParts.length);
+                    generatedText ~= "* ";
+                    for (int k = 0; k < count - 1; k++) {
+                        if (k > 0)
+                            generatedText ~= ".";
+                        generatedText ~= parts[k];
+                    }
+                    generatedText ~= "\n";
+                }
+                else {
+                    int count = (cast(int) min(oldParts.length, parts.length)) - 1;
+                    for (int p; p < count; p++) {
+                        if (oldParts[p] != parts[p]) {
+                            for (int k = 1; k < parts.length; k++) {
+                                generatedText ~= "\t";
+                            }
+
+                            generatedText ~= "* ";
+                            for (int k = p; k < cast(int)(parts.length) - 1; k++) {
+                                if (k > 0)
+                                    generatedText ~= ".";
+                                generatedText ~= parts[k];
+                            }
+                            generatedText ~= "\n";
+                            break;
+                        }
+                    }
+                }
+            }
+            oldParts = parts;
+
+            foreach (string key; parts) {
+                line ~= "\t";
+            }
+            line ~= "- [" ~ parts[$ - 1] ~ "](" ~ "lib/" ~ fileName ~ ")\n";
 
             generatedText ~= line;
         }

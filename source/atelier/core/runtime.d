@@ -10,6 +10,7 @@ import std.stdio : writeln;
 import std.path, std.file, std.exception;
 import std.datetime, std.conv;
 
+import farfadet;
 import grimoire;
 
 import atelier.audio;
@@ -129,16 +130,22 @@ final class Atelier {
             OutStream stream = new OutStream;
             stream.write!string(Atelier_Resource_Compiled_MagicWord);
 
-            Json json = new Json(file.data);
-            Json[] resNodes = json.getObjects("resources", []);
+            try {
+                Farfadet ffd = new Farfadet(file.data);
 
-            stream.write!uint(cast(uint) resNodes.length);
-            foreach (resNode; resNodes) {
-                string resType = resNode.getString("type");
-                stream.write!string(resType);
+                stream.write!uint(cast(uint) ffd.nodes.length);
+                foreach (resNode; ffd.nodes) {
+                    stream.write!string(resNode.name);
 
-                ResourceManager.Loader loader = res.getLoader(resType);
-                loader.compile(dirName(file.path), resNode, stream);
+                    ResourceManager.Loader loader = res.getLoader(resNode.name);
+                    loader.compile(dirName(file.path) ~ Archive.Separator, resNode, stream);
+                }
+            }
+            catch (FarfadetSyntaxException e) {
+                string msg = file.path ~ "(" ~ to!string(
+                    e.tokenLine) ~ "," ~ to!string(e.tokenColumn) ~ "): ";
+                e.msg = msg ~ e.msg;
+                throw e;
             }
 
             file.data = cast(ubyte[]) stream.data;

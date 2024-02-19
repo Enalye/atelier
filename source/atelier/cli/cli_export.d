@@ -12,6 +12,7 @@ import std.file;
 import std.path;
 import std.stdio;
 
+import farfadet;
 import grimoire;
 import atelier.common;
 import atelier.core;
@@ -92,23 +93,30 @@ void cliExport(Cli.Result cli) {
 
                     foreach (file; archive) {
                         if (extension(file.name) == Atelier_Resource_Extension) {
-                            OutStream stream = new OutStream;
-                            stream.write!string(Atelier_Resource_Compiled_MagicWord);
+                            try {
+                                OutStream stream = new OutStream;
+                                stream.write!string(Atelier_Resource_Compiled_MagicWord);
 
-                            Json resJson = new Json(file.data);
-                            Json[] resNodes = resJson.getObjects("resources", []);
+                                Farfadet ffd = new Farfadet(file.data);
+                                stream.write!uint(cast(uint) ffd.nodes.length);
+                                foreach (resNode; ffd.nodes) {
+                                    stream.write!string(resNode.name);
 
-                            stream.write!uint(cast(uint) resNodes.length);
-                            foreach (resNode; resNodes) {
-                                string resType = resNode.getString("type");
-                                stream.write!string(resType);
+                                    ResourceManager.Loader loader = res.getLoader(resNode.name);
+                                    loader.compile(dirName(file.path) ~ Archive.Separator,
+                                        resNode, stream);
+                                }
 
-                                ResourceManager.Loader loader = res.getLoader(resType);
-                                loader.compile(dirName(file.path), resNode, stream);
+                                file.name = setExtension(file.name,
+                                    Atelier_Resource_Compiled_Extension);
+                                file.data = cast(ubyte[]) stream.data;
                             }
-
-                            file.name = setExtension(file.name, Atelier_Resource_Compiled_Extension);
-                            file.data = cast(ubyte[]) stream.data;
+                            catch (FarfadetSyntaxException e) {
+                                string msg = file.path ~ "(" ~ to!string(
+                                    e.tokenLine) ~ "," ~ to!string(e.tokenColumn) ~ "): ";
+                                e.msg = msg ~ e.msg;
+                                throw e;
+                            }
                         }
                     }
 
@@ -124,7 +132,8 @@ void cliExport(Cli.Result cli) {
             }
 
             Json windowNode = configNode.getObject(Atelier_Project_Window_Node);
-            string windowTitle = windowNode.getString(Atelier_Project_Window_Title_Node, configName);
+            string windowTitle = windowNode.getString(Atelier_Project_Window_Title_Node,
+                configName);
             int windowWidth = windowNode.getInt(Atelier_Project_Window_Width_Node,
                 Atelier_Window_Width_Default);
             int windowHeight = windowNode.getInt(Atelier_Project_Window_Height_Node,
@@ -211,6 +220,6 @@ void cliExport(Cli.Result cli) {
         }
     }
 
-    enforce(false, "aucune configuration `" ~ configName ~ "` défini dans `" ~
-            Atelier_Project_File ~ "`");
+    enforce(false,
+        "aucune configuration `" ~ configName ~ "` défini dans `" ~ Atelier_Project_File ~ "`");
 }

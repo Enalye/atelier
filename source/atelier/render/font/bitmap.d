@@ -8,14 +8,14 @@ module atelier.render.font.bitmap;
 import bindbc.sdl;
 
 import atelier.common;
-import atelier.render.texture;
+import atelier.render.imagedata;
 import atelier.render.font.font;
 import atelier.render.font.glyph;
 
 /// Police de caractères formé depuis une texture
 final class BitmapFont : Font, Resource!BitmapFont {
     private {
-        Texture _texture;
+        ImageData _imageData;
 
         /// Taille de la police;
         int _size;
@@ -67,8 +67,8 @@ final class BitmapFont : Font, Resource!BitmapFont {
     }
 
     /// Init
-    this(string filePath, int size_, int ascent_, int descent_) {
-        _texture = new Texture(filePath);
+    this(ImageData imageData, int size_, int ascent_, int descent_) {
+        _imageData = imageData;
         _size = size_;
         _ascent = ascent_;
         _descent = descent_;
@@ -116,7 +116,7 @@ final class BitmapFont : Font, Resource!BitmapFont {
         if (metrics) {
             glyph = new BasicGlyph(true, metrics.advance, metrics.offsetX, metrics.offsetY,
                 metrics.width, metrics.height, metrics.posX, metrics.posY,
-                metrics.width, metrics.height, _texture);
+                metrics.width, metrics.height, _imageData);
         }
         else {
             glyph = new BasicGlyph();

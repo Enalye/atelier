@@ -5,6 +5,7 @@ import std.path;
 import std.stdio;
 import std.exception : enforce;
 
+import atelier.core;
 import atelier.common.stream;
 
 /// Modèle d’archivage
@@ -70,7 +71,7 @@ final class Archive : IArchive {
                     }
                 }
                 catch (Exception e) {
-                    writeln("Erreur d’archivage: ", entry.name, " - ", e.msg);
+                    log("Erreur d’archivage: ", entry.name, " - ", e.msg);
                 }
             }
         }

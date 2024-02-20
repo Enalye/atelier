@@ -9,6 +9,7 @@ import std.stdio, std.file, std.path;
 import std.exception;
 
 import atelier.common;
+import atelier.core;
 
 private enum Default_SourceFileContent = `
 event app {
@@ -29,7 +30,7 @@ export/
 
 void cliInit(Cli.Result cli) {
     if (cli.hasOption("help")) {
-        writeln(cli.getHelp(cli.name));
+        log(cli.getHelp(cli.name));
         return;
     }
 
@@ -101,5 +102,5 @@ void cliInit(Cli.Result cli) {
     std.file.write(buildNormalizedPath(dir, ".gitignore"), Default_GitIgnoreContent);
     std.file.write(buildNormalizedPath(dir, srcPath), Default_SourceFileContent);
 
-    writeln("Projet `", dirName, "` créé");
+    log("Projet `", dirName, "` créé");
 }

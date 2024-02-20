@@ -9,10 +9,11 @@ import std.stdio, std.file, std.path;
 import std.exception;
 
 import atelier.common;
+import atelier.core;
 
 void cliAdd(Cli.Result cli) {
     if (cli.hasOption("help")) {
-        writeln(cli.getHelp(cli.name));
+        log(cli.getHelp(cli.name));
         return;
     }
 
@@ -52,7 +53,8 @@ void cliAdd(Cli.Result cli) {
             programNode.set("window", windowNode);
         }
 
-        Json[] programNodes = json.getObjects(Atelier_Project_DefaultConfigurationName, []);
+        Json[] programNodes = json.getObjects(Atelier_Project_DefaultConfigurationName, [
+            ]);
 
         foreach (Json node; programNodes) {
             enforce(node.getString(Atelier_Project_Name_Node) != appName,
@@ -64,5 +66,5 @@ void cliAdd(Cli.Result cli) {
 
     json.save(jsonPath);
 
-    writeln("Ajout de `" ~ appName ~ "` dans `", dirName, "`");
+    log("Ajout de `" ~ appName ~ "` dans `", dirName, "`");
 }

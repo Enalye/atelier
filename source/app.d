@@ -21,25 +21,27 @@ void main(string[] args) {
     }
 
     try {
+        initLogger();
+
         version (AtelierDoc) {
             import atelier.doc : generateDoc;
 
             generateDoc();
         }
-        else version(AtelierDev) {
+        else version (AtelierDev) {
             parseCli(args);
         }
-        else version(AtelierRedist) {
+        else version (AtelierRedist) {
             boot(args);
         }
     }
     catch (GrCompilerException e) {
-        writeln(e.msg);
+        log(e.msg);
     }
     catch (Exception e) {
-        writeln("Erreur: ", e.msg);
+        log("Erreur: ", e.msg);
         foreach (trace; e.info) {
-            writeln("at: ", trace);
+            log("at: ", trace);
         }
     }
 }

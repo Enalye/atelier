@@ -5,7 +5,6 @@
  */
 module atelier.doc;
 
-import std.stdio : writeln, write;
 import std.algorithm : min;
 import std.string;
 import std.datetime;
@@ -14,6 +13,7 @@ import std.path;
 import std.file;
 import grimoire;
 
+import atelier.core;
 import atelier.script;
 
 void generateDoc() {
@@ -23,7 +23,7 @@ void generateDoc() {
     generate(locale);
 
     auto elapsedTime = MonoTime.currTime() - startTime;
-    writeln("Documentation générée en ", elapsedTime);
+    log("Documentation générée en ", elapsedTime);
 }
 
 alias LibLoader = void function(GrLibDefinition);

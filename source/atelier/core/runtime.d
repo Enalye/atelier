@@ -6,7 +6,6 @@
 module atelier.core.runtime;
 
 import core.thread;
-import std.stdio : writeln;
 import std.path, std.file, std.exception;
 import std.datetime, std.conv;
 
@@ -22,10 +21,11 @@ import atelier.script;
 import atelier.ui;
 
 import atelier.core.loader;
+import atelier.core.logger;
 import atelier.core.window;
 
 private void _print(string msg) {
-    writeln(msg);
+    log(msg);
 }
 
 final class Atelier {
@@ -123,7 +123,7 @@ final class Atelier {
     }
 
     private void _startup() {
-        writeln("[ATELIER] Compilation des ressources...");
+        log("[ATELIER] Compilation des ressources...");
         long startTime = Clock.currStdTime();
 
         foreach (Archive.File file; _resourceFiles) {
@@ -154,9 +154,9 @@ final class Atelier {
         _resourceFiles.length = 0;
 
         double loadDuration = (cast(double)(Clock.currStdTime() - startTime) / 10_000_000.0);
-        writeln("  > Effectué en " ~ to!string(loadDuration) ~ "sec");
+        log("  > Effectué en " ~ to!string(loadDuration) ~ "sec");
 
-        writeln("[ATELIER] Chargement des ressources...");
+        log("[ATELIER] Chargement des ressources...");
         startTime = Clock.currStdTime();
 
         foreach (Archive.File file; _compiledResourceFiles) {
@@ -175,9 +175,9 @@ final class Atelier {
         _compiledResourceFiles.length = 0;
 
         loadDuration = (cast(double)(Clock.currStdTime() - startTime) / 10_000_000.0);
-        writeln("  > Effectué en " ~ to!string(loadDuration) ~ "sec");
+        log("  > Effectué en " ~ to!string(loadDuration) ~ "sec");
 
-        writeln("[ATELIER] Initialisation de la machine virtuelle...");
+        log("[ATELIER] Initialisation de la machine virtuelle...");
         startTime = Clock.currStdTime();
 
         _engine = new GrEngine(Atelier_Version_ID);
@@ -198,11 +198,11 @@ final class Atelier {
         grSetOutputFunction(&_print);
 
         loadDuration = (cast(double)(Clock.currStdTime() - startTime) / 10_000_000.0);
-        writeln("  > Effectué en " ~ to!string(loadDuration) ~ "sec");
+        log("  > Effectué en " ~ to!string(loadDuration) ~ "sec");
     }
 
     void loadResources(string path) {
-        writeln("[ATELIER] Chargement de l’archive `" ~ path ~ "`...");
+        log("[ATELIER] Chargement de l’archive `" ~ path ~ "`...");
         long startTime = Clock.currStdTime();
 
         Archive archive = new Archive;
@@ -232,7 +232,7 @@ final class Atelier {
         }
 
         double loadDuration = (cast(double)(Clock.currStdTime() - startTime) / 10_000_000.0);
-        writeln("  > Effectué en " ~ to!string(loadDuration) ~ "sec");
+        log("  > Effectué en " ~ to!string(loadDuration) ~ "sec");
     }
 
     void run() {
@@ -272,7 +272,7 @@ final class Atelier {
                                 trace.line) ~ "," ~ to!string(trace.column) ~ ")\n";
                         }
                         _engine = null;
-                        writeln(err);
+                        log(err);
                         return;
                     }
                 }

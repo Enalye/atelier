@@ -16,7 +16,7 @@ import atelier.script;
 
 void cliRun(Cli.Result cli) {
     if (cli.hasOption("help")) {
-        writeln(cli.getHelp(cli.name));
+        log(cli.getHelp(cli.name));
         return;
     }
 

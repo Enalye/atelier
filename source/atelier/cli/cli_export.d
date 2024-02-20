@@ -10,7 +10,6 @@ import std.datetime;
 import std.exception;
 import std.file;
 import std.path;
-import std.stdio;
 
 import farfadet;
 import grimoire;
@@ -20,7 +19,7 @@ import atelier.script;
 
 void cliExport(Cli.Result cli) {
     if (cli.hasOption("help")) {
-        writeln(cli.getHelp(cli.name));
+        log(cli.getHelp(cli.name));
         return;
     }
 
@@ -89,7 +88,7 @@ void cliExport(Cli.Result cli) {
                 if (resNode.getBool("archived", true)) {
                     string resDir = buildNormalizedPath(exportDir,
                         setExtension(resName, Atelier_Archive_Extension));
-                    writeln("Archivage de `" ~ resFolder ~ "` vers `", resDir, "`");
+                    log("Archivage de `" ~ resFolder ~ "` vers `", resDir, "`");
 
                     foreach (file; archive) {
                         if (extension(file.name) == Atelier_Resource_Extension) {
@@ -125,7 +124,7 @@ void cliExport(Cli.Result cli) {
                 }
                 else {
                     string resDir = buildNormalizedPath(exportDir, resName);
-                    writeln("Copie de `" ~ resFolder ~ "` vers `", resDir, "`");
+                    log("Copie de `" ~ resFolder ~ "` vers `", resDir, "`");
                     archive.unpack(resDir);
                     archives ~= resName;
                 }
@@ -197,20 +196,20 @@ void cliExport(Cli.Result cli) {
             if (cli.hasOption("symbols")) {
                 options |= GrOption.symbols;
             }
-            writeln("compilation de `", sourceFile, "`");
+            log("compilation de `", sourceFile, "`");
 
             try {
                 long startTime = Clock.currStdTime();
                 GrBytecode bytecode = compiler.compile(options, GrLocale.fr_FR);
                 enforce(bytecode, compiler.getError().prettify(GrLocale.fr_FR));
                 double loadDuration = (cast(double)(Clock.currStdTime() - startTime) / 10_000_000.0);
-                writeln("compilation effectuée en ", to!string(loadDuration), "sec");
+                log("compilation effectuée en ", to!string(loadDuration), "sec");
                 bytecode.save(bytecodePath);
-                writeln("génération du bytecode `", sourceFile, "`");
+                log("génération du bytecode `", sourceFile, "`");
             }
             catch (Exception e) {
-                writeln(e.msg);
-                writeln("compilation échouée");
+                log(e.msg);
+                log("compilation échouée");
             }
 
             return;

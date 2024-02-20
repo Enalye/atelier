@@ -2,8 +2,9 @@ module atelier.common.cli;
 
 import std.conv : to;
 import std.exception : enforce;
-import std.stdio : writeln;
 import std.string;
+
+import atelier.core;
 
 /// Décrit une erreur syntaxique
 private final class CliException : Exception {
@@ -538,13 +539,13 @@ final class Cli {
             state.run();
         }
         catch (CliException e) {
-            writeln("\033[1;91mErreur:\033[0;0m " ~ e.msg);
+            log("\033[1;91mErreur:\033[0;0m " ~ e.msg);
 
             if (state._command) {
-                writeln("\n", getHelp(state._command._name));
+                log("\n", getHelp(state._command._name));
             }
             else {
-                writeln("\n", getHelp());
+                log("\n", getHelp());
             }
         }
     }

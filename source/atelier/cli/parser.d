@@ -5,11 +5,11 @@
  */
 module atelier.cli.parser;
 
-import std.stdio;
 import std.string;
 import std.algorithm;
 
 import atelier.common;
+import atelier.core;
 import atelier.cli.cli_add;
 import atelier.cli.cli_default;
 import atelier.cli.cli_export;
@@ -101,5 +101,5 @@ void displayHelp(string[] args = []) {
         }
     }
 
-    writeln(txt);
+    log(txt);
 }

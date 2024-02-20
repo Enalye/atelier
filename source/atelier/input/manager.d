@@ -17,7 +17,6 @@ import std.file : exists;
 import std.conv : to, parse;
 import std.math : abs;
 import std.path, std.string, std.utf;
-import std.stdio;
 
 import bindbc.sdl;
 
@@ -270,6 +269,7 @@ final class InputManager {
                 break;
             case SDL_WINDOWEVENT:
                 import std.stdio;
+
                 switch (sdlEvent.window.event) {
                 case SDL_WINDOWEVENT_RESIZED:
                 case SDL_WINDOWEVENT_SIZE_CHANGED:
@@ -327,33 +327,33 @@ final class InputManager {
 
     /// Ajoute une manette connectée
     private void _addController(int index) {
-        //writeln("Detected device at index ", index, ".");
+        //log("Detected device at index ", index, ".");
 
         auto c = SDL_JoystickNameForIndex(index);
         auto d = fromStringz(c);
-        //writeln("Device name: ", d);
+        //log("Device name: ", d);
 
         if (!SDL_IsGameController(index)) {
-            //writeln("The device is not recognised as a game controller.");
+            //log("The device is not recognised as a game controller.");
             auto stick = SDL_JoystickOpen(index);
             auto guid = SDL_JoystickGetGUID(stick);
-            //writeln("The device guid is: ");
+            //log("The device guid is: ");
             //foreach (i; 0 .. 16)
             //    printf("%02x", guid.data[i]);
-            //writeln("");
+            //log("");
             return;
         }
-        //writeln("The device has been detected as a game controller.");
+        //log("The device has been detected as a game controller.");
         foreach (controller; _controllers) {
             if (controller.index == index) {
-                //writeln("The controller is already open, aborted.");
+                //log("The controller is already open, aborted.");
                 return;
             }
         }
 
         auto sdlController = SDL_GameControllerOpen(index);
         if (!sdlController) {
-            //writeln("Could not connect the game controller.");
+            //log("Could not connect the game controller.");
             return;
         }
 
@@ -364,12 +364,12 @@ final class InputManager {
         controller.joystickId = SDL_JoystickInstanceID(controller.sdlJoystick);
         _controllers ~= controller;
 
-        //writeln("The game controller is now connected.");
+        //log("The game controller is now connected.");
     }
 
     /// Retire une manette déconnectée
     private void _removeController(int joystickId) {
-        //writeln("Controller disconnected: ", joystickId);
+        //log("Controller disconnected: ", joystickId);
 
         int index;
         bool isControllerPresent;

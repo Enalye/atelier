@@ -10,7 +10,7 @@ import std.conv : to;
 import core.vararg;
 
 version (AtelierDev) {
-    import std.stdio : write, writeln;
+    import std.stdio : write;
 }
 version (AtelierRedist) {
     import std.file : append, remove;

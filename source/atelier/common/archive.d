@@ -2,7 +2,7 @@ module atelier.common.archive;
 
 import std.file;
 import std.path;
-import std.stdio;
+import std.zlib;
 import std.exception : enforce;
 
 import atelier.core;
@@ -249,7 +249,7 @@ final class Archive : IArchive {
     /// Charge une archive
     void load(string path) {
         InStream stream = new InStream;
-        stream.data = cast(ubyte[]) std.file.read(path);
+        stream.data = cast(ubyte[]) uncompress(std.file.read(path));
         enforce(stream.read!string() == MagicWord);
         string name = stream.read!string();
         _rootDir = new Directory("", name);
@@ -264,7 +264,7 @@ final class Archive : IArchive {
             stream.write!string(_rootDir.name);
             _rootDir.save(stream);
         }
-        std.file.write(path, stream.data);
+        std.file.write(path, compress(stream.data));
     }
 
     /// Itérateur

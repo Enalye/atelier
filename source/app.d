@@ -3,10 +3,11 @@
  * License: Zlib
  * Authors: Enalye
  */
-import atelier.cli;
-
 import std.stdio;
 import grimoire;
+
+import atelier.cli;
+import atelier.core;
 
 void main(string[] args) {
     version (AtelierDebug) {
@@ -25,8 +26,11 @@ void main(string[] args) {
 
             generateDoc();
         }
-        else {
+        else version(AtelierDev) {
             parseCli(args);
+        }
+        else version(AtelierRedist) {
+            boot(args);
         }
     }
     catch (GrCompilerException e) {

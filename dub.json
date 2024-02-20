@@ -70,12 +70,12 @@
             "targetName": "atelier"
         },
         {
-            "name": "atelier_rt",
+            "name": "atelier_redist",
             "versions": [
-                "AtelierRT"
+                "AtelierRedist"
             ],
             "targetPath": "export",
-            "targetName": "atelier"
+            "targetName": "redist"
         },
         {
             "name": "atelier_doc",

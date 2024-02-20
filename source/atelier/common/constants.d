@@ -1,10 +1,10 @@
 module atelier.common.constants;
 
 version (Windows) {
-    enum Atelier_Exe = "atelier.exe";
+    enum Atelier_Exe = "redist.exe";
 }
 version (posix) {
-    enum Atelier_Exe = "atelier";
+    enum Atelier_Exe = "redist";
 }
 
 enum Atelier_Version_Major = 0;
@@ -50,30 +50,28 @@ enum Atelier_Window_Height_Default = 600;
 
 enum Atelier_Window_Enabled_Default = true;
 
-enum Atelier_Window_Icon_Default = Atelier_StandardLibrary_File ~ "/lapis.png";
-
 /// GRB: **GR**imoire **B**ytecode
 enum Atelier_Bytecode_Extension = ".grb";
 
-/// ACFG: **A**lchimie **C**on**F**iguration
-enum Atelier_Configuration_Extension = ".acf";
+/// Fichier de configuration
+enum Atelier_Configuration_Extension = ".conf";
 
-/// AME: **A**lchimie **M**achine **E**nvironement
-enum Atelier_Environment_Extension = ".dh";
+/// Fichier de démarrage
+enum Atelier_Environment_Extension = ".at";
 
 /// ARC: **P**a**Q**ue**T**
 enum Atelier_Archive_Extension = ".pqt";
 
-/// ARS: **A**lchimie **R**e**S**source
-enum Atelier_Resource_Extension = ".ars";
+/// Fichier de ressource farfadet
+enum Atelier_Resource_Extension = ".res";
 
-/// ARSC: **A**lchimie **R**e**S**source **C**ompiled
-enum Atelier_Resource_Compiled_Extension = ".arsc";
-
-enum Atelier_StandardLibrary_File = "codex";
-
-enum Atelier_StandardLibrary_Path = Atelier_StandardLibrary_File ~ Atelier_Archive_Extension;
+/// Fichier de ressource compilé
+enum Atelier_Resource_Compiled_Extension = ".resc";
 
 enum Atelier_Environment_MagicWord = "atelier";
 
-enum Atelier_Resource_Compiled_MagicWord = "rscdh";
+enum Atelier_Resource_Compiled_MagicWord = "resc";
+
+static immutable Atelier_Dependencies = [
+    "SDL2.dll", "SDL2_image.dll", "SDL2_ttf.dll"
+];

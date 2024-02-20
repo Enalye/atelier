@@ -147,10 +147,7 @@ void cliExport(Cli.Result cli) {
                     buildNormalizedPath(exportDir, windowIcon));
             }
 
-            foreach (fileName; [
-                    Atelier_StandardLibrary_Path, "SDL2.dll", "SDL2_image.dll",
-                    "SDL2_ttf.dll", "OpenAL32.dll"
-                ]) {
+            foreach (fileName; Atelier_Dependencies) {
                 string filePath = buildNormalizedPath(dirName(thisExePath()), fileName);
                 enforce(exists(filePath), "fichier manquant `" ~ filePath ~ "`");
 
@@ -182,7 +179,7 @@ void cliExport(Cli.Result cli) {
 
             GrLibrary[] libraries = [grLoadStdLibrary(), loadLibrary()];
 
-            GrCompiler compiler = new GrCompiler;
+            GrCompiler compiler = new GrCompiler(Atelier_Version_ID);
             foreach (library; libraries) {
                 compiler.addLibrary(library);
             }

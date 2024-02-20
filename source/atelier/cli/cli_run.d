@@ -20,9 +20,6 @@ void cliRun(Cli.Result cli) {
         return;
     }
 
-    string atelierPath = buildNormalizedPath(dirName(thisExePath()), Atelier_Exe);
-    enforce(atelierPath, "impossible de trouver `" ~ atelierPath ~ "`");
-
     string dir = getcwd();
     string dirName = baseName(dir);
 

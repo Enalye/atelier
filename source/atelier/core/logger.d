@@ -7,26 +7,36 @@ module atelier.core.logger;
 
 import std.concurrency;
 import std.conv : to;
+import std.file : append, remove;
 import core.vararg;
-
-version (AtelierDev) {
-    import std.stdio : write;
-}
-version (AtelierRedist) {
-    import std.file : append, remove;
-}
+import std.stdio;
+import std.stdio : fflush, stderr, write;
 
 private {
     enum Log_Size = 1024;
     enum Log_File = "log.txt";
     Tid _loggerTid;
+    bool _isInit, _isRedist;
 }
 
-void initLogger() {
-    version (AtelierRedist) {
+void initLogger(bool isRedist) {
+    if (_isInit)
+        return;
+    _isRedist = isRedist;
+    _isInit = true;
+
+    if (_isRedist) {
         remove(Log_File);
+        _loggerTid = spawn(&_fileLogger);
     }
-    _loggerTid = spawn(&_logger);
+    else {
+        version (Windows) {
+            import core.sys.windows.windows : SetConsoleOutputCP;
+
+            SetConsoleOutputCP(65_001);
+        }
+        _loggerTid = spawn(&_cmdLogger);
+    }
     setMaxMailboxSize(_loggerTid, Log_Size, OnCrowding.ignore);
 }
 
@@ -36,23 +46,28 @@ void log(T...)(T args) {
         msg ~= to!string(arg);
     }
     msg ~= "\n";
-    _loggerTid.send(msg);
+    if (_isRedist) {
+        _loggerTid.send(msg);
+    }
+    else {
+        write(msg);
+    }
 }
 
-version (AtelierDev) private void _logger() {
+private void _cmdLogger() {
     for (bool isRunning = true; isRunning;) {
         receive((string msg) { //
-            write(msg);
+            stdout.write(msg);
         }, (OwnerTerminated e) { //
             isRunning = false;
         });
     }
 }
 
-version (AtelierRedist) private void _logger() {
+private void _fileLogger() {
     for (bool isRunning = true; isRunning;) {
         receive((string msg) { //
-            std.file.append(Log_File, msg);
+            append(Log_File, msg);
         }, (OwnerTerminated e) { //
             isRunning = false;
         });

@@ -14,7 +14,7 @@ import atelier.common;
 import atelier.script;
 import atelier.core.runtime;
 
-version (AtelierRedist) void boot(string[] args) {
+export extern (C) void boot(string[] args) {
     string windowTitle = "Atelier ~ v" ~ Atelier_Version_Display;
     uint windowWidth = Atelier_Window_Width_Default;
     uint windowHeight = Atelier_Window_Height_Default;

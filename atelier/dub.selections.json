@@ -6,7 +6,7 @@
 		"bindbc-loader": "1.1.4",
 		"bindbc-openal": "1.1.0",
 		"bindbc-sdl": "1.4.5",
-		"farfadet": {"path":"farfadet"},
-		"grimoire": {"path":"grimoire"}
+		"farfadet": {"path":"../farfadet"},
+		"grimoire": {"path":"../grimoire"}
 	}
 }

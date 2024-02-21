@@ -1,0 +1,29 @@
+{
+    "authors": [
+        "enalye"
+    ],
+    "copyright": "Copyright © 2023, Enalye",
+    "description": "Moteur 2D pour Grimoire",
+    "license": "Zlib",
+    "name": "atelier",
+    "targetType": "executable",
+    "workingDirectory": "..",
+    "configurations": [
+        {
+            "name": "atelier_dev",
+            "versions": [
+                "AtelierDev"
+            ],
+            "targetPath": "../export",
+            "targetName": "atelier"
+        },
+        {
+            "name": "atelier_redist",
+            "versions": [
+                "AtelierRedist"
+            ],
+            "targetPath": "../export",
+            "targetName": "redist"
+        }
+    ]
+}

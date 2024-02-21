@@ -17,6 +17,8 @@ import atelier.cli.cli_init;
 import atelier.cli.cli_run;
 
 void parseCli(string[] args) {
+    initLogger(false);
+
     Cli cli = new Cli("atelier");
     cli.setDefault(&cliDefault);
     cli.addOption("v", "version", "Affiche la version du programme");

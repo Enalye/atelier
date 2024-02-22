@@ -1,7 +1,7 @@
 /** 
- * Copyright: Enalye
- * License: Zlib
- * Authors: Enalye
+ * Droits d’auteur: Enalye
+ * Licence: Zlib
+ * Auteur: Enalye
  */
 import core.runtime;
 import std.exception : enforce;

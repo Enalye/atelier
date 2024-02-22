@@ -1,7 +1,7 @@
 /** 
- * Copyright: Enalye
- * License: Zlib
- * Authors: Enalye
+ * Droits d’auteur: Enalye
+ * Licence: Zlib
+ * Auteur: Enalye
  */
 import std.stdio;
 import grimoire;
@@ -54,7 +54,7 @@ version (AtelierDLL) {
 }
 else {
     extern (C) __gshared string[] rt_options = [
-        "gcopt=initReserve:128 minPoolSize:256 parallel:2 profile:1"
+        "gcopt=initReserve:128 minPoolSize:256 parallel:2"
     ];
 
     void main(string[] args) {

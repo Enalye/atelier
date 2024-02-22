@@ -2,9 +2,11 @@ module atelier.common.constants;
 
 version (Windows) {
     enum Atelier_Exe = "redist.exe";
+    enum Atelier_Library = "atelier.dll";
 }
 version (posix) {
     enum Atelier_Exe = "redist";
+    enum Atelier_Library = "atelier.so";
 }
 
 enum Atelier_Version_Major = 0;
@@ -50,16 +52,13 @@ enum Atelier_Window_Height_Default = 600;
 
 enum Atelier_Window_Enabled_Default = true;
 
-/// GRB: **GR**imoire **B**ytecode
-enum Atelier_Bytecode_Extension = ".grb";
-
 /// Fichier de configuration
-enum Atelier_Configuration_Extension = ".conf";
+enum Atelier_Configuration_Extension = ".acf";
 
-/// Fichier de démarrage
-enum Atelier_Environment_Extension = ".at";
+/// Fichier d’application
+enum Atelier_Application_Extension = ".atl";
 
-/// ARC: **P**a**Q**ue**T**
+/// Fichier de données
 enum Atelier_Archive_Extension = ".pqt";
 
 /// Fichier de ressource farfadet

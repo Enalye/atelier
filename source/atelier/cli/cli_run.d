@@ -77,7 +77,7 @@ void cliRun(Cli.Result cli) {
                 Atelier_Window_Enabled_Default);
 
             string envPath = buildNormalizedPath(dir, setExtension(configName,
-                    Atelier_Environment_Extension));
+                    Atelier_Application_Extension));
 
             GrLibrary[] libraries = [grLoadStdLibrary(), loadLibrary()];
 

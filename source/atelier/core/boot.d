@@ -9,6 +9,7 @@ import grimoire;
 import std.exception : enforce;
 import std.file : exists, isFile, thisExePath, read;
 import std.path : dirName, buildNormalizedPath, setExtension;
+import std.zlib;
 
 import atelier.common;
 import atelier.script;
@@ -23,12 +24,12 @@ export extern (C) void boot(string[] args) {
 
     string[] archives;
     string exeDir = dirName(thisExePath());
-    string envPath = setExtension(thisExePath(), Atelier_Environment_Extension);
+    string envPath = setExtension(thisExePath(), Atelier_Application_Extension);
 
     enforce(exists(envPath), "le fichier d’initialisation `" ~ envPath ~ "` n’existe pas");
 
     InStream envStream = new InStream;
-    envStream.set(cast(const ubyte[]) read(envPath));
+    envStream.set(cast(const ubyte[]) uncompress(read(envPath)));
     enforce(envStream.read!string() == Atelier_Environment_MagicWord,
         "le fichier `" ~ envPath ~ "` est invalide");
     enforce(envStream.read!size_t() == Atelier_Version_ID,
@@ -54,9 +55,8 @@ export extern (C) void boot(string[] args) {
         archives ~= envStream.read!string();
     }
 
-    string bytecodePath = setExtension(thisExePath(), Atelier_Bytecode_Extension);
-    enforce(exists(bytecodePath), "le fichier bytecode `" ~ bytecodePath ~ "` n’existe pas");
-    GrBytecode bytecode = new GrBytecode(bytecodePath);
+    GrBytecode bytecode = new GrBytecode();
+    bytecode.deserialize(envStream.read!(ubyte[])());
 
     GrLibrary[] libraries = [grLoadStdLibrary(), loadLibrary()];
 

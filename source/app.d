@@ -17,26 +17,51 @@ version (AtelierDLL) {
         mixin SimpleDllMain;
     }
 
-    export extern(D) void startupDev(string[] args) {
-        parseCli(args);
+    export extern (D) void startupDev(string[] args) {
+        try {
+            openLogger(false);
+            parseCli(args);
+        }
+        catch (GrCompilerException e) {
+            log(e.msg);
+        }
+        catch (Exception e) {
+            log("Erreur: ", e.msg);
+            foreach (trace; e.info) {
+                log("at: ", trace);
+            }
+        }
+        finally {
+            closeLogger();
+        }
     }
 
-    export extern(D) void startupRedist(string[] args) {
-        boot(args);
+    export extern (D) void startupRedist(string[] args) {
+        try {
+            openLogger(true);
+            boot(args);
+        }
+        catch (Exception e) {
+            log("Erreur: ", e.msg);
+            foreach (trace; e.info) {
+                log("à: ", trace);
+            }
+        }
+        finally {
+            closeLogger();
+        }
     }
 }
 else {
+    extern (C) __gshared string[] rt_options = [
+        "gcopt=initReserve:128 minPoolSize:256 parallel:2 profile:1"
+    ];
+
     void main(string[] args) {
+        openLogger(false);
+
         version (AtelierDebug) {
             args = args[0] ~ ["run", "test"];
-        }
-
-        version (AtelierDebug) {
-            version (Windows) {
-                import core.sys.windows.windows : SetConsoleOutputCP;
-
-                SetConsoleOutputCP(65_001);
-            }
         }
 
         try {
@@ -53,8 +78,11 @@ else {
         catch (Exception e) {
             log("Erreur: ", e.msg);
             foreach (trace; e.info) {
-                log("at: ", trace);
+                log("à: ", trace);
             }
+        }
+        finally {
+            closeLogger();
         }
     }
 }

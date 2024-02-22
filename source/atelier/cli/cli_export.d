@@ -10,6 +10,7 @@ import std.datetime;
 import std.exception;
 import std.file;
 import std.path;
+import std.zlib;
 
 import farfadet;
 import grimoire;
@@ -23,8 +24,11 @@ void cliExport(Cli.Result cli) {
         return;
     }
 
-    string atelierPath = buildNormalizedPath(dirName(thisExePath()), Atelier_Exe);
-    enforce(atelierPath, "impossible de trouver `" ~ atelierPath ~ "`");
+    string redistPath = buildNormalizedPath(dirName(thisExePath()), Atelier_Exe);
+    enforce(redistPath, "impossible de trouver `" ~ redistPath ~ "`");
+
+    string libraryPath = buildNormalizedPath(dirName(thisExePath()), Atelier_Library);
+    enforce(libraryPath, "impossible de trouver `" ~ libraryPath ~ "`");
 
     string dir = getcwd();
     string dirBaseName = baseName(dir);
@@ -65,11 +69,14 @@ void cliExport(Cli.Result cli) {
             if (!exists(exportDir))
                 mkdir(exportDir);
 
-            string newAtelierPath = buildNormalizedPath(exportDir, setExtension(configName, "exe"));
-            std.file.copy(atelierPath, newAtelierPath);
+            string newRedistPath = buildNormalizedPath(exportDir, setExtension(configName, "exe"));
+            std.file.copy(redistPath, newRedistPath);
+
+            string newLibraryPath = buildNormalizedPath(exportDir, Atelier_Library);
+            std.file.copy(libraryPath, newLibraryPath);
 
             string envPath = buildNormalizedPath(exportDir,
-                setExtension(configName, Atelier_Environment_Extension));
+                setExtension(configName, Atelier_Application_Extension));
 
             Json[string] resourcesNode = configNode.getObject(Atelier_Project_Resources_Node)
                 .getChildren();
@@ -153,29 +160,6 @@ void cliExport(Cli.Result cli) {
                 std.file.copy(filePath, buildNormalizedPath(exportDir, fileName));
             }
 
-            string bytecodePath = buildNormalizedPath(exportDir,
-                setExtension(configName, Atelier_Bytecode_Extension));
-
-            {
-                OutStream envStream = new OutStream;
-                envStream.write!string(Atelier_Environment_MagicWord);
-                envStream.write!size_t(Atelier_Version_ID);
-                envStream.write!bool(windowEnabled);
-
-                if (windowEnabled) {
-                    envStream.write!string(windowTitle);
-                    envStream.write!uint(windowWidth);
-                    envStream.write!uint(windowHeight);
-                    envStream.write!string(windowIcon);
-                }
-
-                envStream.write!size_t(archives.length);
-                foreach (string archive; archives) {
-                    envStream.write!string(archive);
-                }
-                std.file.write(envPath, envStream.data);
-            }
-
             GrLibrary[] libraries = [grLoadStdLibrary(), loadLibrary()];
 
             GrCompiler compiler = new GrCompiler(Atelier_Version_ID);
@@ -198,18 +182,42 @@ void cliExport(Cli.Result cli) {
             }
             log("compilation de `", sourceFile, "`");
 
+            ubyte[] bytecodeBinary;
+
             try {
                 long startTime = Clock.currStdTime();
                 GrBytecode bytecode = compiler.compile(options, GrLocale.fr_FR);
                 enforce(bytecode, compiler.getError().prettify(GrLocale.fr_FR));
                 double loadDuration = (cast(double)(Clock.currStdTime() - startTime) / 10_000_000.0);
                 log("compilation effectuée en ", to!string(loadDuration), "sec");
-                bytecode.save(bytecodePath);
-                log("génération du bytecode `", sourceFile, "`");
+                bytecodeBinary = bytecode.serialize();
             }
             catch (Exception e) {
                 log(e.msg);
                 log("compilation échouée");
+                return;
+            }
+
+            {
+                OutStream envStream = new OutStream;
+                envStream.write!string(Atelier_Environment_MagicWord);
+                envStream.write!size_t(Atelier_Version_ID);
+                envStream.write!bool(windowEnabled);
+
+                if (windowEnabled) {
+                    envStream.write!string(windowTitle);
+                    envStream.write!uint(windowWidth);
+                    envStream.write!uint(windowHeight);
+                    envStream.write!string(windowIcon);
+                }
+
+                envStream.write!size_t(archives.length);
+                foreach (string archive; archives) {
+                    envStream.write!string(archive);
+                }
+                envStream.write!(ubyte[])(bytecodeBinary);
+                std.file.write(envPath, compress(envStream.data));
+                log("génération de l’application `", envPath, "`");
             }
 
             return;

@@ -17,8 +17,6 @@ import atelier.core;
 import atelier.script;
 
 void generateDoc() {
-    initLogger(false);
-
     const GrLocale locale = GrLocale.fr_FR;
     auto startTime = MonoTime.currTime();
 

@@ -20,6 +20,9 @@ void cliDefault(Cli.Result cli) {
         else
             log(cli.getHelp());
     }
+    else {
+        log(cli.getHelp());
+    }
 }
 
 void cliVersion(Cli.Result cli) {

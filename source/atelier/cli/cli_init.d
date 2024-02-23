@@ -24,8 +24,10 @@ export/
 
 # Fichiers
 *.pqt
-*.grb
-*.dh
+*.atl
+*.exe
+*.dll
+*.so
 `;
 
 void cliInit(Cli.Result cli) {

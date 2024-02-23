@@ -22,6 +22,10 @@
             "versions": [
                 "AtelierRedist"
             ],
+            "lflags": [
+                "-subsystem:windows",
+                "-entry:mainCRTStartup"
+            ],
             "targetPath": "../export",
             "targetName": "redist"
         }

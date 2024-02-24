@@ -22,6 +22,7 @@ package void loadLibUI_state(GrLibDefinition library) {
 
     GrType splineType = grGetEnumType("Spline");
     GrType stateType = library.addNative("UIState");
+    GrType colorType = grGetNativeType("Color");
 
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
 
@@ -33,6 +34,8 @@ package void loadLibUI_state(GrLibDefinition library) {
         "scale", stateType, vec2fType);
     library.addProperty(&_ui_state_angle!"get", &_ui_state_angle!"set",
         "angle", stateType, grDouble);
+    library.addProperty(&_ui_state_color!"get", &_ui_state_color!"set",
+        "color", stateType, colorType);
     library.addProperty(&_ui_state_alpha!"get", &_ui_state_alpha!"set",
         "alpha", stateType, grFloat);
     library.addProperty(&_ui_state_time!"get", &_ui_state_time!"set", "time", stateType, grInt);
@@ -72,6 +75,15 @@ private void _ui_state_angle(string op)(GrCall call) {
         state.angle = call.getDouble(1);
     }
     call.setDouble(state.angle);
+}
+
+private void _ui_state_color(string op)(GrCall call) {
+    UIElement.State state = call.getNative!(UIElement.State)(0);
+
+    static if (op == "set") {
+        state.color = call.getNative!SColor(1);
+    }
+    call.setNative(scolor(state.color));
 }
 
 private void _ui_state_alpha(string op)(GrCall call) {

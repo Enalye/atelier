@@ -16,7 +16,7 @@ import atelier.core;
 import atelier.render.texture;
 import atelier.render.font.font, atelier.render.font.glyph;
 
-/// Font that load a TTF file.
+/// Police correspondant à un fichier TrueType
 final class TrueTypeFont : Font, Resource!TrueTypeFont {
     private {
         TTF_Font* _trueTypeFont;
@@ -26,21 +26,25 @@ final class TrueTypeFont : Font, Resource!TrueTypeFont {
     }
 
     @property {
-        /// Default font size
+        /// Taille de la police
         int size() const {
             return TTF_FontHeight(_trueTypeFont);
         }
-        /// Where the top is above the baseline
+        /// Jusqu’où peut monter un caractère au-dessus la ligne
         int ascent() const {
             return TTF_FontAscent(_trueTypeFont);
         }
-        /// Where the bottom is below the baseline
+        /// Jusqu’où peut descendre un caractère en-dessous la ligne
         int descent() const {
             return TTF_FontDescent(_trueTypeFont);
         }
-        /// Distance between each baselines
+        /// Distance entre chaque ligne
         int lineSkip() const {
             return TTF_FontLineSkip(_trueTypeFont);
+        }
+        /// Taille de la bordure
+        int outline() const {
+            return _outline;
         }
     }
 

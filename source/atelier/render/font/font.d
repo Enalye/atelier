@@ -13,14 +13,16 @@ import atelier.render.font.truetype;
 /// Font that renders text to texture.
 interface Font {
     @property {
-        /// Default font size
+        /// Taille de la police
         int size() const;
-        /// Where the top is above the baseline
+        /// Jusqu’où peut monter un caractère au-dessus la ligne
         int ascent() const;
-        /// Where the bottom is below the baseline
+        /// Jusqu’où peut descendre un caractère en-dessous la ligne
         int descent() const;
-        /// Distance between each baselines
+        /// Distance entre chaque ligne
         int lineSkip() const;
+        /// Taille de la bordure
+        int outline() const;
     }
 
     int getKerning(dchar prevChar, dchar currChar);

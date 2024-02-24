@@ -44,6 +44,11 @@ final class PixelFontBordered : Font {
         int lineSkip() const {
             return _lineSkip * _weight;
         }
+
+        /// Taille de la bordure
+        int outline() const {
+            return 0;
+        }
     }
 
     this(int ascent_, int descent_, int lineSkip_, int weight = 1, int spacing_ = 0) {

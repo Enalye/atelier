@@ -104,6 +104,9 @@ final class Label : UIElement {
             }
         }
 
+        if (_text.length > 0)
+            totalSize_ += _font.outline << 1;
+
         setSize(totalSize_);
     }
 }

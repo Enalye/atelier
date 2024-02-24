@@ -64,6 +64,10 @@ final class BitmapFont : Font, Resource!BitmapFont {
         int lineSkip() const {
             return (_ascent - _descent) + 1;
         }
+        /// Taille de la bordure
+        int outline() const {
+            return 0;
+        }
     }
 
     /// Init

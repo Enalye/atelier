@@ -356,7 +356,7 @@ final class UIManager {
 
         Vec2f size = element.scale * element.getSize();
         Atelier.renderer.popCanvasAndDraw(position, size, element.angle,
-            element.getPivot() * size, element.color, element.alpha);
+            element.getPivot(), element.color, element.alpha);
 
         if (isDebug)
             Atelier.renderer.drawRect(position, size, Color.blue, 1f, false);

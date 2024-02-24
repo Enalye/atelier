@@ -241,6 +241,7 @@ private void _setState(GrCall call) {
     ui.targetState = null;
     ui.offset = ptr.offset;
     ui.scale = ptr.scale;
+    ui.color = ptr.color;
     ui.angle = ptr.angle;
     ui.alpha = ptr.alpha;
     ui.timer.stop();

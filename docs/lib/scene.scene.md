@@ -16,8 +16,8 @@ addScene(scene);
 ## Propriétés
 |Propriété|Natif|Type|Accesseur|Modifieur|Description|
 |-|-|-|-|-|-|
-|canvas|**Entity**|**Canvas**|oui|non||
-|isVisible|**Entity**|**bool**|oui|oui||
+|canvas|**Scene**|**Canvas**|oui|non||
+|isVisible|**Scene**|**bool**|oui|oui||
 |position|**Scene**|**Vec2\<float>**|oui|oui||
 ## Fonctions
 |Fonction|Entrée|Sortie|

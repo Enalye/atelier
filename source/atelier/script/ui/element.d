@@ -209,7 +209,7 @@ private void _alignY(string op)(GrCall call) {
     UIElement ui = call.getNative!UIElement(0);
 
     static if (op == "set") {
-        ui.setAlign(ui.getAlignX(), call.getEnum!(UIAlignY)(2));
+        ui.setAlign(ui.getAlignX(), call.getEnum!(UIAlignY)(1));
     }
     call.setEnum!UIAlignY(ui.getAlignY());
 }

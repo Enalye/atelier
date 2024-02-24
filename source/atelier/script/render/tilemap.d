@@ -16,6 +16,16 @@ import atelier.script.util;
 void loadLibRender_tilemap(GrLibDefinition library) {
     library.setModule("render.tilemap");
     library.setModuleInfo(GrLocale.fr_FR, "Grille de tuiles alignées");
+    library.setModuleDescription(GrLocale.fr_FR, "");
+    library.setModuleExample(GrLocale.fr_FR, "var tileset = @Tileset(\"terrain\");
+var tilemap = @Tilemap(tileset, 20, 20);
+
+// Change la tuile {0;2} à 1
+tilemap.setTile(0, 2, 1);
+
+var map = @Entity;
+map.addImage(tilemap);
+scene.addEntity(map);");
 
     GrType tilemapType = library.addNative("Tilemap", [], "Image");
 
@@ -24,8 +34,11 @@ void loadLibRender_tilemap(GrLibDefinition library) {
 
     library.addConstructor(&_ctor, tilemapType, [tilesetType, grInt, grInt]);
 
+    library.setDescription(GrLocale.fr_FR, "Taille d’une tuile");
     library.addProperty(&_size!"get", &_size!"set", "size", tilemapType, vec2fType);
 
+    library.setDescription(GrLocale.fr_FR, "Change la tuile à la position donnée");
+    library.setParameters(["x", "y", "tile"]);
     library.addFunction(&_setTile, "setTile", [tilemapType, grInt, grInt, grInt]);
 }
 

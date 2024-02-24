@@ -1,13 +1,18 @@
 # render.roundedrectangle
 
 Rectangle avec bords arrondis
+## Description
+```grimoire
+var rect = @RoundedRectangle.fill(200f, 50f, 5f);
+rect.anchor = @Vec2f.zero;
+rect.position = @Vec2f.zero;
+rect.color = @Color.red;
+entity.addImage(rect);
+```
+
 ## Natifs
 ### RoundedRectangle
 Hérite de **Image**
-## Constructeurs
-|Fonction|Entrée|
-|-|-|
-|[@**RoundedRectangle**](#ctor_0)| *param0*: **float**,  *param1*: **float**,  *param2*: **float**,  *param3*: **bool**,  *param4*: **float**|
 ## Propriétés
 |Propriété|Natif|Type|Accesseur|Modifieur|
 |-|-|-|-|-|
@@ -15,6 +20,23 @@ Hérite de **Image**
 |radius|**RoundedRectangle**|**float**|oui|oui|
 |size|**RoundedRectangle**|**Vec2\<float>**|oui|oui|
 |thickness|**RoundedRectangle**|**float**|oui|oui|
+## Fonctions Statiques
+|Fonction|Entrée|Sortie|
+|-|-|-|
+|[@**RoundedRectangle**.fill](#static_0)|*x*: **float**, *y*: **float**, *radius*: **float**|**RoundedRectangle**|
+|[@**RoundedRectangle**.outline](#static_1)|*x*: **float**, *y*: **float**, *radius*: **float**, *thickness*: **float**|**RoundedRectangle**|
 
 
 ***
+## Description des fonctions statiques
+
+<a id="static_0"></a>
+> @**RoundedRectangle**.fill(*x*: **float**, *y*: **float**, *radius*: **float**) (**RoundedRectangle**)
+
+Construit un rectangle arrondi plein
+
+<a id="static_1"></a>
+> @**RoundedRectangle**.outline(*x*: **float**, *y*: **float**, *radius*: **float**, *thickness*: **float**) (**RoundedRectangle**)
+
+Construit le contour d’un rectangle arrondi
+

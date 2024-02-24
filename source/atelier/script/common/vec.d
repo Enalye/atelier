@@ -87,6 +87,17 @@ private void _loadVec(int dimension)(GrLibDefinition library) {
                 type, ", vec", type, "Type], vec", type, "Type);");
         }
 
+        mixin("library.addStatic(&_zero!(dimension, type), vec", type,
+            "Type, \"zero\", [], [vec", type, "Type]);");
+
+        mixin("library.addStatic(&_one!(dimension, type), vec", type,
+            "Type, \"one\", [], [vec", type, "Type]);");
+
+        static if (type == "Float" || type == "Double") {
+            mixin("library.addStatic(&_half!(dimension, type), vec", type,
+                "Type, \"half\", [], [vec", type, "Type]);");
+        }
+
         // Angle
         /*static if (dimension == 2 || dimension == 3) {
             mixin("library.addFunction(&_angle!(dimension, type), \"angle\", [vec",
@@ -155,6 +166,24 @@ private void _scalarLeftOp(int dimension, string op, string type)(GrCall call) {
         dimension, "!Gr", type, ")(1);");
     mixin("SVec", dimension, "!Gr", type, " vec = new SVec", dimension, "!Gr", type, ";");
     mixin("vec._vector = scalar ", op, " veca._vector;");
+    call.setNative(vec);
+}
+
+private void _zero(int dimension, string type)(GrCall call) {
+    mixin("SVec", dimension, "!Gr", type, " vec = new SVec", dimension, "!Gr", type, ";");
+    mixin("vec._vector = SVec", dimension, "!(Gr", type, ").zero;");
+    call.setNative(vec);
+}
+
+private void _one(int dimension, string type)(GrCall call) {
+    mixin("SVec", dimension, "!Gr", type, " vec = new SVec", dimension, "!Gr", type, ";");
+    mixin("vec._vector = SVec", dimension, "!(Gr", type, ").one;");
+    call.setNative(vec);
+}
+
+private void _half(int dimension, string type)(GrCall call) {
+    mixin("SVec", dimension, "!Gr", type, " vec = new SVec", dimension, "!Gr", type, ";");
+    mixin("vec._vector = SVec", dimension, "!(Gr", type, ").half;");
     call.setNative(vec);
 }
 /*

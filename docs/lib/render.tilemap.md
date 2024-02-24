@@ -1,6 +1,20 @@
 # render.tilemap
 
 Grille de tuiles alignées
+## Description
+
+```grimoire
+var tileset = @Tileset("terrain");
+var tilemap = @Tilemap(tileset, 20, 20);
+
+// Change la tuile {0;2} à 1
+tilemap.setTile(0, 2, 1);
+
+var map = @Entity;
+map.addImage(tilemap);
+scene.addEntity(map);
+```
+
 ## Natifs
 ### Tilemap
 Hérite de **Image**
@@ -15,12 +29,14 @@ Hérite de **Image**
 ## Fonctions
 |Fonction|Entrée|Sortie|
 |-|-|-|
-|[setTile](#func_0)|*param0*: **Tilemap**, *param1*: **int**, *param2*: **int**, *param3*: **int**||
+|[setTile](#func_0)|*x*: **Tilemap**, *y*: **int**, *tile*: **int**, *param3*: **int**||
 
 
 ***
 ## Description des fonctions
 
 <a id="func_0"></a>
-> setTile(*param0*: **Tilemap**, *param1*: **int**, *param2*: **int**, *param3*: **int**)
+> setTile(*x*: **Tilemap**, *y*: **int**, *tile*: **int**, *param3*: **int**)
+
+Change la tuile à la position donnée
 

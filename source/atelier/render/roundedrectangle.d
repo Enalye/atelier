@@ -76,7 +76,15 @@ final class RoundedRectangle : Image {
         }
     }
 
-    this(Vec2f size_, float radius_, bool filled_, float thickness_) {
+    static RoundedRectangle fill(Vec2f size_, float radius_) {
+        return new RoundedRectangle(size_, radius_, true, 1f);
+    }
+
+    static RoundedRectangle outline(Vec2f size_, float radius_, float thickness_) {
+        return new RoundedRectangle(size_, radius_, false, thickness_);
+    }
+
+    private this(Vec2f size_, float radius_, bool filled_, float thickness_) {
         _size = size_;
         _radius = radius_;
         _filled = filled_;

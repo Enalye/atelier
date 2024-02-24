@@ -12,6 +12,7 @@
 |-|-|-|-|-|
 |alpha|**UIState**|**float**|oui|oui|
 |angle|**UIState**|**double**|oui|oui|
+|color|**UIState**|**Color**|oui|oui|
 |offset|**UIState**|**Vec2\<float>**|oui|oui|
 |scale|**UIState**|**Vec2\<float>**|oui|oui|
 |spline|**UIState**|**Spline**|oui|oui|

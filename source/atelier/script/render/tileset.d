@@ -24,6 +24,7 @@ void loadLibRender_tileset(GrLibDefinition library) {
 
     library.addConstructor(&_ctor, tilesetType, [grString]);
 
+    library.setDescription(GrLocale.fr_FR, "Durée entre chaque frame");
     library.addProperty(&_frameTime!"get", &_frameTime!"set", "frameTime", tilesetType, grInt);
 }
 

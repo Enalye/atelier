@@ -14,24 +14,51 @@ import atelier.script.util;
 package void loadLibRender_roundedRectangle(GrLibDefinition library) {
     library.setModule("render.roundedrectangle");
     library.setModuleInfo(GrLocale.fr_FR, "Rectangle avec bords arrondis");
+    library.setModuleExample(GrLocale.fr_FR, "var rect = @RoundedRectangle.fill(200f, 50f, 5f);
+rect.anchor = @Vec2f.zero;
+rect.position = @Vec2f.zero;
+rect.color = @Color.red;
+entity.addImage(rect);");
 
     GrType rrectType = library.addNative("RoundedRectangle", [], "Image");
 
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
 
-    library.addConstructor(&_ctor, rrectType, [
-            grFloat, grFloat, grFloat, grBool, grFloat
+    library.setDescription(GrLocale.fr_FR, "Construit un rectangle arrondi plein");
+    library.setParameters(["x", "y", "radius"]);
+    library.addStatic(&_fill, rrectType, "fill", [grFloat, grFloat, grFloat], [
+            rrectType
         ]);
 
+    library.setDescription(GrLocale.fr_FR, "Construit le contour d’un rectangle arrondi");
+    library.setParameters(["x", "y", "radius", "thickness"]);
+    library.addStatic(&_outline, rrectType, "outline", [
+            grFloat, grFloat, grFloat, grFloat
+        ], [rrectType]);
+
+    library.setDescription(GrLocale.fr_FR, "Taille du rectangle");
     library.addProperty(&_size!"get", &_size!"set", "size", rrectType, vec2fType);
+
+    library.setDescription(GrLocale.fr_FR, "Rayon des coins du rectangle");
     library.addProperty(&_radius!"get", &_radius!"set", "radius", rrectType, grFloat);
+
+    library.setDescription(GrLocale.fr_FR,
+        "Si `true`, le rectangle est plein, sinon le rectangle est une bordure");
     library.addProperty(&_filled!"get", &_filled!"set", "filled", rrectType, grBool);
+
+    library.setDescription(GrLocale.fr_FR,
+        "(Seulement si `filled` == false) Épaisseur de la bordure");
     library.addProperty(&_thickness!"get", &_thickness!"set", "thickness", rrectType, grFloat);
 }
 
-private void _ctor(GrCall call) {
-    call.setNative(new RoundedRectangle(Vec2f(call.getFloat(0),
-            call.getFloat(1)), call.getFloat(2), call.getBool(3), call.getFloat(4)));
+private void _fill(GrCall call) {
+    call.setNative(RoundedRectangle.fill(Vec2f(call.getFloat(0),
+            call.getFloat(1)), call.getFloat(2)));
+}
+
+private void _outline(GrCall call) {
+    call.setNative(RoundedRectangle.outline(Vec2f(call.getFloat(0),
+            call.getFloat(1)), call.getFloat(2), call.getFloat(3)));
 }
 
 private void _size(string op)(GrCall call) {

@@ -36,6 +36,10 @@ package void loadLibCore_runtime(GrLibDefinition library) {
 Égal à `@App.size() / 2`.");
     library.addStatic(&_center, appType, "center", [], [vec2iType]);
 
+    library.setDescription(GrLocale.fr_FR,
+        "Renvoie `true` si l’application est en mode exporté, `false` en mode développement.");
+    library.addStatic(&_isRedist, appType, "isRedist", [], [grBool]);
+
     library.setDescription(GrLocale.fr_FR, "Facteur de netteté des pixels.
 Plus cette valeur est grande, plus la qualité est grande mais plus le jeu sera gourmand en ressources graphiques.
 Le canvas du jeu de base est d’abord multiplié par ce facteur, avant de passer à l’algorithme de mise à l’échelle.
@@ -55,6 +59,14 @@ Exemple:
 - **Scaling.stretch**: comme `integer`, puis redimensionnement à la taille de la fenêtre sans respecter le ratio");
     library.setParameters(["scaling"]);
     library.addStatic(&_setScaling, appType, "setScaling", [scalingType]);
+
+    library.setDescription(GrLocale.fr_FR,
+        "(En mode développement seulement) Relance l’application.
+- `reloadResources` recharge les dossiers de ressources.
+- `reloadScript` recompile le programme.");
+    library.setParameters(["reloadResources", "reloadScript"]);
+    library.addStatic(&_reload, appType, "reload", [grBool, grBool]);
+
 }
 
 private void _width(GrCall call) {
@@ -79,4 +91,12 @@ private void _setPixelSharpness(GrCall call) {
 
 private void _setScaling(GrCall call) {
     Atelier.renderer.setScaling(call.getEnum!(Renderer.Scaling)(0));
+}
+
+private void _isRedist(GrCall call) {
+    call.setBool(Atelier.isRedist());
+}
+
+private void _reload(GrCall call) {
+    Atelier.reload(call.getBool(0), call.getBool(1));
 }

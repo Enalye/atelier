@@ -42,7 +42,7 @@ void cliExport(Cli.Result cli) {
 
     string projectFile = buildNormalizedPath(dir, Atelier_Project_File);
     enforce(exists(projectFile),
-        "aucun fichier de project `" ~ Atelier_Project_File ~
+        "aucun fichier de projet `" ~ Atelier_Project_File ~
         "` de trouvé à l’emplacement `" ~ dir ~ "`");
 
     Json json = new Json(projectFile);

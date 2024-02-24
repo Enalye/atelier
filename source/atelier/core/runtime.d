@@ -31,14 +31,21 @@ private void _print(string msg) {
 final class Atelier {
     static private {
         // Grimoire
+        alias CompileFunc = GrBytecode delegate(GrLibrary[]);
         GrEngine _engine;
         GrLibrary[] _libraries;
         GrBytecode _bytecode;
+        CompileFunc _compileFunc;
+
+        // Informations
+        bool _isRedist;
+        bool _mustReload, _mustReloadResources, _mustReloadScript;
 
         // Événements
         GrEvent _inputEvent, _lateInputEvent;
 
         // Ressources
+        string[] _archives;
         Archive.File[] _resourceFiles, _compiledResourceFiles;
 
         // IPS
@@ -58,6 +65,11 @@ final class Atelier {
     }
 
     static @property pragma(inline) {
+        /// L’application est en mode export ?
+        bool isRedist() {
+            return _isRedist;
+        }
+
         Window window() {
             return _window;
         }
@@ -102,9 +114,19 @@ final class Atelier {
         }
     }
 
-    this(GrBytecode bytecode, GrLibrary[] libraries, uint windowWidth,
-        uint windowHeight, string windowTitle) {
-        _bytecode = bytecode;
+    /// Demande le rechargement de l’application (valide seulement en mode développement)
+    static void reload(bool mustReloadResources, bool mustReloadScript) {
+        if (_isRedist)
+            return;
+        _mustReload = true;
+        _mustReloadResources = mustReloadResources;
+        _mustReloadScript = mustReloadScript;
+    }
+
+    this(bool isRedist_, CompileFunc compileFunc, GrLibrary[] libraries,
+        uint windowWidth, uint windowHeight, string windowTitle) {
+        _isRedist = isRedist_;
+        _compileFunc = compileFunc;
         _libraries = libraries;
 
         // Initialisation des modules
@@ -122,7 +144,47 @@ final class Atelier {
         setupDefaultResourceLoaders(_resourceManager);
     }
 
-    private void _startup() {
+    void loadArchive(string path) {
+        _archives ~= path;
+    }
+
+    private void _loadArchives() {
+        foreach (path; _archives) {
+            log("[ATELIER] Chargement de l’archive `" ~ path ~ "`...");
+            long startTime = Clock.currStdTime();
+
+            Archive archive = new Archive;
+
+            if (isDir(path)) {
+                enforce(exists(path), "le dossier `" ~ path ~ "` n’existe pas");
+                archive.pack(path);
+            }
+            else if (extension(path) == Atelier_Archive_Extension) {
+                enforce(exists(path), "l’archive `" ~ path ~ "` n’existe pas");
+                archive.load(path);
+            }
+
+            foreach (file; archive) {
+                const string ext = extension(file.name);
+                switch (ext) {
+                case Atelier_Resource_Extension:
+                    _resourceFiles ~= file;
+                    break;
+                case Atelier_Resource_Compiled_Extension:
+                    _compiledResourceFiles ~= file;
+                    break;
+                default:
+                    res.write(file.path, file.data);
+                    break;
+                }
+            }
+
+            double loadDuration = (cast(double)(Clock.currStdTime() - startTime) / 10_000_000.0);
+            log("  > Effectué en " ~ to!string(loadDuration) ~ "sec");
+        }
+    }
+
+    private void _compileResources() {
         log("[ATELIER] Compilation des ressources...");
         long startTime = Clock.currStdTime();
 
@@ -155,9 +217,11 @@ final class Atelier {
 
         double loadDuration = (cast(double)(Clock.currStdTime() - startTime) / 10_000_000.0);
         log("  > Effectué en " ~ to!string(loadDuration) ~ "sec");
+    }
 
+    private void _loadResources() {
         log("[ATELIER] Chargement des ressources...");
-        startTime = Clock.currStdTime();
+        long startTime = Clock.currStdTime();
 
         foreach (Archive.File file; _compiledResourceFiles) {
             InStream stream = new InStream;
@@ -174,11 +238,13 @@ final class Atelier {
         }
         _compiledResourceFiles.length = 0;
 
-        loadDuration = (cast(double)(Clock.currStdTime() - startTime) / 10_000_000.0);
+        double loadDuration = (cast(double)(Clock.currStdTime() - startTime) / 10_000_000.0);
         log("  > Effectué en " ~ to!string(loadDuration) ~ "sec");
+    }
 
+    private void _startVM() {
         log("[ATELIER] Initialisation de la machine virtuelle...");
-        startTime = Clock.currStdTime();
+        long startTime = Clock.currStdTime();
 
         _engine = new GrEngine(Atelier_Version_ID);
 
@@ -197,46 +263,41 @@ final class Atelier {
 
         grSetOutputFunction(&_print);
 
-        loadDuration = (cast(double)(Clock.currStdTime() - startTime) / 10_000_000.0);
-        log("  > Effectué en " ~ to!string(loadDuration) ~ "sec");
-    }
-
-    void loadResources(string path) {
-        log("[ATELIER] Chargement de l’archive `" ~ path ~ "`...");
-        long startTime = Clock.currStdTime();
-
-        Archive archive = new Archive;
-
-        if (isDir(path)) {
-            enforce(exists(path), "le dossier `" ~ path ~ "` n’existe pas");
-            archive.pack(path);
-        }
-        else if (extension(path) == Atelier_Archive_Extension) {
-            enforce(exists(path), "l’archive `" ~ path ~ "` n’existe pas");
-            archive.load(path);
-        }
-
-        foreach (file; archive) {
-            const string ext = extension(file.name);
-            switch (ext) {
-            case Atelier_Resource_Extension:
-                _resourceFiles ~= file;
-                break;
-            case Atelier_Resource_Compiled_Extension:
-                _compiledResourceFiles ~= file;
-                break;
-            default:
-                res.write(file.path, file.data);
-                break;
-            }
-        }
-
         double loadDuration = (cast(double)(Clock.currStdTime() - startTime) / 10_000_000.0);
         log("  > Effectué en " ~ to!string(loadDuration) ~ "sec");
     }
 
+    void _reload() {
+        _mustReload = false;
+
+        _audioMixer.clear();
+        _uiManager.clearUI();
+        _sceneManager.clear();
+
+        if (_mustReloadResources) {
+            _resourceManager = new ResourceManager();
+            setupDefaultResourceLoaders(_resourceManager);
+            _resourceFiles.length = 0;
+            _compiledResourceFiles.length = 0;
+
+            _loadArchives();
+            _compileResources();
+            _loadResources();
+        }
+
+        if (_mustReloadScript) {
+            _bytecode = _compileFunc(_libraries);
+        }
+        _startVM();
+    }
+
     void run() {
-        _startup();
+        _loadArchives();
+        _compileResources();
+        _loadResources();
+
+        _bytecode = _compileFunc(_libraries);
+        _startVM();
 
         _tickStartFrame = Clock.currStdTime();
         float accumulator = 0f;
@@ -248,6 +309,10 @@ final class Atelier {
             _tickStartFrame = Clock.currStdTime();
 
             accumulator += deltatime;
+
+            if (_mustReload) {
+                _reload();
+            }
 
             // Màj
             while (accumulator >= 1f) {
@@ -289,8 +354,6 @@ final class Atelier {
             _uiManager.draw();
             _renderer.endRenderPass();
         }
-
-        _audioMixer.close();
     }
 
     void callEvent(GrEvent event, GrValue[] parameters = []) {

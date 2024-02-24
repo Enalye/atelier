@@ -45,6 +45,12 @@ final class AudioBus {
         _players = new Array!AudioPlayer;
     }
 
+    void clear() {
+        _busses.clear();
+        _effects.clear();
+        _players.clear();
+    }
+
     void play(AudioPlayer player) {
         _players ~= player;
     }

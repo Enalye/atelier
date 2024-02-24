@@ -48,10 +48,12 @@ final class AudioMixer {
     }
 
     ~this() {
-        close();
     }
 
-    void close() {
+    void clear() {
+        _masterBus.clear();
+        _trackBus.clear();
+        _trackBus.connectTo(_masterBus);
     }
 
     string[] getDevices(bool capture) {

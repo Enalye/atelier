@@ -14,8 +14,10 @@ Informations système
 |[@**App**.height](#static_1)||**int**|
 |[@**App**.size](#static_2)||**Vec2\<int>**|
 |[@**App**.center](#static_3)||**Vec2\<int>**|
-|[@**App**.setPixelSharpness](#static_4)|*sharpness*: **uint**||
-|[@**App**.setScaling](#static_5)|*scaling*: **Scaling**||
+|[@**App**.isRedist](#static_4)||**bool**|
+|[@**App**.setPixelSharpness](#static_5)|*sharpness*: **uint**||
+|[@**App**.setScaling](#static_6)|*scaling*: **Scaling**||
+|[@**App**.reload](#static_7)|*reloadResources*: **bool**, *reloadScript*: **bool**||
 
 
 ***
@@ -44,6 +46,11 @@ Les coordonnées du centre de l’écran.
 Égal à `@App.size() / 2`.
 
 <a id="static_4"></a>
+> @**App**.isRedist() (**bool**)
+
+Renvoie `true` si l’application est en mode exporté, `false` en mode développement.
+
+<a id="static_5"></a>
 > @**App**.setPixelSharpness(*sharpness*: **uint**)
 
 Facteur de netteté des pixels.
@@ -58,7 +65,7 @@ Exemple:
 
     avant d’être mise à l’échelle de la fenêtre grace à la méthode de `setScaling`.
 
-<a id="static_5"></a>
+<a id="static_6"></a>
 > @**App**.setScaling(*scaling*: **Scaling**)
 
 Applique un algorithme de mise à l’échelle.
@@ -72,4 +79,13 @@ Applique un algorithme de mise à l’échelle.
 - **Scaling.contain**: comme `fit`, mais en dépassant de la fenêtre afin d’éviter les bandes noires.
 
 - **Scaling.stretch**: comme `integer`, puis redimensionnement à la taille de la fenêtre sans respecter le ratio
+
+<a id="static_7"></a>
+> @**App**.reload(*reloadResources*: **bool**, *reloadScript*: **bool**)
+
+(En mode développement seulement) Relance l’application.
+
+- `reloadResources` recharge les dossiers de ressources.
+
+- `reloadScript` recompile le programme.
 

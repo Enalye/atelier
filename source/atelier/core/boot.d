@@ -60,10 +60,11 @@ export extern (C) void boot(string[] args) {
 
     GrLibrary[] libraries = [grLoadStdLibrary(), loadLibrary()];
 
-    Atelier atelier = new Atelier(bytecode, libraries, windowWidth, windowHeight, windowTitle);
+    Atelier atelier = new Atelier(true, (GrLibrary[]) => bytecode, libraries,
+        windowWidth, windowHeight, windowTitle);
 
     foreach (string archive; archives) {
-        atelier.loadResources(archive);
+        atelier.loadArchive(archive);
     }
 
     if (windowIcon.length) {

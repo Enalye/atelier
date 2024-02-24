@@ -40,6 +40,10 @@ final class SceneManager {
         sort!((a, b) => (a.zOrder > b.zOrder), SwapStrategy.stable)(_scenes.array);
     }
 
+    void clear() {
+        _scenes.clear();
+    }
+
     void addScene(Scene scene) {
         _scenes ~= scene;
         _sortScenes();

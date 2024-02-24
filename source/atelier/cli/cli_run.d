@@ -79,25 +79,25 @@ void cliRun(Cli.Result cli) {
             string envPath = buildNormalizedPath(dir, setExtension(configName,
                     Atelier_Application_Extension));
 
-            GrLibrary[] libraries = [grLoadStdLibrary(), loadLibrary()];
+            Atelier atelier = new Atelier(false, (GrLibrary[] libraries) {
+                GrCompiler compiler = new GrCompiler(Atelier_Version_ID);
+                foreach (library; libraries) {
+                    compiler.addLibrary(library);
+                }
 
-            GrCompiler compiler = new GrCompiler(Atelier_Version_ID);
-            foreach (library; libraries) {
-                compiler.addLibrary(library);
-            }
+                compiler.addFile(sourceFile);
 
-            compiler.addFile(sourceFile);
+                GrBytecode bytecode = compiler.compile(GrOption.safe | GrOption.profile | GrOption.symbols,
+                    GrLocale.fr_FR);
 
-            GrBytecode bytecode = compiler.compile(
-                GrOption.safe | GrOption.profile | GrOption.symbols, GrLocale.fr_FR);
+                enforce!GrCompilerException(bytecode, compiler.getError()
+                    .prettify(GrLocale.fr_FR));
 
-            enforce!GrCompilerException(bytecode, compiler.getError().prettify(GrLocale.fr_FR));
-
-            Atelier atelier = new Atelier(bytecode, libraries, windowWidth,
-                windowHeight, windowTitle);
+                return bytecode;
+            }, [grLoadStdLibrary(), loadLibrary()], windowWidth, windowHeight, windowTitle);
 
             foreach (string archive; archives) {
-                atelier.loadResources(archive);
+                atelier.loadArchive(archive);
             }
 
             if (windowIcon.length) {
@@ -108,33 +108,6 @@ void cliRun(Cli.Result cli) {
             }
 
             atelier.run();
-
-            /*if (windowIcon.length) {
-                std.file.copy(buildNormalizedPath(dir, windowIcon),
-                    buildNormalizedPath(dir, windowIcon));
-            }*/
-
-            /*{
-                OutStream envStream = new OutStream;
-                envStream.write!string(Atelier_Environment_MagicWord);
-                envStream.write!size_t(Atelier_Version_ID);
-                envStream.write!bool(windowEnabled);
-
-                if (windowEnabled) {
-                    envStream.write!string(windowTitle);
-                    envStream.write!uint(windowWidth);
-                    envStream.write!uint(windowHeight);
-                    envStream.write!string(windowIcon);
-                }
-
-                envStream.write!size_t(archives.length);
-                foreach (string archive; archives) {
-                    envStream.write!string(archive);
-                }
-                std.file.write(envPath, envStream.data);
-            }*/
-
-            //string ret = execute([atelierPath, "run", envPath, sourceFile]).output;
 
             return;
         }

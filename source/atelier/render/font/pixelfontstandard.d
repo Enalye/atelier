@@ -3,7 +3,7 @@
  * Licence: Zlib
  * Auteur: Enalye
  */
-module atelier.render.font.pixelfontbordered;
+module atelier.render.font.pixelfontstandard;
 
 import std.conv : to;
 import atelier.common;
@@ -14,7 +14,7 @@ import atelier.render.imagedata;
 import atelier.render.util;
 import atelier.render.writabletexture;
 
-final class PixelFontBordered : PixelFont {
+final class PixelFontStandard : PixelFont {
     private {
         Glyph[dchar] _glyphs;
         Glyph _unknownGlyph;
@@ -28,17 +28,17 @@ final class PixelFontBordered : PixelFont {
     @property {
         /// Taille de la police
         int size() const {
-            return (_ascent - _descent) * _weight + 2;
+            return (_ascent - _descent) * _weight;
         }
 
         /// Où le haut se situe par rapport à la ligne
         int ascent() const {
-            return _ascent * _weight + 2;
+            return _ascent * _weight;
         }
 
         /// Où le bas se situe par rapport à la ligne
         int descent() const {
-            return _descent * _weight + 2;
+            return _descent * _weight;
         }
 
         /// Distance entre chaque ligne
@@ -59,7 +59,7 @@ final class PixelFontBordered : PixelFont {
         _weight = weight;
         _spacing = spacing_;
 
-        _unknownGlyph = new PixelGlyphBordered();
+        _unknownGlyph = new PixelGlyphStandard();
 
         switch (weight) {
         case 1:
@@ -109,11 +109,11 @@ final class PixelFontBordered : PixelFont {
                     ch) ~ "` ne correspond pas à la taille indiquée: " ~ to!string(
                     rasterData.glyph.length) ~ " contre " ~ to!string(rasterData.h));
 
-        if (_posX + width * _weight * 2 + 2 >= _surfaceW) {
+        if (_posX + width * _weight >= _surfaceW) {
             _posX = 0;
-            _posY += (_ascent - _descent) * _weight * 2 + 2;
+            _posY += (_ascent - _descent) * _weight;
 
-            if (_posY + (_ascent - _descent) * _weight * 2 + 2 > _surfaceH) {
+            if (_posY + (_ascent - _descent) * _weight > _surfaceH) {
                 _posY = 0;
                 _texture = new WritableTexture(_surfaceW, _surfaceH);
             }
@@ -134,14 +134,6 @@ final class PixelFontBordered : PixelFont {
                                 uint index = data.y * texWidth + data.x + (
                                     iy * texWidth + ix) * data.weight + (ry * texWidth + rx);
                                 dest[index] = 0xFFFFFFFF;
-                                uint indexBorder = index + data.w * data.weight;
-
-                                for (int by; by < 3; ++by) {
-                                    for (int bx; bx < 3; ++bx) {
-                                        dest[indexBorder + (by * texWidth + bx)] = 0xFFFFFFFF;
-                                    }
-                                }
-
                             }
                         }
                     }
@@ -150,11 +142,11 @@ final class PixelFontBordered : PixelFont {
             }
         }, &rasterData);
 
-        _glyphs[ch] = new PixelGlyphBordered(true, (rasterData.w + 1) + _spacing,
+        _glyphs[ch] = new PixelGlyphStandard(true, (rasterData.w + 1) + _spacing,
             (rasterData.h + rasterData.descent) - _ascent, rasterData.x,
             rasterData.y, rasterData.w, rasterData.h, _weight, _texture);
 
-        _posX += rasterData.w * _weight * 2 + 2;
+        _posX += rasterData.w * _weight;
     }
 
     int getKerning(dchar prevChar, dchar currChar) {
@@ -167,7 +159,7 @@ final class PixelFontBordered : PixelFont {
     }
 }
 
-private final class PixelGlyphBordered : Glyph {
+private final class PixelGlyphStandard : Glyph {
     @property {
         /// Is the character defined ?
         bool exists() const {
@@ -175,7 +167,7 @@ private final class PixelGlyphBordered : Glyph {
         }
         /// Width to advance cursor from previous position.
         int advance() const {
-            return _advance + 2;
+            return _advance;
         }
         /// Offset
         int offsetX() const {
@@ -183,15 +175,15 @@ private final class PixelGlyphBordered : Glyph {
         }
         /// Ditto
         int offsetY() const {
-            return _offsetY + 2;
+            return _offsetY;
         }
         /// Character size
         int width() const {
-            return _width + 2;
+            return _width;
         }
         /// Ditto
         int height() const {
-            return _height + 2;
+            return _height;
         }
     }
 
@@ -225,12 +217,6 @@ private final class PixelGlyphBordered : Glyph {
 
     /// Render glyph
     void draw(Vec2f position, float scale, Color color, float alpha) {
-        _imageData.color = Color.black;
-        _imageData.blend = Blend.alpha;
-        _imageData.alpha = alpha;
-        _imageData.draw(position, Vec2f((_width + 2) * scale,
-                (_height + 2) * scale), Vec4i(_x + _width, _y, _width + 2, _height + 2), 0f);
-
         _imageData.color = color;
         _imageData.blend = Blend.alpha;
         _imageData.alpha = alpha;

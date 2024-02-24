@@ -9,11 +9,12 @@ import std.conv : to;
 import atelier.common;
 import atelier.render.font.font;
 import atelier.render.font.glyph;
+import atelier.render.font.pixelfont;
 import atelier.render.imagedata;
 import atelier.render.util;
 import atelier.render.writabletexture;
 
-final class PixelFontShadowed : Font {
+final class PixelFontShadowed : PixelFont {
     private {
         Glyph[dchar] _glyphs;
         Glyph _unknownGlyph;
@@ -90,7 +91,7 @@ final class PixelFontShadowed : Font {
         _texture = new WritableTexture(_surfaceW, _surfaceH);
     }
 
-    void addCharacter(dchar ch, int[] glyphData, int width, int height, int descent) {
+    override void addCharacter(dchar ch, int[] glyphData, int width, int height, int descent) {
         struct RasterData {
             int[] glyph;
             int x, y, w, h;

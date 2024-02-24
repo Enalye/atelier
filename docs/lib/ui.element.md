@@ -21,6 +21,13 @@ Alignement vertical
 |alpha|**UIElement**|**float**|oui|oui|Opacité de l’interface|
 |angle|**UIElement**|**double**|oui|oui|Rotation de l’interface|
 |color|**UIElement**|**float**|oui|oui|Couleur de l’interface|
+|hasFocus|**UIElement**|**bool**|oui|non|Focus ?|
+|isActive|**UIElement**|**bool**|oui|oui|Actif ?|
+|isEnabled|**UIElement**|**bool**|oui|non|L’interface est saisie ?|
+|isEnabled|**UIElement**|**bool**|oui|oui|Active/désactive l’interface|
+|isHovered|**UIElement**|**bool**|oui|non|Survolé ?|
+|isPressed|**UIElement**|**bool**|oui|non|Pressé ?|
+|isSelected|**UIElement**|**bool**|oui|oui|Sélectionné ?|
 |pivot|**UIElement**|**Vec2\<float>**|oui|oui|Point de rotation de l’interface|
 |position|**UIElement**|**Vec2\<float>**|oui|oui|Position relatif au parent|
 |scale|**UIElement**|**Vec2\<float>**|oui|oui|Facteur d’échelle de l’interface|

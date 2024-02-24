@@ -70,6 +70,29 @@ Détermine à partir d’où la position de l’interface sera calculé par rapp
 
     library.setDescription(GrLocale.fr_FR, "Alignement vertical");
     library.addProperty(&_alignY!"get", &_alignY!"set", "alignY", elementType, alignYType);
+
+    library.setDescription(GrLocale.fr_FR, "Survolé ?");
+    library.addProperty(&_isHovered, null, "isHovered", elementType, grBool);
+
+    library.setDescription(GrLocale.fr_FR, "Focus ?");
+    library.addProperty(&_hasFocus, null, "hasFocus", elementType, grBool);
+
+    library.setDescription(GrLocale.fr_FR, "Pressé ?");
+    library.addProperty(&_isPressed, null, "isPressed", elementType, grBool);
+
+    library.setDescription(GrLocale.fr_FR, "Sélectionné ?");
+    library.addProperty(&_isSelected!"get", &_isSelected!"set",
+        "isSelected", elementType, grBool);
+
+    library.setDescription(GrLocale.fr_FR, "Actif ?");
+    library.addProperty(&_isActive!"get", &_isActive!"set", "isActive", elementType, grBool);
+
+    library.setDescription(GrLocale.fr_FR, "L’interface est saisie ?");
+    library.addProperty(&_isGrabbed, null, "isEnabled", elementType, grBool);
+
+    library.setDescription(GrLocale.fr_FR, "Active/désactive l’interface");
+    library.addProperty(&_isEnabled!"get", &_isEnabled!"set", "isEnabled", elementType, grBool);
+
     /*
     library.addProperty(&_hovered, null, "hovered", elementType, grBool);
     library.addProperty(&_focused, null, "focused", elementType, grBool);
@@ -213,37 +236,56 @@ private void _alignY(string op)(GrCall call) {
     }
     call.setEnum!UIAlignY(ui.getAlignY());
 }
-/*
-private void _hovered(GrCall call) {
-    UIElement ui = call.getNative!UIElement(0);
 
-    call.setBool(ui.hovered);
+private void _isHovered(GrCall call) {
+    UIElement ui = call.getNative!UIElement(0);
+    call.setBool(ui.isHovered);
 }
 
-private void _focused(GrCall call) {
+private void _hasFocus(GrCall call) {
     UIElement ui = call.getNative!UIElement(0);
-
-    call.setBool(ui.focused);
+    call.setBool(ui.hasFocus);
 }
 
-private void _pressed(GrCall call) {
+private void _isPressed(GrCall call) {
     UIElement ui = call.getNative!UIElement(0);
-
-    call.setBool(ui.pressed);
+    call.setBool(ui.isPressed);
 }
 
-private void _onPress(string op)(GrCall call) {
+private void _isSelected(string op)(GrCall call) {
     UIElement ui = call.getNative!UIElement(0);
 
     static if (op == "set") {
-        ui.onSubmitEvent = call.isNull(1) ? null : call.getEvent(1);
+        ui.isSelected = call.getBool(1);
     }
 
-    if (ui.onSubmitEvent)
-        call.setEvent(ui.onSubmitEvent);
-    else
-        call.setNull();
-}*/
+    call.setBool(ui.isSelected);
+}
+
+private void _isActive(string op)(GrCall call) {
+    UIElement ui = call.getNative!UIElement(0);
+
+    static if (op == "set") {
+        ui.isActive = call.getBool(1);
+    }
+
+    call.setBool(ui.isActive);
+}
+
+private void _isGrabbed(GrCall call) {
+    UIElement ui = call.getNative!UIElement(0);
+    call.setBool(ui.isGrabbed);
+}
+
+private void _isEnabled(string op)(GrCall call) {
+    UIElement ui = call.getNative!UIElement(0);
+
+    static if (op == "set") {
+        ui.isEnabled = call.getBool(1);
+    }
+
+    call.setBool(ui.isEnabled);
+}
 
 private void _addState(GrCall call) {
     UIElement ui = call.getNative!UIElement(0);

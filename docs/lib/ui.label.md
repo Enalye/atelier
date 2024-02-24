@@ -5,9 +5,9 @@ Texte
 ### Label
 Hérite de **UIElement**
 ## Constructeurs
-|Fonction|Entrée|
-|-|-|
-|[@**Label**](#ctor_0)| *param0*: **string**,  *param1*: **Font**|
+|Fonction|Entrée|Description|
+|-|-|-|
+|[@**Label**](#ctor_0)| *param0*: **string**,  *param1*: **Font**||
 ## Fonctions
 |Fonction|Entrée|Sortie|
 |-|-|-|

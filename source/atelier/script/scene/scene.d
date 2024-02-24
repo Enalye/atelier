@@ -32,8 +32,8 @@ addScene(scene);");
     library.addConstructor(&_ctor, sceneType, [grInt, grInt]);
 
     library.addProperty(&_position!"get", &_position!"set", "position", sceneType, vec2fType);
-    library.addProperty(&_isVisible!"get", &_isVisible!"set", "isVisible", entityType, grBool);
-    library.addProperty(&_canvas, null, "canvas", entityType, canvasType);
+    library.addProperty(&_isVisible!"get", &_isVisible!"set", "isVisible", sceneType, grBool);
+    library.addProperty(&_canvas, null, "canvas", sceneType, canvasType);
 
     library.setDescription(GrLocale.fr_FR, "Ajoute une scène à l’application");
     library.setParameters(["scene"]);

@@ -9,9 +9,9 @@ Créer manuellement cet objet permet de lui appliquer des effets avant de lancer
 ### SoundPlayer
 Hérite de **AudioPlayer**
 ## Constructeurs
-|Fonction|Entrée|
-|-|-|
-|[@**SoundPlayer**](#ctor_0)| *player*: **Sound**|
+|Fonction|Entrée|Description|
+|-|-|-|
+|[@**SoundPlayer**](#ctor_0)| *player*: **Sound**|Lance la lecture sur le bus `master`.|
 
 
 ***

@@ -9,9 +9,9 @@ Sound est une ressource définie dans un fichier `.res` (voir la page [ressource
 ## Natifs
 ### Sound
 ## Constructeurs
-|Fonction|Entrée|
-|-|-|
-|[@**Sound**](#ctor_0)| *param0*: **string**|
+|Fonction|Entrée|Description|
+|-|-|-|
+|[@**Sound**](#ctor_0)| *param0*: **string**||
 ## Fonctions
 |Fonction|Entrée|Sortie|
 |-|-|-|

@@ -8,15 +8,15 @@ Sprite est une ressource définie dans un fichier `.res` (voir la page [ressourc
 ### Sprite
 Hérite de **Image**
 ## Constructeurs
-|Fonction|Entrée|
-|-|-|
-|[@**Sprite**](#ctor_0)| *param0*: **string**|
-|[@**Sprite**](#ctor_1)| *param0*: **ImageData**|
-|[@**Sprite**](#ctor_2)| *param0*: **Scene**|
+|Fonction|Entrée|Description|
+|-|-|-|
+|[@**Sprite**](#ctor_0)| *param0*: **string**||
+|[@**Sprite**](#ctor_1)| *param0*: **ImageData**||
+|[@**Sprite**](#ctor_2)| *param0*: **Scene**||
 ## Propriétés
-|Propriété|Natif|Type|Accesseur|Modifieur|
-|-|-|-|-|-|
-|size|**Sprite**|**Vec2\<float>**|oui|oui|
+|Propriété|Natif|Type|Accesseur|Modifieur|Description|
+|-|-|-|-|-|-|
+|size|**Sprite**|**Vec2\<float>**|oui|oui||
 
 
 ***

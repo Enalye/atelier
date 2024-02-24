@@ -21,7 +21,10 @@ package void loadLibUI_box(GrLibDefinition library) {
 
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
 
+    library.setDescription(GrLocale.fr_FR, "Aligne horizontalement les interfaces");
     library.addConstructor(&_hboxCtor, hboxType);
+
+    library.setDescription(GrLocale.fr_FR, "Aligne verticalement les interfaces");
     library.addConstructor(&_vboxCtor, vboxType);
 
     library.setDescription(GrLocale.fr_FR, "Taille minimale de la boite");

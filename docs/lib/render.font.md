@@ -22,11 +22,11 @@ Hérite de **Font**
 ### TrueTypeFont
 Hérite de **Font**
 ## Constructeurs
-|Fonction|Entrée|
-|-|-|
-|[@**TrueTypeFont**](#ctor_0)| *name*: **string**|
-|[@**BitmapFont**](#ctor_1)| *name*: **string**|
-|[@**PixelFont**](#ctor_2)| *ascent*: **int**,  *descent*: **int**,  *lineSkip*: **int**,  *weight*: **int**,  *spacing*: **int**,  *style*: **PixelFontStyle**|
+|Fonction|Entrée|Description|
+|-|-|-|
+|[@**TrueTypeFont**](#ctor_0)| *name*: **string**|Style de police|
+|[@**BitmapFont**](#ctor_1)| *name*: **string**|Style de police|
+|[@**PixelFont**](#ctor_2)| *ascent*: **int**,  *descent*: **int**,  *lineSkip*: **int**,  *weight*: **int**,  *spacing*: **int**,  *style*: **PixelFontStyle**|Style de police|
 ## Fonctions
 |Fonction|Entrée|Sortie|
 |-|-|-|

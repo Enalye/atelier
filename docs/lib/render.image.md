@@ -4,14 +4,14 @@ Image
 ## Natifs
 ### Image
 ## Propriétés
-|Propriété|Natif|Type|Accesseur|Modifieur|
-|-|-|-|-|-|
-|alpha|**Image**|**float**|oui|oui|
-|anchor|**Image**|**Vec2\<float>**|oui|oui|
-|angle|**Image**|**double**|oui|oui|
-|color|**Image**|**Color**|oui|oui|
-|pivot|**Image**|**Vec2\<float>**|oui|oui|
-|position|**Image**|**Vec2\<float>**|oui|oui|
+|Propriété|Natif|Type|Accesseur|Modifieur|Description|
+|-|-|-|-|-|-|
+|alpha|**Image**|**float**|oui|oui||
+|anchor|**Image**|**Vec2\<float>**|oui|oui||
+|angle|**Image**|**double**|oui|oui||
+|color|**Image**|**Color**|oui|oui||
+|pivot|**Image**|**Vec2\<float>**|oui|oui||
+|position|**Image**|**Vec2\<float>**|oui|oui||
 ## Fonctions
 |Fonction|Entrée|Sortie|
 |-|-|-|

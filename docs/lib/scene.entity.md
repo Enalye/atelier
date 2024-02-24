@@ -11,14 +11,14 @@ scene.addEntity(player);
 ## Natifs
 ### Entity
 ## Constructeurs
-|Fonction|Entrée|
-|-|-|
-|[@**Entity**](#ctor_0)||
+|Fonction|Entrée|Description|
+|-|-|-|
+|[@**Entity**](#ctor_0)|||
 ## Propriétés
-|Propriété|Natif|Type|Accesseur|Modifieur|
-|-|-|-|-|-|
-|audio|**Entity**|**AudioComponent**|oui|non|
-|position|**Entity**|**Vec2\<float>**|oui|oui|
+|Propriété|Natif|Type|Accesseur|Modifieur|Description|
+|-|-|-|-|-|-|
+|audio|**Entity**|**AudioComponent**|oui|non||
+|position|**Entity**|**Vec2\<float>**|oui|oui||
 ## Fonctions
 |Fonction|Entrée|Sortie|
 |-|-|-|

@@ -14,11 +14,11 @@ entity.addImage(circle);
 ### Circle
 Hérite de **Image**
 ## Propriétés
-|Propriété|Natif|Type|Accesseur|Modifieur|
-|-|-|-|-|-|
-|filled|**Circle**|**bool**|oui|oui|
-|radius|**Circle**|**float**|oui|oui|
-|thickness|**Circle**|**float**|oui|oui|
+|Propriété|Natif|Type|Accesseur|Modifieur|Description|
+|-|-|-|-|-|-|
+|filled|**Circle**|**bool**|oui|oui|Si `true`, le cercle est plein, sinon le cercle est une bordure|
+|radius|**Circle**|**float**|oui|oui|Rayon du cercle|
+|thickness|**Circle**|**float**|oui|oui|(Seulement si `filled` == false) Épaisseur de la bordure|
 ## Fonctions Statiques
 |Fonction|Entrée|Sortie|
 |-|-|-|

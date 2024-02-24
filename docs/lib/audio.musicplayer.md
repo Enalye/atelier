@@ -9,9 +9,9 @@ Créer manuellement cet objet permet de lui appliquer des effets avant de lancer
 ### MusicPlayer
 Hérite de **AudioPlayer**
 ## Constructeurs
-|Fonction|Entrée|
-|-|-|
-|[@**MusicPlayer**](#ctor_0)| *music*: **Music**|
+|Fonction|Entrée|Description|
+|-|-|-|
+|[@**MusicPlayer**](#ctor_0)| *music*: **Music**||
 
 
 ***

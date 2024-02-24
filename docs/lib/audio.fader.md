@@ -5,16 +5,16 @@ Applique un fondu audio
 ### AudioFader
 Hérite de **AudioEffect**
 ## Constructeurs
-|Fonction|Entrée|
-|-|-|
-|[@**AudioFader**](#ctor_0)||
+|Fonction|Entrée|Description|
+|-|-|-|
+|[@**AudioFader**](#ctor_0)|||
 ## Propriétés
-|Propriété|Natif|Type|Accesseur|Modifieur|
-|-|-|-|-|-|
-|delay|**AudioFader**|**float**|oui|oui|
-|duration|**AudioFader**|**float**|oui|oui|
-|isFadeIn|**AudioFader**|**bool**|oui|oui|
-|spline|**AudioFader**|**Spline**|oui|oui|
+|Propriété|Natif|Type|Accesseur|Modifieur|Description|
+|-|-|-|-|-|-|
+|delay|**AudioFader**|**float**|oui|oui||
+|duration|**AudioFader**|**float**|oui|oui||
+|isFadeIn|**AudioFader**|**bool**|oui|oui||
+|spline|**AudioFader**|**Spline**|oui|oui||
 
 
 ***

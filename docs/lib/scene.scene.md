@@ -10,15 +10,15 @@ addScene(scene);
 ## Natifs
 ### Scene
 ## Constructeurs
-|Fonction|Entrée|
-|-|-|
-|[@**Scene**](#ctor_0)| *width*: **int**,  *height*: **int**|
+|Fonction|Entrée|Description|
+|-|-|-|
+|[@**Scene**](#ctor_0)| *width*: **int**,  *height*: **int**||
 ## Propriétés
-|Propriété|Natif|Type|Accesseur|Modifieur|
-|-|-|-|-|-|
-|canvas|**Entity**|**Canvas**|oui|non|
-|isVisible|**Entity**|**bool**|oui|oui|
-|position|**Scene**|**Vec2\<float>**|oui|oui|
+|Propriété|Natif|Type|Accesseur|Modifieur|Description|
+|-|-|-|-|-|-|
+|canvas|**Entity**|**Canvas**|oui|non||
+|isVisible|**Entity**|**bool**|oui|oui||
+|position|**Scene**|**Vec2\<float>**|oui|oui||
 ## Fonctions
 |Fonction|Entrée|Sortie|
 |-|-|-|

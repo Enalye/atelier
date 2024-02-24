@@ -19,13 +19,13 @@ scene.addEntity(map);
 ### Tilemap
 Hérite de **Image**
 ## Constructeurs
-|Fonction|Entrée|
-|-|-|
-|[@**Tilemap**](#ctor_0)| *param0*: **Tileset**,  *param1*: **int**,  *param2*: **int**|
+|Fonction|Entrée|Description|
+|-|-|-|
+|[@**Tilemap**](#ctor_0)| *param0*: **Tileset**,  *param1*: **int**,  *param2*: **int**||
 ## Propriétés
-|Propriété|Natif|Type|Accesseur|Modifieur|
-|-|-|-|-|-|
-|size|**Tilemap**|**Vec2\<float>**|oui|oui|
+|Propriété|Natif|Type|Accesseur|Modifieur|Description|
+|-|-|-|-|-|-|
+|size|**Tilemap**|**Vec2\<float>**|oui|oui|Taille d’une tuile|
 ## Fonctions
 |Fonction|Entrée|Sortie|
 |-|-|-|

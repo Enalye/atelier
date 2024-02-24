@@ -4,9 +4,9 @@ Route les sons et leur applique des effets
 ## Natifs
 ### AudioBus
 ## Constructeurs
-|Fonction|Entrée|
-|-|-|
-|[@**AudioBus**](#ctor_0)||
+|Fonction|Entrée|Description|
+|-|-|-|
+|[@**AudioBus**](#ctor_0)|||
 ## Fonctions
 |Fonction|Entrée|Sortie|
 |-|-|-|

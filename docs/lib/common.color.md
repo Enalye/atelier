@@ -4,15 +4,15 @@ Représentation d’une couleur dans l’espace RVB
 ## Natifs
 ### Color
 ## Constructeurs
-|Fonction|Entrée|
-|-|-|
-|[@**Color**](#ctor_0)| *param0*: **float**,  *param1*: **float**,  *param2*: **float**|
+|Fonction|Entrée|Description|
+|-|-|-|
+|[@**Color**](#ctor_0)| *param0*: **float**,  *param1*: **float**,  *param2*: **float**||
 ## Propriétés
-|Propriété|Natif|Type|Accesseur|Modifieur|
-|-|-|-|-|-|
-|b|**Color**|**float**|oui|oui|
-|g|**Color**|**float**|oui|oui|
-|r|**Color**|**float**|oui|oui|
+|Propriété|Natif|Type|Accesseur|Modifieur|Description|
+|-|-|-|-|-|-|
+|b|**Color**|**float**|oui|oui||
+|g|**Color**|**float**|oui|oui||
+|r|**Color**|**float**|oui|oui||
 ## Fonctions Statiques
 |Fonction|Entrée|Sortie|
 |-|-|-|

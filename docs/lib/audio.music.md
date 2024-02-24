@@ -7,9 +7,9 @@ Music est une ressource définie dans un fichier `.res` (voir la page [ressource
 ## Natifs
 ### Music
 ## Constructeurs
-|Fonction|Entrée|
-|-|-|
-|[@**Music**](#ctor_0)| *param0*: **string**|
+|Fonction|Entrée|Description|
+|-|-|-|
+|[@**Music**](#ctor_0)| *param0*: **string**||
 ## Fonctions
 |Fonction|Entrée|Sortie|
 |-|-|-|

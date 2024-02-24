@@ -10,20 +10,21 @@
 ### UIElement
 Alignement vertical
 ## Constructeurs
-|Fonction|Entrée|
-|-|-|
-|[@**UIElement**](#ctor_0)||
+|Fonction|Entrée|Description|
+|-|-|-|
+|[@**UIElement**](#ctor_0)||Crée un élément d’interface|
 ## Propriétés
-|Propriété|Natif|Type|Accesseur|Modifieur|
-|-|-|-|-|-|
-|alignX|**UIElement**|**UIAlignX**|oui|oui|
-|alignY|**UIElement**|**UIAlignY**|oui|oui|
-|alpha|**UIElement**|**float**|oui|oui|
-|angle|**UIElement**|**double**|oui|oui|
-|pivot|**UIElement**|**Vec2\<float>**|oui|oui|
-|position|**UIElement**|**Vec2\<float>**|oui|oui|
-|scale|**UIElement**|**Vec2\<float>**|oui|oui|
-|size|**UIElement**|**Vec2\<float>**|oui|oui|
+|Propriété|Natif|Type|Accesseur|Modifieur|Description|
+|-|-|-|-|-|-|
+|alignX|**UIElement**|**UIAlignX**|oui|oui|Alignement horizontal|
+|alignY|**UIElement**|**UIAlignY**|oui|oui|Alignement vertical|
+|alpha|**UIElement**|**float**|oui|oui|Opacité de l’interface|
+|angle|**UIElement**|**double**|oui|oui|Rotation de l’interface|
+|color|**UIElement**|**float**|oui|oui|Couleur de l’interface|
+|pivot|**UIElement**|**Vec2\<float>**|oui|oui|Point de rotation de l’interface|
+|position|**UIElement**|**Vec2\<float>**|oui|oui|Position relatif au parent|
+|scale|**UIElement**|**Vec2\<float>**|oui|oui|Facteur d’échelle de l’interface|
+|size|**UIElement**|**Vec2\<float>**|oui|oui|Taille de l’interface|
 ## Fonctions
 |Fonction|Entrée|Sortie|
 |-|-|-|

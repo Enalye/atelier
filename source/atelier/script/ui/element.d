@@ -34,15 +34,28 @@ package void loadLibUI_element(GrLibDefinition library) {
     GrType imageType = grGetNativeType("Image");
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
 
+    library.setDescription(GrLocale.fr_FR, "Crée un élément d’interface");
     library.addConstructor(&_ctor, elementType);
 
+    library.setDescription(GrLocale.fr_FR, "Position relatif au parent");
     library.addProperty(&_position!"get", &_position!"set", "position", elementType, vec2fType);
+
+    library.setDescription(GrLocale.fr_FR, "Taille de l’interface");
     library.addProperty(&_size!"get", &_size!"set", "size", elementType, vec2fType);
+
+    library.setDescription(GrLocale.fr_FR, "Facteur d’échelle de l’interface");
     library.addProperty(&_scale!"get", &_scale!"set", "scale", elementType, vec2fType);
+
+    library.setDescription(GrLocale.fr_FR, "Point de rotation de l’interface");
     library.addProperty(&_pivot!"get", &_pivot!"set", "pivot", elementType, vec2fType);
 
+    library.setDescription(GrLocale.fr_FR, "Rotation de l’interface");
     library.addProperty(&_angle!"get", &_angle!"set", "angle", elementType, grDouble);
 
+    library.setDescription(GrLocale.fr_FR, "Couleur de l’interface");
+    library.addProperty(&_color!"get", &_color!"set", "color", elementType, grFloat);
+
+    library.setDescription(GrLocale.fr_FR, "Opacité de l’interface");
     library.addProperty(&_alpha!"get", &_alpha!"set", "alpha", elementType, grFloat);
 
     library.setDescription(GrLocale.fr_FR, "Fixe l’alignement de l’interface.
@@ -52,7 +65,10 @@ Détermine à partir d’où la position de l’interface sera calculé par rapp
             elementType, alignXType, alignYType
         ]);
 
+    library.setDescription(GrLocale.fr_FR, "Alignement horizontal");
     library.addProperty(&_alignX!"get", &_alignX!"set", "alignX", elementType, alignXType);
+
+    library.setDescription(GrLocale.fr_FR, "Alignement vertical");
     library.addProperty(&_alignY!"get", &_alignY!"set", "alignY", elementType, alignYType);
     /*
     library.addProperty(&_hovered, null, "hovered", elementType, grBool);
@@ -154,6 +170,15 @@ private void _angle(string op)(GrCall call) {
         ui.angle = call.getDouble(1);
     }
     call.setDouble(ui.angle);
+}
+
+private void _color(string op)(GrCall call) {
+    UIElement ui = call.getNative!UIElement(0);
+
+    static if (op == "set") {
+        ui.color = call.getNative!SColor(1);
+    }
+    call.setNative(scolor(ui.color));
 }
 
 private void _alpha(string op)(GrCall call) {

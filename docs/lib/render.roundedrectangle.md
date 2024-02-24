@@ -14,12 +14,12 @@ entity.addImage(rect);
 ### RoundedRectangle
 Hérite de **Image**
 ## Propriétés
-|Propriété|Natif|Type|Accesseur|Modifieur|
-|-|-|-|-|-|
-|filled|**RoundedRectangle**|**bool**|oui|oui|
-|radius|**RoundedRectangle**|**float**|oui|oui|
-|size|**RoundedRectangle**|**Vec2\<float>**|oui|oui|
-|thickness|**RoundedRectangle**|**float**|oui|oui|
+|Propriété|Natif|Type|Accesseur|Modifieur|Description|
+|-|-|-|-|-|-|
+|filled|**RoundedRectangle**|**bool**|oui|oui|Si `true`, le rectangle est plein, sinon le rectangle est une bordure|
+|radius|**RoundedRectangle**|**float**|oui|oui|Rayon des coins du rectangle|
+|size|**RoundedRectangle**|**Vec2\<float>**|oui|oui|Taille du rectangle|
+|thickness|**RoundedRectangle**|**float**|oui|oui|(Seulement si `filled` == false) Épaisseur de la bordure|
 ## Fonctions Statiques
 |Fonction|Entrée|Sortie|
 |-|-|-|

@@ -5,9 +5,9 @@ Texture générée procéduralement
 ### WritableTexture
 Hérite de **ImageData**
 ## Constructeurs
-|Fonction|Entrée|
-|-|-|
-|[@**WritableTexture**](#ctor_0)| *width*: **uint**,  *height*: **uint**|
+|Fonction|Entrée|Description|
+|-|-|-|
+|[@**WritableTexture**](#ctor_0)| *width*: **uint**,  *height*: **uint**||
 ## Fonctions
 |Fonction|Entrée|Sortie|
 |-|-|-|

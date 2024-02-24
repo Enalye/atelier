@@ -29,13 +29,13 @@ scene.addParticleSource(src);
 ## Natifs
 ### ParticleSource
 ## Constructeurs
-|Fonction|Entrée|
-|-|-|
-|[@**ParticleSource**](#ctor_0)||
+|Fonction|Entrée|Description|
+|-|-|-|
+|[@**ParticleSource**](#ctor_0)||Mode d’émission des particules|
 ## Propriétés
-|Propriété|Natif|Type|Accesseur|Modifieur|
-|-|-|-|-|-|
-|position|**ParticleSource**|**Vec2\<float>**|oui|oui|
+|Propriété|Natif|Type|Accesseur|Modifieur|Description|
+|-|-|-|-|-|-|
+|position|**ParticleSource**|**Vec2\<float>**|oui|oui|Mode d’émission des particules|
 ## Fonctions
 |Fonction|Entrée|Sortie|
 |-|-|-|

@@ -34,35 +34,35 @@ Type d’événement
 |-|-|
 |**InputEvent**|**string**|
 ## Propriétés
-|Propriété|Natif|Type|Accesseur|Modifieur|
-|-|-|-|-|-|
-|axis|**InputEventControllerAxis**|**ControllerButton**|oui|non|
-|button|**InputEventKeyButton**|**KeyButton**|oui|non|
-|button|**InputEventMouseButton**|**KeyButton**|oui|non|
-|button|**InputEventControllerButton**|**ControllerButton**|oui|non|
-|clicks|**InputEventMouseButton**|**int**|oui|non|
-|controllerAxis|**InputEvent**|**InputEventControllerAxis?**|oui|non|
-|controllerButton|**InputEvent**|**InputEventControllerButton?**|oui|non|
-|deltaPosition|**InputEventMouseButton**|**Vec2\<float>**|oui|non|
-|deltaPosition|**InputEventMouseMotion**|**Vec2\<float>**|oui|non|
-|dropFile|**InputEvent**|**InputEventDropFile?**|oui|non|
-|echo|**InputEventKeyButton**|**bool**|oui|non|
-|keyButton|**InputEvent**|**InputEventKeyButton?**|oui|non|
-|mouseButton|**InputEvent**|**InputEventMouseButton?**|oui|non|
-|mouseMotion|**InputEvent**|**InputEventMouseMotion?**|oui|non|
-|mouseWheel|**InputEvent**|**InputEventMouseWheel?**|oui|non|
-|path|**InputEventDropFile**|**string**|oui|non|
-|position|**InputEventMouseButton**|**Vec2\<float>**|oui|non|
-|position|**InputEventMouseMotion**|**Vec2\<float>**|oui|non|
-|state|**InputEventKeyButton**|**KeyState**|oui|non|
-|state|**InputEventMouseButton**|**KeyState**|oui|non|
-|state|**InputEventControllerButton**|**KeyState**|oui|non|
-|text|**InputEventTextInput**|**string**|oui|non|
-|textInput|**InputEvent**|**InputEventTextInput?**|oui|non|
-|type|**InputEvent**|**InputEventType**|oui|non|
-|value|**InputEventControllerAxis**|**float**|oui|non|
-|x|**InputEventMouseWheel**|**int**|oui|non|
-|y|**InputEventMouseWheel**|**int**|oui|non|
+|Propriété|Natif|Type|Accesseur|Modifieur|Description|
+|-|-|-|-|-|-|
+|axis|**InputEventControllerAxis**|**ControllerButton**|oui|non|Affiche le contenu de l’événement.|
+|button|**InputEventKeyButton**|**KeyButton**|oui|non|Affiche le contenu de l’événement.|
+|button|**InputEventMouseButton**|**KeyButton**|oui|non|Affiche le contenu de l’événement.|
+|button|**InputEventControllerButton**|**ControllerButton**|oui|non|Affiche le contenu de l’événement.|
+|clicks|**InputEventMouseButton**|**int**|oui|non|Affiche le contenu de l’événement.|
+|controllerAxis|**InputEvent**|**InputEventControllerAxis?**|oui|non|Si l’événement est de type InputEventControllerAxis, retourne le type.|
+|controllerButton|**InputEvent**|**InputEventControllerButton?**|oui|non|Si l’événement est de type InputEventControllerButton, retourne le type.|
+|deltaPosition|**InputEventMouseButton**|**Vec2\<float>**|oui|non|Affiche le contenu de l’événement.|
+|deltaPosition|**InputEventMouseMotion**|**Vec2\<float>**|oui|non|Affiche le contenu de l’événement.|
+|dropFile|**InputEvent**|**InputEventDropFile?**|oui|non|Si l’événement est de type InputEventDropFile, retourne le type.|
+|echo|**InputEventKeyButton**|**bool**|oui|non|Affiche le contenu de l’événement.|
+|keyButton|**InputEvent**|**InputEventKeyButton?**|oui|non|Si l’événement est de type InputEventKeyButton, retourne le type.|
+|mouseButton|**InputEvent**|**InputEventMouseButton?**|oui|non|Si l’événement est de type InputEventMouseButton, retourne le type.|
+|mouseMotion|**InputEvent**|**InputEventMouseMotion?**|oui|non|Si l’événement est de type InputEventMouseMotion, retourne le type.|
+|mouseWheel|**InputEvent**|**InputEventMouseWheel?**|oui|non|Si l’événement est de type InputEventMouseWheel, retourne le type.|
+|path|**InputEventDropFile**|**string**|oui|non|Affiche le contenu de l’événement.|
+|position|**InputEventMouseButton**|**Vec2\<float>**|oui|non|Affiche le contenu de l’événement.|
+|position|**InputEventMouseMotion**|**Vec2\<float>**|oui|non|Affiche le contenu de l’événement.|
+|state|**InputEventKeyButton**|**KeyState**|oui|non|Affiche le contenu de l’événement.|
+|state|**InputEventMouseButton**|**KeyState**|oui|non|Affiche le contenu de l’événement.|
+|state|**InputEventControllerButton**|**KeyState**|oui|non|Affiche le contenu de l’événement.|
+|text|**InputEventTextInput**|**string**|oui|non|Affiche le contenu de l’événement.|
+|textInput|**InputEvent**|**InputEventTextInput?**|oui|non|Si l’événement est de type InputEventTextInput, retourne le type.|
+|type|**InputEvent**|**InputEventType**|oui|non|Type d’événement|
+|value|**InputEventControllerAxis**|**float**|oui|non|Affiche le contenu de l’événement.|
+|x|**InputEventMouseWheel**|**int**|oui|non|Affiche le contenu de l’événement.|
+|y|**InputEventMouseWheel**|**int**|oui|non|Affiche le contenu de l’événement.|
 ## Fonctions Statiques
 |Fonction|Entrée|Sortie|
 |-|-|-|

@@ -14,11 +14,11 @@ entity.addImage(rect);
 ### Rectangle
 Hérite de **Image**
 ## Propriétés
-|Propriété|Natif|Type|Accesseur|Modifieur|
-|-|-|-|-|-|
-|filled|**Rectangle**|**bool**|oui|oui|
-|size|**Rectangle**|**Vec2\<float>**|oui|oui|
-|thickness|**Rectangle**|**float**|oui|oui|
+|Propriété|Natif|Type|Accesseur|Modifieur|Description|
+|-|-|-|-|-|-|
+|filled|**Rectangle**|**bool**|oui|oui|Si `true`, le rectangle est plein, sinon le rectangle est une bordure|
+|size|**Rectangle**|**Vec2\<float>**|oui|oui|Taille du rectangle|
+|thickness|**Rectangle**|**float**|oui|oui|(Seulement si `filled` == false) Épaisseur de la bordure|
 ## Fonctions Statiques
 |Fonction|Entrée|Sortie|
 |-|-|-|

@@ -5,13 +5,13 @@ Règle la stéréo de l’audio
 ### AudioPanner
 Hérite de **AudioEffect**
 ## Constructeurs
-|Fonction|Entrée|
-|-|-|
-|[@**AudioPanner**](#ctor_0)||
+|Fonction|Entrée|Description|
+|-|-|-|
+|[@**AudioPanner**](#ctor_0)|||
 ## Propriétés
-|Propriété|Natif|Type|Accesseur|Modifieur|
-|-|-|-|-|-|
-|panning|**AudioPanner**|**float**|oui|oui|
+|Propriété|Natif|Type|Accesseur|Modifieur|Description|
+|-|-|-|-|-|-|
+|panning|**AudioPanner**|**float**|oui|oui||
 
 
 ***

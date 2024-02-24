@@ -14,11 +14,11 @@ entity.addImage(capsule);
 ### Capsule
 Hérite de **Image**
 ## Propriétés
-|Propriété|Natif|Type|Accesseur|Modifieur|
-|-|-|-|-|-|
-|filled|**Capsule**|**bool**|oui|oui|
-|size|**Capsule**|**Vec2\<float>**|oui|oui|
-|thickness|**Capsule**|**float**|oui|oui|
+|Propriété|Natif|Type|Accesseur|Modifieur|Description|
+|-|-|-|-|-|-|
+|filled|**Capsule**|**bool**|oui|oui|Si `true`, la capsule est pleine, sinon la capsule est une bordure|
+|size|**Capsule**|**Vec2\<float>**|oui|oui|Taille de la capsule|
+|thickness|**Capsule**|**float**|oui|oui|(Seulement si `filled` == false) Épaisseur de la bordure|
 ## Fonctions Statiques
 |Fonction|Entrée|Sortie|
 |-|-|-|

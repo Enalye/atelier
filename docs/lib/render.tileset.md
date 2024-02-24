@@ -12,13 +12,13 @@ scene.addEntity(map);
 ## Natifs
 ### Tileset
 ## Constructeurs
-|Fonction|Entrée|
-|-|-|
-|[@**Tileset**](#ctor_0)| *name*: **string**|
+|Fonction|Entrée|Description|
+|-|-|-|
+|[@**Tileset**](#ctor_0)| *name*: **string**||
 ## Propriétés
-|Propriété|Natif|Type|Accesseur|Modifieur|
-|-|-|-|-|-|
-|frameTime|**Tileset**|**int**|oui|oui|
+|Propriété|Natif|Type|Accesseur|Modifieur|Description|
+|-|-|-|-|-|-|
+|frameTime|**Tileset**|**int**|oui|oui|Durée entre chaque frame|
 
 
 ***

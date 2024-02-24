@@ -16,12 +16,17 @@ import atelier.script.util;
 void loadLibRender_tileset(GrLibDefinition library) {
     library.setModule("render.tileset");
     library.setModuleInfo(GrLocale.fr_FR, "Jeu de tuiles");
+    library.setModuleDescription(GrLocale.fr_FR, "Tileset est une ressource définie dans un fichier `.res` (voir la page [ressources](/resources#Tileset))");
+    library.setModuleExample(GrLocale.fr_FR, "var tileset = @Tileset(\"terrain\");
+var tilemap = @Tilemap(tileset, 20, 20);
+scene.addEntity(map);");
 
     GrType tilesetType = library.addNative("Tileset");
 
     GrType imageDataType = grGetNativeType("ImageData");
     GrType sceneType = grGetNativeType("Scene");
 
+    library.setParameters(["name"]);
     library.addConstructor(&_ctor, tilesetType, [grString]);
 
     library.setDescription(GrLocale.fr_FR, "Durée entre chaque frame");

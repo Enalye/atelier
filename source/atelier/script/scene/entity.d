@@ -17,6 +17,9 @@ import atelier.script.util;
 package void loadLibScene_entity(GrLibDefinition library) {
     library.setModule("scene.entity");
     library.setModuleInfo(GrLocale.fr_FR, "Élément d’une scène");
+    library.setModuleExample(GrLocale.fr_FR, "var player = @Entity;
+player.addImage(@Sprite(\"player\"));
+scene.addEntity(player);");
 
     GrType entityType = library.addNative("Entity");
     GrType imageType = grGetNativeType("Image");
@@ -29,7 +32,8 @@ package void loadLibScene_entity(GrLibDefinition library) {
 
     library.addProperty(&_audio, null, "audio", entityType, audioComponentType);
 
-    library.setDescription(GrLocale.fr_FR, "Ajoute une entité en tant qu’enfant de cette entité");
+    library.setDescription(GrLocale.fr_FR,
+        "Ajoute une entité en tant qu’enfant de cette entité");
     library.setParameters(["parent", "child"]);
     library.addFunction(&_addChild, "addChild", [entityType, entityType]);
 

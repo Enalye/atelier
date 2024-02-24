@@ -189,7 +189,7 @@ Paramètres:
  * `loopEnd` (optionnel)
     - temps (en secondes) où la musique boucle à `loopStart` (float)
 
-## Truetype
+## TrueType
 Les polices truetype (TTF) permettent de générer du texte à l’écran.
 
 ```

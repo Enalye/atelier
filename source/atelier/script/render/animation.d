@@ -16,6 +16,8 @@ import atelier.script.util;
 void loadLibRender_animation(GrLibDefinition library) {
     library.setModule("render.animation");
     library.setModuleInfo(GrLocale.fr_FR, "Animation");
+    library.setModuleDescription(GrLocale.fr_FR,
+        "Animation est une ressource définie dans un fichier `.res` (voir la page [ressources](/resources#Animation)).");
 
     GrType animationType = library.addNative("Animation", [], "Image");
 

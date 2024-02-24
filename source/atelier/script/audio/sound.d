@@ -17,6 +17,8 @@ package void loadLibAudio_sound(GrLibDefinition library) {
     library.setModuleInfo(GrLocale.fr_FR, "Représente un fichier audio.
 Le son est entièrement décodé en mémoire.
 Il est recommandé de reserver cette classe pour des fichiers peu volumineux.");
+    library.setModuleDescription(GrLocale.fr_FR,
+        "Sound est une ressource définie dans un fichier `.res` (voir la page [ressources](/resources#Sound)).");
 
     GrType soundType = library.addNative("Sound");
 

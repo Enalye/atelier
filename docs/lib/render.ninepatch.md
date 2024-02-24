@@ -1,6 +1,9 @@
 # render.ninepatch
 
 Image divisé en 9 sections pouvant se mettre à l’échelle sans être étiré
+## Description
+NinePatch est une ressource définie dans un fichier `.res` (voir la page [ressources](/resources#NinePatch)).
+
 ## Natifs
 ### NinePatch
 Hérite de **Image**

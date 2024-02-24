@@ -20,6 +20,7 @@ void loadLibRender_writableTexture(GrLibDefinition library) {
     GrType wtextureType = library.addNative("WritableTexture", [], "ImageData");
     GrType vec4iType = grGetNativeType("Vec4", [grInt]);
 
+    library.setParameters(["width", "height"]);
     library.addConstructor(&_ctor, wtextureType, [grUInt, grUInt]);
 
     library.setDescription(GrLocale.fr_FR, "Modifie la texture");

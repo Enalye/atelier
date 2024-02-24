@@ -7,18 +7,18 @@ Hérite de **ImageData**
 ## Constructeurs
 |Fonction|Entrée|
 |-|-|
-|[@**WritableTexture**](#ctor_0)| *param0*: **uint**,  *param1*: **uint**|
+|[@**WritableTexture**](#ctor_0)| *width*: **uint**,  *height*: **uint**|
 ## Fonctions
 |Fonction|Entrée|Sortie|
 |-|-|-|
-|[update](#func_0)|*param0*: **WritableTexture**, *param1*: **Vec4\<int>**, *param2*: **[uint]**||
+|[update](#func_0)|*width*: **WritableTexture**, *height*: **Vec4\<int>**, *param2*: **[uint]**||
 
 
 ***
 ## Description des fonctions
 
 <a id="func_0"></a>
-> update(*param0*: **WritableTexture**, *param1*: **Vec4\<int>**, *param2*: **[uint]**)
+> update(*width*: **WritableTexture**, *height*: **Vec4\<int>**, *param2*: **[uint]**)
 
 Modifie la texture
 

@@ -1,6 +1,13 @@
 # scene.entity
 
 Élément d’une scène
+## Description
+```grimoire
+var player = @Entity;
+player.addImage(@Sprite("player"));
+scene.addEntity(player);
+```
+
 ## Natifs
 ### Entity
 ## Constructeurs

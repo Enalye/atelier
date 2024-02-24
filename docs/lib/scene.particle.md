@@ -1,6 +1,27 @@
 # scene.particle
 
 Système de particules
+## Description
+```grimoire
+var src = @ParticleSource;
+src.setSprite("particle");
+src.setMode(ParticleMode.spread);
+src.setSpread(rad(0f), rad(360f), rad(45f));
+src.setDistance(100f, 100f);
+src.setCount(50, 70);
+src.setLifetime(100, 100);
+src.setSpeedInterval(0, 60, 0.3f, 0.5f, Spline.sineInOut);
+src.setSpeedInterval(60, 100, 0.5f, 0f, Spline.sineInOut);
+src.setAlphaInterval(0, 10, 0f, 1f, Spline.sineInOut);
+src.setAlphaInterval(90, 100, 1f, 0f, Spline.sineInOut);
+src.setPivotSpin(0, rad(2f), rad(2f));
+src.setPivotDistanceInterval(0, 60, 50f, 150f, Spline.sineInOut);
+src.setPivotDistanceInterval(60, 100, 150f, 100f, Spline.sineInOut);
+src.start(5);
+
+scene.addParticleSource(src);
+```
+
 ## Énumérations
 |Énumération|Valeurs|Description|
 |-|-|-|

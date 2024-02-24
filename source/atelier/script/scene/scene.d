@@ -17,6 +17,8 @@ import atelier.script.util;
 package void loadLibScene_scene(GrLibDefinition library) {
     library.setModule("scene.scene");
     library.setModuleInfo(GrLocale.fr_FR, "Défini une caméra où évolue des entités");
+    library.setModuleExample(GrLocale.fr_FR, "var scene = @Scene(@App.width, @App.height);
+addScene(scene);");
 
     GrType sceneType = library.addNative("Scene");
 
@@ -26,6 +28,7 @@ package void loadLibScene_scene(GrLibDefinition library) {
     GrType canvasType = grGetNativeType("Canvas");
     GrType uiType = grGetNativeType("UIElement");
 
+    library.setParameters(["width", "height"]);
     library.addConstructor(&_ctor, sceneType, [grInt, grInt]);
 
     library.addProperty(&_position!"get", &_position!"set", "position", sceneType, vec2fType);

@@ -1,12 +1,18 @@
 # scene.scene
 
 Défini une caméra où évolue des entités
+## Description
+```grimoire
+var scene = @Scene(@App.width, @App.height);
+addScene(scene);
+```
+
 ## Natifs
 ### Scene
 ## Constructeurs
 |Fonction|Entrée|
 |-|-|
-|[@**Scene**](#ctor_0)| *param0*: **int**,  *param1*: **int**|
+|[@**Scene**](#ctor_0)| *width*: **int**,  *height*: **int**|
 ## Propriétés
 |Propriété|Natif|Type|Accesseur|Modifieur|
 |-|-|-|-|-|

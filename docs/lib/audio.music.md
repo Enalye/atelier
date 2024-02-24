@@ -1,6 +1,9 @@
 # audio.music
 
 Représente un fichier audio
+## Description
+Music est une ressource définie dans un fichier `.res` (voir la page [ressources](/resources#Music)).
+
 ## Natifs
 ### Music
 ## Constructeurs

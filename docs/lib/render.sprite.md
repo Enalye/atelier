@@ -1,6 +1,9 @@
 # render.sprite
 
 Élément d’une texture
+## Description
+Sprite est une ressource définie dans un fichier `.res` (voir la page [ressources](/resources#Sprite)).
+
 ## Natifs
 ### Sprite
 Hérite de **Image**

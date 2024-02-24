@@ -1,6 +1,9 @@
 # render.animation
 
 Animation
+## Description
+Animation est une ressource définie dans un fichier `.res` (voir la page [ressources](/resources#Animation)).
+
 ## Natifs
 ### Animation
 Hérite de **Image**

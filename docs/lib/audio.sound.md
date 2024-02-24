@@ -3,6 +3,9 @@
 Représente un fichier audio.
 Le son est entièrement décodé en mémoire.
 Il est recommandé de reserver cette classe pour des fichiers peu volumineux.
+## Description
+Sound est une ressource définie dans un fichier `.res` (voir la page [ressources](/resources#Sound)).
+
 ## Natifs
 ### Sound
 ## Constructeurs

@@ -14,7 +14,10 @@ import atelier.script.util;
 
 package void loadLibRender_font(GrLibDefinition library) {
     library.setModule("render.font");
-    library.setModuleInfo(GrLocale.fr_FR, "Police de caractères");
+    library.setModuleInfo(GrLocale.fr_FR, "Polices de caractères");
+    library.setModuleDescription(GrLocale.fr_FR, "TrueTypeFont est une ressource définie dans un fichier `.res` (voir la page [ressources](/resources#TrueType)).\n
+BitmapFont est une ressource définie dans un fichier `.res` (voir la page [ressources](/resources#BitmapFont)).\n
+PixelFont permet de définir des polices directement en code.");
 
     library.addNative("Font", [], "ImageData");
     GrType ttfType = library.addNative("TrueTypeFont", [], "Font");

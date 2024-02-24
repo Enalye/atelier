@@ -44,6 +44,7 @@
 		- [particle](lib/scene.particle)
 		- [scene](lib/scene.scene)
 	* ui
+		- [box](lib/ui.box)
 		- [element](lib/ui.element)
 		- [label](lib/ui.label)
 		- [manager](lib/ui.manager)

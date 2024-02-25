@@ -26,9 +26,9 @@ entity.addImage(rect);");
 
     library.setDescription(GrLocale.fr_FR, "Construit un rectangle plein");
     library.setParameters(["x", "y"]);
-    library.addStatic(&_fill, rectangleType, "fill", [
-            grFloat, grFloat
-        ], [rectangleType]);
+    library.addStatic(&_fill, rectangleType, "fill", [grFloat, grFloat], [
+            rectangleType
+        ]);
 
     library.setDescription(GrLocale.fr_FR, "Construit le contour d’un rectangle");
     library.setParameters(["x", "y", "thickness"]);
@@ -54,8 +54,7 @@ private void _fill(GrCall call) {
 }
 
 private void _outline(GrCall call) {
-    call.setNative(Rectangle.outline(Vec2f(call.getFloat(0),
-            call.getFloat(1)), call.getFloat(2)));
+    call.setNative(Rectangle.outline(Vec2f(call.getFloat(0), call.getFloat(1)), call.getFloat(2)));
 }
 
 private void _size(string op)(GrCall call) {

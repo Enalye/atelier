@@ -8,17 +8,12 @@ Hérite de **UIElement**
 |Fonction|Entrée|Description|
 |-|-|-|
 |[@**Label**](#ctor_0)| *param0*: **string**,  *param1*: **Font**||
-## Fonctions
-|Fonction|Entrée|Sortie|
-|-|-|-|
-|[text](#func_0)|*param0*: **Label**, *param1*: **string**||
+## Propriétés
+|Propriété|Natif|Type|Accesseur|Modifieur|Description|
+|-|-|-|-|-|-|
+|charSpacing|**Label**|**float**|oui|oui|Espacement entre chaque caractère|
+|font|**Label**|**Font**|oui|oui|Police du label|
+|text|**Label**|**string**|oui|oui|Texte du label|
 
 
 ***
-## Description des fonctions
-
-<a id="func_0"></a>
-> text(*param0*: **Label**, *param1*: **string**)
-
-Texte du label
-

@@ -22,7 +22,14 @@ package void loadLibUI_label(GrLibDefinition library) {
     library.addConstructor(&_ctor, labelType, [grString, fontType]);
 
     library.setDescription(GrLocale.fr_FR, "Texte du label");
-    library.addFunction(&_text, "text", [labelType, grString]);
+    library.addProperty(&_text!"get", &_text!"set", "text", labelType, grString);
+
+    library.setDescription(GrLocale.fr_FR, "Police du label");
+    library.addProperty(&_font!"get", &_font!"set", "font", labelType, fontType);
+
+    library.setDescription(GrLocale.fr_FR, "Espacement entre chaque caractère");
+    library.addProperty(&_charSpacing!"get", &_charSpacing!"set",
+        "charSpacing", labelType, grFloat);
 }
 
 private void _ctor(GrCall call) {
@@ -32,8 +39,32 @@ private void _ctor(GrCall call) {
     call.setNative(label);
 }
 
-private void _text(GrCall call) {
+private void _text(string op)(GrCall call) {
     Label label = call.getNative!Label(0);
 
-    label.text = call.getString(1);
+    static if (op == "set") {
+        label.text = call.getString(1);
+    }
+
+    call.setString(label.text);
+}
+
+private void _font(string op)(GrCall call) {
+    Label label = call.getNative!Label(0);
+
+    static if (op == "set") {
+        label.font = call.getNative!Font(1);
+    }
+
+    call.setNative(label.font);
+}
+
+private void _charSpacing(string op)(GrCall call) {
+    Label label = call.getNative!Label(0);
+
+    static if (op == "set") {
+        label.charSpacing = call.getFloat(1);
+    }
+
+    call.setFloat(label.charSpacing);
 }

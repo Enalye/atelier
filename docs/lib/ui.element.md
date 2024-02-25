@@ -23,8 +23,8 @@ Alignement vertical
 |color|**UIElement**|**float**|oui|oui|Couleur de l’interface|
 |hasFocus|**UIElement**|**bool**|oui|non|Focus ?|
 |isActive|**UIElement**|**bool**|oui|oui|Actif ?|
-|isEnabled|**UIElement**|**bool**|oui|non|L’interface est saisie ?|
 |isEnabled|**UIElement**|**bool**|oui|oui|Active/désactive l’interface|
+|isGrabbed|**UIElement**|**bool**|oui|non|L’interface est saisie ?|
 |isHovered|**UIElement**|**bool**|oui|non|Survolé ?|
 |isPressed|**UIElement**|**bool**|oui|non|Pressé ?|
 |isSelected|**UIElement**|**bool**|oui|oui|Sélectionné ?|

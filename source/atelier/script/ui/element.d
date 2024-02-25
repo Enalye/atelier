@@ -88,18 +88,10 @@ Détermine à partir d’où la position de l’interface sera calculé par rapp
     library.addProperty(&_isActive!"get", &_isActive!"set", "isActive", elementType, grBool);
 
     library.setDescription(GrLocale.fr_FR, "L’interface est saisie ?");
-    library.addProperty(&_isGrabbed, null, "isEnabled", elementType, grBool);
+    library.addProperty(&_isGrabbed, null, "isGrabbed", elementType, grBool);
 
     library.setDescription(GrLocale.fr_FR, "Active/désactive l’interface");
     library.addProperty(&_isEnabled!"get", &_isEnabled!"set", "isEnabled", elementType, grBool);
-
-    /*
-    library.addProperty(&_hovered, null, "hovered", elementType, grBool);
-    library.addProperty(&_focused, null, "focused", elementType, grBool);
-    library.addProperty(&_pressed, null, "pressed", elementType, grBool);
-
-    library.addProperty(&_onPress!"get", &_onPress!"set", "onSubmit",
-        elementType, grOptional(grEvent()));*/
 
     library.setDescription(GrLocale.fr_FR, "Ajoute un état à l’interface.");
     library.setParameters(["ui", "state"]);

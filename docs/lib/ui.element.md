@@ -28,6 +28,7 @@ Alignement vertical
 |isHovered|**UIElement**|**bool**|oui|non|Survolé ?|
 |isPressed|**UIElement**|**bool**|oui|non|Pressé ?|
 |isSelected|**UIElement**|**bool**|oui|oui|Sélectionné ?|
+|mousePosition|**UIElement**|**Vec2\<float>**|oui|non|Position de la souris dans l’interface|
 |pivot|**UIElement**|**Vec2\<float>**|oui|oui|Point de rotation de l’interface|
 |position|**UIElement**|**Vec2\<float>**|oui|oui|Position relatif au parent|
 |scale|**UIElement**|**Vec2\<float>**|oui|oui|Facteur d’échelle de l’interface|

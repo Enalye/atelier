@@ -40,6 +40,9 @@ package void loadLibUI_element(GrLibDefinition library) {
     library.setDescription(GrLocale.fr_FR, "Position relatif au parent");
     library.addProperty(&_position!"get", &_position!"set", "position", elementType, vec2fType);
 
+    library.setDescription(GrLocale.fr_FR, "Position de la souris dans l’interface");
+    library.addProperty(&_mousePosition, null, "mousePosition", elementType, vec2fType);
+
     library.setDescription(GrLocale.fr_FR, "Taille de l’interface");
     library.addProperty(&_size!"get", &_size!"set", "size", elementType, vec2fType);
 
@@ -149,6 +152,11 @@ private void _position(string op)(GrCall call) {
         ui.setPosition(call.getNative!SVec2f(1));
     }
     call.setNative(svec2(ui.getPosition()));
+}
+
+private void _mousePosition(GrCall call) {
+    UIElement ui = call.getNative!UIElement(0);
+    call.setNative(svec2(ui.getMousePosition()));
 }
 
 private void _size(string op)(GrCall call) {

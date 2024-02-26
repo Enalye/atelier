@@ -38,7 +38,7 @@ final class Atelier {
         CompileFunc _compileFunc;
 
         // Informations
-        bool _isRedist;
+        bool _isRedist, _isRunning;
         bool _mustReload, _mustReloadResources, _mustReloadScript;
 
         // Événements
@@ -123,11 +123,16 @@ final class Atelier {
         _mustReloadScript = mustReloadScript;
     }
 
+    static void close() {
+        _isRunning = false;
+    }
+
     this(bool isRedist_, CompileFunc compileFunc, GrLibrary[] libraries,
         uint windowWidth, uint windowHeight, string windowTitle) {
         _isRedist = isRedist_;
         _compileFunc = compileFunc;
         _libraries = libraries;
+        _isRunning = true;
 
         // Initialisation des modules
         _window = new Window(windowWidth, windowHeight);
@@ -302,7 +307,7 @@ final class Atelier {
         _tickStartFrame = Clock.currStdTime();
         float accumulator = 0f;
 
-        while (!_inputManager.hasQuit()) {
+        while (!_inputManager.hasQuit() && _isRunning) {
             long deltaTicks = Clock.currStdTime() - _tickStartFrame;
             double deltatime = (cast(float)(deltaTicks) / 10_000_000f) * _nominalFPS;
             _currentFps = (deltatime == .0f) ? .0f : (10_000_000f / cast(float)(deltaTicks));

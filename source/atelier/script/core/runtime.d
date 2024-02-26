@@ -67,6 +67,9 @@ Exemple:
     library.setParameters(["reloadResources", "reloadScript"]);
     library.addStatic(&_reload, appType, "reload", [grBool, grBool]);
 
+    library.setDescription(GrLocale.fr_FR, "Ferme l’application.");
+    library.setParameters();
+    library.addStatic(&_close, appType, "close");
 }
 
 private void _width(GrCall call) {
@@ -99,4 +102,8 @@ private void _isRedist(GrCall call) {
 
 private void _reload(GrCall call) {
     Atelier.reload(call.getBool(0), call.getBool(1));
+}
+
+private void _close(GrCall call) {
+    Atelier.close();
 }

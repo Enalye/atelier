@@ -18,6 +18,7 @@ Informations système
 |[@**App**.setPixelSharpness](#static_5)|*sharpness*: **uint**||
 |[@**App**.setScaling](#static_6)|*scaling*: **Scaling**||
 |[@**App**.reload](#static_7)|*reloadResources*: **bool**, *reloadScript*: **bool**||
+|[@**App**.close](#static_8)|||
 
 
 ***
@@ -88,4 +89,9 @@ Applique un algorithme de mise à l’échelle.
 - `reloadResources` recharge les dossiers de ressources.
 
 - `reloadScript` recompile le programme.
+
+<a id="static_8"></a>
+> @**App**.close()
+
+Ferme l’application.
 

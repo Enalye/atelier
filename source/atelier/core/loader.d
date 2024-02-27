@@ -25,10 +25,12 @@ void setupDefaultResourceLoaders(ResourceManager res) {
     res.setLoader("animation", &_compileAnimation, &_loadAnimation);
     res.setLoader("ninepatch", &_compileNinepatch, &_loadNinepatch);
     res.setLoader("tileset", &_compileTileset, &_loadTileset);
+    res.setLoader("tilemap", &_compileTilemap, &_loadTilemap);
     res.setLoader("sound", &_compileSound, &_loadSound);
     res.setLoader("music", &_compileMusic, &_loadMusic);
     res.setLoader("truetype", &_compileTtf, &_loadTtf);
     res.setLoader("bitmapfont", &_compileBitmapFont, &_loadBitmapFont);
+    res.setLoader("level", &_compileLevel, &_loadLevel);
 }
 
 /// Crée des textures
@@ -459,6 +461,57 @@ private void _loadTileset(InStream stream) {
     });
 }
 
+/// Crée une tilemap
+private void _compileTilemap(string path, const Farfadet ffd, OutStream stream) {
+    string name = ffd.get!string(0);
+    string tilesetName;
+    int width, height;
+    bool hasTileset, hasSize;
+    int[][] tiles;
+
+    foreach (node; ffd.nodes) {
+        switch (node.name) {
+        case "tileset":
+            tilesetName = node.get!string(0);
+            hasTileset = true;
+            break;
+        case "size":
+            width = node.get!int(0);
+            height = node.get!int(1);
+            hasSize = true;
+            break;
+        case "tiles":
+            tiles = node.get!(int[][])(0);
+            break;
+        default:
+            break;
+        }
+    }
+    enforce(hasTileset, format!"`%s` ne défini pas `tileset`"(name));
+    enforce(hasSize, format!"`%s` ne défini pas `size`"(name));
+
+    stream.write!string(name);
+    stream.write!int(width);
+    stream.write!int(height);
+    stream.write!string(tilesetName);
+    stream.write!(int[][])(tiles);
+}
+
+private void _loadTilemap(InStream stream) {
+    const string name = stream.read!string();
+    const int width = stream.read!int();
+    const int height = stream.read!int();
+    const string tilesetName = stream.read!string();
+    const int[][] tiles = stream.read!(int[][])();
+
+    Atelier.res.store(name, {
+        Tileset tileset = Atelier.res.get!Tileset(tilesetName);
+        Tilemap tilemap = new Tilemap(tileset, width, height);
+        tilemap.setTiles(tiles);
+        return tilemap;
+    });
+}
+
 /// Crée un son
 private void _compileSound(string path, const Farfadet ffd, OutStream stream) {
     string name = ffd.get!string(0);
@@ -738,4 +791,18 @@ private void _loadBitmapFont(InStream stream) {
         }
         return font;
     });
+}
+
+private void _compileLevel(string path, const Farfadet ffd, OutStream stream) {
+    const string name = ffd.get!string(0);
+    Level level = new Level(ffd);
+    stream.write!string(name);
+    level.serialize(stream);
+}
+
+private void _loadLevel(InStream stream) {
+    const string name = stream.read!string();
+    Level level = new Level;
+    level.deserialize(stream);
+    Atelier.res.store(name, { return level; });
 }

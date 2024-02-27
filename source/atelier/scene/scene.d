@@ -24,13 +24,15 @@ final class Scene {
         UIManager _uiManager;
         Array!Entity _entities;
         Array!ParticleSource _particleSources;
-        int _zOrder;
         bool _isAlive = true;
         bool _isVisible = true;
         int _width, _height;
     }
 
+    string name;
+    string[] tags;
     Vec2f position = Vec2f.zero;
+    int zOrder;
 
     @property {
         int width() const {
@@ -39,10 +41,6 @@ final class Scene {
 
         int height() const {
             return _height;
-        }
-
-        int zOrder() const {
-            return _zOrder;
         }
 
         bool isAlive() const {
@@ -101,6 +99,27 @@ final class Scene {
 
     void dispatch(InputEvent event) {
         _uiManager.dispatch(event);
+    }
+
+    Entity fetchNamedEntity(string name) {
+        foreach (entity; _entities) {
+            if (entity.name == name)
+                return entity;
+        }
+        return null;
+    }
+
+    Entity[] fetchTaggedEntities(string[] tags) {
+        Entity[] result;
+        __entityLoop: foreach (entity; _entities) {
+            foreach (string tag; tags) {
+                if (!canFind(entity.tags, tag)) {
+                    continue __entityLoop;
+                }
+            }
+            result ~= entity;
+        }
+        return result;
     }
 
     void update() {

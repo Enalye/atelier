@@ -21,17 +21,15 @@ final class Entity {
         EntityComponent[string] _components;
         Array!Entity _children;
         Array!Image _images;
-        int _zOrder;
         bool _isAlive = true;
     }
 
+    string name;
+    string[] tags;
     Vec2f position = Vec2f.zero;
+    int zOrder;
 
     @property {
-        int zOrder() const {
-            return _zOrder;
-        }
-
         bool isAlive() const {
             return _isAlive;
         }

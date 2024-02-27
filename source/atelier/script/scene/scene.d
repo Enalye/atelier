@@ -35,9 +35,47 @@ addScene(scene);");
     library.addProperty(&_isVisible!"get", &_isVisible!"set", "isVisible", sceneType, grBool);
     library.addProperty(&_canvas, null, "canvas", sceneType, canvasType);
 
+    library.setDescription(GrLocale.fr_FR, "Charge un niveau");
+    library.setParameters(["name"]);
+    library.addFunction(&_loadLevel, "loadLevel", [grString]);
+
     library.setDescription(GrLocale.fr_FR, "Ajoute une scène à l’application");
     library.setParameters(["scene"]);
     library.addFunction(&_addScene, "addScene", [sceneType]);
+
+    library.setDescription(GrLocale.fr_FR, "Récupère la scène correspondant au nom donné");
+    library.setParameters(["name"]);
+    library.addFunction(&_fetchNamedScene, "fetchNamedScene", [grString], [
+            grOptional(sceneType)
+        ]);
+
+    library.setDescription(GrLocale.fr_FR, "Récupère les scènes possédants le tag indiqué");
+    library.setParameters(["tags"]);
+    library.addFunction(&_fetchTaggedScenes, "fetchTaggedScenes",
+        [grList(grString)], [grList(sceneType)]);
+
+    library.setDescription(GrLocale.fr_FR,
+        "Récupère l’entité correspondant au nom donné parmi toutes les scènes");
+    library.setParameters(["name"]);
+    library.addFunction(&_fetchNamedEntity, "fetchNamedEntity", [grString],
+        [grOptional(entityType)]);
+
+    library.setDescription(GrLocale.fr_FR, "Récupère les entités possédants le tag indiqué");
+    library.setParameters(["tags"]);
+    library.addFunction(&_fetchTaggedEntities, "fetchTaggedEntities",
+        [grList(grString)], [grList(entityType)]);
+
+    library.setDescription(GrLocale.fr_FR,
+        "Récupère l’entité correspondant au nom donné dans la scène");
+    library.setParameters(["name"]);
+    library.addFunction(&_fetchNamedEntity_scene, "fetchNamedEntity",
+        [sceneType, grString], [grOptional(entityType)]);
+
+    library.setDescription(GrLocale.fr_FR,
+        "Récupère les entités possédants le tag indiqué dans la scène");
+    library.setParameters(["tags"]);
+    library.addFunction(&_fetchTaggedEntities, "fetchTaggedEntities",
+        [sceneType, grList(grString)], [grList(entityType)]);
 
     library.setDescription(GrLocale.fr_FR, "Ajoute une entité à la scène");
     library.setParameters(["scene", "entity"]);
@@ -85,9 +123,78 @@ private void _canvas(GrCall call) {
     call.setNative(scene.canvas);
 }
 
+private void _loadLevel(GrCall call) {
+    Atelier.scene.load(call.getString(0));
+}
+
 private void _addScene(GrCall call) {
     Scene scene = call.getNative!Scene(0);
     Atelier.scene.addScene(scene);
+}
+
+private void _fetchNamedScene(GrCall call) {
+    Scene scene = Atelier.scene.fetchNamedScene(call.getString(0));
+    if (scene) {
+        call.setNative(scene);
+        return;
+    }
+    call.setNull();
+}
+
+private void _fetchTaggedScenes(GrCall call) {
+    GrString[] list = call.getList(0).getStrings();
+    string[] tags;
+    foreach (element; list) {
+        tags ~= element;
+    }
+    Scene[] scenes = Atelier.scene.fetchTaggedScenes(tags);
+    GrList result = new GrList;
+    result.setNatives(scenes);
+    call.setList(result);
+}
+
+private void _fetchNamedEntity(GrCall call) {
+    Entity entity = Atelier.scene.fetchNamedEntity(call.getString(0));
+    if (entity) {
+        call.setNative(entity);
+        return;
+    }
+    call.setNull();
+}
+
+private void _fetchTaggedEntities(GrCall call) {
+    GrString[] list = call.getList(0).getStrings();
+    string[] tags;
+    foreach (element; list) {
+        tags ~= element;
+    }
+    Entity[] entities = Atelier.scene.fetchTaggedEntities(tags);
+    GrList result = new GrList;
+    result.setNatives(entities);
+    call.setList(result);
+}
+
+private void _fetchNamedEntity_scene(GrCall call) {
+    Scene scene = call.getNative!Scene(0);
+    Entity entity = scene.fetchNamedEntity(call.getString(1));
+    if (entity) {
+        call.setNative(entity);
+        return;
+    }
+    call.setNull();
+}
+
+private void _fetchTaggedEntities_scene(GrCall call) {
+    Scene scene = call.getNative!Scene(0);
+    GrString[] list = call.getList(1).getStrings();
+    string[] tags;
+    foreach (element; list) {
+        tags ~= element;
+    }
+    Entity[] entities = scene.fetchTaggedEntities(tags);
+    GrList result = new GrList;
+    result.setNatives(entities);
+    call.setList(result);
 }
 
 private void _addEntity(GrCall call) {

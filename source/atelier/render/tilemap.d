@@ -6,6 +6,7 @@
 module atelier.render.tilemap;
 
 import std.conv : to;
+import std.exception : enforce;
 import std.math : floor, ceil;
 import std.algorithm.comparison : min, max;
 
@@ -15,7 +16,7 @@ import atelier.scene;
 import atelier.render.image;
 import atelier.render.tileset;
 
-final class Tilemap : Image {
+final class Tilemap : Image, Resource!Tilemap {
     private {
         Tileset _tileset;
         uint _currentTick;
@@ -47,11 +48,36 @@ final class Tilemap : Image {
         size = tilemap.size;
     }
 
+    /// Accès à la ressource
+    Tilemap fetch() {
+        return new Tilemap(this);
+    }
+
+    int getTile(int x, int y) {
+        if (x < 0 || y < 0 || x >= _width || y >= _height)
+            return 0;
+
+        return _tiles[x + y * _width];
+    }
+
     void setTile(int x, int y, int tile) {
         if (x < 0 || y < 0 || x >= _width || y >= _height)
             return;
 
         _tiles[x + y * _width] = cast(short) tile;
+    }
+
+    void setTiles(const(int[][]) tiles_) {
+        enforce(tiles_.length == _height, "taille des tuiles invalides: " ~ to!string(
+                tiles_.length) ~ " lignes au lieu de " ~ to!string(_height));
+        foreach (size_t y, ref const(int[]) line; tiles_) {
+            enforce(line.length == _width, "taille des tuiles invalides: " ~ to!string(
+                    tiles_.length) ~ " colonnes au lieu de " ~ to!string(
+                    _width) ~ " à la ligne " ~ to!string(y));
+            foreach (size_t x, int tileId; line) {
+                _tiles[x + y * _width] = cast(short) tileId;
+            }
+        }
     }
 
     /// Redimensionne l’image pour qu’elle puisse tenir dans une taille donnée

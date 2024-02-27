@@ -12,6 +12,7 @@ import atelier.core;
 import atelier.input;
 import atelier.render;
 import atelier.ui;
+import atelier.scene.entity;
 import atelier.scene.scene;
 
 /// Gère les différentes scènes
@@ -44,9 +45,54 @@ final class SceneManager {
         _scenes.clear();
     }
 
+    void load(string name) {
+        clear();
+        Level level = Atelier.res.get!Level(name);
+        _scenes.array = level.build();
+        _sortScenes();
+    }
+
     void addScene(Scene scene) {
         _scenes ~= scene;
         _sortScenes();
+    }
+
+    Scene fetchNamedScene(string name) {
+        foreach (scene; _scenes) {
+            if (scene.name == name)
+                return scene;
+        }
+        return null;
+    }
+
+    Scene[] fetchTaggedScenes(string[] tags) {
+        Scene[] result;
+        __sceneLoop: foreach (scene; _scenes) {
+            foreach (string tag; tags) {
+                if (!canFind(scene.tags, tag)) {
+                    continue __sceneLoop;
+                }
+            }
+            result ~= scene;
+        }
+        return result;
+    }
+
+    Entity fetchNamedEntity(string name) {
+        foreach (scene; _scenes) {
+            Entity entity = scene.fetchNamedEntity(name);
+            if (entity)
+                return entity;
+        }
+        return null;
+    }
+
+    Entity[] fetchTaggedEntities(string[] tags) {
+        Entity[] result;
+        foreach (scene; _scenes) {
+            result ~= scene.fetchTaggedEntities(tags);
+        }
+        return result;
     }
 
     void update(InputEvent[] inputEvents) {

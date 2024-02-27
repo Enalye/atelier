@@ -13,6 +13,7 @@ public {
     import atelier.common.constants;
     import atelier.common.hslcolor;
     import atelier.common.json;
+    import atelier.common.level;
     import atelier.common.mat3;
     import atelier.common.math;
     import atelier.common.resource;

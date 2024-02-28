@@ -95,9 +95,9 @@ scene.addParticleSource(src);");
     library.setParameters(["source", "entity"]);
     library.addFunction(&_attachTo, "attachTo", [sourceType, entityType]);
 
-    library.setDescription(GrLocale.fr_FR, "La source suit la caméra de la scène.");
+    library.setDescription(GrLocale.fr_FR, "La source suit la caméra.");
     library.setParameters(["source"]);
-    library.addFunction(&_attachToScene, "attachToScene", [sourceType]);
+    library.addFunction(&_attachToCamera, "attachToCamera", [sourceType]);
 
     library.setDescription(GrLocale.fr_FR,
         "Détache la source de l’entité/scène auquel elle était attaché.");
@@ -337,9 +337,9 @@ private void _attachTo(GrCall call) {
     source.attachTo(entity);
 }
 
-private void _attachToScene(GrCall call) {
+private void _attachToCamera(GrCall call) {
     ParticleSource source = call.getNative!ParticleSource(0);
-    source.attachToScene();
+    source.attachToCamera();
 }
 
 private void _detach(GrCall call) {

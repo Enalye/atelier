@@ -234,6 +234,7 @@ private class SceneBuilder {
     private {
         Vec2u _size = Vec2u.zero;
         Vec2f _position = Vec2f.zero;
+        Vec2f _parallax = Vec2f.one;
         int _zOrder;
         EntityBuilder[] _entities;
         string _name;
@@ -263,6 +264,9 @@ private class SceneBuilder {
             case "position":
                 _position = Vec2f(node.get!float(0), node.get!float(1));
                 break;
+            case "parallax":
+                _parallax = Vec2f(node.get!float(0), node.get!float(1));
+                break;
             case "entity":
                 _entities ~= new EntityBuilder(node);
                 break;
@@ -277,6 +281,7 @@ private class SceneBuilder {
         scene.name = _name;
         scene.tags = _tags;
         scene.position = _position;
+        scene.parallax = _parallax;
         scene.zOrder = _zOrder;
 
         foreach (EntityBuilder entityBuilder; _entities) {
@@ -291,6 +296,7 @@ private class SceneBuilder {
         stream.write!(string[])(_tags);
         stream.write!Vec2u(_size);
         stream.write!Vec2f(_position);
+        stream.write!Vec2f(_parallax);
         stream.write!int(_zOrder);
 
         stream.write!uint(cast(uint) _entities.length);
@@ -304,6 +310,7 @@ private class SceneBuilder {
         _tags = stream.read!(string[])();
         _size = stream.read!Vec2u();
         _position = stream.read!Vec2f();
+        _parallax = stream.read!Vec2f();
         _zOrder = stream.read!int();
 
         _entities.length = 0;

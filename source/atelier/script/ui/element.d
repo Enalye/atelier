@@ -32,6 +32,7 @@ package void loadLibUI_element(GrLibDefinition library) {
     GrType elementType = library.addNative("UIElement");
 
     GrType imageType = grGetNativeType("Image");
+    GrType colorType = grGetNativeType("Color");
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
 
     library.setDescription(GrLocale.fr_FR, "Crée un élément d’interface");
@@ -56,7 +57,7 @@ package void loadLibUI_element(GrLibDefinition library) {
     library.addProperty(&_angle!"get", &_angle!"set", "angle", elementType, grDouble);
 
     library.setDescription(GrLocale.fr_FR, "Couleur de l’interface");
-    library.addProperty(&_color!"get", &_color!"set", "color", elementType, grFloat);
+    library.addProperty(&_color!"get", &_color!"set", "color", elementType, colorType);
 
     library.setDescription(GrLocale.fr_FR, "Opacité de l’interface");
     library.addProperty(&_alpha!"get", &_alpha!"set", "alpha", elementType, grFloat);

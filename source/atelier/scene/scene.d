@@ -13,6 +13,7 @@ import atelier.core;
 import atelier.input;
 import atelier.render;
 import atelier.ui;
+import atelier.scene.camera;
 import atelier.scene.entity;
 import atelier.scene.particle;
 
@@ -30,8 +31,9 @@ final class Scene {
     }
 
     string name;
-    string[] tags;
     Vec2f position = Vec2f.zero;
+    Vec2f parallax = Vec2f.one;
+    string[] tags;
     int zOrder;
 
     @property {
@@ -57,6 +59,10 @@ final class Scene {
 
         bool isVisible(bool isVisible_) {
             return _isVisible = isVisible_;
+        }
+
+        Vec2f globalPosition() const {
+            return position + Atelier.scene.camera.getPosition() * parallax;
         }
     }
 
@@ -123,7 +129,7 @@ final class Scene {
     }
 
     void update() {
-        _uiManager.cameraPosition = _sprite.size / 2f - position;
+        _uiManager.cameraPosition = _sprite.size / 2f - globalPosition;
         _uiManager.update();
 
         bool isEntitiesDirty;
@@ -162,11 +168,11 @@ final class Scene {
 
     void render() {
         foreach (entity; _entities) {
-            entity.draw(_sprite.size / 2f - position);
+            entity.draw(_sprite.size / 2f - globalPosition);
         }
 
         foreach (source; _particleSources) {
-            source.draw(_sprite.size / 2f - position);
+            source.draw(_sprite.size / 2f - globalPosition);
         }
 
         _uiManager.draw();

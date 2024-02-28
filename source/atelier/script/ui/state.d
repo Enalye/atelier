@@ -73,6 +73,8 @@ private void _ui_state_angle(string op)(GrCall call) {
 
     static if (op == "set") {
         state.angle = call.getDouble(1);
+        import std.stdio;
+        writeln("STATE: ", state.angle);
     }
     call.setDouble(state.angle);
 }

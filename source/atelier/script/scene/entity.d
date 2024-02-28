@@ -28,9 +28,22 @@ scene.addEntity(player);");
 
     library.addConstructor(&_ctor, entityType);
 
+    library.addProperty(&_name!"get", &_name!"set", "name", entityType, grString);
     library.addProperty(&_position!"get", &_position!"set", "position", entityType, vec2fType);
 
     library.addProperty(&_audio, null, "audio", entityType, audioComponentType);
+
+    library.setDescription(GrLocale.fr_FR, "Récupère les tags de l’entité");
+    library.setParameters(["scene"]);
+    library.addFunction(&_getTags, "getTags", [entityType]);
+
+    library.setDescription(GrLocale.fr_FR, "Ajoute un tag à l’entité");
+    library.setParameters(["scene", "tag"]);
+    library.addFunction(&_addTag, "addTag", [entityType, grString]);
+
+    library.setDescription(GrLocale.fr_FR, "Vérifie si l’entité possède le tag");
+    library.setParameters(["scene", "tag"]);
+    library.addFunction(&_hasTag, "hasTag", [entityType, grString], [grBool]);
 
     library.setDescription(GrLocale.fr_FR,
         "Ajoute une entité en tant qu’enfant de cette entité");
@@ -46,6 +59,15 @@ private void _ctor(GrCall call) {
     call.setNative(new Entity);
 }
 
+private void _name(string op)(GrCall call) {
+    Entity entity = call.getNative!Entity(0);
+
+    static if (op == "set") {
+        entity.name = call.getString(1);
+    }
+    call.setString(entity.name);
+}
+
 private void _position(string op)(GrCall call) {
     Entity entity = call.getNative!Entity(0);
 
@@ -59,6 +81,39 @@ private void _audio(GrCall call) {
     Entity entity = call.getNative!Entity(0);
     AudioComponent audioComponent = entity.getComponent!AudioComponent();
     call.setNative(audioComponent);
+}
+
+private void _getTags(GrCall call) {
+    Entity entity = call.getNative!Entity(0);
+    GrList list = new GrList;
+    list.setStrings(entity.tags);
+    call.setList(list);
+}
+
+private void _addTag(GrCall call) {
+    Entity entity = call.getNative!Entity(0);
+    string tag = call.getString(1);
+
+    foreach (entityTag; entity.tags) {
+        if (entityTag == tag) {
+            return;
+        }
+    }
+
+    entity.tags ~= tag;
+}
+
+private void _hasTag(GrCall call) {
+    Entity entity = call.getNative!Entity(0);
+    string tag = call.getString(1);
+
+    foreach (entityTag; entity.tags) {
+        if (entityTag == tag) {
+            call.setBool(true);
+            return;
+        }
+    }
+    call.setBool(false);
 }
 
 private void _addChild(GrCall call) {

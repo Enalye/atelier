@@ -37,8 +37,14 @@ final class Entity {
         Vec2f scenePosition() const {
             if (_parent)
                 return _parent.scenePosition + position;
+            return position;
+        }
+
+        Vec2f globalPosition() const {
+            if (_parent)
+                return _parent.globalPosition + position;
             else if (_scene)
-                return position - _scene.position;
+                return position - _scene.globalPosition;
             return position;
         }
 

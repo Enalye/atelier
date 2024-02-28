@@ -12,6 +12,7 @@ import atelier.core;
 import atelier.input;
 import atelier.render;
 import atelier.ui;
+import atelier.scene.camera;
 import atelier.scene.entity;
 import atelier.scene.scene;
 
@@ -21,6 +22,7 @@ final class SceneManager {
         Array!Scene _scenes;
         Vec4f _cameraClip;
         bool _isOnScene;
+        Camera _camera;
     }
 
     @property {
@@ -31,10 +33,15 @@ final class SceneManager {
         Vec4f cameraClip() const {
             return _cameraClip;
         }
+
+        Camera camera() {
+            return _camera;
+        }
     }
 
     this() {
         _scenes = new Array!Scene;
+        _camera = new Camera;
     }
 
     private void _sortScenes() {
@@ -43,6 +50,7 @@ final class SceneManager {
 
     void clear() {
         _scenes.clear();
+        _camera.setPosition(Vec2f.zero);
     }
 
     void load(string name) {
@@ -107,6 +115,7 @@ final class SceneManager {
                 isScenesDirty = true;
             }
         }
+        _camera.update();
 
         if (isScenesDirty) {
             _scenes.sweep();
@@ -117,7 +126,8 @@ final class SceneManager {
     void draw(Vec2f origin) {
         foreach (scene; _scenes) {
             Canvas canvas = scene.canvas;
-            Vec2f cameraOffset = -scene.position;
+            Vec2f delta = _camera.getPosition() * scene.parallax;
+            Vec2f cameraOffset = -(scene.position + delta);
 
             _cameraClip = Vec4f(cameraOffset.x, cameraOffset.y,
                 cameraOffset.x + canvas.width, cameraOffset.y + canvas.height);

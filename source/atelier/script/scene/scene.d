@@ -16,7 +16,7 @@ import atelier.script.util;
 
 package void loadLibScene_scene(GrLibDefinition library) {
     library.setModule("scene.scene");
-    library.setModuleInfo(GrLocale.fr_FR, "Défini une caméra où évolue des entités");
+    library.setModuleInfo(GrLocale.fr_FR, "Défini un calque où évolue des entités");
     library.setModuleExample(GrLocale.fr_FR, "var scene = @Scene(@App.width, @App.height);
 addScene(scene);");
 
@@ -27,10 +27,12 @@ addScene(scene);");
     GrType particleSourceType = grGetNativeType("ParticleSource");
     GrType canvasType = grGetNativeType("Canvas");
     GrType uiType = grGetNativeType("UIElement");
+    GrType splineType = grGetEnumType("Spline");
 
     library.setParameters(["width", "height"]);
     library.addConstructor(&_ctor, sceneType, [grInt, grInt]);
 
+    library.addProperty(&_name!"get", &_name!"set", "name", sceneType, grString);
     library.addProperty(&_position!"get", &_position!"set", "position", sceneType, vec2fType);
     library.addProperty(&_isVisible!"get", &_isVisible!"set", "isVisible", sceneType, grBool);
     library.addProperty(&_canvas, null, "canvas", sceneType, canvasType);
@@ -77,6 +79,18 @@ addScene(scene);");
     library.addFunction(&_fetchTaggedEntities, "fetchTaggedEntities",
         [sceneType, grList(grString)], [grList(entityType)]);
 
+    library.setDescription(GrLocale.fr_FR, "Récupère les tags de la scène");
+    library.setParameters(["scene"]);
+    library.addFunction(&_getTags, "getTags", [sceneType], [grList(grString)]);
+
+    library.setDescription(GrLocale.fr_FR, "Ajoute un tag à la scène");
+    library.setParameters(["scene", "tag"]);
+    library.addFunction(&_addTag, "addTag", [sceneType, grString]);
+
+    library.setDescription(GrLocale.fr_FR, "Vérifie si la scène possède le tag");
+    library.setParameters(["scene", "tag"]);
+    library.addFunction(&_hasTag, "hasTag", [sceneType, grString], [grBool]);
+
     library.setDescription(GrLocale.fr_FR, "Ajoute une entité à la scène");
     library.setParameters(["scene", "entity"]);
     library.addFunction(&_addEntity, "addEntity", [sceneType, entityType]);
@@ -98,6 +112,15 @@ addScene(scene);");
 
 private void _ctor(GrCall call) {
     call.setNative(new Scene(call.getInt(0), call.getInt(1)));
+}
+
+private void _name(string op)(GrCall call) {
+    Scene scene = call.getNative!Scene(0);
+
+    static if (op == "set") {
+        scene.name = call.getString(1);
+    }
+    call.setString(scene.name);
 }
 
 private void _position(string op)(GrCall call) {
@@ -142,12 +165,7 @@ private void _fetchNamedScene(GrCall call) {
 }
 
 private void _fetchTaggedScenes(GrCall call) {
-    GrString[] list = call.getList(0).getStrings();
-    string[] tags;
-    foreach (element; list) {
-        tags ~= element;
-    }
-    Scene[] scenes = Atelier.scene.fetchTaggedScenes(tags);
+    Scene[] scenes = Atelier.scene.fetchTaggedScenes(call.getList(0).getStrings!string());
     GrList result = new GrList;
     result.setNatives(scenes);
     call.setList(result);
@@ -163,12 +181,7 @@ private void _fetchNamedEntity(GrCall call) {
 }
 
 private void _fetchTaggedEntities(GrCall call) {
-    GrString[] list = call.getList(0).getStrings();
-    string[] tags;
-    foreach (element; list) {
-        tags ~= element;
-    }
-    Entity[] entities = Atelier.scene.fetchTaggedEntities(tags);
+    Entity[] entities = Atelier.scene.fetchTaggedEntities(call.getList(0).getStrings!string());
     GrList result = new GrList;
     result.setNatives(entities);
     call.setList(result);
@@ -186,15 +199,43 @@ private void _fetchNamedEntity_scene(GrCall call) {
 
 private void _fetchTaggedEntities_scene(GrCall call) {
     Scene scene = call.getNative!Scene(0);
-    GrString[] list = call.getList(1).getStrings();
-    string[] tags;
-    foreach (element; list) {
-        tags ~= element;
-    }
-    Entity[] entities = scene.fetchTaggedEntities(tags);
+    Entity[] entities = scene.fetchTaggedEntities(call.getList(1).getStrings!string());
     GrList result = new GrList;
     result.setNatives(entities);
     call.setList(result);
+}
+
+private void _getTags(GrCall call) {
+    Scene scene = call.getNative!Scene(0);
+    GrList list = new GrList;
+    list.setStrings(scene.tags);
+    call.setList(list);
+}
+
+private void _addTag(GrCall call) {
+    Scene scene = call.getNative!Scene(0);
+    string tag = call.getString(1);
+
+    foreach (sceneTag; scene.tags) {
+        if (sceneTag == tag) {
+            return;
+        }
+    }
+
+    scene.tags ~= tag;
+}
+
+private void _hasTag(GrCall call) {
+    Scene scene = call.getNative!Scene(0);
+    string tag = call.getString(1);
+
+    foreach (sceneTag; scene.tags) {
+        if (sceneTag == tag) {
+            call.setBool(true);
+            return;
+        }
+    }
+    call.setBool(false);
 }
 
 private void _addEntity(GrCall call) {

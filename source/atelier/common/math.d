@@ -6,6 +6,7 @@
 module atelier.common.math;
 
 import std.math;
+import std.traits;
 public import std.algorithm.comparison : clamp, min, max;
 
 /// Interpolation, returns a value between a and b. \
@@ -49,7 +50,7 @@ Vec2!T scaleToFit(T)(Vec2!T src, Vec2!T dst) {
 }
 
 /// Linear interpolation to approach a target
-T approach(T)(T value, T target, T step) {
+T approach(T)(T value, T target, T step) if (isScalarType!T) {
     return value > target ? max(value - step, target) : min(value + step, target);
 }
 

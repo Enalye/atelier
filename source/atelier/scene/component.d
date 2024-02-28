@@ -45,7 +45,7 @@ final class AudioComponent : EntityComponent {
     }
 
     override void update() {
-        _audioSpacializer.position = _entity.scenePosition();
+        _audioSpacializer.position = _entity.globalPosition();
     }
 
     void play(AudioPlayer player) {

@@ -69,7 +69,7 @@ final class ParticleSource {
         bool _isAlive = true;
         bool _isRelativePosition;
         bool _isRelativeSpriteAngle;
-        bool _isAttachedToScene;
+        bool _isAttachedToCamera;
         Entity _attachedEntity;
         uint _interval;
         int _emitterTime;
@@ -122,8 +122,8 @@ final class ParticleSource {
             if (_attachedEntity) {
                 origin += _attachedEntity.scenePosition();
             }
-            else if (_isAttachedToScene && _scene) {
-                origin += _scene.position;
+            else if (_isAttachedToCamera && _scene) {
+                origin += _scene.globalPosition;
             }
         }
 
@@ -150,8 +150,8 @@ final class ParticleSource {
         if (_attachedEntity) {
             origin += _attachedEntity.scenePosition();
         }
-        else if (_isAttachedToScene && _scene) {
-            origin += _scene.position;
+        else if (_isAttachedToCamera && _scene) {
+            origin += _scene.globalPosition;
         }
         return origin;
     }
@@ -236,12 +236,12 @@ final class ParticleSource {
     }
 
     void attachTo(Entity entity) {
-        _isAttachedToScene = false;
+        _isAttachedToCamera = false;
         _attachedEntity = entity;
     }
 
-    void attachToScene() {
-        _isAttachedToScene = true;
+    void attachToCamera() {
+        _isAttachedToCamera = true;
         _attachedEntity = null;
     }
 

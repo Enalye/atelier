@@ -20,7 +20,7 @@ Alignement vertical
 |alignY|**UIElement**|**UIAlignY**|oui|oui|Alignement vertical|
 |alpha|**UIElement**|**float**|oui|oui|Opacité de l’interface|
 |angle|**UIElement**|**double**|oui|oui|Rotation de l’interface|
-|color|**UIElement**|**float**|oui|oui|Couleur de l’interface|
+|color|**UIElement**|**Color**|oui|oui|Couleur de l’interface|
 |hasFocus|**UIElement**|**bool**|oui|non|Focus ?|
 |isActive|**UIElement**|**bool**|oui|oui|Actif ?|
 |isEnabled|**UIElement**|**bool**|oui|oui|Active/désactive l’interface|

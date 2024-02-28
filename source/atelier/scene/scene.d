@@ -27,7 +27,7 @@ final class Scene {
         Array!ParticleSource _particleSources;
         bool _isAlive = true;
         bool _isVisible = true;
-        int _width, _height;
+        Vec2i _size;
     }
 
     string name;
@@ -38,11 +38,11 @@ final class Scene {
 
     @property {
         int width() const {
-            return _width;
+            return _size.x;
         }
 
         int height() const {
-            return _height;
+            return _size.y;
         }
 
         bool isAlive() const {
@@ -66,16 +66,15 @@ final class Scene {
         }
     }
 
-    this(int width_, int height_) {
-        _width = width_;
-        _height = height_;
+    this() {
+        _size = Atelier.renderer.size;
 
         _uiManager = new UIManager();
         _uiManager.isSceneUI = true;
         _entities = new Array!Entity;
         _particleSources = new Array!ParticleSource;
 
-        _canvas = new Canvas(_width, _height);
+        _canvas = new Canvas(_size.x, _size.y);
         _sprite = new Sprite(_canvas);
         _sprite.anchor = Vec2f.half;
     }

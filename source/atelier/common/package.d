@@ -18,6 +18,7 @@ public {
     import atelier.common.math;
     import atelier.common.resource;
     import atelier.common.rng;
+    import atelier.common.simplex;
     import atelier.common.spline;
     import atelier.common.stream;
     import atelier.common.timer;

@@ -244,9 +244,6 @@ final class UIManager {
             element.scale = lerp(element.initState.scale, element.targetState.scale, t);
             element.color = lerp(element.initState.color, element.targetState.color, t);
             element.angle = lerp(element.initState.angle, element.targetState.angle, t);
-
-            import std.stdio;
-            //writeln(element.angle, ", ", element.initState.angle, ", ", element.targetState.angle);
             element.alpha = lerp(element.initState.alpha, element.targetState.alpha, t);
         }
 

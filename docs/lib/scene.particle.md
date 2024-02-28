@@ -40,7 +40,7 @@ scene.addParticleSource(src);
 |Fonction|Entrée|Sortie|
 |-|-|-|
 |[attachTo](#func_0)|*source*: **ParticleSource**, *entity*: **Entity**||
-|[attachToScene](#func_1)|*source*: **ParticleSource**||
+|[attachToCamera](#func_1)|*source*: **ParticleSource**||
 |[clear](#func_2)|*source*: **ParticleSource**||
 |[detach](#func_3)|*source*: **ParticleSource**||
 |[emit](#func_4)|*source*: **ParticleSource**||
@@ -90,9 +90,9 @@ scene.addParticleSource(src);
 La source suit l’entité.
 
 <a id="func_1"></a>
-> attachToScene(*source*: **ParticleSource**)
+> attachToCamera(*source*: **ParticleSource**)
 
-La source suit la caméra de la scène.
+La source suit la caméra.
 
 <a id="func_2"></a>
 > clear(*source*: **ParticleSource**)

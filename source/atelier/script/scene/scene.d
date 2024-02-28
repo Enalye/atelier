@@ -17,7 +17,7 @@ import atelier.script.util;
 package void loadLibScene_scene(GrLibDefinition library) {
     library.setModule("scene.scene");
     library.setModuleInfo(GrLocale.fr_FR, "Défini un calque où évolue des entités");
-    library.setModuleExample(GrLocale.fr_FR, "var scene = @Scene(@App.width, @App.height);
+    library.setModuleExample(GrLocale.fr_FR, "var scene = @Scene;
 addScene(scene);");
 
     GrType sceneType = library.addNative("Scene");
@@ -27,10 +27,9 @@ addScene(scene);");
     GrType particleSourceType = grGetNativeType("ParticleSource");
     GrType canvasType = grGetNativeType("Canvas");
     GrType uiType = grGetNativeType("UIElement");
-    GrType splineType = grGetEnumType("Spline");
 
     library.setParameters(["width", "height"]);
-    library.addConstructor(&_ctor, sceneType, [grInt, grInt]);
+    library.addConstructor(&_ctor, sceneType);
 
     library.addProperty(&_name!"get", &_name!"set", "name", sceneType, grString);
     library.addProperty(&_position!"get", &_position!"set", "position", sceneType, vec2fType);
@@ -111,7 +110,7 @@ addScene(scene);");
 }
 
 private void _ctor(GrCall call) {
-    call.setNative(new Scene(call.getInt(0), call.getInt(1)));
+    call.setNative(new Scene);
 }
 
 private void _name(string op)(GrCall call) {

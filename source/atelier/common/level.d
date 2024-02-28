@@ -232,7 +232,6 @@ private class EntityBuilder {
 
 private class SceneBuilder {
     private {
-        Vec2u _size = Vec2u.zero;
         Vec2f _position = Vec2f.zero;
         Vec2f _parallax = Vec2f.one;
         int _zOrder;
@@ -245,8 +244,6 @@ private class SceneBuilder {
     }
 
     this(const Farfadet ffd) {
-        _size = Vec2u(ffd.get!uint(0), ffd.get!uint(1));
-
         foreach (node; ffd.nodes) {
             switch (node.name) {
             case "name":
@@ -277,7 +274,7 @@ private class SceneBuilder {
     }
 
     Scene build() {
-        Scene scene = new Scene(_size.x, _size.y);
+        Scene scene = new Scene;
         scene.name = _name;
         scene.tags = _tags;
         scene.position = _position;
@@ -294,7 +291,6 @@ private class SceneBuilder {
     void serialize(OutStream stream) {
         stream.write!string(_name);
         stream.write!(string[])(_tags);
-        stream.write!Vec2u(_size);
         stream.write!Vec2f(_position);
         stream.write!Vec2f(_parallax);
         stream.write!int(_zOrder);
@@ -308,7 +304,6 @@ private class SceneBuilder {
     void deserialize(InStream stream) {
         _name = stream.read!string();
         _tags = stream.read!(string[])();
-        _size = stream.read!Vec2u();
         _position = stream.read!Vec2f();
         _parallax = stream.read!Vec2f();
         _zOrder = stream.read!int();

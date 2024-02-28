@@ -124,6 +124,7 @@ final class SceneManager {
     }
 
     void draw(Vec2f origin) {
+        Atelier.renderer.pushCanvas(_camera.canvas);
         foreach (scene; _scenes) {
             Canvas canvas = scene.canvas;
             Vec2f delta = _camera.getPosition() * scene.parallax;
@@ -143,5 +144,7 @@ final class SceneManager {
             if (scene.isVisible)
                 scene.draw(origin);
         }
+        Atelier.renderer.popCanvas();
+        _camera.draw();
     }
 }

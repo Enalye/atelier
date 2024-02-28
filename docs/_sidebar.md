@@ -39,6 +39,7 @@
 		- [tileset](lib/render.tileset)
 		- [writabletexture](lib/render.writabletexture)
 	* scene
+		- [camera](lib/scene.camera)
 		- [component](lib/scene.component)
 		- [entity](lib/scene.entity)
 		- [particle](lib/scene.particle)

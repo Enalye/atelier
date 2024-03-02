@@ -5,29 +5,429 @@
  */
 module atelier.common.level;
 
+import std.conv : to;
+import std.exception : enforce;
+
 import farfadet;
 import atelier.core;
 import atelier.render;
 import atelier.scene;
+import atelier.common.color;
+import atelier.common.hslcolor;
 import atelier.common.resource;
 import atelier.common.stream;
 import atelier.common.vec2;
 
-private interface ImageBuilder {
+private abstract class ImageBuilder {
+    private {
+        Vec2f _position = Vec2f.zero;
+        double _angle = 0.0;
+        bool _flipX, _flipY;
+        Vec2f _anchor = Vec2f.half;
+        Vec2f _pivot = Vec2f.half;
+        Blend _blend = Blend.alpha;
+        Color _color = Color.white;
+        float _alpha = 1f;
+        int _zOrder;
+    }
+
     @property string type() const;
-    void serialize(OutStream);
-    void deserialize(InStream);
+
+    void parse(const Farfadet node) {
+        switch (node.name) {
+        case "position":
+            _position = Vec2f(node.get!float(0), node.get!float(1));
+            break;
+        case "angle":
+            _angle = node.get!double(0);
+            break;
+        case "flip":
+            _flipX = node.get!bool(0);
+            _flipY = node.get!bool(1);
+            break;
+        case "anchor":
+            _anchor = Vec2f(node.get!float(0), node.get!float(1));
+            break;
+        case "pivot":
+            _pivot = Vec2f(node.get!float(0), node.get!float(1));
+            break;
+        case "blend":
+            try {
+                _blend = to!Blend(node.get!string(0));
+            }
+            catch (Exception e) {
+                enforce(false,
+                    "blend doit valoir `none`, `alpha`, `additive`, `modular`, `multiply` ou `mask`, et non `" ~
+                    node.name ~ "`");
+            }
+            break;
+        case "rgb":
+            _color = Color(node.get!float(0), node.get!float(1), node.get!float(2));
+            break;
+        case "hsl":
+            _color = HSLColor(node.get!float(0), node.get!float(1), node.get!float(2)).toColor();
+            break;
+        case "alpha":
+            _alpha = node.get!float(0);
+            break;
+        default:
+            enforce(false, "le nœud `" ~ node.name ~ "` n’est pas reconnu");
+            break;
+        }
+    }
+
+    void serialize(OutStream stream) {
+        stream.write!Vec2f(_position);
+        stream.write!double(_angle);
+        stream.write!bool(_flipX);
+        stream.write!bool(_flipY);
+        stream.write!Vec2f(_anchor);
+        stream.write!Vec2f(_pivot);
+        stream.write!Blend(_blend);
+        stream.write!Color(_color);
+        stream.write!float(_alpha);
+        stream.write!int(_zOrder);
+    }
+
+    void deserialize(InStream stream) {
+        _position = stream.read!Vec2f();
+        _angle = stream.read!double();
+        _flipX = stream.read!bool();
+        _flipY = stream.read!bool();
+        _anchor = stream.read!Vec2f();
+        _pivot = stream.read!Vec2f();
+        _blend = stream.read!Blend();
+        _color = stream.read!Color();
+        _alpha = stream.read!float();
+        _zOrder = stream.read!int();
+    }
+
+    final void build(Image img) {
+        img.position = _position;
+        img.angle = _angle;
+        img.flipX = _flipX;
+        img.flipY = _flipY;
+        img.anchor = _anchor;
+        img.pivot = _pivot;
+        img.blend = _blend;
+        img.color = _color;
+        img.alpha = _alpha;
+        img.zOrder = _zOrder;
+    }
+
     Image build();
+}
+
+private class AnimationBuilder : ImageBuilder {
+    private {
+        string _name;
+    }
+
+    @property override string type() const {
+        return "animation";
+    }
+
+    this() {
+    }
+
+    this(const Farfadet ffd) {
+        _name = ffd.get!string(0);
+
+        foreach (node; ffd.nodes) {
+            switch (node.name) {
+            default:
+                super.parse(node);
+                break;
+            }
+        }
+    }
+
+    override Image build() {
+        Animation animation = Atelier.res.get!Animation(_name);
+        super.build(animation);
+        return animation;
+    }
+
+    override void serialize(OutStream stream) {
+        stream.write!string(_name);
+        super.serialize(stream);
+    }
+
+    override void deserialize(InStream stream) {
+        _name = stream.read!string();
+        super.deserialize(stream);
+    }
+}
+
+private class CapsuleBuilder : ImageBuilder {
+    private {
+        Vec2f _size = Vec2f.zero;
+        float _outline = 0f;
+    }
+
+    @property override string type() const {
+        return "capsule";
+    }
+
+    this() {
+    }
+
+    this(const Farfadet ffd) {
+        foreach (node; ffd.nodes) {
+            switch (node.name) {
+            case "size":
+                _size = Vec2f(node.get!float(0), node.get!float(1));
+                break;
+            case "outline":
+                _outline = node.get!float(0);
+                break;
+            default:
+                super.parse(node);
+                break;
+            }
+        }
+    }
+
+    override Image build() {
+        Capsule capsule;
+        if (_outline > 0f) {
+            capsule = Capsule.outline(_size, _outline);
+        }
+        else {
+            capsule = Capsule.fill(_size);
+        }
+        super.build(capsule);
+        return capsule;
+    }
+
+    override void serialize(OutStream stream) {
+        stream.write!Vec2f(_size);
+        stream.write!float(_outline);
+        super.serialize(stream);
+    }
+
+    override void deserialize(InStream stream) {
+        _size = stream.read!Vec2f();
+        _outline = stream.read!float();
+        super.deserialize(stream);
+    }
+}
+
+private class CircleBuilder : ImageBuilder {
+    private {
+        float _radius = 0f;
+        float _outline = 0f;
+    }
+
+    @property override string type() const {
+        return "circle";
+    }
+
+    this() {
+    }
+
+    this(const Farfadet ffd) {
+        foreach (node; ffd.nodes) {
+            switch (node.name) {
+            case "radius":
+                _radius = node.get!float(0);
+                break;
+            case "outline":
+                _outline = node.get!float(0);
+                break;
+            default:
+                super.parse(node);
+                break;
+            }
+        }
+    }
+
+    override Image build() {
+        Circle circle;
+        if (_outline > 0f) {
+            circle = Circle.outline(_radius, _outline);
+        }
+        else {
+            circle = Circle.fill(_radius);
+        }
+        super.build(circle);
+        return circle;
+    }
+
+    override void serialize(OutStream stream) {
+        stream.write!float(_radius);
+        stream.write!float(_outline);
+        super.serialize(stream);
+    }
+
+    override void deserialize(InStream stream) {
+        _radius = stream.read!float();
+        _outline = stream.read!float();
+        super.deserialize(stream);
+    }
+}
+
+private class NinePatchBuilder : ImageBuilder {
+    private {
+        string _name;
+    }
+
+    @property override string type() const {
+        return "ninepatch";
+    }
+
+    this() {
+    }
+
+    this(const Farfadet ffd) {
+        _name = ffd.get!string(0);
+
+        foreach (node; ffd.nodes) {
+            switch (node.name) {
+            default:
+                super.parse(node);
+                break;
+            }
+        }
+    }
+
+    override Image build() {
+        NinePatch ninepatch = Atelier.res.get!NinePatch(_name);
+        super.build(ninepatch);
+        return ninepatch;
+    }
+
+    override void serialize(OutStream stream) {
+        stream.write!string(_name);
+        super.serialize(stream);
+    }
+
+    override void deserialize(InStream stream) {
+        _name = stream.read!string();
+        super.deserialize(stream);
+    }
+}
+
+private class RectangleBuilder : ImageBuilder {
+    private {
+        Vec2f _size = Vec2f.zero;
+        float _outline = 0f;
+    }
+
+    @property override string type() const {
+        return "rectangle";
+    }
+
+    this() {
+    }
+
+    this(const Farfadet ffd) {
+        foreach (node; ffd.nodes) {
+            switch (node.name) {
+            case "size":
+                _size = Vec2f(node.get!float(0), node.get!float(1));
+                break;
+            case "outline":
+                _outline = node.get!float(0);
+                break;
+            default:
+                super.parse(node);
+                break;
+            }
+        }
+    }
+
+    override Image build() {
+        Rectangle rectangle;
+        if (_outline > 0f) {
+            rectangle = Rectangle.outline(_size, _outline);
+        }
+        else {
+            rectangle = Rectangle.fill(_size);
+        }
+        super.build(rectangle);
+        return rectangle;
+    }
+
+    override void serialize(OutStream stream) {
+        stream.write!Vec2f(_size);
+        stream.write!float(_outline);
+        super.serialize(stream);
+    }
+
+    override void deserialize(InStream stream) {
+        _size = stream.read!Vec2f();
+        _outline = stream.read!float();
+        super.deserialize(stream);
+    }
+}
+
+private class RoundedRectangleBuilder : ImageBuilder {
+    private {
+        Vec2f _size = Vec2f.zero;
+        float _radius = 0f;
+        float _outline = 0f;
+    }
+
+    @property override string type() const {
+        return "roundedrectangle";
+    }
+
+    this() {
+    }
+
+    this(const Farfadet ffd) {
+        foreach (node; ffd.nodes) {
+            switch (node.name) {
+            case "size":
+                _size = Vec2f(node.get!float(0), node.get!float(1));
+                break;
+            case "outline":
+                _outline = node.get!float(0);
+                break;
+            case "radius":
+                _radius = node.get!float(0);
+                break;
+            default:
+                super.parse(node);
+                break;
+            }
+        }
+    }
+
+    override Image build() {
+        RoundedRectangle roundedrectangle;
+        if (_outline > 0f) {
+            roundedrectangle = RoundedRectangle.outline(_size, _radius, _outline);
+        }
+        else {
+            roundedrectangle = RoundedRectangle.fill(_size, _radius);
+        }
+        super.build(roundedrectangle);
+        return roundedrectangle;
+    }
+
+    override void serialize(OutStream stream) {
+        stream.write!Vec2f(_size);
+        stream.write!float(_radius);
+        stream.write!float(_outline);
+        super.serialize(stream);
+    }
+
+    override void deserialize(InStream stream) {
+        _size = stream.read!Vec2f();
+        _radius = stream.read!float();
+        _outline = stream.read!float();
+        super.deserialize(stream);
+    }
 }
 
 private class SpriteBuilder : ImageBuilder {
     private {
         string _name;
-        Vec2f _position = Vec2f.zero;
-        int _zOrder;
     }
 
-    @property string type() const {
+    @property override string type() const {
         return "sprite";
     }
 
@@ -39,41 +439,36 @@ private class SpriteBuilder : ImageBuilder {
 
         foreach (node; ffd.nodes) {
             switch (node.name) {
-            case "position":
-                _position = Vec2f(node.get!float(0), node.get!float(1));
-                break;
             default:
+                super.parse(node);
                 break;
             }
         }
     }
 
-    Image build() {
+    override Image build() {
         Sprite sprite = Atelier.res.get!Sprite(_name);
-        sprite.position = _position;
-        sprite.zOrder = _zOrder;
+        super.build(sprite);
         return sprite;
     }
 
-    void serialize(OutStream stream) {
+    override void serialize(OutStream stream) {
         stream.write!string(_name);
-        stream.write!Vec2f(_position);
+        super.serialize(stream);
     }
 
-    void deserialize(InStream stream) {
+    override void deserialize(InStream stream) {
         _name = stream.read!string();
-        _position = stream.read!Vec2f();
+        super.deserialize(stream);
     }
 }
 
 private class TilemapBuilder : ImageBuilder {
     private {
         string _name;
-        Vec2f _position = Vec2f.zero;
-        int _zOrder;
     }
 
-    @property string type() const {
+    @property override string type() const {
         return "tilemap";
     }
 
@@ -85,32 +480,27 @@ private class TilemapBuilder : ImageBuilder {
 
         foreach (node; ffd.nodes) {
             switch (node.name) {
-            case "position":
-                _position = Vec2f(node.get!float(0), node.get!float(1));
-                break;
             default:
+                super.parse(node);
                 break;
             }
         }
     }
 
-    Image build() {
+    override Image build() {
         Tilemap tilemap = Atelier.res.get!Tilemap(_name);
-        tilemap.position = _position;
-        tilemap.zOrder = _zOrder;
+        super.build(tilemap);
         return tilemap;
     }
 
-    void serialize(OutStream stream) {
+    override void serialize(OutStream stream) {
         stream.write!string(_name);
-        stream.write!Vec2f(_position);
-        stream.write!int(_zOrder);
+        super.serialize(stream);
     }
 
-    void deserialize(InStream stream) {
+    override void deserialize(InStream stream) {
         _name = stream.read!string();
-        _position = stream.read!Vec2f();
-        _zOrder = stream.read!int();
+        super.deserialize(stream);
     }
 }
 
@@ -148,6 +538,24 @@ private class EntityBuilder {
             case "entity":
                 _entities ~= new EntityBuilder(node);
                 break;
+            case "animation":
+                _images ~= new AnimationBuilder(node);
+                break;
+            case "capsule":
+                _images ~= new CapsuleBuilder(node);
+                break;
+            case "circle":
+                _images ~= new CircleBuilder(node);
+                break;
+            case "ninepatch":
+                _images ~= new NinePatchBuilder(node);
+                break;
+            case "rectangle":
+                _images ~= new RectangleBuilder(node);
+                break;
+            case "roundedrectangle":
+                _images ~= new RoundedRectangleBuilder(node);
+                break;
             case "sprite":
                 _images ~= new SpriteBuilder(node);
                 break;
@@ -155,6 +563,7 @@ private class EntityBuilder {
                 _images ~= new TilemapBuilder(node);
                 break;
             default:
+                enforce(false, "le nœud `entity` ne définit pas le nœud `" ~ node.name ~ "`");
                 break;
             }
         }
@@ -214,7 +623,26 @@ private class EntityBuilder {
         const uint imageCount = stream.read!uint();
         for (uint i; i < imageCount; ++i) {
             ImageBuilder image;
-            switch (stream.read!string()) {
+            string imageType = stream.read!string();
+            switch (imageType) {
+            case "animation":
+                image = new AnimationBuilder;
+                break;
+            case "capsule":
+                image = new CapsuleBuilder;
+                break;
+            case "circle":
+                image = new CircleBuilder;
+                break;
+            case "ninepatch":
+                image = new NinePatchBuilder;
+                break;
+            case "rectangle":
+                image = new RectangleBuilder;
+                break;
+            case "roundedrectangle":
+                image = new RoundedRectangleBuilder;
+                break;
             case "sprite":
                 image = new SpriteBuilder;
                 break;
@@ -222,6 +650,7 @@ private class EntityBuilder {
                 image = new TilemapBuilder;
                 break;
             default:
+                enforce(false, "`" ~ imageType ~ "` n’est pas défini");
                 break;
             }
             image.deserialize(stream);

@@ -5,6 +5,7 @@
  */
 module atelier.core.loader;
 
+import std.conv : to, ConvException;
 import std.exception : enforce;
 import std.file;
 import std.format : format;
@@ -13,6 +14,7 @@ import std.path;
 import farfadet;
 import atelier.audio;
 import atelier.common;
+import atelier.scene;
 import atelier.render;
 import atelier.core.data;
 import atelier.core.runtime;
@@ -30,12 +32,13 @@ void setupDefaultResourceLoaders(ResourceManager res) {
     res.setLoader("music", &_compileMusic, &_loadMusic);
     res.setLoader("truetype", &_compileTtf, &_loadTtf);
     res.setLoader("bitmapfont", &_compileBitmapFont, &_loadBitmapFont);
+    res.setLoader("particle", &_compileParticle, &_loadParticle);
     res.setLoader("level", &_compileLevel, &_loadLevel);
 }
 
 /// Crée des textures
 private void _compileTexture(string path, const Farfadet ffd, OutStream stream) {
-    string name = ffd.get!string(0);
+    string id = ffd.get!string(0);
     string filePath;
     bool hasFilePath;
 
@@ -49,25 +52,22 @@ private void _compileTexture(string path, const Farfadet ffd, OutStream stream) 
             break;
         }
     }
-    enforce(hasFilePath, format!"`%s` ne défini pas `file`"(name));
+    enforce(hasFilePath, format!"`%s` ne défini pas `file`"(id));
 
-    stream.write!string(name);
+    stream.write!string(id);
     stream.write!string(path ~ filePath);
 }
 
 private void _loadTexture(InStream stream) {
-    string name = stream.read!string();
+    string id = stream.read!string();
     string filePath = stream.read!string();
 
-    Atelier.res.store(name, {
-        Texture texture = new Texture(filePath);
-        return texture;
-    });
+    Atelier.res.store(id, { Texture texture = new Texture(filePath); return texture; });
 }
 
 /// Crée des sprites
 private void _compileSprite(string path, const Farfadet ffd, OutStream stream) {
-    string name = ffd.get!string(0);
+    string id = ffd.get!string(0);
     string textureName;
     Vec4i clip = Vec4i(-1, -1, -1, -1);
     bool hasTexture, hasClip;
@@ -90,9 +90,9 @@ private void _compileSprite(string path, const Farfadet ffd, OutStream stream) {
         }
     }
 
-    enforce(hasTexture, format!"`%s` ne défini pas `texture`"(name));
+    enforce(hasTexture, format!"`%s` ne défini pas `texture`"(id));
 
-    stream.write!string(name);
+    stream.write!string(id);
     stream.write!string(textureName);
 
     if (hasClip) {
@@ -107,7 +107,7 @@ private void _compileSprite(string path, const Farfadet ffd, OutStream stream) {
 }
 
 private void _loadSprite(InStream stream) {
-    string name = stream.read!string();
+    string id = stream.read!string();
     string file = stream.read!string();
     Vec4i clip;
     bool hasClip;
@@ -121,7 +121,7 @@ private void _loadSprite(InStream stream) {
         hasClip = true;
     }
 
-    Atelier.res.store(name, {
+    Atelier.res.store(id, {
         Texture texture = Atelier.res.get!Texture(file);
         if (!hasClip) {
             clip.x = 0;
@@ -136,7 +136,7 @@ private void _loadSprite(InStream stream) {
 
 /// Crée des Ninepatch
 private void _compileNinepatch(string path, const Farfadet ffd, OutStream stream) {
-    string name = ffd.get!string(0);
+    string id = ffd.get!string(0);
     string textureName;
     Vec4i clip = Vec4i(-1, -1, -1, -1);
     bool hasTexture, hasClip;
@@ -172,9 +172,9 @@ private void _compileNinepatch(string path, const Farfadet ffd, OutStream stream
         }
     }
 
-    enforce(hasTexture, format!"`%s` ne défini pas `texture`"(name));
+    enforce(hasTexture, format!"`%s` ne défini pas `texture`"(id));
 
-    stream.write!string(name);
+    stream.write!string(id);
     stream.write!string(textureName);
 
     if (hasClip) {
@@ -194,7 +194,7 @@ private void _compileNinepatch(string path, const Farfadet ffd, OutStream stream
 }
 
 private void _loadNinepatch(InStream stream) {
-    string name = stream.read!string();
+    string id = stream.read!string();
     string file = stream.read!string();
     Vec4i clip;
     bool hasClip;
@@ -213,7 +213,7 @@ private void _loadNinepatch(InStream stream) {
     int left = stream.read!int();
     int right = stream.read!int();
 
-    Atelier.res.store(name, {
+    Atelier.res.store(id, {
         Texture texture = Atelier.res.get!Texture(file);
         if (!hasClip) {
             clip.x = 0;
@@ -228,7 +228,7 @@ private void _loadNinepatch(InStream stream) {
 
 /// Crée des Animations
 private void _compileAnimation(string path, const Farfadet ffd, OutStream stream) {
-    string name = ffd.get!string(0);
+    string id = ffd.get!string(0);
     string textureName;
     Vec4i clip = Vec4i(-1, -1, -1, -1);
     Vec2i margin;
@@ -276,9 +276,9 @@ private void _compileAnimation(string path, const Farfadet ffd, OutStream stream
         }
     }
 
-    enforce(hasTexture, format!"`%s` ne défini pas `texture`"(name));
+    enforce(hasTexture, format!"`%s` ne défini pas `texture`"(id));
 
-    stream.write!string(name);
+    stream.write!string(id);
     stream.write!string(textureName);
 
     if (hasClip) {
@@ -302,7 +302,7 @@ private void _compileAnimation(string path, const Farfadet ffd, OutStream stream
 }
 
 private void _loadAnimation(InStream stream) {
-    string name = stream.read!string();
+    string id = stream.read!string();
     string file = stream.read!string();
     Vec4i clip;
     bool hasClip;
@@ -327,7 +327,7 @@ private void _loadAnimation(InStream stream) {
     margin.x = stream.read!int();
     margin.y = stream.read!int();
 
-    Atelier.res.store(name, {
+    Atelier.res.store(id, {
         Texture texture = Atelier.res.get!Texture(file);
         if (!hasClip) {
             clip.x = 0;
@@ -347,7 +347,7 @@ private void _loadAnimation(InStream stream) {
 
 /// Crée des Tilesets
 private void _compileTileset(string path, const Farfadet ffd, OutStream stream) {
-    string name = ffd.get!string(0);
+    string id = ffd.get!string(0);
     string textureName;
     Vec4i clip = Vec4i(-1, -1, -1, -1);
     Vec2i margin;
@@ -392,9 +392,9 @@ private void _compileTileset(string path, const Farfadet ffd, OutStream stream) 
         }
     }
 
-    enforce(hasTexture, format!"`%s` ne défini pas `texture`"(name));
+    enforce(hasTexture, format!"`%s` ne défini pas `texture`"(id));
 
-    stream.write!string(name);
+    stream.write!string(id);
     stream.write!string(textureName);
 
     if (hasClip) {
@@ -417,7 +417,7 @@ private void _compileTileset(string path, const Farfadet ffd, OutStream stream) 
 }
 
 private void _loadTileset(InStream stream) {
-    string name = stream.read!string();
+    string id = stream.read!string();
     string file = stream.read!string();
     Vec4i clip;
     bool hasClip;
@@ -441,7 +441,7 @@ private void _loadTileset(InStream stream) {
     margin.x = stream.read!int();
     margin.y = stream.read!int();
 
-    Atelier.res.store(name, {
+    Atelier.res.store(id, {
         Texture texture = Atelier.res.get!Texture(file);
         if (!hasClip) {
             clip.x = 0;
@@ -463,7 +463,7 @@ private void _loadTileset(InStream stream) {
 
 /// Crée une tilemap
 private void _compileTilemap(string path, const Farfadet ffd, OutStream stream) {
-    string name = ffd.get!string(0);
+    string id = ffd.get!string(0);
     string tilesetName;
     int width, height;
     bool hasTileset, hasSize;
@@ -487,10 +487,10 @@ private void _compileTilemap(string path, const Farfadet ffd, OutStream stream) 
             break;
         }
     }
-    enforce(hasTileset, format!"`%s` ne défini pas `tileset`"(name));
-    enforce(hasSize, format!"`%s` ne défini pas `size`"(name));
+    enforce(hasTileset, format!"`%s` ne défini pas `tileset`"(id));
+    enforce(hasSize, format!"`%s` ne défini pas `size`"(id));
 
-    stream.write!string(name);
+    stream.write!string(id);
     stream.write!int(width);
     stream.write!int(height);
     stream.write!string(tilesetName);
@@ -498,13 +498,13 @@ private void _compileTilemap(string path, const Farfadet ffd, OutStream stream) 
 }
 
 private void _loadTilemap(InStream stream) {
-    const string name = stream.read!string();
+    const string id = stream.read!string();
     const int width = stream.read!int();
     const int height = stream.read!int();
     const string tilesetName = stream.read!string();
     const int[][] tiles = stream.read!(int[][])();
 
-    Atelier.res.store(name, {
+    Atelier.res.store(id, {
         Tileset tileset = Atelier.res.get!Tileset(tilesetName);
         Tilemap tilemap = new Tilemap(tileset, width, height);
         tilemap.setTiles(tiles);
@@ -514,7 +514,7 @@ private void _loadTilemap(InStream stream) {
 
 /// Crée un son
 private void _compileSound(string path, const Farfadet ffd, OutStream stream) {
-    string name = ffd.get!string(0);
+    string id = ffd.get!string(0);
     string filePath;
     bool hasFilePath;
     float volume = 1f;
@@ -532,19 +532,19 @@ private void _compileSound(string path, const Farfadet ffd, OutStream stream) {
             break;
         }
     }
-    enforce(hasFilePath, format!"`%s` ne défini pas `file`"(name));
+    enforce(hasFilePath, format!"`%s` ne défini pas `file`"(id));
 
-    stream.write!string(name);
+    stream.write!string(id);
     stream.write!string(path ~ filePath);
     stream.write!float(volume);
 }
 
 private void _loadSound(InStream stream) {
-    string name = stream.read!string();
+    string id = stream.read!string();
     string file = stream.read!string();
     float volume = stream.read!float();
 
-    Atelier.res.store(name, {
+    Atelier.res.store(id, {
         Sound sound = new Sound(file);
         sound.volume = volume;
         return sound;
@@ -553,7 +553,7 @@ private void _loadSound(InStream stream) {
 
 /// Crée une musique
 private void _compileMusic(string path, const Farfadet ffd, OutStream stream) {
-    string name = ffd.get!string(0);
+    string id = ffd.get!string(0);
     string filePath;
     bool hasFilePath;
     float volume = 1f;
@@ -579,9 +579,9 @@ private void _compileMusic(string path, const Farfadet ffd, OutStream stream) {
             break;
         }
     }
-    enforce(hasFilePath, format!"`%s` ne défini pas `file`"(name));
+    enforce(hasFilePath, format!"`%s` ne défini pas `file`"(id));
 
-    stream.write!string(name);
+    stream.write!string(id);
     stream.write!string(path ~ filePath);
     stream.write!float(volume);
     stream.write!float(loopStart);
@@ -589,13 +589,13 @@ private void _compileMusic(string path, const Farfadet ffd, OutStream stream) {
 }
 
 private void _loadMusic(InStream stream) {
-    string name = stream.read!string();
+    string id = stream.read!string();
     string file = stream.read!string();
     float volume = stream.read!float();
     float loopStart = stream.read!float();
     float loopEnd = stream.read!float();
 
-    Atelier.res.store(name, {
+    Atelier.res.store(id, {
         Music music = new Music(file);
         music.volume = volume;
         music.loopStart = loopStart;
@@ -605,7 +605,7 @@ private void _loadMusic(InStream stream) {
 }
 
 private void _compileTtf(string path, const Farfadet ffd, OutStream stream) {
-    string name = ffd.get!string(0);
+    string id = ffd.get!string(0);
     string filePath;
     int size, outline;
     bool hasFilePath, hasSize;
@@ -627,22 +627,22 @@ private void _compileTtf(string path, const Farfadet ffd, OutStream stream) {
             break;
         }
     }
-    enforce(hasFilePath, format!"`%s` ne défini pas `file`"(name));
-    enforce(hasSize, format!"`%s` ne défini pas `size`"(name));
+    enforce(hasFilePath, format!"`%s` ne défini pas `file`"(id));
+    enforce(hasSize, format!"`%s` ne défini pas `size`"(id));
 
-    stream.write!string(name);
+    stream.write!string(id);
     stream.write!string(path ~ filePath);
     stream.write!int(size);
     stream.write!int(outline);
 }
 
 private void _loadTtf(InStream stream) {
-    string name = stream.read!string();
+    string id = stream.read!string();
     string file = stream.read!string();
     int size = stream.read!int();
     int outline = stream.read!int();
 
-    Atelier.res.store(name, {
+    Atelier.res.store(id, {
         TrueTypeFont font = new TrueTypeFont(file, size, outline);
         return font;
     });
@@ -662,7 +662,7 @@ private struct Metrics {
 }
 
 private void _compileBitmapFont(string path, const Farfadet ffd, OutStream stream) {
-    string name = ffd.get!string(0);
+    string id = ffd.get!string(0);
     string textureName;
     Metrics[] metricsList;
     int size, ascent, descent;
@@ -718,12 +718,12 @@ private void _compileBitmapFont(string path, const Farfadet ffd, OutStream strea
         }
     }
 
-    enforce(hasTexture, format!"`%s` ne défini pas `texture`"(name));
-    enforce(hasSize, format!"`%s` ne défini pas `size`"(name));
-    enforce(hasAscent, format!"`%s` ne défini pas `ascent`"(name));
-    enforce(hasDescent, format!"`%s` ne défini pas `descent`"(name));
+    enforce(hasTexture, format!"`%s` ne défini pas `texture`"(id));
+    enforce(hasSize, format!"`%s` ne défini pas `size`"(id));
+    enforce(hasAscent, format!"`%s` ne défini pas `ascent`"(id));
+    enforce(hasDescent, format!"`%s` ne défini pas `descent`"(id));
 
-    stream.write!string(name);
+    stream.write!string(id);
     stream.write!string(textureName);
     stream.write!int(size);
     stream.write!int(ascent);
@@ -749,7 +749,7 @@ private void _compileBitmapFont(string path, const Farfadet ffd, OutStream strea
 }
 
 private void _loadBitmapFont(InStream stream) {
-    string name = stream.read!string();
+    string id = stream.read!string();
     string textureName = stream.read!string();
     int size = stream.read!int();
     int ascent = stream.read!int();
@@ -780,7 +780,7 @@ private void _loadBitmapFont(InStream stream) {
         metricsList ~= metrics;
     }
 
-    Atelier.res.store(name, {
+    Atelier.res.store(id, {
         Texture texture = Atelier.res.get!Texture(textureName);
         BitmapFont font = new BitmapFont(texture, size, ascent, descent);
 
@@ -790,6 +790,372 @@ private void _loadBitmapFont(InStream stream) {
                 metrics.posY, metrics.kerningChar, metrics.kerningOffset);
         }
         return font;
+    });
+}
+
+private struct ParticleEffectInfo {
+    private {
+        string _name;
+        Vec2u _frames;
+        Vec2f _startVec2f = Vec2f.zero;
+        Vec2f _endVec2f = Vec2f.zero;
+        float _startFloat = 0f;
+        float _endFloat = 0f;
+        Color _startColor = Color.white;
+        Color _endColor = Color.white;
+        Spline _spline;
+        int _count;
+        int _type;
+    }
+
+    void _setType(bool isInterval) {
+        if (_type == 0) {
+            _type = isInterval ? 2 : 1;
+            return;
+        }
+        enforce(_type == (isInterval ? 2 : 1),
+            "l’effet peut soit être de type intervalle, soit instantané");
+    }
+
+    void parse(const Farfadet ffd) {
+        _name = ffd.name;
+
+        foreach (node; ffd.nodes) {
+            switch (node.name) {
+            case "frame":
+                uint frame = node.get!uint(0);
+                _frames = Vec2u(frame, frame);
+                _setType(false);
+                break;
+            case "frames":
+                _frames = Vec2u(node.get!uint(0), node.get!uint(1));
+                _setType(true);
+                break;
+            case "spline":
+                _setType(true);
+                try {
+                    _spline = to!Spline(node.get!string(0));
+                }
+                catch (ConvException e) {
+                    enforce(false, "spline `" ~ node.get!string(0) ~ "` n’est pas valide");
+                }
+                break;
+            case "start":
+            case "min":
+                _setType(node.name == "start");
+
+                switch (_name) {
+                case "scale":
+                    _startVec2f = Vec2f(node.get!float(0), node.get!float(1));
+                    break;
+                case "color":
+                    _startColor = Color(node.get!float(0), node.get!float(1), node.get!float(2));
+                    break;
+                default:
+                    _startFloat = node.get!float(0);
+                    break;
+                }
+                break;
+            case "end":
+            case "max":
+                _setType(node.name == "end");
+
+                switch (_name) {
+                case "scale":
+                    _endVec2f = Vec2f(node.get!float(0), node.get!float(1));
+                    break;
+                case "color":
+                    _endColor = Color(node.get!float(0), node.get!float(1), node.get!float(2));
+                    break;
+                default:
+                    _endFloat = node.get!float(0);
+                    break;
+                }
+                break;
+            default:
+                enforce(false, "`" ~ _name ~ "` ne définit pas le nœud `" ~ node.name ~ "`");
+                break;
+            }
+        }
+    }
+
+    void serialize(OutStream stream) {
+        stream.write!string(_name);
+        stream.write!int(_type);
+        if (_type == 1) {
+            stream.write!uint(_frames.x);
+        }
+        else if (_type == 2) {
+            stream.write!uint(_frames.x);
+            stream.write!uint(_frames.y);
+            stream.write!Spline(_spline);
+        }
+
+        switch (_name) {
+        case "scale":
+            stream.write!Vec2f(_startVec2f);
+            stream.write!Vec2f(_endVec2f);
+            break;
+        case "color":
+            stream.write!Color(_startColor);
+            stream.write!Color(_endColor);
+            break;
+        default:
+            stream.write!float(_startFloat);
+            stream.write!float(_endFloat);
+            break;
+        }
+    }
+
+    void deserialize(InStream stream) {
+        _name = stream.read!string();
+        _type = stream.read!int();
+        if (_type == 1) {
+            _frames.x = stream.read!uint();
+        }
+        else if (_type == 2) {
+            _frames.x = stream.read!uint();
+            _frames.y = stream.read!uint();
+            _spline = stream.read!Spline();
+        }
+
+        switch (_name) {
+        case "scale":
+            _startVec2f = stream.read!Vec2f();
+            _endVec2f = stream.read!Vec2f();
+            break;
+        case "color":
+            _startColor = stream.read!Color();
+            _endColor = stream.read!Color();
+            break;
+        default:
+            _startFloat = stream.read!float();
+            _endFloat = stream.read!float();
+            break;
+        }
+    }
+}
+
+private void _compileParticle(string path, const Farfadet ffd, OutStream stream) {
+    const string name = ffd.get!string(0);
+    string sprite;
+    Blend blend = Blend.alpha;
+    bool isRelativePosition, isRelativeSpriteAngle;
+    Vec2u lifetime, count;
+    ParticleMode mode;
+    Vec2f area = Vec2f.zero, distance = Vec2f.zero;
+    Vec2f angle = Vec2f.zero;
+    float spreadAngle = 0f;
+    ParticleEffectInfo[] effects;
+
+    foreach (node; ffd.nodes) {
+        switch (node.name) {
+        case "sprite":
+            sprite = node.get!string(0);
+            break;
+        case "blend":
+            blend = to!Blend(node.get!string(0));
+            break;
+        case "isRelativePosition":
+            isRelativePosition = node.get!bool(0);
+            break;
+        case "isRelativeSpriteAngle":
+            isRelativeSpriteAngle = node.get!bool(0);
+            break;
+        case "lifetime":
+            lifetime = Vec2u(node.get!uint(0), node.get!uint(1));
+            break;
+        case "count":
+            count = Vec2u(node.get!uint(0), node.get!uint(1));
+            break;
+        case "mode":
+            mode = to!ParticleMode(node.get!string(0));
+            break;
+        case "area":
+            area = Vec2f(node.get!float(0), node.get!float(1));
+            break;
+        case "distance":
+            distance = Vec2f(node.get!float(0), node.get!float(1));
+            break;
+        case "spread":
+            angle = Vec2f(node.get!float(0), node.get!float(1));
+            spreadAngle = node.get!float(2);
+            break;
+        case "speed":
+        case "angle":
+        case "spin":
+        case "pivotAngle":
+        case "pivotSpin":
+        case "pivotDistance":
+        case "spriteAngle":
+        case "spriteSpin":
+        case "scale":
+        case "color":
+        case "alpha":
+            ParticleEffectInfo effect;
+            effect.parse(node);
+            effects ~= effect;
+            break;
+        default:
+            enforce(false, "`particle` ne définit pas le nœud `" ~ node.name ~ "`");
+            break;
+        }
+    }
+
+    stream.write!string(name);
+    stream.write!string(sprite);
+    stream.write!Blend(blend);
+    stream.write!bool(isRelativePosition);
+    stream.write!bool(isRelativeSpriteAngle);
+    stream.write!Vec2u(lifetime);
+    stream.write!Vec2u(count);
+    stream.write!ParticleMode(mode);
+    stream.write!Vec2f(area);
+    stream.write!Vec2f(distance);
+    stream.write!Vec2f(angle);
+    stream.write!float(spreadAngle);
+
+    stream.write!uint(cast(uint) effects.length);
+    foreach (ref ParticleEffectInfo effect; effects) {
+        effect.serialize(stream);
+    }
+}
+
+private void _loadParticle(InStream stream) {
+    const string name = stream.read!string();
+    const string sprite = stream.read!string();
+    const Blend blend = stream.read!Blend();
+    const bool isRelativePosition = stream.read!bool();
+    const bool isRelativeSpriteAngle = stream.read!bool();
+    const Vec2u lifetime = stream.read!Vec2u();
+    const Vec2u count = stream.read!Vec2u();
+    const ParticleMode mode = stream.read!ParticleMode();
+    const Vec2f area = stream.read!Vec2f();
+    const Vec2f distance = stream.read!Vec2f();
+    const Vec2f angle = stream.read!Vec2f();
+    const float spreadAngle = stream.read!float();
+
+    const uint effectCount = stream.read!uint();
+    ParticleEffectInfo[] effects = new ParticleEffectInfo[effectCount];
+    for (uint i; i < effectCount; ++i) {
+        effects[i].deserialize(stream);
+    }
+
+    Atelier.res.store(name, {
+        ParticleSource source = new ParticleSource;
+        source.setSprite(sprite);
+        source.setBlend(blend);
+        source.setRelativePosition(isRelativePosition);
+        source.setRelativeSpriteAngle(isRelativeSpriteAngle);
+        source.setLifetime(lifetime.x, lifetime.y);
+        source.setCount(count.x, count.y);
+        source.setMode(mode);
+        source.setArea(area.x, area.y);
+        source.setDistance(distance.x, distance.y);
+        source.setSpread(angle.x, angle.y, spreadAngle);
+
+        foreach (ref ParticleEffectInfo info; effects) {
+            ParticleEffect effect;
+
+            if (info._type == 1) {
+                switch (info._name) {
+                case "speed":
+                    effect = new SpeedParticleEffect(info._startFloat, info._endFloat);
+                    break;
+                case "angle":
+                    effect = new AngleParticleEffect(info._startFloat, info._endFloat);
+                    break;
+                case "spin":
+                    effect = new SpinParticleEffect(info._startFloat, info._endFloat);
+                    break;
+                case "pivotAngle":
+                    effect = new PivotAngleParticleEffect(info._startFloat, info._endFloat);
+                    break;
+                case "pivotSpin":
+                    effect = new PivotSpinParticleEffect(info._startFloat, info._endFloat);
+                    break;
+                case "pivotDistance":
+                    effect = new PivotDistanceParticleEffect(info._startFloat, info._endFloat);
+                    break;
+                case "spriteAngle":
+                    effect = new SpriteAngleParticleEffect(info._startFloat, info._endFloat);
+                    break;
+                case "spriteSpin":
+                    effect = new SpriteSpinParticleEffect(info._startFloat, info._endFloat);
+                    break;
+                case "scale":
+                    effect = new ScaleParticleEffect(info._startVec2f, info._endVec2f);
+                    break;
+                case "color":
+                    effect = new ColorParticleEffect(info._startColor, info._endColor);
+                    break;
+                case "alpha":
+                    effect = new AlphaParticleEffect(info._startFloat, info._endFloat);
+                    break;
+                default:
+                    break;
+                }
+            }
+            else if (info._type == 2) {
+                SplineFunc splineFunc = getSplineFunc(info._spline);
+
+                switch (info._name) {
+                case "speed":
+                    effect = new SpeedIntervalParticleEffect(info._startFloat,
+                        info._endFloat, splineFunc);
+                    break;
+                case "angle":
+                    effect = new AngleIntervalParticleEffect(info._startFloat,
+                        info._endFloat, splineFunc);
+                    break;
+                case "spin":
+                    effect = new SpinIntervalParticleEffect(info._startFloat,
+                        info._endFloat, splineFunc);
+                    break;
+                case "pivotAngle":
+                    effect = new PivotAngleIntervalParticleEffect(info._startFloat,
+                        info._endFloat, splineFunc);
+                    break;
+                case "pivotSpin":
+                    effect = new PivotSpinIntervalParticleEffect(info._startFloat,
+                        info._endFloat, splineFunc);
+                    break;
+                case "pivotDistance":
+                    effect = new PivotDistanceIntervalParticleEffect(info._startFloat,
+                        info._endFloat, splineFunc);
+                    break;
+                case "spriteAngle":
+                    effect = new SpriteAngleIntervalParticleEffect(info._startFloat,
+                        info._endFloat, splineFunc);
+                    break;
+                case "spriteSpin":
+                    effect = new SpriteSpinIntervalParticleEffect(info._startFloat,
+                        info._endFloat, splineFunc);
+                    break;
+                case "scale":
+                    effect = new ScaleIntervalParticleEffect(info._startVec2f,
+                        info._endVec2f, splineFunc);
+                    break;
+                case "color":
+                    effect = new ColorIntervalParticleEffect(info._startColor,
+                        info._endColor, splineFunc);
+                    break;
+                case "alpha":
+                    effect = new AlphaIntervalParticleEffect(info._startFloat,
+                        info._endFloat, splineFunc);
+                    break;
+                default:
+                    break;
+                }
+            }
+
+            if (effect) {
+                effect.setFrames(info._frames.x, info._frames.y);
+                source.addEffect(effect);
+            }
+        }
+
+        return source;
     });
 }
 

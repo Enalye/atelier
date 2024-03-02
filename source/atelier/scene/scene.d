@@ -106,7 +106,7 @@ final class Scene {
         _uiManager.dispatch(event);
     }
 
-    Entity fetchNamedEntity(string name) {
+    Entity fetchEntityByName(string name) {
         foreach (entity; _entities) {
             if (entity.name == name)
                 return entity;
@@ -114,7 +114,7 @@ final class Scene {
         return null;
     }
 
-    Entity[] fetchTaggedEntities(string[] tags) {
+    Entity[] fetchEntitiesByTag(string[] tags) {
         Entity[] result;
         __entityLoop: foreach (entity; _entities) {
             foreach (string tag; tags) {
@@ -123,6 +123,27 @@ final class Scene {
                 }
             }
             result ~= entity;
+        }
+        return result;
+    }
+
+    ParticleSource fetchParticleSourceByName(string name) {
+        foreach (source; _particleSources) {
+            if (source.name == name)
+                return source;
+        }
+        return null;
+    }
+
+    ParticleSource[] fetchParticleSourcesByTag(string[] tags) {
+        ParticleSource[] result;
+        __sourceLoop: foreach (source; _particleSources) {
+            foreach (string tag; tags) {
+                if (!canFind(source.tags, tag)) {
+                    continue __sourceLoop;
+                }
+            }
+            result ~= source;
         }
         return result;
     }

@@ -14,6 +14,7 @@ import atelier.render;
 import atelier.ui;
 import atelier.scene.camera;
 import atelier.scene.entity;
+import atelier.scene.particle;
 import atelier.scene.scene;
 
 /// Gère les différentes scènes
@@ -65,7 +66,7 @@ final class SceneManager {
         _sortScenes();
     }
 
-    Scene fetchNamedScene(string name) {
+    Scene fetchSceneByName(string name) {
         foreach (scene; _scenes) {
             if (scene.name == name)
                 return scene;
@@ -73,7 +74,7 @@ final class SceneManager {
         return null;
     }
 
-    Scene[] fetchTaggedScenes(string[] tags) {
+    Scene[] fetchScenesByTag(string[] tags) {
         Scene[] result;
         __sceneLoop: foreach (scene; _scenes) {
             foreach (string tag; tags) {
@@ -86,25 +87,44 @@ final class SceneManager {
         return result;
     }
 
-    Entity fetchNamedEntity(string name) {
+    Entity fetchEntityByName(string name) {
         foreach (scene; _scenes) {
-            Entity entity = scene.fetchNamedEntity(name);
+            Entity entity = scene.fetchEntityByName(name);
             if (entity)
                 return entity;
         }
         return null;
     }
 
-    Entity[] fetchTaggedEntities(string[] tags) {
+    Entity[] fetchEntitiesByTag(string[] tags) {
         Entity[] result;
         foreach (scene; _scenes) {
-            result ~= scene.fetchTaggedEntities(tags);
+            result ~= scene.fetchEntitiesByTag(tags);
+        }
+        return result;
+    }
+
+    ParticleSource fetchParticleSourceByName(string name) {
+        foreach (scene; _scenes) {
+            ParticleSource entity = scene.fetchParticleSourceByName(name);
+            if (entity)
+                return entity;
+        }
+        return null;
+    }
+
+    ParticleSource[] fetchParticleSourcesByTag(string[] tags) {
+        ParticleSource[] result;
+        foreach (scene; _scenes) {
+            result ~= scene.fetchParticleSourcesByTag(tags);
         }
         return result;
     }
 
     void update(InputEvent[] inputEvents) {
         bool isScenesDirty;
+        _camera.update();
+
         foreach (idx, scene; _scenes) {
             foreach (InputEvent event; inputEvents) {
                 scene.dispatch(event);
@@ -115,7 +135,6 @@ final class SceneManager {
                 isScenesDirty = true;
             }
         }
-        _camera.update();
 
         if (isScenesDirty) {
             _scenes.sweep();

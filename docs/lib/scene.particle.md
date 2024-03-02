@@ -6,17 +6,17 @@ Système de particules
 var src = @ParticleSource;
 src.setSprite("particle");
 src.setMode(ParticleMode.spread);
-src.setSpread(rad(0f), rad(360f), rad(45f));
+src.setSpread(0f, 360f, 45f);
 src.setDistance(100f, 100f);
 src.setCount(50, 70);
 src.setLifetime(100, 100);
-src.setSpeedInterval(0, 60, 0.3f, 0.5f, Spline.sineInOut);
-src.setSpeedInterval(60, 100, 0.5f, 0f, Spline.sineInOut);
-src.setAlphaInterval(0, 10, 0f, 1f, Spline.sineInOut);
-src.setAlphaInterval(90, 100, 1f, 0f, Spline.sineInOut);
-src.setPivotSpin(0, rad(2f), rad(2f));
-src.setPivotDistanceInterval(0, 60, 50f, 150f, Spline.sineInOut);
-src.setPivotDistanceInterval(60, 100, 150f, 100f, Spline.sineInOut);
+src.setSpeed(0, 60, 0.3f, 0.5f, Spline.sineInOut);
+src.setSpeed(60, 100, 0.5f, 0f, Spline.sineInOut);
+src.setAlpha(0, 10, 0f, 1f, Spline.sineInOut);
+src.setAlpha(90, 100, 1f, 0f, Spline.sineInOut);
+src.setPivotSpin(0, 0.02f, 0.02f);
+src.setPivotDistance(0, 60, 50f, 150f, Spline.sineInOut);
+src.setPivotDistance(60, 100, 150f, 100f, Spline.sineInOut);
 src.start(5);
 
 scene.addParticleSource(src);
@@ -32,6 +32,7 @@ scene.addParticleSource(src);
 |Fonction|Entrée|Description|
 |-|-|-|
 |[@**ParticleSource**](#ctor_0)||Mode d’émission des particules|
+|[@**ParticleSource**](#ctor_1)| *param0*: **string**|Mode d’émission des particules|
 ## Propriétés
 |Propriété|Natif|Type|Accesseur|Modifieur|Description|
 |-|-|-|-|-|-|
@@ -45,38 +46,38 @@ scene.addParticleSource(src);
 |[detach](#func_3)|*source*: **ParticleSource**||
 |[emit](#func_4)|*source*: **ParticleSource**||
 |[remove](#func_5)|*source*: **ParticleSource**||
-|[setAlpha](#func_6)|*source*: **ParticleSource**, *frame*: **uint**, *minAlpha*: **float**, *maxAlpha*: **float**||
-|[setAlphaInterval](#func_7)|*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startAlpha*: **float**, *endAlpha*: **float**, *spline*: **Spline**||
-|[setAngle](#func_8)|*source*: **ParticleSource**, *frame*: **uint**, *minAngle*: **float**, *maxAngle*: **float**||
-|[setAngleInterval](#func_9)|*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startAngle*: **float**, *endAngle*: **float**, *spline*: **Spline**||
+|[setAlpha](#func_6)|*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startAlpha*: **float**, *endAlpha*: **float**, *spline*: **Spline**||
+|[setAlpha](#func_7)|*source*: **ParticleSource**, *frame*: **uint**, *minAlpha*: **float**, *maxAlpha*: **float**||
+|[setAngle](#func_8)|*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startAngle*: **float**, *endAngle*: **float**, *spline*: **Spline**||
+|[setAngle](#func_9)|*source*: **ParticleSource**, *frame*: **uint**, *minAngle*: **float**, *maxAngle*: **float**||
 |[setArea](#func_10)|*source*: **ParticleSource**, *width*: **float**, *height*: **float**||
 |[setBlend](#func_11)|*source*: **ParticleSource**, *blend*: **Blend**||
 |[setColor](#func_12)|*source*: **ParticleSource**, *frame*: **uint**, *minColor*: **Color**, *maxColor*: **Color**||
-|[setColorInterval](#func_13)|*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startColor*: **Color**, *endColor*: **Color**, *spline*: **Spline**||
+|[setColor](#func_13)|*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startColor*: **Color**, *endColor*: **Color**, *spline*: **Spline**||
 |[setCount](#func_14)|*source*: **ParticleSource**, *minCount*: **uint**, *maxCount*: **uint**||
 |[setDistance](#func_15)|*source*: **ParticleSource**, *minDistance*: **float**, *maxDistance*: **float**||
 |[setLifetime](#func_16)|*source*: **ParticleSource**, *minLifetime*: **uint**, *maxLifetime*: **uint**||
 |[setMode](#func_17)|*source*: **ParticleSource**, *mode*: **ParticleMode**||
 |[setPivotAngle](#func_18)|*source*: **ParticleSource**, *frame*: **uint**, *minAngle*: **float**, *maxAngle*: **float**||
-|[setPivotAngleInterval](#func_19)|*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startAngle*: **float**, *endAngle*: **float**, *spline*: **Spline**||
+|[setPivotAngle](#func_19)|*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startAngle*: **float**, *endAngle*: **float**, *spline*: **Spline**||
 |[setPivotDistance](#func_20)|*source*: **ParticleSource**, *frame*: **uint**, *minDistance*: **float**, *maxDistance*: **float**||
-|[setPivotDistanceInterval](#func_21)|*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startDistance*: **float**, *endDistance*: **float**, *spline*: **Spline**||
+|[setPivotDistance](#func_21)|*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startDistance*: **float**, *endDistance*: **float**, *spline*: **Spline**||
 |[setPivotSpin](#func_22)|*source*: **ParticleSource**, *frame*: **uint**, *minSpin*: **float**, *maxSpin*: **float**||
-|[setPivotSpinInterval](#func_23)|*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startSpin*: **float**, *endSpin*: **float**, *spline*: **Spline**||
+|[setPivotSpin](#func_23)|*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startSpin*: **float**, *endSpin*: **float**, *spline*: **Spline**||
 |[setRelativePosition](#func_24)|*source*: **ParticleSource**, *isRelative*: **bool**||
 |[setRelativeSpriteAngle](#func_25)|*source*: **ParticleSource**, *isRelative*: **bool**||
 |[setScale](#func_26)|*source*: **ParticleSource**, *frame*: **uint**, *minScale*: **Vec2\<float>**, *maxScale*: **Vec2\<float>**||
-|[setScaleInterval](#func_27)|*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startScale*: **Vec2\<float>**, *endScale*: **Vec2\<float>**, *spline*: **Spline**||
+|[setScale](#func_27)|*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startScale*: **Vec2\<float>**, *endScale*: **Vec2\<float>**, *spline*: **Spline**||
 |[setSpeed](#func_28)|*source*: **ParticleSource**, *frame*: **uint**, *minSpeed*: **float**, *maxSpeed*: **float**||
-|[setSpeedInterval](#func_29)|*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startSpeed*: **float**, *endSpeed*: **float**, *spline*: **Spline**||
+|[setSpeed](#func_29)|*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startSpeed*: **float**, *endSpeed*: **float**, *spline*: **Spline**||
 |[setSpin](#func_30)|*source*: **ParticleSource**, *frame*: **uint**, *minSpin*: **float**, *maxSpin*: **float**||
-|[setSpinInterval](#func_31)|*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startSpin*: **float**, *endSpin*: **float**, *spline*: **Spline**||
+|[setSpin](#func_31)|*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startSpin*: **float**, *endSpin*: **float**, *spline*: **Spline**||
 |[setSpread](#func_32)|*source*: **ParticleSource**, *minAngle*: **float**, *maxAngle*: **float**, *spreadAngle*: **float**||
 |[setSprite](#func_33)|*source*: **ParticleSource**, *spriteId*: **string**||
 |[setSpriteAngle](#func_34)|*source*: **ParticleSource**, *frame*: **uint**, *minAngle*: **float**, *maxAngle*: **float**||
-|[setSpriteAngleInterval](#func_35)|*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startAngle*: **float**, *endAngle*: **float**, *spline*: **Spline**||
+|[setSpriteAngle](#func_35)|*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startAngle*: **float**, *endAngle*: **float**, *spline*: **Spline**||
 |[setSpriteSpin](#func_36)|*source*: **ParticleSource**, *frame*: **uint**, *minSpin*: **float**, *maxSpin*: **float**||
-|[setSpriteSpinInterval](#func_37)|*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startSpin*: **float**, *endSpin*: **float**, *spline*: **Spline**||
+|[setSpriteSpin](#func_37)|*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startSpin*: **float**, *endSpin*: **float**, *spline*: **Spline**||
 |[start](#func_38)|*source*: **ParticleSource**, *interval*: **uint**||
 |[stop](#func_39)|*source*: **ParticleSource**||
 
@@ -115,22 +116,22 @@ Génère une seule fois des particules.
 Retire la source de la scène.
 
 <a id="func_6"></a>
-> setAlpha(*source*: **ParticleSource**, *frame*: **uint**, *minAlpha*: **float**, *maxAlpha*: **float**)
+> setAlpha(*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startAlpha*: **float**, *endAlpha*: **float**, *spline*: **Spline**)
 
 Change l’opacité des particules.
 
 <a id="func_7"></a>
-> setAlphaInterval(*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startAlpha*: **float**, *endAlpha*: **float**, *spline*: **Spline**)
+> setAlpha(*source*: **ParticleSource**, *frame*: **uint**, *minAlpha*: **float**, *maxAlpha*: **float**)
 
 Change l’opacité des particules.
 
 <a id="func_8"></a>
-> setAngle(*source*: **ParticleSource**, *frame*: **uint**, *minAngle*: **float**, *maxAngle*: **float**)
+> setAngle(*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startAngle*: **float**, *endAngle*: **float**, *spline*: **Spline**)
 
 Change l’angle des particules.
 
 <a id="func_9"></a>
-> setAngleInterval(*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startAngle*: **float**, *endAngle*: **float**, *spline*: **Spline**)
+> setAngle(*source*: **ParticleSource**, *frame*: **uint**, *minAngle*: **float**, *maxAngle*: **float**)
 
 Change l’angle des particules.
 
@@ -150,7 +151,7 @@ Type de blending
 Change la couleur des particules.
 
 <a id="func_13"></a>
-> setColorInterval(*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startColor*: **Color**, *endColor*: **Color**, *spline*: **Spline**)
+> setColor(*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startColor*: **Color**, *endColor*: **Color**, *spline*: **Spline**)
 
 Change la couleur des particules.
 
@@ -186,7 +187,7 @@ Le mode d’émission:
 Change l’angle des particules autour de leur pivot.
 
 <a id="func_19"></a>
-> setPivotAngleInterval(*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startAngle*: **float**, *endAngle*: **float**, *spline*: **Spline**)
+> setPivotAngle(*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startAngle*: **float**, *endAngle*: **float**, *spline*: **Spline**)
 
 Change l’angle des particules autour de leur pivot.
 
@@ -196,7 +197,7 @@ Change l’angle des particules autour de leur pivot.
 Change la distance des particules avec leur pivot.
 
 <a id="func_21"></a>
-> setPivotDistanceInterval(*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startDistance*: **float**, *endDistance*: **float**, *spline*: **Spline**)
+> setPivotDistance(*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startDistance*: **float**, *endDistance*: **float**, *spline*: **Spline**)
 
 Change la distance des particules avec leur pivot.
 
@@ -206,7 +207,7 @@ Change la distance des particules avec leur pivot.
 Change la vitesse de rotation des particules autour de leur pivot.
 
 <a id="func_23"></a>
-> setPivotSpinInterval(*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startSpin*: **float**, *endSpin*: **float**, *spline*: **Spline**)
+> setPivotSpin(*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startSpin*: **float**, *endSpin*: **float**, *spline*: **Spline**)
 
 Change la vitesse de rotation des particules autour de leur pivot.
 
@@ -226,7 +227,7 @@ Est-ce que l’orientation du sprite dépend de l’angle de la particule ?
 Change la taille des particules.
 
 <a id="func_27"></a>
-> setScaleInterval(*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startScale*: **Vec2\<float>**, *endScale*: **Vec2\<float>**, *spline*: **Spline**)
+> setScale(*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startScale*: **Vec2\<float>**, *endScale*: **Vec2\<float>**, *spline*: **Spline**)
 
 Change la taille des particules.
 
@@ -236,7 +237,7 @@ Change la taille des particules.
 Change la vitesse des particules.
 
 <a id="func_29"></a>
-> setSpeedInterval(*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startSpeed*: **float**, *endSpeed*: **float**, *spline*: **Spline**)
+> setSpeed(*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startSpeed*: **float**, *endSpeed*: **float**, *spline*: **Spline**)
 
 Change la vitesse des particules.
 
@@ -246,7 +247,7 @@ Change la vitesse des particules.
 Change la vitesse de rotation des particules.
 
 <a id="func_31"></a>
-> setSpinInterval(*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startSpin*: **float**, *endSpin*: **float**, *spline*: **Spline**)
+> setSpin(*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startSpin*: **float**, *endSpin*: **float**, *spline*: **Spline**)
 
 Change la vitesse de rotation des particules.
 
@@ -268,7 +269,7 @@ Change le sprite des particules.
 Change la rotation de l’image des particules.
 
 <a id="func_35"></a>
-> setSpriteAngleInterval(*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startAngle*: **float**, *endAngle*: **float**, *spline*: **Spline**)
+> setSpriteAngle(*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startAngle*: **float**, *endAngle*: **float**, *spline*: **Spline**)
 
 Change la rotation de l’image des particules.
 
@@ -278,7 +279,7 @@ Change la rotation de l’image des particules.
 Change la vitesse de rotation de l’image des particules.
 
 <a id="func_37"></a>
-> setSpriteSpinInterval(*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startSpin*: **float**, *endSpin*: **float**, *spline*: **Spline**)
+> setSpriteSpin(*source*: **ParticleSource**, *startFrame*: **uint**, *endFrame*: **uint**, *startSpin*: **float**, *endSpin*: **float**, *spline*: **Spline**)
 
 Change la vitesse de rotation de l’image des particules.
 

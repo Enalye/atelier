@@ -57,7 +57,7 @@ enum ParticleMode {
     ellipsis
 }
 
-final class ParticleSource {
+final class ParticleSource : Resource!ParticleSource {
     private {
         Array!Particle _particles;
         ParticleEffect[] _effects;
@@ -88,6 +88,8 @@ final class ParticleSource {
     }
 
     Vec2f position = Vec2f.zero;
+    string name;
+    string[] tags;
 
     @property {
         bool isAlive() const {
@@ -97,6 +99,48 @@ final class ParticleSource {
 
     this() {
         _particles = new Array!Particle;
+    }
+
+    this(ParticleSource source) {
+        _particles = new Array!Particle;
+
+        _scene = null;
+        _isAlive = true;
+        _isAttachedToCamera = false;
+        _attachedEntity = null;
+        _emitterTime = 0;
+        _interval = 0;
+
+        // Les effets n’ont pas d’état interne,
+        // on peut se permettre une copie superficielle.
+        _effects = source._effects;
+
+        position = source.position;
+        name = source.name;
+        tags = source.tags;
+
+        _sprite = new Sprite(source._sprite);
+        _spriteSize = source._spriteSize;
+
+        _isRelativePosition = source._isRelativePosition;
+        _isRelativeSpriteAngle = source._isRelativeSpriteAngle;
+        _minCount = source._minCount;
+        _maxCount = source._maxCount;
+        _minLifetime = source._minLifetime;
+        _maxLifetime = source._maxLifetime;
+
+        _blend = source._blend;
+        _mode = source._mode;
+        _minAngle = source._minAngle;
+        _maxAngle = source._maxAngle;
+        _spreadAngle = source._spreadAngle;
+        _minDistance = source._minDistance;
+        _maxDistance = source._maxDistance;
+        _area = source._area;
+    }
+
+    ParticleSource fetch() {
+        return new ParticleSource(this);
     }
 
     package void setScene(Scene scene_) {
@@ -166,10 +210,10 @@ final class ParticleSource {
             _sprite.alpha = particle.alpha;
             _sprite.size = particle.scale * _spriteSize;
             if (_isRelativeSpriteAngle) {
-                _sprite.angle = radToDeg(particle.angle + particle.spriteAngle);
+                _sprite.angle = particle.angle + particle.spriteAngle;
             }
             else {
-                _sprite.angle = radToDeg(particle.spriteAngle);
+                _sprite.angle = particle.spriteAngle;
             }
             _sprite.draw(origin + particle.origin + particle.position + particle.pivot);
         }

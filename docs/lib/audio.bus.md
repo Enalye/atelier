@@ -7,6 +7,10 @@ Route les sons et leur applique des effets
 |Fonction|Entrée|Description|
 |-|-|-|
 |[@**AudioBus**](#ctor_0)|||
+## Propriétés
+|Propriété|Natif|Type|Accesseur|Modifieur|Description|
+|-|-|-|-|-|-|
+|isMuted|**AudioBus**|**bool**|oui|oui|Coupe le son du bus|
 ## Fonctions
 |Fonction|Entrée|Sortie|
 |-|-|-|

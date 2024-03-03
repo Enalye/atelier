@@ -25,6 +25,9 @@ package void loadLibAudio_bus(GrLibDefinition library) {
 
     library.addConstructor(&_ctor, busType);
 
+    library.setDescription(GrLocale.fr_FR, "Coupe le son du bus");
+    library.addProperty(&_isMuted!"get", &_isMuted!"set", "isMuted", busType, grBool);
+
     library.setDescription(GrLocale.fr_FR, "Joue le son sur le bus.");
     library.setParameters(["bus", "player"]);
     library.addFunction(&_play, "play", [busType, playerType]);
@@ -52,6 +55,16 @@ private void _ctor(GrCall call) {
     AudioBus bus = new AudioBus();
     bus.connectToMaster();
     call.setNative(bus);
+}
+
+private void _isMuted(string op)(GrCall call) {
+    AudioBus bus = call.getNative!AudioBus(0);
+
+    static if (op == "set") {
+        bus.isMuted = call.getBool(1);
+    }
+
+    call.setBool(bus.isMuted);
 }
 
 private void _play(GrCall call) {

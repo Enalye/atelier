@@ -16,7 +16,7 @@ import atelier.audio.player;
 
 final class AudioBus {
     private {
-        bool _isMaster;
+        bool _isMaster, _isMuted;
         AudioBus _parentBus;
         Array!AudioBus _busses;
         Array!AudioEffect _effects;
@@ -37,6 +37,16 @@ final class AudioBus {
             }
         }
         return _masterBus;
+    }
+
+    @property {
+        bool isMuted() const {
+            return _isMuted;
+        }
+
+        bool isMuted(bool isMuted_) {
+            return _isMuted = isMuted_;
+        }
     }
 
     this() {
@@ -119,6 +129,9 @@ final class AudioBus {
         }
         _effects.sweep();
 
+        if (_isMuted) {
+            mixBuffer[] = 0f;
+        }
         buffer[] = mixBuffer[];
     }
 }

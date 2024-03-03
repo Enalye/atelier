@@ -38,7 +38,7 @@ void setupDefaultResourceLoaders(ResourceManager res) {
 
 /// Crée des textures
 private void _compileTexture(string path, const Farfadet ffd, OutStream stream) {
-    string id = ffd.get!string(0);
+    string rid = ffd.get!string(0);
     string filePath;
     bool hasFilePath;
 
@@ -52,30 +52,33 @@ private void _compileTexture(string path, const Farfadet ffd, OutStream stream) 
             break;
         }
     }
-    enforce(hasFilePath, format!"`%s` ne défini pas `file`"(id));
+    enforce(hasFilePath, format!"`%s` ne défini pas `file`"(rid));
 
-    stream.write!string(id);
+    stream.write!string(rid);
     stream.write!string(path ~ filePath);
 }
 
 private void _loadTexture(InStream stream) {
-    string id = stream.read!string();
+    string rid = stream.read!string();
     string filePath = stream.read!string();
 
-    Atelier.res.store(id, { Texture texture = new Texture(filePath); return texture; });
+    Atelier.res.store(rid, {
+        Texture texture = new Texture(filePath);
+        return texture;
+    });
 }
 
 /// Crée des sprites
 private void _compileSprite(string path, const Farfadet ffd, OutStream stream) {
-    string id = ffd.get!string(0);
-    string textureName;
+    string rid = ffd.get!string(0);
+    string textureRID;
     Vec4i clip = Vec4i(-1, -1, -1, -1);
     bool hasTexture, hasClip;
 
     foreach (node; ffd.nodes) {
         switch (node.name) {
         case "texture":
-            textureName = node.get!string(0);
+            textureRID = node.get!string(0);
             hasTexture = true;
             break;
         case "clip":
@@ -90,10 +93,10 @@ private void _compileSprite(string path, const Farfadet ffd, OutStream stream) {
         }
     }
 
-    enforce(hasTexture, format!"`%s` ne défini pas `texture`"(id));
+    enforce(hasTexture, format!"`%s` ne défini pas `texture`"(rid));
 
-    stream.write!string(id);
-    stream.write!string(textureName);
+    stream.write!string(rid);
+    stream.write!string(textureRID);
 
     if (hasClip) {
         stream.write!int(clip.x);
@@ -107,8 +110,8 @@ private void _compileSprite(string path, const Farfadet ffd, OutStream stream) {
 }
 
 private void _loadSprite(InStream stream) {
-    string id = stream.read!string();
-    string file = stream.read!string();
+    string rid = stream.read!string();
+    string textureRID = stream.read!string();
     Vec4i clip;
     bool hasClip;
 
@@ -121,8 +124,8 @@ private void _loadSprite(InStream stream) {
         hasClip = true;
     }
 
-    Atelier.res.store(id, {
-        Texture texture = Atelier.res.get!Texture(file);
+    Atelier.res.store(rid, {
+        Texture texture = Atelier.res.get!Texture(textureRID);
         if (!hasClip) {
             clip.x = 0;
             clip.y = 0;
@@ -136,8 +139,8 @@ private void _loadSprite(InStream stream) {
 
 /// Crée des Ninepatch
 private void _compileNinepatch(string path, const Farfadet ffd, OutStream stream) {
-    string id = ffd.get!string(0);
-    string textureName;
+    string rid = ffd.get!string(0);
+    string textureRID;
     Vec4i clip = Vec4i(-1, -1, -1, -1);
     bool hasTexture, hasClip;
     int top, bottom, left, right;
@@ -145,7 +148,7 @@ private void _compileNinepatch(string path, const Farfadet ffd, OutStream stream
     foreach (node; ffd.nodes) {
         switch (node.name) {
         case "texture":
-            textureName = node.get!string(0);
+            textureRID = node.get!string(0);
             hasTexture = true;
             break;
         case "clip":
@@ -172,10 +175,10 @@ private void _compileNinepatch(string path, const Farfadet ffd, OutStream stream
         }
     }
 
-    enforce(hasTexture, format!"`%s` ne défini pas `texture`"(id));
+    enforce(hasTexture, format!"`%s` ne défini pas `texture`"(rid));
 
-    stream.write!string(id);
-    stream.write!string(textureName);
+    stream.write!string(rid);
+    stream.write!string(textureRID);
 
     if (hasClip) {
         stream.write!int(clip.x);
@@ -194,8 +197,8 @@ private void _compileNinepatch(string path, const Farfadet ffd, OutStream stream
 }
 
 private void _loadNinepatch(InStream stream) {
-    string id = stream.read!string();
-    string file = stream.read!string();
+    string rid = stream.read!string();
+    string textureRID = stream.read!string();
     Vec4i clip;
     bool hasClip;
 
@@ -213,8 +216,8 @@ private void _loadNinepatch(InStream stream) {
     int left = stream.read!int();
     int right = stream.read!int();
 
-    Atelier.res.store(id, {
-        Texture texture = Atelier.res.get!Texture(file);
+    Atelier.res.store(rid, {
+        Texture texture = Atelier.res.get!Texture(textureRID);
         if (!hasClip) {
             clip.x = 0;
             clip.y = 0;
@@ -228,8 +231,8 @@ private void _loadNinepatch(InStream stream) {
 
 /// Crée des Animations
 private void _compileAnimation(string path, const Farfadet ffd, OutStream stream) {
-    string id = ffd.get!string(0);
-    string textureName;
+    string rid = ffd.get!string(0);
+    string textureRID;
     Vec4i clip = Vec4i(-1, -1, -1, -1);
     Vec2i margin;
     bool hasTexture, hasClip;
@@ -240,7 +243,7 @@ private void _compileAnimation(string path, const Farfadet ffd, OutStream stream
     foreach (node; ffd.nodes) {
         switch (node.name) {
         case "texture":
-            textureName = node.get!string(0);
+            textureRID = node.get!string(0);
             hasTexture = true;
             break;
         case "clip":
@@ -276,10 +279,10 @@ private void _compileAnimation(string path, const Farfadet ffd, OutStream stream
         }
     }
 
-    enforce(hasTexture, format!"`%s` ne défini pas `texture`"(id));
+    enforce(hasTexture, format!"`%s` ne défini pas `texture`"(rid));
 
-    stream.write!string(id);
-    stream.write!string(textureName);
+    stream.write!string(rid);
+    stream.write!string(textureRID);
 
     if (hasClip) {
         stream.write!int(clip.x);
@@ -302,8 +305,8 @@ private void _compileAnimation(string path, const Farfadet ffd, OutStream stream
 }
 
 private void _loadAnimation(InStream stream) {
-    string id = stream.read!string();
-    string file = stream.read!string();
+    string rid = stream.read!string();
+    string textureRID = stream.read!string();
     Vec4i clip;
     bool hasClip;
 
@@ -327,8 +330,8 @@ private void _loadAnimation(InStream stream) {
     margin.x = stream.read!int();
     margin.y = stream.read!int();
 
-    Atelier.res.store(id, {
-        Texture texture = Atelier.res.get!Texture(file);
+    Atelier.res.store(rid, {
+        Texture texture = Atelier.res.get!Texture(textureRID);
         if (!hasClip) {
             clip.x = 0;
             clip.y = 0;
@@ -347,8 +350,8 @@ private void _loadAnimation(InStream stream) {
 
 /// Crée des Tilesets
 private void _compileTileset(string path, const Farfadet ffd, OutStream stream) {
-    string id = ffd.get!string(0);
-    string textureName;
+    string rid = ffd.get!string(0);
+    string textureRID;
     Vec4i clip = Vec4i(-1, -1, -1, -1);
     Vec2i margin;
     bool hasTexture, hasClip;
@@ -358,7 +361,7 @@ private void _compileTileset(string path, const Farfadet ffd, OutStream stream) 
     foreach (node; ffd.nodes) {
         switch (node.name) {
         case "texture":
-            textureName = node.get!string(0);
+            textureRID = node.get!string(0);
             hasTexture = true;
             break;
         case "clip":
@@ -392,10 +395,10 @@ private void _compileTileset(string path, const Farfadet ffd, OutStream stream) 
         }
     }
 
-    enforce(hasTexture, format!"`%s` ne défini pas `texture`"(id));
+    enforce(hasTexture, format!"`%s` ne défini pas `texture`"(rid));
 
-    stream.write!string(id);
-    stream.write!string(textureName);
+    stream.write!string(rid);
+    stream.write!string(textureRID);
 
     if (hasClip) {
         stream.write!int(clip.x);
@@ -417,8 +420,8 @@ private void _compileTileset(string path, const Farfadet ffd, OutStream stream) 
 }
 
 private void _loadTileset(InStream stream) {
-    string id = stream.read!string();
-    string file = stream.read!string();
+    string rid = stream.read!string();
+    string textureRID = stream.read!string();
     Vec4i clip;
     bool hasClip;
 
@@ -441,8 +444,8 @@ private void _loadTileset(InStream stream) {
     margin.x = stream.read!int();
     margin.y = stream.read!int();
 
-    Atelier.res.store(id, {
-        Texture texture = Atelier.res.get!Texture(file);
+    Atelier.res.store(rid, {
+        Texture texture = Atelier.res.get!Texture(textureRID);
         if (!hasClip) {
             clip.x = 0;
             clip.y = 0;
@@ -463,8 +466,8 @@ private void _loadTileset(InStream stream) {
 
 /// Crée une tilemap
 private void _compileTilemap(string path, const Farfadet ffd, OutStream stream) {
-    string id = ffd.get!string(0);
-    string tilesetName;
+    string rid = ffd.get!string(0);
+    string tilesetRID;
     int width, height;
     bool hasTileset, hasSize;
     int[][] tiles;
@@ -472,7 +475,7 @@ private void _compileTilemap(string path, const Farfadet ffd, OutStream stream) 
     foreach (node; ffd.nodes) {
         switch (node.name) {
         case "tileset":
-            tilesetName = node.get!string(0);
+            tilesetRID = node.get!string(0);
             hasTileset = true;
             break;
         case "size":
@@ -487,25 +490,25 @@ private void _compileTilemap(string path, const Farfadet ffd, OutStream stream) 
             break;
         }
     }
-    enforce(hasTileset, format!"`%s` ne défini pas `tileset`"(id));
-    enforce(hasSize, format!"`%s` ne défini pas `size`"(id));
+    enforce(hasTileset, format!"`%s` ne défini pas `tileset`"(rid));
+    enforce(hasSize, format!"`%s` ne défini pas `size`"(rid));
 
-    stream.write!string(id);
+    stream.write!string(rid);
     stream.write!int(width);
     stream.write!int(height);
-    stream.write!string(tilesetName);
+    stream.write!string(tilesetRID);
     stream.write!(int[][])(tiles);
 }
 
 private void _loadTilemap(InStream stream) {
-    const string id = stream.read!string();
+    const string rid = stream.read!string();
     const int width = stream.read!int();
     const int height = stream.read!int();
-    const string tilesetName = stream.read!string();
+    const string tilesetRID = stream.read!string();
     const int[][] tiles = stream.read!(int[][])();
 
-    Atelier.res.store(id, {
-        Tileset tileset = Atelier.res.get!Tileset(tilesetName);
+    Atelier.res.store(rid, {
+        Tileset tileset = Atelier.res.get!Tileset(tilesetRID);
         Tilemap tilemap = new Tilemap(tileset, width, height);
         tilemap.setTiles(tiles);
         return tilemap;
@@ -514,7 +517,7 @@ private void _loadTilemap(InStream stream) {
 
 /// Crée un son
 private void _compileSound(string path, const Farfadet ffd, OutStream stream) {
-    string id = ffd.get!string(0);
+    string rid = ffd.get!string(0);
     string filePath;
     bool hasFilePath;
     float volume = 1f;
@@ -532,19 +535,19 @@ private void _compileSound(string path, const Farfadet ffd, OutStream stream) {
             break;
         }
     }
-    enforce(hasFilePath, format!"`%s` ne défini pas `file`"(id));
+    enforce(hasFilePath, format!"`%s` ne défini pas `file`"(rid));
 
-    stream.write!string(id);
+    stream.write!string(rid);
     stream.write!string(path ~ filePath);
     stream.write!float(volume);
 }
 
 private void _loadSound(InStream stream) {
-    string id = stream.read!string();
+    string rid = stream.read!string();
     string file = stream.read!string();
     float volume = stream.read!float();
 
-    Atelier.res.store(id, {
+    Atelier.res.store(rid, {
         Sound sound = new Sound(file);
         sound.volume = volume;
         return sound;
@@ -553,7 +556,7 @@ private void _loadSound(InStream stream) {
 
 /// Crée une musique
 private void _compileMusic(string path, const Farfadet ffd, OutStream stream) {
-    string id = ffd.get!string(0);
+    string rid = ffd.get!string(0);
     string filePath;
     bool hasFilePath;
     float volume = 1f;
@@ -579,9 +582,9 @@ private void _compileMusic(string path, const Farfadet ffd, OutStream stream) {
             break;
         }
     }
-    enforce(hasFilePath, format!"`%s` ne défini pas `file`"(id));
+    enforce(hasFilePath, format!"`%s` ne défini pas `file`"(rid));
 
-    stream.write!string(id);
+    stream.write!string(rid);
     stream.write!string(path ~ filePath);
     stream.write!float(volume);
     stream.write!float(loopStart);
@@ -589,13 +592,13 @@ private void _compileMusic(string path, const Farfadet ffd, OutStream stream) {
 }
 
 private void _loadMusic(InStream stream) {
-    string id = stream.read!string();
+    string rid = stream.read!string();
     string file = stream.read!string();
     float volume = stream.read!float();
     float loopStart = stream.read!float();
     float loopEnd = stream.read!float();
 
-    Atelier.res.store(id, {
+    Atelier.res.store(rid, {
         Music music = new Music(file);
         music.volume = volume;
         music.loopStart = loopStart;
@@ -605,7 +608,7 @@ private void _loadMusic(InStream stream) {
 }
 
 private void _compileTtf(string path, const Farfadet ffd, OutStream stream) {
-    string id = ffd.get!string(0);
+    string rid = ffd.get!string(0);
     string filePath;
     int size, outline;
     bool hasFilePath, hasSize;
@@ -627,22 +630,22 @@ private void _compileTtf(string path, const Farfadet ffd, OutStream stream) {
             break;
         }
     }
-    enforce(hasFilePath, format!"`%s` ne défini pas `file`"(id));
-    enforce(hasSize, format!"`%s` ne défini pas `size`"(id));
+    enforce(hasFilePath, format!"`%s` ne défini pas `file`"(rid));
+    enforce(hasSize, format!"`%s` ne défini pas `size`"(rid));
 
-    stream.write!string(id);
+    stream.write!string(rid);
     stream.write!string(path ~ filePath);
     stream.write!int(size);
     stream.write!int(outline);
 }
 
 private void _loadTtf(InStream stream) {
-    string id = stream.read!string();
+    string rid = stream.read!string();
     string file = stream.read!string();
     int size = stream.read!int();
     int outline = stream.read!int();
 
-    Atelier.res.store(id, {
+    Atelier.res.store(rid, {
         TrueTypeFont font = new TrueTypeFont(file, size, outline);
         return font;
     });
@@ -662,8 +665,8 @@ private struct Metrics {
 }
 
 private void _compileBitmapFont(string path, const Farfadet ffd, OutStream stream) {
-    string id = ffd.get!string(0);
-    string textureName;
+    string rid = ffd.get!string(0);
+    string textureRID;
     Metrics[] metricsList;
     int size, ascent, descent;
     bool hasTexture, hasSize, hasAscent, hasDescent;
@@ -671,7 +674,7 @@ private void _compileBitmapFont(string path, const Farfadet ffd, OutStream strea
     foreach (node; ffd.nodes) {
         switch (node.name) {
         case "texture":
-            textureName = node.get!string(0);
+            textureRID = node.get!string(0);
             hasTexture = true;
             break;
         case "size":
@@ -718,13 +721,13 @@ private void _compileBitmapFont(string path, const Farfadet ffd, OutStream strea
         }
     }
 
-    enforce(hasTexture, format!"`%s` ne défini pas `texture`"(id));
-    enforce(hasSize, format!"`%s` ne défini pas `size`"(id));
-    enforce(hasAscent, format!"`%s` ne défini pas `ascent`"(id));
-    enforce(hasDescent, format!"`%s` ne défini pas `descent`"(id));
+    enforce(hasTexture, format!"`%s` ne défini pas `texture`"(rid));
+    enforce(hasSize, format!"`%s` ne défini pas `size`"(rid));
+    enforce(hasAscent, format!"`%s` ne défini pas `ascent`"(rid));
+    enforce(hasDescent, format!"`%s` ne défini pas `descent`"(rid));
 
-    stream.write!string(id);
-    stream.write!string(textureName);
+    stream.write!string(rid);
+    stream.write!string(textureRID);
     stream.write!int(size);
     stream.write!int(ascent);
     stream.write!int(descent);
@@ -749,8 +752,8 @@ private void _compileBitmapFont(string path, const Farfadet ffd, OutStream strea
 }
 
 private void _loadBitmapFont(InStream stream) {
-    string id = stream.read!string();
-    string textureName = stream.read!string();
+    string rid = stream.read!string();
+    string textureRID = stream.read!string();
     int size = stream.read!int();
     int ascent = stream.read!int();
     int descent = stream.read!int();
@@ -780,8 +783,8 @@ private void _loadBitmapFont(InStream stream) {
         metricsList ~= metrics;
     }
 
-    Atelier.res.store(id, {
-        Texture texture = Atelier.res.get!Texture(textureName);
+    Atelier.res.store(rid, {
+        Texture texture = Atelier.res.get!Texture(textureRID);
         BitmapFont font = new BitmapFont(texture, size, ascent, descent);
 
         foreach (ref Metrics metrics; metricsList) {
@@ -937,7 +940,7 @@ private struct ParticleEffectInfo {
 }
 
 private void _compileParticle(string path, const Farfadet ffd, OutStream stream) {
-    const string name = ffd.get!string(0);
+    const string rid = ffd.get!string(0);
     string sprite;
     Blend blend = Blend.alpha;
     bool isRelativePosition, isRelativeSpriteAngle;
@@ -1002,7 +1005,7 @@ private void _compileParticle(string path, const Farfadet ffd, OutStream stream)
         }
     }
 
-    stream.write!string(name);
+    stream.write!string(rid);
     stream.write!string(sprite);
     stream.write!Blend(blend);
     stream.write!bool(isRelativePosition);
@@ -1022,7 +1025,7 @@ private void _compileParticle(string path, const Farfadet ffd, OutStream stream)
 }
 
 private void _loadParticle(InStream stream) {
-    const string name = stream.read!string();
+    const string rid = stream.read!string();
     const string sprite = stream.read!string();
     const Blend blend = stream.read!Blend();
     const bool isRelativePosition = stream.read!bool();
@@ -1041,7 +1044,7 @@ private void _loadParticle(InStream stream) {
         effects[i].deserialize(stream);
     }
 
-    Atelier.res.store(name, {
+    Atelier.res.store(rid, {
         ParticleSource source = new ParticleSource;
         source.setSprite(sprite);
         source.setBlend(blend);
@@ -1160,15 +1163,15 @@ private void _loadParticle(InStream stream) {
 }
 
 private void _compileLevel(string path, const Farfadet ffd, OutStream stream) {
-    const string name = ffd.get!string(0);
+    const string rid = ffd.get!string(0);
     Level level = new Level(ffd);
-    stream.write!string(name);
+    stream.write!string(rid);
     level.serialize(stream);
 }
 
 private void _loadLevel(InStream stream) {
-    const string name = stream.read!string();
+    const string rid = stream.read!string();
     Level level = new Level;
     level.deserialize(stream);
-    Atelier.res.store(name, { return level; });
+    Atelier.res.store(rid, { return level; });
 }

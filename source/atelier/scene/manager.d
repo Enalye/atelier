@@ -54,9 +54,9 @@ final class SceneManager {
         _camera.setPosition(Vec2f.zero);
     }
 
-    void load(string name) {
+    void load(string rid) {
         clear();
-        Level level = Atelier.res.get!Level(name);
+        Level level = Atelier.res.get!Level(rid);
         _scenes.array = level.build();
         _sortScenes();
     }

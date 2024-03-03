@@ -120,7 +120,7 @@ private abstract class ImageBuilder {
 
 private class AnimationBuilder : ImageBuilder {
     private {
-        string _id;
+        string _rid;
     }
 
     @property override string type() const {
@@ -131,7 +131,7 @@ private class AnimationBuilder : ImageBuilder {
     }
 
     this(const Farfadet ffd) {
-        _id = ffd.get!string(0);
+        _rid = ffd.get!string(0);
 
         foreach (node; ffd.nodes) {
             switch (node.name) {
@@ -143,18 +143,18 @@ private class AnimationBuilder : ImageBuilder {
     }
 
     override Image build() {
-        Animation animation = Atelier.res.get!Animation(_id);
+        Animation animation = Atelier.res.get!Animation(_rid);
         super.build(animation);
         return animation;
     }
 
     override void serialize(OutStream stream) {
-        stream.write!string(_id);
+        stream.write!string(_rid);
         super.serialize(stream);
     }
 
     override void deserialize(InStream stream) {
-        _id = stream.read!string();
+        _rid = stream.read!string();
         super.deserialize(stream);
     }
 }
@@ -269,7 +269,7 @@ private class CircleBuilder : ImageBuilder {
 
 private class NinePatchBuilder : ImageBuilder {
     private {
-        string _id;
+        string _rid;
     }
 
     @property override string type() const {
@@ -280,7 +280,7 @@ private class NinePatchBuilder : ImageBuilder {
     }
 
     this(const Farfadet ffd) {
-        _id = ffd.get!string(0);
+        _rid = ffd.get!string(0);
 
         foreach (node; ffd.nodes) {
             switch (node.name) {
@@ -292,18 +292,18 @@ private class NinePatchBuilder : ImageBuilder {
     }
 
     override Image build() {
-        NinePatch ninepatch = Atelier.res.get!NinePatch(_id);
+        NinePatch ninepatch = Atelier.res.get!NinePatch(_rid);
         super.build(ninepatch);
         return ninepatch;
     }
 
     override void serialize(OutStream stream) {
-        stream.write!string(_id);
+        stream.write!string(_rid);
         super.serialize(stream);
     }
 
     override void deserialize(InStream stream) {
-        _id = stream.read!string();
+        _rid = stream.read!string();
         super.deserialize(stream);
     }
 }
@@ -424,7 +424,7 @@ private class RoundedRectangleBuilder : ImageBuilder {
 
 private class SpriteBuilder : ImageBuilder {
     private {
-        string _id;
+        string _rid;
     }
 
     @property override string type() const {
@@ -435,7 +435,7 @@ private class SpriteBuilder : ImageBuilder {
     }
 
     this(const Farfadet ffd) {
-        _id = ffd.get!string(0);
+        _rid = ffd.get!string(0);
 
         foreach (node; ffd.nodes) {
             switch (node.name) {
@@ -447,25 +447,25 @@ private class SpriteBuilder : ImageBuilder {
     }
 
     override Image build() {
-        Sprite sprite = Atelier.res.get!Sprite(_id);
+        Sprite sprite = Atelier.res.get!Sprite(_rid);
         super.build(sprite);
         return sprite;
     }
 
     override void serialize(OutStream stream) {
-        stream.write!string(_id);
+        stream.write!string(_rid);
         super.serialize(stream);
     }
 
     override void deserialize(InStream stream) {
-        _id = stream.read!string();
+        _rid = stream.read!string();
         super.deserialize(stream);
     }
 }
 
 private class TilemapBuilder : ImageBuilder {
     private {
-        string _id;
+        string _rid;
     }
 
     @property override string type() const {
@@ -476,7 +476,7 @@ private class TilemapBuilder : ImageBuilder {
     }
 
     this(const Farfadet ffd) {
-        _id = ffd.get!string(0);
+        _rid = ffd.get!string(0);
 
         foreach (node; ffd.nodes) {
             switch (node.name) {
@@ -488,18 +488,18 @@ private class TilemapBuilder : ImageBuilder {
     }
 
     override Image build() {
-        Tilemap tilemap = Atelier.res.get!Tilemap(_id);
+        Tilemap tilemap = Atelier.res.get!Tilemap(_rid);
         super.build(tilemap);
         return tilemap;
     }
 
     override void serialize(OutStream stream) {
-        stream.write!string(_id);
+        stream.write!string(_rid);
         super.serialize(stream);
     }
 
     override void deserialize(InStream stream) {
-        _id = stream.read!string();
+        _rid = stream.read!string();
         super.deserialize(stream);
     }
 }
@@ -662,7 +662,7 @@ private class EntityBuilder {
 private class ParticleSourceBuilder {
     private {
         Vec2f _position = Vec2f.zero;
-        string _id;
+        string _rid;
         string _name;
         string[] _tags;
     }
@@ -671,7 +671,7 @@ private class ParticleSourceBuilder {
     }
 
     this(const Farfadet ffd) {
-        _id = ffd.get!string(0);
+        _rid = ffd.get!string(0);
 
         foreach (node; ffd.nodes) {
             switch (node.name) {
@@ -695,7 +695,7 @@ private class ParticleSourceBuilder {
     }
 
     ParticleSource build() {
-        ParticleSource source = Atelier.res.get!ParticleSource(_id);
+        ParticleSource source = Atelier.res.get!ParticleSource(_rid);
         source.name = _name;
         source.tags = _tags;
         source.position = _position;
@@ -703,14 +703,14 @@ private class ParticleSourceBuilder {
     }
 
     void serialize(OutStream stream) {
-        stream.write!string(_id);
+        stream.write!string(_rid);
         stream.write!string(_name);
         stream.write!(string[])(_tags);
         stream.write!Vec2f(_position);
     }
 
     void deserialize(InStream stream) {
-        _id = stream.read!string();
+        _rid = stream.read!string();
         _name = stream.read!string();
         _tags = stream.read!(string[])();
         _position = stream.read!Vec2f();

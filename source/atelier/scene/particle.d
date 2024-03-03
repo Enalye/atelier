@@ -252,8 +252,8 @@ final class ParticleSource : Resource!ParticleSource {
         }
     }
 
-    void setSprite(string id) {
-        _sprite = Atelier.res.get!Sprite(id);
+    void setSprite(string rid) {
+        _sprite = Atelier.res.get!Sprite(rid);
         _spriteSize = _sprite.size;
     }
 

@@ -24,6 +24,7 @@ scene.addEntity(player);");
     GrType entityType = library.addNative("Entity");
     GrType imageType = grGetNativeType("Image");
     GrType canvasType = grGetNativeType("Canvas");
+    GrType spriteType = grGetNativeType("Sprite");
     GrType audioComponentType = grGetNativeType("AudioComponent");
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
 
@@ -63,6 +64,12 @@ scene.addEntity(player);");
     library.setParameters(["entity"]);
     library.addFunction(&_getCanvas, "getCanvas", [
             entityType, grOptional(canvasType)
+        ]);
+
+    library.setDescription(GrLocale.fr_FR, "Retourne le sprite du canvas de rendu de l’entité");
+    library.setParameters(["entity"]);
+    library.addFunction(&_getSprite, "getSprite", [
+            entityType, grOptional(spriteType)
         ]);
 
     library.setDescription(GrLocale.fr_FR, "Supprime le canvas de l’entité");
@@ -153,6 +160,16 @@ private void _getCanvas(GrCall call) {
     Canvas canvas = entity.getCanvas();
     if (canvas) {
         call.setNative(canvas);
+        return;
+    }
+    call.setNull();
+}
+
+private void _getSprite(GrCall call) {
+    Entity entity = call.getNative!Entity(0);
+    Sprite sprite = entity.getSprite();
+    if (sprite) {
+        call.setNative(sprite);
         return;
     }
     call.setNull();

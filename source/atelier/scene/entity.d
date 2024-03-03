@@ -147,6 +147,10 @@ final class Entity {
         return _canvas;
     }
 
+    Sprite getSprite() {
+        return _sprite;
+    }
+
     void removeCanvas() {
         _canvas = null;
         _sprite = null;

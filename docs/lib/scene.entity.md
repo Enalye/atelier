@@ -27,10 +27,11 @@ scene.addEntity(player);
 |[addImage](#func_1)|*entity*: **Entity**, *image*: **Image**||
 |[addTag](#func_2)|*scene*: **Entity**, *tag*: **string**||
 |[getCanvas](#func_3)|*entity*: **Entity**, *param1*: **Canvas?**||
-|[getTags](#func_4)|*scene*: **Entity**||
-|[hasTag](#func_5)|*scene*: **Entity**, *tag*: **string**|**bool**|
-|[removeCanvas](#func_6)|*entity*: **Entity**||
-|[setCanvas](#func_7)|*entity*: **Entity**, *width*: **uint**, *height*: **uint**||
+|[getSprite](#func_4)|*entity*: **Entity**, *param1*: **Sprite?**||
+|[getTags](#func_5)|*scene*: **Entity**||
+|[hasTag](#func_6)|*scene*: **Entity**, *tag*: **string**|**bool**|
+|[removeCanvas](#func_7)|*entity*: **Entity**||
+|[setCanvas](#func_8)|*entity*: **Entity**, *width*: **uint**, *height*: **uint**||
 
 
 ***
@@ -57,21 +58,26 @@ Ajoute un tag à l’entité
 Retourne le canvas de rendu de l’entité
 
 <a id="func_4"></a>
+> getSprite(*entity*: **Entity**, *param1*: **Sprite?**)
+
+Retourne le sprite du canvas de rendu de l’entité
+
+<a id="func_5"></a>
 > getTags(*scene*: **Entity**)
 
 Récupère les tags de l’entité
 
-<a id="func_5"></a>
+<a id="func_6"></a>
 > hasTag(*scene*: **Entity**, *tag*: **string**) (**bool**)
 
 Vérifie si l’entité possède le tag
 
-<a id="func_6"></a>
+<a id="func_7"></a>
 > removeCanvas(*entity*: **Entity**)
 
 Supprime le canvas de l’entité
 
-<a id="func_7"></a>
+<a id="func_8"></a>
 > setCanvas(*entity*: **Entity**, *width*: **uint**, *height*: **uint**)
 
 Crée un canvas de rendu de l’entité

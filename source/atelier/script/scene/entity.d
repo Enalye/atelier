@@ -23,6 +23,7 @@ scene.addEntity(player);");
 
     GrType entityType = library.addNative("Entity");
     GrType imageType = grGetNativeType("Image");
+    GrType canvasType = grGetNativeType("Canvas");
     GrType audioComponentType = grGetNativeType("AudioComponent");
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
 
@@ -53,6 +54,20 @@ scene.addEntity(player);");
     library.setDescription(GrLocale.fr_FR, "Ajoute une image à l’entité");
     library.setParameters(["entity", "image"]);
     library.addFunction(&_addImage, "addImage", [entityType, imageType]);
+
+    library.setDescription(GrLocale.fr_FR, "Crée un canvas de rendu de l’entité");
+    library.setParameters(["entity", "width", "height"]);
+    library.addFunction(&_setCanvas, "setCanvas", [entityType, grUInt, grUInt]);
+
+    library.setDescription(GrLocale.fr_FR, "Retourne le canvas de rendu de l’entité");
+    library.setParameters(["entity"]);
+    library.addFunction(&_getCanvas, "getCanvas", [
+            entityType, grOptional(canvasType)
+        ]);
+
+    library.setDescription(GrLocale.fr_FR, "Supprime le canvas de l’entité");
+    library.setParameters(["entity"]);
+    library.addFunction(&_removeCanvas, "removeCanvas", [entityType]);
 }
 
 private void _ctor(GrCall call) {
@@ -126,4 +141,24 @@ private void _addImage(GrCall call) {
     Entity entity = call.getNative!Entity(0);
     Image image = call.getNative!Image(1);
     entity.addImage(image);
+}
+
+private void _setCanvas(GrCall call) {
+    Entity entity = call.getNative!Entity(0);
+    entity.setCanvas(call.getUInt(1), call.getUInt(2));
+}
+
+private void _getCanvas(GrCall call) {
+    Entity entity = call.getNative!Entity(0);
+    Canvas canvas = entity.getCanvas();
+    if (canvas) {
+        call.setNative(canvas);
+        return;
+    }
+    call.setNull();
+}
+
+private void _removeCanvas(GrCall call) {
+    Entity entity = call.getNative!Entity(0);
+    entity.removeCanvas();
 }

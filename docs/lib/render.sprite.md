@@ -13,6 +13,7 @@ Hérite de **Image**
 |[@**Sprite**](#ctor_0)| *param0*: **string**||
 |[@**Sprite**](#ctor_1)| *param0*: **ImageData**||
 |[@**Sprite**](#ctor_2)| *param0*: **Scene**||
+|[@**Sprite**](#ctor_3)| *param0*: **Entity**||
 ## Propriétés
 |Propriété|Natif|Type|Accesseur|Modifieur|Description|
 |-|-|-|-|-|-|

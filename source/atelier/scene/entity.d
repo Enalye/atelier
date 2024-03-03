@@ -9,6 +9,7 @@ import std.algorithm;
 
 import atelier.audio;
 import atelier.common;
+import atelier.core;
 import atelier.render;
 import atelier.scene.component;
 import atelier.scene.scene;
@@ -16,6 +17,8 @@ import atelier.scene.scene;
 /// Entité présente dans une scène
 final class Entity {
     private {
+        Canvas _canvas;
+        Sprite _sprite;
         Scene _scene;
         Entity _parent;
         EntityComponent[string] _components;
@@ -54,6 +57,10 @@ final class Entity {
 
         Entity parent() {
             return _parent;
+        }
+
+        Canvas canvas() {
+            return _canvas;
         }
     }
 
@@ -131,15 +138,43 @@ final class Entity {
         }
     }
 
+    void setCanvas(uint width, uint height) {
+        _canvas = new Canvas(width, height);
+        _sprite = new Sprite(_canvas);
+    }
+
+    Canvas getCanvas() {
+        return _canvas;
+    }
+
+    void removeCanvas() {
+        _canvas = null;
+        _sprite = null;
+    }
+
     void draw(Vec2f origin) {
-        Vec2f absolutePosition = origin + position;
+        if (_canvas) {
+            Atelier.renderer.pushCanvas(_canvas);
+            foreach (image; _images) {
+                image.draw(Vec2f.zero);
+            }
 
-        foreach (image; _images) {
-            image.draw(absolutePosition);
+            foreach (entity; _children) {
+                entity.draw(Vec2f.zero);
+            }
+            Atelier.renderer.popCanvas();
+            _sprite.draw(origin + position);
         }
+        else {
+            Vec2f absolutePosition = origin + position;
 
-        foreach (entity; _children) {
-            entity.draw(absolutePosition);
+            foreach (image; _images) {
+                image.draw(absolutePosition);
+            }
+
+            foreach (entity; _children) {
+                entity.draw(absolutePosition);
+            }
         }
     }
 

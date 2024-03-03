@@ -25,12 +25,15 @@ void loadLibRender_sprite(GrLibDefinition library) {
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
     GrType imageDataType = grGetNativeType("ImageData");
     GrType sceneType = grGetNativeType("Scene");
+    GrType entityType = grGetNativeType("Entity");
 
     library.addConstructor(&_ctor_str, spriteType, [grString]);
 
     library.addConstructor(&_ctor_imageData, spriteType, [imageDataType]);
 
     library.addConstructor(&_ctor_scene, spriteType, [sceneType]);
+
+    library.addConstructor(&_ctor_entity, spriteType, [entityType]);
 
     library.addProperty(&_size!"get", &_size!"set", "size", spriteType, vec2fType);
 }
@@ -45,6 +48,15 @@ private void _ctor_imageData(GrCall call) {
 
 private void _ctor_scene(GrCall call) {
     call.setNative(new Sprite(call.getNative!Scene(0).canvas));
+}
+
+private void _ctor_entity(GrCall call) {
+    Canvas canvas = call.getNative!Entity(0).canvas;
+    if (canvas) {
+        call.setNative(new Sprite(canvas));
+        return;
+    }
+    call.raise("NullError");
 }
 
 private void _size(string op)(GrCall call) {

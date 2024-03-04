@@ -18,8 +18,11 @@ scene.addEntity(player);
 |Propriété|Natif|Type|Accesseur|Modifieur|Description|
 |-|-|-|-|-|-|
 |audio|**Entity**|**AudioComponent**|oui|non||
+|isAlive|**Entity**|**bool**|oui|non||
+|isVisible|**Entity**|**bool**|oui|oui||
 |name|**Entity**|**string**|oui|oui||
 |position|**Entity**|**Vec2\<float>**|oui|oui||
+|zOrder|**Entity**|**int**|oui|oui||
 ## Fonctions
 |Fonction|Entrée|Sortie|
 |-|-|-|
@@ -30,8 +33,9 @@ scene.addEntity(player);
 |[getSprite](#func_4)|*entity*: **Entity**, *param1*: **Sprite?**||
 |[getTags](#func_5)|*scene*: **Entity**||
 |[hasTag](#func_6)|*scene*: **Entity**, *tag*: **string**|**bool**|
-|[removeCanvas](#func_7)|*entity*: **Entity**||
-|[setCanvas](#func_8)|*entity*: **Entity**, *width*: **uint**, *height*: **uint**||
+|[remove](#func_7)|*entity*: **Entity**||
+|[removeCanvas](#func_8)|*entity*: **Entity**||
+|[setCanvas](#func_9)|*entity*: **Entity**, *width*: **uint**, *height*: **uint**||
 
 
 ***
@@ -73,11 +77,16 @@ Récupère les tags de l’entité
 Vérifie si l’entité possède le tag
 
 <a id="func_7"></a>
+> remove(*entity*: **Entity**)
+
+Supprime l’entité
+
+<a id="func_8"></a>
 > removeCanvas(*entity*: **Entity**)
 
 Supprime le canvas de l’entité
 
-<a id="func_8"></a>
+<a id="func_9"></a>
 > setCanvas(*entity*: **Entity**, *width*: **uint**, *height*: **uint**)
 
 Crée un canvas de rendu de l’entité

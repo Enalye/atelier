@@ -36,6 +36,8 @@ scene.addParticleSource(src);
 ## Propriétés
 |Propriété|Natif|Type|Accesseur|Modifieur|Description|
 |-|-|-|-|-|-|
+|isAlive|**ParticleSource**|**bool**|oui|non|Mode d’émission des particules|
+|isVisible|**ParticleSource**|**bool**|oui|oui|Mode d’émission des particules|
 |position|**ParticleSource**|**Vec2\<float>**|oui|oui|Mode d’émission des particules|
 ## Fonctions
 |Fonction|Entrée|Sortie|

@@ -24,6 +24,7 @@ final class Entity {
         EntityComponent[string] _components;
         Array!Entity _children;
         Array!Image _images;
+        bool _isVisible = true;
         bool _isAlive = true;
     }
 
@@ -61,6 +62,14 @@ final class Entity {
 
         Canvas canvas() {
             return _canvas;
+        }
+
+        bool isVisible() const {
+            return _isVisible;
+        }
+
+        bool isVisible(bool isVisible_) {
+            return _isVisible = isVisible_;
         }
     }
 
@@ -157,6 +166,9 @@ final class Entity {
     }
 
     void draw(Vec2f origin) {
+        if (!_isVisible)
+            return;
+
         if (_canvas) {
             Atelier.renderer.pushCanvas(_canvas);
             foreach (image; _images) {

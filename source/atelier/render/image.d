@@ -31,9 +31,15 @@ abstract class Image {
 
     int zOrder;
 
-    bool isAlive = true;
-
     bool isVisible = true;
+
+    private bool _isAlive = true;
+
+    @property {
+        bool isAlive() const {
+            return _isAlive;
+        }
+    }
 
     this() {
     }
@@ -49,6 +55,10 @@ abstract class Image {
         blend = image.blend;
         color = image.color;
         alpha = image.alpha;
+    }
+
+    void remove() {
+        _isAlive = false;
     }
 
     /// Redimensionne l’image pour qu’elle puisse tenir dans une taille donnée

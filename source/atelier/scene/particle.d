@@ -46,9 +46,6 @@ private final class Particle {
         }
         frame++;
     }
-
-    void draw() {
-    }
 }
 
 enum ParticleMode {
@@ -67,6 +64,7 @@ final class ParticleSource : Resource!ParticleSource {
         Vec2f _spriteSize = Vec2f.one;
 
         bool _isAlive = true;
+        bool _isVisible = true;
         bool _isRelativePosition;
         bool _isRelativeSpriteAngle;
         bool _isAttachedToCamera;
@@ -94,6 +92,14 @@ final class ParticleSource : Resource!ParticleSource {
     @property {
         bool isAlive() const {
             return _isAlive;
+        }
+
+        bool isVisible() const {
+            return _isVisible;
+        }
+
+        bool isVisible(bool isVisible_) {
+            return _isVisible = isVisible_;
         }
     }
 
@@ -201,7 +207,7 @@ final class ParticleSource : Resource!ParticleSource {
     }
 
     void draw(Vec2f origin) {
-        if (!_sprite)
+        if (!_sprite || !_isVisible)
             return;
 
         _sprite.blend = _blend;

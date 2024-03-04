@@ -48,6 +48,8 @@ scene.addParticleSource(src);");
     library.addConstructor(&_ctor_str, sourceType, [grString]);
 
     library.addProperty(&_position!"get", &_position!"set", "position", sourceType, vec2fType);
+    library.addProperty(&_isVisible!"get", &_isVisible!"set", "isVisible", sourceType, grBool);
+    library.addProperty(&_isAlive, null, "isAlive", sourceType, grBool);
 
     library.setDescription(GrLocale.fr_FR,
         "Démarre l’émission de particules toutes les `interval` frames.");
@@ -288,6 +290,20 @@ private void _position(string op)(GrCall call) {
         source.position = call.getNative!SVec2f(1);
     }
     call.setNative(svec2(source.position));
+}
+
+private void _isVisible(string op)(GrCall call) {
+    ParticleSource source = call.getNative!ParticleSource(0);
+
+    static if (op == "set") {
+        source.isVisible = call.getBool(1);
+    }
+    call.setBool(source.isVisible);
+}
+
+private void _isAlive(GrCall call) {
+    ParticleSource source = call.getNative!ParticleSource(0);
+    call.setBool(source.isAlive);
 }
 
 private void _start(GrCall call) {

@@ -33,7 +33,9 @@ addScene(scene);");
 
     library.addProperty(&_name!"get", &_name!"set", "name", sceneType, grString);
     library.addProperty(&_position!"get", &_position!"set", "position", sceneType, vec2fType);
+    library.addProperty(&_zOrder!"get", &_zOrder!"set", "zOrder", entityType, grInt);
     library.addProperty(&_isVisible!"get", &_isVisible!"set", "isVisible", sceneType, grBool);
+    library.addProperty(&_isAlive, null, "isAlive", sceneType, grBool);
     library.addProperty(&_canvas, null, "canvas", sceneType, canvasType);
 
     library.setDescription(GrLocale.fr_FR, "Charge un niveau");
@@ -131,6 +133,10 @@ addScene(scene);");
     library.setDescription(GrLocale.fr_FR, "Supprime les élements d’interface de la scène");
     library.setParameters(["scene"]);
     library.addFunction(&_clearUI, "clearUI", [sceneType]);
+
+    library.setDescription(GrLocale.fr_FR, "Supprime la scène");
+    library.setParameters(["scene"]);
+    library.addFunction(&_remove, "remove", [sceneType]);
 }
 
 private void _ctor(GrCall call) {
@@ -155,6 +161,15 @@ private void _position(string op)(GrCall call) {
     call.setNative(svec2(scene.position));
 }
 
+private void _zOrder(string op)(GrCall call) {
+    Scene scene = call.getNative!Scene(0);
+
+    static if (op == "set") {
+        scene.zOrder = call.getInt(1);
+    }
+    call.setInt(scene.zOrder);
+}
+
 private void _isVisible(string op)(GrCall call) {
     Scene scene = call.getNative!Scene(0);
 
@@ -162,6 +177,11 @@ private void _isVisible(string op)(GrCall call) {
         scene.isVisible = call.getBool(1);
     }
     call.setBool(scene.isVisible);
+}
+
+private void _isAlive(GrCall call) {
+    Scene scene = call.getNative!Scene(0);
+    call.setBool(scene.isAlive);
 }
 
 private void _canvas(GrCall call) {
@@ -318,4 +338,9 @@ private void _addUI(GrCall call) {
 private void _clearUI(GrCall call) {
     Scene scene = call.getNative!Scene(0);
     scene.clearUI();
+}
+
+private void _remove(GrCall call) {
+    Scene scene = call.getNative!Scene(0);
+    scene.remove();
 }

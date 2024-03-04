@@ -32,6 +32,9 @@ scene.addEntity(player);");
 
     library.addProperty(&_name!"get", &_name!"set", "name", entityType, grString);
     library.addProperty(&_position!"get", &_position!"set", "position", entityType, vec2fType);
+    library.addProperty(&_zOrder!"get", &_zOrder!"set", "zOrder", entityType, grInt);
+    library.addProperty(&_isVisible!"get", &_isVisible!"set", "isVisible", entityType, grBool);
+    library.addProperty(&_isAlive, null, "isAlive", entityType, grBool);
 
     library.addProperty(&_audio, null, "audio", entityType, audioComponentType);
 
@@ -75,6 +78,10 @@ scene.addEntity(player);");
     library.setDescription(GrLocale.fr_FR, "Supprime le canvas de l’entité");
     library.setParameters(["entity"]);
     library.addFunction(&_removeCanvas, "removeCanvas", [entityType]);
+
+    library.setDescription(GrLocale.fr_FR, "Supprime l’entité");
+    library.setParameters(["entity"]);
+    library.addFunction(&_remove, "remove", [entityType]);
 }
 
 private void _ctor(GrCall call) {
@@ -97,6 +104,29 @@ private void _position(string op)(GrCall call) {
         entity.position = call.getNative!SVec2f(1);
     }
     call.setNative(svec2(entity.position));
+}
+
+private void _zOrder(string op)(GrCall call) {
+    Entity entity = call.getNative!Entity(0);
+
+    static if (op == "set") {
+        entity.zOrder = call.getInt(1);
+    }
+    call.setInt(entity.zOrder);
+}
+
+private void _isVisible(string op)(GrCall call) {
+    Entity entity = call.getNative!Entity(0);
+
+    static if (op == "set") {
+        entity.isVisible = call.getBool(1);
+    }
+    call.setBool(entity.isVisible);
+}
+
+private void _isAlive(GrCall call) {
+    Entity entity = call.getNative!Entity(0);
+    call.setBool(entity.isAlive);
 }
 
 private void _audio(GrCall call) {
@@ -178,4 +208,9 @@ private void _getSprite(GrCall call) {
 private void _removeCanvas(GrCall call) {
     Entity entity = call.getNative!Entity(0);
     entity.removeCanvas();
+}
+
+private void _remove(GrCall call) {
+    Scene scene = call.getNative!Scene(0);
+    scene.remove();
 }

@@ -17,9 +17,11 @@ addScene(scene);
 |Propriété|Natif|Type|Accesseur|Modifieur|Description|
 |-|-|-|-|-|-|
 |canvas|**Scene**|**Canvas**|oui|non||
+|isAlive|**Scene**|**bool**|oui|non||
 |isVisible|**Scene**|**bool**|oui|oui||
 |name|**Scene**|**string**|oui|oui||
 |position|**Scene**|**Vec2\<float>**|oui|oui||
+|zOrder|**Entity**|**int**|oui|oui||
 ## Fonctions
 |Fonction|Entrée|Sortie|
 |-|-|-|
@@ -42,6 +44,7 @@ addScene(scene);
 |[getTags](#func_16)|*scene*: **Scene**|**[string]**|
 |[hasTag](#func_17)|*scene*: **Scene**, *tag*: **string**|**bool**|
 |[loadLevel](#func_18)|*name*: **string**||
+|[remove](#func_19)|*scene*: **Scene**||
 
 
 ***
@@ -141,4 +144,9 @@ Vérifie si la scène possède le tag
 > loadLevel(*name*: **string**)
 
 Charge un niveau
+
+<a id="func_19"></a>
+> remove(*scene*: **Scene**)
+
+Supprime la scène
 

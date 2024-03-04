@@ -166,13 +166,13 @@ final class Tilemap : Image, Resource!Tilemap {
             int maxX = _width;
             int maxY = _height;
 
-            if (Atelier.scene.isOnScene) {
+            /*if (Atelier.scene.isOnScene) {
                 Vec4f cameraClip = Atelier.scene.cameraClip;
                 minX = max(0, cast(int) floor((cameraClip.x - startPos.x) / size.x));
                 minY = max(0, cast(int) floor((cameraClip.y - startPos.y) / size.y));
                 maxX = min(_width, cast(int) ceil((cameraClip.z - startPos.x) / size.x));
                 maxY = min(_height, cast(int) ceil((cameraClip.w - startPos.y) / size.y));
-            }
+            }*/
 
             for (int y = minY; y < maxY; y++) {
                 for (int x = minX; x < maxX; x++) {

@@ -26,8 +26,10 @@ final class Tileset : Resource!Tileset {
     }
 
     Vec4i clip;
+    Vec2i tileSize;
     int columns, lines, maxCount;
     Vec2i margin;
+    bool isIsometric;
 
     int frameTime;
 
@@ -49,6 +51,7 @@ final class Tileset : Resource!Tileset {
     this(ImageData texture, Vec4i clip_, uint columns_, uint lines_, uint maxCount_ = 0) {
         _imageData = texture;
         clip = clip_;
+        tileSize = clip.zw;
         columns = columns_;
         lines = lines_;
         maxCount = maxCount_;
@@ -58,9 +61,11 @@ final class Tileset : Resource!Tileset {
     this(Tileset tileset) {
         _imageData = tileset._imageData;
         clip = tileset.clip;
+        tileSize = tileset.tileSize;
         columns = tileset.columns;
         lines = tileset.lines;
         maxCount = tileset.maxCount;
+        isIsometric = tileset.isIsometric;
         frameTime = tileset.frameTime;
         _tileFrames = tileset._tileFrames;
         margin = tileset.margin;

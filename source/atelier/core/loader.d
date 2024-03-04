@@ -354,9 +354,11 @@ private void _compileTileset(string path, const Farfadet ffd, OutStream stream) 
     string textureRID;
     Vec4i clip = Vec4i(-1, -1, -1, -1);
     Vec2i margin;
+    Vec2i tileSize;
     bool hasTexture, hasClip;
     int frameTime, columns, lines, maxCount;
     int[] tileFrames;
+    bool isIsometric;
 
     foreach (node; ffd.nodes) {
         switch (node.name) {
@@ -370,6 +372,16 @@ private void _compileTileset(string path, const Farfadet ffd, OutStream stream) 
             clip.z = node.get!int(2);
             clip.w = node.get!int(3);
             hasClip = true;
+
+            if (tileSize.sum() == 0) {
+                tileSize = clip.zw;
+            }
+            break;
+        case "tileSize":
+            tileSize = Vec2i(node.get!int(0), node.get!int(1));
+            break;
+        case "isIsometric":
+            isIsometric = node.get!bool(0);
             break;
         case "frameTime":
             frameTime = node.get!int(0);
@@ -410,9 +422,11 @@ private void _compileTileset(string path, const Farfadet ffd, OutStream stream) 
         stream.write!int(-1);
     }
 
+    stream.write!Vec2i(tileSize);
     stream.write!int(columns);
     stream.write!int(lines);
     stream.write!int(maxCount);
+    stream.write!bool(isIsometric);
     stream.write!(int[])(tileFrames);
     stream.write!int(frameTime);
     stream.write!int(margin.x);
@@ -434,9 +448,11 @@ private void _loadTileset(InStream stream) {
         hasClip = true;
     }
 
+    Vec2i tileSize = stream.read!Vec2i();
     int columns = stream.read!int();
     int lines = stream.read!int();
     int maxCount = stream.read!int();
+    bool isIsometric = stream.read!bool();
     int[] tileFrames = stream.read!(int[])();
     int frameTime = stream.read!int();
 
@@ -454,8 +470,10 @@ private void _loadTileset(InStream stream) {
         }
 
         Tileset tileset = new Tileset(texture, clip, columns, lines, maxCount);
+        tileset.tileSize = tileSize;
         tileset.frameTime = frameTime;
         tileset.margin = margin;
+        tileset.isIsometric = isIsometric;
 
         for (int tileId; tileId < tileFrames.length; tileId += 2) {
             tileset.setTileFrame(cast(short) tileFrames[tileId], cast(short) tileFrames[tileId + 1]);
@@ -471,6 +489,7 @@ private void _compileTilemap(string path, const Farfadet ffd, OutStream stream) 
     int width, height;
     bool hasTileset, hasSize;
     int[][] tiles;
+    int[][] heightmap;
 
     foreach (node; ffd.nodes) {
         switch (node.name) {
@@ -486,6 +505,9 @@ private void _compileTilemap(string path, const Farfadet ffd, OutStream stream) 
         case "tiles":
             tiles = node.get!(int[][])(0);
             break;
+        case "heightmap":
+            heightmap = node.get!(int[][])(0);
+            break;
         default:
             break;
         }
@@ -498,6 +520,7 @@ private void _compileTilemap(string path, const Farfadet ffd, OutStream stream) 
     stream.write!int(height);
     stream.write!string(tilesetRID);
     stream.write!(int[][])(tiles);
+    stream.write!(int[][])(heightmap);
 }
 
 private void _loadTilemap(InStream stream) {
@@ -506,11 +529,15 @@ private void _loadTilemap(InStream stream) {
     const int height = stream.read!int();
     const string tilesetRID = stream.read!string();
     const int[][] tiles = stream.read!(int[][])();
+    const int[][] heightmap = stream.read!(int[][])();
 
     Atelier.res.store(rid, {
         Tileset tileset = Atelier.res.get!Tileset(tilesetRID);
         Tilemap tilemap = new Tilemap(tileset, width, height);
-        tilemap.setTiles(tiles);
+        if (tiles.length)
+            tilemap.setTiles(tiles);
+        if (heightmap.length)
+            tilemap.setTilesElevation(heightmap);
         return tilemap;
     });
 }

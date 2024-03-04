@@ -151,6 +151,9 @@ Paramètres:
     - y (int)
     - largeur (int)
     - hauteur (int)
+ * `tileSize` (optionnel) Taille de la surface de la tuile dans le clip
+    - largeur (int)
+    - hauteur (int)
  * `frameTime` (optionnel)
     - durée entre chaque frame (int)
  * `tileFrame` (optionnel) animation des tuiles
@@ -191,6 +194,8 @@ Paramètres:
     - hauteur de la grille en tuiles (uint)
  * `tiles` (optionnel)
     - grille des tuiles à la dimension de `size` (int[][])
+ * `heightmap` (optionnel)
+    - grille des élévations des tuiles à la dimension de `size` (int[][])
 
 ## Sound
 Les sons permettent de jouer de l’audio et sont entièrement chargés en mémoire.

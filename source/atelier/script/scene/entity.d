@@ -39,15 +39,15 @@ scene.addEntity(player);");
     library.addProperty(&_audio, null, "audio", entityType, audioComponentType);
 
     library.setDescription(GrLocale.fr_FR, "Récupère les tags de l’entité");
-    library.setParameters(["scene"]);
+    library.setParameters(["entity"]);
     library.addFunction(&_getTags, "getTags", [entityType]);
 
     library.setDescription(GrLocale.fr_FR, "Ajoute un tag à l’entité");
-    library.setParameters(["scene", "tag"]);
+    library.setParameters(["entity", "tag"]);
     library.addFunction(&_addTag, "addTag", [entityType, grString]);
 
     library.setDescription(GrLocale.fr_FR, "Vérifie si l’entité possède le tag");
-    library.setParameters(["scene", "tag"]);
+    library.setParameters(["entity", "tag"]);
     library.addFunction(&_hasTag, "hasTag", [entityType, grString], [grBool]);
 
     library.setDescription(GrLocale.fr_FR,
@@ -211,6 +211,6 @@ private void _removeCanvas(GrCall call) {
 }
 
 private void _remove(GrCall call) {
-    Scene scene = call.getNative!Scene(0);
-    scene.remove();
+    Entity entity = call.getNative!Entity(0);
+    entity.remove();
 }

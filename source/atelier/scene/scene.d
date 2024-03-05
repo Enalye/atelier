@@ -13,9 +13,12 @@ import atelier.core;
 import atelier.input;
 import atelier.render;
 import atelier.ui;
+import atelier.scene.actor;
 import atelier.scene.camera;
+import atelier.scene.collider;
 import atelier.scene.entity;
 import atelier.scene.particle;
+import atelier.scene.solid;
 
 /// Représente un contexte contenant des entités
 final class Scene {
@@ -23,11 +26,15 @@ final class Scene {
         Canvas _canvas;
         Sprite _sprite;
         UIManager _uiManager;
+        Array!Actor _actors;
+        Array!Solid _solids;
         Array!Entity _entities;
         Array!ParticleSource _particleSources;
         bool _isAlive = true;
         bool _isVisible = true;
         Vec2i _size;
+
+        bool _showColliders = true;
     }
 
     string name;
@@ -64,6 +71,14 @@ final class Scene {
         Vec2f globalPosition() const {
             return position + Atelier.scene.camera.getPosition() * parallax;
         }
+
+        Array!Solid solids() {
+            return _solids;
+        }
+
+        Array!Actor actors() {
+            return _actors;
+        }
     }
 
     this() {
@@ -77,6 +92,9 @@ final class Scene {
         _canvas = new Canvas(_size.x, _size.y);
         _sprite = new Sprite(_canvas);
         _sprite.anchor = Vec2f.half;
+
+        _actors = new Array!Actor;
+        _solids = new Array!Solid;
     }
 
     private void _sortEntities() {
@@ -92,6 +110,16 @@ final class Scene {
     void addParticleSource(ParticleSource source) {
         source.setScene(this);
         _particleSources ~= source;
+    }
+
+    void addActor(Actor actor) {
+        actor.setScene(this);
+        _actors ~= actor;
+    }
+
+    void addSolid(Solid solid) {
+        solid.setScene(this);
+        _solids ~= solid;
     }
 
     void addUI(UIElement ui) {
@@ -148,20 +176,29 @@ final class Scene {
         return result;
     }
 
+    Solid collideAt(Vec2i point, Vec2i halfSize) {
+        foreach (Solid solid; _solids) {
+            if (solid.collideWith(point, halfSize))
+                return solid;
+        }
+        return null;
+    }
+
     void update() {
         _uiManager.cameraPosition = _sprite.size / 2f - globalPosition;
         _uiManager.update();
 
-        bool isEntitiesDirty;
+        bool isDirty = false;
         foreach (idx, entity; _entities) {
             entity.update();
             if (!entity.isAlive) {
                 _entities.mark(idx);
-                isEntitiesDirty = true;
+                isDirty = true;
             }
         }
 
-        if (isEntitiesDirty) {
+        if (isDirty) {
+            isDirty = false;
             _entities.sweep();
             _sortEntities();
         }
@@ -170,10 +207,40 @@ final class Scene {
             source.update();
             if (!source.isAlive) {
                 _particleSources.mark(idx);
-                isEntitiesDirty = true;
+                isDirty = true;
             }
         }
-        _particleSources.sweep();
+
+        if (isDirty) {
+            isDirty = false;
+            _particleSources.sweep();
+        }
+
+        foreach (idx, actor; _actors) {
+            actor.update();
+            if (!actor.isAlive) {
+                _actors.mark(idx);
+                isDirty = true;
+            }
+        }
+
+        if (isDirty) {
+            isDirty = false;
+            _actors.sweep();
+        }
+
+        foreach (idx, solid; _solids) {
+            solid.update();
+            if (!solid.isAlive) {
+                _solids.mark(idx);
+                isDirty = true;
+            }
+        }
+
+        if (isDirty) {
+            isDirty = false;
+            _solids.sweep();
+        }
     }
 
     void remove() {
@@ -187,12 +254,28 @@ final class Scene {
     }
 
     void render() {
+        Vec2f offset = _sprite.size / 2f - globalPosition;
         foreach (entity; _entities) {
-            entity.draw(_sprite.size / 2f - globalPosition);
+            entity.draw(offset);
         }
 
         foreach (source; _particleSources) {
-            source.draw(_sprite.size / 2f - globalPosition);
+            source.draw(offset);
+        }
+
+        if (_showColliders) {
+            foreach (actor; _actors) {
+                Vec2f pos = offset + cast(Vec2f)(actor.position - actor.hitbox);
+                Atelier.renderer.drawRect(pos, (cast(Vec2f) actor.hitbox) * 2f,
+                    Color.blue, 1f, false);
+            }
+
+            foreach (solid; _solids) {
+                Vec2f pos = offset + cast(Vec2f)(solid.position - solid.hitbox);
+                Atelier.renderer.drawRect(pos, (cast(Vec2f) solid.hitbox) * 2f,
+                    Color.red, 1f, false);
+            }
+
         }
 
         _uiManager.draw();

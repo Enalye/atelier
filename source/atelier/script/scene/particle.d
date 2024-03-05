@@ -47,9 +47,22 @@ scene.addParticleSource(src);");
     library.addConstructor(&_ctor, sourceType);
     library.addConstructor(&_ctor_str, sourceType, [grString]);
 
+    library.addProperty(&_name!"get", &_name!"set", "name", sourceType, grString);
     library.addProperty(&_position!"get", &_position!"set", "position", sourceType, vec2fType);
     library.addProperty(&_isVisible!"get", &_isVisible!"set", "isVisible", sourceType, grBool);
     library.addProperty(&_isAlive, null, "isAlive", sourceType, grBool);
+
+    library.setDescription(GrLocale.fr_FR, "Récupère les tags de la source");
+    library.setParameters(["source"]);
+    library.addFunction(&_getTags, "getTags", [sourceType]);
+
+    library.setDescription(GrLocale.fr_FR, "Ajoute un tag à la source");
+    library.setParameters(["source", "tag"]);
+    library.addFunction(&_addTag, "addTag", [sourceType, grString]);
+
+    library.setDescription(GrLocale.fr_FR, "Vérifie si la source possède le tag");
+    library.setParameters(["source", "tag"]);
+    library.addFunction(&_hasTag, "hasTag", [sourceType, grString], [grBool]);
 
     library.setDescription(GrLocale.fr_FR,
         "Démarre l’émission de particules toutes les `interval` frames.");
@@ -283,6 +296,15 @@ private void _ctor_str(GrCall call) {
     call.setNative(source);
 }
 
+private void _name(string op)(GrCall call) {
+    ParticleSource source = call.getNative!ParticleSource(0);
+
+    static if (op == "set") {
+        source.name = call.getString(1);
+    }
+    call.setString(source.name);
+}
+
 private void _position(string op)(GrCall call) {
     ParticleSource source = call.getNative!ParticleSource(0);
 
@@ -304,6 +326,39 @@ private void _isVisible(string op)(GrCall call) {
 private void _isAlive(GrCall call) {
     ParticleSource source = call.getNative!ParticleSource(0);
     call.setBool(source.isAlive);
+}
+
+private void _getTags(GrCall call) {
+    ParticleSource source = call.getNative!ParticleSource(0);
+    GrList list = new GrList;
+    list.setStrings(source.tags);
+    call.setList(list);
+}
+
+private void _addTag(GrCall call) {
+    ParticleSource source = call.getNative!ParticleSource(0);
+    string tag = call.getString(1);
+
+    foreach (sourceTag; source.tags) {
+        if (sourceTag == tag) {
+            return;
+        }
+    }
+
+    source.tags ~= tag;
+}
+
+private void _hasTag(GrCall call) {
+    ParticleSource source = call.getNative!ParticleSource(0);
+    string tag = call.getString(1);
+
+    foreach (sourceTag; source.tags) {
+        if (sourceTag == tag) {
+            call.setBool(true);
+            return;
+        }
+    }
+    call.setBool(false);
 }
 
 private void _start(GrCall call) {

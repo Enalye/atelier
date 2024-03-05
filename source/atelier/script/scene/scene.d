@@ -24,6 +24,8 @@ addScene(scene);");
 
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
     GrType entityType = grGetNativeType("Entity");
+    GrType actorType = grGetNativeType("Actor");
+    GrType solidType = grGetNativeType("Solid");
     GrType particleSourceType = grGetNativeType("ParticleSource");
     GrType canvasType = grGetNativeType("Canvas");
     GrType uiType = grGetNativeType("UIElement");
@@ -125,6 +127,14 @@ addScene(scene);");
     library.addFunction(&_addParticleSource, "addParticleSource", [
             sceneType, particleSourceType
         ]);
+
+    library.setDescription(GrLocale.fr_FR, "Ajoute un solide à la scène");
+    library.setParameters(["scene", "solid"]);
+    library.addFunction(&_addSolid, "addSolid", [sceneType, solidType]);
+
+    library.setDescription(GrLocale.fr_FR, "Ajoute un acteur à la scène");
+    library.setParameters(["scene", "actor"]);
+    library.addFunction(&_addActor, "addActor", [sceneType, actorType]);
 
     library.setDescription(GrLocale.fr_FR, "Ajoute un élément d’interface à la scène");
     library.setParameters(["scene", "ui"]);
@@ -327,6 +337,18 @@ private void _addParticleSource(GrCall call) {
     Scene scene = call.getNative!Scene(0);
     ParticleSource source = call.getNative!ParticleSource(1);
     scene.addParticleSource(source);
+}
+
+private void _addActor(GrCall call) {
+    Scene scene = call.getNative!Scene(0);
+    Actor actor = call.getNative!Actor(1);
+    scene.addActor(actor);
+}
+
+private void _addSolid(GrCall call) {
+    Scene scene = call.getNative!Scene(0);
+    Solid solid = call.getNative!Solid(1);
+    scene.addSolid(solid);
 }
 
 private void _addUI(GrCall call) {

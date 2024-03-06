@@ -478,6 +478,51 @@ final class InputManager {
         }
     }
 
+    /// Est-ce que la touche est appuyée sur cette frame ?
+    bool isDown(InputEvent.KeyButton.Button button) const {
+        return _keyButtonStates[button].down();
+    }
+
+    /// Ditto
+    bool isDown(InputEvent.MouseButton.Button button) const {
+        return _mouseButtonStates[button].down();
+    }
+
+    /// Ditto
+    bool isDown(InputEvent.ControllerButton.Button button) const {
+        return _controllerButtonStates[button].down();
+    }
+
+    /// Est-ce que la touche est relâchée sur cette frame ?
+    bool isUp(InputEvent.KeyButton.Button button) const {
+        return _keyButtonStates[button].up();
+    }
+
+    /// Ditto
+    bool isUp(InputEvent.MouseButton.Button button) const {
+        return _mouseButtonStates[button].up();
+    }
+
+    /// Ditto
+    bool isUp(InputEvent.ControllerButton.Button button) const {
+        return _controllerButtonStates[button].up();
+    }
+
+    /// Est-ce que la touche est maintenue ?
+    bool isHeld(InputEvent.KeyButton.Button button) const {
+        return _keyButtonStates[button].held();
+    }
+
+    /// Ditto
+    bool isHeld(InputEvent.MouseButton.Button button) const {
+        return _mouseButtonStates[button].held();
+    }
+
+    /// Ditto
+    bool isHeld(InputEvent.ControllerButton.Button button) const {
+        return _controllerButtonStates[button].held();
+    }
+
     /// Est-ce que la touche est appuyée ?
     bool isPressed(InputEvent.KeyButton.Button button) const {
         return _keyButtonStates[button].pressed();
@@ -545,10 +590,10 @@ final class InputManager {
         return getActionStrength(positiveId) - getActionStrength(negativeId);
     }
 
-    /*
-    vec2f getVector(string leftAction, string rightAction, string upAction, string downAction) {
-
-    }*/
+    Vec2f getActionVector(string leftAction, string rightAction, string upAction, string downAction) {
+        return Vec2f(getActionStrength(rightAction) - getActionStrength(leftAction),
+            getActionStrength(downAction) - getActionStrength(upAction));
+    }
 }
 
 /// Capture les interruptions

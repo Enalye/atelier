@@ -1,29 +1,31 @@
 # ui.manager
 
 Gestionnaire d’interface
-## Fonctions
+## Natifs
+### UI
+## Fonctions Statiques
 |Fonction|Entrée|Sortie|
 |-|-|-|
-|[addUI](#func_0)|*ui*: **UIElement**||
-|[clearUI](#func_1)|||
-|[setDebugUI](#func_2)|*isDebug*: **bool**||
+|[@**UI**.setDebug](#static_0)|*isDebug*: **bool**||
+|[@**UI**.add](#static_1)|*ui*: **UIElement**||
+|[@**UI**.clear](#static_2)|||
 
 
 ***
-## Description des fonctions
+## Description des fonctions statiques
 
-<a id="func_0"></a>
-> addUI(*ui*: **UIElement**)
+<a id="static_0"></a>
+> @**UI**.setDebug(*isDebug*: **bool**)
+
+Montre les bordures des interfaces
+
+<a id="static_1"></a>
+> @**UI**.add(*ui*: **UIElement**)
 
 Ajoute une interface au sommet de la hiérarchie
 
-<a id="func_1"></a>
-> clearUI()
+<a id="static_2"></a>
+> @**UI**.clear()
 
 Supprime toutes les interfaces
-
-<a id="func_2"></a>
-> setDebugUI(*isDebug*: **bool**)
-
-Montre les bordures des interfaces
 

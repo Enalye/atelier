@@ -28,11 +28,11 @@ scene.addEntity(player);
 |-|-|-|
 |[addChild](#func_0)|*parent*: **Entity**, *child*: **Entity**||
 |[addImage](#func_1)|*entity*: **Entity**, *image*: **Image**||
-|[addTag](#func_2)|*scene*: **Entity**, *tag*: **string**||
+|[addTag](#func_2)|*entity*: **Entity**, *tag*: **string**||
 |[getCanvas](#func_3)|*entity*: **Entity**, *param1*: **Canvas?**||
 |[getSprite](#func_4)|*entity*: **Entity**, *param1*: **Sprite?**||
-|[getTags](#func_5)|*scene*: **Entity**||
-|[hasTag](#func_6)|*scene*: **Entity**, *tag*: **string**|**bool**|
+|[getTags](#func_5)|*entity*: **Entity**||
+|[hasTag](#func_6)|*entity*: **Entity**, *tag*: **string**|**bool**|
 |[remove](#func_7)|*entity*: **Entity**||
 |[removeCanvas](#func_8)|*entity*: **Entity**||
 |[setCanvas](#func_9)|*entity*: **Entity**, *width*: **uint**, *height*: **uint**||
@@ -52,7 +52,7 @@ Ajoute une entité en tant qu’enfant de cette entité
 Ajoute une image à l’entité
 
 <a id="func_2"></a>
-> addTag(*scene*: **Entity**, *tag*: **string**)
+> addTag(*entity*: **Entity**, *tag*: **string**)
 
 Ajoute un tag à l’entité
 
@@ -67,12 +67,12 @@ Retourne le canvas de rendu de l’entité
 Retourne le sprite du canvas de rendu de l’entité
 
 <a id="func_5"></a>
-> getTags(*scene*: **Entity**)
+> getTags(*entity*: **Entity**)
 
 Récupère les tags de l’entité
 
 <a id="func_6"></a>
-> hasTag(*scene*: **Entity**, *tag*: **string**) (**bool**)
+> hasTag(*entity*: **Entity**, *tag*: **string**) (**bool**)
 
 Vérifie si l’entité possède le tag
 

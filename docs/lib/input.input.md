@@ -1,228 +1,145 @@
 # input.input
 
 Entrées utilisateur
-## Énumérations
-|Énumération|Valeurs|Description|
-|-|-|-|
-|ControllerAxis|{unknown, leftX, leftY, rightX, rightY, leftTrigger, rightTrigger}|Axe de la manette|
-|ControllerButton|{unknown, a, b, x, y, back, guide, start, leftStick, rightStick, leftShoulder, rightShoulder, up, down, left, right}|Bouton de la manette|
-|InputEventType|{none, keyButton, mouseButton, mouseMotion, mouseWheel, controllerButton, controllerAxis, textInput, dropFile}|Type d’événement|
-|KeyButton|{unknown, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z, alpha1, alpha2, alpha3, alpha4, alpha5, alpha6, alpha7, alpha8, alpha9, alpha0, enter, escape, backspace, tab, space, minus, equals, leftBracket, rightBracket, backslash, nonushash, semicolon, apostrophe, grave, comma, period, slash, capslock, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, printScreen, scrollLock, pause, insert, home, pageup, remove, end, pagedown, right, left, down, up, numLockclear, numDivide, numMultiply, numMinus, numPlus, numEnter, num1, num2, num3, num4, num5, num6, num7, num8, num9, num0, numPeriod, nonusBackslash, application, power, numEquals, f13, f14, f15, f16, f17, f18, f19, f20, f21, f22, f23, f24, execute, help, menu, select, stop, again, undo, cut, copy, paste, find, mute, volumeUp, volumeDown, numComma, numEqualsAs400, international1, international2, international3, international4, international5, international6, international7, international8, international9, lang1, lang2, lang3, lang4, lang5, lang6, lang7, lang8, lang9, alterase, sysreq, cancel, clear, prior, enter2, separator, out_, oper, clearAgain, crsel, exsel, num00, num000, thousandSeparator, decimalSeparator, currencyUnit, currencySubunit, numLeftParenthesis, numRightParenthesis, numLeftBrace, numRightBrace, numTab, numBackspace, numA, numB, numC, numD, numE, numF, numXor, numPower, numPercent, numLess, numGreater, numAmpersand, numDblAmpersand, numVerticalBar, numDblVerticalBar, numColon, numHash, numSpace, numAt, numExclam, numMemStore, numMemRecall, numMemClear, numMemAdd, numMemSubtract, numMemMultiply, numMemDivide, numPlusMinus, numClear, numClearEntry, numBinary, numOctal, numDecimal, numHexadecimal, leftControl, leftShift, leftAlt, leftGUI, rightControl, rightShift, rightAlt, rightGUI, mode, audioNext, audioPrev, audioStop, audioPlay, audioMute, mediaSelect, www, mail, calculator, computer, acSearch, acHome, acBack, acForward, acStop, acRefresh, acBookmarks, brightnessDown, brightnessUp, displaysWitch, kbdIllumToggle, kbdIllumDown, kbdIllumUp, eject, sleep, app1, app2}|Touche du clavier|
-|KeyState|{none, down, held, up, pressed}|État d’une entrée|
-|MouseButton|{left, middle, right, x1, x2}|Bouton de la souris|
 ## Natifs
-### InputEvent
-Type d’événement
-### InputEventControllerAxis
-Type d’événement
-### InputEventControllerButton
-Type d’événement
-### InputEventDropFile
-Type d’événement
-### InputEventKeyButton
-Type d’événement
-### InputEventMouseButton
-Type d’événement
-### InputEventMouseMotion
-Type d’événement
-### InputEventMouseWheel
-Type d’événement
-### InputEventTextInput
-Type d’événement
-## Conversions
-|Source|Destination|
-|-|-|
-|**InputEvent**|**string**|
-## Propriétés
-|Propriété|Natif|Type|Accesseur|Modifieur|Description|
-|-|-|-|-|-|-|
-|axis|**InputEventControllerAxis**|**ControllerButton**|oui|non|Affiche le contenu de l’événement.|
-|button|**InputEventKeyButton**|**KeyButton**|oui|non|Affiche le contenu de l’événement.|
-|button|**InputEventMouseButton**|**KeyButton**|oui|non|Affiche le contenu de l’événement.|
-|button|**InputEventControllerButton**|**ControllerButton**|oui|non|Affiche le contenu de l’événement.|
-|clicks|**InputEventMouseButton**|**int**|oui|non|Affiche le contenu de l’événement.|
-|controllerAxis|**InputEvent**|**InputEventControllerAxis?**|oui|non|Si l’événement est de type InputEventControllerAxis, retourne le type.|
-|controllerButton|**InputEvent**|**InputEventControllerButton?**|oui|non|Si l’événement est de type InputEventControllerButton, retourne le type.|
-|deltaPosition|**InputEventMouseButton**|**Vec2\<float>**|oui|non|Affiche le contenu de l’événement.|
-|deltaPosition|**InputEventMouseMotion**|**Vec2\<float>**|oui|non|Affiche le contenu de l’événement.|
-|dropFile|**InputEvent**|**InputEventDropFile?**|oui|non|Si l’événement est de type InputEventDropFile, retourne le type.|
-|echo|**InputEventKeyButton**|**bool**|oui|non|Affiche le contenu de l’événement.|
-|keyButton|**InputEvent**|**InputEventKeyButton?**|oui|non|Si l’événement est de type InputEventKeyButton, retourne le type.|
-|mouseButton|**InputEvent**|**InputEventMouseButton?**|oui|non|Si l’événement est de type InputEventMouseButton, retourne le type.|
-|mouseMotion|**InputEvent**|**InputEventMouseMotion?**|oui|non|Si l’événement est de type InputEventMouseMotion, retourne le type.|
-|mouseWheel|**InputEvent**|**InputEventMouseWheel?**|oui|non|Si l’événement est de type InputEventMouseWheel, retourne le type.|
-|path|**InputEventDropFile**|**string**|oui|non|Affiche le contenu de l’événement.|
-|position|**InputEventMouseButton**|**Vec2\<float>**|oui|non|Affiche le contenu de l’événement.|
-|position|**InputEventMouseMotion**|**Vec2\<float>**|oui|non|Affiche le contenu de l’événement.|
-|state|**InputEventKeyButton**|**KeyState**|oui|non|Affiche le contenu de l’événement.|
-|state|**InputEventMouseButton**|**KeyState**|oui|non|Affiche le contenu de l’événement.|
-|state|**InputEventControllerButton**|**KeyState**|oui|non|Affiche le contenu de l’événement.|
-|text|**InputEventTextInput**|**string**|oui|non|Affiche le contenu de l’événement.|
-|textInput|**InputEvent**|**InputEventTextInput?**|oui|non|Si l’événement est de type InputEventTextInput, retourne le type.|
-|type|**InputEvent**|**InputEventType**|oui|non|Type d’événement|
-|value|**InputEventControllerAxis**|**float**|oui|non|Affiche le contenu de l’événement.|
-|x|**InputEventMouseWheel**|**int**|oui|non|Affiche le contenu de l’événement.|
-|y|**InputEventMouseWheel**|**int**|oui|non|Affiche le contenu de l’événement.|
+### Input
 ## Fonctions Statiques
 |Fonction|Entrée|Sortie|
 |-|-|-|
-|[@**InputEvent**.keyButton](#static_0)|*param0*: **KeyButton**, *param1*: **KeyState**|**InputEvent**|
-|[@**InputEvent**.keyButton](#static_1)|*param0*: **KeyButton**, *param1*: **KeyState**, *param2*: **bool**|**InputEvent**|
-|[@**InputEvent**.mouseButton](#static_2)|*param0*: **MouseButton**, *param1*: **KeyState**, *param2*: **int**, *param3*: **Vec2\<float>**, *param4*: **Vec2\<float>**|**InputEvent**|
-|[@**InputEvent**.mouseMotion](#static_3)|*param0*: **Vec2\<float>**, *param1*: **Vec2\<float>**|**InputEvent**|
-|[@**InputEvent**.mouseWheel](#static_4)|*param0*: **int**, *param1*: **int**|**InputEvent**|
-|[@**InputEvent**.controllerButton](#static_5)|*param0*: **ControllerButton**, *param1*: **KeyState**|**InputEvent**|
-|[@**InputEvent**.controllerAxis](#static_6)|*param0*: **ControllerAxis**, *param1*: **float**|**InputEvent**|
-|[@**InputEvent**.textInput](#static_7)|*param0*: **string**|**InputEvent**|
-|[@**InputEvent**.dropFile](#static_8)|*param0*: **string**|**InputEvent**|
-## Fonctions
-|Fonction|Entrée|Sortie|
-|-|-|-|
-|[accept](#func_0)|*param0*: **InputEvent**||
-|[addAction](#func_1)|*param0*: **string**||
-|[addActionEvent](#func_2)|*param0*: **string**, *param1*: **InputEvent**||
-|[echo](#func_3)|*param0*: **InputEvent**|**bool**|
-|[getActionAxis](#func_4)|*param0*: **string**, *param1*: **string**|**float**|
-|[getActionStrength](#func_5)|*param0*: **string**|**float**|
-|[hasAction](#func_6)|*param0*: **string**|**bool**|
-|[isAction](#func_7)|*param0*: **InputEvent**, *param1*: **string**|**bool**|
-|[isActionActivated](#func_8)|*param0*: **string**|**bool**|
-|[isPressed](#func_9)|*param0*: **InputEvent**|**bool**|
-|[isPressed](#func_10)|*param0*: **KeyButton**|**bool**|
-|[isPressed](#func_11)|*param0*: **MouseButton**|**bool**|
-|[isPressed](#func_12)|*param0*: **ControllerButton**|**bool**|
-|[print](#func_13)|*param0*: **InputEvent**||
-|[removeAction](#func_14)|*param0*: **string**||
-|[removeActionEvents](#func_15)|*param0*: **string**||
+|[@**Input**.isDown](#static_0)|*input*: **KeyButton**|**bool**|
+|[@**Input**.isDown](#static_1)|*input*: **MouseButton**|**bool**|
+|[@**Input**.isDown](#static_2)|*input*: **ControllerButton**|**bool**|
+|[@**Input**.isUp](#static_3)|*input*: **KeyButton**|**bool**|
+|[@**Input**.isUp](#static_4)|*input*: **MouseButton**|**bool**|
+|[@**Input**.isUp](#static_5)|*input*: **ControllerButton**|**bool**|
+|[@**Input**.isHeld](#static_6)|*input*: **KeyButton**|**bool**|
+|[@**Input**.isHeld](#static_7)|*input*: **MouseButton**|**bool**|
+|[@**Input**.isHeld](#static_8)|*input*: **ControllerButton**|**bool**|
+|[@**Input**.isPressed](#static_9)|*input*: **KeyButton**|**bool**|
+|[@**Input**.isPressed](#static_10)|*input*: **MouseButton**|**bool**|
+|[@**Input**.isPressed](#static_11)|*input*: **ControllerButton**|**bool**|
+|[@**Input**.addAction](#static_12)|*action*: **string**||
+|[@**Input**.removeAction](#static_13)|*action*: **string**||
+|[@**Input**.hasAction](#static_14)|*action*: **string**|**bool**|
+|[@**Input**.isAction](#static_15)|*action*: **string**, *event*: **InputEvent**|**bool**|
+|[@**Input**.addActionEvent](#static_16)|*action*: **string**, *event*: **InputEvent**||
+|[@**Input**.removeActionEvents](#static_17)|*action*: **string**||
+|[@**Input**.isActionActivated](#static_18)|*action*: **string**|**bool**|
+|[@**Input**.getActionStrength](#static_19)|*action*: **string**|**float**|
+|[@**Input**.getActionAxis](#static_20)|*negative*: **string**, *positive*: **string**|**float**|
+|[@**Input**.getActionVector](#static_21)|*left*: **string**, *right*: **string**, *up*: **string**, *down*: **string**|**Vec2\<float>**|
 
 
 ***
 ## Description des fonctions statiques
 
 <a id="static_0"></a>
-> @**InputEvent**.keyButton(*param0*: **KeyButton**, *param1*: **KeyState**) (**InputEvent**)
+> @**Input**.isDown(*input*: **KeyButton**) (**bool**)
 
-Crée un événement clavier.
+La touche est-elle appuyée sur cette frame ?
 
 <a id="static_1"></a>
-> @**InputEvent**.keyButton(*param0*: **KeyButton**, *param1*: **KeyState**, *param2*: **bool**) (**InputEvent**)
+> @**Input**.isDown(*input*: **MouseButton**) (**bool**)
 
-Crée un événement clavier.
+La touche est-elle appuyée sur cette frame ?
 
 <a id="static_2"></a>
-> @**InputEvent**.mouseButton(*param0*: **MouseButton**, *param1*: **KeyState**, *param2*: **int**, *param3*: **Vec2\<float>**, *param4*: **Vec2\<float>**) (**InputEvent**)
+> @**Input**.isDown(*input*: **ControllerButton**) (**bool**)
 
-Crée un événement bouton de souris.
+La touche est-elle appuyée sur cette frame ?
 
 <a id="static_3"></a>
-> @**InputEvent**.mouseMotion(*param0*: **Vec2\<float>**, *param1*: **Vec2\<float>**) (**InputEvent**)
+> @**Input**.isUp(*input*: **KeyButton**) (**bool**)
 
-Crée un événement déplacement de souris.
+La touche est-elle relâchée sur cette frame ?
 
 <a id="static_4"></a>
-> @**InputEvent**.mouseWheel(*param0*: **int**, *param1*: **int**) (**InputEvent**)
+> @**Input**.isUp(*input*: **MouseButton**) (**bool**)
 
-Crée un événement molette de souris.
+La touche est-elle relâchée sur cette frame ?
 
 <a id="static_5"></a>
-> @**InputEvent**.controllerButton(*param0*: **ControllerButton**, *param1*: **KeyState**) (**InputEvent**)
+> @**Input**.isUp(*input*: **ControllerButton**) (**bool**)
 
-Crée un événement bouton de manette.
+La touche est-elle relâchée sur cette frame ?
 
 <a id="static_6"></a>
-> @**InputEvent**.controllerAxis(*param0*: **ControllerAxis**, *param1*: **float**) (**InputEvent**)
+> @**Input**.isHeld(*input*: **KeyButton**) (**bool**)
 
-Crée un événement axe de manette.
+La touche est-elle enfoncée ?
 
 <a id="static_7"></a>
-> @**InputEvent**.textInput(*param0*: **string**) (**InputEvent**)
+> @**Input**.isHeld(*input*: **MouseButton**) (**bool**)
 
-Crée un événement entrée textuelle.
+La touche est-elle enfoncée ?
 
 <a id="static_8"></a>
-> @**InputEvent**.dropFile(*param0*: **string**) (**InputEvent**)
+> @**Input**.isHeld(*input*: **ControllerButton**) (**bool**)
 
-Crée un événement fichier déposé.
+La touche est-elle enfoncée ?
 
-## Description des fonctions
+<a id="static_9"></a>
+> @**Input**.isPressed(*input*: **KeyButton**) (**bool**)
 
-<a id="func_0"></a>
-> accept(*param0*: **InputEvent**)
+La touche est-elle pressée ?
 
-Consomme l’événement.
+<a id="static_10"></a>
+> @**Input**.isPressed(*input*: **MouseButton**) (**bool**)
 
-<a id="func_1"></a>
-> addAction(*param0*: **string**)
+La touche est-elle pressée ?
+
+<a id="static_11"></a>
+> @**Input**.isPressed(*input*: **ControllerButton**) (**bool**)
+
+La touche est-elle pressée ?
+
+<a id="static_12"></a>
+> @**Input**.addAction(*action*: **string**)
 
 Défini une nouvelle action
 
-<a id="func_2"></a>
-> addActionEvent(*param0*: **string**, *param1*: **InputEvent**)
-
-Associe un événement à une action
-
-<a id="func_3"></a>
-> echo(*param0*: **InputEvent**) (**bool**)
-
-L’événement est-il déclenché par répétition ?
-
-<a id="func_4"></a>
-> getActionAxis(*param0*: **string**, *param1*: **string**) (**float**)
-
-Récupère l’intensité sous forme d’un axe défini par 2 actions (l’un positif, l’autre négatif)
-
-<a id="func_5"></a>
-> getActionStrength(*param0*: **string**) (**float**)
-
-Récupère l’intensité de l’action
-
-<a id="func_6"></a>
-> hasAction(*param0*: **string**) (**bool**)
-
-Vérifie si l’action existe
-
-<a id="func_7"></a>
-> isAction(*param0*: **InputEvent**, *param1*: **string**) (**bool**)
-
-L’événement correspond-il a l’action ?
-
-<a id="func_8"></a>
-> isActionActivated(*param0*: **string**) (**bool**)
-
-L’action a-t’elle été déclenchée ?
-
-<a id="func_9"></a>
-> isPressed(*param0*: **InputEvent**) (**bool**)
-
-La touche est-elle active ?
-
-<a id="func_10"></a>
-> isPressed(*param0*: **KeyButton**) (**bool**)
-
-L’événement est-il pressé ?
-
-<a id="func_11"></a>
-> isPressed(*param0*: **MouseButton**) (**bool**)
-
-L’événement est-il pressé ?
-
-<a id="func_12"></a>
-> isPressed(*param0*: **ControllerButton**) (**bool**)
-
-L’événement est-il pressé ?
-
-<a id="func_13"></a>
-> print(*param0*: **InputEvent**)
-
-Affiche le contenu de l’événement.
-
-<a id="func_14"></a>
-> removeAction(*param0*: **string**)
+<a id="static_13"></a>
+> @**Input**.removeAction(*action*: **string**)
 
 Supprime une action existante
 
-<a id="func_15"></a>
-> removeActionEvents(*param0*: **string**)
+<a id="static_14"></a>
+> @**Input**.hasAction(*action*: **string**) (**bool**)
+
+Vérifie si l’action existe
+
+<a id="static_15"></a>
+> @**Input**.isAction(*action*: **string**, *event*: **InputEvent**) (**bool**)
+
+L’événement correspond-il a l’action ?
+
+<a id="static_16"></a>
+> @**Input**.addActionEvent(*action*: **string**, *event*: **InputEvent**)
+
+Associe un événement à une action
+
+<a id="static_17"></a>
+> @**Input**.removeActionEvents(*action*: **string**)
 
 Supprime les événements associés à une action
+
+<a id="static_18"></a>
+> @**Input**.isActionActivated(*action*: **string**) (**bool**)
+
+L’action a-t’elle été déclenchée ?
+
+<a id="static_19"></a>
+> @**Input**.getActionStrength(*action*: **string**) (**float**)
+
+Récupère l’intensité de l’action
+
+<a id="static_20"></a>
+> @**Input**.getActionAxis(*negative*: **string**, *positive*: **string**) (**float**)
+
+Récupère l’intensité sous forme d’un axe défini par 2 actions (l’un positif, l’autre négatif)
+
+<a id="static_21"></a>
+> @**Input**.getActionVector(*left*: **string**, *right*: **string**, *up*: **string**, *down*: **string**) (**Vec2\<float>**)
+
+Récupère l’intensité sous forme d’un vecteur défini par 4 actions
 

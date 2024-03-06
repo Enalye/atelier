@@ -21,6 +21,7 @@
 	* core
 		- [runtime](lib/core.runtime)
 	* input
+		- [event](lib/input.event)
 		- [input](lib/input.input)
 	* render
 		- [animation](lib/render.animation)
@@ -39,11 +40,16 @@
 		- [tileset](lib/render.tileset)
 		- [writabletexture](lib/render.writabletexture)
 	* scene
+		- [actor](lib/scene.actor)
 		- [camera](lib/scene.camera)
+		- [collider](lib/scene.collider)
 		- [component](lib/scene.component)
 		- [entity](lib/scene.entity)
+	- [docgen38](lib/docgen38)
+	* 
 		- [particle](lib/scene.particle)
 		- [scene](lib/scene.scene)
+		- [solid](lib/scene.solid)
 	* ui
 		- [box](lib/ui.box)
 		- [element](lib/ui.element)

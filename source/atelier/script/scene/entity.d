@@ -34,7 +34,6 @@ scene.addEntity(player);");
     library.addProperty(&_position!"get", &_position!"set", "position", entityType, vec2fType);
     library.addProperty(&_zOrder!"get", &_zOrder!"set", "zOrder", entityType, grInt);
     library.addProperty(&_isVisible!"get", &_isVisible!"set", "isVisible", entityType, grBool);
-    library.addProperty(&_isAlive, null, "isAlive", entityType, grBool);
 
     library.addProperty(&_audio, null, "audio", entityType, audioComponentType);
 
@@ -122,11 +121,6 @@ private void _isVisible(string op)(GrCall call) {
         entity.isVisible = call.getBool(1);
     }
     call.setBool(entity.isVisible);
-}
-
-private void _isAlive(GrCall call) {
-    Entity entity = call.getNative!Entity(0);
-    call.setBool(entity.isAlive);
 }
 
 private void _audio(GrCall call) {

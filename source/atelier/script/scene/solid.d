@@ -17,14 +17,15 @@ package void loadLibScene_solid(GrLibDefinition library) {
     library.setModuleInfo(GrLocale.fr_FR, "Obstacle physique aux acteurs d’une scène.");
 
     GrType solidType = library.addNative("Solid", [], "Collider");
-    GrType collisionDataType = grGetNativeType("CollisionData");
+    GrType collisionType = grGetNativeType("Collision");
 
     library.addConstructor(&_ctor, solidType);
 
     library.setDescription(GrLocale.fr_FR, "Déplace le solide.");
     library.setParameters(["solid", "x", "y"]);
-    library.addFunction(&_move, "move", [solidType, grFloat, grFloat],
-        [grList(collisionDataType)]);
+    library.addFunction(&_move, "move", [solidType, grFloat, grFloat], [
+            grList(collisionType)
+        ]);
 }
 
 private void _ctor(GrCall call) {

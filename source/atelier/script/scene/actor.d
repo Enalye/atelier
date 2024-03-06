@@ -17,7 +17,7 @@ package void loadLibScene_actor(GrLibDefinition library) {
     library.setModuleInfo(GrLocale.fr_FR, "Acteur physique d’une scène");
 
     GrType actorType = library.addNative("Actor", [], "Collider");
-    GrType collisionDataType = grGetNativeType("CollisionData");
+    GrType collisionType = grGetNativeType("Collision");
     GrType solidType = grGetNativeType("Solid");
 
     library.addConstructor(&_ctor, actorType);
@@ -26,14 +26,14 @@ package void loadLibScene_actor(GrLibDefinition library) {
         "Déplace horizontalement l’acteur et retourne des informations de collision si un solide est touché.");
     library.setParameters(["actor", "x"]);
     library.addFunction(&_moveX, "moveX", [actorType, grFloat], [
-            grOptional(collisionDataType)
+            grOptional(collisionType)
         ]);
 
     library.setDescription(GrLocale.fr_FR,
         "Déplace verticalement l’acteur et retourne des informations de collision si un solide est touché.");
     library.setParameters(["actor", "y"]);
     library.addFunction(&_moveY, "moveY", [actorType, grFloat], [
-            grOptional(collisionDataType)
+            grOptional(collisionType)
         ]);
 
     library.setDescription(GrLocale.fr_FR, "Attache l’acteur au solide");
@@ -52,10 +52,10 @@ private void _ctor(GrCall call) {
 private void _moveX(GrCall call) {
     Actor actor = call.getNative!Actor(0);
     float movement = call.getFloat(1);
-    CollisionData collData = actor.moveX(movement);
+    Collision collision = actor.moveX(movement);
 
-    if (collData) {
-        call.setNative(collData);
+    if (collision) {
+        call.setNative(collision);
     }
     else {
         call.setNull();
@@ -65,10 +65,10 @@ private void _moveX(GrCall call) {
 private void _moveY(GrCall call) {
     Actor actor = call.getNative!Actor(0);
     float movement = call.getFloat(1);
-    CollisionData collData = actor.moveY(movement);
+    Collision collision = actor.moveY(movement);
 
-    if (collData) {
-        call.setNative(collData);
+    if (collision) {
+        call.setNative(collision);
     }
     else {
         call.setNull();

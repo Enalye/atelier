@@ -19,8 +19,14 @@ final class Actor : Collider {
         Solid _mountedSolid;
     }
 
-    CollisionData moveX(float x, bool getInfo = true) {
-        CollisionData collData;
+    override void remove() {
+        if (scene) {
+            scene.removeActor(this);
+        }
+    }
+
+    Collision moveX(float x, bool getInfo = true) {
+        Collision collision;
         _moveRemaining.x += x;
         int move = cast(int) round(_moveRemaining.x);
 
@@ -30,14 +36,17 @@ final class Actor : Collider {
                 int dir = move > 0 ? 1 : -1;
 
                 while (move) {
-                    Solid solid = _scene.collideAt(_position + Vec2i(dir, 0), _hitbox);
+                    Solid solid;
+                    if (scene) {
+                        solid = scene.collideAt(_position + Vec2i(dir, 0), _hitbox);
+                    }
                     if (solid) {
                         _moveRemaining.x = 0f;
                         if (getInfo) {
-                            collData = new CollisionData;
-                            collData.actor = this;
-                            collData.solid = solid;
-                            collData.direction = Vec2i(dir, 0);
+                            collision = new Collision;
+                            collision.actor = this;
+                            collision.solid = solid;
+                            collision.direction = Vec2i(dir, 0);
                         }
                         break;
                     }
@@ -52,11 +61,11 @@ final class Actor : Collider {
             }
         }
 
-        return collData;
+        return collision;
     }
 
-    CollisionData moveY(float y, bool getInfo = true) {
-        CollisionData collData;
+    Collision moveY(float y, bool getInfo = true) {
+        Collision collision;
         _moveRemaining.y += y;
         int move = cast(int) round(_moveRemaining.y);
 
@@ -66,14 +75,17 @@ final class Actor : Collider {
                 int dir = move > 0 ? 1 : -1;
 
                 while (move) {
-                    Solid solid = _scene.collideAt(_position + Vec2i(0, dir), _hitbox);
+                    Solid solid;
+                    if (scene) {
+                        solid = scene.collideAt(_position + Vec2i(0, dir), _hitbox);
+                    }
                     if (solid) {
                         _moveRemaining.y = 0f;
                         if (getInfo) {
-                            collData = new CollisionData;
-                            collData.actor = this;
-                            collData.solid = solid;
-                            collData.direction = Vec2i(0, dir);
+                            collision = new Collision;
+                            collision.actor = this;
+                            collision.solid = solid;
+                            collision.direction = Vec2i(0, dir);
                         }
                         break;
                     }
@@ -88,7 +100,7 @@ final class Actor : Collider {
             }
         }
 
-        return collData;
+        return collision;
     }
 
     void mount(Solid solid) {

@@ -717,6 +717,114 @@ private class ParticleSourceBuilder {
     }
 }
 
+private abstract class ColliderBuilder {
+    private {
+        Vec2i _position = Vec2i.zero;
+        Vec2i _hitbox = Vec2i.zero;
+        string _name;
+        string[] _tags;
+        bool _hasEntity;
+        EntityBuilder _entity;
+    }
+
+    this() {
+    }
+
+    this(const Farfadet ffd) {
+        foreach (node; ffd.nodes) {
+            switch (node.name) {
+            case "name":
+                _name = node.get!string(0);
+                break;
+            case "tags":
+                _tags ~= node.get!(string[])(0);
+                break;
+            case "tag":
+                _tags ~= node.get!string(0);
+                break;
+            case "position":
+                _position = Vec2i(node.get!int(0), node.get!int(1));
+                break;
+            case "hitbox":
+                _hitbox = Vec2i(node.get!int(0), node.get!int(1));
+                break;
+            case "entity":
+                _hasEntity = true;
+                _entity = new EntityBuilder(node);
+                break;
+            default:
+                break;
+            }
+        }
+    }
+
+    final void build(Collider collider) {
+        collider.name = _name;
+        collider.tags = _tags;
+        collider.position = _position;
+        collider.hitbox = _hitbox;
+
+        if (_hasEntity) {
+            collider.entity = _entity.build();
+        }
+    }
+
+    void serialize(OutStream stream) {
+        stream.write!string(_name);
+        stream.write!(string[])(_tags);
+        stream.write!Vec2i(_position);
+        stream.write!Vec2i(_hitbox);
+        stream.write!bool(_hasEntity);
+
+        if (_hasEntity) {
+            _entity.serialize(stream);
+        }
+    }
+
+    void deserialize(InStream stream) {
+        _name = stream.read!string();
+        _tags = stream.read!(string[])();
+        _position = stream.read!Vec2i();
+        _hitbox = stream.read!Vec2i();
+        _hasEntity = stream.read!bool();
+
+        if (_hasEntity) {
+            _entity = new EntityBuilder;
+            _entity.deserialize(stream);
+        }
+    }
+}
+
+private class ActorBuilder : ColliderBuilder {
+    this() {
+    }
+
+    this(const Farfadet ffd) {
+        super(ffd);
+    }
+
+    Actor build() {
+        Actor actor = new Actor;
+        super.build(actor);
+        return actor;
+    }
+}
+
+private class SolidBuilder : ColliderBuilder {
+    this() {
+    }
+
+    this(const Farfadet ffd) {
+        super(ffd);
+    }
+
+    Solid build() {
+        Solid solid = new Solid;
+        super.build(solid);
+        return solid;
+    }
+}
+
 private class SceneBuilder {
     private {
         Vec2f _position = Vec2f.zero;
@@ -724,6 +832,8 @@ private class SceneBuilder {
         int _zOrder;
         EntityBuilder[] _entities;
         ParticleSourceBuilder[] _particleSources;
+        ActorBuilder[] _actors;
+        SolidBuilder[] _solids;
         string _name;
         string[] _tags;
     }
@@ -758,6 +868,12 @@ private class SceneBuilder {
             case "particle":
                 _particleSources ~= new ParticleSourceBuilder(node);
                 break;
+            case "actor":
+                _actors ~= new ActorBuilder(node);
+                break;
+            case "solid":
+                _solids ~= new SolidBuilder(node);
+                break;
             default:
                 break;
             }
@@ -780,6 +896,16 @@ private class SceneBuilder {
             scene.addParticleSource(sourceBuilder.build());
         }
 
+        foreach (ActorBuilder actorBuilder; _actors) {
+            Actor actor = actorBuilder.build();
+            scene.addActor(actor);
+        }
+
+        foreach (SolidBuilder solidBuilder; _solids) {
+            Solid solid = solidBuilder.build();
+            scene.addSolid(solid);
+        }
+
         return scene;
     }
 
@@ -798,6 +924,16 @@ private class SceneBuilder {
         stream.write!uint(cast(uint) _particleSources.length);
         foreach (ParticleSourceBuilder source; _particleSources) {
             source.serialize(stream);
+        }
+
+        stream.write!uint(cast(uint) _actors.length);
+        foreach (ActorBuilder actor; _actors) {
+            actor.serialize(stream);
+        }
+
+        stream.write!uint(cast(uint) _solids.length);
+        foreach (SolidBuilder solid; _solids) {
+            solid.serialize(stream);
         }
     }
 
@@ -822,6 +958,22 @@ private class SceneBuilder {
             ParticleSourceBuilder particle = new ParticleSourceBuilder;
             particle.deserialize(stream);
             _particleSources[i] = particle;
+        }
+
+        const uint actorCount = stream.read!uint();
+        _actors = new ActorBuilder[actorCount];
+        for (uint i; i < actorCount; ++i) {
+            ActorBuilder actor = new ActorBuilder;
+            actor.deserialize(stream);
+            _actors[i] = actor;
+        }
+
+        const uint solidCount = stream.read!uint();
+        _solids = new SolidBuilder[solidCount];
+        for (uint i; i < solidCount; ++i) {
+            SolidBuilder solid = new SolidBuilder;
+            solid.deserialize(stream);
+            _solids[i] = solid;
         }
     }
 }

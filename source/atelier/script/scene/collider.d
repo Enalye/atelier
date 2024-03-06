@@ -22,10 +22,10 @@ package void loadLibScene_collider(GrLibDefinition library) {
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
     GrType entityType = grGetNativeType("Entity");
 
-    GrType collisionDataType = library.addNative("CollisionData");
+    GrType collisionType = library.addNative("Collision");
 
-    library.addProperty(&_solid_collData, null, "solid", collisionDataType, solidType);
-    library.addProperty(&_direction_collData, null, "direction", collisionDataType, vec2iType);
+    library.addProperty(&_solid_collision, null, "solid", collisionType, solidType);
+    library.addProperty(&_direction_collision, null, "direction", collisionType, vec2iType);
 
     library.addProperty(&_name!"get", &_name!"set", "name", colliderType, grString);
     library.addProperty(&_position!"get", &_position!"set", "position",
@@ -54,14 +54,14 @@ package void loadLibScene_collider(GrLibDefinition library) {
     library.addFunction(&_remove, "remove", [colliderType]);
 }
 
-private void _solid_collData(GrCall call) {
-    CollisionData data = call.getNative!CollisionData(0);
-    call.setNative(data.solid);
+private void _solid_collision(GrCall call) {
+    Collision collision = call.getNative!Collision(0);
+    call.setNative(collision.solid);
 }
 
-private void _direction_collData(GrCall call) {
-    CollisionData data = call.getNative!CollisionData(0);
-    call.setNative(svec2(data.direction));
+private void _direction_collision(GrCall call) {
+    Collision collision = call.getNative!Collision(0);
+    call.setNative(svec2(collision.direction));
 }
 
 private void _name(string op)(GrCall call) {

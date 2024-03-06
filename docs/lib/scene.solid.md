@@ -11,14 +11,14 @@ Hérite de **Collider**
 ## Fonctions
 |Fonction|Entrée|Sortie|
 |-|-|-|
-|[move](#func_0)|*solid*: **Solid**, *x*: **float**, *y*: **float**|**[CollisionData]**|
+|[move](#func_0)|*solid*: **Solid**, *x*: **float**, *y*: **float**|**[Collision]**|
 
 
 ***
 ## Description des fonctions
 
 <a id="func_0"></a>
-> move(*solid*: **Solid**, *x*: **float**, *y*: **float**) (**[CollisionData]**)
+> move(*solid*: **Solid**, *x*: **float**, *y*: **float**) (**[Collision]**)
 
 Déplace le solide.
 

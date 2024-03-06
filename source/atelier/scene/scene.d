@@ -6,6 +6,7 @@
 module atelier.scene.scene;
 
 import std.algorithm;
+import std.exception : enforce;
 
 import atelier.audio;
 import atelier.common;
@@ -102,24 +103,97 @@ final class Scene {
     }
 
     void addEntity(Entity entity) {
-        entity.setScene(this);
+        enforce(!entity.scene, "entité déjà enregistrée dans une scène");
+        entity.scene = this;
         _entities ~= entity;
         _sortEntities();
     }
 
+    void removeEntity(Entity entity) {
+        if (entity.scene != this)
+            return;
+        entity.scene = null;
+
+        foreach (idx, element; _entities) {
+            if (element == entity) {
+                _entities.mark(idx);
+            }
+        }
+        _entities.sweep();
+        _sortEntities();
+    }
+
     void addParticleSource(ParticleSource source) {
-        source.setScene(this);
+        enforce(!source.scene, "source déjà enregistrée dans une scène");
+        source.scene = this;
         _particleSources ~= source;
     }
 
+    void removeParticleSource(ParticleSource source) {
+        if (source.scene != this)
+            return;
+        source.scene = null;
+
+        foreach (idx, element; _particleSources) {
+            if (element == source) {
+                _particleSources.mark(idx);
+            }
+        }
+        _particleSources.sweep();
+    }
+
     void addActor(Actor actor) {
-        actor.setScene(this);
+        enforce(!actor.scene, "acteur déjà enregistré dans une scène");
+        actor.scene = this;
         _actors ~= actor;
+
+        if (actor.entity) {
+            addEntity(actor.entity);
+        }
+    }
+
+    void removeActor(Actor actor) {
+        if (actor.scene != this)
+            return;
+        actor.scene = null;
+
+        foreach (idx, element; _actors) {
+            if (element == actor) {
+                _actors.mark(idx);
+            }
+        }
+        _actors.sweep();
+
+        if (actor.entity) {
+            removeEntity(actor.entity);
+        }
     }
 
     void addSolid(Solid solid) {
-        solid.setScene(this);
+        enforce(!solid.scene, "solide déjà enregistré dans une scène");
+        solid.scene = this;
         _solids ~= solid;
+
+        if (solid.entity) {
+            addEntity(solid.entity);
+        }
+    }
+
+    void removeSolid(Solid solid) {
+        if (solid.scene != this)
+            return;
+        solid.scene = null;
+
+        foreach (idx, element; _solids) {
+            if (element == solid) {
+                _solids.mark(idx);
+            }
+        }
+        _solids.sweep();
+
+        if (solid.entity) {
+            removeEntity(solid.entity);
+        }
     }
 
     void addUI(UIElement ui) {
@@ -134,86 +208,41 @@ final class Scene {
         _uiManager.dispatch(event);
     }
 
-    Entity fetchEntityByName(string name) {
-        foreach (entity; _entities) {
-            if (entity.name == name)
-                return entity;
+    private Array!T _getArray(T)() {
+        static if (is(T == Entity)) {
+            return _entities;
+        }
+        else static if (is(T == ParticleSource)) {
+            return _particleSources;
+        }
+        else static if (is(T == Actor)) {
+            return _actors;
+        }
+        else static if (is(T == Solid)) {
+            return _solids;
+        }
+        else {
+            static assert(false, "type non-supporté");
+        }
+    }
+
+    T findByName(T)(string name) {
+        foreach (element; _getArray!T()) {
+            if (element.name == name)
+                return element;
         }
         return null;
     }
 
-    Entity[] fetchEntitiesByTag(string[] tags) {
-        Entity[] result;
-        __entityLoop: foreach (entity; _entities) {
+    T[] findByTag(T)(string[] tags) {
+        T[] result;
+        __elementLoop: foreach (element; _getArray!T()) {
             foreach (string tag; tags) {
-                if (!canFind(entity.tags, tag)) {
-                    continue __entityLoop;
+                if (!canFind(element.tags, tag)) {
+                    continue __elementLoop;
                 }
             }
-            result ~= entity;
-        }
-        return result;
-    }
-
-    ParticleSource fetchParticleSourceByName(string name) {
-        foreach (source; _particleSources) {
-            if (source.name == name)
-                return source;
-        }
-        return null;
-    }
-
-    ParticleSource[] fetchParticleSourcesByTag(string[] tags) {
-        ParticleSource[] result;
-        __sourceLoop: foreach (source; _particleSources) {
-            foreach (string tag; tags) {
-                if (!canFind(source.tags, tag)) {
-                    continue __sourceLoop;
-                }
-            }
-            result ~= source;
-        }
-        return result;
-    }
-
-    Actor fetchActorByName(string name) {
-        foreach (actor; _actors) {
-            if (actor.name == name)
-                return actor;
-        }
-        return null;
-    }
-
-    Actor[] fetchActorsByTag(string[] tags) {
-        Actor[] result;
-        __actorLoop: foreach (actor; _actors) {
-            foreach (string tag; tags) {
-                if (!canFind(actor.tags, tag)) {
-                    continue __actorLoop;
-                }
-            }
-            result ~= actor;
-        }
-        return result;
-    }
-
-    Solid fetchSolidByName(string name) {
-        foreach (solid; _solids) {
-            if (solid.name == name)
-                return solid;
-        }
-        return null;
-    }
-
-    Solid[] fetchSolidsByTag(string[] tags) {
-        Solid[] result;
-        __solidLoop: foreach (solid; _solids) {
-            foreach (string tag; tags) {
-                if (!canFind(solid.tags, tag)) {
-                    continue __solidLoop;
-                }
-            }
-            result ~= solid;
+            result ~= element;
         }
         return result;
     }
@@ -230,58 +259,20 @@ final class Scene {
         _uiManager.cameraPosition = _sprite.size / 2f - globalPosition;
         _uiManager.update();
 
-        bool isDirty = false;
-        foreach (idx, entity; _entities) {
+        foreach (entity; _entities) {
             entity.update();
-            if (!entity.isAlive) {
-                _entities.mark(idx);
-                isDirty = true;
-            }
         }
 
-        if (isDirty) {
-            isDirty = false;
-            _entities.sweep();
-            _sortEntities();
-        }
-
-        foreach (idx, source; _particleSources) {
+        foreach (source; _particleSources) {
             source.update();
-            if (!source.isAlive) {
-                _particleSources.mark(idx);
-                isDirty = true;
-            }
         }
 
-        if (isDirty) {
-            isDirty = false;
-            _particleSources.sweep();
-        }
-
-        foreach (idx, actor; _actors) {
+        foreach (actor; _actors) {
             actor.update();
-            if (!actor.isAlive) {
-                _actors.mark(idx);
-                isDirty = true;
-            }
         }
 
-        if (isDirty) {
-            isDirty = false;
-            _actors.sweep();
-        }
-
-        foreach (idx, solid; _solids) {
+        foreach (solid; _solids) {
             solid.update();
-            if (!solid.isAlive) {
-                _solids.mark(idx);
-                isDirty = true;
-            }
-        }
-
-        if (isDirty) {
-            isDirty = false;
-            _solids.sweep();
         }
     }
 
@@ -289,10 +280,26 @@ final class Scene {
         if (!_isAlive)
             return;
         _isAlive = false;
+
         foreach (entity; _entities) {
-            entity.remove();
+            entity.scene = null;
         }
         _entities.clear();
+
+        foreach (source; _particleSources) {
+            source.scene = null;
+        }
+        _particleSources.clear();
+
+        foreach (actor; _actors) {
+            actor.scene = null;
+        }
+        _actors.clear();
+
+        foreach (solid; _solids) {
+            solid.scene = null;
+        }
+        _solids.clear();
     }
 
     void render() {

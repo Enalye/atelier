@@ -3,17 +3,17 @@
 Objet physique d’une scène
 ## Natifs
 ### Collider
-### CollisionData
+### Collision
 ## Propriétés
 |Propriété|Natif|Type|Accesseur|Modifieur|Description|
 |-|-|-|-|-|-|
-|direction|**CollisionData**|**Vec2\<int>**|oui|non||
+|direction|**Collision**|**Vec2\<int>**|oui|non||
 |entity|**Collider**|**Entity?**|oui|oui|Entité lié à l’objet|
 |hitbox|**Collider**|**Vec2\<int>**|oui|oui||
 |isAlive|**Collider**|**bool**|oui|non||
 |name|**Collider**|**string**|oui|oui||
 |position|**Collider**|**Vec2\<int>**|oui|oui||
-|solid|**CollisionData**|**Solid**|oui|non||
+|solid|**Collision**|**Solid**|oui|non||
 ## Fonctions
 |Fonction|Entrée|Sortie|
 |-|-|-|

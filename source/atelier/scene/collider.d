@@ -14,7 +14,7 @@ import atelier.scene.entity;
 import atelier.scene.scene;
 import atelier.scene.solid;
 
-final class CollisionData {
+final class Collision {
     Actor actor;
     Solid solid;
     Vec2i direction;
@@ -22,7 +22,6 @@ final class CollisionData {
 
 abstract class Collider {
     protected {
-        Scene _scene;
         Vec2f _moveRemaining = Vec2f.zero;
         Vec2i _position, _hitbox;
     }
@@ -32,6 +31,7 @@ abstract class Collider {
         Entity _entity;
     }
 
+    Scene scene;
     string name;
     string[] tags;
 
@@ -45,8 +45,8 @@ abstract class Collider {
         }
 
         Vec2f globalPosition() const {
-            if (_scene)
-                return (cast(Vec2f) position) - _scene.globalPosition;
+            if (scene)
+                return (cast(Vec2f) position) - scene.globalPosition;
             return cast(Vec2f) position;
         }
 
@@ -96,14 +96,7 @@ abstract class Collider {
     this() {
     }
 
-    void setScene(Scene scene) {
-        _scene = scene;
-    }
-
-    void remove() {
-        _isAlive = false;
-        _scene = null;
-    }
+    abstract void remove();
 
     void update() {
         if (_entity) {

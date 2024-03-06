@@ -32,13 +32,17 @@ addScene(scene);
 |[addTag](#func_4)|*scene*: **Scene**, *tag*: **string**||
 |[addUI](#func_5)|*scene*: **Scene**, *ui*: **UIElement**||
 |[clearUI](#func_6)|*scene*: **Scene**||
-|[fetchEntitiesByTag](#func_7)|*tags*: **Scene**, *param1*: **[string]**|**[Entity]**|
-|[fetchEntityByName](#func_8)|*name*: **Scene**, *param1*: **string**|**Entity?**|
-|[fetchParticleSourceByName](#func_9)|*name*: **Scene**, *param1*: **string**|**ParticleSource?**|
-|[fetchParticleSourcesByTag](#func_10)|*tags*: **Scene**, *param1*: **[string]**|**[ParticleSource]**|
-|[getTags](#func_11)|*scene*: **Scene**|**[string]**|
-|[hasTag](#func_12)|*scene*: **Scene**, *tag*: **string**|**bool**|
-|[remove](#func_13)|*scene*: **Scene**||
+|[fetchActorByName](#func_7)|*name*: **Scene**, *param1*: **string**|**Actor?**|
+|[fetchActorsByTag](#func_8)|*tags*: **Scene**, *param1*: **[string]**|**[Actor]**|
+|[fetchEntitiesByTag](#func_9)|*tags*: **Scene**, *param1*: **[string]**|**[Entity]**|
+|[fetchEntityByName](#func_10)|*name*: **Scene**, *param1*: **string**|**Entity?**|
+|[fetchParticleSourceByName](#func_11)|*name*: **Scene**, *param1*: **string**|**ParticleSource?**|
+|[fetchParticleSourcesByTag](#func_12)|*tags*: **Scene**, *param1*: **[string]**|**[ParticleSource]**|
+|[fetchSolidByName](#func_13)|*name*: **Scene**, *param1*: **string**|**Solid?**|
+|[fetchSolidByTag](#func_14)|*tags*: **Scene**, *param1*: **[string]**|**[Solid]**|
+|[getTags](#func_15)|*scene*: **Scene**|**[string]**|
+|[hasTag](#func_16)|*scene*: **Scene**, *tag*: **string**|**bool**|
+|[remove](#func_17)|*scene*: **Scene**||
 
 
 ***
@@ -80,36 +84,56 @@ Ajoute un élément d’interface à la scène
 Supprime les élements d’interface de la scène
 
 <a id="func_7"></a>
+> fetchActorByName(*name*: **Scene**, *param1*: **string**) (**Actor?**)
+
+Récupère l’acteur correspondant au nom donné dans la scène
+
+<a id="func_8"></a>
+> fetchActorsByTag(*tags*: **Scene**, *param1*: **[string]**) (**[Actor]**)
+
+Récupère les acteurs possédants le tag indiqué dans la scène
+
+<a id="func_9"></a>
 > fetchEntitiesByTag(*tags*: **Scene**, *param1*: **[string]**) (**[Entity]**)
 
 Récupère les entités possédants le tag indiqué dans la scène
 
-<a id="func_8"></a>
+<a id="func_10"></a>
 > fetchEntityByName(*name*: **Scene**, *param1*: **string**) (**Entity?**)
 
 Récupère l’entité correspondant au nom donné dans la scène
 
-<a id="func_9"></a>
+<a id="func_11"></a>
 > fetchParticleSourceByName(*name*: **Scene**, *param1*: **string**) (**ParticleSource?**)
 
-Récupère l’entité correspondant au nom donné dans la scène
+Récupère la source correspondant au nom donné dans la scène
 
-<a id="func_10"></a>
+<a id="func_12"></a>
 > fetchParticleSourcesByTag(*tags*: **Scene**, *param1*: **[string]**) (**[ParticleSource]**)
 
-Récupère les entités possédants le tag indiqué dans la scène
+Récupère les sources possédants le tag indiqué dans la scène
 
-<a id="func_11"></a>
+<a id="func_13"></a>
+> fetchSolidByName(*name*: **Scene**, *param1*: **string**) (**Solid?**)
+
+Récupère le solide correspondant au nom donné dans la scène
+
+<a id="func_14"></a>
+> fetchSolidByTag(*tags*: **Scene**, *param1*: **[string]**) (**[Solid]**)
+
+Récupère les solides possédants le tag indiqué dans la scène
+
+<a id="func_15"></a>
 > getTags(*scene*: **Scene**) (**[string]**)
 
 Récupère les tags de la scène
 
-<a id="func_12"></a>
+<a id="func_16"></a>
 > hasTag(*scene*: **Scene**, *tag*: **string**) (**bool**)
 
 Vérifie si la scène possède le tag
 
-<a id="func_13"></a>
+<a id="func_17"></a>
 > remove(*scene*: **Scene**)
 
 Supprime la scène

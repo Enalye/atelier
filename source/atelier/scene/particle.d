@@ -58,12 +58,10 @@ final class ParticleSource : Resource!ParticleSource {
     private {
         Array!Particle _particles;
         ParticleEffect[] _effects;
-        Scene _scene;
 
         Sprite _sprite;
         Vec2f _spriteSize = Vec2f.one;
 
-        bool _isAlive = true;
         bool _isVisible = true;
         bool _isRelativePosition;
         bool _isRelativeSpriteAngle;
@@ -85,15 +83,12 @@ final class ParticleSource : Resource!ParticleSource {
         Vec2f _area = Vec2f.zero;
     }
 
+    Scene scene;
     Vec2f position = Vec2f.zero;
     string name;
     string[] tags;
 
     @property {
-        bool isAlive() const {
-            return _isAlive;
-        }
-
         bool isVisible() const {
             return _isVisible;
         }
@@ -110,8 +105,7 @@ final class ParticleSource : Resource!ParticleSource {
     this(ParticleSource source) {
         _particles = new Array!Particle;
 
-        _scene = null;
-        _isAlive = true;
+        scene = null;
         _isAttachedToCamera = false;
         _attachedEntity = null;
         _emitterTime = 0;
@@ -149,10 +143,6 @@ final class ParticleSource : Resource!ParticleSource {
         return new ParticleSource(this);
     }
 
-    package void setScene(Scene scene_) {
-        _scene = scene_;
-    }
-
     void addEffect(ParticleEffect effect) {
         _effects ~= effect;
     }
@@ -172,8 +162,8 @@ final class ParticleSource : Resource!ParticleSource {
             if (_attachedEntity) {
                 origin += _attachedEntity.scenePosition();
             }
-            else if (_isAttachedToCamera && _scene) {
-                origin += _scene.globalPosition;
+            else if (_isAttachedToCamera && scene) {
+                origin += scene.globalPosition;
             }
         }
 
@@ -200,8 +190,8 @@ final class ParticleSource : Resource!ParticleSource {
         if (_attachedEntity) {
             origin += _attachedEntity.scenePosition();
         }
-        else if (_isAttachedToCamera && _scene) {
-            origin += _scene.globalPosition;
+        else if (_isAttachedToCamera && scene) {
+            origin += scene.globalPosition;
         }
         return origin;
     }
@@ -241,7 +231,9 @@ final class ParticleSource : Resource!ParticleSource {
     }
 
     void remove() {
-        _isAlive = false;
+        if (scene) {
+            scene.removeParticleSource(this);
+        }
     }
 
     void emit() {

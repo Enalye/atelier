@@ -13,8 +13,8 @@ Hérite de **Collider**
 |-|-|-|
 |[dismount](#func_0)|*actor*: **Actor**||
 |[mount](#func_1)|*actor*: **Actor**, *solid*: **Solid**||
-|[moveX](#func_2)|*actor*: **Actor**, *x*: **float**|**CollisionData?**|
-|[moveY](#func_3)|*actor*: **Actor**, *y*: **float**|**CollisionData?**|
+|[moveX](#func_2)|*actor*: **Actor**, *x*: **float**|**Collision?**|
+|[moveY](#func_3)|*actor*: **Actor**, *y*: **float**|**Collision?**|
 
 
 ***
@@ -31,12 +31,12 @@ Détache l’acteur du solide
 Attache l’acteur au solide
 
 <a id="func_2"></a>
-> moveX(*actor*: **Actor**, *x*: **float**) (**CollisionData?**)
+> moveX(*actor*: **Actor**, *x*: **float**) (**Collision?**)
 
 Déplace horizontalement l’acteur et retourne des informations de collision si un solide est touché.
 
 <a id="func_3"></a>
-> moveY(*actor*: **Actor**, *y*: **float**) (**CollisionData?**)
+> moveY(*actor*: **Actor**, *y*: **float**) (**Collision?**)
 
 Déplace verticalement l’acteur et retourne des informations de collision si un solide est touché.
 

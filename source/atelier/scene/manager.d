@@ -66,7 +66,7 @@ final class SceneManager {
         _sortScenes();
     }
 
-    Scene fetchSceneByName(string name) {
+    Scene findSceneByName(string name) {
         foreach (scene; _scenes) {
             if (scene.name == name)
                 return scene;
@@ -74,7 +74,7 @@ final class SceneManager {
         return null;
     }
 
-    Scene[] fetchScenesByTag(string[] tags) {
+    Scene[] findScenesByTag(string[] tags) {
         Scene[] result;
         __sceneLoop: foreach (scene; _scenes) {
             foreach (string tag; tags) {
@@ -87,36 +87,19 @@ final class SceneManager {
         return result;
     }
 
-    Entity fetchEntityByName(string name) {
+    T findByName(T)(string name) {
         foreach (scene; _scenes) {
-            Entity entity = scene.fetchEntityByName(name);
-            if (entity)
-                return entity;
+            T element = scene.findByName!T(name);
+            if (element)
+                return element;
         }
         return null;
     }
 
-    Entity[] fetchEntitiesByTag(string[] tags) {
-        Entity[] result;
+    T[] findByTag(T)(string[] tags) {
+        T[] result;
         foreach (scene; _scenes) {
-            result ~= scene.fetchEntitiesByTag(tags);
-        }
-        return result;
-    }
-
-    ParticleSource fetchParticleSourceByName(string name) {
-        foreach (scene; _scenes) {
-            ParticleSource entity = scene.fetchParticleSourceByName(name);
-            if (entity)
-                return entity;
-        }
-        return null;
-    }
-
-    ParticleSource[] fetchParticleSourcesByTag(string[] tags) {
-        ParticleSource[] result;
-        foreach (scene; _scenes) {
-            result ~= scene.fetchParticleSourcesByTag(tags);
+            result ~= scene.findByTag!T(tags);
         }
         return result;
     }

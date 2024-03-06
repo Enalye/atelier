@@ -6,6 +6,7 @@
 module atelier.scene.entity;
 
 import std.algorithm;
+import std.exception : enforce;
 
 import atelier.audio;
 import atelier.common;
@@ -19,25 +20,20 @@ final class Entity {
     private {
         Canvas _canvas;
         Sprite _sprite;
-        Scene _scene;
         Entity _parent;
         EntityComponent[string] _components;
         Array!Entity _children;
         Array!Image _images;
         bool _isVisible = true;
-        bool _isAlive = true;
     }
 
+    Scene scene;
     string name;
     string[] tags;
     Vec2f position = Vec2f.zero;
     int zOrder;
 
     @property {
-        bool isAlive() const {
-            return _isAlive;
-        }
-
         Vec2f scenePosition() const {
             if (_parent)
                 return _parent.scenePosition + position;
@@ -47,13 +43,9 @@ final class Entity {
         Vec2f globalPosition() const {
             if (_parent)
                 return _parent.globalPosition + position;
-            else if (_scene)
-                return position - _scene.globalPosition;
+            else if (scene)
+                return position - scene.globalPosition;
             return position;
-        }
-
-        Scene scene() {
-            return _scene;
         }
 
         Entity parent() {
@@ -86,19 +78,25 @@ final class Entity {
         sort!((a, b) => (a.zOrder > b.zOrder), SwapStrategy.stable)(_images.array);
     }
 
-    package void setScene(Scene scene_) {
-        _scene = scene_;
-        foreach (child; _children) {
-            if (child.isAlive) {
-                child.setScene(_scene);
-            }
-        }
+    void addChild(Entity child) {
+        enforce(!child.scene, "entité déjà enregistrée dans une scène");
+        enforce(!child._parent, "entité déjà apparentée à une autre entité");
+        child._parent = this;
+        _children ~= child;
+        _sortChildren();
     }
 
-    void addChild(Entity child) {
-        child._parent = this;
-        child.setScene(_scene);
-        _children ~= child;
+    void removeChild(Entity child) {
+        if (child._parent != this)
+            return;
+        child._parent = null;
+
+        foreach (idx, element; _children) {
+            if (element == child) {
+                _children.mark(idx);
+            }
+        }
+        _children.sweep();
         _sortChildren();
     }
 
@@ -108,27 +106,20 @@ final class Entity {
     }
 
     void remove() {
-        _isAlive = false;
-        _parent = null;
-        _scene = null;
+        if (_parent) {
+            _parent.removeChild(this);
+        }
+        else if (scene) {
+            scene.removeEntity(this);
+        }
     }
 
     void update() {
-        bool isChildrenDirty, isImagesDirty;
-
-        foreach (idx, entity; _children) {
+        foreach (entity; _children) {
             entity.update();
-            if (!entity.isAlive) {
-                _children.mark(idx);
-                isChildrenDirty = true;
-            }
         }
 
-        if (isChildrenDirty) {
-            _children.sweep();
-            _sortChildren();
-        }
-
+        bool isImagesDirty;
         foreach (idx, image; _images) {
             image.update();
             if (!image.isAlive) {

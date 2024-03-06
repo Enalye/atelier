@@ -45,8 +45,7 @@
 		- [collider](lib/scene.collider)
 		- [component](lib/scene.component)
 		- [entity](lib/scene.entity)
-	- [docgen38](lib/docgen38)
-	* 
+		- [level](lib/scene.level)
 		- [particle](lib/scene.particle)
 		- [scene](lib/scene.scene)
 		- [solid](lib/scene.solid)

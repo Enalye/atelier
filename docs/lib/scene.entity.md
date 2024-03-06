@@ -18,7 +18,6 @@ scene.addEntity(player);
 |Propriété|Natif|Type|Accesseur|Modifieur|Description|
 |-|-|-|-|-|-|
 |audio|**Entity**|**AudioComponent**|oui|non||
-|isAlive|**Entity**|**bool**|oui|non||
 |isVisible|**Entity**|**bool**|oui|oui||
 |name|**Entity**|**string**|oui|oui||
 |position|**Entity**|**Vec2\<float>**|oui|oui||

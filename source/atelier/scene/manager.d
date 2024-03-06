@@ -56,7 +56,7 @@ final class SceneManager {
 
     void load(string rid) {
         clear();
-        Level level = Atelier.res.get!Level(rid);
+        LevelBuilder level = Atelier.res.get!LevelBuilder(rid);
         _scenes.array = level.build();
         _sortScenes();
     }

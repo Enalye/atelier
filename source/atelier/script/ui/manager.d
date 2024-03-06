@@ -15,31 +15,32 @@ package void loadLibUI_manager(GrLibDefinition library) {
     library.setModule("ui.manager");
     library.setModuleInfo(GrLocale.fr_FR, "Gestionnaire d’interface");
 
-    GrType uiType = grGetNativeType("UIElement");
+    GrType uiType = library.addNative("UI");
+    GrType elementType = grGetNativeType("UIElement");
 
     library.setDescription(GrLocale.fr_FR, "Montre les bordures des interfaces");
     library.setParameters(["isDebug"]);
-    library.addFunction(&_setDebugUI, "setDebugUI", [grBool]);
+    library.addStatic(&_setDebug, uiType, "setDebug", [grBool]);
 
     library.setDescription(GrLocale.fr_FR, "Ajoute une interface au sommet de la hiérarchie");
     library.setParameters(["ui"]);
-    library.addFunction(&_addUI, "addUI", [uiType]);
+    library.addStatic(&_add, uiType, "add", [elementType]);
 
     library.setDescription(GrLocale.fr_FR, "Supprime toutes les interfaces");
     library.setParameters();
-    library.addFunction(&_clearUI, "clearUI");
+    library.addStatic(&_clear, uiType, "clear");
 }
 
-private void _setDebugUI(GrCall call) {
+private void _setDebug(GrCall call) {
     Atelier.ui.isDebug = call.getBool(0);
 }
 
-private void _addUI(GrCall call) {
+private void _add(GrCall call) {
     UIElement ui = call.getNative!UIElement(0);
 
     Atelier.ui.addUI(ui);
 }
 
-private void _clearUI(GrCall call) {
+private void _clear(GrCall call) {
     Atelier.ui.clearUI();
 }

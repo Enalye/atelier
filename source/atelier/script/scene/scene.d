@@ -40,64 +40,23 @@ addScene(scene);");
     library.addProperty(&_isAlive, null, "isAlive", sceneType, grBool);
     library.addProperty(&_canvas, null, "canvas", sceneType, canvasType);
 
-    library.setDescription(GrLocale.fr_FR, "Charge un niveau");
-    library.setParameters(["name"]);
-    library.addFunction(&_loadLevel, "loadLevel", [grString]);
-
-    library.setDescription(GrLocale.fr_FR, "Ajoute une scène à l’application");
-    library.setParameters(["scene"]);
-    library.addFunction(&_addScene, "addScene", [sceneType]);
-
-    library.setDescription(GrLocale.fr_FR, "Récupère la scène correspondant au nom donné");
-    library.setParameters(["name"]);
-    library.addFunction(&_fetchSceneByName, "fetchSceneByName", [grString],
-        [grOptional(sceneType)]);
-
-    library.setDescription(GrLocale.fr_FR, "Récupère les scènes possédants le tag indiqué");
-    library.setParameters(["tags"]);
-    library.addFunction(&_fetchScenesByTag, "fetchScenesByTag",
-        [grList(grString)], [grList(sceneType)]);
-
-    library.setDescription(GrLocale.fr_FR,
-        "Récupère l’entité correspondant au nom donné parmi toutes les scènes");
-    library.setParameters(["name"]);
-    library.addFunction(&_fetchEntityByName, "fetchEntityByName", [grString],
-        [grOptional(entityType)]);
-
-    library.setDescription(GrLocale.fr_FR, "Récupère les entités possédants le tag indiqué");
-    library.setParameters(["tags"]);
-    library.addFunction(&_fetchEntitiesByTag, "fetchEntitiesByTag",
-        [grList(grString)], [grList(entityType)]);
-
     library.setDescription(GrLocale.fr_FR,
         "Récupère l’entité correspondant au nom donné dans la scène");
     library.setParameters(["name"]);
-    library.addFunction(&_fetchEntityByName_scene, "fetchEntityByName",
-        [sceneType, grString], [grOptional(entityType)]);
+    library.addFunction(&_fetchEntityByName, "fetchEntityByName", [
+            sceneType, grString
+        ], [grOptional(entityType)]);
 
     library.setDescription(GrLocale.fr_FR,
         "Récupère les entités possédants le tag indiqué dans la scène");
     library.setParameters(["tags"]);
-    library.addFunction(&_fetchEntitiesByTag_scene, "fetchEntitiesByTag",
+    library.addFunction(&_fetchEntitiesByTag, "fetchEntitiesByTag",
         [sceneType, grList(grString)], [grList(entityType)]);
-
-    library.setDescription(GrLocale.fr_FR,
-        "Récupère l’entité correspondant au nom donné parmi toutes les scènes");
-    library.setParameters(["name"]);
-    library.addFunction(&_fetchParticleSourceByName,
-        "fetchParticleSourceByName", [grString], [
-            grOptional(particleSourceType)
-        ]);
-
-    library.setDescription(GrLocale.fr_FR, "Récupère les entités possédants le tag indiqué");
-    library.setParameters(["tags"]);
-    library.addFunction(&_fetchParticleSourcesByTag, "fetchParticleSourcesByTag",
-        [grList(grString)], [grList(particleSourceType)]);
 
     library.setDescription(GrLocale.fr_FR,
         "Récupère l’entité correspondant au nom donné dans la scène");
     library.setParameters(["name"]);
-    library.addFunction(&_fetchParticleSourceByName_scene, "fetchParticleSourceByName",
+    library.addFunction(&_fetchParticleSourceByName, "fetchParticleSourceByName",
         [sceneType, grString], [grOptional(particleSourceType)]);
 
     library.setDescription(GrLocale.fr_FR,
@@ -199,48 +158,7 @@ private void _canvas(GrCall call) {
     call.setNative(scene.canvas);
 }
 
-private void _loadLevel(GrCall call) {
-    Atelier.scene.load(call.getString(0));
-}
-
-private void _addScene(GrCall call) {
-    Scene scene = call.getNative!Scene(0);
-    Atelier.scene.addScene(scene);
-}
-
-private void _fetchSceneByName(GrCall call) {
-    Scene scene = Atelier.scene.fetchSceneByName(call.getString(0));
-    if (scene) {
-        call.setNative(scene);
-        return;
-    }
-    call.setNull();
-}
-
-private void _fetchScenesByTag(GrCall call) {
-    Scene[] scenes = Atelier.scene.fetchScenesByTag(call.getList(0).getStrings!string());
-    GrList result = new GrList;
-    result.setNatives(scenes);
-    call.setList(result);
-}
-
 private void _fetchEntityByName(GrCall call) {
-    Entity entity = Atelier.scene.fetchEntityByName(call.getString(0));
-    if (entity) {
-        call.setNative(entity);
-        return;
-    }
-    call.setNull();
-}
-
-private void _fetchEntitiesByTag(GrCall call) {
-    Entity[] entities = Atelier.scene.fetchEntitiesByTag(call.getList(0).getStrings!string());
-    GrList result = new GrList;
-    result.setNatives(entities);
-    call.setList(result);
-}
-
-private void _fetchEntityByName_scene(GrCall call) {
     Scene scene = call.getNative!Scene(0);
     Entity entity = scene.fetchEntityByName(call.getString(1));
     if (entity) {
@@ -250,7 +168,7 @@ private void _fetchEntityByName_scene(GrCall call) {
     call.setNull();
 }
 
-private void _fetchEntitiesByTag_scene(GrCall call) {
+private void _fetchEntitiesByTag(GrCall call) {
     Scene scene = call.getNative!Scene(0);
     Entity[] entities = scene.fetchEntitiesByTag(call.getList(1).getStrings!string());
     GrList result = new GrList;
@@ -259,23 +177,6 @@ private void _fetchEntitiesByTag_scene(GrCall call) {
 }
 
 private void _fetchParticleSourceByName(GrCall call) {
-    ParticleSource source = Atelier.scene.fetchParticleSourceByName(call.getString(0));
-    if (source) {
-        call.setNative(source);
-        return;
-    }
-    call.setNull();
-}
-
-private void _fetchParticleSourcesByTag(GrCall call) {
-    ParticleSource[] sources = Atelier.scene.fetchParticleSourcesByTag(call.getList(0)
-            .getStrings!string());
-    GrList result = new GrList;
-    result.setNatives(sources);
-    call.setList(result);
-}
-
-private void _fetchParticleSourceByName_scene(GrCall call) {
     Scene scene = call.getNative!Scene(0);
     ParticleSource source = scene.fetchParticleSourceByName(call.getString(1));
     if (source) {

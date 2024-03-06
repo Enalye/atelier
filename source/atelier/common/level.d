@@ -826,7 +826,7 @@ private class SceneBuilder {
     }
 }
 
-final class Level : Resource!Level {
+final class LevelBuilder : Resource!LevelBuilder {
     private {
         SceneBuilder[] _scenes;
     }
@@ -846,7 +846,7 @@ final class Level : Resource!Level {
         }
     }
 
-    Level fetch() {
+    LevelBuilder fetch() {
         return this;
     }
 

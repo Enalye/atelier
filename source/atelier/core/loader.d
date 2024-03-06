@@ -1191,14 +1191,14 @@ private void _loadParticle(InStream stream) {
 
 private void _compileLevel(string path, const Farfadet ffd, OutStream stream) {
     const string rid = ffd.get!string(0);
-    Level level = new Level(ffd);
+    LevelBuilder level = new LevelBuilder(ffd);
     stream.write!string(rid);
     level.serialize(stream);
 }
 
 private void _loadLevel(InStream stream) {
     const string rid = stream.read!string();
-    Level level = new Level;
+    LevelBuilder level = new LevelBuilder;
     level.deserialize(stream);
     Atelier.res.store(rid, { return level; });
 }

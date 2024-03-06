@@ -14,24 +14,8 @@ import atelier.scene.entity;
 import atelier.scene.scene;
 import atelier.scene.solid;
 
-final class CollideAction {
-    private {
-        GrEngine _engine;
-        GrEvent _event;
-    }
-
-    this(GrEngine engine, GrEvent event) {
-        enforce(engine && event, "CollideAction invalide");
-        _engine = engine;
-        _event = event;
-    }
-
-    void opCall(CollisionData data) {
-        _engine.callEvent(_event, [GrValue(data)]);
-    }
-}
-
 final class CollisionData {
+    Actor actor;
     Solid solid;
     Vec2i direction;
 }
@@ -45,6 +29,7 @@ abstract class Collider {
 
     private {
         bool _isAlive = true;
+        Entity _entity;
     }
 
     string name;
@@ -96,6 +81,16 @@ abstract class Collider {
         final Vec2i hitbox(Vec2i v) {
             return _hitbox = v;
         }
+
+        final Entity entity() {
+            return _entity;
+        }
+
+        final Entity entity(Entity entity_) {
+            enforce(!entity_ || !entity_.parent,
+                "l’entité doit être à la racine de la scène");
+            return _entity = entity_;
+        }
     }
 
     this() {
@@ -111,6 +106,8 @@ abstract class Collider {
     }
 
     void update() {
-
+        if (_entity) {
+            _entity.position = scenePosition;
+        }
     }
 }

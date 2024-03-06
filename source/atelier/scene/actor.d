@@ -16,9 +16,11 @@ import atelier.scene.solid;
 final class Actor : Collider {
     private {
         bool _hasPhysics = true;
+        Solid _mountedSolid;
     }
 
-    void moveX(float x, GrEvent onCollide) {
+    CollisionData moveX(float x, bool getInfo = true) {
+        CollisionData collData;
         _moveRemaining.x += x;
         int move = cast(int) round(_moveRemaining.x);
 
@@ -31,11 +33,11 @@ final class Actor : Collider {
                     Solid solid = _scene.collideAt(_position + Vec2i(dir, 0), _hitbox);
                     if (solid) {
                         _moveRemaining.x = 0f;
-                        if (onCollide) {
-                            CollisionData data = new CollisionData;
-                            data.solid = solid;
-                            data.direction = Vec2i(dir, 0);
-                            Atelier.vm.callEvent(onCollide, [GrValue(data)]);
+                        if (getInfo) {
+                            collData = new CollisionData;
+                            collData.actor = this;
+                            collData.solid = solid;
+                            collData.direction = Vec2i(dir, 0);
                         }
                         break;
                     }
@@ -49,9 +51,12 @@ final class Actor : Collider {
                 _position.x += move;
             }
         }
+
+        return collData;
     }
 
-    void moveY(float y, GrEvent onCollide) {
+    CollisionData moveY(float y, bool getInfo = true) {
+        CollisionData collData;
         _moveRemaining.y += y;
         int move = cast(int) round(_moveRemaining.y);
 
@@ -64,11 +69,11 @@ final class Actor : Collider {
                     Solid solid = _scene.collideAt(_position + Vec2i(0, dir), _hitbox);
                     if (solid) {
                         _moveRemaining.y = 0f;
-                        if (onCollide) {
-                            CollisionData data = new CollisionData;
-                            data.solid = solid;
-                            data.direction = Vec2i(0, dir);
-                            Atelier.vm.callEvent(onCollide, [GrValue(data)]);
+                        if (getInfo) {
+                            collData = new CollisionData;
+                            collData.actor = this;
+                            collData.solid = solid;
+                            collData.direction = Vec2i(0, dir);
                         }
                         break;
                     }
@@ -82,12 +87,19 @@ final class Actor : Collider {
                 _position.y += move;
             }
         }
+
+        return collData;
+    }
+
+    void mount(Solid solid) {
+        _mountedSolid = solid;
+    }
+
+    void dismount() {
+        _mountedSolid = null;
     }
 
     bool isRiding(Solid solid) {
-        return false;
-        //return (solid.left < right) && (solid.down < up) && (solid.right > left) && (solid.up > down);
+        return _mountedSolid == solid;
     }
-
-    GrEvent onSquish;
 }

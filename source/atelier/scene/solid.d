@@ -18,15 +18,16 @@ final class Solid : Collider {
         bool _isCollidable = true;
     }
 
-    void moveX(float x) {
-        move(x, 0f);
+    CollisionData[] moveX(float x) {
+        return move(x, 0f);
     }
 
-    void moveY(float y) {
-        move(0f, y);
+    CollisionData[] moveY(float y) {
+        return move(0f, y);
     }
 
-    void move(float x, float y) {
+    CollisionData[] move(float x, float y) {
+        CollisionData[] collDataList;
         _moveRemaining.x += x;
         _moveRemaining.y += y;
 
@@ -45,20 +46,20 @@ final class Solid : Collider {
                 if (moveX > 0) {
                     foreach (Actor actor; _scene.actors) {
                         if (overlapWith(actor)) {
-                            actor.moveX(right - actor.left, actor.onSquish);
+                            collDataList ~= actor.moveX(right - actor.left, true);
                         }
                         else if (ridingActors.canFind(actor)) {
-                            actor.moveX(moveX, null);
+                            actor.moveX(moveX, false);
                         }
                     }
                 }
                 else {
                     foreach (Actor actor; _scene.actors) {
                         if (overlapWith(actor)) {
-                            actor.moveX(left - actor.right, actor.onSquish);
+                            collDataList ~= actor.moveX(left - actor.right, true);
                         }
                         else if (ridingActors.canFind(actor)) {
-                            actor.moveX(moveX, null);
+                            actor.moveX(moveX, false);
                         }
                     }
                 }
@@ -70,26 +71,28 @@ final class Solid : Collider {
                 if (moveY > 0) {
                     foreach (Actor actor; _scene.actors) {
                         if (overlapWith(actor)) {
-                            actor.moveY(up - actor.down, actor.onSquish);
+                            collDataList ~= actor.moveY(up - actor.down, true);
                         }
                         else if (ridingActors.canFind(actor)) {
-                            actor.moveY(moveY, null);
+                            actor.moveY(moveY, false);
                         }
                     }
                 }
                 else {
                     foreach (Actor actor; _scene.actors) {
                         if (overlapWith(actor)) {
-                            actor.moveY(down - actor.up, actor.onSquish);
+                            collDataList ~= actor.moveY(down - actor.up, true);
                         }
                         else if (ridingActors.canFind(actor)) {
-                            actor.moveY(moveY, null);
+                            actor.moveY(moveY, false);
                         }
                     }
                 }
             }
             _isTempCollidable = true;
         }
+
+        return collDataList;
     }
 
     Actor[] getAllRidingActors() {

@@ -20,6 +20,7 @@ package void loadLibScene_collider(GrLibDefinition library) {
     GrType solidType = grGetNativeType("Solid");
     GrType vec2iType = grGetNativeType("Vec2", [grInt]);
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
+    GrType entityType = grGetNativeType("Entity");
 
     GrType collisionDataType = library.addNative("CollisionData");
 
@@ -31,6 +32,10 @@ package void loadLibScene_collider(GrLibDefinition library) {
         colliderType, vec2iType);
     library.addProperty(&_hitbox!"get", &_hitbox!"set", "hitbox", colliderType, vec2iType);
     library.addProperty(&_isAlive, null, "isAlive", colliderType, grBool);
+
+    library.setDescription(GrLocale.fr_FR, "Entité lié à l’objet");
+    library.addProperty(&_entity!"get", &_entity!"set", "entity",
+        colliderType, grOptional(entityType));
 
     library.setDescription(GrLocale.fr_FR, "Récupère les tags de l’objet");
     library.setParameters(["collider"]);
@@ -127,4 +132,24 @@ private void _hasTag(GrCall call) {
 private void _remove(GrCall call) {
     Collider collider = call.getNative!Collider(0);
     collider.remove();
+}
+
+private void _entity(string op)(GrCall call) {
+    Collider collider = call.getNative!Collider(0);
+
+    static if (op == "set") {
+        if (call.isNull(1)) {
+            collider.entity = null;
+        }
+        else {
+            collider.entity = call.getNative!Entity(1);
+        }
+    }
+
+    if (collider.entity) {
+        call.setNative(collider.entity);
+    }
+    else {
+        call.setNull();
+    }
 }

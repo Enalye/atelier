@@ -176,6 +176,48 @@ final class Scene {
         return result;
     }
 
+    Actor fetchActorByName(string name) {
+        foreach (actor; _actors) {
+            if (actor.name == name)
+                return actor;
+        }
+        return null;
+    }
+
+    Actor[] fetchActorsByTag(string[] tags) {
+        Actor[] result;
+        __actorLoop: foreach (actor; _actors) {
+            foreach (string tag; tags) {
+                if (!canFind(actor.tags, tag)) {
+                    continue __actorLoop;
+                }
+            }
+            result ~= actor;
+        }
+        return result;
+    }
+
+    Solid fetchSolidByName(string name) {
+        foreach (solid; _solids) {
+            if (solid.name == name)
+                return solid;
+        }
+        return null;
+    }
+
+    Solid[] fetchSolidsByTag(string[] tags) {
+        Solid[] result;
+        __solidLoop: foreach (solid; _solids) {
+            foreach (string tag; tags) {
+                if (!canFind(solid.tags, tag)) {
+                    continue __solidLoop;
+                }
+            }
+            result ~= solid;
+        }
+        return result;
+    }
+
     Solid collideAt(Vec2i point, Vec2i halfSize) {
         foreach (Solid solid; _solids) {
             if (solid.collideWith(point, halfSize))

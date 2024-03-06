@@ -123,7 +123,6 @@ final class SceneManager {
 
     void update(InputEvent[] inputEvents) {
         bool isScenesDirty;
-        _camera.update();
 
         foreach (idx, scene; _scenes) {
             foreach (InputEvent event; inputEvents) {
@@ -140,6 +139,8 @@ final class SceneManager {
             _scenes.sweep();
             _sortScenes();
         }
+
+        _camera.update();
     }
 
     void draw(Vec2f origin) {

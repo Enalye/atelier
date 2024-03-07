@@ -64,6 +64,7 @@ final class Renderer {
     }
 
     Color color = Color.white;
+    uint scalingTime = 15;
 
     this(Window window) {
         _kernelSize = Vec2i(window.width, window.height);
@@ -130,7 +131,13 @@ final class Renderer {
             break;
         }
 
-        _scaleTimer.start(15);
+        if (scalingTime > 0) {
+            _scaleTimer.start(scalingTime);
+        }
+        else {
+            _scaleTimer.start(1);
+            _scaleTimer.update();
+        }
     }
 
     private void _updateSharpness() {

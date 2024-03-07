@@ -1,0 +1,34 @@
+{
+    "authors": [
+        "enalye"
+    ],
+    "copyright": "Copyright © 2024, Enalye",
+    "description": "Éditeur d’Atelier",
+    "license": "Zlib",
+    "name": "studio",
+    "targetType": "executable",
+    "targetName": "studio",
+    "workingDirectory": "..",
+    "dependencies": {
+        "etabli": {
+            "path": "../etabli"
+        },
+        "farfadet": {
+            "path": "../farfadet"
+        }
+    },
+    "configurations": [
+        {
+            "name": "debug",
+            "targetPath": "../bin"
+        },
+        {
+            "name": "export",
+            "lflags": [
+                "-subsystem:windows",
+                "-entry:mainCRTStartup"
+            ],
+            "targetPath": "../export"
+        }
+    ]
+}

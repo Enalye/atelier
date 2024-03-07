@@ -45,7 +45,8 @@ final class Renderer {
         integer,
         fit,
         contain,
-        stretch
+        stretch,
+        desktop
     }
 
     @property {
@@ -65,22 +66,14 @@ final class Renderer {
     Color color = Color.white;
 
     this(Window window) {
+        _kernelSize = Vec2i(window.width, window.height);
         _sdlRenderer = SDL_CreateRenderer(window.sdlWindow, -1,
             SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
         enforce(_sdlRenderer, "renderer creation failure");
     }
 
     void setupKernel() {
-        _kernelSize = Vec2i(Atelier.window.width, Atelier.window.height);
-        _kernelCanvas = new Canvas(_kernelSize.x, _kernelSize.y);
-        _kernelSprite = new Sprite(_kernelCanvas);
-        _kernelSprite.anchor = Vec2f.half;
-
-        _scaledCanvas = new Canvas(_kernelSize.x * _pixelSharpness,
-            _kernelSize.y * _pixelSharpness, true);
-        _scaledSprite = new Sprite(_scaledCanvas);
-        _scaledSprite.anchor = Vec2f.half;
-
+        _updateKernel();
         _updateScaling();
         _updateSharpness();
     }
@@ -93,6 +86,17 @@ final class Renderer {
         Vec2f windowSize = Vec2f(Atelier.window.width, Atelier.window.height);
         Vec2f ratio = (cast(Vec2f) _kernelSize) / windowSize;
         return position * ratio;
+    }
+
+    private void _updateKernel() {
+        _kernelCanvas = new Canvas(_kernelSize.x, _kernelSize.y);
+        _kernelSprite = new Sprite(_kernelCanvas);
+        _kernelSprite.anchor = Vec2f.half;
+
+        _scaledCanvas = new Canvas(_kernelSize.x * _pixelSharpness,
+            _kernelSize.y * _pixelSharpness, true);
+        _scaledSprite = new Sprite(_scaledCanvas);
+        _scaledSprite.anchor = Vec2f.half;
     }
 
     private void _updateScaling() {
@@ -117,6 +121,12 @@ final class Renderer {
             break;
         case stretch:
             _scaledSizeEnd = windowSize;
+            break;
+        case desktop:
+            _kernelSize = Vec2i(Atelier.window.width, Atelier.window.height);
+            _updateKernel();
+            _scaledSizeEnd = cast(Vec2f) _kernelSize;
+            Atelier.ui.dispatchEvent("windowSize");
             break;
         }
 

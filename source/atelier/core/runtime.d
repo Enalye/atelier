@@ -136,6 +136,7 @@ final class Atelier {
 
         // Initialisation des modules
         _window = new Window(windowWidth, windowHeight);
+        _window.title = windowTitle;
         _renderer = new Renderer(_window);
         _renderer.setupKernel();
 
@@ -248,6 +249,9 @@ final class Atelier {
     }
 
     private void _startVM() {
+        if (!_bytecode)
+            return;
+
         log("[ATELIER] Initialisation de la machine virtuelle...");
         long startTime = Clock.currStdTime();
 
@@ -290,7 +294,7 @@ final class Atelier {
             _loadResources();
         }
 
-        if (_mustReloadScript) {
+        if (_mustReloadScript && _compileFunc) {
             _bytecode = _compileFunc(_libraries);
         }
         _startVM();
@@ -301,7 +305,9 @@ final class Atelier {
         _compileResources();
         _loadResources();
 
-        _bytecode = _compileFunc(_libraries);
+        if (_compileFunc) {
+            _bytecode = _compileFunc(_libraries);
+        }
         _startVM();
 
         _tickStartFrame = Clock.currStdTime();

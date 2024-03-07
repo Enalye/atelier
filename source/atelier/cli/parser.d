@@ -12,6 +12,7 @@ import atelier.common;
 import atelier.core;
 import atelier.cli.cli_add;
 import atelier.cli.cli_default;
+import atelier.cli.cli_edit;
 import atelier.cli.cli_export;
 import atelier.cli.cli_init;
 import atelier.cli.cli_run;
@@ -43,6 +44,11 @@ void parseCli(string[] args) {
     cli.addCommandOption("run", "h", "help", "Affiche l’aide de la commande");
     cli.addCommandOption("run", "c", "config",
         "Exécute la configuration spécifiée", ["config"]);
+
+    cli.addCommand(&cliEdit, "edit", "Lance l’éditeur", [], ["dir"]);
+    cli.addCommandOption("edit", "h", "help", "Affiche l’aide de la commande");
+    cli.addCommandOption("edit", "c", "config",
+        "Lance l’éditeur pour la configuration spécifiée", ["config"]);
 
     cli.addCommand(&cliExport, "export", "Exporte un projet", [], ["name"]);
     cli.addCommandOption("export", "h", "help", "Affiche l’aide de la commande");

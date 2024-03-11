@@ -5,15 +5,15 @@
  */
 module studio.ui.editor;
 
-import etabli;
+import ciel;
 import studio.ui.propertyeditor;
 import studio.ui.tabbar;
-import studio.ui.taskbar;
+import studio.ui.menubar;
 import studio.ui.resourcelist;
 
 final class Editor : UIElement {
     private {
-        TaskBar _taskBar;
+        MenuBar _taskBar;
         TabBar _tabBar;
         //Visualizer _visualizer;
         PropertyEditor _propertyEditor;
@@ -21,20 +21,15 @@ final class Editor : UIElement {
     }
 
     this() {
-        setSize(cast(Vec2f) Etabli.window.size);
+        setSize(Ciel.size);
         setAlign(UIAlignX.center, UIAlignY.center);
 
-        {
-            VBox box = new VBox;
-            box.setAlign(UIAlignX.center, UIAlignY.top);
-            addUI(box);
+        _taskBar = new EditorMenu;
+        addUI(_taskBar);
 
-            _taskBar = new TaskBar;
-            box.addUI(_taskBar);
-
-            _tabBar = new TabBar;
-            box.addUI(_tabBar);
-        }
+        _tabBar = new TabBar;
+        _tabBar.setPosition(Vec2f(0f, 50f));
+        addUI(_tabBar);
 
         {
             _resourceList = new ResourceList;
@@ -46,6 +41,6 @@ final class Editor : UIElement {
             addUI(_propertyEditor);
         }
 
-        addEventListener("windowSize", { setSize(cast(Vec2f) Etabli.window.size); });
+        addEventListener("windowSize", { setSize(Ciel.size); });
     }
 }

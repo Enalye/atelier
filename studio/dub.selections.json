@@ -4,7 +4,8 @@
 		"bindbc-common": "0.1.3",
 		"bindbc-loader": "1.1.5",
 		"bindbc-sdl": "1.4.5",
-		"etabli": {"path":"../etabli"},
+		"ciel": {"path":"../ciel"},
+		"etabli": {"path":"../ciel/etabli"},
 		"farfadet": {"path":"../farfadet"}
 	}
 }

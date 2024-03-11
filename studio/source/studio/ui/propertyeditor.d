@@ -5,22 +5,18 @@
  */
 module studio.ui.propertyeditor;
 
-import etabli;
+import ciel;
 
-final class PropertyEditor : UIElement {
+final class PropertyEditor : Surface {
     private {
     }
 
     this() {
         setAlign(UIAlignX.right, UIAlignY.bottom);
-        setSize(Vec2f(200f, Etabli.window.height - 50f));
+        setSize(Vec2f(200f, Ciel.height - 50f));
 
         addEventListener("windowSize", {
-            setSize(Vec2f(200f, Etabli.window.height - 50f));
-        });
-
-        addEventListener("draw", {
-            Etabli.renderer.drawRect(Vec2f.zero, getSize(), Color.fromHex(0x102030), 1f, true);
+            setSize(Vec2f(200f, Ciel.height - 50f));
         });
     }
 }

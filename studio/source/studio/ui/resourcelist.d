@@ -5,22 +5,29 @@
  */
 module studio.ui.resourcelist;
 
-import etabli;
+import ciel;
 
-final class ResourceList : UIElement {
+final class ResourceList : Surface {
     private {
+        Rectangle _rect;
     }
 
     this() {
         setAlign(UIAlignX.left, UIAlignY.bottom);
-        setSize(Vec2f(200f, Etabli.window.height - 50f));
+        setSize(Vec2f(200f, Ciel.height - 50f));
 
         addEventListener("windowSize", {
-            setSize(Vec2f(200f, Etabli.window.height - 50f));
+            setSize(Vec2f(200f, Ciel.height - 50f));
         });
 
-        addEventListener("draw", {
-            Etabli.renderer.drawRect(Vec2f.zero, getSize(), Color.fromHex(0x102030), 1f, true);
-        });
+        VBox box = new VBox;
+        box.setSpacing(10f);
+        addUI(box);
+
+        box.addUI(new PrimaryButton("Primary"));
+        box.addUI(new SecondaryButton("Secondary"));
+        box.addUI(new OutlinedButton("Outlined"));
+        box.addUI(new GhostButton("Ghost"));
+        box.addUI(new DangerButton("Danger"));
     }
 }

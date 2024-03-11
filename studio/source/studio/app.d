@@ -3,7 +3,7 @@
  * Licence: Zlib
  * Auteur: Enalye
  */
-import etabli;
+import ciel;
 
 import studio.ui;
 
@@ -117,12 +117,25 @@ private immutable ubyte[] _logo64Data = [
 ];
 
 void main() {
-    Etabli etabli = new Etabli(800, 600, "Studio Atelier");
+    Ciel ciel = new Ciel(1280, 720, {
+        Theme theme;
+        theme.font = getDefaultFont();
+        theme.background = Color.fromHex(0x1e1e1e);
+        theme.surface = Color.fromHex(0x252526);
+        theme.container = Color.fromHex(0x2d2d30);
+        theme.foreground = Color.fromHex(0x3e3e42);
+        theme.neutral = Color.fromHex(0x57575c);
+        theme.accent = Color.fromHex(0x007acc);
+        theme.danger = Color.fromHex(0xcc0000);
+        theme.onNeutral = Color.fromHex(0xffffff);
+        theme.onAccent = Color.fromHex(0xffffff);
+        theme.onDanger = Color.fromHex(0xffffff);
+        theme.corner = 8f;
+        return theme;
+    }, "Atelier");
 
-    etabli.renderer.color = Color.fromHex(0x101010);
+    ciel.addUI(new Editor);
 
-    etabli.ui.addUI(new Editor);
-
-    etabli.window.setIconFromMemory(_logo64Data);
-    etabli.run();
+    Etabli.window.setIconFromMemory(_logo64Data);
+    ciel.run();
 }

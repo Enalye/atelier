@@ -10,8 +10,8 @@
     "targetName": "studio",
     "workingDirectory": "..",
     "dependencies": {
-        "etabli": {
-            "path": "../etabli"
+        "ciel": {
+            "path": "../ciel"
         },
         "farfadet": {
             "path": "../farfadet"

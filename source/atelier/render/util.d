@@ -7,21 +7,40 @@ module atelier.render.util;
 
 import bindbc.sdl;
 
-/// Blending algorithm \
-/// none: Paste everything without transparency \
-/// modular: Multiply color value with the destination \
-/// additive: Add color value with the destination \
-/// alpha: Paste everything with transparency (Default one)
+/** Algorithme de composition
+none:
+    dC = sC \
+    dA = sA
+alpha:
+    dC = sC * sA + dC * (1 - sA) \
+    dA = sA + dA * (1 - sA)
+additive:
+    dC = sC * sA + dC \
+    dA = dA
+modular:
+    dC = sC * dC \
+    dA = dA
+multiply:
+    dC = sC * dC + dC * (1 - sA) \
+    dA = sA * dA + dA * (1 - sA)
+canvas:
+    dC = sC + dC * (1 - sA) \
+    dA = sA + dA * (1 - sA)
+mask:
+    dC = sC \
+    dA = dA
+*/
 enum Blend {
     none,
     alpha,
     additive,
     modular,
     multiply,
+    canvas,
     mask
 }
 
-/// Returns the SDL blend flag.
+/// Récupère l’option SDL de composition
 package SDL_BlendMode getSDLBlend(Blend blend) {
     final switch (blend) with (Blend) {
     case none:
@@ -34,6 +53,10 @@ package SDL_BlendMode getSDLBlend(Blend blend) {
         return SDL_BLENDMODE_MOD;
     case multiply:
         return SDL_BLENDMODE_MUL;
+    case canvas:
+        return SDL_ComposeCustomBlendMode(SDL_BLENDFACTOR_ONE,
+            SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA, SDL_BLENDOPERATION_ADD,
+            SDL_BLENDFACTOR_ONE, SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA, SDL_BLENDOPERATION_ADD);
     case mask:
         return SDL_ComposeCustomBlendMode(SDL_BLENDFACTOR_ONE, SDL_BLENDFACTOR_ZERO, SDL_BLENDOPERATION_ADD,
             SDL_BLENDFACTOR_DST_ALPHA, SDL_BLENDFACTOR_ZERO, SDL_BLENDOPERATION_ADD);

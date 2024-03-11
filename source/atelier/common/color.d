@@ -173,6 +173,10 @@ struct Color {
         return this;
     }
 
+    Color lerp(Color end, float t) const {
+        return (this * (1f - t)) + (end * t);
+    }
+
     /// Assignment
     Color opOpAssign(string op)(float s) {
         mixin("s = clamp(s, 0f, 1f);_r = _r", op, "s;_g = _g", op, "s;_b = _b", op, "s;");

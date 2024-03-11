@@ -41,7 +41,7 @@ class UIElement {
 
         bool _isHovered, _hasFocus, _isPressed, _isSelected, _isActive, _isGrabbed;
         bool _isEnabled = true;
-        bool _isAlive = true;
+        bool _isAlive;
     }
 
     /// Ordenancement
@@ -74,6 +74,14 @@ class UIElement {
     @property {
         package final bool isAlive() const {
             return _isAlive;
+        }
+
+        package final bool isAlive(bool isAlive_) {
+            if (_isAlive != isAlive_) {
+                _isAlive = isAlive_;
+                dispatchEvent(_isAlive ? "register" : "unregister", false);
+            }
+            return _isAlive = isAlive_;
         }
 
         final bool isHovered() const {
@@ -229,6 +237,7 @@ class UIElement {
             return;
         _size = size_;
         dispatchEvent("size");
+        dispatchEventChildren("parentSize");
     }
 
     final Vec2f getCenter() const {
@@ -284,7 +293,7 @@ class UIElement {
         });
     }
 
-    final void dispatchEvent(string type, bool bubbling = true) {
+    final void dispatchEvent(string type, bool bubbleUp = true) {
         { // Natifs
             auto p = type in _nativeEventListeners;
             if (p) {
@@ -305,19 +314,36 @@ class UIElement {
             }
         }
 
-        if (bubbling && _parent) {
+        if (bubbleUp && _parent) {
             _parent.dispatchEvent(type);
         }
     }
 
-    final void addUI(UIElement ui) {
-        ui._parent = this;
-        _children ~= ui;
+    final void dispatchEventChildren(string type, bool bubbleDown = true) {
+        if (bubbleDown) {
+            foreach (UIElement child; _children) {
+                child.dispatchEvent(type, false);
+                child.dispatchEventChildren(type, bubbleDown);
+            }
+        }
+        else {
+            foreach (UIElement child; _children) {
+                child.dispatchEvent(type, false);
+            }
+        }
+    }
+
+    final void addUI(UIElement element) {
+        if (element.isAlive)
+            return;
+
+        element.isAlive = true;
+        element._parent = this;
+        _children ~= element;
     }
 
     final void clearUI() {
         foreach (child; _children) {
-            child._parent = null;
             child.remove();
         }
         _children.clear();
@@ -332,9 +358,7 @@ class UIElement {
     }
 
     final void remove() {
-        _isAlive = false;
+        isAlive = false;
         _parent = null;
-        clearUI();
-        clearImages();
     }
 }

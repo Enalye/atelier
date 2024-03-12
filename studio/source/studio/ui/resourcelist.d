@@ -29,5 +29,6 @@ final class ResourceList : Surface {
         box.addUI(new OutlinedButton("Outlined"));
         box.addUI(new GhostButton("Ghost"));
         box.addUI(new DangerButton("Danger"));
+        box.addUI(new TextField());
     }
 }

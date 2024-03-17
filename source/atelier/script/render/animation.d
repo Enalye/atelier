@@ -23,7 +23,7 @@ void loadLibRender_animation(GrLibDefinition library) {
 
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
     GrType vec2iType = grGetNativeType("Vec2", [grInt]);
-    GrType vec4iType = grGetNativeType("Vec4", [grInt]);
+    GrType vec4uType = grGetNativeType("Vec4", [grUInt]);
     GrType imageDataType = grGetNativeType("ImageData");
 
     library.setParameters(["name"]);
@@ -31,12 +31,12 @@ void loadLibRender_animation(GrLibDefinition library) {
 
     library.setParameters(["imageData", "clip", "columns", "lines"]);
     library.addConstructor(&_ctor_imageData_2, animationType, [
-            imageDataType, vec4iType, grInt, grInt
+            imageDataType, vec4uType, grInt, grInt
         ]);
 
     library.setParameters(["imageData", "clip", "columns", "lines", "maxCount"]);
     library.addConstructor(&_ctor_imageData_3, animationType, [
-            imageDataType, vec4iType, grInt, grInt, grInt
+            imageDataType, vec4uType, grInt, grInt, grInt
         ]);
 
     library.addProperty(&_size!"get", &_size!"set", "size", animationType, vec2fType);
@@ -56,12 +56,12 @@ private void _ctor_str(GrCall call) {
 
 private void _ctor_imageData_2(GrCall call) {
     call.setNative(new Animation(call.getNative!ImageData(0),
-            call.getNative!SVec4i(1), call.getInt(1), call.getInt(2)));
+            call.getNative!SVec4u(1), call.getInt(1), call.getInt(2)));
 }
 
 private void _ctor_imageData_3(GrCall call) {
     call.setNative(new Animation(call.getNative!ImageData(0),
-            call.getNative!SVec4i(1), call.getInt(1), call.getInt(2), call.getInt(3)));
+            call.getNative!SVec4u(1), call.getInt(1), call.getInt(2), call.getInt(3)));
 }
 
 private void _size(string op)(GrCall call) {

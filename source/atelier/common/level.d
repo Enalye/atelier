@@ -33,46 +33,63 @@ private abstract class ImageBuilder {
 
     @property string type() const;
 
-    void parse(const Farfadet node) {
-        switch (node.name) {
-        case "position":
+    @property immutable(string[]) acceptedNodes() const {
+        return [
+            "position", "angle", "flip", "anchor", "pivot", "blend", "rgb", "hsl",
+            "alpha"
+        ];
+    }
+
+    void parse(const Farfadet ffd) {
+        if (ffd.hasNode("position")) {
+            Farfadet node = ffd.getNode("position", 2);
             _position = Vec2f(node.get!float(0), node.get!float(1));
-            break;
-        case "angle":
-            _angle = node.get!double(0);
-            break;
-        case "flip":
+        }
+
+        if (ffd.hasNode("angle")) {
+            _angle = ffd.getNode("angle", 1).get!double(0);
+        }
+
+        if (ffd.hasNode("flip")) {
+            Farfadet node = ffd.getNode("flip", 2);
             _flipX = node.get!bool(0);
-            _flipY = node.get!bool(1);
-            break;
-        case "anchor":
+            _flipY = node.get!float(1);
+        }
+
+        if (ffd.hasNode("anchor")) {
+            Farfadet node = ffd.getNode("anchor", 2);
             _anchor = Vec2f(node.get!float(0), node.get!float(1));
-            break;
-        case "pivot":
+        }
+
+        if (ffd.hasNode("pivot")) {
+            Farfadet node = ffd.getNode("pivot", 2);
             _pivot = Vec2f(node.get!float(0), node.get!float(1));
-            break;
-        case "blend":
+        }
+
+        if (ffd.hasNode("blend")) {
+            Farfadet node = ffd.getNode("blend", 1);
             try {
                 _blend = to!Blend(node.get!string(0));
             }
             catch (ConvException e) {
                 enforce(false,
                     "blend doit valoir `none`, `alpha`, `additive`, `modular`, `multiply` ou `mask`, et non `" ~
-                    node.name ~ "`");
+                    node.get!string(0) ~ "`");
             }
-            break;
-        case "rgb":
+        }
+
+        if (ffd.hasNode("rgb")) {
+            Farfadet node = ffd.getNode("rgb", 3);
             _color = Color(node.get!float(0), node.get!float(1), node.get!float(2));
-            break;
-        case "hsl":
+        }
+
+        if (ffd.hasNode("hsl")) {
+            Farfadet node = ffd.getNode("hsl", 3);
             _color = HSLColor(node.get!float(0), node.get!float(1), node.get!float(2)).toColor();
-            break;
-        case "alpha":
-            _alpha = node.get!float(0);
-            break;
-        default:
-            enforce(false, "le nœud `" ~ node.name ~ "` n’est pas reconnu");
-            break;
+        }
+
+        if (ffd.hasNode("alpha")) {
+            _alpha = ffd.getNode("alpha", 1).get!float(0);
         }
     }
 
@@ -132,14 +149,8 @@ private class AnimationBuilder : ImageBuilder {
 
     this(const Farfadet ffd) {
         _rid = ffd.get!string(0);
-
-        foreach (node; ffd.nodes) {
-            switch (node.name) {
-            default:
-                super.parse(node);
-                break;
-            }
-        }
+        ffd.accept(super.acceptedNodes());
+        super.parse(ffd);
     }
 
     override Image build() {
@@ -173,19 +184,18 @@ private class CapsuleBuilder : ImageBuilder {
     }
 
     this(const Farfadet ffd) {
-        foreach (node; ffd.nodes) {
-            switch (node.name) {
-            case "size":
-                _size = Vec2f(node.get!float(0), node.get!float(1));
-                break;
-            case "outline":
-                _outline = node.get!float(0);
-                break;
-            default:
-                super.parse(node);
-                break;
-            }
+        ffd.accept(super.acceptedNodes() ~ ["size", "outline"]);
+
+        if (ffd.hasNode("size")) {
+            Farfadet node = ffd.getNode("size", 2);
+            _size = Vec2f(node.get!float(0), node.get!float(1));
         }
+
+        if (ffd.hasNode("outline")) {
+            _outline = ffd.getNode("outline", 1).get!float(0);
+        }
+
+        super.parse(ffd);
     }
 
     override Image build() {
@@ -227,19 +237,17 @@ private class CircleBuilder : ImageBuilder {
     }
 
     this(const Farfadet ffd) {
-        foreach (node; ffd.nodes) {
-            switch (node.name) {
-            case "radius":
-                _radius = node.get!float(0);
-                break;
-            case "outline":
-                _outline = node.get!float(0);
-                break;
-            default:
-                super.parse(node);
-                break;
-            }
+        ffd.accept(super.acceptedNodes() ~ ["radius", "outline"]);
+
+        if (ffd.hasNode("radius")) {
+            _radius = ffd.getNode("radius", 1).get!float(0);
         }
+
+        if (ffd.hasNode("outline")) {
+            _outline = ffd.getNode("outline", 1).get!float(0);
+        }
+
+        super.parse(ffd);
     }
 
     override Image build() {
@@ -281,14 +289,8 @@ private class NinePatchBuilder : ImageBuilder {
 
     this(const Farfadet ffd) {
         _rid = ffd.get!string(0);
-
-        foreach (node; ffd.nodes) {
-            switch (node.name) {
-            default:
-                super.parse(node);
-                break;
-            }
-        }
+        ffd.accept(super.acceptedNodes());
+        super.parse(ffd);
     }
 
     override Image build() {
@@ -322,19 +324,18 @@ private class RectangleBuilder : ImageBuilder {
     }
 
     this(const Farfadet ffd) {
-        foreach (node; ffd.nodes) {
-            switch (node.name) {
-            case "size":
-                _size = Vec2f(node.get!float(0), node.get!float(1));
-                break;
-            case "outline":
-                _outline = node.get!float(0);
-                break;
-            default:
-                super.parse(node);
-                break;
-            }
+        ffd.accept(super.acceptedNodes() ~ ["size", "outline"]);
+
+        if (ffd.hasNode("size")) {
+            Farfadet node = ffd.getNode("size", 2);
+            _size = Vec2f(node.get!float(0), node.get!float(1));
         }
+
+        if (ffd.hasNode("outline")) {
+            _outline = ffd.getNode("outline", 1).get!float(0);
+        }
+
+        super.parse(ffd);
     }
 
     override Image build() {
@@ -377,22 +378,22 @@ private class RoundedRectangleBuilder : ImageBuilder {
     }
 
     this(const Farfadet ffd) {
-        foreach (node; ffd.nodes) {
-            switch (node.name) {
-            case "size":
-                _size = Vec2f(node.get!float(0), node.get!float(1));
-                break;
-            case "outline":
-                _outline = node.get!float(0);
-                break;
-            case "radius":
-                _radius = node.get!float(0);
-                break;
-            default:
-                super.parse(node);
-                break;
-            }
+        ffd.accept(super.acceptedNodes() ~ ["size", "outline", "radius"]);
+
+        if (ffd.hasNode("size")) {
+            Farfadet node = ffd.getNode("size", 2);
+            _size = Vec2f(node.get!float(0), node.get!float(1));
         }
+
+        if (ffd.hasNode("outline")) {
+            _outline = ffd.getNode("outline", 1).get!float(0);
+        }
+
+        if (ffd.hasNode("radius")) {
+            _radius = ffd.getNode("radius", 1).get!float(0);
+        }
+
+        super.parse(ffd);
     }
 
     override Image build() {
@@ -436,14 +437,8 @@ private class SpriteBuilder : ImageBuilder {
 
     this(const Farfadet ffd) {
         _rid = ffd.get!string(0);
-
-        foreach (node; ffd.nodes) {
-            switch (node.name) {
-            default:
-                super.parse(node);
-                break;
-            }
-        }
+        ffd.accept(super.acceptedNodes());
+        super.parse(ffd);
     }
 
     override Image build() {
@@ -477,14 +472,8 @@ private class TilemapBuilder : ImageBuilder {
 
     this(const Farfadet ffd) {
         _rid = ffd.get!string(0);
-
-        foreach (node; ffd.nodes) {
-            switch (node.name) {
-            default:
-                super.parse(node);
-                break;
-            }
-        }
+        ffd.accept(super.acceptedNodes());
+        super.parse(ffd);
     }
 
     override Image build() {
@@ -518,54 +507,67 @@ private class EntityBuilder {
     }
 
     this(const Farfadet ffd) {
-        foreach (node; ffd.nodes) {
-            switch (node.name) {
-            case "name":
-                _name = node.get!string(0);
-                break;
-            case "tags":
-                _tags ~= node.get!(string[])(0);
-                break;
-            case "tag":
-                _tags ~= node.get!string(0);
-                break;
-            case "position":
-                _position = Vec2f(node.get!float(0), node.get!float(1));
-                break;
-            case "zOrder":
-                _zOrder = node.get!int(0);
-                break;
-            case "entity":
-                _entities ~= new EntityBuilder(node);
-                break;
-            case "animation":
-                _images ~= new AnimationBuilder(node);
-                break;
-            case "capsule":
-                _images ~= new CapsuleBuilder(node);
-                break;
-            case "circle":
-                _images ~= new CircleBuilder(node);
-                break;
-            case "ninepatch":
-                _images ~= new NinePatchBuilder(node);
-                break;
-            case "rectangle":
-                _images ~= new RectangleBuilder(node);
-                break;
-            case "roundedrectangle":
-                _images ~= new RoundedRectangleBuilder(node);
-                break;
-            case "sprite":
-                _images ~= new SpriteBuilder(node);
-                break;
-            case "tilemap":
-                _images ~= new TilemapBuilder(node);
-                break;
-            default:
-                enforce(false, "le nœud `entity` ne définit pas le nœud `" ~ node.name ~ "`");
-                break;
-            }
+        ffd.accept([
+            "name", "tags", "tag", "zOrder", "position", "entity", "animation",
+            "capsule", "circle", "ninepatch", "rectangle",
+            "roundedrectangle", "sprite", "tilemap"
+        ]);
+
+        if (ffd.hasNode("name")) {
+            _name = ffd.getNode("name", 1).get!string(0);
+        }
+
+        foreach (node; ffd.getNodes("tags")) {
+            _tags ~= node.get!(string[])(0);
+        }
+
+        foreach (node; ffd.getNodes("tag")) {
+            _tags ~= node.get!string(0);
+        }
+
+        if (ffd.hasNode("zOrder")) {
+            _zOrder = ffd.getNode("zOrder", 1).get!int(0);
+        }
+
+        if (ffd.hasNode("position")) {
+            Farfadet node = ffd.getNode("position", 2);
+            _position = Vec2f(node.get!float(0), node.get!float(1));
+        }
+
+        foreach (node; ffd.getNodes("entity")) {
+            _entities ~= new EntityBuilder(node);
+        }
+
+        foreach (node; ffd.getNodes("animation")) {
+            _images ~= new AnimationBuilder(node);
+        }
+
+        foreach (node; ffd.getNodes("capsule")) {
+            _images ~= new CapsuleBuilder(node);
+        }
+
+        foreach (node; ffd.getNodes("circle")) {
+            _images ~= new CircleBuilder(node);
+        }
+
+        foreach (node; ffd.getNodes("ninepatch")) {
+            _images ~= new NinePatchBuilder(node);
+        }
+
+        foreach (node; ffd.getNodes("rectangle")) {
+            _images ~= new RectangleBuilder(node);
+        }
+
+        foreach (node; ffd.getNodes("roundedrectangle")) {
+            _images ~= new RoundedRectangleBuilder(node);
+        }
+
+        foreach (node; ffd.getNodes("sprite")) {
+            _images ~= new SpriteBuilder(node);
+        }
+
+        foreach (node; ffd.getNodes("tilemap")) {
+            _images ~= new TilemapBuilder(node);
         }
     }
 
@@ -673,24 +675,23 @@ private class ParticleSourceBuilder {
     this(const Farfadet ffd) {
         _rid = ffd.get!string(0);
 
-        foreach (node; ffd.nodes) {
-            switch (node.name) {
-            case "name":
-                _name = node.get!string(0);
-                break;
-            case "tags":
-                _tags ~= node.get!(string[])(0);
-                break;
-            case "tag":
-                _tags ~= node.get!string(0);
-                break;
-            case "position":
-                _position = Vec2f(node.get!float(0), node.get!float(1));
-                break;
-            default:
-                enforce(false, "le nœud `particle` ne définit pas le nœud `" ~ node.name ~ "`");
-                break;
-            }
+        ffd.accept(["name", "tags", "tag", "position"]);
+
+        if (ffd.hasNode("name")) {
+            _name = ffd.getNode("name", 1).get!string(0);
+        }
+
+        foreach (node; ffd.getNodes("tags")) {
+            _tags ~= node.get!(string[])(0);
+        }
+
+        foreach (node; ffd.getNodes("tag")) {
+            _tags ~= node.get!string(0);
+        }
+
+        if (ffd.hasNode("position")) {
+            Farfadet node = ffd.getNode("position", 2);
+            _position = Vec2f(node.get!float(0), node.get!float(1));
         }
     }
 
@@ -731,30 +732,33 @@ private abstract class ColliderBuilder {
     }
 
     this(const Farfadet ffd) {
-        foreach (node; ffd.nodes) {
-            switch (node.name) {
-            case "name":
-                _name = node.get!string(0);
-                break;
-            case "tags":
-                _tags ~= node.get!(string[])(0);
-                break;
-            case "tag":
-                _tags ~= node.get!string(0);
-                break;
-            case "position":
-                _position = Vec2i(node.get!int(0), node.get!int(1));
-                break;
-            case "hitbox":
-                _hitbox = Vec2i(node.get!int(0), node.get!int(1));
-                break;
-            case "entity":
-                _hasEntity = true;
-                _entity = new EntityBuilder(node);
-                break;
-            default:
-                break;
-            }
+        ffd.accept(["name", "tags", "tag", "position", "hitbox", "entity"]);
+
+        if (ffd.hasNode("name")) {
+            _name = ffd.getNode("name", 1).get!string(0);
+        }
+
+        foreach (node; ffd.getNodes("tags")) {
+            _tags ~= node.get!(string[])(0);
+        }
+
+        foreach (node; ffd.getNodes("tag")) {
+            _tags ~= node.get!string(0);
+        }
+
+        if (ffd.hasNode("position")) {
+            Farfadet node = ffd.getNode("position", 2);
+            _position = Vec2i(node.get!int(0), node.get!int(1));
+        }
+
+        if (ffd.hasNode("hitbox")) {
+            Farfadet node = ffd.getNode("hitbox", 2);
+            _hitbox = Vec2i(node.get!int(0), node.get!int(1));
+        }
+
+        if (ffd.hasNode("entity")) {
+            _entity = new EntityBuilder(ffd.getNode("entity"));
+            _hasEntity = true;
         }
     }
 
@@ -842,41 +846,51 @@ private class SceneBuilder {
     }
 
     this(const Farfadet ffd) {
-        foreach (node; ffd.nodes) {
-            switch (node.name) {
-            case "name":
-                _name = node.get!string(0);
-                break;
-            case "tags":
-                _tags ~= node.get!(string[])(0);
-                break;
-            case "tag":
-                _tags ~= node.get!string(0);
-                break;
-            case "zOrder":
-                _zOrder = node.get!int(0);
-                break;
-            case "position":
-                _position = Vec2f(node.get!float(0), node.get!float(1));
-                break;
-            case "parallax":
-                _parallax = Vec2f(node.get!float(0), node.get!float(1));
-                break;
-            case "entity":
-                _entities ~= new EntityBuilder(node);
-                break;
-            case "particle":
-                _particleSources ~= new ParticleSourceBuilder(node);
-                break;
-            case "actor":
-                _actors ~= new ActorBuilder(node);
-                break;
-            case "solid":
-                _solids ~= new SolidBuilder(node);
-                break;
-            default:
-                break;
-            }
+        ffd.accept([
+            "name", "tags", "tag", "zOrder", "position", "parallax", "entity",
+            "particle", "actor", "solid"
+        ]);
+
+        if (ffd.hasNode("name")) {
+            _name = ffd.getNode("name", 1).get!string(0);
+        }
+
+        foreach (node; ffd.getNodes("tags")) {
+            _tags ~= node.get!(string[])(0);
+        }
+
+        foreach (node; ffd.getNodes("tag")) {
+            _tags ~= node.get!string(0);
+        }
+
+        if (ffd.hasNode("zOrder")) {
+            _zOrder = ffd.getNode("zOrder", 1).get!int(0);
+        }
+
+        if (ffd.hasNode("position")) {
+            Farfadet node = ffd.getNode("position", 2);
+            _position = Vec2f(node.get!float(0), node.get!float(1));
+        }
+
+        if (ffd.hasNode("parallax")) {
+            Farfadet node = ffd.getNode("parallax", 2);
+            _parallax = Vec2f(node.get!float(0), node.get!float(1));
+        }
+
+        foreach (node; ffd.getNodes("entity")) {
+            _entities ~= new EntityBuilder(node);
+        }
+
+        foreach (node; ffd.getNodes("particle", 1)) {
+            _particleSources ~= new ParticleSourceBuilder(node);
+        }
+
+        foreach (node; ffd.getNodes("actor")) {
+            _actors ~= new ActorBuilder(node);
+        }
+
+        foreach (node; ffd.getNodes("solid")) {
+            _solids ~= new SolidBuilder(node);
         }
     }
 
@@ -987,14 +1001,9 @@ final class LevelBuilder : Resource!LevelBuilder {
     }
 
     this(const Farfadet ffd) {
-        foreach (node; ffd.nodes) {
-            switch (node.name) {
-            case "scene":
-                _scenes ~= new SceneBuilder(node);
-                break;
-            default:
-                break;
-            }
+        ffd.accept(["scene"]);
+        foreach (node; ffd.getNodes("scene")) {
+            _scenes ~= new SceneBuilder(node);
         }
     }
 

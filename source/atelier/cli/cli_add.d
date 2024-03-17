@@ -8,6 +8,7 @@ module atelier.cli.cli_add;
 import std.stdio, std.file, std.path;
 import std.exception;
 
+import farfadet;
 import atelier.common;
 import atelier.core;
 
@@ -20,51 +21,44 @@ void cliAdd(Cli.Result cli) {
     string dir = getcwd();
     string dirName = baseName(dir);
 
-    string jsonPath = buildNormalizedPath(dir, Atelier_Project_File);
-    enforce(exists(jsonPath),
-        "aucun projet `" ~ Atelier_Project_File ~ "` trouvable dans `" ~ dir ~ "`");
+    string ffdPath = buildNormalizedPath(dir, Atelier_Project_File);
+    enforce(exists(ffdPath), "aucun projet `" ~ Atelier_Project_File ~
+            "` trouvable dans `" ~ dir ~ "`");
 
-    Json json = new Json(jsonPath);
+    Farfadet ffd = Farfadet.fromFile(ffdPath);
 
-    string appName = cli.getRequiredParam(0);
-    string srcPath = setExtension(appName, "gr");
+    string configName = cli.getRequiredParam(0);
+    string srcPath = setExtension(configName, "gr");
 
-    if (cli.hasOption(Atelier_Project_Source_Node)) {
-        Cli.Result.Option option = cli.getOption(Atelier_Project_Source_Node);
+    if (cli.hasOption("source")) {
+        Cli.Result.Option option = cli.getOption("source");
         srcPath = buildNormalizedPath(option.getRequiredParam(0));
     }
 
     {
-        Json configurationsNode = json.getObject(Atelier_Project_Configurations_Node);
-        enforce(configurationsNode.getString(Atelier_Project_Name_Node) != appName,
-            "le nom `" ~ appName ~ "` est déjà utilisé");
+        const Farfadet[] configNodes = ffd.getNodes("config", 1);
+
+        foreach (configNode; configNodes) {
+            enforce(configNode.get!string(0) != configName,
+                "le nom `" ~ configName ~ "` est déjà utilisé");
+        }
     }
 
     {
-        Json programNode = new Json;
-        programNode.set(Atelier_Project_Name_Node, appName);
-        programNode.set(Atelier_Project_Source_Node, srcPath);
+        Farfadet configNode = ffd.addNode("config").add(configName);
+        configNode.addNode("source").add(srcPath);
+        configNode.addNode("export").add("export");
 
-        {
-            Json windowNode = new Json;
-            windowNode.set("enabled", true);
-            windowNode.set("width", Atelier_Window_Width_Default);
-            windowNode.set("height", Atelier_Window_Height_Default);
-            programNode.set("window", windowNode);
-        }
+        Farfadet resNode = configNode.addNode("resource").add("res");
+        resNode.addNode("path").add("res");
+        resNode.addNode("archived").add(true);
 
-        Json[] programNodes = json.getObjects(Atelier_Project_DefaultConfigurationName, [
-            ]);
-
-        foreach (Json node; programNodes) {
-            enforce(node.getString(Atelier_Project_Name_Node) != appName,
-                "le nom `" ~ appName ~ "` est déjà utilisé");
-        }
-        programNodes ~= programNode;
-        json.set(Atelier_Project_DefaultConfigurationName, programNodes);
+        Farfadet windowNode = configNode.addNode("window");
+        windowNode.addNode("size").add(Atelier_Window_Width_Default)
+            .add(Atelier_Window_Height_Default);
     }
 
-    json.save(jsonPath);
+    std.file.write(ffdPath, ffd.generate());
 
-    log("Ajout de `" ~ appName ~ "` dans `", dirName, "`");
+    log("Ajout de `" ~ configName ~ "` dans `", dirName, "`");
 }

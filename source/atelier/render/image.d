@@ -11,7 +11,7 @@ import atelier.common;
 import atelier.render.util;
 
 abstract class Image {
-    Vec4i clip;
+    Vec4u clip;
 
     Vec2f position = Vec2f.zero;
 

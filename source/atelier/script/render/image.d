@@ -20,9 +20,9 @@ package void loadLibRender_image(GrLibDefinition library) {
     GrType colorType = grGetNativeType("Color");
     GrType blendType = grGetEnumType("Blend");
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
-    GrType vec4iType = grGetNativeType("Vec4", [grInt]);
+    GrType vec4uType = grGetNativeType("Vec4", [grUInt]);
 
-    library.addProperty(&_clip!"get", &_clip!"set", "clip", imageType, vec4iType);
+    library.addProperty(&_clip!"get", &_clip!"set", "clip", imageType, vec4uType);
     library.addProperty(&_position!"get", &_position!"set", "position", imageType, vec2fType);
     library.addProperty(&_angle!"get", &_angle!"set", "angle", imageType, grDouble);
     library.addProperty(&_flipX!"get", &_flipX!"set", "flipX", imageType, grBool);
@@ -45,7 +45,7 @@ private void _clip(string op)(GrCall call) {
     Image image = call.getNative!Image(0);
 
     static if (op == "set") {
-        image.clip = call.getNative!SVec4i(1);
+        image.clip = call.getNative!SVec4u(1);
     }
     call.setNative(svec4(image.clip));
 }

@@ -18,14 +18,14 @@ void loadLibRender_writableTexture(GrLibDefinition library) {
     library.setModuleInfo(GrLocale.fr_FR, "Texture générée procéduralement");
 
     GrType wtextureType = library.addNative("WritableTexture", [], "ImageData");
-    GrType vec4iType = grGetNativeType("Vec4", [grInt]);
+    GrType vec4uType = grGetNativeType("Vec4", [grUInt]);
 
     library.setParameters(["width", "height"]);
     library.addConstructor(&_ctor, wtextureType, [grUInt, grUInt]);
 
     library.setDescription(GrLocale.fr_FR, "Modifie la texture");
     library.addFunction(&_update, "update", [
-            wtextureType, vec4iType, grList(grUInt)
+            wtextureType, vec4uType, grList(grUInt)
         ]);
 }
 
@@ -36,7 +36,7 @@ private void _ctor(GrCall call) {
 
 private void _update(GrCall call) {
     WritableTexture tex = call.getNative!WritableTexture(0);
-    Vec4i clip = call.getNative!SVec4i(1);
+    Vec4u clip = call.getNative!SVec4u(1);
     GrUInt[] texels = call.getList(1).getUInts();
 
     if (tex.width == 0 || tex.height == 0)

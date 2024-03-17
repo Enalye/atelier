@@ -164,6 +164,6 @@ final class Circle : Image {
         _cache.blend = blend;
         _cache.alpha = alpha;
         _cache.draw(origin + position - (anchor * _radius), Vec2f(_radius,
-                _radius), Vec4i(0, 0, _cache.width, _cache.height), angle, pivot, flipX, flipY);
+                _radius), Vec4u(0, 0, _cache.width, _cache.height), angle, pivot, flipX, flipY);
     }
 }

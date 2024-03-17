@@ -134,8 +134,7 @@ void main() {
         return theme;
     }, "Atelier");
 
-    ciel.addUI(new Editor);
-
     Etabli.window.setIconFromMemory(_logo64Data);
+    initApp();
     ciel.run();
 }

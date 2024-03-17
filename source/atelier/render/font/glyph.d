@@ -99,6 +99,6 @@ final class BasicGlyph : Glyph {
         _imageData.blend = Blend.alpha;
         _imageData.alpha = alpha;
         _imageData.draw(position, Vec2f(_width * scale, _height * scale),
-            Vec4i(_packX, _packY, _packWidth, _packHeight), 0f);
+            Vec4u(_packX, _packY, _packWidth, _packHeight), 0f);
     }
 }

@@ -24,12 +24,12 @@ void loadLibRender_ninepatch(GrLibDefinition library) {
     GrType ninepatchType = library.addNative("NinePatch", [], "Image");
 
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
-    GrType vec4iType = grGetNativeType("Vec4", [grInt]);
+    GrType vec4uType = grGetNativeType("Vec4", [grUInt]);
     GrType textureType = grGetNativeType("Texture");
 
     library.addConstructor(&_ctor_str, ninepatchType, [grString]);
     library.addConstructor(&_ctor_texture, ninepatchType, [
-            textureType, vec4iType, grInt, grInt, grInt, grInt
+            textureType, vec4uType, grInt, grInt, grInt, grInt
         ]);
 
     library.addProperty(&_size!"get", &_size!"set", "size", ninepatchType, vec2fType);
@@ -48,7 +48,7 @@ private void _ctor_str(GrCall call) {
 
 private void _ctor_texture(GrCall call) {
     call.setNative(new NinePatch(call.getNative!Texture(0),
-            call.getNative!SVec4i(1), call.getInt(2), call.getInt(3),
+            call.getNative!SVec4u(1), call.getInt(2), call.getInt(3),
             call.getInt(4), call.getInt(5)));
 }
 

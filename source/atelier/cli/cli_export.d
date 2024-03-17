@@ -45,26 +45,28 @@ void cliExport(Cli.Result cli) {
         "aucun fichier de projet `" ~ Atelier_Project_File ~
         "` de trouvé à l’emplacement `" ~ dir ~ "`");
 
-    Json json = new Json(projectFile);
+    Farfadet ffd = Farfadet.fromFile(projectFile);
 
     string sourceFile;
-    string configName = json.getString(Atelier_Project_DefaultConfiguration_Node, "");
+    string configName;
 
     if (cli.hasOption("config")) {
         configName = cli.getOption("config").getRequiredParam(0);
     }
+    else {
+        configName = ffd.getNode("default", 1).get!string(0);
+    }
 
-    Json[] configsNode = json.getObjects(Atelier_Project_Configurations_Node, []);
-    foreach (Json configNode; configsNode) {
-        if (configNode.getString(Atelier_Project_Name_Node, "") == configName) {
-            sourceFile = buildNormalizedPath(dir, configNode.getString(Atelier_Project_Source_Node));
+    const Farfadet[] configsNode = ffd.getNodes("config", 1);
+    foreach (configNode; configsNode) {
+        if (configNode.get!string(0) == configName) {
+            sourceFile = buildNormalizedPath(dir, configNode.getNode("source", 1).get!string(0));
 
             enforce(exists(sourceFile),
                 "le fichier source `" ~ sourceFile ~ "` référencé dans `" ~
                 Atelier_Project_File ~ "` n’existe pas");
 
-            string exportDir = buildNormalizedPath(dir,
-                configNode.getString(Atelier_Project_Export_Node));
+            string exportDir = buildNormalizedPath(dir, configNode.getNode("export", 1).get!string(0));
 
             if (!exists(exportDir))
                 mkdir(exportDir);
@@ -78,21 +80,31 @@ void cliExport(Cli.Result cli) {
             string envPath = buildNormalizedPath(exportDir,
                 setExtension(configName, Atelier_Application_Extension));
 
-            Json[string] resourcesNode = configNode.getObject(Atelier_Project_Resources_Node)
-                .getChildren();
+            const(Farfadet[]) resourcesNode = configNode.getNodes("resource", 1);
             string[] archives;
 
             ResourceManager res = new ResourceManager;
             setupDefaultResourceLoaders(res);
 
-            foreach (string resName, Json resNode; resourcesNode) {
-                string resFolder = buildNormalizedPath(dir, resNode.getString("path", resName));
+            foreach (resNode; resourcesNode) {
+                string resName = resNode.get!string(0);
+                string resFolder = resName;
+                if (resNode.hasNode("path")) {
+                    resFolder = resNode.getNode("path", 1).get!string(0);
+                }
+                resFolder = buildNormalizedPath(dir, resFolder);
                 enforce(exists(resFolder), "le dossier de ressources `" ~ resFolder ~
                         "` référencé dans `" ~ Atelier_Project_File ~ "` n’existe pas");
 
                 Archive archive = new Archive;
                 archive.pack(resFolder);
-                if (resNode.getBool("archived", true)) {
+
+                bool isArchived = true;
+                if (resNode.hasNode("archived")) {
+                    isArchived = resNode.getNode("archived", 1).get!bool(0);
+                }
+
+                if (isArchived) {
                     string resDir = buildNormalizedPath(exportDir,
                         setExtension(resName, Atelier_Archive_Extension));
                     log("Archivage de `" ~ resFolder ~ "` vers `", resDir, "`");
@@ -103,9 +115,9 @@ void cliExport(Cli.Result cli) {
                                 OutStream stream = new OutStream;
                                 stream.write!string(Atelier_Resource_Compiled_MagicWord);
 
-                                Farfadet ffd = new Farfadet(file.data);
-                                stream.write!uint(cast(uint) ffd.nodes.length);
-                                foreach (resNode; ffd.nodes) {
+                                Farfadet resFfd = Farfadet.fromBytes(file.data);
+                                stream.write!uint(cast(uint) resFfd.getNodes().length);
+                                foreach (resNode; resFfd.getNodes()) {
                                     stream.write!string(resNode.name);
 
                                     ResourceManager.Loader loader = res.getLoader(resNode.name);
@@ -137,16 +149,28 @@ void cliExport(Cli.Result cli) {
                 }
             }
 
-            Json windowNode = configNode.getObject(Atelier_Project_Window_Node);
-            string windowTitle = windowNode.getString(Atelier_Project_Window_Title_Node,
-                configName);
-            int windowWidth = windowNode.getInt(Atelier_Project_Window_Width_Node,
-                Atelier_Window_Width_Default);
-            int windowHeight = windowNode.getInt(Atelier_Project_Window_Height_Node,
-                Atelier_Window_Height_Default);
-            string windowIcon = windowNode.getString(Atelier_Project_Window_Icon_Node, "");
-            bool windowEnabled = windowNode.getBool(Atelier_Project_Window_Enabled_Node,
-                Atelier_Window_Enabled_Default);
+            bool windowEnabled = configNode.hasNode("window");
+
+            string windowTitle = configName;
+            int windowWidth = Atelier_Window_Width_Default;
+            int windowHeight = Atelier_Window_Height_Default;
+            string windowIcon = "";
+
+            if (windowEnabled) {
+                const Farfadet windowNode = configNode.getNode("window");
+
+                if (windowNode.hasNode("size")) {
+                    const Farfadet sizeNode = windowNode.getNode("size", 2);
+                    windowWidth = sizeNode.get!uint(0);
+                    windowHeight = sizeNode.get!uint(1);
+                }
+
+                if (windowNode.hasNode("title"))
+                    windowTitle = windowNode.getNode("title", 1).get!string(0);
+
+                if (windowNode.hasNode("icon"))
+                    windowIcon = windowNode.getNode("icon", 1).get!string(0);
+            }
 
             if (windowIcon.length) {
                 std.file.copy(buildNormalizedPath(dir, windowIcon),

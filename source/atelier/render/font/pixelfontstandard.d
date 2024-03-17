@@ -221,6 +221,6 @@ private final class PixelGlyphStandard : Glyph {
         _imageData.blend = Blend.alpha;
         _imageData.alpha = alpha;
         _imageData.draw(position, Vec2f(_width * scale, _height * scale),
-            Vec4i(_x, _y, _width, _height), 0f);
+            Vec4u(_x, _y, _width, _height), 0f);
     }
 }

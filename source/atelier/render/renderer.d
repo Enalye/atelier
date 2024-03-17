@@ -21,7 +21,7 @@ final class Renderer {
 
         final class CanvasContext {
             Canvas canvas;
-            Vec4i clip;
+            Vec4u clip;
         }
 
         CanvasContext[] _canvases;
@@ -144,7 +144,7 @@ final class Renderer {
 
     private void _updateSharpness() {
         _scaledCanvas.setSize(_kernelSize.x * _pixelSharpness, _kernelSize.y * _pixelSharpness);
-        _scaledSprite.clip = Vec4i(0, 0, _scaledCanvas.width, _scaledCanvas.height);
+        _scaledSprite.clip = Vec4u(0, 0, _scaledCanvas.width, _scaledCanvas.height);
         _kernelSprite.size = cast(Vec2f)(_kernelSize * _pixelSharpness);
     }
 
@@ -218,7 +218,7 @@ final class Renderer {
         }
 
         context.canvas = canvas;
-        context.clip = Vec4i(0, 0, canvas.width, canvas.height);
+        context.clip = Vec4u(0, 0, canvas.width, canvas.height);
 
         SDL_Color sdlColor = context.canvas.color.toSDL();
 
@@ -236,12 +236,12 @@ final class Renderer {
         if (_idxContext == _canvases.length) {
             context = new CanvasContext;
             context.canvas = new Canvas(width, height);
-            context.clip = Vec4i(0, 0, width, height);
+            context.clip = Vec4u(0, 0, width, height);
             _canvases ~= context;
         }
         else {
             context = _canvases[_idxContext];
-            context.clip = Vec4i(0, 0, width, height);
+            context.clip = Vec4u(0, 0, width, height);
 
             if (context.canvas.width < width || context.canvas.height < height) {
                 context.canvas.setSize(max(context.canvas.width, width),

@@ -183,7 +183,7 @@ final class Texture : ImageData, Resource!Texture {
     }
 
     /// Dessine la texture
-    override void draw(Vec2f position, Vec2f size, Vec4i clip, double angle,
+    override void draw(Vec2f position, Vec2f size, Vec4u clip, double angle,
         Vec2f pivot = Vec2f.half, bool flipX = false, bool flipY = false) {
 
         SDL_Rect sdlSrc = clip.toSdlRect();

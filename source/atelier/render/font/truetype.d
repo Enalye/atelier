@@ -20,7 +20,7 @@ import atelier.render.font.font, atelier.render.font.glyph;
 final class TrueTypeFont : Font, Resource!TrueTypeFont {
     private {
         TTF_Font* _trueTypeFont;
-        int _size, _outline;
+        uint _size, _outline;
         Glyph[dchar] _cache;
         bool _isSmooth;
     }
@@ -56,7 +56,7 @@ final class TrueTypeFont : Font, Resource!TrueTypeFont {
     }
 
     /// Ctor
-    this(const string filePath, int size_ = 12u, int outline_ = 0) {
+    this(const string filePath, uint size_ = 12u, uint outline_ = 0) {
         const(ubyte)[] data = Atelier.res.read(filePath);
         SDL_RWops* rw = SDL_RWFromConstMem(cast(const(void)*) data.ptr, cast(int) data.length);
         _size = size_;

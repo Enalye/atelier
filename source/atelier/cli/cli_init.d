@@ -8,6 +8,7 @@ module atelier.cli.cli_init;
 import std.stdio, std.file, std.path;
 import std.exception;
 
+import farfadet;
 import atelier.common;
 import atelier.core;
 
@@ -57,43 +58,33 @@ void cliInit(Cli.Result cli) {
         appName = option.getRequiredParam(0);
     }
 
-    if (cli.hasOption(Atelier_Project_Source_Node)) {
-        Cli.Result.Option option = cli.getOption(Atelier_Project_Source_Node);
+    if (cli.hasOption("source")) {
+        Cli.Result.Option option = cli.getOption("source");
         srcPath = buildNormalizedPath(option.getRequiredParam(0));
     }
 
-    Json json = new Json;
-    json.set(Atelier_Project_DefaultConfiguration_Node, appName);
+    Farfadet ffd = new Farfadet;
 
-    {
-        Json appNode = new Json;
-        appNode.set(Atelier_Project_Name_Node, appName);
-        appNode.set(Atelier_Project_Source_Node, srcPath);
-        appNode.set(Atelier_Project_Export_Node, "export");
-
-        {
-            Json resNode = new Json;
-            resNode.set("path", "res");
-            resNode.set("archived", true);
-            resNode.set("salt", "");
-
-            Json resourcesNode = new Json;
-            resourcesNode.set("res", resNode);
-            appNode.set(Atelier_Project_Resources_Node, resourcesNode);
-        }
-
-        {
-            Json windowNode = new Json;
-            windowNode.set("enabled", true);
-            windowNode.set("width", Atelier_Window_Width_Default);
-            windowNode.set("height", Atelier_Window_Height_Default);
-            appNode.set("window", windowNode);
-        }
-
-        json.set(Atelier_Project_Configurations_Node, [appNode]);
+    { // Programme par défaut
+        Farfadet default_ = ffd.addNode("default");
+        default_.add(appName);
     }
 
-    json.save(buildNormalizedPath(dir, Atelier_Project_File));
+    {
+        Farfadet configNode = ffd.addNode("config").add(appName);
+        configNode.addNode("source").add(srcPath);
+        configNode.addNode("export").add("export");
+
+        Farfadet resNode = configNode.addNode("resource").add("res");
+        resNode.addNode("path").add("res");
+        resNode.addNode("archived").add(true);
+
+        Farfadet windowNode = configNode.addNode("window");
+        windowNode.addNode("size").add(Atelier_Window_Width_Default)
+            .add(Atelier_Window_Height_Default);
+    }
+
+    ffd.save(buildNormalizedPath(dir, Atelier_Project_File));
 
     foreach (subDir; ["res", "src", "export"]) {
         string resDir = buildNormalizedPath(dir, subDir);

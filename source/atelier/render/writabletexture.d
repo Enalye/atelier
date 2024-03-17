@@ -113,7 +113,7 @@ final class WritableTexture : ImageData {
         }
     }
 
-    void update(Vec4i clip, uint[] texels) {
+    void update(Vec4u clip, uint[] texels) {
         uint* dest;
         int pitch;
         SDL_Rect sdlClip = clip.toSdlRect();
@@ -144,7 +144,7 @@ final class WritableTexture : ImageData {
     }
 
     /// Render a section of the texture here
-    override void draw(Vec2f position, Vec2f size, Vec4i clip, double angle,
+    override void draw(Vec2f position, Vec2f size, Vec4u clip, double angle,
         Vec2f pivot = Vec2f.half, bool flipX = false, bool flipY = false) {
 
         SDL_Rect sdlSrc = clip.toSdlRect();

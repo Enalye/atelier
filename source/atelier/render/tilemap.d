@@ -26,12 +26,12 @@ final class Tilemap : Image, Resource!Tilemap {
         Tileset _tileset;
         uint _currentTick;
         Tile[] _tiles;
-        int _width, _height;
+        uint _width, _height;
     }
 
     Vec2f size = Vec2f.zero;
 
-    this(Tileset tileset, int width, int height) {
+    this(Tileset tileset, uint width, uint height) {
         _tileset = tileset;
         _width = width;
         _height = height;

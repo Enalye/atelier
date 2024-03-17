@@ -25,8 +25,8 @@ final class Tileset : Resource!Tileset {
         short[short] _tileFrames;
     }
 
-    Vec4i clip;
-    Vec2i tileSize;
+    Vec4u clip;
+    Vec2u tileSize;
     int columns, lines, maxCount;
     Vec2i margin;
     bool isIsometric;
@@ -48,7 +48,7 @@ final class Tileset : Resource!Tileset {
     }
 
     /// Ctor
-    this(ImageData texture, Vec4i clip_, uint columns_, uint lines_, uint maxCount_ = 0) {
+    this(ImageData texture, Vec4u clip_, uint columns_, uint lines_, uint maxCount_ = 0) {
         _imageData = texture;
         clip = clip_;
         tileSize = clip.zw;
@@ -96,7 +96,7 @@ final class Tileset : Resource!Tileset {
             id = 0;
 
         Vec2i coord = Vec2i(id % columns, id / columns);
-        Vec4i imageClip = Vec4i(clip.x + coord.x * (clip.z + margin.x),
+        Vec4u imageClip = Vec4u(clip.x + coord.x * (clip.z + margin.x),
             clip.y + coord.y * (clip.w + margin.y), clip.z, clip.w);
 
         return new Sprite(_imageData, imageClip);
@@ -134,7 +134,7 @@ final class Tileset : Resource!Tileset {
         Vec2i coord = Vec2i(id % columns, id / columns);
         enforce(coord.y <= lines, "tileset id out of bounds");
 
-        Vec4i currentClip = Vec4i(clip.x + coord.x * (clip.z + margin.x),
+        Vec4u currentClip = Vec4u(clip.x + coord.x * (clip.z + margin.x),
             clip.y + coord.y * (clip.w + margin.y), clip.z, clip.w);
 
         _imageData.color = color;

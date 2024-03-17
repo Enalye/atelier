@@ -229,12 +229,12 @@ private final class PixelGlyphBordered : Glyph {
         _imageData.blend = Blend.alpha;
         _imageData.alpha = alpha;
         _imageData.draw(position, Vec2f((_width + 2) * scale,
-                (_height + 2) * scale), Vec4i(_x + _width, _y, _width + 2, _height + 2), 0f);
+                (_height + 2) * scale), Vec4u(_x + _width, _y, _width + 2, _height + 2), 0f);
 
         _imageData.color = color;
         _imageData.blend = Blend.alpha;
         _imageData.alpha = alpha;
         _imageData.draw(position, Vec2f(_width * scale, _height * scale),
-            Vec4i(_x, _y, _width, _height), 0f);
+            Vec4u(_x, _y, _width, _height), 0f);
     }
 }

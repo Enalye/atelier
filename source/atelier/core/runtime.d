@@ -199,10 +199,10 @@ final class Atelier {
             stream.write!string(Atelier_Resource_Compiled_MagicWord);
 
             try {
-                Farfadet ffd = new Farfadet(file.data);
+                Farfadet ffd = Farfadet.fromBytes(file.data);
 
-                stream.write!uint(cast(uint) ffd.nodes.length);
-                foreach (resNode; ffd.nodes) {
+                stream.write!uint(cast(uint) ffd.getNodes().length);
+                foreach (resNode; ffd.getNodes()) {
                     stream.write!string(resNode.name);
 
                     ResourceManager.Loader loader = res.getLoader(resNode.name);

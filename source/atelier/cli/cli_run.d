@@ -110,7 +110,8 @@ void cliRun(Cli.Result cli) {
                     .prettify(GrLocale.fr_FR));
 
                 return bytecode;
-            }, [grLoadStdLibrary(), loadLibrary()], windowWidth, windowHeight, windowTitle);
+            }, [grGetStandardLibrary(), getEngineLibrary()], windowWidth,
+                windowHeight, windowTitle);
 
             foreach (string archive; archives) {
                 atelier.loadArchive(archive);

@@ -33,7 +33,7 @@ private abstract class ImageBuilder {
 
     @property string type() const;
 
-    @property immutable(string[]) acceptedNodes() const {
+    @property string[] acceptedNodes() const {
         return [
             "position", "angle", "flip", "anchor", "pivot", "blend", "rgb", "hsl",
             "alpha"
@@ -53,7 +53,7 @@ private abstract class ImageBuilder {
         if (ffd.hasNode("flip")) {
             Farfadet node = ffd.getNode("flip", 2);
             _flipX = node.get!bool(0);
-            _flipY = node.get!float(1);
+            _flipY = node.get!bool(1);
         }
 
         if (ffd.hasNode("anchor")) {
@@ -538,7 +538,7 @@ private class EntityBuilder {
             _entities ~= new EntityBuilder(node);
         }
 
-        foreach (node; ffd.getNodes("animation")) {
+        foreach (node; ffd.getNodes("animation", 1)) {
             _images ~= new AnimationBuilder(node);
         }
 
@@ -550,7 +550,7 @@ private class EntityBuilder {
             _images ~= new CircleBuilder(node);
         }
 
-        foreach (node; ffd.getNodes("ninepatch")) {
+        foreach (node; ffd.getNodes("ninepatch", 1)) {
             _images ~= new NinePatchBuilder(node);
         }
 
@@ -562,11 +562,11 @@ private class EntityBuilder {
             _images ~= new RoundedRectangleBuilder(node);
         }
 
-        foreach (node; ffd.getNodes("sprite")) {
+        foreach (node; ffd.getNodes("sprite", 1)) {
             _images ~= new SpriteBuilder(node);
         }
 
-        foreach (node; ffd.getNodes("tilemap")) {
+        foreach (node; ffd.getNodes("tilemap", 1)) {
             _images ~= new TilemapBuilder(node);
         }
     }

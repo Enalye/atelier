@@ -11,16 +11,16 @@ import atelier.common;
 
 import atelier.script.util;
 
-package void loadLibCommon_color(GrLibDefinition library) {
-    library.setModule("common.color");
-    library.setModuleInfo(GrLocale.fr_FR, "Représentation d’une couleur dans l’espace RVB");
+package void loadLibCommon_color(GrModule mod) {
+    mod.setModule("common.color");
+    mod.setModuleInfo(GrLocale.fr_FR, "Représentation d’une couleur dans l’espace RVB");
 
-    GrType colorType = library.addNative("Color");
+    GrType colorType = mod.addNative("Color");
 
-    library.addConstructor(&_ctor, colorType, [grFloat, grFloat, grFloat]);
+    mod.addConstructor(&_ctor, colorType, [grFloat, grFloat, grFloat]);
 
     static foreach (field; ["r", "g", "b"]) {
-        library.addProperty(&_property!(field, "get"), &_property!(field,
+        mod.addProperty(&_property!(field, "get"), &_property!(field,
                 "set"), field, colorType, grFloat);
     }
 
@@ -29,7 +29,7 @@ package void loadLibCommon_color(GrLibDefinition library) {
             "silver", "gray", "grey", "maroon", "olive", "green", "purple",
             "teal", "pink", "orange"
         ]) {
-        library.addStatic(&_color!c, colorType, c, [], [colorType]);
+        mod.addStatic(&_color!c, colorType, c, [], [colorType]);
     }
 }
 

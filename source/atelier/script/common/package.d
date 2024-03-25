@@ -13,7 +13,7 @@ import atelier.script.common.math;
 import atelier.script.common.spline;
 import atelier.script.common.vec;
 
-package(atelier.script) GrLibLoader[] getLibLoaders_common() {
+package(atelier.script) GrModuleLoader[] getLibLoaders_common() {
     return [
         &loadLibCommon_color,
         &loadLibCommon_hslcolor,

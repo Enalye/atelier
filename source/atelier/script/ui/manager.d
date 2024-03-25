@@ -11,24 +11,24 @@ import atelier.common;
 import atelier.core;
 import atelier.ui;
 
-package void loadLibUI_manager(GrLibDefinition library) {
-    library.setModule("ui.manager");
-    library.setModuleInfo(GrLocale.fr_FR, "Gestionnaire d’interface");
+package void loadLibUI_manager(GrModule mod) {
+    mod.setModule("ui.manager");
+    mod.setModuleInfo(GrLocale.fr_FR, "Gestionnaire d’interface");
 
-    GrType uiType = library.addNative("UI");
+    GrType uiType = mod.addNative("UI");
     GrType elementType = grGetNativeType("UIElement");
 
-    library.setDescription(GrLocale.fr_FR, "Montre les bordures des interfaces");
-    library.setParameters(["isDebug"]);
-    library.addStatic(&_setDebug, uiType, "setDebug", [grBool]);
+    mod.setDescription(GrLocale.fr_FR, "Montre les bordures des interfaces");
+    mod.setParameters(["isDebug"]);
+    mod.addStatic(&_setDebug, uiType, "setDebug", [grBool]);
 
-    library.setDescription(GrLocale.fr_FR, "Ajoute une interface au sommet de la hiérarchie");
-    library.setParameters(["ui"]);
-    library.addStatic(&_add, uiType, "add", [elementType]);
+    mod.setDescription(GrLocale.fr_FR, "Ajoute une interface au sommet de la hiérarchie");
+    mod.setParameters(["ui"]);
+    mod.addStatic(&_add, uiType, "add", [elementType]);
 
-    library.setDescription(GrLocale.fr_FR, "Supprime toutes les interfaces");
-    library.setParameters();
-    library.addStatic(&_clear, uiType, "clear");
+    mod.setDescription(GrLocale.fr_FR, "Supprime toutes les interfaces");
+    mod.setParameters();
+    mod.addStatic(&_clear, uiType, "clear");
 }
 
 private void _setDebug(GrCall call) {

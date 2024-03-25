@@ -13,7 +13,7 @@ import atelier.script.ui.label;
 import atelier.script.ui.manager;
 import atelier.script.ui.state;
 
-package(atelier.script) GrLibLoader[] getLibLoaders_ui() {
+package(atelier.script) GrModuleLoader[] getLibLoaders_ui() {
     return [
         &loadLibUI_box, &loadLibUI_element, &loadLibUI_label,
         &loadLibUI_manager, &loadLibUI_state

@@ -14,53 +14,46 @@ import atelier.scene;
 import atelier.render;
 import atelier.script.util;
 
-package void loadLibScene_component(GrLibDefinition library) {
-    library.setModule("scene.component");
-    library.setModuleInfo(GrLocale.fr_FR, "Composant d’une entité");
+package void loadLibScene_component(GrModule mod) {
+    mod.setModule("scene.component");
+    mod.setModuleInfo(GrLocale.fr_FR, "Composant d’une entité");
 
-    GrType entityComponentType = library.addNative("EntityComponent");
-    GrType audioComponentType = library.addNative("AudioComponent", [], "EntityComponent");
+    GrType entityComponentType = mod.addNative("EntityComponent");
+    GrType audioComponentType = mod.addNative("AudioComponent", [], "EntityComponent");
     GrType audioPlayerType = grGetNativeType("AudioPlayer");
     GrType audioBusType = grGetNativeType("AudioBus");
     GrType soundType = grGetNativeType("Sound");
     GrType musicType = grGetNativeType("Music");
     GrType effectType = grGetNativeType("AudioEffect");
 
-    library.setDescription(GrLocale.fr_FR, "Joue un son spacialisé au niveau de l’entité");
-    library.setParameters(["audio", "sound"]);
-    library.addFunction(&_playSound, "play", [audioComponentType, soundType]);
+    mod.setDescription(GrLocale.fr_FR, "Joue un son spacialisé au niveau de l’entité");
+    mod.setParameters(["audio", "sound"]);
+    mod.addFunction(&_playSound, "play", [audioComponentType, soundType]);
 
-    library.setDescription(GrLocale.fr_FR,
-        "Joue une musique spacialisée au niveau de l’entité");
-    library.setParameters(["audio", "music"]);
-    library.addFunction(&_playMusic, "play", [audioComponentType, musicType]);
+    mod.setDescription(GrLocale.fr_FR, "Joue une musique spacialisée au niveau de l’entité");
+    mod.setParameters(["audio", "music"]);
+    mod.addFunction(&_playMusic, "play", [audioComponentType, musicType]);
 
-    library.setDescription(GrLocale.fr_FR,
+    mod.setDescription(GrLocale.fr_FR,
         "Lance un lecteur audio spacialisé au niveau de l’entité");
-    library.setParameters(["audio", "player"]);
-    library.addFunction(&_play, "play", [audioComponentType, audioPlayerType]);
+    mod.setParameters(["audio", "player"]);
+    mod.addFunction(&_play, "play", [audioComponentType, audioPlayerType]);
 
-    library.setDescription(GrLocale.fr_FR, "Ajoute un effet audio au bus audio de l’entité");
-    library.setParameters(["audio", "effect"]);
-    library.addFunction(&_addEffect, "addEffect", [
-            audioComponentType, effectType
-        ]);
+    mod.setDescription(GrLocale.fr_FR, "Ajoute un effet audio au bus audio de l’entité");
+    mod.setParameters(["audio", "effect"]);
+    mod.addFunction(&_addEffect, "addEffect", [audioComponentType, effectType]);
 
-    library.setDescription(GrLocale.fr_FR, "Connecte le bus audio de l’entité à un autre bus");
-    library.setParameters(["audio", "bus"]);
-    library.addFunction(&_connectTo, "connectTo", [
-            audioComponentType, audioBusType
-        ]);
+    mod.setDescription(GrLocale.fr_FR, "Connecte le bus audio de l’entité à un autre bus");
+    mod.setParameters(["audio", "bus"]);
+    mod.addFunction(&_connectTo, "connectTo", [audioComponentType, audioBusType]);
 
-    library.setDescription(GrLocale.fr_FR, "Connecte le bus audio de l’entité au bus maître");
-    library.setParameters(["audio"]);
-    library.addFunction(&_connectToMaster, "connectToMaster", [
-            audioComponentType
-        ]);
+    mod.setDescription(GrLocale.fr_FR, "Connecte le bus audio de l’entité au bus maître");
+    mod.setParameters(["audio"]);
+    mod.addFunction(&_connectToMaster, "connectToMaster", [audioComponentType]);
 
-    library.setDescription(GrLocale.fr_FR, "Déconnecte le bus audio de l’entité");
-    library.setParameters(["audio"]);
-    library.addFunction(&_disconnect, "disconnect", [audioComponentType]);
+    mod.setDescription(GrLocale.fr_FR, "Déconnecte le bus audio de l’entité");
+    mod.setParameters(["audio"]);
+    mod.addFunction(&_disconnect, "disconnect", [audioComponentType]);
 }
 
 private void _playSound(GrCall call) {

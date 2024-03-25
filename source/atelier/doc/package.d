@@ -26,15 +26,14 @@ void generateDoc() {
     log("Documentation générée en ", elapsedTime);
 }
 
-alias LibLoader = void function(GrLibDefinition);
 void generate(GrLocale locale) {
-    LibLoader[] libLoaders = getLibraryLoaders();
+    GrLibrary library = getEngineLibrary();
 
     string[] modules;
 
     int i;
-    foreach (libLoader; libLoaders) {
-        GrDoc doc = new GrDoc("docgen" ~ to!string(i));
+    foreach (libLoader; library.loaders) {
+        GrModuleDoc doc = new GrModuleDoc("docgen" ~ to!string(i));
         libLoader(doc);
 
         const string generatedText = doc.generate(locale);

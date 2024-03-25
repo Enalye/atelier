@@ -10,37 +10,36 @@ import grimoire;
 import atelier.common;
 import atelier.render;
 
-package void loadLibRender_circle(GrLibDefinition library) {
-    library.setModule("render.circle");
-    library.setModuleInfo(GrLocale.fr_FR, "Cercle");
-    library.setModuleExample(GrLocale.fr_FR, "var circle = @Circle.fill(20f);
+package void loadLibRender_circle(GrModule mod) {
+    mod.setModule("render.circle");
+    mod.setModuleInfo(GrLocale.fr_FR, "Cercle");
+    mod.setModuleExample(GrLocale.fr_FR, "var circle = @Circle.fill(20f);
 circle.anchor = @Vec2f.half;
 circle.position = @Vec2f(32f, -48f);
 circle.color = @Color.blue;
 entity.addImage(circle);");
 
-    GrType circleType = library.addNative("Circle", [], "Image");
+    GrType circleType = mod.addNative("Circle", [], "Image");
 
-    library.setDescription(GrLocale.fr_FR, "Construit un cercle plein");
-    library.setParameters(["radius"]);
-    library.addStatic(&_fill, circleType, "fill", [grFloat], [circleType]);
+    mod.setDescription(GrLocale.fr_FR, "Construit un cercle plein");
+    mod.setParameters(["radius"]);
+    mod.addStatic(&_fill, circleType, "fill", [grFloat], [circleType]);
 
-    library.setDescription(GrLocale.fr_FR, "Construit le contour d’un cercle");
-    library.setParameters(["radius", "thickness"]);
-    library.addStatic(&_outline, circleType, "outline", [grFloat, grFloat], [
+    mod.setDescription(GrLocale.fr_FR, "Construit le contour d’un cercle");
+    mod.setParameters(["radius", "thickness"]);
+    mod.addStatic(&_outline, circleType, "outline", [grFloat, grFloat], [
             circleType
         ]);
 
-    library.setDescription(GrLocale.fr_FR, "Rayon du cercle");
-    library.addProperty(&_radius!"get", &_radius!"set", "radius", circleType, grFloat);
+    mod.setDescription(GrLocale.fr_FR, "Rayon du cercle");
+    mod.addProperty(&_radius!"get", &_radius!"set", "radius", circleType, grFloat);
 
-    library.setDescription(GrLocale.fr_FR,
+    mod.setDescription(GrLocale.fr_FR,
         "Si `true`, le cercle est plein, sinon le cercle est une bordure");
-    library.addProperty(&_filled!"get", &_filled!"set", "filled", circleType, grBool);
+    mod.addProperty(&_filled!"get", &_filled!"set", "filled", circleType, grBool);
 
-    library.setDescription(GrLocale.fr_FR,
-        "(Seulement si `filled` == false) Épaisseur de la bordure");
-    library.addProperty(&_thickness!"get", &_thickness!"set", "thickness", circleType, grFloat);
+    mod.setDescription(GrLocale.fr_FR, "(Seulement si `filled` == false) Épaisseur de la bordure");
+    mod.addProperty(&_thickness!"get", &_thickness!"set", "thickness", circleType, grFloat);
 }
 
 private void _fill(GrCall call) {

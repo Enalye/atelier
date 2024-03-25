@@ -16,7 +16,7 @@ import atelier.script.scene.particle;
 import atelier.script.scene.scene;
 import atelier.script.scene.solid;
 
-package(atelier.script) GrLibLoader[] getLibLoaders_scene() {
+package(atelier.script) GrModuleLoader[] getLibLoaders_scene() {
     return [
         &loadLibScene_actor,
         &loadLibScene_camera,

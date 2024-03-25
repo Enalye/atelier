@@ -14,28 +14,28 @@ import atelier.render;
 import atelier.scene;
 import atelier.script.util;
 
-void loadLibRender_sprite(GrLibDefinition library) {
-    library.setModule("render.sprite");
-    library.setModuleInfo(GrLocale.fr_FR, "Élément d’une texture");
-    library.setModuleDescription(GrLocale.fr_FR,
+void loadLibRender_sprite(GrModule mod) {
+    mod.setModule("render.sprite");
+    mod.setModuleInfo(GrLocale.fr_FR, "Élément d’une texture");
+    mod.setModuleDescription(GrLocale.fr_FR,
         "Sprite est une ressource définie dans un fichier `.res` (voir la page [ressources](/resources#Sprite)).");
 
-    GrType spriteType = library.addNative("Sprite", [], "Image");
+    GrType spriteType = mod.addNative("Sprite", [], "Image");
 
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
     GrType imageDataType = grGetNativeType("ImageData");
     GrType sceneType = grGetNativeType("Scene");
     GrType entityType = grGetNativeType("Entity");
 
-    library.addConstructor(&_ctor_str, spriteType, [grString]);
+    mod.addConstructor(&_ctor_str, spriteType, [grString]);
 
-    library.addConstructor(&_ctor_imageData, spriteType, [imageDataType]);
+    mod.addConstructor(&_ctor_imageData, spriteType, [imageDataType]);
 
-    library.addConstructor(&_ctor_scene, spriteType, [sceneType]);
+    mod.addConstructor(&_ctor_scene, spriteType, [sceneType]);
 
-    library.addConstructor(&_ctor_entity, spriteType, [entityType]);
+    mod.addConstructor(&_ctor_entity, spriteType, [entityType]);
 
-    library.addProperty(&_size!"get", &_size!"set", "size", spriteType, vec2fType);
+    mod.addProperty(&_size!"get", &_size!"set", "size", spriteType, vec2fType);
 }
 
 private void _ctor_str(GrCall call) {

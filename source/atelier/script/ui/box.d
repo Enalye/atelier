@@ -11,30 +11,30 @@ import atelier.common;
 import atelier.ui;
 import atelier.script.util;
 
-package void loadLibUI_box(GrLibDefinition library) {
-    library.setModule("ui.box");
-    library.setModuleInfo(GrLocale.fr_FR, "Système d’alignement d’interfaces");
+package void loadLibUI_box(GrModule mod) {
+    mod.setModule("ui.box");
+    mod.setModuleInfo(GrLocale.fr_FR, "Système d’alignement d’interfaces");
 
-    GrType boxType = library.addNative("Box", [], "UIElement");
-    GrType hboxType = library.addNative("HBox", [], "Box");
-    GrType vboxType = library.addNative("VBox", [], "Box");
+    GrType boxType = mod.addNative("Box", [], "UIElement");
+    GrType hboxType = mod.addNative("HBox", [], "Box");
+    GrType vboxType = mod.addNative("VBox", [], "Box");
 
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
 
-    library.setDescription(GrLocale.fr_FR, "Aligne horizontalement les interfaces");
-    library.addConstructor(&_hboxCtor, hboxType);
+    mod.setDescription(GrLocale.fr_FR, "Aligne horizontalement les interfaces");
+    mod.addConstructor(&_hboxCtor, hboxType);
 
-    library.setDescription(GrLocale.fr_FR, "Aligne verticalement les interfaces");
-    library.addConstructor(&_vboxCtor, vboxType);
+    mod.setDescription(GrLocale.fr_FR, "Aligne verticalement les interfaces");
+    mod.addConstructor(&_vboxCtor, vboxType);
 
-    library.setDescription(GrLocale.fr_FR, "Taille minimale de la boite");
-    library.addProperty(&_padding!"get", &_padding!"set", "padding", boxType, vec2fType);
+    mod.setDescription(GrLocale.fr_FR, "Taille minimale de la boite");
+    mod.addProperty(&_padding!"get", &_padding!"set", "padding", boxType, vec2fType);
 
-    library.setDescription(GrLocale.fr_FR, "Taille de la marge");
-    library.addProperty(&_margin!"get", &_margin!"set", "margin", boxType, vec2fType);
+    mod.setDescription(GrLocale.fr_FR, "Taille de la marge");
+    mod.addProperty(&_margin!"get", &_margin!"set", "margin", boxType, vec2fType);
 
-    library.setDescription(GrLocale.fr_FR, "Espacement entre les enfants");
-    library.addProperty(&_spacing!"get", &_spacing!"set", "spacing", boxType, grFloat);
+    mod.setDescription(GrLocale.fr_FR, "Espacement entre les enfants");
+    mod.addProperty(&_spacing!"get", &_spacing!"set", "spacing", boxType, grFloat);
 }
 
 private void _hboxCtor(GrCall call) {

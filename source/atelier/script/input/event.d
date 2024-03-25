@@ -14,184 +14,178 @@ import atelier.common;
 import atelier.core;
 import atelier.script.util;
 
-void loadLibInput_event(GrLibDefinition library) {
-    library.setModule("input.event");
-    library.setModuleInfo(GrLocale.fr_FR, "Événements d’entrée");
+void loadLibInput_event(GrModule mod) {
+    mod.setModule("input.event");
+    mod.setModuleInfo(GrLocale.fr_FR, "Événements d’entrée");
 
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
 
-    library.setDescription(GrLocale.fr_FR, "État d’une entrée");
-    GrType keyState = library.addEnum("KeyState", grNativeEnum!(KeyState));
+    mod.setDescription(GrLocale.fr_FR, "État d’une entrée");
+    GrType keyState = mod.addEnum("KeyState", grNativeEnum!(KeyState));
 
-    library.setDescription(GrLocale.fr_FR, "Touche du clavier");
-    GrType keyButton = library.addEnum("KeyButton", grNativeEnum!(InputEvent.KeyButton.Button));
+    mod.setDescription(GrLocale.fr_FR, "Touche du clavier");
+    GrType keyButton = mod.addEnum("KeyButton", grNativeEnum!(InputEvent.KeyButton.Button));
 
-    library.setDescription(GrLocale.fr_FR, "Bouton de la souris");
-    GrType mouseButton = library.addEnum("MouseButton",
-        grNativeEnum!(InputEvent.MouseButton.Button));
+    mod.setDescription(GrLocale.fr_FR, "Bouton de la souris");
+    GrType mouseButton = mod.addEnum("MouseButton", grNativeEnum!(InputEvent.MouseButton.Button));
 
-    library.setDescription(GrLocale.fr_FR, "Bouton de la manette");
-    GrType controllerButton = library.addEnum("ControllerButton",
+    mod.setDescription(GrLocale.fr_FR, "Bouton de la manette");
+    GrType controllerButton = mod.addEnum("ControllerButton",
         grNativeEnum!(InputEvent.ControllerButton.Button));
 
-    library.setDescription(GrLocale.fr_FR, "Axe de la manette");
-    GrType controllerAxis = library.addEnum("ControllerAxis",
+    mod.setDescription(GrLocale.fr_FR, "Axe de la manette");
+    GrType controllerAxis = mod.addEnum("ControllerAxis",
         grNativeEnum!(InputEvent.ControllerAxis.Axis));
 
-    library.setDescription(GrLocale.fr_FR, "Type d’événement");
-    GrType inputEventType = library.addEnum("InputEventType", grNativeEnum!(InputEvent.Type));
+    mod.setDescription(GrLocale.fr_FR, "Type d’événement");
+    GrType inputEventType = mod.addEnum("InputEventType", grNativeEnum!(InputEvent.Type));
 
-    GrType inputEvent = library.addNative("InputEvent");
-    GrType inputEventKeyButton = library.addNative("InputEventKeyButton");
-    GrType inputEventMouseButton = library.addNative("InputEventMouseButton");
-    GrType inputEventMouseMotion = library.addNative("InputEventMouseMotion");
-    GrType inputEventMouseWheel = library.addNative("InputEventMouseWheel");
-    GrType inputEventControllerButton = library.addNative("InputEventControllerButton");
-    GrType inputEventControllerAxis = library.addNative("InputEventControllerAxis");
-    GrType inputEventTextInput = library.addNative("InputEventTextInput");
-    GrType inputEventDropFile = library.addNative("InputEventDropFile");
+    GrType inputEvent = mod.addNative("InputEvent");
+    GrType inputEventKeyButton = mod.addNative("InputEventKeyButton");
+    GrType inputEventMouseButton = mod.addNative("InputEventMouseButton");
+    GrType inputEventMouseMotion = mod.addNative("InputEventMouseMotion");
+    GrType inputEventMouseWheel = mod.addNative("InputEventMouseWheel");
+    GrType inputEventControllerButton = mod.addNative("InputEventControllerButton");
+    GrType inputEventControllerAxis = mod.addNative("InputEventControllerAxis");
+    GrType inputEventTextInput = mod.addNative("InputEventTextInput");
+    GrType inputEventDropFile = mod.addNative("InputEventDropFile");
 
     // InputEvent
-    library.addCast(&_asString, inputEvent, grString);
-    library.addProperty(&_type, null, "type", inputEvent, inputEventType);
+    mod.addCast(&_asString, inputEvent, grString);
+    mod.addProperty(&_type, null, "type", inputEvent, inputEventType);
 
-    library.setDescription(GrLocale.fr_FR, "L’événement correspond-il à l’action ?");
-    library.setParameters(["event", "action"]);
-    library.addFunction(&_isAction, "isAction", [inputEvent, grString], [grBool]);
+    mod.setDescription(GrLocale.fr_FR, "L’événement correspond-il à l’action ?");
+    mod.setParameters(["event", "action"]);
+    mod.addFunction(&_isAction, "isAction", [inputEvent, grString], [grBool]);
 
-    library.setDescription(GrLocale.fr_FR, "La touche est-elle active ?");
-    library.addFunction(&_inputEvent_isPressed, "isPressed", [inputEvent], [
-            grBool
-        ]);
+    mod.setDescription(GrLocale.fr_FR, "La touche est-elle active ?");
+    mod.addFunction(&_inputEvent_isPressed, "isPressed", [inputEvent], [grBool]);
 
-    library.setDescription(GrLocale.fr_FR, "L’événement est-il déclenché par répétition ?");
-    library.addFunction(&_inputEvent_echo, "echo", [inputEvent], [grBool]);
+    mod.setDescription(GrLocale.fr_FR, "L’événement est-il déclenché par répétition ?");
+    mod.addFunction(&_inputEvent_echo, "echo", [inputEvent], [grBool]);
 
-    library.setDescription(GrLocale.fr_FR,
+    mod.setDescription(GrLocale.fr_FR,
         "Si l’événement est de type InputEventKeyButton, retourne le type.");
-    library.addProperty(&_keyButton, null, "keyButton", inputEvent,
-        grOptional(inputEventKeyButton));
+    mod.addProperty(&_keyButton, null, "keyButton", inputEvent, grOptional(inputEventKeyButton));
 
-    library.setDescription(GrLocale.fr_FR,
+    mod.setDescription(GrLocale.fr_FR,
         "Si l’événement est de type InputEventMouseButton, retourne le type.");
-    library.addProperty(&_mouseButton, null, "mouseButton", inputEvent,
+    mod.addProperty(&_mouseButton, null, "mouseButton", inputEvent,
         grOptional(inputEventMouseButton));
 
-    library.setDescription(GrLocale.fr_FR,
+    mod.setDescription(GrLocale.fr_FR,
         "Si l’événement est de type InputEventMouseMotion, retourne le type.");
-    library.addProperty(&_mouseMotion, null, "mouseMotion", inputEvent,
+    mod.addProperty(&_mouseMotion, null, "mouseMotion", inputEvent,
         grOptional(inputEventMouseMotion));
 
-    library.setDescription(GrLocale.fr_FR,
+    mod.setDescription(GrLocale.fr_FR,
         "Si l’événement est de type InputEventMouseWheel, retourne le type.");
-    library.addProperty(&_mouseWheel, null, "mouseWheel", inputEvent,
+    mod.addProperty(&_mouseWheel, null, "mouseWheel", inputEvent,
         grOptional(inputEventMouseWheel));
 
-    library.setDescription(GrLocale.fr_FR,
+    mod.setDescription(GrLocale.fr_FR,
         "Si l’événement est de type InputEventControllerButton, retourne le type.");
-    library.addProperty(&_controllerButton, null, "controllerButton",
-        inputEvent, grOptional(inputEventControllerButton));
+    mod.addProperty(&_controllerButton, null, "controllerButton", inputEvent,
+        grOptional(inputEventControllerButton));
 
-    library.setDescription(GrLocale.fr_FR,
+    mod.setDescription(GrLocale.fr_FR,
         "Si l’événement est de type InputEventControllerAxis, retourne le type.");
-    library.addProperty(&_controllerAxis, null, "controllerAxis", inputEvent,
+    mod.addProperty(&_controllerAxis, null, "controllerAxis", inputEvent,
         grOptional(inputEventControllerAxis));
 
-    library.setDescription(GrLocale.fr_FR,
+    mod.setDescription(GrLocale.fr_FR,
         "Si l’événement est de type InputEventTextInput, retourne le type.");
-    library.addProperty(&_textInput, null, "textInput", inputEvent,
-        grOptional(inputEventTextInput));
+    mod.addProperty(&_textInput, null, "textInput", inputEvent, grOptional(inputEventTextInput));
 
-    library.setDescription(GrLocale.fr_FR,
+    mod.setDescription(GrLocale.fr_FR,
         "Si l’événement est de type InputEventDropFile, retourne le type.");
-    library.addProperty(&_dropFile, null, "dropFile", inputEvent, grOptional(inputEventDropFile));
+    mod.addProperty(&_dropFile, null, "dropFile", inputEvent, grOptional(inputEventDropFile));
 
-    library.setDescription(GrLocale.fr_FR, "Consomme l’événement.");
-    library.addFunction(&_accept, "accept", [inputEvent]);
+    mod.setDescription(GrLocale.fr_FR, "Consomme l’événement.");
+    mod.addFunction(&_accept, "accept", [inputEvent]);
 
-    library.setDescription(GrLocale.fr_FR, "Affiche le contenu de l’événement.");
-    library.addFunction(&_print, "print", [inputEvent]);
+    mod.setDescription(GrLocale.fr_FR, "Affiche le contenu de l’événement.");
+    mod.addFunction(&_print, "print", [inputEvent]);
 
     // KeyButton
-    library.addProperty(&_KeyButton_button, null, "button", inputEventKeyButton, keyButton);
-    library.addProperty(&_KeyButton_state, null, "state", inputEventKeyButton, keyState);
-    library.addProperty(&_KeyButton_echo, null, "echo", inputEventKeyButton, grBool);
+    mod.addProperty(&_KeyButton_button, null, "button", inputEventKeyButton, keyButton);
+    mod.addProperty(&_KeyButton_state, null, "state", inputEventKeyButton, keyState);
+    mod.addProperty(&_KeyButton_echo, null, "echo", inputEventKeyButton, grBool);
 
     // MouseButton
-    library.addProperty(&_MouseButton_button, null, "button", inputEventMouseButton, keyButton);
-    library.addProperty(&_MouseButton_state, null, "state", inputEventMouseButton, keyState);
-    library.addProperty(&_MouseButton_clicks, null, "clicks", inputEventMouseButton, grInt);
-    library.addProperty(&_MouseButton_position, null, "position",
-        inputEventMouseButton, vec2fType);
-    library.addProperty(&_MouseButton_deltaPosition, null, "deltaPosition",
+    mod.addProperty(&_MouseButton_button, null, "button", inputEventMouseButton, keyButton);
+    mod.addProperty(&_MouseButton_state, null, "state", inputEventMouseButton, keyState);
+    mod.addProperty(&_MouseButton_clicks, null, "clicks", inputEventMouseButton, grInt);
+    mod.addProperty(&_MouseButton_position, null, "position", inputEventMouseButton, vec2fType);
+    mod.addProperty(&_MouseButton_deltaPosition, null, "deltaPosition",
         inputEventMouseButton, vec2fType);
 
     // MouseMotion
-    library.addProperty(&_MouseMotion_position, null, "position",
-        inputEventMouseMotion, vec2fType);
-    library.addProperty(&_MouseMotion_deltaPosition, null, "deltaPosition",
+    mod.addProperty(&_MouseMotion_position, null, "position", inputEventMouseMotion, vec2fType);
+    mod.addProperty(&_MouseMotion_deltaPosition, null, "deltaPosition",
         inputEventMouseMotion, vec2fType);
 
     // MouseWheel
-    library.addProperty(&_MouseWheel_x, null, "x", inputEventMouseWheel, grInt);
-    library.addProperty(&_MouseWheel_y, null, "y", inputEventMouseWheel, grInt);
+    mod.addProperty(&_MouseWheel_x, null, "x", inputEventMouseWheel, grInt);
+    mod.addProperty(&_MouseWheel_y, null, "y", inputEventMouseWheel, grInt);
 
     // ControllerButton
-    library.addProperty(&_ControllerButton_button, null, "button",
+    mod.addProperty(&_ControllerButton_button, null, "button",
         inputEventControllerButton, controllerButton);
-    library.addProperty(&_ControllerButton_state, null, "state",
-        inputEventControllerButton, keyState);
+    mod.addProperty(&_ControllerButton_state, null, "state", inputEventControllerButton, keyState);
 
     // ControllerAxis
-    library.addProperty(&_ControllerAxis_axis, null, "axis",
+    mod.addProperty(&_ControllerAxis_axis, null, "axis",
         inputEventControllerAxis, controllerButton);
-    library.addProperty(&_ControllerAxis_value, null, "value", inputEventControllerAxis, grFloat);
+    mod.addProperty(&_ControllerAxis_value, null, "value", inputEventControllerAxis, grFloat);
 
     // TextInput
-    library.addProperty(&_TextInput_text, null, "text", inputEventTextInput, grString);
+    mod.addProperty(&_TextInput_text, null, "text", inputEventTextInput, grString);
 
     // DropFile
-    library.addProperty(&_DropFile_path, null, "path", inputEventDropFile, grString);
+    mod.addProperty(&_DropFile_path, null, "path", inputEventDropFile, grString);
 
     // Input
 
-    library.setDescription(GrLocale.fr_FR, "Crée un événement clavier.");
-    library.addStatic(&_makeKeyButton1, inputEvent, "keyButton", [
+    mod.setDescription(GrLocale.fr_FR, "Crée un événement clavier.");
+    mod.addStatic(&_makeKeyButton1, inputEvent, "keyButton", [
             keyButton, keyState
         ], [inputEvent]);
 
-    library.addStatic(&_makeKeyButton2, inputEvent, "keyButton", [
+    mod.addStatic(&_makeKeyButton2, inputEvent, "keyButton", [
             keyButton, keyState, grBool
         ], [inputEvent]);
 
-    library.setDescription(GrLocale.fr_FR, "Crée un événement bouton de souris.");
-    library.addStatic(&_makeMouseButton, inputEvent, "mouseButton",
-        [mouseButton, keyState, grInt, vec2fType, vec2fType], [inputEvent]);
+    mod.setDescription(GrLocale.fr_FR, "Crée un événement bouton de souris.");
+    mod.addStatic(&_makeMouseButton, inputEvent, "mouseButton", [
+            mouseButton, keyState, grInt, vec2fType, vec2fType
+        ], [inputEvent]);
 
-    library.setDescription(GrLocale.fr_FR, "Crée un événement déplacement de souris.");
-    library.addStatic(&_makeMouseMotion, inputEvent, "mouseMotion",
-        [vec2fType, vec2fType], [inputEvent]);
+    mod.setDescription(GrLocale.fr_FR, "Crée un événement déplacement de souris.");
+    mod.addStatic(&_makeMouseMotion, inputEvent, "mouseMotion", [
+            vec2fType, vec2fType
+        ], [inputEvent]);
 
-    library.setDescription(GrLocale.fr_FR, "Crée un événement molette de souris.");
-    library.addStatic(&_makeMouseWheel, inputEvent, "mouseWheel", [grInt, grInt], [
+    mod.setDescription(GrLocale.fr_FR, "Crée un événement molette de souris.");
+    mod.addStatic(&_makeMouseWheel, inputEvent, "mouseWheel", [grInt, grInt], [
             inputEvent
         ]);
 
-    library.setDescription(GrLocale.fr_FR, "Crée un événement bouton de manette.");
-    library.addStatic(&_makeControllerButton, inputEvent, "controllerButton",
+    mod.setDescription(GrLocale.fr_FR, "Crée un événement bouton de manette.");
+    mod.addStatic(&_makeControllerButton, inputEvent, "controllerButton",
         [controllerButton, keyState], [inputEvent]);
 
-    library.setDescription(GrLocale.fr_FR, "Crée un événement axe de manette.");
-    library.addStatic(&_makeControllerAxis, inputEvent, "controllerAxis",
+    mod.setDescription(GrLocale.fr_FR, "Crée un événement axe de manette.");
+    mod.addStatic(&_makeControllerAxis, inputEvent, "controllerAxis",
         [controllerAxis, grFloat], [inputEvent]);
 
-    library.setDescription(GrLocale.fr_FR, "Crée un événement entrée textuelle.");
-    library.addStatic(&_makeTextInput, inputEvent, "textInput", [grString], [
+    mod.setDescription(GrLocale.fr_FR, "Crée un événement entrée textuelle.");
+    mod.addStatic(&_makeTextInput, inputEvent, "textInput", [grString], [
             inputEvent
         ]);
 
-    library.setDescription(GrLocale.fr_FR, "Crée un événement fichier déposé.");
-    library.addStatic(&_makeDropFile, inputEvent, "dropFile", [grString], [
+    mod.setDescription(GrLocale.fr_FR, "Crée un événement fichier déposé.");
+    mod.addStatic(&_makeDropFile, inputEvent, "dropFile", [grString], [
             inputEvent
         ]);
 }
@@ -285,7 +279,7 @@ private void _accept(GrCall call) {
 }
 
 private void _print(GrCall call) {
-    grPrint(call.getNative!InputEvent(0).prettify());
+    call.task.engine.print(call.getNative!InputEvent(0).prettify());
 }
 
 // KeyButton

@@ -13,24 +13,25 @@ import atelier.input;
 import atelier.render;
 import atelier.script.util;
 
-void loadLibRender_tileset(GrLibDefinition library) {
-    library.setModule("render.tileset");
-    library.setModuleInfo(GrLocale.fr_FR, "Jeu de tuiles");
-    library.setModuleDescription(GrLocale.fr_FR, "Tileset est une ressource définie dans un fichier `.res` (voir la page [ressources](/resources#Tileset))");
-    library.setModuleExample(GrLocale.fr_FR, "var tileset = @Tileset(\"terrain\");
+void loadLibRender_tileset(GrModule mod) {
+    mod.setModule("render.tileset");
+    mod.setModuleInfo(GrLocale.fr_FR, "Jeu de tuiles");
+    mod.setModuleDescription(GrLocale.fr_FR,
+        "Tileset est une ressource définie dans un fichier `.res` (voir la page [ressources](/resources#Tileset))");
+    mod.setModuleExample(GrLocale.fr_FR, "var tileset = @Tileset(\"terrain\");
 var tilemap = @Tilemap(tileset, 20, 20);
 scene.addEntity(map);");
 
-    GrType tilesetType = library.addNative("Tileset");
+    GrType tilesetType = mod.addNative("Tileset");
 
     GrType imageDataType = grGetNativeType("ImageData");
     GrType sceneType = grGetNativeType("Scene");
 
-    library.setParameters(["name"]);
-    library.addConstructor(&_ctor, tilesetType, [grString]);
+    mod.setParameters(["name"]);
+    mod.addConstructor(&_ctor, tilesetType, [grString]);
 
-    library.setDescription(GrLocale.fr_FR, "Durée entre chaque frame");
-    library.addProperty(&_frameTime!"get", &_frameTime!"set", "frameTime", tilesetType, grInt);
+    mod.setDescription(GrLocale.fr_FR, "Durée entre chaque frame");
+    mod.addProperty(&_frameTime!"get", &_frameTime!"set", "frameTime", tilesetType, grInt);
 }
 
 private void _ctor(GrCall call) {

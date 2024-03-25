@@ -12,23 +12,23 @@ import atelier.core;
 import atelier.render;
 import atelier.ui;
 
-package void loadLibUI_label(GrLibDefinition library) {
-    library.setModule("ui.label");
-    library.setModuleInfo(GrLocale.fr_FR, "Texte");
+package void loadLibUI_label(GrModule mod) {
+    mod.setModule("ui.label");
+    mod.setModuleInfo(GrLocale.fr_FR, "Texte");
 
-    GrType labelType = library.addNative("Label", [], "UIElement");
+    GrType labelType = mod.addNative("Label", [], "UIElement");
     GrType fontType = grGetNativeType("Font");
 
-    library.addConstructor(&_ctor, labelType, [grString, fontType]);
+    mod.addConstructor(&_ctor, labelType, [grString, fontType]);
 
-    library.setDescription(GrLocale.fr_FR, "Texte du label");
-    library.addProperty(&_text!"get", &_text!"set", "text", labelType, grString);
+    mod.setDescription(GrLocale.fr_FR, "Texte du label");
+    mod.addProperty(&_text!"get", &_text!"set", "text", labelType, grString);
 
-    library.setDescription(GrLocale.fr_FR, "Police du label");
-    library.addProperty(&_font!"get", &_font!"set", "font", labelType, fontType);
+    mod.setDescription(GrLocale.fr_FR, "Police du label");
+    mod.addProperty(&_font!"get", &_font!"set", "font", labelType, fontType);
 
-    library.setDescription(GrLocale.fr_FR, "Espacement entre chaque caractère");
-    library.addProperty(&_charSpacing!"get", &_charSpacing!"set",
+    mod.setDescription(GrLocale.fr_FR, "Espacement entre chaque caractère");
+    mod.addProperty(&_charSpacing!"get", &_charSpacing!"set",
         "charSpacing", labelType, grFloat);
 }
 

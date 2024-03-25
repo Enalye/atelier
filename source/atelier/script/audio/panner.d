@@ -12,15 +12,15 @@ import atelier.common;
 import atelier.core;
 import atelier.script.util;
 
-package void loadLibAudio_panner(GrLibDefinition library) {
-    library.setModule("audio.panner");
-    library.setModuleInfo(GrLocale.fr_FR, "Règle la stéréo de l’audio");
+package void loadLibAudio_panner(GrModule mod) {
+    mod.setModule("audio.panner");
+    mod.setModuleInfo(GrLocale.fr_FR, "Règle la stéréo de l’audio");
 
-    GrType pannerType = library.addNative("AudioPanner", [], "AudioEffect");
+    GrType pannerType = mod.addNative("AudioPanner", [], "AudioEffect");
 
-    library.addConstructor(&_ctor, pannerType);
+    mod.addConstructor(&_ctor, pannerType);
 
-    library.addProperty(&_panning!"get", &_panning!"set", "panning", pannerType, grFloat);
+    mod.addProperty(&_panning!"get", &_panning!"set", "panning", pannerType, grFloat);
 }
 
 private void _ctor(GrCall call) {

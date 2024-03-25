@@ -12,50 +12,48 @@ import atelier.core;
 import atelier.render;
 import atelier.script.util;
 
-package void loadLibRender_font(GrLibDefinition library) {
-    library.setModule("render.font");
-    library.setModuleInfo(GrLocale.fr_FR, "Polices de caractères");
-    library.setModuleDescription(GrLocale.fr_FR, "TrueTypeFont est une ressource définie dans un fichier `.res` (voir la page [ressources](/resources#TrueType)).\n
+package void loadLibRender_font(GrModule mod) {
+    mod.setModule("render.font");
+    mod.setModuleInfo(GrLocale.fr_FR, "Polices de caractères");
+    mod.setModuleDescription(GrLocale.fr_FR, "TrueTypeFont est une ressource définie dans un fichier `.res` (voir la page [ressources](/resources#TrueType)).\n
 BitmapFont est une ressource définie dans un fichier `.res` (voir la page [ressources](/resources#BitmapFont)).\n
 PixelFont permet de définir des polices directement en code.");
 
-    library.addNative("Font", [], "ImageData");
-    GrType ttfType = library.addNative("TrueTypeFont", [], "Font");
-    GrType bmpfType = library.addNative("BitmapFont", [], "Font");
-    GrType pxfType = library.addNative("PixelFont", [], "Font");
+    mod.addNative("Font", [], "ImageData");
+    GrType ttfType = mod.addNative("TrueTypeFont", [], "Font");
+    GrType bmpfType = mod.addNative("BitmapFont", [], "Font");
+    GrType pxfType = mod.addNative("PixelFont", [], "Font");
 
-    library.setDescription(GrLocale.fr_FR, "Style de police");
-    GrType pxfStyleType = library.addEnum("PixelFontStyle", [
+    mod.setDescription(GrLocale.fr_FR, "Style de police");
+    GrType pxfStyleType = mod.addEnum("PixelFontStyle", [
             "standard", "shadowed", "bordered"
         ]);
 
-    library.setParameters(["name"]);
-    library.addConstructor(&_ttfCtor, ttfType, [grString]);
+    mod.setParameters(["name"]);
+    mod.addConstructor(&_ttfCtor, ttfType, [grString]);
 
-    library.setParameters(["name"]);
-    library.addConstructor(&_bmpfCtor, bmpfType, [grString]);
+    mod.setParameters(["name"]);
+    mod.addConstructor(&_bmpfCtor, bmpfType, [grString]);
 
-    library.setParameters([
+    mod.setParameters([
         "ascent", "descent", "lineSkip", "weight", "spacing", "style"
     ]);
-    library.addConstructor(&_pxfCtor, pxfType, [
+    mod.addConstructor(&_pxfCtor, pxfType, [
             grInt, grInt, grInt, grInt, grInt, pxfStyleType
         ]);
 
-    library.setDescription(GrLocale.fr_FR, "Ajoute un caractère à la police.");
-    library.setParameters([
+    mod.setDescription(GrLocale.fr_FR, "Ajoute un caractère à la police.");
+    mod.setParameters([
         "font", "ch", "advance", "offsetX", "offsetY", "width", "height",
         "posX", "posY", "kerningChar", "kerningOffset"
     ]);
-    library.addFunction(&_addCharacter_bmpf, "addCharacter", [
+    mod.addFunction(&_addCharacter_bmpf, "addCharacter", [
             bmpfType, grChar, grInt, grInt, grInt, grInt, grInt, grInt, grInt,
             grList(grChar), grList(grInt)
         ]);
 
-    library.setParameters([
-        "font", "ch", "glyphData", "width", "height", "descent"
-    ]);
-    library.addFunction(&_addCharacter_pxf, "addCharacter", [
+    mod.setParameters(["font", "ch", "glyphData", "width", "height", "descent"]);
+    mod.addFunction(&_addCharacter_pxf, "addCharacter", [
             pxfType, grChar, grList(grInt), grInt, grInt, grInt
         ]);
 }

@@ -11,7 +11,7 @@ import atelier.core;
 import atelier.render;
 import atelier.script.util;
 
-package void loadLibCore_runtime(GrLibDefinition library) {
+package void loadLibCore_runtime(GrModule library) {
     library.setModule("core.runtime");
     library.setModuleInfo(GrLocale.fr_FR, "Informations système");
 

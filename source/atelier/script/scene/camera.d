@@ -11,54 +11,53 @@ import atelier.core;
 import atelier.scene;
 import atelier.script.util;
 
-package void loadLibScene_camera(GrLibDefinition library) {
-    library.setModule("scene.camera");
-    library.setModuleInfo(GrLocale.fr_FR, "Point de vue du joueur");
-    library.setModuleExample(GrLocale.fr_FR, "@Camera.follow(player, @Vec2f(1f, 0.2f), @Vec2f(0f, 100f));
+package void loadLibScene_camera(GrModule mod) {
+    mod.setModule("scene.camera");
+    mod.setModuleInfo(GrLocale.fr_FR, "Point de vue du joueur");
+    mod.setModuleExample(GrLocale.fr_FR,
+        "@Camera.follow(player, @Vec2f(1f, 0.2f), @Vec2f(0f, 100f));
 @Camera.zoom(1f, 120, Spline.sineInOut);");
 
-    GrType cameraType = library.addNative("Camera");
+    GrType cameraType = mod.addNative("Camera");
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
     GrType splineType = grGetEnumType("Spline");
     GrType entityType = grGetNativeType("Entity");
 
-    library.setDescription(GrLocale.fr_FR, "Récupère la position de la caméra");
-    library.setParameters();
-    library.addStatic(&_getPosition, cameraType, "getPosition", [], [vec2fType]);
+    mod.setDescription(GrLocale.fr_FR, "Récupère la position de la caméra");
+    mod.setParameters();
+    mod.addStatic(&_getPosition, cameraType, "getPosition", [], [vec2fType]);
 
-    library.setDescription(GrLocale.fr_FR, "Déplace instantanément la caméra");
-    library.setParameters(["position"]);
-    library.addStatic(&_setPosition, cameraType, "setPosition", [vec2fType]);
+    mod.setDescription(GrLocale.fr_FR, "Déplace instantanément la caméra");
+    mod.setParameters(["position"]);
+    mod.addStatic(&_setPosition, cameraType, "setPosition", [vec2fType]);
 
-    library.setDescription(GrLocale.fr_FR, "Déplace la caméra vers la position");
-    library.setParameters(["position", "frames", "spline"]);
-    library.addStatic(&_moveTo, cameraType, "moveTo", [
+    mod.setDescription(GrLocale.fr_FR, "Déplace la caméra vers la position");
+    mod.setParameters(["position", "frames", "spline"]);
+    mod.addStatic(&_moveTo, cameraType, "moveTo", [
             vec2fType, grUInt, splineType
         ]);
 
-    library.setDescription(GrLocale.fr_FR, "Déplace la caméra en suivant une cible");
-    library.setParameters(["target", "damping", "deadzone"]);
-    library.addStatic(&_follow, cameraType, "follow", [
+    mod.setDescription(GrLocale.fr_FR, "Déplace la caméra en suivant une cible");
+    mod.setParameters(["target", "damping", "deadzone"]);
+    mod.addStatic(&_follow, cameraType, "follow", [
             entityType, vec2fType, vec2fType
         ]);
 
-    library.setDescription(GrLocale.fr_FR, "Arrête la caméra");
-    library.setParameters();
-    library.addStatic(&_stop, cameraType, "stop");
+    mod.setDescription(GrLocale.fr_FR, "Arrête la caméra");
+    mod.setParameters();
+    mod.addStatic(&_stop, cameraType, "stop");
 
-    library.setDescription(GrLocale.fr_FR, "Change le zoom de la caméra");
-    library.setParameters(["zoomLevel", "frames", "spline"]);
-    library.addStatic(&_zoom, cameraType, "zoom", [grFloat, grUInt, splineType]);
+    mod.setDescription(GrLocale.fr_FR, "Change le zoom de la caméra");
+    mod.setParameters(["zoomLevel", "frames", "spline"]);
+    mod.addStatic(&_zoom, cameraType, "zoom", [grFloat, grUInt, splineType]);
 
-    library.setDescription(GrLocale.fr_FR, "Secoue temporairement la caméra");
-    library.setParameters(["trauma"]);
-    library.addStatic(&_shake, cameraType, "shake", [grFloat]);
+    mod.setDescription(GrLocale.fr_FR, "Secoue temporairement la caméra");
+    mod.setParameters(["trauma"]);
+    mod.addStatic(&_shake, cameraType, "shake", [grFloat]);
 
-    library.setDescription(GrLocale.fr_FR, "Fait trembler la caméra");
-    library.setParameters(["trauma", "frames", "spline"]);
-    library.addStatic(&_rumble, cameraType, "rumble", [
-            grFloat, grUInt, splineType
-        ]);
+    mod.setDescription(GrLocale.fr_FR, "Fait trembler la caméra");
+    mod.setParameters(["trauma", "frames", "spline"]);
+    mod.addStatic(&_rumble, cameraType, "rumble", [grFloat, grUInt, splineType]);
 }
 
 private void _getPosition(GrCall call) {

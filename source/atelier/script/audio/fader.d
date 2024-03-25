@@ -12,19 +12,19 @@ import atelier.common;
 import atelier.core;
 import atelier.script.util;
 
-package void loadLibAudio_fader(GrLibDefinition library) {
-    library.setModule("audio.fader");
-    library.setModuleInfo(GrLocale.fr_FR, "Applique un fondu audio");
+package void loadLibAudio_fader(GrModule mod) {
+    mod.setModule("audio.fader");
+    mod.setModuleInfo(GrLocale.fr_FR, "Applique un fondu audio");
 
-    GrType faderType = library.addNative("AudioFader", [], "AudioEffect");
+    GrType faderType = mod.addNative("AudioFader", [], "AudioEffect");
     GrType splineType = grGetEnumType("Spline");
 
-    library.addConstructor(&_ctor, faderType);
+    mod.addConstructor(&_ctor, faderType);
 
-    library.addProperty(&_isFadeIn!"get", &_isFadeIn!"set", "isFadeIn", faderType, grBool);
-    library.addProperty(&_spline!"get", &_spline!"set", "spline", faderType, splineType);
-    library.addProperty(&_duration!"get", &_duration!"set", "duration", faderType, grFloat);
-    library.addProperty(&_delay!"get", &_delay!"set", "delay", faderType, grFloat);
+    mod.addProperty(&_isFadeIn!"get", &_isFadeIn!"set", "isFadeIn", faderType, grBool);
+    mod.addProperty(&_spline!"get", &_spline!"set", "spline", faderType, splineType);
+    mod.addProperty(&_duration!"get", &_duration!"set", "duration", faderType, grFloat);
+    mod.addProperty(&_delay!"get", &_delay!"set", "delay", faderType, grFloat);
 }
 
 private void _ctor(GrCall call) {

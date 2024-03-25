@@ -12,18 +12,18 @@ import atelier.core;
 import atelier.scene;
 import atelier.script.util;
 
-package void loadLibScene_solid(GrLibDefinition library) {
-    library.setModule("scene.solid");
-    library.setModuleInfo(GrLocale.fr_FR, "Obstacle physique aux acteurs d’une scène.");
+package void loadLibScene_solid(GrModule mod) {
+    mod.setModule("scene.solid");
+    mod.setModuleInfo(GrLocale.fr_FR, "Obstacle physique aux acteurs d’une scène.");
 
-    GrType solidType = library.addNative("Solid", [], "Collider");
+    GrType solidType = mod.addNative("Solid", [], "Collider");
     GrType collisionType = grGetNativeType("Collision");
 
-    library.addConstructor(&_ctor, solidType);
+    mod.addConstructor(&_ctor, solidType);
 
-    library.setDescription(GrLocale.fr_FR, "Déplace le solide.");
-    library.setParameters(["solid", "x", "y"]);
-    library.addFunction(&_move, "move", [solidType, grFloat, grFloat], [
+    mod.setDescription(GrLocale.fr_FR, "Déplace le solide.");
+    mod.setParameters(["solid", "x", "y"]);
+    mod.addFunction(&_move, "move", [solidType, grFloat, grFloat], [
             grList(collisionType)
         ]);
 }

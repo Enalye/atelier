@@ -12,23 +12,23 @@ import atelier.common;
 import atelier.core;
 import atelier.script.util;
 
-package void loadLibAudio_sound(GrLibDefinition library) {
-    library.setModule("audio.sound");
-    library.setModuleInfo(GrLocale.fr_FR, "Représente un fichier audio.
+package void loadLibAudio_sound(GrModule mod) {
+    mod.setModule("audio.sound");
+    mod.setModuleInfo(GrLocale.fr_FR, "Représente un fichier audio.
 Le son est entièrement décodé en mémoire.
 Il est recommandé de reserver cette classe pour des fichiers peu volumineux.");
-    library.setModuleDescription(GrLocale.fr_FR,
+    mod.setModuleDescription(GrLocale.fr_FR,
         "Sound est une ressource définie dans un fichier `.res` (voir la page [ressources](/resources#Sound)).");
 
-    GrType soundType = library.addNative("Sound");
+    GrType soundType = mod.addNative("Sound");
 
-    library.addConstructor(&_ctor, soundType, [grString]);
+    mod.addConstructor(&_ctor, soundType, [grString]);
 
-    library.setDescription(GrLocale.fr_FR, "Lance la lecture sur le bus `master`.");
-    library.setParameters(["sound"]);
-    library.addFunction(&_play, "play", [soundType]);
+    mod.setDescription(GrLocale.fr_FR, "Lance la lecture sur le bus `master`.");
+    mod.setParameters(["sound"]);
+    mod.addFunction(&_play, "play", [soundType]);
 
-    //library.addProperty(&_volume!"get", &_volume!"set", "volume", soundType, grFloat);
+    //mod.addProperty(&_volume!"get", &_volume!"set", "volume", soundType, grFloat);
 }
 
 private void _ctor(GrCall call) {

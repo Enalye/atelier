@@ -23,7 +23,7 @@ import atelier.script.render.tilemap;
 import atelier.script.render.tileset;
 import atelier.script.render.writabletexture;
 
-package(atelier.script) GrLibLoader[] getLibLoaders_render() {
+package(atelier.script) GrModuleLoader[] getLibLoaders_render() {
     return [
         &loadLibRender_animation, &loadLibRender_canvas, &loadLibRender_capsule,
         &loadLibRender_circle, &loadLibRender_font, &loadLibRender_image,

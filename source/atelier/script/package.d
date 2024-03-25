@@ -16,19 +16,19 @@ import atelier.script.scene;
 import atelier.script.ui;
 
 /// Charge la bibliothèque
-GrLibrary loadLibrary() {
-    GrLibrary library = new GrLibrary;
+GrLibrary getEngineLibrary() {
+    GrLibrary library = new GrLibrary(0);
 
     foreach (loader; getLibraryLoaders()) {
-        loader(library);
+        library.addModule(loader);
     }
 
     return library;
 }
 
 /// Retourne les fonctions de chargement de la bibliothèque
-GrLibLoader[] getLibraryLoaders() {
-    GrLibLoader[] loaders;
+private GrModuleLoader[] getLibraryLoaders() {
+    GrModuleLoader[] loaders;
 
     static foreach (pack; [
             &getLibLoaders_audio, &getLibLoaders_common, &getLibLoaders_core,

@@ -14,13 +14,13 @@ import atelier.scene;
 import atelier.ui;
 import atelier.script.util;
 
-package void loadLibScene_scene(GrLibDefinition library) {
-    library.setModule("scene.scene");
-    library.setModuleInfo(GrLocale.fr_FR, "Défini un calque où évolue des entités");
-    library.setModuleExample(GrLocale.fr_FR, "var scene = @Scene;
+package void loadLibScene_scene(GrModule mod) {
+    mod.setModule("scene.scene");
+    mod.setModuleInfo(GrLocale.fr_FR, "Défini un calque où évolue des entités");
+    mod.setModuleExample(GrLocale.fr_FR, "var scene = @Scene;
 addScene(scene);");
 
-    GrType sceneType = library.addNative("Scene");
+    GrType sceneType = mod.addNative("Scene");
 
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
     GrType entityType = grGetNativeType("Entity");
@@ -30,111 +30,109 @@ addScene(scene);");
     GrType canvasType = grGetNativeType("Canvas");
     GrType uiType = grGetNativeType("UIElement");
 
-    library.setParameters(["width", "height"]);
-    library.addConstructor(&_ctor, sceneType);
+    mod.setParameters(["width", "height"]);
+    mod.addConstructor(&_ctor, sceneType);
 
-    library.addProperty(&_name!"get", &_name!"set", "name", sceneType, grString);
-    library.addProperty(&_position!"get", &_position!"set", "position", sceneType, vec2fType);
-    library.addProperty(&_zOrder!"get", &_zOrder!"set", "zOrder", entityType, grInt);
-    library.addProperty(&_isVisible!"get", &_isVisible!"set", "isVisible", sceneType, grBool);
-    library.addProperty(&_isAlive, null, "isAlive", sceneType, grBool);
-    library.addProperty(&_canvas, null, "canvas", sceneType, canvasType);
+    mod.addProperty(&_name!"get", &_name!"set", "name", sceneType, grString);
+    mod.addProperty(&_position!"get", &_position!"set", "position", sceneType, vec2fType);
+    mod.addProperty(&_zOrder!"get", &_zOrder!"set", "zOrder", entityType, grInt);
+    mod.addProperty(&_isVisible!"get", &_isVisible!"set", "isVisible", sceneType, grBool);
+    mod.addProperty(&_isAlive, null, "isAlive", sceneType, grBool);
+    mod.addProperty(&_canvas, null, "canvas", sceneType, canvasType);
 
-    library.setDescription(GrLocale.fr_FR,
+    mod.setDescription(GrLocale.fr_FR,
         "Récupère l’entité correspondant au nom donné dans la scène");
-    library.setParameters(["name"]);
-    library.addFunction(&_findByName!Entity, "findEntityByName", [
+    mod.setParameters(["name"]);
+    mod.addFunction(&_findByName!Entity, "findEntityByName", [
             sceneType, grString
         ], [grOptional(entityType)]);
 
-    library.setDescription(GrLocale.fr_FR,
+    mod.setDescription(GrLocale.fr_FR,
         "Récupère les entités possédants le tag indiqué dans la scène");
-    library.setParameters(["tags"]);
-    library.addFunction(&_findByTag!Entity, "findEntitiesByTag", [
+    mod.setParameters(["tags"]);
+    mod.addFunction(&_findByTag!Entity, "findEntitiesByTag", [
             sceneType, grList(grString)
         ], [grList(entityType)]);
 
-    library.setDescription(GrLocale.fr_FR,
+    mod.setDescription(GrLocale.fr_FR,
         "Récupère la source correspondant au nom donné dans la scène");
-    library.setParameters(["name"]);
-    library.addFunction(&_findByName!ParticleSource, "findParticleSourceByName",
+    mod.setParameters(["name"]);
+    mod.addFunction(&_findByName!ParticleSource, "findParticleSourceByName",
         [sceneType, grString], [grOptional(particleSourceType)]);
 
-    library.setDescription(GrLocale.fr_FR,
+    mod.setDescription(GrLocale.fr_FR,
         "Récupère les sources possédants le tag indiqué dans la scène");
-    library.setParameters(["tags"]);
-    library.addFunction(&_findByTag!ParticleSource, "findParticleSourcesByTag",
+    mod.setParameters(["tags"]);
+    mod.addFunction(&_findByTag!ParticleSource, "findParticleSourcesByTag",
         [sceneType, grList(grString)], [grList(particleSourceType)]);
 
-    library.setDescription(GrLocale.fr_FR,
+    mod.setDescription(GrLocale.fr_FR,
         "Récupère l’acteur correspondant au nom donné dans la scène");
-    library.setParameters(["name"]);
-    library.addFunction(&_findByName!Actor, "findActorByName", [
-            sceneType, grString
-        ], [grOptional(actorType)]);
+    mod.setParameters(["name"]);
+    mod.addFunction(&_findByName!Actor, "findActorByName", [sceneType,
+            grString], [grOptional(actorType)]);
 
-    library.setDescription(GrLocale.fr_FR,
+    mod.setDescription(GrLocale.fr_FR,
         "Récupère les acteurs possédants le tag indiqué dans la scène");
-    library.setParameters(["tags"]);
-    library.addFunction(&_findByTag!Actor, "findActorsByTag", [
+    mod.setParameters(["tags"]);
+    mod.addFunction(&_findByTag!Actor, "findActorsByTag", [
             sceneType, grList(grString)
         ], [grList(actorType)]);
 
-    library.setDescription(GrLocale.fr_FR,
+    mod.setDescription(GrLocale.fr_FR,
         "Récupère le solide correspondant au nom donné dans la scène");
-    library.setParameters(["name"]);
-    library.addFunction(&_findByName!Solid, "findSolidByName", [
-            sceneType, grString
-        ], [grOptional(solidType)]);
+    mod.setParameters(["name"]);
+    mod.addFunction(&_findByName!Solid, "findSolidByName", [sceneType,
+            grString], [grOptional(solidType)]);
 
-    library.setDescription(GrLocale.fr_FR,
+    mod.setDescription(GrLocale.fr_FR,
         "Récupère les solides possédants le tag indiqué dans la scène");
-    library.setParameters(["tags"]);
-    library.addFunction(&_findByTag!Solid, "findSolidByTag", [
+    mod.setParameters(["tags"]);
+    mod.addFunction(&_findByTag!Solid, "findSolidByTag", [
             sceneType, grList(grString)
         ], [grList(solidType)]);
 
-    library.setDescription(GrLocale.fr_FR, "Récupère les tags de la scène");
-    library.setParameters(["scene"]);
-    library.addFunction(&_getTags, "getTags", [sceneType], [grList(grString)]);
+    mod.setDescription(GrLocale.fr_FR, "Récupère les tags de la scène");
+    mod.setParameters(["scene"]);
+    mod.addFunction(&_getTags, "getTags", [sceneType], [grList(grString)]);
 
-    library.setDescription(GrLocale.fr_FR, "Ajoute un tag à la scène");
-    library.setParameters(["scene", "tag"]);
-    library.addFunction(&_addTag, "addTag", [sceneType, grString]);
+    mod.setDescription(GrLocale.fr_FR, "Ajoute un tag à la scène");
+    mod.setParameters(["scene", "tag"]);
+    mod.addFunction(&_addTag, "addTag", [sceneType, grString]);
 
-    library.setDescription(GrLocale.fr_FR, "Vérifie si la scène possède le tag");
-    library.setParameters(["scene", "tag"]);
-    library.addFunction(&_hasTag, "hasTag", [sceneType, grString], [grBool]);
+    mod.setDescription(GrLocale.fr_FR, "Vérifie si la scène possède le tag");
+    mod.setParameters(["scene", "tag"]);
+    mod.addFunction(&_hasTag, "hasTag", [sceneType, grString], [grBool]);
 
-    library.setDescription(GrLocale.fr_FR, "Ajoute une entité à la scène");
-    library.setParameters(["scene", "entity"]);
-    library.addFunction(&_addEntity, "addEntity", [sceneType, entityType]);
+    mod.setDescription(GrLocale.fr_FR, "Ajoute une entité à la scène");
+    mod.setParameters(["scene", "entity"]);
+    mod.addFunction(&_addEntity, "addEntity", [sceneType, entityType]);
 
-    library.setDescription(GrLocale.fr_FR, "Ajoute une source de particules à la scène");
-    library.setParameters(["scene", "source"]);
-    library.addFunction(&_addParticleSource, "addParticleSource", [
+    mod.setDescription(GrLocale.fr_FR, "Ajoute une source de particules à la scène");
+    mod.setParameters(["scene", "source"]);
+    mod.addFunction(&_addParticleSource, "addParticleSource", [
             sceneType, particleSourceType
         ]);
 
-    library.setDescription(GrLocale.fr_FR, "Ajoute un solide à la scène");
-    library.setParameters(["scene", "solid"]);
-    library.addFunction(&_addSolid, "addSolid", [sceneType, solidType]);
+    mod.setDescription(GrLocale.fr_FR, "Ajoute un solide à la scène");
+    mod.setParameters(["scene", "solid"]);
+    mod.addFunction(&_addSolid, "addSolid", [sceneType, solidType]);
 
-    library.setDescription(GrLocale.fr_FR, "Ajoute un acteur à la scène");
-    library.setParameters(["scene", "actor"]);
-    library.addFunction(&_addActor, "addActor", [sceneType, actorType]);
+    mod.setDescription(GrLocale.fr_FR, "Ajoute un acteur à la scène");
+    mod.setParameters(["scene", "actor"]);
+    mod.addFunction(&_addActor, "addActor", [sceneType, actorType]);
 
-    library.setDescription(GrLocale.fr_FR, "Ajoute un élément d’interface à la scène");
-    library.setParameters(["scene", "ui"]);
-    library.addFunction(&_addUI, "addUI", [sceneType, uiType]);
+    mod.setDescription(GrLocale.fr_FR, "Ajoute un élément d’interface à la scène");
+    mod.setParameters(["scene", "ui"]);
+    mod.addFunction(&_addUI, "addUI", [sceneType, uiType]);
 
-    library.setDescription(GrLocale.fr_FR, "Supprime les élements d’interface de la scène");
-    library.setParameters(["scene"]);
-    library.addFunction(&_clearUI, "clearUI", [sceneType]);
+    mod.setDescription(GrLocale.fr_FR, "Supprime les élements d’interface de la scène");
+    mod.setParameters(["scene"]);
+    mod.addFunction(&_clearUI, "clearUI", [sceneType]);
 
-    library.setDescription(GrLocale.fr_FR, "Supprime la scène");
-    library.setParameters(["scene"]);
-    library.addFunction(&_remove, "remove", [sceneType]);
+    mod.setDescription(GrLocale.fr_FR, "Supprime la scène");
+    mod.setParameters(["scene"]);
+    mod.addFunction(&_remove, "remove", [sceneType]);
 }
 
 private void _ctor(GrCall call) {

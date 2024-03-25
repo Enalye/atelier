@@ -11,42 +11,40 @@ import atelier.common;
 import atelier.render;
 import atelier.script.util;
 
-package void loadLibRender_rectangle(GrLibDefinition library) {
-    library.setModule("render.rectangle");
-    library.setModuleInfo(GrLocale.fr_FR, "Rectangle");
-    library.setModuleExample(GrLocale.fr_FR, "var rect = @Rectangle.fill(200f, 50f);
+package void loadLibRender_rectangle(GrModule mod) {
+    mod.setModule("render.rectangle");
+    mod.setModuleInfo(GrLocale.fr_FR, "Rectangle");
+    mod.setModuleExample(GrLocale.fr_FR, "var rect = @Rectangle.fill(200f, 50f);
 rect.anchor = @Vec2f.zero;
 rect.position = @Vec2f.zero;
 rect.color = @Color.red;
 entity.addImage(rect);");
 
-    GrType rectangleType = library.addNative("Rectangle", [], "Image");
+    GrType rectangleType = mod.addNative("Rectangle", [], "Image");
 
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
 
-    library.setDescription(GrLocale.fr_FR, "Construit un rectangle plein");
-    library.setParameters(["x", "y"]);
-    library.addStatic(&_fill, rectangleType, "fill", [grFloat, grFloat], [
+    mod.setDescription(GrLocale.fr_FR, "Construit un rectangle plein");
+    mod.setParameters(["x", "y"]);
+    mod.addStatic(&_fill, rectangleType, "fill", [grFloat, grFloat], [
             rectangleType
         ]);
 
-    library.setDescription(GrLocale.fr_FR, "Construit le contour d’un rectangle");
-    library.setParameters(["x", "y", "thickness"]);
-    library.addStatic(&_outline, rectangleType, "outline", [
+    mod.setDescription(GrLocale.fr_FR, "Construit le contour d’un rectangle");
+    mod.setParameters(["x", "y", "thickness"]);
+    mod.addStatic(&_outline, rectangleType, "outline", [
             grFloat, grFloat, grFloat
         ], [rectangleType]);
 
-    library.setDescription(GrLocale.fr_FR, "Taille du rectangle");
-    library.addProperty(&_size!"get", &_size!"set", "size", rectangleType, vec2fType);
+    mod.setDescription(GrLocale.fr_FR, "Taille du rectangle");
+    mod.addProperty(&_size!"get", &_size!"set", "size", rectangleType, vec2fType);
 
-    library.setDescription(GrLocale.fr_FR,
+    mod.setDescription(GrLocale.fr_FR,
         "Si `true`, le rectangle est plein, sinon le rectangle est une bordure");
-    library.addProperty(&_filled!"get", &_filled!"set", "filled", rectangleType, grBool);
+    mod.addProperty(&_filled!"get", &_filled!"set", "filled", rectangleType, grBool);
 
-    library.setDescription(GrLocale.fr_FR,
-        "(Seulement si `filled` == false) Épaisseur de la bordure");
-    library.addProperty(&_thickness!"get", &_thickness!"set", "thickness",
-        rectangleType, grFloat);
+    mod.setDescription(GrLocale.fr_FR, "(Seulement si `filled` == false) Épaisseur de la bordure");
+    mod.addProperty(&_thickness!"get", &_thickness!"set", "thickness", rectangleType, grFloat);
 }
 
 private void _fill(GrCall call) {

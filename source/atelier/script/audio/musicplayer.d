@@ -12,20 +12,20 @@ import atelier.common;
 import atelier.core;
 import atelier.script.util;
 
-package void loadLibAudio_musicPlayer(GrLibDefinition library) {
-    library.setModule("audio.musicplayer");
-    library.setModuleInfo(GrLocale.fr_FR, "Instance d’une musique.
+package void loadLibAudio_musicPlayer(GrModule mod) {
+    mod.setModule("audio.musicplayer");
+    mod.setModuleInfo(GrLocale.fr_FR, "Instance d’une musique.
 Implicitement créé quand `Music` est passé à une fonction de type `play`.
 Créer manuellement cet objet permet de lui appliquer des effets avant de lancer la musique.\n
 **Note**: MusicPlayer ne peut être lancé qu’une seule fois, après il devient invalide.");
 
-    GrType musicPlayerType = library.addNative("MusicPlayer", [], "AudioPlayer");
+    GrType musicPlayerType = mod.addNative("MusicPlayer", [], "AudioPlayer");
     GrType musicType = grGetNativeType("Music");
 
-    library.setParameters(["music"]);
-    library.addConstructor(&_ctor, musicPlayerType, [musicType]);
+    mod.setParameters(["music"]);
+    mod.addConstructor(&_ctor, musicPlayerType, [musicType]);
 
-    //library.addProperty(&_volume!"get", &_volume!"set", "volume", musicType, grFloat);
+    //mod.addProperty(&_volume!"get", &_volume!"set", "volume", musicType, grFloat);
 }
 
 private void _ctor(GrCall call) {

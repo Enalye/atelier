@@ -13,18 +13,18 @@ import atelier.input;
 import atelier.render;
 import atelier.script.util;
 
-void loadLibRender_writableTexture(GrLibDefinition library) {
-    library.setModule("render.writabletexture");
-    library.setModuleInfo(GrLocale.fr_FR, "Texture générée procéduralement");
+void loadLibRender_writableTexture(GrModule mod) {
+    mod.setModule("render.writabletexture");
+    mod.setModuleInfo(GrLocale.fr_FR, "Texture générée procéduralement");
 
-    GrType wtextureType = library.addNative("WritableTexture", [], "ImageData");
+    GrType wtextureType = mod.addNative("WritableTexture", [], "ImageData");
     GrType vec4uType = grGetNativeType("Vec4", [grUInt]);
 
-    library.setParameters(["width", "height"]);
-    library.addConstructor(&_ctor, wtextureType, [grUInt, grUInt]);
+    mod.setParameters(["width", "height"]);
+    mod.addConstructor(&_ctor, wtextureType, [grUInt, grUInt]);
 
-    library.setDescription(GrLocale.fr_FR, "Modifie la texture");
-    library.addFunction(&_update, "update", [
+    mod.setDescription(GrLocale.fr_FR, "Modifie la texture");
+    mod.addFunction(&_update, "update", [
             wtextureType, vec4uType, grList(grUInt)
         ]);
 }

@@ -9,13 +9,12 @@ import ciel;
 import studio.ui.propertyeditor;
 import studio.ui.tabbar;
 import studio.ui.resourcelist;
+import studio.ui.newproject;
 
 void initApp() {
     MenuBar bar = new MenuBar;
     bar.add("Projet", "Nouveau Projet").addEventListener("click", {
-        import std.stdio;
-
-        writeln("nouvprojet");
+        Ciel.pushModalUI(new NewProject);
     });
     bar.addSeparator("Projet");
     bar.add("Projet", "Lancer");
@@ -59,6 +58,12 @@ final class Editor : UIElement {
         {
             _propertyEditor = new PropertyEditor;
             addUI(_propertyEditor);
+        }
+
+        {
+            auto bc = new FileBrowser();
+            bc.setAlign(UIAlignX.center, UIAlignY.center);
+            addUI(bc);
         }
 
         addEventListener("windowSize", {

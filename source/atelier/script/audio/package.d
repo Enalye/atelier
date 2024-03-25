@@ -18,7 +18,7 @@ import atelier.script.audio.player;
 import atelier.script.audio.sound;
 import atelier.script.audio.soundplayer;
 
-package(atelier.script) GrLibLoader[] getLibLoaders_audio() {
+package(atelier.script) GrModuleLoader[] getLibLoaders_audio() {
     return [
         &loadLibAudio_bus,
         &loadLibAudio_effect,

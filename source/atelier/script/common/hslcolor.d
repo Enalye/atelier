@@ -11,16 +11,16 @@ import atelier.common;
 
 import atelier.script.util;
 
-package void loadLibCommon_hslcolor(GrLibDefinition library) {
-    library.setModule("common.hslcolor");
-    library.setModuleInfo(GrLocale.fr_FR, "Représentation d’une couleur dans l’espace TSL");
+package void loadLibCommon_hslcolor(GrModule mod) {
+    mod.setModule("common.hslcolor");
+    mod.setModuleInfo(GrLocale.fr_FR, "Représentation d’une couleur dans l’espace TSL");
 
-    GrType hslColorType = library.addNative("HSLColor");
+    GrType hslColorType = mod.addNative("HSLColor");
 
-    library.addConstructor(&_ctor, hslColorType, [grFloat, grFloat, grFloat]);
+    mod.addConstructor(&_ctor, hslColorType, [grFloat, grFloat, grFloat]);
 
     static foreach (field; ["h", "s", "l"]) {
-        library.addProperty(&_property!(field, "get"), &_property!(field,
+        mod.addProperty(&_property!(field, "get"), &_property!(field,
                 "set"), field, hslColorType, grFloat);
     }
 }

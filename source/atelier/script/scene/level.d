@@ -14,79 +14,79 @@ import atelier.scene;
 import atelier.ui;
 import atelier.script.util;
 
-package void loadLibScene_level(GrLibDefinition library) {
-    library.setModule("scene.level");
-    library.setModuleInfo(GrLocale.fr_FR, "Niveau actuel");
+package void loadLibScene_level(GrModule mod) {
+    mod.setModule("scene.level");
+    mod.setModuleInfo(GrLocale.fr_FR, "Niveau actuel");
 
-    GrType levelType = library.addNative("Level");
+    GrType levelType = mod.addNative("Level");
     GrType sceneType = grGetNativeType("Scene");
     GrType entityType = grGetNativeType("Entity");
     GrType particleSourceType = grGetNativeType("ParticleSource");
     GrType actorType = grGetNativeType("Actor");
     GrType solidType = grGetNativeType("Solid");
 
-    library.setDescription(GrLocale.fr_FR, "Charge un niveau");
-    library.setParameters(["rid"]);
-    library.addStatic(&_load, levelType, "load", [grString]);
+    mod.setDescription(GrLocale.fr_FR, "Charge un niveau");
+    mod.setParameters(["rid"]);
+    mod.addStatic(&_load, levelType, "load", [grString]);
 
-    library.setDescription(GrLocale.fr_FR, "Ajoute une scène au niveau");
-    library.setParameters(["scene"]);
-    library.addStatic(&_addScene, levelType, "addScene", [sceneType]);
+    mod.setDescription(GrLocale.fr_FR, "Ajoute une scène au niveau");
+    mod.setParameters(["scene"]);
+    mod.addStatic(&_addScene, levelType, "addScene", [sceneType]);
 
-    library.setDescription(GrLocale.fr_FR, "Récupère la scène correspondant au nom donné");
-    library.setParameters(["name"]);
-    library.addStatic(&_findSceneByName, levelType, "findSceneByName",
-        [grString], [grOptional(sceneType)]);
+    mod.setDescription(GrLocale.fr_FR, "Récupère la scène correspondant au nom donné");
+    mod.setParameters(["name"]);
+    mod.addStatic(&_findSceneByName, levelType, "findSceneByName", [grString],
+        [grOptional(sceneType)]);
 
-    library.setDescription(GrLocale.fr_FR, "Récupère les scènes possédants le tag indiqué");
-    library.setParameters(["tags"]);
-    library.addStatic(&_findScenesByTag, levelType, "findScenesByTag",
+    mod.setDescription(GrLocale.fr_FR, "Récupère les scènes possédants le tag indiqué");
+    mod.setParameters(["tags"]);
+    mod.addStatic(&_findScenesByTag, levelType, "findScenesByTag",
         [grList(grString)], [grList(sceneType)]);
 
-    library.setDescription(GrLocale.fr_FR,
+    mod.setDescription(GrLocale.fr_FR,
         "Récupère l’entité correspondant au nom donné parmi toutes les scènes");
-    library.setParameters(["name"]);
-    library.addStatic(&_findByName!Entity, levelType, "findEntityByName",
+    mod.setParameters(["name"]);
+    mod.addStatic(&_findByName!Entity, levelType, "findEntityByName",
         [grString], [grOptional(entityType)]);
 
-    library.setDescription(GrLocale.fr_FR, "Récupère les entités possédants le tag indiqué");
-    library.setParameters(["tags"]);
-    library.addStatic(&_findByTag!Entity, levelType, "findEntitiesByTag",
+    mod.setDescription(GrLocale.fr_FR, "Récupère les entités possédants le tag indiqué");
+    mod.setParameters(["tags"]);
+    mod.addStatic(&_findByTag!Entity, levelType, "findEntitiesByTag",
         [grList(grString)], [grList(entityType)]);
 
-    library.setDescription(GrLocale.fr_FR,
+    mod.setDescription(GrLocale.fr_FR,
         "Récupère la source correspondant au nom donné parmi toutes les scènes");
-    library.setParameters(["name"]);
-    library.addStatic(&_findByName!ParticleSource, levelType,
+    mod.setParameters(["name"]);
+    mod.addStatic(&_findByName!ParticleSource, levelType,
         "findParticleSourceByName", [grString], [grOptional(particleSourceType)]);
 
-    library.setDescription(GrLocale.fr_FR, "Récupère les sources possédants le tag indiqué");
-    library.setParameters(["tags"]);
-    library.addStatic(&_findByTag!ParticleSource, levelType,
+    mod.setDescription(GrLocale.fr_FR, "Récupère les sources possédants le tag indiqué");
+    mod.setParameters(["tags"]);
+    mod.addStatic(&_findByTag!ParticleSource, levelType,
         "findParticleSourcesByTag", [grList(grString)], [
             grList(particleSourceType)
         ]);
 
-    library.setDescription(GrLocale.fr_FR,
+    mod.setDescription(GrLocale.fr_FR,
         "Récupère l’acteur correspondant au nom donné parmi toutes les scènes");
-    library.setParameters(["name"]);
-    library.addStatic(&_findByName!Actor, levelType, "findActorByName",
+    mod.setParameters(["name"]);
+    mod.addStatic(&_findByName!Actor, levelType, "findActorByName",
         [grString], [grOptional(actorType)]);
 
-    library.setDescription(GrLocale.fr_FR, "Récupère les acteurs possédants le tag indiqué");
-    library.setParameters(["tags"]);
-    library.addStatic(&_findByTag!Actor, levelType, "findActorsByTag",
+    mod.setDescription(GrLocale.fr_FR, "Récupère les acteurs possédants le tag indiqué");
+    mod.setParameters(["tags"]);
+    mod.addStatic(&_findByTag!Actor, levelType, "findActorsByTag",
         [grList(grString)], [grList(actorType)]);
 
-    library.setDescription(GrLocale.fr_FR,
+    mod.setDescription(GrLocale.fr_FR,
         "Récupère le solide correspondant au nom donné parmi toutes les scènes");
-    library.setParameters(["name"]);
-    library.addStatic(&_findByName!Solid, levelType, "findSolidByName",
+    mod.setParameters(["name"]);
+    mod.addStatic(&_findByName!Solid, levelType, "findSolidByName",
         [grString], [grOptional(solidType)]);
 
-    library.setDescription(GrLocale.fr_FR, "Récupère les solides possédants le tag indiqué");
-    library.setParameters(["tags"]);
-    library.addStatic(&_findByTag!Solid, levelType, "findSolidsByTag",
+    mod.setDescription(GrLocale.fr_FR, "Récupère les solides possédants le tag indiqué");
+    mod.setParameters(["tags"]);
+    mod.addStatic(&_findByTag!Solid, levelType, "findSolidsByTag",
         [grList(grString)], [grList(solidType)]);
 }
 

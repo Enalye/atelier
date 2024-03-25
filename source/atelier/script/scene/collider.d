@@ -12,46 +12,45 @@ import atelier.core;
 import atelier.scene;
 import atelier.script.util;
 
-package void loadLibScene_collider(GrLibDefinition library) {
-    library.setModule("scene.collider");
-    library.setModuleInfo(GrLocale.fr_FR, "Objet physique d’une scène");
+package void loadLibScene_collider(GrModule mod) {
+    mod.setModule("scene.collider");
+    mod.setModuleInfo(GrLocale.fr_FR, "Objet physique d’une scène");
 
-    GrType colliderType = library.addNative("Collider");
+    GrType colliderType = mod.addNative("Collider");
     GrType solidType = grGetNativeType("Solid");
     GrType vec2iType = grGetNativeType("Vec2", [grInt]);
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
     GrType entityType = grGetNativeType("Entity");
 
-    GrType collisionType = library.addNative("Collision");
+    GrType collisionType = mod.addNative("Collision");
 
-    library.addProperty(&_solid_collision, null, "solid", collisionType, solidType);
-    library.addProperty(&_direction_collision, null, "direction", collisionType, vec2iType);
+    mod.addProperty(&_solid_collision, null, "solid", collisionType, solidType);
+    mod.addProperty(&_direction_collision, null, "direction", collisionType, vec2iType);
 
-    library.addProperty(&_name!"get", &_name!"set", "name", colliderType, grString);
-    library.addProperty(&_position!"get", &_position!"set", "position",
-        colliderType, vec2iType);
-    library.addProperty(&_hitbox!"get", &_hitbox!"set", "hitbox", colliderType, vec2iType);
-    library.addProperty(&_isAlive, null, "isAlive", colliderType, grBool);
+    mod.addProperty(&_name!"get", &_name!"set", "name", colliderType, grString);
+    mod.addProperty(&_position!"get", &_position!"set", "position", colliderType, vec2iType);
+    mod.addProperty(&_hitbox!"get", &_hitbox!"set", "hitbox", colliderType, vec2iType);
+    mod.addProperty(&_isAlive, null, "isAlive", colliderType, grBool);
 
-    library.setDescription(GrLocale.fr_FR, "Entité lié à l’objet");
-    library.addProperty(&_entity!"get", &_entity!"set", "entity",
-        colliderType, grOptional(entityType));
+    mod.setDescription(GrLocale.fr_FR, "Entité lié à l’objet");
+    mod.addProperty(&_entity!"get", &_entity!"set", "entity", colliderType,
+        grOptional(entityType));
 
-    library.setDescription(GrLocale.fr_FR, "Récupère les tags de l’objet");
-    library.setParameters(["collider"]);
-    library.addFunction(&_getTags, "getTags", [colliderType]);
+    mod.setDescription(GrLocale.fr_FR, "Récupère les tags de l’objet");
+    mod.setParameters(["collider"]);
+    mod.addFunction(&_getTags, "getTags", [colliderType]);
 
-    library.setDescription(GrLocale.fr_FR, "Ajoute un tag à l’objet");
-    library.setParameters(["collider", "tag"]);
-    library.addFunction(&_addTag, "addTag", [colliderType, grString]);
+    mod.setDescription(GrLocale.fr_FR, "Ajoute un tag à l’objet");
+    mod.setParameters(["collider", "tag"]);
+    mod.addFunction(&_addTag, "addTag", [colliderType, grString]);
 
-    library.setDescription(GrLocale.fr_FR, "Vérifie si l’objet possède le tag");
-    library.setParameters(["collider", "tag"]);
-    library.addFunction(&_hasTag, "hasTag", [colliderType, grString], [grBool]);
+    mod.setDescription(GrLocale.fr_FR, "Vérifie si l’objet possède le tag");
+    mod.setParameters(["collider", "tag"]);
+    mod.addFunction(&_hasTag, "hasTag", [colliderType, grString], [grBool]);
 
-    library.setDescription(GrLocale.fr_FR, "Supprime l’objet");
-    library.setParameters(["collider"]);
-    library.addFunction(&_remove, "remove", [colliderType]);
+    mod.setDescription(GrLocale.fr_FR, "Supprime l’objet");
+    mod.setParameters(["collider"]);
+    mod.addFunction(&_remove, "remove", [colliderType]);
 }
 
 private void _solid_collision(GrCall call) {

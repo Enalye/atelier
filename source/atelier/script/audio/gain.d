@@ -12,15 +12,15 @@ import atelier.common;
 import atelier.core;
 import atelier.script.util;
 
-package void loadLibAudio_gain(GrLibDefinition library) {
-    library.setModule("audio.gain");
-    library.setModuleInfo(GrLocale.fr_FR, "Amplifie l’audio");
+package void loadLibAudio_gain(GrModule mod) {
+    mod.setModule("audio.gain");
+    mod.setModuleInfo(GrLocale.fr_FR, "Amplifie l’audio");
 
-    GrType gainType = library.addNative("AudioGain", [], "AudioEffect");
+    GrType gainType = mod.addNative("AudioGain", [], "AudioEffect");
 
-    library.addConstructor(&_ctor, gainType);
+    mod.addConstructor(&_ctor, gainType);
 
-    library.addProperty(&_volume!"get", &_volume!"set", "volume", gainType, grFloat);
+    mod.addProperty(&_volume!"get", &_volume!"set", "volume", gainType, grFloat);
 }
 
 private void _ctor(GrCall call) {

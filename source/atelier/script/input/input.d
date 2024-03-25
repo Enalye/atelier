@@ -14,9 +14,9 @@ import atelier.common;
 import atelier.core;
 import atelier.script.util;
 
-void loadLibInput_input(GrLibDefinition library) {
-    library.setModule("input.input");
-    library.setModuleInfo(GrLocale.fr_FR, "Entrées utilisateur");
+void loadLibInput_input(GrModule mod) {
+    mod.setModule("input.input");
+    mod.setModuleInfo(GrLocale.fr_FR, "Entrées utilisateur");
 
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
 
@@ -24,102 +24,104 @@ void loadLibInput_input(GrLibDefinition library) {
     GrType mouseButton = grGetEnumType("MouseButton");
     GrType controllerButton = grGetEnumType("ControllerButton");
 
-    GrType inputType = library.addNative("Input");
+    GrType inputType = mod.addNative("Input");
 
     GrType inputEvent = grGetNativeType("InputEvent");
 
-    library.setDescription(GrLocale.fr_FR, "La touche est-elle appuyée sur cette frame ?");
-    library.setParameters(["input"]);
-    library.addStatic(&_isDown!(InputEvent.KeyButton.Button), inputType,
+    mod.setDescription(GrLocale.fr_FR, "La touche est-elle appuyée sur cette frame ?");
+    mod.setParameters(["input"]);
+    mod.addStatic(&_isDown!(InputEvent.KeyButton.Button), inputType,
         "isDown", [keyButton], [grBool]);
-    library.addStatic(&_isDown!(InputEvent.MouseButton.Button), inputType,
+    mod.addStatic(&_isDown!(InputEvent.MouseButton.Button), inputType,
         "isDown", [mouseButton], [grBool]);
-    library.addStatic(&_isDown!(InputEvent.ControllerButton.Button),
-        inputType, "isDown", [controllerButton], [grBool]);
+    mod.addStatic(&_isDown!(InputEvent.ControllerButton.Button), inputType,
+        "isDown", [controllerButton], [grBool]);
 
-    library.setDescription(GrLocale.fr_FR, "La touche est-elle relâchée sur cette frame ?");
-    library.setParameters(["input"]);
-    library.addStatic(&_isUp!(InputEvent.KeyButton.Button), inputType,
-        "isUp", [keyButton], [grBool]);
-    library.addStatic(&_isUp!(InputEvent.MouseButton.Button), inputType,
-        "isUp", [mouseButton], [grBool]);
-    library.addStatic(&_isUp!(InputEvent.ControllerButton.Button), inputType,
+    mod.setDescription(GrLocale.fr_FR, "La touche est-elle relâchée sur cette frame ?");
+    mod.setParameters(["input"]);
+    mod.addStatic(&_isUp!(InputEvent.KeyButton.Button), inputType, "isUp", [
+            keyButton
+        ], [grBool]);
+    mod.addStatic(&_isUp!(InputEvent.MouseButton.Button), inputType, "isUp",
+        [mouseButton], [grBool]);
+    mod.addStatic(&_isUp!(InputEvent.ControllerButton.Button), inputType,
         "isUp", [controllerButton], [grBool]);
 
-    library.setDescription(GrLocale.fr_FR, "La touche est-elle enfoncée ?");
-    library.setParameters(["input"]);
-    library.addStatic(&_isHeld!(InputEvent.KeyButton.Button), inputType,
+    mod.setDescription(GrLocale.fr_FR, "La touche est-elle enfoncée ?");
+    mod.setParameters(["input"]);
+    mod.addStatic(&_isHeld!(InputEvent.KeyButton.Button), inputType,
         "isHeld", [keyButton], [grBool]);
-    library.addStatic(&_isHeld!(InputEvent.MouseButton.Button), inputType,
+    mod.addStatic(&_isHeld!(InputEvent.MouseButton.Button), inputType,
         "isHeld", [mouseButton], [grBool]);
-    library.addStatic(&_isHeld!(InputEvent.ControllerButton.Button),
-        inputType, "isHeld", [controllerButton], [grBool]);
+    mod.addStatic(&_isHeld!(InputEvent.ControllerButton.Button), inputType,
+        "isHeld", [controllerButton], [grBool]);
 
-    library.setDescription(GrLocale.fr_FR, "La touche est-elle pressée ?");
-    library.setParameters(["input"]);
-    library.addStatic(&_isPressed!(InputEvent.KeyButton.Button), inputType,
+    mod.setDescription(GrLocale.fr_FR, "La touche est-elle pressée ?");
+    mod.setParameters(["input"]);
+    mod.addStatic(&_isPressed!(InputEvent.KeyButton.Button), inputType,
         "isPressed", [keyButton], [grBool]);
-    library.addStatic(&_isPressed!(InputEvent.MouseButton.Button), inputType,
+    mod.addStatic(&_isPressed!(InputEvent.MouseButton.Button), inputType,
         "isPressed", [mouseButton], [grBool]);
-    library.addStatic(&_isPressed!(InputEvent.ControllerButton.Button),
+    mod.addStatic(&_isPressed!(InputEvent.ControllerButton.Button),
         inputType, "isPressed", [controllerButton], [grBool]);
 
     // Action
 
-    library.setDescription(GrLocale.fr_FR, "Défini une nouvelle action");
-    library.setParameters(["action"]);
-    library.addStatic(&_addAction, inputType, "addAction", [grString]);
+    mod.setDescription(GrLocale.fr_FR, "Défini une nouvelle action");
+    mod.setParameters(["action"]);
+    mod.addStatic(&_addAction, inputType, "addAction", [grString]);
 
-    library.setDescription(GrLocale.fr_FR, "Supprime une action existante");
-    library.setParameters(["action"]);
-    library.addStatic(&_removeAction, inputType, "removeAction", [grString]);
+    mod.setDescription(GrLocale.fr_FR, "Supprime une action existante");
+    mod.setParameters(["action"]);
+    mod.addStatic(&_removeAction, inputType, "removeAction", [grString]);
 
-    library.setDescription(GrLocale.fr_FR, "Vérifie si l’action existe");
-    library.setParameters(["action"]);
-    library.addStatic(&_hasAction, inputType, "hasAction", [grString], [grBool]);
+    mod.setDescription(GrLocale.fr_FR, "Vérifie si l’action existe");
+    mod.setParameters(["action"]);
+    mod.addStatic(&_hasAction, inputType, "hasAction", [grString], [grBool]);
 
-    library.setDescription(GrLocale.fr_FR, "L’événement correspond-il a l’action ?");
-    library.setParameters(["action", "event"]);
-    library.addStatic(&_isAction, inputType, "isAction", [grString, inputEvent], [
+    mod.setDescription(GrLocale.fr_FR, "L’événement correspond-il a l’action ?");
+    mod.setParameters(["action", "event"]);
+    mod.addStatic(&_isAction, inputType, "isAction", [grString, inputEvent], [
             grBool
         ]);
 
-    library.setDescription(GrLocale.fr_FR, "Associe un événement à une action");
-    library.setParameters(["action", "event"]);
-    library.addStatic(&_addActionEvent, inputType, "addActionEvent", [
+    mod.setDescription(GrLocale.fr_FR, "Associe un événement à une action");
+    mod.setParameters(["action", "event"]);
+    mod.addStatic(&_addActionEvent, inputType, "addActionEvent", [
             grString, inputEvent
         ]);
 
-    library.setDescription(GrLocale.fr_FR, "Supprime les événements associés à une action");
-    library.setParameters(["action"]);
-    library.addStatic(&_removeActionEvents, inputType, "removeActionEvents", [
+    mod.setDescription(GrLocale.fr_FR, "Supprime les événements associés à une action");
+    mod.setParameters(["action"]);
+    mod.addStatic(&_removeActionEvents, inputType, "removeActionEvents", [
             grString
         ]);
 
-    library.setDescription(GrLocale.fr_FR, "L’action a-t’elle été déclenchée ?");
-    library.setParameters(["action"]);
-    library.addStatic(&_isActionActivated, inputType, "isActionActivated", [
+    mod.setDescription(GrLocale.fr_FR, "L’action a-t’elle été déclenchée ?");
+    mod.setParameters(["action"]);
+    mod.addStatic(&_isActionActivated, inputType, "isActionActivated", [
             grString
         ], [grBool]);
 
-    library.setDescription(GrLocale.fr_FR, "Récupère l’intensité de l’action");
-    library.setParameters(["action"]);
-    library.addStatic(&_getActionStrength, inputType, "getActionStrength", [
+    mod.setDescription(GrLocale.fr_FR, "Récupère l’intensité de l’action");
+    mod.setParameters(["action"]);
+    mod.addStatic(&_getActionStrength, inputType, "getActionStrength", [
             grString
         ], [grFloat]);
 
-    library.setDescription(GrLocale.fr_FR,
+    mod.setDescription(GrLocale.fr_FR,
         "Récupère l’intensité sous forme d’un axe défini par 2 actions (l’un positif, l’autre négatif)");
-    library.setParameters(["negative", "positive"]);
-    library.addStatic(&_getActionAxis, inputType, "getActionAxis", [
+    mod.setParameters(["negative", "positive"]);
+    mod.addStatic(&_getActionAxis, inputType, "getActionAxis", [
             grString, grString
         ], [grFloat]);
 
-    library.setDescription(GrLocale.fr_FR,
+    mod.setDescription(GrLocale.fr_FR,
         "Récupère l’intensité sous forme d’un vecteur défini par 4 actions");
-    library.setParameters(["left", "right", "up", "down"]);
-    library.addStatic(&_getActionVector, inputType, "getActionVector",
-        [grString, grString, grString, grString], [vec2fType]);
+    mod.setParameters(["left", "right", "up", "down"]);
+    mod.addStatic(&_getActionVector, inputType, "getActionVector", [
+            grString, grString, grString, grString
+        ], [vec2fType]);
 }
 
 private void _isDown(T)(GrCall call) {

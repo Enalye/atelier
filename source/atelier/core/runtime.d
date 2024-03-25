@@ -270,7 +270,7 @@ final class Atelier {
                 grGetNativeType("InputEvent")
             ]);
 
-        grSetOutputFunction(&_print);
+        _engine.setPrintOutput(&_print);
 
         double loadDuration = (cast(double)(Clock.currStdTime() - startTime) / 10_000_000.0);
         log("  > Effectué en " ~ to!string(loadDuration) ~ "sec");

@@ -13,11 +13,11 @@ import atelier.input;
 import atelier.render;
 import atelier.script.util;
 
-void loadLibRender_tilemap(GrLibDefinition library) {
-    library.setModule("render.tilemap");
-    library.setModuleInfo(GrLocale.fr_FR, "Grille de tuiles alignées");
-    library.setModuleDescription(GrLocale.fr_FR, "");
-    library.setModuleExample(GrLocale.fr_FR, "var tileset = @Tileset(\"terrain\");
+void loadLibRender_tilemap(GrModule mod) {
+    mod.setModule("render.tilemap");
+    mod.setModuleInfo(GrLocale.fr_FR, "Grille de tuiles alignées");
+    mod.setModuleDescription(GrLocale.fr_FR, "");
+    mod.setModuleExample(GrLocale.fr_FR, "var tileset = @Tileset(\"terrain\");
 var tilemap = @Tilemap(tileset, 20, 20);
 
 // Tilemap peut également être définie en ressource
@@ -30,33 +30,29 @@ var map = @Entity;
 map.addImage(tilemap);
 scene.addEntity(map);");
 
-    GrType tilemapType = library.addNative("Tilemap", [], "Image");
+    GrType tilemapType = mod.addNative("Tilemap", [], "Image");
 
     GrType tilesetType = grGetNativeType("Tileset");
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
 
-    library.setDescription(GrLocale.fr_FR, "Crée une tilemap depuis un tileset");
-    library.setParameters(["tileset", "width", "height"]);
-    library.addConstructor(&_ctor_tileset, tilemapType, [
-            tilesetType, grInt, grInt
-        ]);
+    mod.setDescription(GrLocale.fr_FR, "Crée une tilemap depuis un tileset");
+    mod.setParameters(["tileset", "width", "height"]);
+    mod.addConstructor(&_ctor_tileset, tilemapType, [tilesetType, grInt, grInt]);
 
-    library.setDescription(GrLocale.fr_FR, "Charge la ressource");
-    library.setParameters(["name"]);
-    library.addConstructor(&_ctor_name, tilemapType, [grString]);
+    mod.setDescription(GrLocale.fr_FR, "Charge la ressource");
+    mod.setParameters(["name"]);
+    mod.addConstructor(&_ctor_name, tilemapType, [grString]);
 
-    library.setDescription(GrLocale.fr_FR, "Taille d’une tuile");
-    library.addProperty(&_size!"get", &_size!"set", "size", tilemapType, vec2fType);
+    mod.setDescription(GrLocale.fr_FR, "Taille d’une tuile");
+    mod.addProperty(&_size!"get", &_size!"set", "size", tilemapType, vec2fType);
 
-    library.setDescription(GrLocale.fr_FR, "Récupère la tuile à la position donnée");
-    library.setParameters(["x", "y"]);
-    library.addFunction(&_getTile, "getTile", [tilemapType, grInt, grInt], [
-            grInt
-        ]);
+    mod.setDescription(GrLocale.fr_FR, "Récupère la tuile à la position donnée");
+    mod.setParameters(["x", "y"]);
+    mod.addFunction(&_getTile, "getTile", [tilemapType, grInt, grInt], [grInt]);
 
-    library.setDescription(GrLocale.fr_FR, "Change la tuile à la position donnée");
-    library.setParameters(["x", "y", "tile"]);
-    library.addFunction(&_setTile, "setTile", [tilemapType, grInt, grInt, grInt]);
+    mod.setDescription(GrLocale.fr_FR, "Change la tuile à la position donnée");
+    mod.setParameters(["x", "y", "tile"]);
+    mod.addFunction(&_setTile, "setTile", [tilemapType, grInt, grInt, grInt]);
 }
 
 private void _ctor_tileset(GrCall call) {

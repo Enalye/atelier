@@ -58,7 +58,7 @@ export extern (C) void boot(string[] args) {
     GrBytecode bytecode = new GrBytecode();
     bytecode.deserialize(envStream.read!(ubyte[])());
 
-    GrLibrary[] libraries = [grLoadStdLibrary(), loadLibrary()];
+    GrLibrary[] libraries = [grGetStandardLibrary(), getEngineLibrary()];
 
     Atelier atelier = new Atelier(true, (GrLibrary[]) => bytecode, libraries,
         windowWidth, windowHeight, windowTitle);

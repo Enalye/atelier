@@ -66,7 +66,8 @@ void cliExport(Cli.Result cli) {
                 "le fichier source `" ~ sourceFile ~ "` référencé dans `" ~
                 Atelier_Project_File ~ "` n’existe pas");
 
-            string exportDir = buildNormalizedPath(dir, configNode.getNode("export", 1).get!string(0));
+            string exportDir = buildNormalizedPath(dir,
+                configNode.getNode("export", 1).get!string(0));
 
             if (!exists(exportDir))
                 mkdir(exportDir);
@@ -184,7 +185,7 @@ void cliExport(Cli.Result cli) {
                 std.file.copy(filePath, buildNormalizedPath(exportDir, fileName));
             }
 
-            GrLibrary[] libraries = [grLoadStdLibrary(), loadLibrary()];
+            GrLibrary[] libraries = [grGetStandardLibrary(), getEngineLibrary()];
 
             GrCompiler compiler = new GrCompiler(Atelier_Version_ID);
             foreach (library; libraries) {

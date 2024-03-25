@@ -12,37 +12,37 @@ import atelier.core;
 import atelier.scene;
 import atelier.script.util;
 
-package void loadLibScene_actor(GrLibDefinition library) {
-    library.setModule("scene.actor");
-    library.setModuleInfo(GrLocale.fr_FR, "Acteur physique d’une scène");
+package void loadLibScene_actor(GrModule mod) {
+    mod.setModule("scene.actor");
+    mod.setModuleInfo(GrLocale.fr_FR, "Acteur physique d’une scène");
 
-    GrType actorType = library.addNative("Actor", [], "Collider");
+    GrType actorType = mod.addNative("Actor", [], "Collider");
     GrType collisionType = grGetNativeType("Collision");
     GrType solidType = grGetNativeType("Solid");
 
-    library.addConstructor(&_ctor, actorType);
+    mod.addConstructor(&_ctor, actorType);
 
-    library.setDescription(GrLocale.fr_FR,
+    mod.setDescription(GrLocale.fr_FR,
         "Déplace horizontalement l’acteur et retourne des informations de collision si un solide est touché.");
-    library.setParameters(["actor", "x"]);
-    library.addFunction(&_moveX, "moveX", [actorType, grFloat], [
+    mod.setParameters(["actor", "x"]);
+    mod.addFunction(&_moveX, "moveX", [actorType, grFloat], [
             grOptional(collisionType)
         ]);
 
-    library.setDescription(GrLocale.fr_FR,
+    mod.setDescription(GrLocale.fr_FR,
         "Déplace verticalement l’acteur et retourne des informations de collision si un solide est touché.");
-    library.setParameters(["actor", "y"]);
-    library.addFunction(&_moveY, "moveY", [actorType, grFloat], [
+    mod.setParameters(["actor", "y"]);
+    mod.addFunction(&_moveY, "moveY", [actorType, grFloat], [
             grOptional(collisionType)
         ]);
 
-    library.setDescription(GrLocale.fr_FR, "Attache l’acteur au solide");
-    library.setParameters(["actor", "solid"]);
-    library.addFunction(&_mount, "mount", [actorType, solidType]);
+    mod.setDescription(GrLocale.fr_FR, "Attache l’acteur au solide");
+    mod.setParameters(["actor", "solid"]);
+    mod.addFunction(&_mount, "mount", [actorType, solidType]);
 
-    library.setDescription(GrLocale.fr_FR, "Détache l’acteur du solide");
-    library.setParameters(["actor"]);
-    library.addFunction(&_dismount, "dismount", [actorType]);
+    mod.setDescription(GrLocale.fr_FR, "Détache l’acteur du solide");
+    mod.setParameters(["actor"]);
+    mod.addFunction(&_dismount, "dismount", [actorType]);
 }
 
 private void _ctor(GrCall call) {

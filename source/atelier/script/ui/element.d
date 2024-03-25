@@ -17,129 +17,125 @@ import atelier.render;
 import atelier.ui;
 import atelier.script.util;
 
-package void loadLibUI_element(GrLibDefinition library) {
-    library.setModule("ui.element");
-    library.setModuleInfo(GrLocale.fr_FR, "Élément d’interface");
+package void loadLibUI_element(GrModule mod) {
+    mod.setModule("ui.element");
+    mod.setModuleInfo(GrLocale.fr_FR, "Élément d’interface");
 
-    library.setDescription(GrLocale.fr_FR, "Alignement horizontal");
-    GrType alignXType = library.addEnum("UIAlignX", ["left", "center", "right"]);
+    mod.setDescription(GrLocale.fr_FR, "Alignement horizontal");
+    GrType alignXType = mod.addEnum("UIAlignX", ["left", "center", "right"]);
 
-    library.setDescription(GrLocale.fr_FR, "Alignement vertical");
-    GrType alignYType = library.addEnum("UIAlignY", ["top", "center", "bottom"]);
+    mod.setDescription(GrLocale.fr_FR, "Alignement vertical");
+    GrType alignYType = mod.addEnum("UIAlignY", ["top", "center", "bottom"]);
 
     GrType stateType = grGetNativeType("UIState");
 
-    GrType elementType = library.addNative("UIElement");
+    GrType elementType = mod.addNative("UIElement");
 
     GrType imageType = grGetNativeType("Image");
     GrType colorType = grGetNativeType("Color");
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
 
-    library.setDescription(GrLocale.fr_FR, "Crée un élément d’interface");
-    library.addConstructor(&_ctor, elementType);
+    mod.setDescription(GrLocale.fr_FR, "Crée un élément d’interface");
+    mod.addConstructor(&_ctor, elementType);
 
-    library.setDescription(GrLocale.fr_FR, "Position relatif au parent");
-    library.addProperty(&_position!"get", &_position!"set", "position", elementType, vec2fType);
+    mod.setDescription(GrLocale.fr_FR, "Position relatif au parent");
+    mod.addProperty(&_position!"get", &_position!"set", "position", elementType, vec2fType);
 
-    library.setDescription(GrLocale.fr_FR, "Position de la souris dans l’interface");
-    library.addProperty(&_mousePosition, null, "mousePosition", elementType, vec2fType);
+    mod.setDescription(GrLocale.fr_FR, "Position de la souris dans l’interface");
+    mod.addProperty(&_mousePosition, null, "mousePosition", elementType, vec2fType);
 
-    library.setDescription(GrLocale.fr_FR, "Taille de l’interface");
-    library.addProperty(&_size!"get", &_size!"set", "size", elementType, vec2fType);
+    mod.setDescription(GrLocale.fr_FR, "Taille de l’interface");
+    mod.addProperty(&_size!"get", &_size!"set", "size", elementType, vec2fType);
 
-    library.setDescription(GrLocale.fr_FR, "Facteur d’échelle de l’interface");
-    library.addProperty(&_scale!"get", &_scale!"set", "scale", elementType, vec2fType);
+    mod.setDescription(GrLocale.fr_FR, "Facteur d’échelle de l’interface");
+    mod.addProperty(&_scale!"get", &_scale!"set", "scale", elementType, vec2fType);
 
-    library.setDescription(GrLocale.fr_FR, "Point de rotation de l’interface");
-    library.addProperty(&_pivot!"get", &_pivot!"set", "pivot", elementType, vec2fType);
+    mod.setDescription(GrLocale.fr_FR, "Point de rotation de l’interface");
+    mod.addProperty(&_pivot!"get", &_pivot!"set", "pivot", elementType, vec2fType);
 
-    library.setDescription(GrLocale.fr_FR, "Rotation de l’interface");
-    library.addProperty(&_angle!"get", &_angle!"set", "angle", elementType, grDouble);
+    mod.setDescription(GrLocale.fr_FR, "Rotation de l’interface");
+    mod.addProperty(&_angle!"get", &_angle!"set", "angle", elementType, grDouble);
 
-    library.setDescription(GrLocale.fr_FR, "Couleur de l’interface");
-    library.addProperty(&_color!"get", &_color!"set", "color", elementType, colorType);
+    mod.setDescription(GrLocale.fr_FR, "Couleur de l’interface");
+    mod.addProperty(&_color!"get", &_color!"set", "color", elementType, colorType);
 
-    library.setDescription(GrLocale.fr_FR, "Opacité de l’interface");
-    library.addProperty(&_alpha!"get", &_alpha!"set", "alpha", elementType, grFloat);
+    mod.setDescription(GrLocale.fr_FR, "Opacité de l’interface");
+    mod.addProperty(&_alpha!"get", &_alpha!"set", "alpha", elementType, grFloat);
 
-    library.setDescription(GrLocale.fr_FR, "Fixe l’alignement de l’interface.
+    mod.setDescription(GrLocale.fr_FR, "Fixe l’alignement de l’interface.
 Détermine à partir d’où la position de l’interface sera calculé par rapport au parent.");
-    library.setParameters(["ui", "alignX", "alignY"]);
-    library.addFunction(&_setAlign, "setAlign", [
+    mod.setParameters(["ui", "alignX", "alignY"]);
+    mod.addFunction(&_setAlign, "setAlign", [
             elementType, alignXType, alignYType
         ]);
 
-    library.setDescription(GrLocale.fr_FR, "Alignement horizontal");
-    library.addProperty(&_alignX!"get", &_alignX!"set", "alignX", elementType, alignXType);
+    mod.setDescription(GrLocale.fr_FR, "Alignement horizontal");
+    mod.addProperty(&_alignX!"get", &_alignX!"set", "alignX", elementType, alignXType);
 
-    library.setDescription(GrLocale.fr_FR, "Alignement vertical");
-    library.addProperty(&_alignY!"get", &_alignY!"set", "alignY", elementType, alignYType);
+    mod.setDescription(GrLocale.fr_FR, "Alignement vertical");
+    mod.addProperty(&_alignY!"get", &_alignY!"set", "alignY", elementType, alignYType);
 
-    library.setDescription(GrLocale.fr_FR, "Survolé ?");
-    library.addProperty(&_isHovered, null, "isHovered", elementType, grBool);
+    mod.setDescription(GrLocale.fr_FR, "Survolé ?");
+    mod.addProperty(&_isHovered, null, "isHovered", elementType, grBool);
 
-    library.setDescription(GrLocale.fr_FR, "Focus ?");
-    library.addProperty(&_hasFocus, null, "hasFocus", elementType, grBool);
+    mod.setDescription(GrLocale.fr_FR, "Focus ?");
+    mod.addProperty(&_hasFocus, null, "hasFocus", elementType, grBool);
 
-    library.setDescription(GrLocale.fr_FR, "Pressé ?");
-    library.addProperty(&_isPressed, null, "isPressed", elementType, grBool);
+    mod.setDescription(GrLocale.fr_FR, "Pressé ?");
+    mod.addProperty(&_isPressed, null, "isPressed", elementType, grBool);
 
-    library.setDescription(GrLocale.fr_FR, "Sélectionné ?");
-    library.addProperty(&_isSelected!"get", &_isSelected!"set",
-        "isSelected", elementType, grBool);
+    mod.setDescription(GrLocale.fr_FR, "Sélectionné ?");
+    mod.addProperty(&_isSelected!"get", &_isSelected!"set", "isSelected", elementType, grBool);
 
-    library.setDescription(GrLocale.fr_FR, "Actif ?");
-    library.addProperty(&_isActive!"get", &_isActive!"set", "isActive", elementType, grBool);
+    mod.setDescription(GrLocale.fr_FR, "Actif ?");
+    mod.addProperty(&_isActive!"get", &_isActive!"set", "isActive", elementType, grBool);
 
-    library.setDescription(GrLocale.fr_FR, "L’interface est saisie ?");
-    library.addProperty(&_isGrabbed, null, "isGrabbed", elementType, grBool);
+    mod.setDescription(GrLocale.fr_FR, "L’interface est saisie ?");
+    mod.addProperty(&_isGrabbed, null, "isGrabbed", elementType, grBool);
 
-    library.setDescription(GrLocale.fr_FR, "Active/désactive l’interface");
-    library.addProperty(&_isEnabled!"get", &_isEnabled!"set", "isEnabled", elementType, grBool);
+    mod.setDescription(GrLocale.fr_FR, "Active/désactive l’interface");
+    mod.addProperty(&_isEnabled!"get", &_isEnabled!"set", "isEnabled", elementType, grBool);
 
-    library.setDescription(GrLocale.fr_FR, "Ajoute un état à l’interface.");
-    library.setParameters(["ui", "state"]);
-    library.addFunction(&_addState, "addState", [elementType, stateType]);
+    mod.setDescription(GrLocale.fr_FR, "Ajoute un état à l’interface.");
+    mod.setParameters(["ui", "state"]);
+    mod.addFunction(&_addState, "addState", [elementType, stateType]);
 
-    library.setDescription(GrLocale.fr_FR,
-        "Fixe l’état actuel de l’interface sans transition.");
-    library.setParameters(["ui", "stateId"]);
-    library.addFunction(&_setState, "setState", [elementType, grString]);
+    mod.setDescription(GrLocale.fr_FR, "Fixe l’état actuel de l’interface sans transition.");
+    mod.setParameters(["ui", "stateId"]);
+    mod.addFunction(&_setState, "setState", [elementType, grString]);
 
-    library.setDescription(GrLocale.fr_FR,
+    mod.setDescription(GrLocale.fr_FR,
         "Démarre la transition de l’interface de son état actuel vers son prochain état.");
-    library.setParameters(["ui", "stateId"]);
-    library.addFunction(&_runState, "runState", [elementType, grString]);
+    mod.setParameters(["ui", "stateId"]);
+    mod.addFunction(&_runState, "runState", [elementType, grString]);
 
-    library.setDescription(GrLocale.fr_FR, "Ajoute une image à l’interface.");
-    library.setParameters(["ui", "image"]);
-    library.addFunction(&_addImage, "addImage", [elementType, imageType]);
+    mod.setDescription(GrLocale.fr_FR, "Ajoute une image à l’interface.");
+    mod.setParameters(["ui", "image"]);
+    mod.addFunction(&_addImage, "addImage", [elementType, imageType]);
 
-    library.setDescription(GrLocale.fr_FR,
+    mod.setDescription(GrLocale.fr_FR,
         "Ajoute une interface en tant qu’enfant de cette interface.");
-    library.setParameters(["parent", "child"]);
-    library.addFunction(&_addUI, "addUI", [elementType, elementType]);
+    mod.setParameters(["parent", "child"]);
+    mod.addFunction(&_addUI, "addUI", [elementType, elementType]);
 
-    library.setDescription(GrLocale.fr_FR,
-        "Supprime les éléments d’interface enfants du parent.");
-    library.setParameters(["parent"]);
-    library.addFunction(&_clearUI, "clearUI", [elementType]);
+    mod.setDescription(GrLocale.fr_FR, "Supprime les éléments d’interface enfants du parent.");
+    mod.setParameters(["parent"]);
+    mod.addFunction(&_clearUI, "clearUI", [elementType]);
 
-    library.setDescription(GrLocale.fr_FR, "Ajoute une fonction de rappel à un événement.");
-    library.setParameters(["ui", "id", "callback"]);
-    library.addFunction(&_addEventListener, "addEventListener", [
+    mod.setDescription(GrLocale.fr_FR, "Ajoute une fonction de rappel à un événement.");
+    mod.setParameters(["ui", "id", "callback"]);
+    mod.addFunction(&_addEventListener, "addEventListener", [
             elementType, grString, grEvent()
         ]);
 
-    library.setDescription(GrLocale.fr_FR,
-        "Supprime une fonction de rappel lié à un événement.");
-    library.setParameters(["ui", "id", "callback"]);
-    library.addFunction(&_removeEventListener, "removeEventListener",
+    mod.setDescription(GrLocale.fr_FR, "Supprime une fonction de rappel lié à un événement.");
+    mod.setParameters(["ui", "id", "callback"]);
+    mod.addFunction(&_removeEventListener, "removeEventListener",
         [elementType, grString, grEvent()]);
 
-    library.setDescription(GrLocale.fr_FR, "Retire l’interface de l’arborescence.");
-    library.setParameters(["ui"]);
-    library.addFunction(&_remove, "remove", [elementType]);
+    mod.setDescription(GrLocale.fr_FR, "Retire l’interface de l’arborescence.");
+    mod.setParameters(["ui"]);
+    mod.addFunction(&_remove, "remove", [elementType]);
 }
 
 private void _ctor(GrCall call) {

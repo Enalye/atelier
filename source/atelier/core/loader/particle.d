@@ -178,7 +178,7 @@ package void compileParticle(string path, const Farfadet ffd, OutStream stream) 
     ]);
 
     if (ffd.hasNode("sprite")) {
-        Farfadet node = ffd.getNode("sprite");
+        Farfadet node = ffd.getNode("sprite", 1);
         sprite = node.get!string(0);
     }
 
@@ -188,42 +188,42 @@ package void compileParticle(string path, const Farfadet ffd, OutStream stream) 
     }
 
     if (ffd.hasNode("isRelativePosition")) {
-        Farfadet node = ffd.getNode("isRelativePosition");
+        Farfadet node = ffd.getNode("isRelativePosition", 1);
         isRelativePosition = node.get!bool(0);
     }
 
     if (ffd.hasNode("isRelativeSpriteAngle")) {
-        Farfadet node = ffd.getNode("isRelativeSpriteAngle");
+        Farfadet node = ffd.getNode("isRelativeSpriteAngle", 1);
         isRelativeSpriteAngle = node.get!bool(0);
     }
 
     if (ffd.hasNode("lifetime")) {
-        Farfadet node = ffd.getNode("lifetime");
+        Farfadet node = ffd.getNode("lifetime", 2);
         lifetime = Vec2u(node.get!uint(0), node.get!uint(1));
     }
 
     if (ffd.hasNode("count")) {
-        Farfadet node = ffd.getNode("count");
+        Farfadet node = ffd.getNode("count", 2);
         count = Vec2u(node.get!uint(0), node.get!uint(1));
     }
 
     if (ffd.hasNode("mode")) {
-        Farfadet node = ffd.getNode("mode");
+        Farfadet node = ffd.getNode("mode", 1);
         mode = to!ParticleMode(node.get!string(0));
     }
 
     if (ffd.hasNode("area")) {
-        Farfadet node = ffd.getNode("area");
+        Farfadet node = ffd.getNode("area", 2);
         area = Vec2f(node.get!float(0), node.get!float(1));
     }
 
     if (ffd.hasNode("distance")) {
-        Farfadet node = ffd.getNode("distance");
+        Farfadet node = ffd.getNode("distance", 2);
         distance = Vec2f(node.get!float(0), node.get!float(1));
     }
 
     if (ffd.hasNode("spread")) {
-        Farfadet node = ffd.getNode("spread");
+        Farfadet node = ffd.getNode("spread", 3);
         angle = Vec2f(node.get!float(0), node.get!float(1));
         spreadAngle = node.get!float(2);
     }
@@ -246,7 +246,6 @@ package void compileParticle(string path, const Farfadet ffd, OutStream stream) 
             effects ~= effect;
             break;
         default:
-            enforce(false, "`particle` ne définit pas le nœud `" ~ node.name ~ "`");
             break;
         }
     }

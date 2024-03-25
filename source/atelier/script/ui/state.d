@@ -16,30 +16,30 @@ import atelier.core;
 import atelier.ui;
 import atelier.script.util;
 
-package void loadLibUI_state(GrLibDefinition library) {
-    library.setModule("ui.state");
-    library.setModuleInfo(GrLocale.fr_FR, "État d’un élément d’interface");
+package void loadLibUI_state(GrModule mod) {
+    mod.setModule("ui.state");
+    mod.setModuleInfo(GrLocale.fr_FR, "État d’un élément d’interface");
 
     GrType splineType = grGetEnumType("Spline");
-    GrType stateType = library.addNative("UIState");
+    GrType stateType = mod.addNative("UIState");
     GrType colorType = grGetNativeType("Color");
 
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
 
-    library.addConstructor(&_ui_state_new, stateType, [grString]);
+    mod.addConstructor(&_ui_state_new, stateType, [grString]);
 
-    library.addProperty(&_ui_state_offset!"get", &_ui_state_offset!"set",
+    mod.addProperty(&_ui_state_offset!"get", &_ui_state_offset!"set",
         "offset", stateType, vec2fType);
-    library.addProperty(&_ui_state_scale!"get", &_ui_state_scale!"set",
+    mod.addProperty(&_ui_state_scale!"get", &_ui_state_scale!"set",
         "scale", stateType, vec2fType);
-    library.addProperty(&_ui_state_angle!"get", &_ui_state_angle!"set",
+    mod.addProperty(&_ui_state_angle!"get", &_ui_state_angle!"set",
         "angle", stateType, grDouble);
-    library.addProperty(&_ui_state_color!"get", &_ui_state_color!"set",
+    mod.addProperty(&_ui_state_color!"get", &_ui_state_color!"set",
         "color", stateType, colorType);
-    library.addProperty(&_ui_state_alpha!"get", &_ui_state_alpha!"set",
+    mod.addProperty(&_ui_state_alpha!"get", &_ui_state_alpha!"set",
         "alpha", stateType, grFloat);
-    library.addProperty(&_ui_state_time!"get", &_ui_state_time!"set", "time", stateType, grInt);
-    library.addProperty(&_ui_state_spline!"get", &_ui_state_spline!"set",
+    mod.addProperty(&_ui_state_time!"get", &_ui_state_time!"set", "time", stateType, grInt);
+    mod.addProperty(&_ui_state_spline!"get", &_ui_state_spline!"set",
         "spline", stateType, splineType);
 }
 
@@ -74,6 +74,7 @@ private void _ui_state_angle(string op)(GrCall call) {
     static if (op == "set") {
         state.angle = call.getDouble(1);
         import std.stdio;
+
         writeln("STATE: ", state.angle);
     }
     call.setDouble(state.angle);

@@ -12,43 +12,43 @@ import atelier.common;
 import atelier.core;
 import atelier.script.util;
 
-package void loadLibAudio_bus(GrLibDefinition library) {
-    library.setModule("audio.bus");
-    library.setModuleInfo(GrLocale.fr_FR, "Route les sons et leur applique des effets");
+package void loadLibAudio_bus(GrModule mod) {
+    mod.setModule("audio.bus");
+    mod.setModuleInfo(GrLocale.fr_FR, "Route les sons et leur applique des effets");
 
-    GrType busType = library.addNative("AudioBus");
+    GrType busType = mod.addNative("AudioBus");
 
     GrType playerType = grGetNativeType("AudioPlayer");
     GrType soundType = grGetNativeType("Sound");
     GrType musicType = grGetNativeType("Music");
     GrType effectType = grGetNativeType("AudioEffect");
 
-    library.addConstructor(&_ctor, busType);
+    mod.addConstructor(&_ctor, busType);
 
-    library.setDescription(GrLocale.fr_FR, "Coupe le son du bus");
-    library.addProperty(&_isMuted!"get", &_isMuted!"set", "isMuted", busType, grBool);
+    mod.setDescription(GrLocale.fr_FR, "Coupe le son du bus");
+    mod.addProperty(&_isMuted!"get", &_isMuted!"set", "isMuted", busType, grBool);
 
-    library.setDescription(GrLocale.fr_FR, "Joue le son sur le bus.");
-    library.setParameters(["bus", "player"]);
-    library.addFunction(&_play, "play", [busType, playerType]);
-    library.addFunction(&_playSound, "play", [busType, soundType]);
-    library.addFunction(&_playMusic, "play", [busType, musicType]);
+    mod.setDescription(GrLocale.fr_FR, "Joue le son sur le bus.");
+    mod.setParameters(["bus", "player"]);
+    mod.addFunction(&_play, "play", [busType, playerType]);
+    mod.addFunction(&_playSound, "play", [busType, soundType]);
+    mod.addFunction(&_playMusic, "play", [busType, musicType]);
 
-    library.setDescription(GrLocale.fr_FR, "Ajoute un effet.");
-    library.setParameters(["bus", "effect"]);
-    library.addFunction(&_addEffect, "addEffect", [busType, effectType]);
+    mod.setDescription(GrLocale.fr_FR, "Ajoute un effet.");
+    mod.setParameters(["bus", "effect"]);
+    mod.addFunction(&_addEffect, "addEffect", [busType, effectType]);
 
-    library.setDescription(GrLocale.fr_FR, "Connecte le bus à un bus destinataire.");
-    library.setParameters(["srcBus", "destBus"]);
-    library.addFunction(&_connectTo, "connectTo", [busType, busType]);
+    mod.setDescription(GrLocale.fr_FR, "Connecte le bus à un bus destinataire.");
+    mod.setParameters(["srcBus", "destBus"]);
+    mod.addFunction(&_connectTo, "connectTo", [busType, busType]);
 
-    library.setDescription(GrLocale.fr_FR, "Connecte le bus au bus maître.");
-    library.setParameters(["bus"]);
-    library.addFunction(&_connectToMaster, "connectToMaster", [busType]);
+    mod.setDescription(GrLocale.fr_FR, "Connecte le bus au bus maître.");
+    mod.setParameters(["bus"]);
+    mod.addFunction(&_connectToMaster, "connectToMaster", [busType]);
 
-    library.setDescription(GrLocale.fr_FR, "Déconnecte le bus de toute destination.");
-    library.setParameters(["srcBus", "destBus"]);
-    library.addFunction(&_disconnect, "disconnect", [busType]);
+    mod.setDescription(GrLocale.fr_FR, "Déconnecte le bus de toute destination.");
+    mod.setParameters(["srcBus", "destBus"]);
+    mod.addFunction(&_disconnect, "disconnect", [busType]);
 }
 
 private void _ctor(GrCall call) {

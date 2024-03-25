@@ -9,7 +9,7 @@ import grimoire;
 
 import atelier.script.core.runtime;
 
-package(atelier.script) GrLibLoader[] getLibLoaders_core() {
+package(atelier.script) GrModuleLoader[] getLibLoaders_core() {
     return [
         &loadLibCore_runtime
     ];

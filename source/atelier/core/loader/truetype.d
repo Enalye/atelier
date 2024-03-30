@@ -22,8 +22,8 @@ package void compileTrueType(string path, const Farfadet ffd, OutStream stream) 
     uint size = ffd.getNode("size", 1).get!uint(0);
 
     uint outline = 0;
-    if (ffd.hasNode("size")) {
-        outline = ffd.getNode("size", 1).get!uint(0);
+    if (ffd.hasNode("outline")) {
+        outline = ffd.getNode("outline", 1).get!uint(0);
     }
 
     stream.write!string(rid);
@@ -39,7 +39,7 @@ package void loadTrueType(InStream stream) {
     uint outline = stream.read!uint();
 
     Atelier.res.store(rid, {
-        TrueTypeFont font = new TrueTypeFont(file, size, outline);
+        TrueTypeFont font = TrueTypeFont.fromFile(file, size, outline);
         return font;
     });
 }

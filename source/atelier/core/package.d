@@ -10,5 +10,6 @@ public {
     import atelier.core.loader;
     import atelier.core.logger;
     import atelier.core.runtime;
+    import atelier.core.theme;
     import atelier.core.window;
 }

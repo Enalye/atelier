@@ -3,10 +3,10 @@
  * License: Zlib
  * Authors: Enalye
  */
-module atelier.ui.contentview;
+module atelier.ui.core.contentview;
 
 import atelier.common;
-import atelier.ui.element;
+import atelier.ui.core.element;
 
 abstract class ContentView : UIElement {
     private {

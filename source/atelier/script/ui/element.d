@@ -47,8 +47,20 @@ package void loadLibUI_element(GrModule mod) {
     mod.setDescription(GrLocale.fr_FR, "Taille de l’interface");
     mod.addProperty(&_size!"get", &_size!"set", "size", elementType, vec2fType);
 
+    mod.setDescription(GrLocale.fr_FR, "Facteur d’échelle de l’interface");
+    mod.addProperty(&_scale!"get", &_scale!"set", "scale", elementType, vec2fType);
+
     mod.setDescription(GrLocale.fr_FR, "Point de rotation de l’interface");
     mod.addProperty(&_pivot!"get", &_pivot!"set", "pivot", elementType, vec2fType);
+
+    mod.setDescription(GrLocale.fr_FR, "Rotation de l’interface");
+    mod.addProperty(&_angle!"get", &_angle!"set", "angle", elementType, grDouble);
+
+    mod.setDescription(GrLocale.fr_FR, "Couleur de l’interface");
+    mod.addProperty(&_color!"get", &_color!"set", "color", elementType, colorType);
+
+    mod.setDescription(GrLocale.fr_FR, "Opacité de l’interface");
+    mod.addProperty(&_alpha!"get", &_alpha!"set", "alpha", elementType, grFloat);
 
     mod.setDescription(GrLocale.fr_FR, "Fixe l’alignement de l’interface.
 Détermine à partir d’où la position de l’interface sera calculé par rapport au parent.");
@@ -157,6 +169,15 @@ private void _size(string op)(GrCall call) {
     call.setNative(svec2(ui.getSize()));
 }
 
+private void _scale(string op)(GrCall call) {
+    UIElement ui = call.getNative!UIElement(0);
+
+    static if (op == "set") {
+        ui.scale = call.getNative!SVec2f(1);
+    }
+    call.setNative(svec2(ui.scale));
+}
+
 private void _pivot(string op)(GrCall call) {
     UIElement ui = call.getNative!UIElement(0);
 
@@ -164,6 +185,33 @@ private void _pivot(string op)(GrCall call) {
         ui.setPivot(call.getNative!SVec2f(1));
     }
     call.setNative(svec2(ui.getPivot()));
+}
+
+private void _angle(string op)(GrCall call) {
+    UIElement ui = call.getNative!UIElement(0);
+
+    static if (op == "set") {
+        ui.angle = call.getDouble(1);
+    }
+    call.setDouble(ui.angle);
+}
+
+private void _color(string op)(GrCall call) {
+    UIElement ui = call.getNative!UIElement(0);
+
+    static if (op == "set") {
+        ui.color = call.getNative!SColor(1);
+    }
+    call.setNative(scolor(ui.color));
+}
+
+private void _alpha(string op)(GrCall call) {
+    UIElement ui = call.getNative!UIElement(0);
+
+    static if (op == "set") {
+        ui.alpha = call.getFloat(1);
+    }
+    call.setFloat(ui.alpha);
 }
 
 private void _setAlign(GrCall call) {

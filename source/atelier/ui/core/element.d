@@ -1,11 +1,16 @@
-module atelier.ui.element;
+/** 
+ * Copyright: Enalye
+ * License: Zlib
+ * Authors: Enalye
+ */
+module atelier.ui.core.element;
 
 import grimoire;
 
 import atelier.common;
 import atelier.core;
 import atelier.render;
-import atelier.ui.manager;
+import atelier.ui.core.manager;
 
 /// Alignement horizontal
 enum UIAlignX {
@@ -66,14 +71,14 @@ class UIElement {
         }
     }
 
-    package {
-        // Transitions
-        Vec2f offset = Vec2f.zero;
-        Vec2f scale = Vec2f.one;
-        Color color = Color.white;
-        float alpha = 1f;
-        double angle = 0.0;
+    // Transitions
+    Vec2f offset = Vec2f.zero;
+    Vec2f scale = Vec2f.one;
+    Color color = Color.white;
+    float alpha = 1f;
+    double angle = 0.0;
 
+    package {
         // États
         State[string] states;
         string currentStateName;
@@ -386,6 +391,12 @@ class UIElement {
             return;
         _pivot = pivot_;
         dispatchEvent("pivot");
+    }
+
+    final void focus() {
+        if (_manager) {
+            _manager.setFocus(this);
+        }
     }
 
     final void addState(State state) {

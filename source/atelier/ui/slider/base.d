@@ -3,12 +3,11 @@
  * License: Zlib
  * Authors: Enalye
  */
-module atelier.ui.slider;
+module atelier.ui.slider.base;
 
 import std.math;
-
 import atelier.common;
-import atelier.ui.element;
+import atelier.ui.core;
 
 /// Base abstract class for any vertical or horizontal slider/scrollbar.
 abstract class Slider : UIElement {
@@ -128,38 +127,6 @@ abstract class Slider : UIElement {
             }
         }
     }
-    /*
-    override void onEvent(Event event) {
-        if (_step == 0f)
-            return;
-
-        switch (event.type) with (Event.Type) {
-        case mouseWheel:
-            _offset -= event.scroll.delta.y * _step;
-            _offset = (_offset < -_step) ? -_step : ((_offset > 1f + _step) ? 1f + _step : _offset); //Clamp the value.
-
-            if (_lastOffset != _offset) {
-                _lastOffset = _offset;
-                dispatchEvent("value", false);
-            }
-            break;
-        case mouseUpdate:
-            if (!isPressed)
-                break;
-            relocateSlider(event);
-            break;
-        case mouseDown:
-            relocateSlider(event);
-            break;
-        case mouseUp:
-            relocateSlider(event);
-            break;
-        default:
-            break;
-        }
-        if (isSelected)
-            relocateSlider(event);
-    }*/
 
     /// Process the slider position.
     protected void relocateSlider() {

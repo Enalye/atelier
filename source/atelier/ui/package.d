@@ -6,11 +6,14 @@
 module atelier.ui;
 
 public {
-    import atelier.ui.box;
-    import atelier.ui.contentview;
-    import atelier.ui.element;
-    import atelier.ui.label;
-    import atelier.ui.manager;
+    import atelier.ui.button;
+    import atelier.ui.core;
+    import atelier.ui.file;
+    import atelier.ui.input;
+    import atelier.ui.menu;
+    import atelier.ui.navigation;
+    import atelier.ui.panel;
     import atelier.ui.scrollbar;
+    import atelier.ui.select;
     import atelier.ui.slider;
 }

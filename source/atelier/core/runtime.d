@@ -22,6 +22,7 @@ import atelier.ui;
 
 import atelier.core.loader;
 import atelier.core.logger;
+import atelier.core.theme;
 import atelier.core.window;
 
 private void _print(string msg) {
@@ -62,6 +63,7 @@ final class Atelier {
         AudioMixer _audioMixer;
         SceneManager _sceneManager;
         RNG _rng;
+        Theme _theme;
     }
 
     static @property pragma(inline) {
@@ -112,6 +114,10 @@ final class Atelier {
         GrEngine vm() {
             return _engine;
         }
+
+        Theme theme() {
+            return _theme;
+        }
     }
 
     /// Demande le rechargement de l’application (valide seulement en mode développement)
@@ -146,6 +152,7 @@ final class Atelier {
         _sceneManager = new SceneManager();
         _resourceManager = new ResourceManager();
         _rng = new RNG();
+        _theme = new Theme();
 
         setupDefaultResourceLoaders(_resourceManager);
     }
@@ -282,6 +289,7 @@ final class Atelier {
         _audioMixer.clear();
         _uiManager.clearUI();
         _sceneManager.clear();
+        _theme.setDefault();
 
         if (_mustReloadResources) {
             _resourceManager = new ResourceManager();

@@ -3,7 +3,7 @@
  * Licence: Zlib
  * Auteur: Enalye
  */
-module atelier.ui.manager;
+module atelier.ui.core.manager;
 
 import std.algorithm;
 import std.stdio;
@@ -15,7 +15,7 @@ import atelier.common;
 import atelier.core;
 import atelier.input;
 import atelier.render;
-import atelier.ui.element;
+import atelier.ui.core.element;
 
 /// Gestionnaire d’interfaces
 final class UIManager {

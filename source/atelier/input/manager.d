@@ -480,62 +480,62 @@ final class InputManager {
 
     /// Est-ce que la touche est appuyée sur cette frame ?
     bool isDown(InputEvent.KeyButton.Button button) const {
-        return _keyButtonStates[button].down();
+        return _keyButtonStates[button].isKeyStateDown();
     }
 
     /// Ditto
     bool isDown(InputEvent.MouseButton.Button button) const {
-        return _mouseButtonStates[button].down();
+        return _mouseButtonStates[button].isKeyStateDown();
     }
 
     /// Ditto
     bool isDown(InputEvent.ControllerButton.Button button) const {
-        return _controllerButtonStates[button].down();
+        return _controllerButtonStates[button].isKeyStateDown();
     }
 
     /// Est-ce que la touche est relâchée sur cette frame ?
     bool isUp(InputEvent.KeyButton.Button button) const {
-        return _keyButtonStates[button].up();
+        return _keyButtonStates[button].isKeyStateUp();
     }
 
     /// Ditto
     bool isUp(InputEvent.MouseButton.Button button) const {
-        return _mouseButtonStates[button].up();
+        return _mouseButtonStates[button].isKeyStateUp();
     }
 
     /// Ditto
     bool isUp(InputEvent.ControllerButton.Button button) const {
-        return _controllerButtonStates[button].up();
+        return _controllerButtonStates[button].isKeyStateUp();
     }
 
     /// Est-ce que la touche est maintenue ?
     bool isHeld(InputEvent.KeyButton.Button button) const {
-        return _keyButtonStates[button].held();
+        return _keyButtonStates[button].isKeyStateHeld();
     }
 
     /// Ditto
     bool isHeld(InputEvent.MouseButton.Button button) const {
-        return _mouseButtonStates[button].held();
+        return _mouseButtonStates[button].isKeyStateHeld();
     }
 
     /// Ditto
     bool isHeld(InputEvent.ControllerButton.Button button) const {
-        return _controllerButtonStates[button].held();
+        return _controllerButtonStates[button].isKeyStateHeld();
     }
 
     /// Est-ce que la touche est appuyée ?
     bool isPressed(InputEvent.KeyButton.Button button) const {
-        return _keyButtonStates[button].pressed();
+        return _keyButtonStates[button].isKeyStatePressed();
     }
 
     /// Ditto
     bool isPressed(InputEvent.MouseButton.Button button) const {
-        return _mouseButtonStates[button].pressed();
+        return _mouseButtonStates[button].isKeyStatePressed();
     }
 
     /// Ditto
     bool isPressed(InputEvent.ControllerButton.Button button) const {
-        return _controllerButtonStates[button].pressed();
+        return _controllerButtonStates[button].isKeyStatePressed();
     }
 
     /// Retourne la valeur de l’axe

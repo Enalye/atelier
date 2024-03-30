@@ -11,7 +11,7 @@ The Font Software may be modified, altered, or added to, and in particular the d
 
 This License becomes null and void to the extent applicable to Fonts or Font Software that has been modified and is distributed under the "Bitstream Vera" names.
 
-The Font Software may be sold as part of a larger software package but no copy of one or more of the Font Software typefaces may be sold by itself.
+The Font Software may be sold as part of a larger software  but no copy of one or more of the Font Software typefaces may be sold by itself.
 
 THE FONT SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT OF COPYRIGHT, PATENT, TRADEMARK, OR OTHER RIGHT. IN NO EVENT SHALL BITSTREAM OR THE GNOME FOUNDATION BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM OTHER DEALINGS IN THE FONT SOFTWARE.
 */
@@ -39,7 +39,7 @@ void extractFontHex() {
 */
 
 /// Bitstream Vera font data
-package immutable ubyte[] veraFontData = [
+immutable ubyte[] veraFontData = [
     0x00, 0x01, 0x00, 0x00, 0x00, 0x11, 0x01, 0x00, 0x00, 0x04, 0x00, 0x10,
     0x4f, 0x53, 0x2f, 0x32, 0xb4, 0x5f, 0xf4, 0x63, 0x00, 0x00, 0xeb, 0x70,
     0x00, 0x00, 0x00, 0x56, 0x50, 0x43, 0x4c, 0x54, 0xd1, 0x8a, 0x5e, 0x97,

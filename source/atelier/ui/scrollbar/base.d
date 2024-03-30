@@ -3,10 +3,10 @@
  * License: Zlib
  * Authors: Enalye
  */
-module atelier.ui.scrollbar;
+module atelier.ui.scrollbar.base;
 
 import std.algorithm.comparison : clamp, max;
-import atelier.ui.element;
+import atelier.ui.core;
 
 abstract class Scrollbar : UIElement {
     private {

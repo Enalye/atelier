@@ -3,10 +3,10 @@
  * Licence: Zlib
  * Auteur: Enalye
  */
-module atelier.ui.box;
+module atelier.ui.core.box;
 
 import atelier.common;
-import atelier.ui.element;
+import atelier.ui.core.element;
 
 abstract class Box : UIElement {
     private {

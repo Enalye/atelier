@@ -203,11 +203,11 @@ private void _isAction(GrCall call) {
 }
 
 private void _inputEvent_isPressed(GrCall call) {
-    call.setBool(call.getNative!InputEvent(0).pressed);
+    call.setBool(call.getNative!InputEvent(0).isPressed());
 }
 
 private void _inputEvent_echo(GrCall call) {
-    call.setBool(call.getNative!InputEvent(0).echo);
+    call.setBool(call.getNative!InputEvent(0).isEcho());
 }
 
 private void _keyButton(GrCall call) {

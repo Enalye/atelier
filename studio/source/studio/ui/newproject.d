@@ -35,7 +35,7 @@ final class NewProject : Modal {
         setAlign(UIAlignX.center, UIAlignY.center);
         setSize(Vec2f(500f, 500f));
 
-        Label title = new Label("Nouveau Projet", Ciel.getFont());
+        Label title = new Label("Nouveau Projet", Atelier.theme.font);
         title.setAlign(UIAlignX.center, UIAlignY.top);
         title.setPosition(Vec2f(0f, 4f));
         addUI(title);
@@ -53,15 +53,15 @@ final class NewProject : Modal {
             nameBox.setSpacing(8f);
             vbox.addUI(nameBox);
 
-            nameBox.addUI(new Label("Nom du projet:", Ciel.getFont()));
+            nameBox.addUI(new Label("Nom du projet:", Atelier.theme.font));
 
             _nameField = new TextField;
             _nameField.setWidth(400f);
             _nameField.addEventListener("value", &_onChangeField);
             nameBox.addUI(_nameField);
 
-            _nameErrorLabel = new Label("", Ciel.getFont());
-            _nameErrorLabel.color = Ciel.getDanger();
+            _nameErrorLabel = new Label("", Atelier.theme.font);
+            _nameErrorLabel.color = Atelier.theme.danger;
             _nameErrorLabel.isVisible = false;
             nameBox.addUI(_nameErrorLabel);
         }
@@ -72,7 +72,7 @@ final class NewProject : Modal {
             configBox.setSpacing(8f);
             vbox.addUI(configBox);
 
-            configBox.addUI(new Label("Configuration:", Ciel.getFont()));
+            configBox.addUI(new Label("Configuration:", Atelier.theme.font));
 
             _configField = new TextField;
             _configField.value = "app";
@@ -80,8 +80,8 @@ final class NewProject : Modal {
             _configField.addEventListener("value", &_onChangeField);
             configBox.addUI(_configField);
 
-            _configErrorLabel = new Label("", Ciel.getFont());
-            _configErrorLabel.color = Ciel.getDanger();
+            _configErrorLabel = new Label("", Atelier.theme.font);
+            _configErrorLabel.color = Atelier.theme.danger;
             _configErrorLabel.isVisible = false;
             configBox.addUI(_configErrorLabel);
         }
@@ -92,7 +92,7 @@ final class NewProject : Modal {
             sourceBox.setSpacing(8f);
             vbox.addUI(sourceBox);
 
-            sourceBox.addUI(new Label("Fichier source:", Ciel.getFont()));
+            sourceBox.addUI(new Label("Fichier source:", Atelier.theme.font));
 
             HBox hbox = new HBox;
             hbox.setSpacing(4f);
@@ -104,10 +104,10 @@ final class NewProject : Modal {
             _sourceField.addEventListener("value", &_onChangeField);
             hbox.addUI(_sourceField);
 
-            hbox.addUI(new Label(".gr", Ciel.getFont()));
+            hbox.addUI(new Label(".gr", Atelier.theme.font));
 
-            _sourceErrorLabel = new Label("", Ciel.getFont());
-            _sourceErrorLabel.color = Ciel.getDanger();
+            _sourceErrorLabel = new Label("", Atelier.theme.font);
+            _sourceErrorLabel.color = Atelier.theme.danger;
             _sourceErrorLabel.isVisible = false;
             sourceBox.addUI(_sourceErrorLabel);
         }
@@ -118,7 +118,7 @@ final class NewProject : Modal {
             pathBox.setSpacing(8f);
             vbox.addUI(pathBox);
 
-            pathBox.addUI(new Label("Dossier du projet:", Ciel.getFont()));
+            pathBox.addUI(new Label("Dossier du projet:", Atelier.theme.font));
 
             HBox hbox = new HBox;
             hbox.setSpacing(8f);
@@ -141,8 +141,8 @@ final class NewProject : Modal {
             });
             hbox.addUI(browseBtn);
 
-            _pathErrorLabel = new Label("", Ciel.getFont());
-            _pathErrorLabel.color = Ciel.getDanger();
+            _pathErrorLabel = new Label("", Atelier.theme.font);
+            _pathErrorLabel.color = Atelier.theme.danger;
             _pathErrorLabel.isVisible = false;
             pathBox.addUI(_pathErrorLabel);
         }

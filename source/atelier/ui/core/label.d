@@ -1,4 +1,4 @@
-module atelier.ui.label;
+module atelier.ui.core.label;
 
 import std.algorithm.comparison : min;
 import std.conv : to;
@@ -7,7 +7,7 @@ import std.stdio;
 
 import atelier.common;
 import atelier.render;
-import atelier.ui.element;
+import atelier.ui.core.element;
 
 /// Label
 final class Label : UIElement {

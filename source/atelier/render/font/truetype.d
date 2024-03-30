@@ -55,12 +55,19 @@ final class TrueTypeFont : Font, Resource!TrueTypeFont {
         _outline = font._outline;
     }
 
-    /// Ctor
-    this(const string filePath, uint size_ = 12u, uint outline_ = 0) {
+    static TrueTypeFont fromMemory(const(ubyte)[] data, uint size_ = 12u, uint outline_ = 0) {
+        return new TrueTypeFont(data, size_, outline_);
+    }
+
+    static TrueTypeFont fromFile(const string filePath, uint size_ = 12u, uint outline_ = 0) {
         const(ubyte)[] data = Atelier.res.read(filePath);
-        SDL_RWops* rw = SDL_RWFromConstMem(cast(const(void)*) data.ptr, cast(int) data.length);
+        return new TrueTypeFont(data, size_, outline_);
+    }
+
+    private this(const(ubyte)[] data, uint size_, uint outline_) {
         _size = size_;
         _outline = outline_;
+        SDL_RWops* rw = SDL_RWFromConstMem(cast(const(void)*) data.ptr, cast(int) data.length);
 
         assert(_size != 0u, "can't render a font with no size");
         if (null != _trueTypeFont)

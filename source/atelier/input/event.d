@@ -26,22 +26,22 @@ enum KeyState {
 
 pragma(inline) {
     /// Dans le cas d’une touche ou d’un bouton, est-il appuyé ?
-    bool pressed(KeyState state) {
+    bool isKeyStatePressed(KeyState state) {
         return cast(bool)(state & KeyState.pressed);
     }
 
     /// Dans le cas d’une touche ou d’un bouton, est-il maintenu enfoncé ?
-    bool held(KeyState state) {
+    bool isKeyStateHeld(KeyState state) {
         return cast(bool)(state & KeyState.held);
     }
 
     /// Dans le cas d'une touche ou d'un bouton, a-t-il été appuyé cette frame ?
-    bool down(KeyState state) {
+    bool isKeyStateDown(KeyState state) {
         return cast(bool)(state & KeyState.down);
     }
 
     /// Dans le cas d'une touche ou d'un bouton, a-t-on arreté d'appuyer dessus cette frame ?
-    bool up(KeyState state) {
+    bool isKeyStateUp(KeyState state) {
         return cast(bool)(state & KeyState.up);
     }
 }
@@ -361,8 +361,7 @@ final class InputEvent {
         Vec2f deltaPosition;
 
         /// Init
-        this(Button button_, InputState state_, uint clicks_,
-            Vec2f position_, Vec2f deltaPosition_) {
+        this(Button button_, InputState state_, uint clicks_, Vec2f position_, Vec2f deltaPosition_) {
             button = button_;
             state = state_;
             clicks = clicks_;
@@ -619,27 +618,27 @@ final class InputEvent {
         }
 
         /// Dans le cas d’une touche ou d’un bouton, est-il appuyé ?
-        bool pressed() const {
-            return state.pressed();
+        bool isPressed() const {
+            return cast(bool)(state & KeyState.pressed);
         }
 
         /// Dans le cas d’une touche ou d’un bouton, est-il maintenu enfoncé ?
-        bool held() const {
-            return state.held();
+        bool isHeld() const {
+            return cast(bool)(state & KeyState.held);
         }
 
         /// Dans le cas d'une touche ou d'un bouton, a-t-il été appuyé cette frame ?
-        bool down() const {
-            return state.down();
+        bool isDown() const {
+            return cast(bool)(state & KeyState.down);
         }
 
         /// Dans le cas d'une touche ou d'un bouton, a-t-on arreté d'appuyer dessus cette frame ?
-        bool up() const {
-            return state.held();
+        bool isUp() const {
+            return cast(bool)(state & KeyState.up);
         }
 
         /// L’événement est-il un écho ?
-        bool echo() const {
+        bool isEcho() const {
             switch (_type) with (Type) {
             case keyButton:
                 return _keyButton.echo;
@@ -654,7 +653,7 @@ final class InputEvent {
             case keyButton:
             case mouseButton:
             case controllerButton:
-                return pressed ? 1.0 : .0;
+                return isPressed() ? 1.0 : .0;
             case controllerAxis:
                 return _controllerAxis.value;
             default:
@@ -664,13 +663,13 @@ final class InputEvent {
 
         /// Formate l'etat
         string infoState() const {
-            if (down) {
+            if (isDown()) {
                 return "down";
             }
-            else if (held) {
+            else if (isHeld()) {
                 return "held";
             }
-            else if (up) {
+            else if (isUp()) {
                 return "up";
             }
             else {
@@ -779,8 +778,7 @@ final class InputEvent {
 
         void _makeMouseButton(MouseButton.Button button, InputState state,
             uint clicks, Vec2f position, Vec2f deltaPosition) {
-            _mouseButton = new MouseButton(button, state, clicks,
-                position, deltaPosition);
+            _mouseButton = new MouseButton(button, state, clicks, position, deltaPosition);
         }
 
         void _makeMouseMotion(Vec2f position, Vec2f deltaPosition) {

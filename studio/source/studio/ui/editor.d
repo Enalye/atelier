@@ -44,6 +44,8 @@ void initApp() {
         });
         Ciel.pushModalUI(modal);
     });
+    bar.add("Projet", "Ouvrir");
+    bar.add("Projet", "Fermer");
     bar.addSeparator("Projet");
     bar.add("Projet", "Lancer");
     bar.add("Projet", "Exporter");

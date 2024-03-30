@@ -47,20 +47,8 @@ package void loadLibUI_element(GrModule mod) {
     mod.setDescription(GrLocale.fr_FR, "Taille de l’interface");
     mod.addProperty(&_size!"get", &_size!"set", "size", elementType, vec2fType);
 
-    mod.setDescription(GrLocale.fr_FR, "Facteur d’échelle de l’interface");
-    mod.addProperty(&_scale!"get", &_scale!"set", "scale", elementType, vec2fType);
-
     mod.setDescription(GrLocale.fr_FR, "Point de rotation de l’interface");
     mod.addProperty(&_pivot!"get", &_pivot!"set", "pivot", elementType, vec2fType);
-
-    mod.setDescription(GrLocale.fr_FR, "Rotation de l’interface");
-    mod.addProperty(&_angle!"get", &_angle!"set", "angle", elementType, grDouble);
-
-    mod.setDescription(GrLocale.fr_FR, "Couleur de l’interface");
-    mod.addProperty(&_color!"get", &_color!"set", "color", elementType, colorType);
-
-    mod.setDescription(GrLocale.fr_FR, "Opacité de l’interface");
-    mod.addProperty(&_alpha!"get", &_alpha!"set", "alpha", elementType, grFloat);
 
     mod.setDescription(GrLocale.fr_FR, "Fixe l’alignement de l’interface.
 Détermine à partir d’où la position de l’interface sera calculé par rapport au parent.");
@@ -99,6 +87,10 @@ Détermine à partir d’où la position de l’interface sera calculé par rapp
     mod.setDescription(GrLocale.fr_FR, "Ajoute un état à l’interface.");
     mod.setParameters(["ui", "state"]);
     mod.addFunction(&_addState, "addState", [elementType, stateType]);
+
+    mod.setDescription(GrLocale.fr_FR, "Retourne le nom de l’état actuel.");
+    mod.setParameters(["ui"]);
+    mod.addFunction(&_getState, "getState", [elementType], [grString]);
 
     mod.setDescription(GrLocale.fr_FR, "Fixe l’état actuel de l’interface sans transition.");
     mod.setParameters(["ui", "stateId"]);
@@ -165,15 +157,6 @@ private void _size(string op)(GrCall call) {
     call.setNative(svec2(ui.getSize()));
 }
 
-private void _scale(string op)(GrCall call) {
-    UIElement ui = call.getNative!UIElement(0);
-
-    static if (op == "set") {
-        ui.scale = call.getNative!SVec2f(1);
-    }
-    call.setNative(svec2(ui.scale));
-}
-
 private void _pivot(string op)(GrCall call) {
     UIElement ui = call.getNative!UIElement(0);
 
@@ -181,33 +164,6 @@ private void _pivot(string op)(GrCall call) {
         ui.setPivot(call.getNative!SVec2f(1));
     }
     call.setNative(svec2(ui.getPivot()));
-}
-
-private void _angle(string op)(GrCall call) {
-    UIElement ui = call.getNative!UIElement(0);
-
-    static if (op == "set") {
-        ui.angle = call.getDouble(1);
-    }
-    call.setDouble(ui.angle);
-}
-
-private void _color(string op)(GrCall call) {
-    UIElement ui = call.getNative!UIElement(0);
-
-    static if (op == "set") {
-        ui.color = call.getNative!SColor(1);
-    }
-    call.setNative(scolor(ui.color));
-}
-
-private void _alpha(string op)(GrCall call) {
-    UIElement ui = call.getNative!UIElement(0);
-
-    static if (op == "set") {
-        ui.alpha = call.getFloat(1);
-    }
-    call.setFloat(ui.alpha);
 }
 
 private void _setAlign(GrCall call) {
@@ -287,48 +243,22 @@ private void _isEnabled(string op)(GrCall call) {
 private void _addState(GrCall call) {
     UIElement ui = call.getNative!UIElement(0);
     UIElement.State state = call.getNative!(UIElement.State)(1);
+    ui.addState(state);
+}
 
-    ui.states[state.name] = state;
+private void _getState(GrCall call) {
+    UIElement ui = call.getNative!UIElement(0);
+    call.setString(ui.getState());
 }
 
 private void _setState(GrCall call) {
     UIElement ui = call.getNative!UIElement(0);
-
-    const auto ptr = call.getString(1) in ui.states;
-    if (!ptr) {
-        call.raise("NullError");
-        return;
-    }
-
-    ui.currentStateName = ptr.name;
-    ui.initState = null;
-    ui.targetState = null;
-    ui.offset = ptr.offset;
-    ui.scale = ptr.scale;
-    ui.color = ptr.color;
-    ui.angle = ptr.angle;
-    ui.alpha = ptr.alpha;
-    ui.timer.stop();
+    ui.setState(call.getString(1));
 }
 
 private void _runState(GrCall call) {
     UIElement ui = call.getNative!UIElement(0);
-
-    auto ptr = call.getString(1) in ui.states;
-    if (!ptr) {
-        call.raise("NullError");
-        return;
-    }
-
-    ui.currentStateName = ptr.name;
-    ui.initState = new UIElement.State;
-    ui.initState.offset = ui.offset;
-    ui.initState.scale = ui.scale;
-    ui.initState.angle = ui.angle;
-    ui.initState.alpha = ui.alpha;
-    ui.initState.time = ui.timer.duration;
-    ui.targetState = *ptr;
-    ui.timer.start(ptr.time);
+    ui.runState(call.getString(1));
 }
 
 private void _addImage(GrCall call) {

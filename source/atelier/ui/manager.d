@@ -20,7 +20,7 @@ import atelier.ui.element;
 /// Gestionnaire d’interfaces
 final class UIManager {
     private {
-        UIElement[] _elements;
+        Array!UIElement _elements;
 
         UIElement _pressedElement;
         Vec2f _pressedElementPosition = Vec2f.zero;
@@ -33,25 +33,82 @@ final class UIManager {
         Vec2f _hoveredElementPosition = Vec2f.zero;
 
         UIElement _focusedElement;
+
+        InputEvent _inputEvent;
+
+        UIElement[] _mouseDownElements;
+
+        UIElement[] _modalStack;
     }
 
     @property {
         Vec2f pressedElementPosition() const {
             return _pressedElementPosition;
         }
+
+        InputEvent input() {
+            return _inputEvent;
+        }
     }
 
     bool isDebug;
 
-    /// Update
+    this() {
+        _elements = new Array!UIElement;
+    }
+
+    /// Màj
     void update() {
-        foreach (UIElement element; _elements) {
+        UIElement[] modalElements;
+        bool isDirty;
+        for (size_t i; i < _modalStack.length; ++i) {
+            update(_modalStack[i]);
+            if (_modalStack[i].isAlive) {
+                modalElements ~= _modalStack[i];
+            }
+            else {
+                isDirty = true;
+            }
+        }
+        if (isDirty) {
+            _modalStack = modalElements;
+        }
+
+        sort!((a, b) => (a.zOrder > b.zOrder), SwapStrategy.stable)(_elements.array);
+        foreach (i, element; _elements) {
             update(element);
+
+            if (!element.isAlive) {
+                _elements.mark(i);
+            }
+        }
+        _elements.sweep();
+    }
+
+    void setFocus(UIElement element) {
+        if (_focusedElement && _focusedElement != element) {
+            _focusedElement.hasFocus = false;
+        }
+        _focusedElement = null;
+
+        if (element) {
+            if (element.focusable) {
+                _focusedElement = element;
+                _focusedElement.hasFocus = true;
+            }
         }
     }
 
     void dispatch(InputEvent event) {
-        switch (event.type) with (InputEvent.Type) {
+        _inputEvent = event;
+        final switch (event.type) with (InputEvent.Type) {
+        case none:
+            break;
+        case keyButton:
+            if (_focusedElement) {
+                _focusedElement.dispatchEvent("key");
+            }
+            break;
         case mouseButton:
             auto mouseButtonEvent = event.asMouseButton();
             if (mouseButtonEvent.state.down()) {
@@ -59,7 +116,7 @@ final class UIManager {
                 _pressedElement = null;
 
                 if (!event.isAccepted) {
-                    foreach (UIElement element; _elements) {
+                    foreach (UIElement element; _getActiveElements()) {
                         if (dispatchMouseDownEvent(mouseButtonEvent.position, element)) {
                             event.accept();
                             break;
@@ -71,15 +128,25 @@ final class UIManager {
                     _grabbedElement = _tempGrabbedElement;
                 }
 
+                if (_focusedElement && _focusedElement != _pressedElement) {
+                    _focusedElement.hasFocus = false;
+                }
+                _focusedElement = null;
+
                 if (_pressedElement) {
                     _pressedElement.isPressed = true;
+
+                    if (_pressedElement.focusable) {
+                        _focusedElement = _pressedElement;
+                        _focusedElement.hasFocus = true;
+                    }
                 }
             }
             else {
                 _grabbedElement = null;
 
                 if (!event.isAccepted) {
-                    foreach (UIElement element; _elements) {
+                    foreach (UIElement element; _getActiveElements()) {
                         if (dispatchMouseUpEvent(mouseButtonEvent.position, element)) {
                             event.accept();
                             break;
@@ -87,24 +154,19 @@ final class UIManager {
                     }
                 }
 
-                if (_focusedElement && _focusedElement != _pressedElement) {
-                    _focusedElement.hasFocus = false;
+                foreach (UIElement element; _mouseDownElements) {
+                    element.dispatchEvent("mouserelease", false);
                 }
-                _focusedElement = null;
+                _mouseDownElements.length = 0;
 
                 if (_pressedElement) {
                     _pressedElement.isPressed = false;
-                }
-
-                if (_pressedElement && _pressedElement.focusable) {
-                    _focusedElement = _pressedElement;
-                    _focusedElement.hasFocus = true;
                 }
             }
             break;
         case mouseMotion:
             auto mouseMotionEvent = event.asMouseMotion();
-            foreach (UIElement element; _elements) {
+            foreach (UIElement element; _getActiveElements()) {
                 dispatchMouseUpdateEvent(mouseMotionEvent.position, element);
             }
 
@@ -112,19 +174,55 @@ final class UIManager {
                 _hoveredElement.isHovered = true;
             }
             break;
-        default:
+        case mouseWheel:
+            if (_hoveredElement) {
+                _hoveredElement.dispatchEvent("wheel");
+            }
+            break;
+        case controllerButton:
+            if (_focusedElement) {
+                _focusedElement.dispatchEvent("button");
+            }
+            break;
+        case controllerAxis:
+            if (_focusedElement) {
+                _focusedElement.dispatchEvent("axis");
+            }
+            break;
+        case textInput:
+            if (_focusedElement) {
+                _focusedElement.dispatchEvent("text");
+            }
+            break;
+        case dropFile:
+            if (_focusedElement) {
+                _focusedElement.dispatchEvent("file");
+            }
             break;
         }
     }
 
+    private void updateMousePosition(Vec2f position, UIElement element) {
+        position = _getPointInElement(position, element);
+        element.setMousePosition(position);
+
+        foreach (child; element.getChildren()) {
+            updateMousePosition(position, child);
+        }
+    }
+
     /// Process a mouse down event down the tree.
-    private bool dispatchMouseDownEvent(Vec2f position, UIElement element, UIElement parent = null) {
-        position = _getPointInElement(position, element, parent);
+    private bool dispatchMouseDownEvent(Vec2f position, UIElement element) {
+        Vec2f parentPosition = position;
+        position = _getPointInElement(position, element);
         Vec2f elementSize = element.getSize() * element.scale;
         element.setMousePosition(position);
 
         bool isInside = position.isBetween(Vec2f.zero, elementSize);
         if (!element.isEnabled || !isInside) {
+            foreach (child; element.getChildren()) {
+                updateMousePosition(position, child);
+            }
             return false;
         }
 
@@ -135,30 +233,34 @@ final class UIManager {
 
         if (element.movable && !_grabbedElement) {
             _tempGrabbedElement = element;
-            _grabbedElementPosition = _pressedElementPosition;
+            _grabbedElementPosition = parentPosition;
         }
 
         foreach (child; element.getChildren())
-            dispatchMouseDownEvent(position, child, element);
+            dispatchMouseDownEvent(position, child);
 
         element.dispatchEvent("mousedown", false);
+        _mouseDownElements ~= element;
 
         return true;
     }
 
     /// Process a mouse up event down the tree.
-    private bool dispatchMouseUpEvent(Vec2f position, UIElement element, UIElement parent = null) {
-        position = _getPointInElement(position, element, parent);
+    private bool dispatchMouseUpEvent(Vec2f position, UIElement element) {
+        position = _getPointInElement(position, element);
         Vec2f elementSize = element.getSize() * element.scale;
         element.setMousePosition(position);
 
         bool isInside = position.isBetween(Vec2f.zero, elementSize);
         if (!element.isEnabled || !isInside) {
+            foreach (child; element.getChildren()) {
+                updateMousePosition(position, child);
+            }
             return false;
         }
 
         foreach (child; element.getChildren())
-            dispatchMouseUpEvent(position, child, element);
+            dispatchMouseUpEvent(position, child);
 
         element.dispatchEvent("mouseup", false);
 
@@ -174,14 +276,16 @@ final class UIManager {
 
             dispatchEventExclude("clickoutside", _pressedElement);
             _pressedElement.dispatchEvent("click");
+            _pressedElement.dispatchEvent("clickinside");
         }
 
         return true;
     }
 
     /// Process a mouse update event down the tree.
-    private void dispatchMouseUpdateEvent(Vec2f position, UIElement element, UIElement parent = null) {
-        position = _getPointInElement(position, element, parent);
+    private void dispatchMouseUpdateEvent(Vec2f position, UIElement element) {
+        Vec2f parentPosition = position;
+        position = _getPointInElement(position, element);
         Vec2f elementSize = element.getSize() * element.scale;
         element.setMousePosition(position);
 
@@ -194,7 +298,7 @@ final class UIManager {
                 _grabbedElement = null;
             }
             else {
-                Vec2f delta = position - _grabbedElementPosition;
+                Vec2f delta = parentPosition - _grabbedElementPosition;
 
                 if (element.getAlignX() == UIAlignX.right)
                     delta.x = -delta.x;
@@ -204,7 +308,7 @@ final class UIManager {
 
                 element.setPosition(element.getPosition() + delta);
 
-                _grabbedElementPosition = position;
+                _grabbedElementPosition = parentPosition;
             }
         }
 
@@ -226,11 +330,15 @@ final class UIManager {
             }
 
             unhoverElement(element);
+
+            foreach (child; element.getChildren()) {
+                updateMousePosition(position, child);
+            }
             return;
         }
 
         foreach (child; element.getChildren())
-            dispatchMouseUpdateEvent(position, child, element);
+            dispatchMouseUpdateEvent(position, child);
     }
 
     private void update(UIElement element) {
@@ -279,9 +387,8 @@ final class UIManager {
         element.dispatchEvent("update", false);
     }
 
-    pragma(inline) private Vec2f _getPointInElement(Vec2f position,
-        UIElement element, UIElement parent = null) {
-        Vec2f elementPos = _getElementOrigin(element, parent);
+    pragma(inline) private Vec2f _getPointInElement(Vec2f position, UIElement element) {
+        Vec2f elementPos = element.getElementOrigin();
         Vec2f elementSize = element.getSize() * element.scale;
         Vec2f pivot = elementPos + elementSize * element.getPivot();
 
@@ -297,53 +404,21 @@ final class UIManager {
     bool isSceneUI;
     Vec2f cameraPosition = Vec2f.zero;
 
-    pragma(inline) private Vec2f _getElementOrigin(UIElement element, UIElement parent = null) {
-        Vec2f position = element.getPosition() + element.offset;
-
-        if (isSceneUI && !parent) {
-            return cameraPosition + position - element.getSize() * element.scale * 0.5f;
-        }
-
-        const Vec2f parentSize = parent ? parent.getSize() : cast(Vec2f) Atelier.renderer.size;
-
-        final switch (element.getAlignX()) with (UIAlignX) {
-        case left:
-            break;
-        case right:
-            position.x = parentSize.x - (position.x + (element.getWidth() * element.scale.x));
-            break;
-        case center:
-            position.x = (parentSize.x / 2f + position.x) - (element.getSize()
-                    .x * element.scale.x) / 2f;
-            break;
-        }
-
-        final switch (element.getAlignY()) with (UIAlignY) {
-        case top:
-            break;
-        case bottom:
-            position.y = parentSize.y - (position.y + (element.getHeight() * element.scale.y));
-            break;
-        case center:
-            position.y = (parentSize.y / 2f + position.y) - (element.getSize()
-                    .y * element.scale.y) / 2f;
-            break;
-        }
-
-        return position;
-    }
-
     /// Draw
     void draw() {
         foreach (UIElement element; _elements) {
             draw(element);
         }
+
+        foreach (UIElement element; _modalStack) {
+            draw(element);
+        }
     }
 
-    private void draw(UIElement element, UIElement parent = null) {
-        Vec2f position = _getElementOrigin(element, parent).round();
+    private void draw(UIElement element) {
+        Vec2f position = element.getElementOrigin().round();
 
-        if (element.getWidth() <= 0f || element.getHeight() <= 0f)
+        if (!element.isVisible || element.getWidth() <= 0f || element.getHeight() <= 0f)
             return;
 
         Atelier.renderer.pushCanvas(cast(uint) element.getWidth(), cast(uint) element.getHeight());
@@ -356,7 +431,7 @@ final class UIManager {
         element.dispatchEvent("draw", false);
 
         foreach (UIElement child; element.getChildren()) {
-            draw(child, element);
+            draw(child);
         }
 
         Vec2f size = element.scale * element.getSize();
@@ -369,13 +444,21 @@ final class UIManager {
 
     void dispatchEvent(string type, bool bubbleDown = true) {
         if (bubbleDown) {
-            foreach (UIElement child; _elements) {
-                _dispatchEvent(type, child);
+            foreach_reverse (UIElement element; _modalStack) {
+                _dispatchEvent(type, element);
+            }
+
+            foreach (UIElement element; _elements) {
+                _dispatchEvent(type, element);
             }
         }
         else {
-            foreach (UIElement child; _elements) {
-                child.dispatchEvent(type, false);
+            foreach_reverse (UIElement element; _modalStack) {
+                element.dispatchEvent(type, false);
+            }
+
+            foreach (UIElement element; _elements) {
+                element.dispatchEvent(type, false);
             }
         }
     }
@@ -418,17 +501,43 @@ final class UIManager {
         element.dispatchEvent(type, false);
     }
 
+    private UIElement[] _getActiveElements() {
+        if (_modalStack.length) {
+            return _modalStack[$ - 1 .. $];
+        }
+        return _elements.array;
+    }
+
     /// Ajoute un élément d’interface
     void addUI(UIElement element) {
         _elements ~= element;
+        element.setManager(this);
         element.isAlive = true;
+    }
+
+    void pushModalUI(UIElement element) {
+        _modalStack ~= element;
+        element.setManager(this);
+        element.isAlive = true;
+    }
+
+    void popModalUI() {
+        if (!_modalStack.length)
+            return;
+        _modalStack[$ - 1].remove();
+        _modalStack.length--;
     }
 
     /// Supprime toutes les interfaces
     void clearUI() {
-        _elements.length = 0;
+        foreach (UIElement element; _modalStack) {
+            element.remove();
+        }
+        _modalStack.length = 0;
+
         foreach (UIElement element; _elements) {
             element.remove();
         }
+        _elements.clear();
     }
 }

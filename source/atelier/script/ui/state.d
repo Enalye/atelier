@@ -44,9 +44,7 @@ package void loadLibUI_state(GrModule mod) {
 }
 
 private void _ui_state_new(GrCall call) {
-    UIElement.State state = new UIElement.State;
-
-    state.name = call.getString(0);
+    UIElement.State state = new UIElement.State(call.getString(0));
     call.setNative(state);
 }
 
@@ -114,30 +112,4 @@ private void _ui_state_spline(string op)(GrCall call) {
         state.spline = call.getEnum!Spline(1);
     }
     call.setEnum!Spline(state.spline);
-}
-
-private void _ui_addState(GrCall call) {
-    UIElement ui = call.getNative!UIElement(0);
-    UIElement.State state = call.getNative!(UIElement.State)(1);
-
-    ui.states[state.name] = state;
-}
-
-private void _ui_setState(GrCall call) {
-    UIElement ui = call.getNative!UIElement(0);
-
-    const auto ptr = call.getString(1) in ui.states;
-    if (!ptr) {
-        call.raise("NullError");
-        return;
-    }
-
-    ui.currentStateName = ptr.name;
-    ui.initState = null;
-    ui.targetState = null;
-    ui.offset = ptr.offset;
-    ui.scale = ptr.scale;
-    ui.angle = ptr.angle;
-    ui.alpha = ptr.alpha;
-    ui.timer.stop();
 }

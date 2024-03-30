@@ -5,6 +5,7 @@ import grimoire;
 import atelier.common;
 import atelier.core;
 import atelier.render;
+import atelier.ui.manager;
 
 /// Alignement horizontal
 enum UIAlignX {
@@ -25,6 +26,7 @@ class UIElement {
     private {
         alias NativeEventListener = void delegate();
 
+        UIManager _manager;
         UIElement _parent;
         Array!UIElement _children;
         Array!Image _images;
@@ -43,17 +45,11 @@ class UIElement {
         bool _isEnabled = true;
         bool _isAlive;
         bool _widthLock, _heightLock;
+        bool _isVisible = true;
     }
 
     /// Ordenancement
     int zOrder = 0;
-
-    /// Transitions
-    Vec2f offset = Vec2f.zero;
-    Vec2f scale = Vec2f.one;
-    Color color = Color.white;
-    float alpha = 1f;
-    double angle = 0.0;
 
     static final class State {
         string name;
@@ -64,12 +60,26 @@ class UIElement {
         double angle = 0.0;
         int time = 60;
         Spline spline = Spline.linear;
+
+        this(string name_) {
+            name = name_;
+        }
     }
 
-    State[string] states;
-    string currentStateName;
-    State initState, targetState;
-    Timer timer;
+    package {
+        // Transitions
+        Vec2f offset = Vec2f.zero;
+        Vec2f scale = Vec2f.one;
+        Color color = Color.white;
+        float alpha = 1f;
+        double angle = 0.0;
+
+        // États
+        State[string] states;
+        string currentStateName;
+        State initState, targetState;
+        Timer timer;
+    }
 
     // Propriétés
     @property {
@@ -168,6 +178,18 @@ class UIElement {
             }
             return _isEnabled;
         }
+
+        final bool isVisible() const {
+            return _isVisible;
+        }
+
+        final bool isVisible(bool isVisible_) {
+            if (_isVisible != isVisible_) {
+                _isVisible = isVisible_;
+                dispatchEvent(_isVisible ? "visible" : "hidden", false);
+            }
+            return _isVisible;
+        }
     }
 
     bool focusable, movable;
@@ -177,8 +199,40 @@ class UIElement {
         _images = new Array!Image;
     }
 
+    final UIManager getManager() {
+        return _manager;
+    }
+
+    package final void setManager(UIManager manager) {
+        _manager = manager;
+        foreach (child; getChildren()) {
+            child.setManager(manager);
+        }
+    }
+
     final UIElement getParent() {
         return _parent;
+    }
+
+    final Vec2f getParentSize() const {
+        if (_parent) {
+            return _parent._size;
+        }
+        return cast(Vec2f) Atelier.renderer.size;
+    }
+
+    final float getParentWidth() const {
+        if (_parent) {
+            return _parent._size.x;
+        }
+        return Atelier.renderer.size.x;
+    }
+
+    final float getParentHeight() const {
+        if (_parent) {
+            return _parent._size.y;
+        }
+        return Atelier.renderer.size.y;
     }
 
     final Array!UIElement getChildren() {
@@ -202,12 +256,55 @@ class UIElement {
         _alignY = alignY;
     }
 
-    final UIAlignX getAlignX() {
+    final UIAlignX getAlignX() const {
         return _alignX;
     }
 
-    final UIAlignY getAlignY() {
+    final UIAlignY getAlignY() const {
         return _alignY;
+    }
+
+    final Vec2f getElementOrigin() const {
+        Vec2f position = getPosition() + offset;
+
+        if (_manager && _manager.isSceneUI && !_parent) {
+            return _manager.cameraPosition + position - getSize() * scale * 0.5f;
+        }
+
+        const Vec2f parentSize = getParentSize();
+
+        final switch (getAlignX()) with (UIAlignX) {
+        case left:
+            break;
+        case right:
+            position.x = parentSize.x - (position.x + (getWidth() * scale.x));
+            break;
+        case center:
+            position.x = (parentSize.x / 2f + position.x) - (getSize().x * scale.x) / 2f;
+            break;
+        }
+
+        final switch (getAlignY()) with (UIAlignY) {
+        case top:
+            break;
+        case bottom:
+            position.y = parentSize.y - (position.y + (getHeight() * scale.y));
+            break;
+        case center:
+            position.y = (parentSize.y / 2f + position.y) - (getSize().y * scale.y) / 2f;
+            break;
+        }
+
+        return position;
+    }
+
+    final Vec2f getAbsolutePosition() const {
+        Vec2f position = Vec2f.zero;
+        if (_parent) {
+            position = _parent.getAbsolutePosition();
+        }
+        position += getElementOrigin();
+        return position;
     }
 
     final Vec2f getPosition() const {
@@ -289,6 +386,48 @@ class UIElement {
             return;
         _pivot = pivot_;
         dispatchEvent("pivot");
+    }
+
+    final void addState(State state) {
+        states[state.name] = state;
+    }
+
+    final string getState() {
+        return currentStateName;
+    }
+
+    final void setState(string name) {
+        const auto ptr = name in states;
+        if (!ptr) {
+            return;
+        }
+
+        currentStateName = ptr.name;
+        initState = null;
+        targetState = null;
+        offset = ptr.offset;
+        scale = ptr.scale;
+        color = ptr.color;
+        angle = ptr.angle;
+        alpha = ptr.alpha;
+        timer.stop();
+    }
+
+    final void runState(string name) {
+        auto ptr = name in states;
+        if (!ptr) {
+            return;
+        }
+
+        currentStateName = ptr.name;
+        initState = new State("");
+        initState.offset = offset;
+        initState.scale = scale;
+        initState.angle = angle;
+        initState.alpha = alpha;
+        initState.time = timer.duration;
+        targetState = *ptr;
+        timer.start(ptr.time);
     }
 
     final void addEventListener(string type, NativeEventListener listener) {
@@ -374,6 +513,7 @@ class UIElement {
             return;
 
         element.isAlive = true;
+        element.setManager(_manager);
         element._parent = this;
         _children ~= element;
     }
@@ -395,6 +535,7 @@ class UIElement {
 
     final void remove() {
         isAlive = false;
+        setManager(null);
         _parent = null;
     }
 }

@@ -81,5 +81,8 @@
                 "AtelierDoc"
             ]
         }
+    ],
+    "subPackages": [
+        "./studio"
     ]
 }

@@ -1,0 +1,9 @@
+{
+    "dscanner.ignoredKeys": [
+        "dscanner.suspicious.unmodified",
+        "dscanner.confusing.argument_parameter_mismatch",
+        "dscanner.vcall_ctor",
+        "dscanner.style.long_line",
+        "dscanner.confusing.lambda_returns_lambda"
+    ]
+}

@@ -5,16 +5,44 @@
  */
 module studio.ui.editor;
 
+import std.file;
+import std.path;
 import ciel;
+import farfadet;
 import studio.ui.propertyeditor;
 import studio.ui.tabbar;
 import studio.ui.resourcelist;
 import studio.ui.newproject;
 
+private enum Default_SourceFileContent = `
+event app {
+    // Début du programme
+    print("Bonjour le monde !");
+}
+`;
+
+private enum Default_GitIgnoreContent = `
+# Dossiers
+export/
+
+# Fichiers
+*.pqt
+*.atl
+*.exe
+*.dll
+*.so
+`;
+
 void initApp() {
     MenuBar bar = new MenuBar;
+    Editor editor = new Editor;
+
     bar.add("Projet", "Nouveau Projet").addEventListener("click", {
-        Ciel.pushModalUI(new NewProject);
+        auto modal = new NewProject;
+        modal.addEventListener("newProject", {
+            editor.createProject(modal.path, modal.configName, modal.sourceFile);
+        });
+        Ciel.pushModalUI(modal);
     });
     bar.addSeparator("Projet");
     bar.add("Projet", "Lancer");
@@ -30,7 +58,6 @@ void initApp() {
     bar.add("Ressource", "Fermer");
     Ciel.addUI(bar);
 
-    Editor editor = new Editor;
     Ciel.addUI(editor);
 }
 
@@ -60,14 +87,34 @@ final class Editor : UIElement {
             addUI(_propertyEditor);
         }
 
-        {
-            auto bc = new FileBrowser();
-            bc.setAlign(UIAlignX.center, UIAlignY.center);
-            addUI(bc);
-        }
-
         addEventListener("windowSize", {
             setSize(Vec2f(Ciel.width, Ciel.height - 35f));
         });
+    }
+
+    void createProject(string path, string configName, string sourceFile) {
+        Farfadet ffd = new Farfadet;
+
+        { // Programme par défaut
+            Farfadet default_ = ffd.addNode("default");
+            default_.add(configName);
+        }
+
+        {
+            Farfadet configNode = ffd.addNode("config").add(configName);
+            configNode.addNode("source").add(sourceFile);
+            configNode.addNode("export").add("export");
+
+            Farfadet windowNode = configNode.addNode("window");
+            windowNode.addNode("size").add(800).add(600);
+        }
+
+        if (!exists(path))
+            mkdir(path);
+
+        ffd.save(buildNormalizedPath(path, "atelier.ffd"));
+
+        std.file.write(buildNormalizedPath(path, ".gitignore"), Default_GitIgnoreContent);
+        std.file.write(buildNormalizedPath(path, sourceFile), Default_SourceFileContent);
     }
 }

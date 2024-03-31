@@ -5,7 +5,7 @@
  */
 module studio.ui.propertyeditor;
 
-import ciel;
+import atelier;
 
 final class PropertyEditor : Surface {
     private {
@@ -13,10 +13,10 @@ final class PropertyEditor : Surface {
 
     this() {
         setAlign(UIAlignX.right, UIAlignY.bottom);
-        setSize(Vec2f(200f, Ciel.height - 50f));
+        setSize(Vec2f(200f, Atelier.window.height - 50f));
 
         addEventListener("windowSize", {
-            setSize(Vec2f(200f, Ciel.height - 50f));
+            setSize(Vec2f(200f, Atelier.window.height - 50f));
         });
     }
 }

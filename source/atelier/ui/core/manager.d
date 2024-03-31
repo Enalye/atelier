@@ -116,10 +116,11 @@ final class UIManager {
                 _pressedElement = null;
 
                 if (!event.isAccepted) {
-                    foreach (UIElement element; _getActiveElements()) {
-                        if (dispatchMouseDownEvent(mouseButtonEvent.position, element)) {
+                    bool isDiscarded;
+                    foreach_reverse (UIElement element; _getActiveElements()) {
+                        if (dispatchMouseDownEvent(mouseButtonEvent.position, element, isDiscarded)) {
                             event.accept();
-                            break;
+                            isDiscarded = true;
                         }
                     }
                 }
@@ -146,10 +147,11 @@ final class UIManager {
                 _grabbedElement = null;
 
                 if (!event.isAccepted) {
-                    foreach (UIElement element; _getActiveElements()) {
-                        if (dispatchMouseUpEvent(mouseButtonEvent.position, element)) {
+                    bool isDiscarded;
+                    foreach_reverse (UIElement element; _getActiveElements()) {
+                        if (dispatchMouseUpEvent(mouseButtonEvent.position, element, isDiscarded)) {
                             event.accept();
-                            break;
+                            isDiscarded = true;
                         }
                     }
                 }
@@ -212,14 +214,14 @@ final class UIManager {
     }
 
     /// Process a mouse down event down the tree.
-    private bool dispatchMouseDownEvent(Vec2f position, UIElement element) {
+    private bool dispatchMouseDownEvent(Vec2f position, UIElement element, bool isDiscarded = false) {
         Vec2f parentPosition = position;
         position = _getPointInElement(position, element);
         Vec2f elementSize = element.getSize() * element.scale;
         element.setMousePosition(position);
 
         bool isInside = position.isBetween(Vec2f.zero, elementSize);
-        if (!element.isEnabled || !isInside) {
+        if (!element.isEnabled || !isInside || isDiscarded) {
             foreach (child; element.getChildren()) {
                 updateMousePosition(position, child);
             }
@@ -236,8 +238,12 @@ final class UIManager {
             _grabbedElementPosition = parentPosition;
         }
 
-        foreach (child; element.getChildren())
-            dispatchMouseDownEvent(position, child);
+        foreach_reverse (child; element.getChildren()) {
+            bool discard = dispatchMouseDownEvent(position, child, isDiscarded);
+            if (discard) {
+                isDiscarded = discard;
+            }
+        }
 
         element.dispatchEvent("mousedown", false);
         _mouseDownElements ~= element;
@@ -246,21 +252,25 @@ final class UIManager {
     }
 
     /// Process a mouse up event down the tree.
-    private bool dispatchMouseUpEvent(Vec2f position, UIElement element) {
+    private bool dispatchMouseUpEvent(Vec2f position, UIElement element, bool isDiscarded = false) {
         position = _getPointInElement(position, element);
         Vec2f elementSize = element.getSize() * element.scale;
         element.setMousePosition(position);
 
         bool isInside = position.isBetween(Vec2f.zero, elementSize);
-        if (!element.isEnabled || !isInside) {
+        if (!element.isEnabled || !isInside || isDiscarded) {
             foreach (child; element.getChildren()) {
                 updateMousePosition(position, child);
             }
             return false;
         }
 
-        foreach (child; element.getChildren())
-            dispatchMouseUpEvent(position, child);
+        foreach_reverse (child; element.getChildren()) {
+            bool discard = dispatchMouseUpEvent(position, child, isDiscarded);
+            if (discard) {
+                isDiscarded = discard;
+            }
+        }
 
         element.dispatchEvent("mouseup", false);
 
@@ -275,7 +285,7 @@ final class UIManager {
             element.isHovered = true;
 
             dispatchEventExclude("clickoutside", _pressedElement);
-            _pressedElement.dispatchEvent("click");
+            _pressedElement.dispatchEvent("click", false);
             _pressedElement.dispatchEvent("clickinside");
         }
 
@@ -438,8 +448,16 @@ final class UIManager {
         Atelier.renderer.popCanvasAndDraw(position, size, element.angle,
             element.getPivot(), element.color, element.alpha);
 
-        if (isDebug)
-            Atelier.renderer.drawRect(position, size, Color.blue, 1f, false);
+        if (isDebug) {
+            Color rectColor = Color.blue;
+            if (!element.isEnabled)
+                rectColor = Color.white;
+            else if (element.isPressed)
+                rectColor = Color.red;
+            else if (element.isHovered)
+                rectColor = Color.green;
+            Atelier.renderer.drawRect(position, size, rectColor, 1f, false);
+        }
     }
 
     void dispatchEvent(string type, bool bubbleDown = true) {

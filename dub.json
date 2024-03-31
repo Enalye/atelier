@@ -5,7 +5,7 @@
     "copyright": "Copyright © 2023, Enalye",
     "description": "Moteur 2D pour Grimoire",
     "license": "Zlib",
-    "name": "atelier_engine",
+    "name": "atelier",
     "targetName": "atelier",
     "workingDirectory": ".",
     "dependencies": {
@@ -57,8 +57,17 @@
                 "-gf"
             ],
             "versions": [
-                "AtelierDebug"
+                "AtelierDebug",
+                "AtelierExe"
             ]
+        },
+        {
+            "name": "atelier_core",
+            "versions": [
+                "AtelierCore"
+            ],
+            "targetType": "library",
+            "targetName": "atelier"
         },
         {
             "name": "atelier_dll",
@@ -78,7 +87,8 @@
                 "-gf"
             ],
             "versions": [
-                "AtelierDoc"
+                "AtelierDoc",
+                "AtelierExe"
             ]
         }
     ],

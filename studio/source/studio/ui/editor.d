@@ -7,7 +7,7 @@ module studio.ui.editor;
 
 import std.file;
 import std.path;
-import ciel;
+import atelier;
 import farfadet;
 import studio.ui.propertyeditor;
 import studio.ui.tabbar;
@@ -41,8 +41,9 @@ void initApp() {
         auto modal = new NewProject;
         modal.addEventListener("newProject", {
             editor.createProject(modal.path, modal.configName, modal.sourceFile);
+            Atelier.ui.popModalUI();
         });
-        Ciel.pushModalUI(modal);
+        Atelier.ui.pushModalUI(modal);
     });
     bar.add("Projet", "Ouvrir");
     bar.add("Projet", "Fermer");
@@ -58,9 +59,9 @@ void initApp() {
     bar.add("Ressource", "Enregistrer Sous…");
     bar.addSeparator("Ressource");
     bar.add("Ressource", "Fermer");
-    Ciel.addUI(bar);
+    Atelier.ui.addUI(bar);
+    Atelier.ui.addUI(editor);
 
-    Ciel.addUI(editor);
 }
 
 final class Editor : UIElement {
@@ -72,11 +73,10 @@ final class Editor : UIElement {
     }
 
     this() {
-        setSize(Vec2f(Ciel.width, Ciel.height - 35f));
+        setSize(Vec2f(Atelier.renderer.size.x, Atelier.renderer.size.y - 35f));
         setAlign(UIAlignX.center, UIAlignY.bottom);
 
         _tabBar = new TabBar;
-        _tabBar.setPosition(Vec2f(0f, 50f));
         addUI(_tabBar);
 
         {
@@ -90,7 +90,7 @@ final class Editor : UIElement {
         }
 
         addEventListener("windowSize", {
-            setSize(Vec2f(Ciel.width, Ciel.height - 35f));
+            setSize(Vec2f(Atelier.window.width, Atelier.window.height - 35f));
         });
     }
 

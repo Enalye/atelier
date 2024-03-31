@@ -5,7 +5,7 @@
  */
 module studio.ui.resourcelist;
 
-import ciel;
+import atelier;
 
 final class ResourceList : Surface {
     private {
@@ -14,9 +14,11 @@ final class ResourceList : Surface {
 
     this() {
         setAlign(UIAlignX.left, UIAlignY.bottom);
-        setSize(Vec2f(200f, Ciel.height - 50f));
+        setSize(Vec2f(200f, Atelier.window.height - 50f));
 
-        addEventListener("windowSize", { setSize(Vec2f(200f, Ciel.height - 50f)); });
+        addEventListener("windowSize", {
+            setSize(Vec2f(200f, Atelier.window.height - 50f));
+        });
 
         VBox box = new VBox;
         box.setSpacing(10f);

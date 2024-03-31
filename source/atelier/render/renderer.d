@@ -64,7 +64,6 @@ final class Renderer {
         }
     }
 
-    Color color = Color.white;
     uint scalingTime = 15;
 
     this(Window window) {
@@ -196,7 +195,7 @@ final class Renderer {
         _scaledSprite.size = scaledSize;
         _scaledSprite.draw(Vec2f(Atelier.window.width, Atelier.window.height) / 2f);
 
-        SDL_Color sdlColor = color.toSDL();
+        SDL_Color sdlColor = Atelier.theme.background.toSDL();
 
         SDL_RenderPresent(_sdlRenderer);
         SDL_SetRenderDrawColor(_sdlRenderer, sdlColor.r, sdlColor.g, sdlColor.b, 0);

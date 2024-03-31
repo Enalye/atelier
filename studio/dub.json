@@ -10,13 +10,16 @@
     "targetName": "studio",
     "workingDirectory": "..",
     "dependencies": {
-        "ciel": {
-            "path": "../ciel"
+        "atelier": {
+            "path": "../"
         },
         "farfadet": {
             "path": "../farfadet"
         }
     },
+	"subConfigurations": {
+		"atelier": "atelier_core"
+	},
     "configurations": [
         {
             "name": "debug",

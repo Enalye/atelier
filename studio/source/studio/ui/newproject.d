@@ -7,7 +7,7 @@ module studio.ui.newproject;
 
 import std.path;
 import std.file;
-import ciel;
+import atelier;
 
 final class NewProject : Modal {
     private {
@@ -135,9 +135,9 @@ final class NewProject : Modal {
                 auto browser = new BrowseDir(_pathField.value);
                 browser.addEventListener("value", {
                     _pathField.value = browser.value;
-                    Ciel.popModalUI();
+                    Atelier.ui.popModalUI();
                 });
-                Ciel.pushModalUI(browser);
+                Atelier.ui.pushModalUI(browser);
             });
             hbox.addUI(browseBtn);
 

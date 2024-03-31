@@ -5,7 +5,7 @@
  */
 module studio.ui.tabbar;
 
-import ciel;
+import atelier;
 
 final class TabBar : Surface {
     private {
@@ -13,10 +13,12 @@ final class TabBar : Surface {
     }
 
     this() {
-        setSize(Vec2f(Ciel.width, 25f));
+        setSize(Vec2f(Atelier.window.width, 25f));
+        setAlign(UIAlignX.left, UIAlignY.top);
+        addUI(new Label("YOOOO", Atelier.theme.font));
 
         addEventListener("windowSize", {
-            setSize(Vec2f(Ciel.width, 25f));
+            setSize(Vec2f(Atelier.window.width, 25f));
         });
     }
 }

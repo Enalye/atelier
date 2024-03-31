@@ -133,6 +133,10 @@ final class Atelier {
         _isRunning = false;
     }
 
+    this(uint windowWidth, uint windowHeight, string windowTitle) {
+        this(false, null, [], windowWidth, windowHeight, windowTitle);
+    }
+
     this(bool isRedist_, CompileFunc compileFunc, GrLibrary[] libraries,
         uint windowWidth, uint windowHeight, string windowTitle) {
         _isRedist = isRedist_;

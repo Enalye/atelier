@@ -60,7 +60,8 @@ final class IArray(T, size_t _capacity, bool _useParallelism = false) {
             //Retire le dernier index disponible dans la liste
             _availableIndexesTop--;
             index = _availableIndexes[_availableIndexesTop];
-        } else {
+        }
+        else {
             //Ou on utilise un nouvel id
             index = _dataTop;
         }
@@ -131,7 +132,8 @@ final class IArray(T, size_t _capacity, bool _useParallelism = false) {
 
             return result;
         }
-    } else {
+    }
+    else {
         /// Ditto
         int opApply(int delegate(ref T) dlg) {
             int result;
@@ -175,7 +177,8 @@ final class IArray(T, size_t _capacity, bool _useParallelism = false) {
 
             return result;
         }
-    } else {
+    }
+    else {
         /// Ditto
         int opApply(int delegate(const size_t, ref T) dlg) {
             int result;
@@ -220,14 +223,14 @@ final class IArray(T, size_t _capacity, bool _useParallelism = false) {
     }
 
     /// Opérateur ~
-    typeof(this) opBinary(string op: "~")(T value) const {
+    typeof(this) opBinary(string op : "~")(T value) const {
         typeof(this) result = new typeof(this);
         result ~= value;
         return result;
     }
 
     /// Opérateur ~=
-    typeof(this) opOpAssign(string op: "~")(T value) {
+    typeof(this) opOpAssign(string op : "~")(T value) {
         push(value);
         return this;
     }
@@ -346,12 +349,41 @@ final class Array(T, bool _useParallelism = false) {
 
             return result;
         }
-    } else {
+
+        /// Ditto
+        int opApplyReverse(int delegate(ref T) dlg) {
+            int result;
+
+            foreach_reverse (i; parallel(iota(_dataTable.length))) {
+                result = dlg(_dataTable[i]);
+
+                if (result)
+                    break;
+            }
+
+            return result;
+        }
+    }
+    else {
         /// Ditto
         int opApply(int delegate(ref T) dlg) {
             int result;
 
             foreach (value; _dataTable) {
+                result = dlg(value);
+
+                if (result)
+                    break;
+            }
+
+            return result;
+        }
+
+        /// Ditto
+        int opApplyReverse(int delegate(ref T) dlg) {
+            int result;
+
+            foreach_reverse (value; _dataTable) {
                 result = dlg(value);
 
                 if (result)
@@ -376,6 +408,20 @@ final class Array(T, bool _useParallelism = false) {
         return result;
     }
 
+    /// Ditto
+    int opApplyReverse(int delegate(const ref T) dlg) const {
+        int result;
+
+        foreach_reverse (value; _dataTable) {
+            result = dlg(value);
+
+            if (result)
+                break;
+        }
+
+        return result;
+    }
+
     static if (_useParallelism) {
         /// Ditto
         int opApply(int delegate(const size_t, ref T) dlg) {
@@ -390,12 +436,41 @@ final class Array(T, bool _useParallelism = false) {
 
             return result;
         }
-    } else {
+
+        /// Ditto
+        int opApplyReverse(int delegate(const size_t, ref T) dlg) {
+            int result;
+
+            foreach_reverse (i; parallel(iota(_dataTable.length))) {
+                result = dlg(i, _dataTable[i]);
+
+                if (result)
+                    break;
+            }
+
+            return result;
+        }
+    }
+    else {
         /// Ditto
         int opApply(int delegate(const size_t, ref T) dlg) {
             int result;
 
             foreach (size_t i, T value; _dataTable) {
+                result = dlg(i, value);
+
+                if (result)
+                    break;
+            }
+
+            return result;
+        }
+
+        /// Ditto
+        int opApplyReverse(int delegate(const size_t, ref T) dlg) {
+            int result;
+
+            foreach_reverse (size_t i, T value; _dataTable) {
                 result = dlg(i, value);
 
                 if (result)
@@ -421,6 +496,20 @@ final class Array(T, bool _useParallelism = false) {
     }
 
     /// Ditto
+    int opApplyReverse(int delegate(const size_t, const ref T) dlg) const {
+        int result;
+
+        foreach_reverse (size_t i, const T value; _dataTable) {
+            result = dlg(i, value);
+
+            if (result)
+                break;
+        }
+
+        return result;
+    }
+
+    /// Ditto
     int opApply(int delegate(const Tuple!(const size_t, const T)) dlg) const {
         int result;
 
@@ -434,15 +523,29 @@ final class Array(T, bool _useParallelism = false) {
         return result;
     }
 
+    /// Ditto
+    int opApplyReverse(int delegate(const Tuple!(const size_t, const T)) dlg) const {
+        int result;
+
+        foreach_reverse (size_t i, const T value; _dataTable) {
+            result = dlg(tuple!(const size_t, const T)(i, value));
+
+            if (result)
+                break;
+        }
+
+        return result;
+    }
+
     /// Opérateur ~
-    typeof(this) opBinary(string op: "~")(T value) const {
+    typeof(this) opBinary(string op : "~")(T value) const {
         typeof(this) result = new typeof(this);
         result ~= value;
         return result;
     }
 
     /// Opérateur ~=
-    typeof(this) opOpAssign(string op: "~")(T value) {
+    typeof(this) opOpAssign(string op : "~")(T value) {
         push(value);
         return this;
     }

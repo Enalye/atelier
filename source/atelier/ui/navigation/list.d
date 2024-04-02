@@ -32,6 +32,10 @@ abstract class List : UIElement {
         _contentView.addUI(element);
     }
 
+    UIElement[] getList() {
+        return _contentView.getChildren().array;
+    }
+
     void clearList() {
         _contentView.clearUI();
         _contentView.setContentPosition(0f);

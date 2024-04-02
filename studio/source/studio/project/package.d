@@ -6,6 +6,6 @@
 module studio.project;
 
 public {
-    import studio.project.config;
+    import studio.project.settings;
 }
 

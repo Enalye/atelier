@@ -27,7 +27,7 @@ final class NewProject : Modal {
         }
 
         string sourceFile() const {
-            return _sourceField.value;
+            return setExtension(_sourceField.value, ".gr");
         }
     }
 

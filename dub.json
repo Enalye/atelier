@@ -63,20 +63,21 @@
         },
         {
             "name": "atelier_core",
+            "targetType": "library",
+            "targetName": "atelier",
+            "targetPath": "../bin",
             "versions": [
                 "AtelierCore"
-            ],
-            "targetType": "library",
-            "targetName": "atelier"
+            ]
         },
         {
             "name": "atelier_dll",
-            "versions": [
-                "AtelierDLL"
-            ],
             "targetType": "dynamicLibrary",
             "targetPath": "export",
-            "targetName": "atelier"
+            "targetName": "atelier",
+            "versions": [
+                "AtelierDLL"
+            ]
         },
         {
             "name": "atelier_doc",

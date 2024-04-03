@@ -300,10 +300,7 @@ final class Atelier {
             setupDefaultResourceLoaders(_resourceManager);
             _resourceFiles.length = 0;
             _compiledResourceFiles.length = 0;
-
-            _loadArchives();
-            _compileResources();
-            _loadResources();
+            loadResources();
         }
 
         if (_mustReloadScript && _compileFunc) {
@@ -312,11 +309,13 @@ final class Atelier {
         _startVM();
     }
 
-    void run() {
+    void loadResources() {
         _loadArchives();
         _compileResources();
         _loadResources();
+    }
 
+    void run() {
         if (_compileFunc) {
             _bytecode = _compileFunc(_libraries);
         }

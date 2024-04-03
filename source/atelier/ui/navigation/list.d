@@ -44,6 +44,15 @@ abstract class List : UIElement {
     private void _onSize() {
         _background.size = getSize();
     }
+
+    float getContentPosition() {
+        return _contentView.getContentPosition();
+    }
+
+    void setContentPosition(float position) {
+        _contentView.setContentPosition(position);
+        _scrollbar.setContentPosition(position);
+    }
 }
 
 final class HList : List {

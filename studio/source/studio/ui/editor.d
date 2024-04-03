@@ -25,6 +25,7 @@ void initApp() {
         modal.addEventListener("newProject", {
             Project.create(modal.path, modal.configName, modal.sourceFile);
             Atelier.ui.popModalUI();
+            editor.updateRessourceFolders();
         });
         Atelier.ui.pushModalUI(modal);
     });
@@ -33,6 +34,7 @@ void initApp() {
         modal.addEventListener("value", {
             Project.open(modal.value);
             Atelier.ui.popModalUI();
+            editor.updateRessourceFolders();
         });
         Atelier.ui.pushModalUI(modal);
     });
@@ -48,6 +50,9 @@ void initApp() {
             return;
 
         auto modal = new ResourceFolderManager;
+        modal.addEventListener("updateRessourceFolders", {
+            editor.updateRessourceFolders();
+        });
         Atelier.ui.pushModalUI(modal);
     });
     bar.addSeparator("Ressource");
@@ -88,5 +93,9 @@ final class Editor : UIElement {
         addEventListener("windowSize", {
             setSize(Vec2f(Atelier.window.width, Atelier.window.height - 35f));
         });
+    }
+
+    void updateRessourceFolders() {
+        _resourceList.updateRessourceFolders();
     }
 }

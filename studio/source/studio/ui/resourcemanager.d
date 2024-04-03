@@ -72,6 +72,7 @@ final class ResourceFolderManager : Modal {
             Project.addRessourceFolder(elt._nameField.value, elt._archivedCheckbox.value);
         }
         Project.save();
+        dispatchEvent("updateRessourceFolders", false);
         remove();
     }
 }

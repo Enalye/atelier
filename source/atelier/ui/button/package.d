@@ -12,6 +12,7 @@ public {
     import atelier.ui.button.danger;
     import atelier.ui.button.fx;
     import atelier.ui.button.ghost;
+    import atelier.ui.button.icon;
     import atelier.ui.button.neutral;
     import atelier.ui.button.outlined;
     import atelier.ui.button.radio;

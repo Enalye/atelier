@@ -31,3 +31,28 @@ sprite "editor:magnify" {
     texture "editor"
     clip 80 0 16 16
 }
+
+sprite "editor:exit" {
+    texture "editor"
+    clip 96 0 8 8
+}
+
+sprite "editor:file-font" {
+    texture "editor"
+    clip 0 16 16 16
+}
+
+sprite "editor:file-image" {
+    texture "editor"
+    clip 16 16 16 16
+}
+
+sprite "editor:file-audio" {
+    texture "editor"
+    clip 32 16 16 16
+}
+
+sprite "editor:file-grimoire" {
+    texture "editor"
+    clip 48 16 16 16
+}

@@ -82,7 +82,7 @@ final class UIManager {
                 _elements.mark(i);
             }
         }
-        _elements.sweep();
+        _elements.sweep(true);
     }
 
     void setFocus(UIElement element) {
@@ -380,7 +380,7 @@ final class UIManager {
                 images.mark(i);
             }
         }
-        images.sweep();
+        images.sweep(true);
 
         /// Màj des enfants
         Array!UIElement children = element.getChildren();
@@ -392,7 +392,7 @@ final class UIManager {
                 children.mark(i);
             }
         }
-        children.sweep();
+        children.sweep(true);
 
         element.dispatchEvent("update", false);
     }

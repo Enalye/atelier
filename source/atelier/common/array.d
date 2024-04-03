@@ -5,6 +5,7 @@
  */
 module atelier.common.array;
 
+import std.algorithm;
 import std.parallelism;
 import std.range;
 import std.typecons;
@@ -307,13 +308,26 @@ final class Array(T, bool _useParallelism = false) {
     }
 
     /// Retire un élément de la liste
-    void pop(size_t index) {
-        //Prend la première valeur de la pile et comble le trou
-        if ((index + 1) < _dataTable.length) {
-            _dataTable[index] = _dataTable[$ - 1];
+    void pop(size_t index, bool isStable = false) {
+        if (isStable) {
+            if (index == 0) {
+                _dataTable = _dataTable[1 .. $];
+            }
+            else if (index + 1 == _dataTable.length) {
+                _dataTable.length--;
+            }
+            else {
+                _dataTable = _dataTable[0 .. index] ~ _dataTable[index + 1 .. $];
+            }
         }
+        else {
+            //Prend la première valeur de la pile et comble le trou
+            if ((index + 1) < _dataTable.length) {
+                _dataTable[index] = _dataTable[$ - 1];
+            }
 
-        _dataTable.length--;
+            _dataTable.length--;
+        }
     }
 
     /// Vide la liste
@@ -328,9 +342,25 @@ final class Array(T, bool _useParallelism = false) {
     }
 
     /// Supprime tous les éléments marqué pour suppression
-    void sweep() {
-        foreach (size_t index; _removeTable) {
-            pop(index);
+    void sweep(bool isStable = false) {
+        if (isStable) {
+            sort!("a > b", SwapStrategy.unstable)(_removeTable);
+
+            T[] result;
+            for (size_t i; i < _dataTable.length; ++i) {
+                if (_removeTable.length && i == _removeTable[$ - 1]) {
+                    _removeTable.length--;
+                }
+                else {
+                    result ~= _dataTable[i];
+                }
+            }
+            _dataTable = result;
+        }
+        else {
+            foreach (size_t index; _removeTable) {
+                pop(index);
+            }
         }
         _removeTable.length = 0u;
     }

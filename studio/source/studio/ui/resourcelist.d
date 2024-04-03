@@ -14,10 +14,10 @@ import std.string;
 import std.typecons : No;
 import atelier;
 import studio.project;
+import studio.ui.editor;
 
 final class ResourceList : Surface {
     private {
-        Rectangle _rect;
         SelectButton _resFolderSelect;
         string _currentResFolder;
         VList _list;
@@ -27,10 +27,10 @@ final class ResourceList : Surface {
 
     this() {
         setAlign(UIAlignX.left, UIAlignY.bottom);
-        setSize(Vec2f(250f, Atelier.window.height - 50f));
+        setSize(Vec2f(250f, Atelier.window.height - 35f));
 
         addEventListener("windowSize", {
-            setSize(Vec2f(250f, Atelier.window.height - 50f));
+            setSize(Vec2f(250f, Atelier.window.height - 35f));
         });
 
         reload();
@@ -93,8 +93,6 @@ final class ResourceList : Surface {
 
         rebuildList();
     }
-
-    import std.conv : to;
 
     void rebuildList() {
         _list.clearList();
@@ -248,7 +246,7 @@ private final class FolderItem : Item {
         }
         _arrowSprite.anchor = Vec2f(0f, .5f);
         _folderSprite.anchor = Vec2f(0f, .5f);
-        _arrowSprite.position = Vec2f(0f + _depth * _indentOffset, getCenter().y);
+        _arrowSprite.position = Vec2f(8f + _depth * _indentOffset, getCenter().y);
         _folderSprite.position = Vec2f(32f + _depth * _indentOffset, getCenter().y);
 
         addImage(_arrowSprite);
@@ -285,7 +283,7 @@ private final class FolderItem : Item {
 
         _arrowSprite.anchor = Vec2f(0f, .5f);
         _folderSprite.anchor = Vec2f(0f, .5f);
-        _arrowSprite.position = Vec2f(0f + _depth * _indentOffset, getCenter().y);
+        _arrowSprite.position = Vec2f(8f + _depth * _indentOffset, getCenter().y);
         _folderSprite.position = Vec2f(32f + _depth * _indentOffset, getCenter().y);
 
         addImage(_arrowSprite);
@@ -307,10 +305,33 @@ private final class FileItem : Item {
         _rect.isVisible = false;
         addImage(_rect);
 
-        Sprite sprite = Atelier.res.get!Sprite("editor:file");
-        sprite.anchor = Vec2f(0f, .5f);
-        sprite.position = Vec2f(32f + _depth * _indentOffset, getCenter().y);
-        addImage(sprite);
+        Icon icon;
+        switch (extension(_name)) {
+        case ".png":
+        case ".bmp":
+        case ".jpg":
+        case ".jpeg":
+        case ".gif":
+            icon = new Icon("editor:file-image");
+            break;
+        case ".ogg":
+        case ".wav":
+        case ".mp3":
+            icon = new Icon("editor:file-audio");
+            break;
+        case ".ttf":
+            icon = new Icon("editor:file-font");
+            break;
+        case ".gr":
+            icon = new Icon("editor:file-grimoire");
+            break;
+        default:
+            icon = new Icon("editor:file");
+            break;
+        }
+        icon.setAlign(UIAlignX.left, UIAlignY.center);
+        icon.setPosition(Vec2f(32f + _depth * _indentOffset, 0f));
+        addUI(icon);
 
         Label label = new Label(_name, Atelier.theme.font);
         label.setAlign(UIAlignX.left, UIAlignY.center);
@@ -318,7 +339,11 @@ private final class FileItem : Item {
         addUI(label);
 
         addEventListener("mouseenter", { _rect.isVisible = true; });
-
         addEventListener("mouseleave", { _rect.isVisible = false; });
+        addEventListener("click", &_onClick);
+    }
+
+    private void _onClick() {
+        Editor.editFile(_path);
     }
 }

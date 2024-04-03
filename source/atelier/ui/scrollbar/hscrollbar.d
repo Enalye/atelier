@@ -18,7 +18,6 @@ final class HScrollbar : Scrollbar {
 
     this() {
         setSize(Vec2f(0f, 9f));
-        setSizeLock(false, true);
 
         _background = Capsule.fill(getSize());
         _background.anchor = Vec2f.zero;

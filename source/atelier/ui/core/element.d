@@ -108,6 +108,7 @@ class UIElement {
             if (_isHovered != isHovered_) {
                 _isHovered = isHovered_;
                 dispatchEvent(_isHovered ? "mouseenter" : "mouseleave", false);
+                dispatchEvent(_isHovered ? "mouseenterinside" : "mouseleaveinside", true);
             }
             return _isHovered;
         }
@@ -465,7 +466,7 @@ class UIElement {
                 if (eventListener == listener)
                     evllist.mark(i);
             }
-            evllist.sweep();
+            evllist.sweep(true);
         });
     }
 
@@ -475,7 +476,7 @@ class UIElement {
                 if (eventListener == listener)
                     evllist.mark(i);
             }
-            evllist.sweep();
+            evllist.sweep(true);
         });
     }
 

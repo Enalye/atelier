@@ -51,12 +51,12 @@ abstract class List : UIElement {
 
     void setContentPosition(float position) {
         _contentView.setContentPosition(position);
-        _scrollbar.setContentPosition(position);
+        _scrollbar.setContentPosition(_contentView.getContentPosition());
     }
 }
 
 final class HList : List {
-    this() {
+    this(float scrollbarSize = 9f) {
         HContentView contentView = new HContentView;
         contentView.setAlign(UIAlignX.left, UIAlignY.top);
         contentView.setChildAlign(UIAlignY.top);
@@ -66,6 +66,7 @@ final class HList : List {
 
         _scrollbar = new HScrollbar;
         _scrollbar.setAlign(UIAlignX.left, UIAlignY.bottom);
+        _scrollbar.setHeight(scrollbarSize);
         addUI(_scrollbar);
 
         addEventListener("size", &_onSize);
@@ -77,10 +78,12 @@ final class HList : List {
     private void _onSize() {
         _scrollbar.setWidth(getWidth());
         _contentView.setSize(getSize() - Vec2f(0f, _scrollbar.getHeight()));
+        _scrollbar.isVisible = _contentView.getContentWidth() > getWidth();
     }
 
     private void _onUpdateContent() {
         _scrollbar.setContentSize(_contentView.getContentWidth());
+        _scrollbar.isVisible = _contentView.getContentWidth() > getWidth();
     }
 
     private void _onHandlePosition() {
@@ -100,7 +103,7 @@ final class HList : List {
 }
 
 final class VList : List {
-    this() {
+    this(float scrollbarSize = 9f) {
         VContentView contentView = new VContentView;
         contentView.setAlign(UIAlignX.left, UIAlignY.top);
         contentView.setChildAlign(UIAlignX.left);
@@ -110,6 +113,7 @@ final class VList : List {
 
         _scrollbar = new VScrollbar;
         _scrollbar.setAlign(UIAlignX.right, UIAlignY.top);
+        _scrollbar.setWidth(scrollbarSize);
         addUI(_scrollbar);
 
         addEventListener("size", &_onSize);
@@ -121,10 +125,12 @@ final class VList : List {
     private void _onSize() {
         _scrollbar.setHeight(getHeight());
         _contentView.setSize(getSize() - Vec2f(_scrollbar.getWidth(), 0f));
+        _scrollbar.isVisible = _contentView.getContentHeight() > getHeight();
     }
 
     private void _onUpdateContent() {
         _scrollbar.setContentSize(_contentView.getContentHeight());
+        _scrollbar.isVisible = _contentView.getContentHeight() > getHeight();
     }
 
     private void _onHandlePosition() {

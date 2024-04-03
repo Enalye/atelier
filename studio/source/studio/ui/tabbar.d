@@ -6,7 +6,7 @@
 module studio.ui.tabbar;
 
 import atelier;
-
+/*
 final class TabBar : Surface {
     private {
         Rectangle _rect;
@@ -22,3 +22,4 @@ final class TabBar : Surface {
         });
     }
 }
+*/

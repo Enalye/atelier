@@ -18,7 +18,6 @@ final class VScrollbar : Scrollbar {
 
     this() {
         setSize(Vec2f(9f, 0f));
-        setSizeLock(true, false);
 
         _background = Capsule.fill(getSize());
         _background.anchor = Vec2f.zero;

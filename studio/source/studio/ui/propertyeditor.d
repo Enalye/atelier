@@ -13,10 +13,10 @@ final class PropertyEditor : Surface {
 
     this() {
         setAlign(UIAlignX.right, UIAlignY.bottom);
-        setSize(Vec2f(200f, Atelier.window.height - 50f));
+        setSize(Vec2f(250f, Atelier.window.height - 35f));
 
         addEventListener("windowSize", {
-            setSize(Vec2f(200f, Atelier.window.height - 50f));
+            setSize(Vec2f(250f, Atelier.window.height - 35f));
         });
     }
 }

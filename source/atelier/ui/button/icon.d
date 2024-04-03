@@ -3,23 +3,28 @@
  * License: Zlib
  * Authors: Enalye
  */
-module atelier.ui.button.ghost;
+module atelier.ui.button.icon;
 
 import atelier.common;
 import atelier.core;
 import atelier.render;
+import atelier.ui.core;
 import atelier.ui.button.button;
 
-final class GhostButton : TextButton!RoundedRectangle {
+final class IconButton : Button!RoundedRectangle {
     private {
         RoundedRectangle _background;
+        Icon _icon;
     }
 
-    this(string text_) {
-        super(text_);
-
+    this(string icon) {
         setFxColor(Atelier.theme.neutral);
-        setTextColor(Atelier.theme.onNeutral);
+
+        _icon = new Icon(icon);
+        _icon.setAlign(UIAlignX.center, UIAlignY.center);
+        addUI(_icon);
+
+        setSize(_icon.getSize() + Vec2f(8f, 8f));
 
         _background = RoundedRectangle.fill(getSize(), Atelier.theme.corner);
         _background.color = Atelier.theme.neutral;
@@ -36,16 +41,12 @@ final class GhostButton : TextButton!RoundedRectangle {
     }
 
     private void _onEnable() {
-        setTextColor(Atelier.theme.onNeutral);
-
         addEventListener("mouseenter", &_onMouseEnter);
         addEventListener("mouseleave", &_onMouseLeave);
     }
 
     private void _onDisable() {
         _background.isVisible = false;
-        setTextColor(Atelier.theme.neutral);
-
         removeEventListener("mouseenter", &_onMouseEnter);
         removeEventListener("mouseleave", &_onMouseLeave);
     }

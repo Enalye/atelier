@@ -66,7 +66,7 @@ void initApp() {
 }
 
 final class Editor : UIElement {
-    private {
+    private static {
         TabBar _tabBar;
         //Visualizer _visualizer;
         PropertyEditor _propertyEditor;
@@ -78,6 +78,9 @@ final class Editor : UIElement {
         setAlign(UIAlignX.center, UIAlignY.bottom);
 
         _tabBar = new TabBar;
+        _tabBar.setWidth(Atelier.window.width - 500f);
+        _tabBar.setAlign(UIAlignX.left, UIAlignY.top);
+        _tabBar.setPosition(Vec2f(250f, 0f));
         addUI(_tabBar);
 
         {
@@ -97,5 +100,33 @@ final class Editor : UIElement {
 
     void updateRessourceFolders() {
         _resourceList.updateRessourceFolders();
+    }
+
+    static void editFile(string path) {
+        string icon;
+        switch (extension(path)) {
+        case ".png":
+        case ".bmp":
+        case ".jpg":
+        case ".jpeg":
+        case ".gif":
+            icon = "editor:file-image";
+            break;
+        case ".ogg":
+        case ".wav":
+        case ".mp3":
+            icon = "editor:file-audio";
+            break;
+        case ".ttf":
+            icon = "editor:file-font";
+            break;
+        case ".gr":
+            icon = "editor:file-grimoire";
+            break;
+        default:
+            icon = "editor:file";
+            break;
+        }
+        _tabBar.addTab(baseName(path), path, icon);
     }
 }

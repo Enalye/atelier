@@ -40,10 +40,50 @@ final class TabBar : UIElement {
         _list.setWidth(getWidth());
     }
 
+    bool hasTab(string id) {
+        Tab[] tabs = cast(Tab[]) _list.getList();
+
+        foreach (Tab tab; tabs) {
+            if (tab._id == id)
+                return true;
+        }
+        return false;
+    }
+
     void addTab(string name, string id, string icon = "") {
         Tab tab = new Tab(this, name, id, icon);
         _list.addList(tab);
         select(tab);
+    }
+
+    void select(string id) {
+        Tab[] tabs = cast(Tab[]) _list.getList();
+
+        bool hasValue;
+        foreach (Tab tab; tabs) {
+            if (tab._id == id) {
+                hasValue = true;
+            }
+            tab.updateValue(tab._id == id);
+        }
+
+        if (!tabs.length) {
+            if (_value != "") {
+                _value = "";
+                dispatchEvent("value", false);
+                return;
+            }
+        }
+
+        if (!hasValue) {
+            tabs[0].updateValue(true);
+            _value = tabs[0]._id;
+        }
+
+        if (_value != id) {
+            _value = id;
+            dispatchEvent("value", false);
+        }
     }
 
     private void select(Tab tab_) {
@@ -53,8 +93,10 @@ final class TabBar : UIElement {
             tab.updateValue(tab_ == tab);
         }
 
-        _value = tab_._id;
-        dispatchEvent("value", false);
+        if (_value != tab_._id) {
+            _value = tab_._id;
+            dispatchEvent("value", false);
+        }
     }
 
     private void unselect(Tab tab_) {
@@ -69,6 +111,9 @@ final class TabBar : UIElement {
                 }
             }
         }
+
+        if (tabs.length <= 1)
+            _value = "";
 
         dispatchEvent("value", false);
     }

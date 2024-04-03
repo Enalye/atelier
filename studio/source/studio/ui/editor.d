@@ -9,6 +9,7 @@ import std.file;
 import std.path;
 import atelier;
 import farfadet;
+import studio.editors;
 import studio.project;
 import studio.ui.propertyeditor;
 import studio.ui.tabbar;
@@ -68,7 +69,8 @@ void initApp() {
 final class Editor : UIElement {
     private static {
         TabBar _tabBar;
-        //Visualizer _visualizer;
+        ContentEditor[string] _contentEditors;
+        ContentEditor _contentEditor;
         PropertyEditor _propertyEditor;
         ResourceList _resourceList;
     }
@@ -81,6 +83,7 @@ final class Editor : UIElement {
         _tabBar.setWidth(Atelier.window.width - 500f);
         _tabBar.setAlign(UIAlignX.left, UIAlignY.top);
         _tabBar.setPosition(Vec2f(250f, 0f));
+        _tabBar.addEventListener("value", &_onTab);
         addUI(_tabBar);
 
         {
@@ -102,31 +105,61 @@ final class Editor : UIElement {
         _resourceList.updateRessourceFolders();
     }
 
-    static void editFile(string path) {
-        string icon;
-        switch (extension(path)) {
-        case ".png":
-        case ".bmp":
-        case ".jpg":
-        case ".jpeg":
-        case ".gif":
-            icon = "editor:file-image";
-            break;
-        case ".ogg":
-        case ".wav":
-        case ".mp3":
-            icon = "editor:file-audio";
-            break;
-        case ".ttf":
-            icon = "editor:file-font";
-            break;
-        case ".gr":
-            icon = "editor:file-grimoire";
-            break;
-        default:
-            icon = "editor:file";
-            break;
+    private void _onTab() {
+        if (_contentEditor) {
+            _contentEditor.remove();
+            if (!_tabBar.hasTab(_contentEditor.path)) {
+                _contentEditors.remove(_contentEditor.path);
+            }
+            _contentEditor = null;
         }
-        _tabBar.addTab(baseName(path), path, icon);
+
+        string path = _tabBar.value;
+        auto p = path in _contentEditors;
+
+        if (!path.length)
+            return;
+
+        if (!p) {
+            _contentEditor = new InvalidContentEditor(path);
+            _contentEditors[path] = _contentEditor;
+        }
+        else {
+            _contentEditor = *p;
+        }
+        addUI(_contentEditor);
+    }
+
+    static void editFile(string path) {
+        if (_tabBar.hasTab(path)) {
+            _tabBar.select(path);
+        }
+        else {
+            string icon;
+            switch (extension(path)) {
+            case ".png":
+            case ".bmp":
+            case ".jpg":
+            case ".jpeg":
+            case ".gif":
+                icon = "editor:file-image";
+                break;
+            case ".ogg":
+            case ".wav":
+            case ".mp3":
+                icon = "editor:file-audio";
+                break;
+            case ".ttf":
+                icon = "editor:file-font";
+                break;
+            case ".gr":
+                icon = "editor:file-grimoire";
+                break;
+            default:
+                icon = "editor:file";
+                break;
+            }
+            _tabBar.addTab(baseName(path), path, icon);
+        }
     }
 }

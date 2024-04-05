@@ -15,7 +15,7 @@ void main() {
         atelier.window.setIcon("atelier:logo128");
         atelier.renderer.setScaling(Renderer.Scaling.desktop);
 
-        atelier.addArchive("res");
+        atelier.addArchive("media");
         atelier.loadResources();
 
         initApp();

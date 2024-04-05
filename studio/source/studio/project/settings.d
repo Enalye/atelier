@@ -28,8 +28,8 @@ final class Project {
         return _path;
     }
 
-    static string getResPath() {
-        return buildNormalizedPath(_directory, "res");
+    static string getMediaDir() {
+        return buildNormalizedPath(_directory, "media");
     }
 
     static bool isOpen() {

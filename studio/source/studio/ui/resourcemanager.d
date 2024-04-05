@@ -134,7 +134,7 @@ final class ResourceFolderElement : UIElement {
             return;
         }
 
-        string path = buildNormalizedPath(Project.getResPath(), _nameField.value);
+        string path = buildNormalizedPath(Project.getMediaDir(), _nameField.value);
         if (!exists(path)) {
             _errorLabel.isVisible = true;
             _errorLabel.text = "Dossier inexistant";

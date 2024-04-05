@@ -97,8 +97,8 @@ final class ResourceList : Surface {
     void rebuildList() {
         _list.clearList();
 
-        string search = _searchField.value;
-        string resPath = buildNormalizedPath(Project.getResPath(), _currentResFolder);
+        string search = _searchField ? _searchField.value : "";
+        string resPath = buildNormalizedPath(Project.getMediaDir(), _currentResFolder);
 
         if (search.length) {
             if (exists(resPath)) {

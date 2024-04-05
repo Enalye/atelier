@@ -5,7 +5,7 @@
     "copyright": "Copyright © 2023, Enalye",
     "description": "Moteur 2D pour Grimoire",
     "license": "Zlib",
-    "name": "atelier",
+    "name": "app",
     "targetType": "executable",
     "workingDirectory": "..",
     "configurations": [

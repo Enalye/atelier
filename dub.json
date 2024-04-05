@@ -94,6 +94,7 @@
         }
     ],
     "subPackages": [
+        "./app",
         "./studio"
     ]
 }

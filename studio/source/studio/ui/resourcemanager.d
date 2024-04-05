@@ -40,7 +40,7 @@ final class ResourceFolderManager : Modal {
         _list.setPosition(Vec2f(0f, 8f));
         vbox.addUI(_list);
 
-        foreach (name, isArchived; Project.getRessourceFolders()) {
+        foreach (name, isArchived; Project.getMedias()) {
             auto elt = new ResourceFolderElement(name, isArchived);
             _list.addList(elt);
         }
@@ -66,10 +66,10 @@ final class ResourceFolderManager : Modal {
     }
 
     private void _onApply() {
-        Project.clearRessourceFolders();
+        Project.clearMedias();
         auto list = cast(ResourceFolderElement[]) _list.getList();
         foreach (elt; list) {
-            Project.addRessourceFolder(elt._nameField.value, elt._archivedCheckbox.value);
+            Project.addMedia(elt._nameField.value, elt._archivedCheckbox.value);
         }
         Project.save();
         dispatchEvent("updateRessourceFolders", false);

@@ -65,7 +65,7 @@ struct Color {
 
     static {
         /// Take a 0xFFFFFF color format.
-        Color fromHex(int rgbValue) {
+        Color fromHex(uint rgbValue) {
             return Color((rgbValue >> 16) & 0xFF, (rgbValue >> 8) & 0xFF, rgbValue & 0xFF);
         }
     }
@@ -203,6 +203,11 @@ struct Color {
             cast(ubyte)(_r * 255f), cast(ubyte)(_g * 255f), cast(ubyte)(_b * 255f)
         };
         return sdlColor;
+    }
+
+    uint toHex() const {
+        return (((cast(uint)(_r * 255f)) & 0xff) << 16) | (
+            ((cast(uint)(_g * 255f)) & 0xff) << 8) | ((cast(uint)(_b * 255f)) & 0xff);
     }
 }
 

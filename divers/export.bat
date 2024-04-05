@@ -1,6 +1,7 @@
 cd ..
 del /q export\*
 dub build --config=atelier_dll --build=release-nobounds
+dub build :studio --build=release-nobounds
 cd atelier
 dub build --config=atelier_dev --build=release-nobounds
 dub build --config=atelier_redist --build=release-nobounds

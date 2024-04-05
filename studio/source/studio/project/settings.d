@@ -12,25 +12,6 @@ import std.process;
 import atelier;
 import farfadet;
 
-private enum Default_SourceFileContent = `
-event app {
-    // Début du programme
-    print("Bonjour le monde !");
-}
-`;
-
-private enum Default_GitIgnoreContent = `
-# Dossiers
-export/
-
-# Fichiers
-*.pqt
-*.atl
-*.exe
-*.dll
-*.so
-`;
-
 final class Project {
     static private {
         ProjectSettings _settings;
@@ -62,7 +43,7 @@ final class Project {
     static void open(string path) {
         if (isDir(path)) {
             _directory = path;
-            _path = buildNormalizedPath(_directory, "atelier.ffd");
+            _path = buildNormalizedPath(_directory, Atelier_Project_File);
         }
         else {
             _path = path;
@@ -70,7 +51,7 @@ final class Project {
         }
         _settings = new ProjectSettings;
         _settings.load(_path);
-        _currentConfig = _settings.getConfig(_settings.getDefaultConfig());
+        _currentConfig = _settings.getConfig(_settings.getDefault());
         _isOpen = true;
         _isDirty = false;
 
@@ -89,55 +70,44 @@ final class Project {
 
     static void create(string path, string configName, string sourceFile) {
         _directory = path;
-        _path = buildNormalizedPath(_directory, "atelier.ffd");
 
-        if (!exists(_directory))
-            mkdir(_directory);
-
-        string resPath = buildNormalizedPath(_directory, "res");
-        if (!exists(resPath))
-            mkdir(resPath);
-
-        string exportPath = buildNormalizedPath(_directory, "export");
-        if (!exists(exportPath))
-            mkdir(exportPath);
+        generateProjectLayout(_directory, sourceFile);
 
         _settings = new ProjectSettings();
-        _settings.setDefaultConfig(configName);
+        _settings.setDefault(configName);
         _currentConfig = _settings.addConfig(configName);
-        _currentConfig.setSource("src");
-        _currentConfig.setExport("export");
-        _currentConfig.setSourceFile(sourceFile);
-        _currentConfig.setWindow(800, 600, configName, "");
+        _currentConfig.setSource(sourceFile);
+        _currentConfig.setWindow(Atelier_Window_Width_Default,
+            Atelier_Window_Height_Default, configName, "");
+
+        _path = buildNormalizedPath(_directory, Atelier_Project_File);
         _settings.save(_path);
 
-        std.file.write(buildNormalizedPath(_directory, ".gitignore"), Default_GitIgnoreContent);
-        std.file.write(buildNormalizedPath(_directory, sourceFile), Default_SourceFileContent);
         _isOpen = true;
         _isDirty = false;
 
         updateTitle();
     }
 
-    static void clearRessourceFolders() {
+    static void clearMedias() {
         if (!isOpen())
             return;
 
-        _currentConfig.clearRessourceFolders();
+        _currentConfig.clearMedias();
     }
 
-    static void addRessourceFolder(string name, bool isArchived) {
+    static void addMedia(string name, bool isArchived) {
         if (!isOpen())
             return;
 
-        _currentConfig.addRessourceFolder(name, isArchived);
+        _currentConfig.addMedia(name, isArchived);
     }
 
-    static bool[string] getRessourceFolders() {
+    static bool[string] getMedias() {
         if (!isOpen())
             return (bool[string]).init;
 
-        return _currentConfig.getRessourceFolders();
+        return _currentConfig.getMedias();
     }
 
     static void run() {

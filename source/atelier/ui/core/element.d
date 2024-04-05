@@ -88,7 +88,7 @@ class UIElement {
 
     // Propriétés
     @property {
-        package final bool isAlive() const {
+        final bool isAlive() const {
             return _isAlive;
         }
 

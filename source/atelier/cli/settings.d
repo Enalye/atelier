@@ -6,15 +6,16 @@
 module atelier.cli.settings;
 
 import std.file;
+import std.path;
 import farfadet;
 
 final class ProjectSettings {
     class Config {
         private {
             string _name;
-            string _srcPath, _exportPath, _srcName;
+            string _sourceName, _exportName;
 
-            bool[string] _resources;
+            bool[string] _medias;
 
             bool _hasWindow;
             string _title;
@@ -26,28 +27,32 @@ final class ProjectSettings {
             _name = name_;
         }
 
-        void setSourceFile(string name) {
-            _srcName = name;
+        void setSource(string name) {
+            _sourceName = name;
         }
 
-        void setSource(string path) {
-            _srcPath = path;
+        string getSource() const {
+            return _sourceName;
         }
 
         void setExport(string path) {
-            _exportPath = path;
+            _exportName = path;
         }
 
-        void clearRessourceFolders() {
-            _resources.clear();
+        string getExport() const {
+            return _exportName;
         }
 
-        void addRessourceFolder(string name, bool isArchived) {
-            _resources[name] = isArchived;
+        void clearMedias() {
+            _medias.clear();
         }
 
-        bool[string] getRessourceFolders() {
-            return _resources;
+        void addMedia(string name, bool isArchived) {
+            _medias[name] = isArchived;
+        }
+
+        bool[string] getMedias() {
+            return _medias;
         }
 
         void setWindow(uint width, uint height, string title, string icon) {
@@ -58,20 +63,44 @@ final class ProjectSettings {
             _hasWindow = true;
         }
 
+        bool hasWindow() const {
+            return _hasWindow;
+        }
+
+        uint getWidth() const {
+            return _width;
+        }
+
+        uint getHeight() const {
+            return _height;
+        }
+
+        string getTitle() const {
+            return _title;
+        }
+
+        string getIcon() const {
+            return _icon;
+        }
+
         void removeWindow() {
             _hasWindow = false;
         }
 
         void load(Farfadet ffd) {
             _name = ffd.get!string(0);
-            _srcPath = ffd.getNode("source", 1).get!string(0);
-            _exportPath = ffd.getNode("export", 1).get!string(0);
 
-            _resources.clear();
-            foreach (resNode; ffd.getNodes("resource", 2)) {
-                string name = resNode.get!string(0);
-                bool isArchived = resNode.get!bool(1);
-                _resources[name] = isArchived;
+            if (ffd.hasNode("source"))
+                _sourceName = ffd.getNode("source", 1).get!string(0);
+
+            if (ffd.hasNode("export"))
+                _exportName = ffd.getNode("export", 1).get!string(0);
+
+            _medias.clear();
+            foreach (mediaNode; ffd.getNodes("media", 2)) {
+                string name = mediaNode.get!string(0);
+                bool isArchived = mediaNode.get!bool(1);
+                _medias[name] = isArchived;
             }
 
             _hasWindow = ffd.hasNode("window");
@@ -95,11 +124,15 @@ final class ProjectSettings {
 
         void save(Farfadet ffd) {
             Farfadet configNode = ffd.addNode("config").add(_name);
-            configNode.addNode("source").add(_srcPath);
-            configNode.addNode("export").add(_exportPath);
 
-            foreach (name, isArchived; _resources) {
-                configNode.addNode("resource").add(name).add(isArchived);
+            if (_sourceName.length)
+                configNode.addNode("source").add(_sourceName);
+
+            if (_exportName.length)
+                configNode.addNode("export").add(_exportName);
+
+            foreach (name, isArchived; _medias) {
+                configNode.addNode("media").add(name).add(isArchived);
             }
 
             if (_hasWindow) {
@@ -115,15 +148,15 @@ final class ProjectSettings {
 
     private {
         Config[string] _configs;
-        string _defaultConfig;
+        string _default;
     }
 
-    void setDefaultConfig(string name) {
-        _defaultConfig = name;
+    void setDefault(string name) {
+        _default = name;
     }
 
-    string getDefaultConfig() const {
-        return _defaultConfig;
+    string getDefault() const {
+        return _default;
     }
 
     bool hasConfig(string name) {
@@ -147,7 +180,7 @@ final class ProjectSettings {
 
     void load(string filePath) {
         Farfadet ffd = Farfadet.fromFile(filePath);
-        _defaultConfig = ffd.getNode("default", 1).get!string(0);
+        _default = ffd.getNode("default", 1).get!string(0);
 
         _configs.clear();
         foreach (configNode; ffd.getNodes("config", 1)) {
@@ -159,11 +192,68 @@ final class ProjectSettings {
 
     void save(string filePath) {
         Farfadet ffd = new Farfadet;
-        if (_defaultConfig.length)
-            ffd.addNode("default").add(_defaultConfig);
+        if (_default.length)
+            ffd.addNode("default").add(_default);
         foreach (config; _configs) {
             config.save(ffd);
         }
         ffd.save(filePath);
+    }
+}
+
+private enum Default_SourceFileContent = `
+event app {
+    // Début du programme
+    print("Bonjour le monde !");
+}
+`;
+
+private enum Default_GitIgnoreContent = `
+# Dossiers
+export/
+
+# Fichiers
+*.pqt
+*.atl
+*.exe
+*.dll
+*.so
+`;
+
+private enum Default_MediaContent = `
+1/ Ajoutez vos dossiers media dans ce répertoire
+2/ Dans le fichier de projet, ajouter la ligne correspondante dans la configuration voulue:
+media "NOM_DU_DOSSIER" true/false (ex: media "img" true)
+(true si le fichier doit être compressé durant l’export.)
+`;
+
+private enum Default_ExportContent = `
+Le projet sera généré dans ce dossier sous le nom donné par le champ export de la configuration (si renseigné)
+`;
+
+void generateProjectLayout(string path, string sourceName) {
+    if (!exists(path))
+        mkdir(path);
+
+    std.file.write(buildNormalizedPath(path, ".gitignore"), Default_GitIgnoreContent);
+
+    foreach (subDir; ["media", "source", "export"]) {
+        string dir = buildNormalizedPath(path, subDir);
+        if (!exists(dir))
+            mkdir(dir);
+
+        switch (subDir) {
+        case "media":
+            std.file.write(buildNormalizedPath(dir, "media.txt"), Default_MediaContent);
+            break;
+        case "source":
+            std.file.write(buildNormalizedPath(dir, sourceName), Default_SourceFileContent);
+            break;
+        case "export":
+            std.file.write(buildNormalizedPath(dir, "export.txt"), Default_ExportContent);
+            break;
+        default:
+            break;
+        }
     }
 }

@@ -14,6 +14,7 @@ import grimoire;
 import atelier.common;
 import atelier.core;
 import atelier.script;
+import atelier.cli.settings;
 
 void cliRun(Cli.Result cli) {
     if (cli.hasOption("help")) {
@@ -36,7 +37,8 @@ void cliRun(Cli.Result cli) {
         "aucun fichier de project `" ~ Atelier_Project_File ~
         "` de trouvé à l’emplacement `" ~ dir ~ "`");
 
-    Farfadet ffd = Farfadet.fromFile(projectFile);
+    ProjectSettings settings = new ProjectSettings;
+    settings.load(projectFile);
 
     string sourceFile;
     string configName;
@@ -45,91 +47,56 @@ void cliRun(Cli.Result cli) {
         configName = cli.getOption("config").getRequiredParam(0);
     }
     else {
-        configName = ffd.getNode("default", 1).get!string(0);
+        configName = settings.getDefault();
     }
 
-    const Farfadet[] configsNode = ffd.getNodes("config", 1);
-    foreach (configNode; configsNode) {
-        if (configNode.get!string(0) == configName) {
-            sourceFile = buildNormalizedPath(dir, configNode.getNode("source", 1).get!string(0));
-
-            enforce(exists(sourceFile),
-                "le fichier source `" ~ sourceFile ~ "` référencé dans `" ~
-                Atelier_Project_File ~ "` n’existe pas");
-
-            const(Farfadet[]) resourcesNode = configNode.getNodes("resource", 1);
-            string[] archives;
-
-            foreach (resNode; resourcesNode) {
-                string resFolder = resNode.get!string(0);
-                if (resNode.hasNode("path")) {
-                    resFolder = resNode.getNode("path", 1).get!string(0);
-                }
-                resFolder = buildNormalizedPath(dir, resFolder);
-                enforce(exists(resFolder), "le dossier de ressources `" ~ resFolder ~
-                        "` référencé dans `" ~ Atelier_Project_File ~ "` n’existe pas");
-
-                archives ~= resFolder;
-            }
-
-            bool windowEnabled = configNode.hasNode("window");
-
-            string windowTitle = configName;
-            int windowWidth = Atelier_Window_Width_Default;
-            int windowHeight = Atelier_Window_Height_Default;
-            string windowIcon = "";
-
-            if (windowEnabled) {
-                const Farfadet windowNode = configNode.getNode("window");
-
-                if (windowNode.hasNode("size")) {
-                    const Farfadet sizeNode = windowNode.getNode("size", 2);
-                    windowWidth = sizeNode.get!uint(0);
-                    windowHeight = sizeNode.get!uint(1);
-                }
-
-                if (windowNode.hasNode("title"))
-                    windowTitle = windowNode.getNode("title", 1).get!string(0);
-
-                if (windowNode.hasNode("icon"))
-                    windowIcon = windowNode.getNode("icon", 1).get!string(0);
-            }
-
-            Atelier atelier = new Atelier(false, (GrLibrary[] libraries) {
-                GrCompiler compiler = new GrCompiler(Atelier_Version_ID);
-                foreach (library; libraries) {
-                    compiler.addLibrary(library);
-                }
-
-                compiler.addFile(sourceFile);
-
-                GrBytecode bytecode = compiler.compile(GrOption.safe | GrOption.profile | GrOption.symbols,
-                    GrLocale.fr_FR);
-
-                enforce!GrCompilerException(bytecode, compiler.getError()
-                    .prettify(GrLocale.fr_FR));
-
-                return bytecode;
-            }, [grGetStandardLibrary(), getEngineLibrary()], windowWidth,
-                windowHeight, windowTitle);
-
-            foreach (string archive; archives) {
-                atelier.loadArchive(archive);
-            }
-
-            if (windowIcon.length) {
-                atelier.window.setIcon(windowIcon);
-            }
-            else {
-                atelier.window.setIcon("atelier:logo128");
-            }
-
-            atelier.run();
-
-            return;
-        }
-    }
-
-    enforce(false,
+    ProjectSettings.Config config = settings.getConfig(configName);
+    enforce(config,
         "aucune configuration `" ~ configName ~ "` défini dans `" ~ Atelier_Project_File ~ "`");
+
+    sourceFile = buildNormalizedPath(dir, "source", config.getSource());
+    enforce(exists(sourceFile),
+        "le fichier source `" ~ sourceFile ~ "` référencé dans `" ~
+        Atelier_Project_File ~ "` n’existe pas");
+
+    string[] archives;
+    foreach (media; config.getMedias().byKey) {
+        string mediaPath = buildNormalizedPath(dir, "media", media);
+        enforce(exists(mediaPath),
+            "le dossier de ressources `" ~ mediaPath ~ "` référencé dans `" ~
+            Atelier_Project_File ~ "` n’existe pas");
+        archives ~= mediaPath;
+    }
+
+    Atelier atelier = new Atelier(false, (GrLibrary[] libraries) {
+        GrCompiler compiler = new GrCompiler(Atelier_Version_ID);
+        foreach (library; libraries) {
+            compiler.addLibrary(library);
+        }
+
+        compiler.addFile(sourceFile);
+
+        GrBytecode bytecode = compiler.compile(GrOption.safe | GrOption.profile | GrOption.symbols,
+            GrLocale.fr_FR);
+
+        enforce!GrCompilerException(bytecode, compiler.getError().prettify(GrLocale.fr_FR));
+
+        return bytecode;
+    }, [grGetStandardLibrary(), getEngineLibrary()], config.getWidth(),
+        config.getHeight(), config.getTitle());
+
+    foreach (string archive; archives) {
+        atelier.addArchive(archive);
+    }
+
+    atelier.loadResources();
+
+    if (config.getIcon().length) {
+        atelier.window.setIcon(config.getIcon());
+    }
+    else {
+        atelier.window.setIcon("atelier:logo128");
+    }
+
+    atelier.run();
 }

@@ -64,8 +64,10 @@ export extern (C) void boot(string[] args) {
         windowWidth, windowHeight, windowTitle);
 
     foreach (string archive; archives) {
-        atelier.loadArchive(archive);
+        atelier.addArchive(archive);
     }
+
+    atelier.loadResources();
 
     if (windowIcon.length) {
         atelier.window.setIcon(windowIcon);

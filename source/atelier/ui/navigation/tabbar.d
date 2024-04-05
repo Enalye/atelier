@@ -15,12 +15,16 @@ import atelier.ui.navigation.list;
 final class TabBar : UIElement {
     private {
         HList _list;
-        string _value;
+        string _value, _lastRemovedTab;
     }
 
     @property {
         string value() {
             return _value;
+        }
+
+        string lastRemovedTab() {
+            return _lastRemovedTab;
         }
     }
 
@@ -44,7 +48,7 @@ final class TabBar : UIElement {
         Tab[] tabs = cast(Tab[]) _list.getList();
 
         foreach (Tab tab; tabs) {
-            if (tab._id == id)
+            if (tab._id == id && tab.isAlive())
                 return true;
         }
         return false;
@@ -107,8 +111,12 @@ final class TabBar : UIElement {
                 if (i > 0) {
                     tabs[i - 1].updateValue(true);
                     _value = tabs[i - 1]._id;
-                    break;
                 }
+                else if (i + 1 < tabs.length) {
+                    tabs[i + 1].updateValue(true);
+                    _value = tabs[i + 1]._id;
+                }
+                break;
             }
         }
 
@@ -188,5 +196,7 @@ private final class Tab : UIElement {
             _bar.unselect(this);
         }
         remove();
+        _bar._lastRemovedTab = _id;
+        _bar.dispatchEvent("close", false);
     }
 }

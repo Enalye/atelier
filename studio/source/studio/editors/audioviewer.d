@@ -249,7 +249,7 @@ private final class SpectralView : UIElement {
             playPos -= _images[0].virtualPosition * _images[0].virtualSize;
             playPos += getWidth() / 2f;
             Atelier.renderer.drawRect(Vec2f(playPos, 0f), Vec2f(1f,
-                    getHeight()), Atelier.theme.accent, 1f, true);
+                    getHeight()), Atelier.theme.onAccent, 1f, true);
         }
     }
 
@@ -340,6 +340,7 @@ private final class SpectralImage : Image {
             const(float)[] samples;
             float start, end, ratio;
             int channelId, channelCount, sampleCount;
+            uint color;
         }
 
         RasterData rasterData;
@@ -352,6 +353,7 @@ private final class SpectralImage : Image {
         rasterData.channelId = _channelId;
         rasterData.channelCount = cast(int) _sound.channels;
         rasterData.sampleCount = cast(int) _sound.samples;
+        rasterData.color = (Atelier.theme.accent.toHex() << 8) | 0xff;
 
         _cache.update(function(uint* dest, uint texWidth, uint texHeight, void* data_) {
             RasterData* data = cast(RasterData*) data_;
@@ -396,7 +398,7 @@ private final class SpectralImage : Image {
                 if (upperBound != 0 && lowerBound != 0) {
                     for (size_t iy; iy < texHeight; ++iy) {
                         dest[iy * texWidth + ix] = iy >= upperBound &&
-                            iy <= lowerBound ? 0xffffffff : 0x00000000;
+                            iy <= lowerBound ? data.color : 0x00000000;
                     }
                 }
             }

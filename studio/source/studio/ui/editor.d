@@ -84,6 +84,7 @@ final class Editor : UIElement {
         _tabBar.setAlign(UIAlignX.left, UIAlignY.top);
         _tabBar.setPosition(Vec2f(250f, 0f));
         _tabBar.addEventListener("value", &_onTab);
+        _tabBar.addEventListener("close", &_onTabClose);
         addUI(_tabBar);
 
         {
@@ -105,12 +106,14 @@ final class Editor : UIElement {
         _resourceList.updateRessourceFolders();
     }
 
+    private void _onTabClose() {
+        string path = _tabBar.lastRemovedTab;
+        _contentEditors.remove(path);
+    }
+
     private void _onTab() {
         if (_contentEditor) {
             _contentEditor.remove();
-            if (!_tabBar.hasTab(_contentEditor.path)) {
-                _contentEditors.remove(_contentEditor.path);
-            }
             _contentEditor = null;
         }
 

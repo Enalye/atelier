@@ -52,12 +52,15 @@ abstract class ContentEditor : UIElement {
 
     this(string path_) {
         _path = path_;
+        focusable = true;
+
         setAlign(UIAlignX.left, UIAlignY.top);
         setPosition(Vec2f(250f, 35f));
         setSize(Vec2f(Atelier.window.width - 500f, Atelier.window.height - 35f));
 
         addEventListener("parentSize", &_onParentSize);
         addEventListener("register", &_onParentSize);
+        addEventListener("register", &focus);
     }
 
     private void _onParentSize() {

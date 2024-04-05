@@ -54,7 +54,7 @@ final class ResourceList : Surface {
         addUI(vbox);
 
         string[] folders;
-        foreach (name, isArchived; Project.getRessourceFolders()) {
+        foreach (name, isArchived; Project.getMedias()) {
             folders ~= name;
         }
 

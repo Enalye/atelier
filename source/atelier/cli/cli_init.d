@@ -11,25 +11,7 @@ import std.exception;
 import farfadet;
 import atelier.common;
 import atelier.core;
-
-private enum Default_SourceFileContent = `
-event app {
-    // Début du programme
-    print("Bonjour le monde !");
-}
-`;
-
-private enum Default_GitIgnoreContent = `
-# Dossiers
-export/
-
-# Fichiers
-*.pqt
-*.atl
-*.exe
-*.dll
-*.so
-`;
+import atelier.cli.settings;
 
 void cliInit(Cli.Result cli) {
     if (cli.hasOption("help")) {
@@ -51,7 +33,7 @@ void cliInit(Cli.Result cli) {
     enforce(!extension(dirName).length, "le nom du projet ne peut pas être un fichier");
 
     string appName = dirName;
-    string srcPath = setExtension("app", "gr");
+    string sourceName = setExtension("app", "gr");
 
     if (cli.hasOption("app")) {
         Cli.Result.Option option = cli.getOption("app");
@@ -60,40 +42,19 @@ void cliInit(Cli.Result cli) {
 
     if (cli.hasOption("source")) {
         Cli.Result.Option option = cli.getOption("source");
-        srcPath = buildNormalizedPath(option.getRequiredParam(0));
+        sourceName = buildNormalizedPath(option.getRequiredParam(0));
     }
 
-    Farfadet ffd = new Farfadet;
+    generateProjectLayout(dir, sourceName);
 
-    { // Programme par défaut
-        Farfadet default_ = ffd.addNode("default");
-        default_.add(appName);
-    }
+    ProjectSettings settings = new ProjectSettings;
+    settings.setDefault(appName);
 
-    {
-        Farfadet configNode = ffd.addNode("config").add(appName);
-        configNode.addNode("source").add(srcPath);
-        configNode.addNode("export").add("export");
+    ProjectSettings.Config config = settings.addConfig(appName);
+    config.setSource(sourceName);
+    config.setWindow(Atelier_Window_Width_Default, Atelier_Window_Height_Default, appName, "");
 
-        Farfadet resNode = configNode.addNode("resource").add("res");
-        resNode.addNode("path").add("res");
-        resNode.addNode("archived").add(true);
-
-        Farfadet windowNode = configNode.addNode("window");
-        windowNode.addNode("size").add(Atelier_Window_Width_Default)
-            .add(Atelier_Window_Height_Default);
-    }
-
-    ffd.save(buildNormalizedPath(dir, Atelier_Project_File));
-
-    foreach (subDir; ["res", "src", "export"]) {
-        string resDir = buildNormalizedPath(dir, subDir);
-        if (!exists(resDir))
-            mkdir(resDir);
-    }
-
-    std.file.write(buildNormalizedPath(dir, ".gitignore"), Default_GitIgnoreContent);
-    std.file.write(buildNormalizedPath(dir, srcPath), Default_SourceFileContent);
+    settings.save(buildNormalizedPath(dir, Atelier_Project_File));
 
     log("Projet `", dirName, "` créé");
 }

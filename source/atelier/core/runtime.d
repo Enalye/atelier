@@ -161,7 +161,7 @@ final class Atelier {
         setupDefaultResourceLoaders(_resourceManager);
     }
 
-    void loadArchive(string path) {
+    void addArchive(string path) {
         _archives ~= path;
     }
 

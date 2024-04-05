@@ -6,6 +6,6 @@
 module studio.editors;
 
 public {
+    import studio.editors.base;
     import studio.editors.invalid;
 }
-

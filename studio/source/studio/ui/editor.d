@@ -121,7 +121,7 @@ final class Editor : UIElement {
             return;
 
         if (!p) {
-            _contentEditor = new InvalidContentEditor(path);
+            _contentEditor = ContentEditor.create(path);
             _contentEditors[path] = _contentEditor;
         }
         else {

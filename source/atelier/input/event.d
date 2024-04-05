@@ -63,8 +63,47 @@ final class InputEvent {
         dropFile
     }
 
+    private abstract class BaseEvent {
+        /// Dans le cas d’une touche ou d’un bouton, est-il appuyé ?
+        final bool isPressed() const {
+            return this.outer.isPressed();
+        }
+
+        /// Dans le cas d’une touche ou d’un bouton, est-il maintenu enfoncé ?
+        final bool isHeld() const {
+            return this.outer.isHeld();
+        }
+
+        /// Dans le cas d'une touche ou d'un bouton, a-t-il été appuyé cette frame ?
+        final bool isDown() const {
+            return this.outer.isDown();
+        }
+
+        /// Dans le cas d'une touche ou d'un bouton, a-t-on arreté d'appuyer dessus cette frame ?
+        final bool isUp() const {
+            return this.outer.isUp();
+        }
+
+        /// L’événement est-il un écho ?
+        final bool isEcho() const {
+            return this.outer.isEcho();
+        }
+
+        final double getValue() const {
+            return this.outer.getValue();
+        }
+
+        final string getInfoState() const {
+            return this.outer.getInfoState();
+        }
+
+        final string prettify() const {
+            return this.outer.prettify();
+        }
+    }
+
     /// Touche du clavier
-    final class KeyButton {
+    final class KeyButton : BaseEvent {
         /// Touches du clavier
         enum Button {
             unknown = SDL_SCANCODE_UNKNOWN,
@@ -648,7 +687,7 @@ final class InputEvent {
         }
 
         /// Valeur analogique du bouton ou de l’axe
-        double value() const {
+        double getValue() const {
             switch (_type) with (Type) {
             case keyButton:
             case mouseButton:
@@ -662,7 +701,7 @@ final class InputEvent {
         }
 
         /// Formate l'etat
-        string infoState() const {
+        string getInfoState() const {
             if (isDown()) {
                 return "down";
             }
@@ -689,13 +728,13 @@ final class InputEvent {
                 break;
             case keyButton:
                 info ~= "button: " ~ to!string(_keyButton.button);
-                info ~= infoState;
+                info ~= getInfoState();
                 if (_keyButton.echo)
                     info ~= "echo";
                 break;
             case mouseButton:
                 info ~= "button: " ~ to!string(_mouseButton.button);
-                info ~= infoState;
+                info ~= getInfoState();
                 info ~= "clicks: " ~ to!string(_mouseButton.clicks);
                 info ~= "position: " ~ to!string(_mouseButton.position);
                 info ~= "deltaPosition: " ~ to!string(_mouseButton.deltaPosition);
@@ -709,7 +748,7 @@ final class InputEvent {
                 break;
             case controllerButton:
                 info ~= "button: " ~ to!string(_controllerButton.button);
-                info ~= infoState;
+                info ~= getInfoState();
                 break;
             case controllerAxis:
                 info ~= "axis: " ~ to!string(_controllerAxis.axis);

@@ -6,6 +6,7 @@
 module atelier.audio.music;
 
 import std.stdio;
+import std.file;
 import audioformats;
 import bindbc.sdl;
 
@@ -73,10 +74,22 @@ final class Music : Resource!Music {
         }
     }
 
+    static Music fromMemory(const(ubyte)[] data) {
+        return new Music(data);
+    }
+
+    static Music fromFile(string filePath) {
+        return new Music(cast(const(ubyte)[]) std.file.read(filePath));
+    }
+
+    static Music fromResource(string filePath) {
+        return new Music(Atelier.res.read(filePath));
+    }
+
     /// Charge depuis un fichier
-    this(string filePath) {
+    this(const(ubyte)[] data) {
         AudioStream stream;
-        _data = Atelier.res.read(filePath);
+        _data = data;
         stream.openFromMemory(_data);
 
         _channels = cast(ubyte) stream.getNumChannels();

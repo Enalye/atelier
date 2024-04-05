@@ -56,3 +56,18 @@ sprite "editor:file-grimoire" {
     texture "editor"
     clip 48 16 16 16
 }
+
+sprite "editor:play" {
+    texture "editor"
+    clip 0 32 32 32
+}
+
+sprite "editor:pause" {
+    texture "editor"
+    clip 32 32 32 32
+}
+
+sprite "editor:stop" {
+    texture "editor"
+    clip 64 32 32 32
+}

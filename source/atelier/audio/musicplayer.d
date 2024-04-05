@@ -25,7 +25,13 @@ final class MusicPlayer : AudioPlayer {
         float[] _decoderBuffer;
     }
 
-    this(Music music, float delay = 0f) {
+    @property {
+        float currentPosition() const {
+            return cast(float) _currentFrame / cast(float) _music.sampleRate;
+        }
+    }
+
+    this(Music music, float delay = 0f, float startPosition = 0f) {
         _music = music;
         _stream = SDL_NewAudioStream(AUDIO_F32, _music.channels, _music.sampleRate,
             AUDIO_F32, Atelier_Audio_Channels, Atelier_Audio_SampleRate);
@@ -53,6 +59,12 @@ final class MusicPlayer : AudioPlayer {
         }
 
         _initDecoder();
+        if (startPosition > 0f) {
+            int startFrame = clamp(cast(int)(startPosition * _music.sampleRate),
+                0, cast(int) _music.samples);
+            _decoder.seekPosition(startFrame);
+            _currentFrame = startFrame;
+        }
     }
 
     void resume(float delay = 0f) {

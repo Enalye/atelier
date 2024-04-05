@@ -40,6 +40,11 @@ final class IconButton : Button!RoundedRectangle {
         addEventListener("disable", &_onDisable);
     }
 
+    void setIcon(string icon) {
+        _icon.setIcon(icon);
+        setSize(_icon.getSize() + Vec2f(8f, 8f));
+    }
+
     private void _onEnable() {
         addEventListener("mouseenter", &_onMouseEnter);
         addEventListener("mouseleave", &_onMouseLeave);

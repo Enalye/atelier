@@ -6,6 +6,7 @@
 module atelier.render.font.truetype;
 
 import std.conv : to;
+import std.file : read;
 import std.string : toStringz, fromStringz;
 
 import bindbc.sdl;
@@ -59,8 +60,13 @@ final class TrueTypeFont : Font, Resource!TrueTypeFont {
         return new TrueTypeFont(data, size_, outline_);
     }
 
-    static TrueTypeFont fromFile(const string filePath, uint size_ = 12u, uint outline_ = 0) {
+    static TrueTypeFont fromResource(const string filePath, uint size_ = 12u, uint outline_ = 0) {
         const(ubyte)[] data = Atelier.res.read(filePath);
+        return new TrueTypeFont(data, size_, outline_);
+    }
+
+    static TrueTypeFont fromFile(const string filePath, uint size_ = 12u, uint outline_ = 0) {
+        const(ubyte)[] data = cast(const(ubyte)[]) read(filePath);
         return new TrueTypeFont(data, size_, outline_);
     }
 
@@ -106,7 +112,7 @@ final class TrueTypeFont : Font, Resource!TrueTypeFont {
 
             SDL_Surface* surface = TTF_RenderGlyph32_Blended(_trueTypeFont, ch, aa);
             assert(surface);
-            Texture texture = new Texture(surface, _isSmooth);
+            Texture texture = Texture.fromSurface(surface, true, _isSmooth);
             assert(texture);
 
             Glyph metrics = new BasicGlyph(true, advance, 0, 0, texture.width,
@@ -135,7 +141,7 @@ final class TrueTypeFont : Font, Resource!TrueTypeFont {
 
             SDL_BlitSurface(surface, &srcRect, surfaceOutline, &dstRect);
 
-            Texture texture = new Texture(surfaceOutline, _isSmooth);
+            Texture texture = Texture.fromSurface(surfaceOutline, true, _isSmooth);
             assert(texture);
             SDL_FreeSurface(surface);
             Glyph metrics = new BasicGlyph(true, advance, 0, 0, texture.width,

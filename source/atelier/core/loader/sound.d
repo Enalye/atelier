@@ -33,7 +33,7 @@ package void loadSound(InStream stream) {
     float volume = stream.read!float();
 
     Atelier.res.store(rid, {
-        Sound sound = new Sound(file);
+        Sound sound = Sound.fromResource(file);
         sound.volume = volume;
         return sound;
     });

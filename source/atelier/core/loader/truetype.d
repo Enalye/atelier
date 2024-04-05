@@ -39,7 +39,7 @@ package void loadTrueType(InStream stream) {
     uint outline = stream.read!uint();
 
     Atelier.res.store(rid, {
-        TrueTypeFont font = TrueTypeFont.fromFile(file, size, outline);
+        TrueTypeFont font = TrueTypeFont.fromResource(file, size, outline);
         return font;
     });
 }

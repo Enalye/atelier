@@ -26,7 +26,7 @@ package void loadTexture(InStream stream) {
     string filePath = stream.read!string();
 
     Atelier.res.store(rid, {
-        Texture texture = new Texture(filePath);
+        Texture texture = Texture.fromResource(filePath);
         return texture;
     });
 }

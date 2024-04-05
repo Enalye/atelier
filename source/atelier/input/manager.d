@@ -440,7 +440,7 @@ final class InputManager {
                 case mouseButton:
                 case mouseWheel:
                 case controllerButton:
-                    eventStrength = event.value;
+                    eventStrength = event.getValue();
                     break;
                 case controllerAxis:
                     const InputEvent.ControllerAxis controllerAxis = event.asControllerAxis();

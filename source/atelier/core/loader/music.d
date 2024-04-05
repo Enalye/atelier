@@ -46,7 +46,7 @@ package void loadMusic(InStream stream) {
     float loopEnd = stream.read!float();
 
     Atelier.res.store(rid, {
-        Music music = new Music(file);
+        Music music = Music.fromResource(file);
         music.volume = volume;
         music.loopStart = loopStart;
         music.loopEnd = loopEnd;

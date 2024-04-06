@@ -11,7 +11,7 @@ Hérite de **Image**
 |Fonction|Entrée|Description|
 |-|-|-|
 |[@**NinePatch**](#ctor_0)| *param0*: **string**||
-|[@**NinePatch**](#ctor_1)| *param0*: **Texture**,  *param1*: **Vec4\<int>**,  *param2*: **int**,  *param3*: **int**,  *param4*: **int**,  *param5*: **int**||
+|[@**NinePatch**](#ctor_1)| *param0*: **Texture**,  *param1*: **Vec4\<uint>**,  *param2*: **int**,  *param3*: **int**,  *param4*: **int**,  *param5*: **int**||
 ## Propriétés
 |Propriété|Natif|Type|Accesseur|Modifieur|Description|
 |-|-|-|-|-|-|

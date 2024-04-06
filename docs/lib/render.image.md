@@ -10,7 +10,7 @@ Image
 |anchor|**Image**|**Vec2\<float>**|oui|oui||
 |angle|**Image**|**double**|oui|oui||
 |blend|**Image**|**Blend**|oui|oui||
-|clip|**Image**|**Vec4\<int>**|oui|oui||
+|clip|**Image**|**Vec4\<uint>**|oui|oui||
 |color|**Image**|**Color**|oui|oui||
 |flipX|**Image**|**bool**|oui|oui||
 |flipY|**Image**|**bool**|oui|oui||

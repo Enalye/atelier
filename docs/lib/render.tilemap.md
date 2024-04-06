@@ -29,7 +29,9 @@ Hérite de **Image**
 ## Propriétés
 |Propriété|Natif|Type|Accesseur|Modifieur|Description|
 |-|-|-|-|-|-|
-|size|**Tilemap**|**Vec2\<float>**|oui|oui|Taille d’une tuile|
+|height|**Tilemap**|**uint**|oui|non|Hauteur en tuiles|
+|tileSize|**Tilemap**|**Vec2\<float>**|oui|oui|Taille d’une tuile|
+|width|**Tilemap**|**uint**|oui|non|Largeur en tuiles|
 ## Fonctions
 |Fonction|Entrée|Sortie|
 |-|-|-|

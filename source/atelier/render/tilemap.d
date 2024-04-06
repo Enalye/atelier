@@ -29,14 +29,24 @@ final class Tilemap : Image, Resource!Tilemap {
         uint _width, _height;
     }
 
-    Vec2f size = Vec2f.zero;
+    @property {
+        uint width() const {
+            return _width;
+        }
+
+        uint height() const {
+            return _height;
+        }
+    }
+
+    Vec2f tileSize = Vec2f.zero;
 
     this(Tileset tileset, uint width, uint height) {
         _tileset = tileset;
         _width = width;
         _height = height;
         clip = _tileset.clip;
-        size = cast(Vec2f) clip.zw;
+        tileSize = cast(Vec2f) clip.zw;
 
         _tiles.length = _width * _height;
         foreach (ref Tile tile; _tiles) {
@@ -51,7 +61,7 @@ final class Tilemap : Image, Resource!Tilemap {
         _width = tilemap._width;
         _height = tilemap._height;
         _tiles = tilemap._tiles;
-        size = tilemap.size;
+        tileSize = tilemap.tileSize;
     }
 
     /// Accès à la ressource
@@ -115,12 +125,12 @@ final class Tilemap : Image, Resource!Tilemap {
 
     /// Redimensionne l’image pour qu’elle puisse tenir dans une taille donnée
     override void fit(Vec2f size_) {
-        size = to!Vec2f(clip.zw).fit(size_);
+        tileSize = to!Vec2f(clip.zw).fit(size_);
     }
 
     /// Redimensionne l’image pour qu’elle puisse contenir une taille donnée
     override void contain(Vec2f size_) {
-        size = to!Vec2f(clip.zw).contain(size_);
+        tileSize = to!Vec2f(clip.zw).contain(size_);
     }
 
     override void update() {
@@ -138,12 +148,13 @@ final class Tilemap : Image, Resource!Tilemap {
         _tileset.alpha = alpha;
         _tileset.blend = blend;
 
-        Vec2f tileSize = ((cast(Vec2f) _tileset.tileSize) * size) / cast(Vec2f) _tileset.clip.zw;
-        Vec2f startPos = origin + position - size * anchor;
+        Vec2f finalTileSize = ((cast(Vec2f) _tileset.tileSize) * tileSize) / cast(Vec2f) _tileset
+            .clip.zw;
+        Vec2f startPos = origin + position - tileSize * anchor;
         Vec2f tilePos;
 
         if (_tileset.isIsometric) {
-            Vec2f halfTile = tileSize / 2f;
+            Vec2f halfTile = finalTileSize / 2f;
 
             for (int y; y < _height; y++) {
                 for (int x; x < _width; x++) {
@@ -151,12 +162,12 @@ final class Tilemap : Image, Resource!Tilemap {
                     tilePos.x += (x - y) * halfTile.x;
                     tilePos.y += (x + y) * halfTile.y;
 
-                    int tileId = _tiles[x * _width + y].id;
-                    int elevation = _tiles[x * _width + y].elevation;
+                    int tileId = _tiles[x + y * _width].id;
+                    int elevation = _tiles[x + y * _width].elevation;
                     tilePos.y -= elevation;
 
                     if (tileId >= 0)
-                        _tileset.draw(tileId, tilePos, size, angle);
+                        _tileset.draw(tileId, tilePos, tileSize, angle);
                 }
             }
         }
@@ -168,24 +179,24 @@ final class Tilemap : Image, Resource!Tilemap {
 
             /*if (Atelier.scene.isOnScene) {
                 Vec4f cameraClip = Atelier.scene.cameraClip;
-                minX = max(0, cast(int) floor((cameraClip.x - startPos.x) / size.x));
-                minY = max(0, cast(int) floor((cameraClip.y - startPos.y) / size.y));
-                maxX = min(_width, cast(int) ceil((cameraClip.z - startPos.x) / size.x));
-                maxY = min(_height, cast(int) ceil((cameraClip.w - startPos.y) / size.y));
+                minX = max(0, cast(int) floor((cameraClip.x - startPos.x) / tileSize.x));
+                minY = max(0, cast(int) floor((cameraClip.y - startPos.y) / tileSize.y));
+                maxX = min(_width, cast(int) ceil((cameraClip.z - startPos.x) / tileSize.x));
+                maxY = min(_height, cast(int) ceil((cameraClip.w - startPos.y) / tileSize.y));
             }*/
 
             for (int y = minY; y < maxY; y++) {
                 for (int x = minX; x < maxX; x++) {
                     tilePos = startPos;
-                    tilePos.x += x * size.x;
-                    tilePos.y += y * size.y;
+                    tilePos.x += x * tileSize.x;
+                    tilePos.y += y * tileSize.y;
 
-                    int tileId = _tiles[x * _width + y].id;
-                    int elevation = _tiles[x * _width + y].elevation;
+                    int tileId = _tiles[x + y * _width].id;
+                    int elevation = _tiles[x + y * _width].elevation;
                     tilePos.y -= elevation;
 
                     if (tileId >= 0)
-                        _tileset.draw(tileId, tilePos, size, angle);
+                        _tileset.draw(tileId, tilePos, tileSize, angle);
                 }
             }
         }

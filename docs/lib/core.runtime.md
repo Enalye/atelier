@@ -4,7 +4,7 @@ Informations système
 ## Énumérations
 |Énumération|Valeurs|Description|
 |-|-|-|
-|Scaling|{none, integer, fit, contain, stretch}|Algorithme de mise à l’échelle (voir: setScaling)|
+|Scaling|{none, integer, fit, contain, stretch, desktop}|Algorithme de mise à l’échelle (voir: setScaling)|
 ## Natifs
 ### App
 ## Fonctions Statiques

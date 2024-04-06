@@ -41,11 +41,12 @@ Alignement vertical
 |[addState](#func_2)|*ui*: **UIElement**, *state*: **UIState**||
 |[addUI](#func_3)|*parent*: **UIElement**, *child*: **UIElement**||
 |[clearUI](#func_4)|*parent*: **UIElement**||
-|[remove](#func_5)|*ui*: **UIElement**||
-|[removeEventListener](#func_6)|*ui*: **UIElement**, *id*: **string**, *callback*: **event()**||
-|[runState](#func_7)|*ui*: **UIElement**, *stateId*: **string**||
-|[setAlign](#func_8)|*ui*: **UIElement**, *alignX*: **UIAlignX**, *alignY*: **UIAlignY**||
-|[setState](#func_9)|*ui*: **UIElement**, *stateId*: **string**||
+|[getState](#func_5)|*ui*: **UIElement**|**string**|
+|[remove](#func_6)|*ui*: **UIElement**||
+|[removeEventListener](#func_7)|*ui*: **UIElement**, *id*: **string**, *callback*: **event()**||
+|[runState](#func_8)|*ui*: **UIElement**, *stateId*: **string**||
+|[setAlign](#func_9)|*ui*: **UIElement**, *alignX*: **UIAlignX**, *alignY*: **UIAlignY**||
+|[setState](#func_10)|*ui*: **UIElement**, *stateId*: **string**||
 
 
 ***
@@ -77,28 +78,33 @@ Ajoute une interface en tant qu’enfant de cette interface.
 Supprime les éléments d’interface enfants du parent.
 
 <a id="func_5"></a>
+> getState(*ui*: **UIElement**) (**string**)
+
+Retourne le nom de l’état actuel.
+
+<a id="func_6"></a>
 > remove(*ui*: **UIElement**)
 
 Retire l’interface de l’arborescence.
 
-<a id="func_6"></a>
+<a id="func_7"></a>
 > removeEventListener(*ui*: **UIElement**, *id*: **string**, *callback*: **event()**)
 
 Supprime une fonction de rappel lié à un événement.
 
-<a id="func_7"></a>
+<a id="func_8"></a>
 > runState(*ui*: **UIElement**, *stateId*: **string**)
 
 Démarre la transition de l’interface de son état actuel vers son prochain état.
 
-<a id="func_8"></a>
+<a id="func_9"></a>
 > setAlign(*ui*: **UIElement**, *alignX*: **UIAlignX**, *alignY*: **UIAlignY**)
 
 Fixe l’alignement de l’interface.
 
 Détermine à partir d’où la position de l’interface sera calculé par rapport au parent.
 
-<a id="func_9"></a>
+<a id="func_10"></a>
 > setState(*ui*: **UIElement**, *stateId*: **string**)
 
 Fixe l’état actuel de l’interface sans transition.

@@ -11,8 +11,8 @@ Hérite de **Image**
 |Fonction|Entrée|Description|
 |-|-|-|
 |[@**Animation**](#ctor_0)| *name*: **string**||
-|[@**Animation**](#ctor_1)| *imageData*: **ImageData**,  *clip*: **Vec4\<int>**,  *columns*: **int**,  *lines*: **int**||
-|[@**Animation**](#ctor_2)| *imageData*: **ImageData**,  *clip*: **Vec4\<int>**,  *columns*: **int**,  *lines*: **int**,  *maxCount*: **int**||
+|[@**Animation**](#ctor_1)| *imageData*: **ImageData**,  *clip*: **Vec4\<uint>**,  *columns*: **int**,  *lines*: **int**||
+|[@**Animation**](#ctor_2)| *imageData*: **ImageData**,  *clip*: **Vec4\<uint>**,  *columns*: **int**,  *lines*: **int**,  *maxCount*: **int**||
 ## Propriétés
 |Propriété|Natif|Type|Accesseur|Modifieur|Description|
 |-|-|-|-|-|-|

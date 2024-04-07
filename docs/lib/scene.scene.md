@@ -21,6 +21,7 @@ addScene(scene);
 |isVisible|**Scene**|**bool**|oui|oui||
 |name|**Scene**|**string**|oui|oui||
 |position|**Scene**|**Vec2\<float>**|oui|oui||
+|showColliders|**Scene**|**bool**|oui|oui||
 |zOrder|**Entity**|**int**|oui|oui||
 ## Fonctions
 |Fonction|Entrée|Sortie|

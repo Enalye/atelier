@@ -50,7 +50,7 @@ final class Tilemap : Image, Resource!Tilemap {
 
         _tiles.length = _width * _height;
         foreach (ref Tile tile; _tiles) {
-            tile.id = 5;
+            tile.id = -1;
             tile.elevation = 0;
         }
     }
@@ -71,7 +71,7 @@ final class Tilemap : Image, Resource!Tilemap {
 
     int getTile(int x, int y) {
         if (x < 0 || y < 0 || x >= _width || y >= _height)
-            return 0;
+            return -1;
 
         return _tiles[x + y * _width].id;
     }
@@ -85,7 +85,7 @@ final class Tilemap : Image, Resource!Tilemap {
 
     int getTileElevation(int x, int y) {
         if (x < 0 || y < 0 || x >= _width || y >= _height)
-            return 0;
+            return -1;
 
         return _tiles[x + y * _width].elevation;
     }

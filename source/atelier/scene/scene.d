@@ -34,8 +34,6 @@ final class Scene {
         bool _isAlive = true;
         bool _isVisible = true;
         Vec2i _size;
-
-        bool _showColliders = true;
     }
 
     string name;
@@ -43,6 +41,8 @@ final class Scene {
     Vec2f parallax = Vec2f.one;
     string[] tags;
     int zOrder;
+    bool showColliders;
+    Vec2f mousePosition = Vec2f.zero;
 
     @property {
         int width() const {
@@ -148,6 +148,8 @@ final class Scene {
         _actors ~= actor;
 
         if (actor.entity) {
+            if (actor.entity.scene || actor.entity.parent)
+                actor.entity.remove();
             addEntity(actor.entity);
         }
     }
@@ -175,6 +177,8 @@ final class Scene {
         _solids ~= solid;
 
         if (solid.entity) {
+            if (solid.entity.scene || solid.entity.parent)
+                solid.entity.remove();
             addEntity(solid.entity);
         }
     }
@@ -205,6 +209,18 @@ final class Scene {
     }
 
     void dispatch(InputEvent event) {
+        switch (event.type) with (InputEvent.Type) {
+        case mouseButton:
+            Vec2f pos = event.asMouseButton().position;
+            mousePosition = pos - (_sprite.size / 2f - globalPosition);
+            break;
+        case mouseMotion:
+            Vec2f pos = event.asMouseMotion().position;
+            mousePosition = pos - (_sprite.size / 2f - globalPosition);
+            break;
+        default:
+            break;
+        }
         _uiManager.dispatch(event);
     }
 
@@ -312,7 +328,7 @@ final class Scene {
             source.draw(offset);
         }
 
-        if (_showColliders) {
+        if (showColliders) {
             foreach (actor; _actors) {
                 Vec2f pos = offset + cast(Vec2f)(actor.position - actor.hitbox);
                 Atelier.renderer.drawRect(pos, (cast(Vec2f) actor.hitbox) * 2f,

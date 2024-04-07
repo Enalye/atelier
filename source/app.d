@@ -27,9 +27,6 @@ version (AtelierDLL) {
         }
         catch (Exception e) {
             log("Erreur: ", e.msg);
-            foreach (trace; e.info) {
-                log("at: ", trace);
-            }
         }
         finally {
             closeLogger();
@@ -43,16 +40,13 @@ version (AtelierDLL) {
         }
         catch (Exception e) {
             log("Erreur: ", e.msg);
-            foreach (trace; e.info) {
-                log("à: ", trace);
-            }
         }
         finally {
             closeLogger();
         }
     }
 }
-else version(AtelierExe) {
+else version (AtelierExe) {
     extern (C) __gshared string[] rt_options = [
         "gcopt=initReserve:128 minPoolSize:256 parallel:2"
     ];
@@ -77,8 +71,10 @@ else version(AtelierExe) {
         }
         catch (Exception e) {
             log("Erreur: ", e.msg);
-            foreach (trace; e.info) {
-                log("à: ", trace);
+            version (AtelierDebug) {
+                foreach (trace; e.info) {
+                    log("à: ", trace);
+                }
             }
         }
         finally {

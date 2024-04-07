@@ -182,16 +182,18 @@ final class MusicPlayer : AudioPlayer {
         _decode(framesToRead);
         int framesRead = SDL_AudioStreamGet(_stream, buffer.ptr + (Atelier_Audio_Channels * _delayStartFrame * (float*)
                 .sizeof), cast(int)(float.sizeof * Atelier_Audio_Channels * framesToRead));
-        framesRead >>= 2;
 
-        const float volume = _music.volume;
-        for (int i = _delayStartFrame * Atelier_Audio_Channels; i < (
-                (_delayStartFrame + framesToRead) * Atelier_Audio_Channels); i += 2) {
-            buffer[i] *= volume;
-            buffer[i + 1] *= volume;
+        if (framesRead >= 0) {
+            framesRead >>= 2;
+
+            const float volume = _music.volume;
+            for (int i = _delayStartFrame * Atelier_Audio_Channels; i < (
+                    (_delayStartFrame + framesToRead) * Atelier_Audio_Channels); i += 2) {
+                buffer[i] *= volume;
+                buffer[i + 1] *= volume;
+            }
         }
-
-        if (framesRead <= 0) {
+        else {
             remove();
         }
 

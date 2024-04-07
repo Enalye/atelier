@@ -35,9 +35,15 @@ addScene(scene);");
 
     mod.addProperty(&_name!"get", &_name!"set", "name", sceneType, grString);
     mod.addProperty(&_position!"get", &_position!"set", "position", sceneType, vec2fType);
+
+    mod.setDescription(GrLocale.fr_FR, "Position de la souris dans la scène");
+    mod.addProperty(&_mousePosition, null, "mousePosition", sceneType, vec2fType);
+
     mod.addProperty(&_zOrder!"get", &_zOrder!"set", "zOrder", entityType, grInt);
     mod.addProperty(&_isVisible!"get", &_isVisible!"set", "isVisible", sceneType, grBool);
     mod.addProperty(&_isAlive, null, "isAlive", sceneType, grBool);
+    mod.addProperty(&_showColliders!"get", &_showColliders!"set",
+        "showColliders", sceneType, grBool);
     mod.addProperty(&_canvas, null, "canvas", sceneType, canvasType);
 
     mod.setDescription(GrLocale.fr_FR,
@@ -157,6 +163,11 @@ private void _position(string op)(GrCall call) {
     call.setNative(svec2(scene.position));
 }
 
+private void _mousePosition(GrCall call) {
+    Scene scene = call.getNative!Scene(0);
+    call.setNative(svec2(scene.mousePosition));
+}
+
 private void _zOrder(string op)(GrCall call) {
     Scene scene = call.getNative!Scene(0);
 
@@ -178,6 +189,16 @@ private void _isVisible(string op)(GrCall call) {
 private void _isAlive(GrCall call) {
     Scene scene = call.getNative!Scene(0);
     call.setBool(scene.isAlive);
+}
+
+private void _showColliders(string op)(GrCall call) {
+    Scene scene = call.getNative!Scene(0);
+
+    static if (op == "set") {
+        scene.showColliders = call.getBool(1);
+    }
+
+    call.setBool(scene.showColliders);
 }
 
 private void _canvas(GrCall call) {

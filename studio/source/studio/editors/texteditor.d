@@ -25,6 +25,7 @@ final class TextEditor : ContentEditor {
         Label[] _lineCountLabels;
         Label[] _lineTextLabels;
         uint _currentLine, _currentColumn, _maxColumn;
+        uint _selectionLine, _selectionColumn;
         uint charSize = 0;
     }
 
@@ -104,6 +105,54 @@ final class TextEditor : ContentEditor {
         Atelier.renderer.drawRect(Vec2f(64f, lineOffset * font.lineSkip()),
             Vec2f(getWidth(), font.lineSkip()), Atelier.theme.foreground, 1f, true);
 
+        if (_selectionLine != _currentLine || _selectionColumn != _currentColumn) {
+            void drawSelectionLine(uint line, uint start, uint end) {
+                if (startLine > line || line > startLine + textWindowHeight)
+                    return;
+
+                uint selectionLineOffset = line - startLine;
+
+                long selectionStart, selectionWidth;
+                selectionStart = start;
+                selectionStart -= startColumn;
+
+                selectionWidth = cast(long) end - cast(long) start;
+
+                if (selectionStart < 0) {
+                    selectionWidth += selectionStart;
+                    selectionStart = 0;
+                }
+                if (selectionWidth > textWindowWidth) {
+                    selectionWidth = textWindowWidth;
+                }
+
+                Atelier.renderer.drawRect(Vec2f(64f + selectionStart * charSize,
+                        selectionLineOffset * font.lineSkip()), Vec2f(selectionWidth * charSize,
+                        font.lineSkip()), Atelier.theme.danger, 1f, true);
+            }
+
+            if (_selectionLine == _currentLine) {
+                drawSelectionLine(_currentLine, min(_selectionColumn,
+                        _currentColumn), max(_selectionColumn, _currentColumn));
+            }
+            else if (_selectionLine < _currentLine) {
+                drawSelectionLine(_selectionLine, _selectionColumn,
+                    cast(uint) _lines[_selectionLine].getLength());
+                for (uint i = _selectionLine + 1; i < _currentLine; ++i) {
+                    drawSelectionLine(i, 0, cast(uint) _lines[i].getLength());
+                }
+                drawSelectionLine(_currentLine, 0, _currentColumn);
+            }
+            else if (_currentLine < _selectionLine) {
+                drawSelectionLine(_currentLine, _currentColumn,
+                    cast(uint) _lines[_currentLine].getLength());
+                for (uint i = _currentLine + 1; i < _selectionLine; ++i) {
+                    drawSelectionLine(i, 0, cast(uint) _lines[i].getLength());
+                }
+                drawSelectionLine(_selectionLine, 0, _selectionColumn);
+            }
+        }
+
         Atelier.renderer.drawRect(Vec2f(64f + columnOffset * charSize,
                 lineOffset * font.lineSkip()), Vec2f(charSize,
                 font.lineSkip()), Atelier.theme.accent, 1f, true);
@@ -119,37 +168,181 @@ final class TextEditor : ContentEditor {
                 int step = 1;
                 if (Atelier.input.isPressed(InputEvent.KeyButton.Button.leftControl))
                     step = 4;
-                _moveUp(step);
+
+                if (_selectionLine != _currentLine || _selectionColumn != _currentColumn) {
+                    if (!_useSelectionInput()) {
+                        if (_currentLine == _selectionLine) {
+                            uint minColumn = min(_selectionColumn, _currentColumn);
+                            _selectionColumn = minColumn;
+                            _currentColumn = minColumn;
+                        }
+                        else {
+                            uint minLine = min(_selectionLine, _currentLine);
+                            if (minLine == _currentLine) {
+                                _selectionLine = minLine;
+                                _selectionColumn = _currentColumn;
+                            }
+                            else {
+                                _currentLine = minLine;
+                                _currentColumn = _selectionColumn;
+                            }
+                        }
+                    }
+                    else {
+                        _moveUp(step);
+                    }
+                }
+                else {
+                    _moveUp(step);
+
+                    if (!_useSelectionInput()) {
+                        _selectionLine = _currentLine;
+                        _selectionColumn = _currentColumn;
+                    }
+                }
                 break;
             case down:
                 int step = 1;
                 if (Atelier.input.isPressed(InputEvent.KeyButton.Button.leftControl))
                     step = 4;
-                _moveDown(step);
+
+                if (_selectionLine != _currentLine || _selectionColumn != _currentColumn) {
+                    if (!_useSelectionInput()) {
+                        if (_currentLine == _selectionLine) {
+                            uint minColumn = max(_selectionColumn, _currentColumn);
+                            _selectionColumn = minColumn;
+                            _currentColumn = minColumn;
+                        }
+                        else {
+                            uint minLine = max(_selectionLine, _currentLine);
+                            if (minLine == _currentLine) {
+                                _selectionLine = minLine;
+                                _selectionColumn = _currentColumn;
+                            }
+                            else {
+                                _currentLine = minLine;
+                                _currentColumn = _selectionColumn;
+                            }
+                        }
+                    }
+                    else {
+                        _moveDown(step);
+                    }
+                }
+                else {
+                    _moveDown(step);
+
+                    if (!_useSelectionInput()) {
+                        _selectionLine = _currentLine;
+                        _selectionColumn = _currentColumn;
+                    }
+                }
                 break;
             case left:
-                if (Atelier.input.isPressed(InputEvent.KeyButton.Button.leftControl))
-                    _moveWordBorder(-1);
-                else
-                    _moveLeft();
+                if (_selectionLine != _currentLine || _selectionColumn != _currentColumn) {
+                    if (!_useSelectionInput()) {
+                        if (_currentLine == _selectionLine) {
+                            uint minColumn = min(_selectionColumn, _currentColumn);
+                            _selectionColumn = minColumn;
+                            _currentColumn = minColumn;
+                        }
+                        else {
+                            uint minLine = min(_selectionLine, _currentLine);
+                            if (minLine == _currentLine) {
+                                _selectionLine = minLine;
+                                _selectionColumn = _currentColumn;
+                            }
+                            else {
+                                _currentLine = minLine;
+                                _currentColumn = _selectionColumn;
+                            }
+                        }
+                    }
+                    else {
+                        if (Atelier.input.isPressed(InputEvent.KeyButton.Button.leftControl))
+                            _moveWordBorder(-1);
+                        else
+                            _moveLeft();
+                    }
+                }
+                else {
+                    if (Atelier.input.isPressed(InputEvent.KeyButton.Button.leftControl))
+                        _moveWordBorder(-1);
+                    else
+                        _moveLeft();
+
+                    if (!_useSelectionInput()) {
+                        _selectionLine = _currentLine;
+                        _selectionColumn = _currentColumn;
+                    }
+                }
                 break;
             case right:
-                if (Atelier.input.isPressed(InputEvent.KeyButton.Button.leftControl))
-                    _moveWordBorder(1);
-                else
-                    _moveRight();
+                if (_selectionLine != _currentLine || _selectionColumn != _currentColumn) {
+                    if (!_useSelectionInput()) {
+                        if (_currentLine == _selectionLine) {
+                            uint minColumn = max(_selectionColumn, _currentColumn);
+                            _selectionColumn = minColumn;
+                            _currentColumn = minColumn;
+                        }
+                        else {
+                            uint minLine = max(_selectionLine, _currentLine);
+                            if (minLine == _currentLine) {
+                                _selectionLine = minLine;
+                                _selectionColumn = _currentColumn;
+                            }
+                            else {
+                                _currentLine = minLine;
+                                _currentColumn = _selectionColumn;
+                            }
+                        }
+                    }
+                    else {
+                        if (Atelier.input.isPressed(InputEvent.KeyButton.Button.leftControl))
+                            _moveWordBorder(1);
+                        else
+                            _moveRight();
+                    }
+                }
+                else {
+                    if (Atelier.input.isPressed(InputEvent.KeyButton.Button.leftControl))
+                        _moveWordBorder(1);
+                    else
+                        _moveRight();
+
+                    if (!_useSelectionInput()) {
+                        _selectionLine = _currentLine;
+                        _selectionColumn = _currentColumn;
+                    }
+                }
                 break;
             case home:
                 _moveLineBorder(-1);
+                if (!_useSelectionInput()) {
+                    _selectionLine = _currentLine;
+                    _selectionColumn = _currentColumn;
+                }
                 break;
             case end:
                 _moveLineBorder(1);
+                if (!_useSelectionInput()) {
+                    _selectionLine = _currentLine;
+                    _selectionColumn = _currentColumn;
+                }
                 break;
             case pageup:
                 _moveFileBorder(-1);
+                if (!_useSelectionInput()) {
+                    _selectionLine = _currentLine;
+                    _selectionColumn = _currentColumn;
+                }
                 break;
             case pagedown:
                 _moveFileBorder(1);
+                if (!_useSelectionInput()) {
+                    _selectionLine = _currentLine;
+                    _selectionColumn = _currentColumn;
+                }
                 break;
             default:
                 break;
@@ -257,6 +450,11 @@ final class TextEditor : ContentEditor {
             _lineTextLabels[index].text = to!string(_lines[line].getText(startColumn, endColumn));
             index++;
         }
+    }
+
+    private bool _useSelectionInput() {
+        return Atelier.input.isPressed(InputEvent.KeyButton.Button.leftShift) ||
+            Atelier.input.isPressed(InputEvent.KeyButton.Button.rightShift);
     }
 
     void _moveUp(int step) {
@@ -407,7 +605,7 @@ private final class Line {
         return _text[startColumn .. endColumn + 1];
     }
 
-    size_t getLength() const {
+    long getLength() const {
         return _text.length;
     }
 

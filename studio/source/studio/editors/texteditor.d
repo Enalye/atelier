@@ -5,12 +5,15 @@
  */
 module studio.editors.texteditor;
 
+import std.algorithm.mutation;
+import std.array;
 import std.ascii;
 import std.conv : to;
 import std.file;
 import std.math;
 import std.stdio;
 import std.string;
+import std.typecons;
 import atelier;
 import studio.editors.base;
 import atelier.core.data.vera;
@@ -21,7 +24,7 @@ final class TextEditor : ContentEditor {
     private {
         Surface _linesSurface;
         UIElement _textContainer;
-        Array!Line _lines;
+        Line[] _lines;
         Label[] _lineCountLabels;
         Label[] _lineTextLabels;
         uint _currentLine, _currentColumn, _maxColumn;
@@ -34,8 +37,6 @@ final class TextEditor : ContentEditor {
 
         font = TrueTypeFont.fromMemory(veraMonoFontData, 16);
         charSize = font.getGlyph('a').advance();
-
-        _lines = new Array!Line;
 
         auto file = File(path_);
         uint lineId;
@@ -153,9 +154,14 @@ final class TextEditor : ContentEditor {
             }
         }
 
+        Color cursorColor = Atelier.theme.accent;
+        if(_currentLine != _selectionLine || _currentColumn != _selectionColumn) {
+            cursorColor = Color(cursorColor.r, cursorColor.b, cursorColor.g);
+        }
+
         Atelier.renderer.drawRect(Vec2f(64f + columnOffset * charSize,
                 lineOffset * font.lineSkip()), Vec2f(charSize,
-                font.lineSkip()), Atelier.theme.accent, 1f, true);
+                font.lineSkip()), cursorColor, 1f, true);
     }
 
     private void _onKey() {
@@ -343,6 +349,12 @@ final class TextEditor : ContentEditor {
                     _selectionLine = _currentLine;
                     _selectionColumn = _currentColumn;
                 }
+                break;
+            case remove:
+                _removeSelection(1);
+                break;
+            case backspace:
+                _removeSelection(-1);
                 break;
             default:
                 break;
@@ -560,7 +572,7 @@ final class TextEditor : ContentEditor {
 
     private void _moveFileBorder(int direction) {
         if (direction > 0) {
-            _currentLine = cast(uint)((cast(long) _lines.length()) - 1);
+            _currentLine = cast(uint)((cast(long) _lines.length) - 1);
         }
         else {
             _currentLine = 0;
@@ -572,6 +584,67 @@ final class TextEditor : ContentEditor {
         if (_currentColumn >= _lines[_currentLine].getLength()) {
             _currentColumn = cast(uint) _lines[_currentLine].getLength();
         }
+    }
+
+    private void _removeSelection(int direction) {
+        if (!_lines.length)
+            return;
+
+        if (_currentLine == _selectionLine && _currentColumn == _selectionColumn) {
+            if (direction > 0) {
+                if (_currentColumn == _lines[_currentLine].getLength()) {
+                    if (_currentLine < _lines.length) {
+                        _lines[_currentLine].insertAt(_currentColumn,
+                            _lines[_currentLine + 1].getText());
+                        _lines = _lines.remove(_currentLine + 1);
+                    }
+                }
+                else {
+                    _lines[_currentLine].removeAt(_currentColumn);
+                }
+            }
+            else {
+                if (_currentColumn == 0) {
+                    if (_currentLine > 0) {
+                        _currentLine--;
+                        _currentColumn = cast(uint) _lines[_currentLine].getLength();
+                        _lines[_currentLine].insertAt(_currentColumn,
+                            _lines[_currentLine + 1].getText());
+                        _lines = _lines.remove(_currentLine + 1);
+                    }
+                }
+                else {
+                    _currentColumn--;
+                    _lines[_currentLine].removeAt(_currentColumn);
+                }
+            }
+        }
+        else {
+            if (_currentLine == _selectionLine) {
+                uint startCol = min(_currentColumn, _selectionColumn);
+                uint endCol = max(_currentColumn, _selectionColumn);
+                _lines[_currentLine].removeAt(startCol, endCol);
+            }
+            else if (_currentLine < _selectionLine) {
+                _lines[_currentLine].removeAt(_currentColumn, _lines[_currentLine].getLength());
+                _lines[_currentLine].insertAt(_currentColumn, _lines[_selectionLine].getText(_selectionColumn,
+                        cast(uint) _lines[_selectionLine].getLength()));
+                _lines.remove(tuple(_currentLine + 1, _selectionLine + 1));
+            }
+            else if (_selectionLine < _currentLine) {
+                _lines[_selectionLine].removeAt(_selectionColumn,
+                    _lines[_selectionLine].getLength());
+                _lines[_selectionLine].insertAt(_selectionColumn,
+                    _lines[_currentLine].getText(_currentColumn,
+                        cast(uint) _lines[_currentLine].getLength()));
+                _lines.remove(tuple(_selectionLine + 1, _currentLine + 1));
+                _currentLine = _selectionLine;
+                _currentColumn = _selectionColumn;
+            }
+        }
+
+        _selectionLine = _currentLine;
+        _selectionColumn = _currentColumn;
     }
 }
 
@@ -590,8 +663,28 @@ private final class Line {
     void draw(Vec2f position) {
     }
 
+    void insertAt(size_t col, dstring text) {
+        _text.insertInPlace(col, text);
+    }
+
+    void removeAt(size_t startCol, size_t endCol) {
+        dchar[] text = cast(dchar[]) _text;
+        text = text.remove!(SwapStrategy.stable)(tuple(startCol, endCol));
+        _text = cast(dstring) text;
+    }
+
+    void removeAt(size_t col) {
+        dchar[] text = cast(dchar[]) _text;
+        text = text.remove!(SwapStrategy.stable)(col);
+        _text = cast(dstring) text;
+    }
+
     void setText(dstring text) {
         _text = text.dup;
+    }
+
+    dstring getText() {
+        return getText(0, _text.length > 0 ? (cast(int) _text.length) - 1 : 0);
     }
 
     dstring getText(uint startColumn, uint endColumn) const {

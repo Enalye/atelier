@@ -18,8 +18,8 @@ import studio.ui.editor;
 
 final class ResourceList : Surface {
     private {
-        SelectButton _resFolderSelect;
-        string _currentResFolder;
+        SelectButton _mediaSelect;
+        string _currentMedia;
         VList _list;
         string[] _unfoldedFolders;
         TextField _searchField;
@@ -48,6 +48,7 @@ final class ResourceList : Surface {
             return;
 
         VBox vbox = new VBox;
+        vbox.setPosition(Vec2f(0f, 16f));
         vbox.setSpacing(16f);
         vbox.setAlign(UIAlignX.left, UIAlignY.top);
         vbox.setChildAlign(UIAlignX.left);
@@ -67,13 +68,13 @@ final class ResourceList : Surface {
 
                 hbox.addUI(new Label("Dossier:", Atelier.theme.font));
 
-                _resFolderSelect = new SelectButton(folders, _currentResFolder);
-                hbox.addUI(_resFolderSelect);
+                _mediaSelect = new SelectButton(folders, _currentMedia);
+                _mediaSelect.addEventListener("value", &rebuildList);
+                hbox.addUI(_mediaSelect);
 
-                _currentResFolder = _resFolderSelect.value;
+                _currentMedia = _mediaSelect.value;
             }
             {
-
                 HBox hbox = new HBox;
                 hbox.setSpacing(4f);
                 hbox.setMargin(Vec2f(16f, 0f));
@@ -96,13 +97,14 @@ final class ResourceList : Surface {
 
     void rebuildList() {
         _list.clearList();
+        _currentMedia = _mediaSelect.value;
 
         string search = _searchField ? _searchField.value : "";
-        string resPath = buildNormalizedPath(Project.getMediaDir(), _currentResFolder);
+        string mediaPath = buildNormalizedPath(Project.getMediaDir(), _currentMedia);
 
         if (search.length) {
-            if (exists(resPath)) {
-                foreach (entry; dirEntries(resPath, SpanMode.depth)) {
+            if (exists(mediaPath)) {
+                foreach (entry; dirEntries(mediaPath, SpanMode.depth)) {
                     if (entry.isDir() || entry.indexOf(search, No.caseSentitive) == -1)
                         continue;
 
@@ -111,7 +113,7 @@ final class ResourceList : Surface {
                 return;
             }
         }
-        foreach (elt; _buildFolder(resPath, 0)) {
+        foreach (elt; _buildFolder(mediaPath, 0)) {
             _list.addList(elt);
         }
 

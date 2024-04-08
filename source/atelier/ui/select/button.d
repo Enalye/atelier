@@ -30,10 +30,14 @@ final class SelectButton : Button!RoundedRectangle {
         }
 
         string value(string value_) {
+            if (_value == value_)
+                return _value;
+
             if (_items.canFind(value_)) {
                 _value = value_;
+                _label.text = _value;
+                dispatchEvent("value", false);
             }
-            _label.text = _value;
             return _value;
         }
     }

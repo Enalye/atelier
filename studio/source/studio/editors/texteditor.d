@@ -526,8 +526,13 @@ final class TextEditor : ContentEditor {
         if (_currentColumn > _lines[_currentLine].getLength())
             _currentColumn = cast(uint) _lines[_currentLine].getLength();
 
-        if (_currentColumn > 0)
+        if (_currentColumn > 0) {
             _currentColumn--;
+        }
+        else if (_currentLine > 0) {
+            _currentLine--;
+            _currentColumn = getLineLength(_currentLine);
+        }
 
         _maxColumn = _currentColumn;
     }
@@ -536,8 +541,13 @@ final class TextEditor : ContentEditor {
         if (_currentColumn > _lines[_currentLine].getLength())
             _currentColumn = cast(uint) _lines[_currentLine].getLength();
 
-        if (_currentColumn < _lines[_currentLine].getLength())
+        if (_currentColumn < _lines[_currentLine].getLength()) {
             _currentColumn++;
+        }
+        else if (_currentLine + 1 < _lines.length) {
+            _currentLine++;
+            _currentColumn = 0;
+        }
 
         _maxColumn = _currentColumn;
     }
@@ -552,31 +562,67 @@ final class TextEditor : ContentEditor {
     }
 
     private void _moveWordBorder(int direction) {
-        int currentIndex = cast(int) _currentColumn;
         if (direction > 0) {
-            for (; currentIndex < getCurrentLineSize(); ++currentIndex) {
-                if (isPunctuation(getCurrentLineAt(currentIndex)) ||
-                    isWhite(getCurrentLineAt(currentIndex))) {
-                    if (currentIndex == _currentColumn)
-                        currentIndex++;
+            _moveRight();
+
+            for (; _currentColumn < getCurrentLineSize(); ++_currentColumn) {
+                if (!isWhite(getCurrentLineAt(_currentColumn))) {
                     break;
                 }
             }
-            _currentColumn = currentIndex;
+
+            if (_currentColumn < getCurrentLineSize()) {
+                if (isPunctuation(getCurrentLineAt(_currentColumn))) {
+                    for (; _currentColumn < getCurrentLineSize(); ++_currentColumn) {
+                        if (!isPunctuation(getCurrentLineAt(_currentColumn))) {
+                            break;
+                        }
+                    }
+                }
+                else {
+                    for (; _currentColumn < getCurrentLineSize(); ++_currentColumn) {
+                        if (isWhite(getCurrentLineAt(_currentColumn)) ||
+                            isPunctuation(getCurrentLineAt(_currentColumn))) {
+                            break;
+                        }
+                    }
+                }
+            }
+
+            _maxColumn = _currentColumn;
         }
         else {
-            currentIndex--;
-            for (; currentIndex >= 0; --currentIndex) {
-                if (isPunctuation(getCurrentLineAt(currentIndex)) ||
-                    isWhite(getCurrentLineAt(currentIndex))) {
-                    if (currentIndex + 1 == _currentColumn)
-                        currentIndex--;
+            _moveLeft();
+
+            if (_currentColumn >= getLineLength(_currentLine) && _currentColumn > 0)
+                _currentColumn--;
+
+            for (; _currentColumn > 0; --_currentColumn) {
+                if (!isWhite(getCurrentLineAt(_currentColumn - 1))) {
                     break;
                 }
             }
-            _currentColumn = currentIndex + 1;
+
+            if (_currentColumn > 0) {
+                if (isPunctuation(getCurrentLineAt(_currentColumn))) {
+                    for (; _currentColumn > 0; --_currentColumn) {
+                        if (!isPunctuation(getCurrentLineAt(_currentColumn - 1))) {
+                            break;
+                        }
+                    }
+                }
+                else {
+                    for (; _currentColumn > 0; --_currentColumn) {
+                        if (isWhite(getCurrentLineAt(_currentColumn - 1)) ||
+                            isPunctuation(getCurrentLineAt(_currentColumn - 1))) {
+                            break;
+                        }
+                    }
+                }
+            }
+
+            _maxColumn = _currentColumn;
         }
-        _maxColumn = _currentColumn;
     }
 
     private void _moveLineBorder(int direction) {

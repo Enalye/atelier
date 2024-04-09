@@ -39,16 +39,9 @@ final class TextEditor : ContentEditor {
         charSize = font.getGlyph('a').advance();
 
         auto file = File(path_);
-        uint lineId;
         foreach (textLine; file.byLine) {
-            Line line = new Line(this, lineId);
+            Line line = new Line;
             line.setText(to!dstring(textLine.chomp()));
-            _lines ~= line;
-
-            lineId++;
-        }
-        {
-            Line line = new Line(this, lineId);
             _lines ~= line;
         }
 
@@ -106,7 +99,7 @@ final class TextEditor : ContentEditor {
         Atelier.renderer.drawRect(Vec2f(64f, lineOffset * font.lineSkip()),
             Vec2f(getWidth(), font.lineSkip()), Atelier.theme.foreground, 1f, true);
 
-        if (_selectionLine != _currentLine || _selectionColumn != _currentColumn) {
+        if (hasSelection()) {
             void drawSelectionLine(uint line, uint start, uint end) {
                 if (startLine > line || line > startLine + textWindowHeight)
                     return;
@@ -155,7 +148,7 @@ final class TextEditor : ContentEditor {
         }
 
         Color cursorColor = Atelier.theme.accent;
-        if(_currentLine != _selectionLine || _currentColumn != _selectionColumn) {
+        if (hasSelection()) {
             cursorColor = Color(cursorColor.r, cursorColor.b, cursorColor.g);
         }
 
@@ -175,7 +168,7 @@ final class TextEditor : ContentEditor {
                 if (Atelier.input.isPressed(InputEvent.KeyButton.Button.leftControl))
                     step = 4;
 
-                if (_selectionLine != _currentLine || _selectionColumn != _currentColumn) {
+                if (hasSelection()) {
                     if (!_useSelectionInput()) {
                         if (_currentLine == _selectionLine) {
                             uint minColumn = min(_selectionColumn, _currentColumn);
@@ -212,7 +205,7 @@ final class TextEditor : ContentEditor {
                 if (Atelier.input.isPressed(InputEvent.KeyButton.Button.leftControl))
                     step = 4;
 
-                if (_selectionLine != _currentLine || _selectionColumn != _currentColumn) {
+                if (hasSelection()) {
                     if (!_useSelectionInput()) {
                         if (_currentLine == _selectionLine) {
                             uint minColumn = max(_selectionColumn, _currentColumn);
@@ -245,7 +238,7 @@ final class TextEditor : ContentEditor {
                 }
                 break;
             case left:
-                if (_selectionLine != _currentLine || _selectionColumn != _currentColumn) {
+                if (hasSelection()) {
                     if (!_useSelectionInput()) {
                         if (_currentLine == _selectionLine) {
                             uint minColumn = min(_selectionColumn, _currentColumn);
@@ -284,7 +277,7 @@ final class TextEditor : ContentEditor {
                 }
                 break;
             case right:
-                if (_selectionLine != _currentLine || _selectionColumn != _currentColumn) {
+                if (hasSelection()) {
                     if (!_useSelectionInput()) {
                         if (_currentLine == _selectionLine) {
                             uint minColumn = max(_selectionColumn, _currentColumn);
@@ -355,6 +348,24 @@ final class TextEditor : ContentEditor {
                 break;
             case backspace:
                 _removeSelection(-1);
+                break;
+            case c:
+                if (hasControlModifier()) {
+                    Atelier.input.setClipboard(to!string(getSelection()));
+                }
+                break;
+            case x:
+                if (hasControlModifier()) {
+                    Atelier.input.setClipboard(to!string(getSelection()));
+                    _removeSelection(0);
+                }
+                break;
+            case v:
+                if (hasControlModifier()) {
+                    if (Atelier.input.hasClipboard()) {
+                        insertText(to!dstring(Atelier.input.getClipboard()));
+                    }
+                }
                 break;
             default:
                 break;
@@ -467,6 +478,20 @@ final class TextEditor : ContentEditor {
     private bool _useSelectionInput() {
         return Atelier.input.isPressed(InputEvent.KeyButton.Button.leftShift) ||
             Atelier.input.isPressed(InputEvent.KeyButton.Button.rightShift);
+    }
+
+    bool hasControlModifier() const {
+        return Atelier.input.isPressed(InputEvent.KeyButton.Button.leftControl) ||
+            Atelier.input.isPressed(InputEvent.KeyButton.Button.rightControl);
+    }
+
+    bool hasShiftModifier() const {
+        return Atelier.input.isPressed(InputEvent.KeyButton.Button.leftShift) ||
+            Atelier.input.isPressed(InputEvent.KeyButton.Button.rightShift);
+    }
+
+    bool hasSelection() const {
+        return _selectionLine != _currentLine || _selectionColumn != _currentColumn;
     }
 
     void _moveUp(int step) {
@@ -590,10 +615,10 @@ final class TextEditor : ContentEditor {
         if (!_lines.length)
             return;
 
-        if (_currentLine == _selectionLine && _currentColumn == _selectionColumn) {
+        if (!hasSelection()) {
             if (direction > 0) {
                 if (_currentColumn == _lines[_currentLine].getLength()) {
-                    if (_currentLine < _lines.length) {
+                    if (_currentLine + 1 < _lines.length) {
                         _lines[_currentLine].insertAt(_currentColumn,
                             _lines[_currentLine + 1].getText());
                         _lines = _lines.remove(_currentLine + 1);
@@ -603,7 +628,7 @@ final class TextEditor : ContentEditor {
                     _lines[_currentLine].removeAt(_currentColumn);
                 }
             }
-            else {
+            else if (direction < 0) {
                 if (_currentColumn == 0) {
                     if (_currentLine > 0) {
                         _currentLine--;
@@ -627,43 +652,142 @@ final class TextEditor : ContentEditor {
             }
             else if (_currentLine < _selectionLine) {
                 _lines[_currentLine].removeAt(_currentColumn, _lines[_currentLine].getLength());
-                _lines[_currentLine].insertAt(_currentColumn, _lines[_selectionLine].getText(_selectionColumn,
-                        cast(uint) _lines[_selectionLine].getLength()));
+                _lines[_currentLine].insertAt(_currentColumn,
+                    _lines[_selectionLine].getText(_selectionColumn, getLineLength(_selectionLine)));
                 _lines.remove(tuple(_currentLine + 1, _selectionLine + 1));
             }
             else if (_selectionLine < _currentLine) {
                 _lines[_selectionLine].removeAt(_selectionColumn,
                     _lines[_selectionLine].getLength());
                 _lines[_selectionLine].insertAt(_selectionColumn,
-                    _lines[_currentLine].getText(_currentColumn,
-                        cast(uint) _lines[_currentLine].getLength()));
+                    _lines[_currentLine].getText(_currentColumn, getLineLength(_currentLine)));
                 _lines.remove(tuple(_selectionLine + 1, _currentLine + 1));
                 _currentLine = _selectionLine;
                 _currentColumn = _selectionColumn;
             }
         }
 
-        _selectionLine = _currentLine;
+        if (_currentLine == _selectionLine) {
+            _currentColumn = _selectionColumn = min(_currentColumn, _selectionColumn);
+        }
+        else if (_currentLine < _selectionLine) {
+            _selectionLine = _currentLine;
+            _selectionColumn = _currentColumn;
+        }
+        else {
+            _currentLine = _selectionLine;
+            _currentColumn = _selectionColumn;
+        }
+        _maxColumn = _currentColumn;
+    }
+
+    void insertText(dstring text) {
+        _removeSelection(0);
+
+        dstring[] ntext;
+        foreach (textLine; text.split('\n')) {
+            ntext ~= to!dstring(textLine.chomp());
+        }
+        if (ntext.length == 0)
+            return;
+
+        if (ntext.length == 1) {
+            _lines[_currentLine].insertAt(_currentColumn, ntext[0]);
+            _currentColumn += ntext[0].length;
+        }
+        else {
+            dstring endLine = _lines[_currentLine].getText(_currentColumn,
+                getLineLength(_currentLine));
+            _lines[_currentLine].removeAt(_currentColumn, getLineLength(_currentLine));
+            _lines[_currentLine].insertAt(_currentColumn, ntext[0]);
+            foreach (dstring line; ntext[1 .. $]) {
+                _currentLine++;
+                insertLine(_currentLine, line);
+            }
+            appendAt(_currentLine, endLine);
+            _currentColumn = cast(uint) ntext[$ - 1].length;
+        }
+
         _selectionColumn = _currentColumn;
+        _selectionLine = _currentLine;
+        _maxColumn = _currentColumn;
+    }
+
+    void insertLine(uint line, dstring text) {
+        Line nline = new Line;
+        nline.setText(text);
+        if (line > _lines.length) {
+            _lines ~= nline;
+        }
+        else {
+            _lines.insertInPlace(line, nline);
+        }
+    }
+
+    void insertAt(uint line, uint col, dstring text) {
+        if (line >= _lines.length) {
+            insertLine(line, text);
+        }
+        else {
+            _lines[line].insertAt(col, text);
+        }
+    }
+
+    void appendAt(uint line, dstring text) {
+        insertAt(line, getLineLength(line), text);
+    }
+
+    uint getLineLength(uint line) const {
+        if (line >= _lines.length) {
+            return 0;
+        }
+        return _lines[line].getLength();
+    }
+
+    dstring getSelection() {
+        if (!hasSelection())
+            return "";
+
+        dstring result;
+        if (_currentLine == _selectionLine) {
+            uint startCol = min(_selectionColumn, _currentColumn);
+            uint endCol = max(_selectionColumn, _currentColumn);
+            result = _lines[_currentLine].getText(startCol, endCol);
+        }
+        else if (_currentLine < _selectionLine) {
+            result = _lines[_currentLine].getText(_currentColumn,
+                getLineLength(_currentLine)) ~ "\n";
+
+            for (uint i = _currentLine + 1; i < _selectionLine; ++i) {
+                result ~= _lines[i].getText() ~ "\n";
+            }
+            result ~= _lines[_selectionLine].getText(0, _selectionColumn);
+        }
+        else if (_selectionLine < _currentLine) {
+            result = _lines[_selectionLine].getText(_selectionColumn,
+                getLineLength(_selectionLine)) ~ "\n";
+
+            for (uint i = _selectionLine + 1; i < _currentLine; ++i) {
+                result ~= _lines[i].getText() ~ "\n";
+            }
+            result ~= _lines[_currentLine].getText(0, _currentColumn);
+        }
+
+        return result;
     }
 }
 
 private final class Line {
     private {
-        uint _lineId;
-        TextEditor _editor;
         dstring _text;
-    }
-
-    this(TextEditor editor, uint lineId) {
-        _editor = editor;
-        _lineId = lineId;
     }
 
     void draw(Vec2f position) {
     }
 
     void insertAt(size_t col, dstring text) {
+        if (col >= _text.length)
+            col = _text.length;
         _text.insertInPlace(col, text);
     }
 
@@ -684,22 +808,24 @@ private final class Line {
     }
 
     dstring getText() {
-        return getText(0, _text.length > 0 ? (cast(int) _text.length) - 1 : 0);
+        if (!_text.length)
+            return "";
+        return getText(0, cast(uint) _text.length);
     }
 
-    dstring getText(uint startColumn, uint endColumn) const {
+    dstring getText(uint startColumn, uint endColumnExcluded) const {
         if (startColumn >= _text.length)
             return "";
-        if (endColumn >= _text.length) {
-            endColumn = cast(uint)((cast(long) _text.length) - 1);
+        if (endColumnExcluded > _text.length) {
+            endColumnExcluded = cast(uint) _text.length;
         }
-        if (startColumn > endColumn)
+        if (startColumn >= endColumnExcluded)
             return "";
-        return _text[startColumn .. endColumn + 1];
+        return _text[startColumn .. endColumnExcluded];
     }
 
-    long getLength() const {
-        return _text.length;
+    uint getLength() const {
+        return cast(uint) _text.length;
     }
 
     dchar getChar(size_t column) const {

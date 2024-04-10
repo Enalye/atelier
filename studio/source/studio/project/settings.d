@@ -20,6 +20,10 @@ final class Project {
         bool _isOpen, _isDirty;
     }
 
+    static void setDirectory(string dir) {
+        _directory = dir;
+    }
+
     static string getDirectory() {
         return _directory;
     }

@@ -97,6 +97,8 @@ final class ResourceList : Surface {
 
     void rebuildList() {
         _list.clearList();
+        if (!_mediaSelect)
+            return;
         _currentMedia = _mediaSelect.value;
 
         string search = _searchField ? _searchField.value : "";

@@ -21,6 +21,8 @@ void initApp() {
     MenuBar bar = new MenuBar;
     Editor editor = new Editor;
 
+    Project.setDirectory(getcwd());
+
     bar.add("Projet", "Nouveau Projet").addEventListener("click", {
         auto modal = new NewProject;
         modal.addEventListener("newProject", {

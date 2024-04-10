@@ -30,6 +30,9 @@ final class TextEditor : ContentEditor {
         uint _currentLine, _currentColumn, _maxColumn;
         uint _selectionLine, _selectionColumn;
         uint charSize = 0;
+        bool _isHistoryEnabled = true;
+        TextState _currentState;
+        TextState[] _prevStates, _nextStates;
     }
 
     this(string path_) {
@@ -345,9 +348,11 @@ final class TextEditor : ContentEditor {
                 break;
             case remove:
                 _removeSelection(1);
+                pushHistory();
                 break;
             case backspace:
                 _removeSelection(-1);
+                pushHistory();
                 break;
             case c:
                 if (hasControlModifier()) {
@@ -358,13 +363,25 @@ final class TextEditor : ContentEditor {
                 if (hasControlModifier()) {
                     Atelier.input.setClipboard(to!string(getSelection()));
                     _removeSelection(0);
+                    pushHistory();
                 }
                 break;
             case v:
                 if (hasControlModifier()) {
                     if (Atelier.input.hasClipboard()) {
                         insertText(to!dstring(Atelier.input.getClipboard()));
+                        pushHistory();
                     }
+                }
+                break;
+            case w:
+                if (hasControlModifier()) {
+                    undoHistory();
+                }
+                break;
+            case y:
+                if (hasControlModifier()) {
+                    redoHistory();
                 }
                 break;
             default:
@@ -665,26 +682,34 @@ final class TextEditor : ContentEditor {
             if (direction > 0) {
                 if (_currentColumn == _lines[_currentLine].getLength()) {
                     if (_currentLine + 1 < _lines.length) {
+                        addHistory(TextState.Type.update, _currentLine);
                         _lines[_currentLine].insertAt(_currentColumn,
                             _lines[_currentLine + 1].getText());
+
+                        addHistory(TextState.Type.remove, _currentLine + 1);
                         _lines = _lines.remove(_currentLine + 1);
                     }
                 }
                 else {
+                    addHistory(TextState.Type.update, _currentLine);
                     _lines[_currentLine].removeAt(_currentColumn);
                 }
             }
             else if (direction < 0) {
                 if (_currentColumn == 0) {
                     if (_currentLine > 0) {
+                        addHistory(TextState.Type.update, _currentLine);
                         _currentLine--;
                         _currentColumn = cast(uint) _lines[_currentLine].getLength();
                         _lines[_currentLine].insertAt(_currentColumn,
                             _lines[_currentLine + 1].getText());
+
+                        addHistory(TextState.Type.remove, _currentLine + 1);
                         _lines = _lines.remove(_currentLine + 1);
                     }
                 }
                 else {
+                    addHistory(TextState.Type.update, _currentLine);
                     _currentColumn--;
                     _lines[_currentLine].removeAt(_currentColumn);
                 }
@@ -694,19 +719,27 @@ final class TextEditor : ContentEditor {
             if (_currentLine == _selectionLine) {
                 uint startCol = min(_currentColumn, _selectionColumn);
                 uint endCol = max(_currentColumn, _selectionColumn);
+
+                addHistory(TextState.Type.update, _currentLine);
                 _lines[_currentLine].removeAt(startCol, endCol);
             }
             else if (_currentLine < _selectionLine) {
+                addHistory(TextState.Type.update, _currentLine);
                 _lines[_currentLine].removeAt(_currentColumn, _lines[_currentLine].getLength());
                 _lines[_currentLine].insertAt(_currentColumn,
                     _lines[_selectionLine].getText(_selectionColumn, getLineLength(_selectionLine)));
+
+                addHistory(TextState.Type.remove, _currentLine + 1, _selectionLine + 1);
                 _lines.remove(tuple(_currentLine + 1, _selectionLine + 1));
             }
             else if (_selectionLine < _currentLine) {
+                addHistory(TextState.Type.update, _selectionLine);
                 _lines[_selectionLine].removeAt(_selectionColumn,
                     _lines[_selectionLine].getLength());
                 _lines[_selectionLine].insertAt(_selectionColumn,
                     _lines[_currentLine].getText(_currentColumn, getLineLength(_currentLine)));
+
+                addHistory(TextState.Type.remove, _selectionLine + 1, _currentLine + 1);
                 _lines.remove(tuple(_selectionLine + 1, _currentLine + 1));
                 _currentLine = _selectionLine;
                 _currentColumn = _selectionColumn;
@@ -738,10 +771,12 @@ final class TextEditor : ContentEditor {
             return;
 
         if (ntext.length == 1) {
+            addHistory(TextState.Type.update, _currentLine);
             _lines[_currentLine].insertAt(_currentColumn, ntext[0]);
             _currentColumn += ntext[0].length;
         }
         else {
+            addHistory(TextState.Type.update, _currentLine);
             dstring endLine = _lines[_currentLine].getText(_currentColumn,
                 getLineLength(_currentLine));
             _lines[_currentLine].removeAt(_currentColumn, getLineLength(_currentLine));
@@ -762,6 +797,7 @@ final class TextEditor : ContentEditor {
     void insertLine(uint line, dstring text) {
         Line nline = new Line;
         nline.setText(text);
+        addHistory(TextState.Type.add, _currentLine);
         if (line > _lines.length) {
             _lines ~= nline;
         }
@@ -775,6 +811,7 @@ final class TextEditor : ContentEditor {
             insertLine(line, text);
         }
         else {
+            addHistory(TextState.Type.update, line);
             _lines[line].insertAt(col, text);
         }
     }
@@ -821,6 +858,130 @@ final class TextEditor : ContentEditor {
 
         return result;
     }
+
+    void pushHistory() {
+        if (!_isHistoryEnabled)
+            return;
+        _nextStates.length = 0;
+        _prevStates ~= _currentState;
+        _currentState.commands.length = 0;
+    }
+
+    void addHistory(TextState.Type action, uint line) {
+        if (!_isHistoryEnabled)
+            return;
+        TextState.Command command;
+        command.type = action;
+        command.line = line;
+        command.text = _lines[line].getText().dup;
+        _currentState.commands ~= command;
+    }
+
+    void addHistory(TextState.Type action, uint startLine, uint endLineExcluded) {
+        if (!_isHistoryEnabled)
+            return;
+        for (uint line = startLine; line < endLineExcluded; ++line) {
+            addHistory(action, line);
+        }
+    }
+
+    void undoHistory() {
+        if (!_prevStates.length)
+            return;
+
+        _currentState.commands.length = 0;
+
+        _isHistoryEnabled = false;
+
+        TextState state = _prevStates[$ - 1];
+        _prevStates.length--;
+
+        TextState nextState;
+
+        foreach (command; state.commands) {
+            TextState.Command nextCommand;
+            nextCommand.type = command.type;
+            nextCommand.line = command.line;
+            if (command.line < _lines.length)
+                nextCommand.text = _lines[command.line].getText();
+            nextState.commands ~= nextCommand;
+        }
+
+        foreach (command; state.commands) {
+            final switch (command.type) with (TextState.Type) {
+            case add:
+                _lines = _lines.remove(command.line);
+                break;
+            case remove:
+                insertLine(command.line, command.text.dup);
+                break;
+            case update:
+                _lines[command.line].setText(command.text.dup);
+                break;
+            }
+        }
+
+        _nextStates ~= nextState;
+
+        _isHistoryEnabled = true;
+    }
+
+    void redoHistory() {
+        if (!_nextStates.length)
+            return;
+
+        _currentState.commands.length = 0;
+
+        _isHistoryEnabled = false;
+
+        TextState state = _nextStates[$ - 1];
+        _nextStates.length--;
+
+        TextState prevState;
+
+        foreach (command; state.commands) {
+            TextState.Command prevCommand;
+            prevCommand.line = command.line;
+            prevCommand.type = command.type;
+            if (command.line < _lines.length)
+                prevCommand.text = _lines[command.line].getText();
+            prevState.commands ~= prevCommand;
+        }
+
+        foreach_reverse (command; state.commands) {
+            final switch (command.type) with (TextState.Type) {
+            case add:
+                insertLine(command.line, command.text.dup);
+                break;
+            case remove:
+                _lines = _lines.remove(command.line);
+                break;
+            case update:
+                _lines[command.line].setText(command.text.dup);
+                break;
+            }
+        }
+
+        _prevStates ~= prevState;
+
+        _isHistoryEnabled = true;
+    }
+}
+
+private struct TextState {
+    enum Type {
+        add,
+        remove,
+        update
+    }
+
+    struct Command {
+        Type type;
+        dstring text;
+        uint line;
+    }
+
+    Command[] commands;
 }
 
 private final class Line {

@@ -126,7 +126,7 @@ final class Editor : UIElement {
             return;
 
         if (!p) {
-            _contentEditor = ContentEditor.create(path);
+            _contentEditor = ContentEditor.create(path, getSize());
             _contentEditors[path] = _contentEditor;
         }
         else {

@@ -25,38 +25,38 @@ abstract class ContentEditor : UIElement {
         }
     }
 
-    static ContentEditor create(string path) {
+    static ContentEditor create(string path, Vec2f windowSize) {
         switch (extension(path)) {
         case ".png":
         case ".bmp":
         case ".jpg":
         case ".jpeg":
         case ".gif":
-            return new ImageViewer(path);
+            return new ImageViewer(path, windowSize);
         case ".ogg":
         case ".wav":
         case ".mp3":
-            return new AudioViewer(path);
+            return new AudioViewer(path, windowSize);
         case ".ttf":
-            return new FontViewer(path);
+            return new FontViewer(path, windowSize);
         case ".txt":
         case ".log":
         case ".ini":
         case ".md":
         case ".gr":
-            return new TextEditor(path);
+            return new TextEditor(path, windowSize);
         default:
-            return new InvalidContentEditor(path);
+            return new InvalidContentEditor(path, windowSize);
         }
     }
 
-    this(string path_) {
+    this(string path_, Vec2f windowSize) {
         _path = path_;
         focusable = true;
 
         setAlign(UIAlignX.left, UIAlignY.top);
         setPosition(Vec2f(250f, 35f));
-        setSize(Vec2f(Atelier.window.width - 500f, Atelier.window.height - 35f));
+        setSize(Vec2f(windowSize.x - 500f, windowSize.y - 35f));
 
         addEventListener("parentSize", &_onParentSize);
         addEventListener("register", &_onParentSize);
@@ -64,6 +64,8 @@ abstract class ContentEditor : UIElement {
     }
 
     private void _onParentSize() {
+        if(!isAlive())
+            return;
         setSize(Vec2f(getParentWidth() - 500f, getParentHeight() - 35f));
     }
 }

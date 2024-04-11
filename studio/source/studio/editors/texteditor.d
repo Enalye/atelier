@@ -27,6 +27,12 @@ final class TextEditor : ContentEditor {
         Line[] _lines;
         Label[] _lineCountLabels;
         Label[] _lineTextLabels;
+        uint _borderX = 10;
+        uint _borderY = 5;
+        uint _startLine = 0;
+        uint _endLine = 0;
+        uint _startColumn = 0;
+        uint _endColumn = 0;
         uint _currentLine, _currentColumn, _maxColumn;
         uint _selectionLine, _selectionColumn;
         uint charSize = 0;
@@ -35,8 +41,8 @@ final class TextEditor : ContentEditor {
         TextState[] _prevStates, _nextStates;
     }
 
-    this(string path_) {
-        super(path_);
+    this(string path_, Vec2f windowSize) {
+        super(path_, windowSize);
 
         font = TrueTypeFont.fromMemory(veraMonoFontData, 16);
         charSize = font.getGlyph('a').advance();
@@ -56,9 +62,13 @@ final class TextEditor : ContentEditor {
         _textContainer = new UIElement;
         _textContainer.focusable = true;
         _textContainer.setAlign(UIAlignX.right, UIAlignY.top);
+
         _textContainer.setSize(Vec2f(getWidth() - 64f, getHeight()));
         addUI(_textContainer);
 
+        _textContainer.addEventListener("wheel", &_onWheel);
+        _textContainer.addEventListener("mousedown", &_onMouseDown);
+        _textContainer.addEventListener("mouserelease", &_onMouseRelease);
         _textContainer.addEventListener("key", &_onKey);
         addEventListener("draw", &_onDraw);
         addEventListener("size", &updateLines);
@@ -66,32 +76,90 @@ final class TextEditor : ContentEditor {
         updateLines();
     }
 
+    private uint _getMouseLine() {
+        uint line = cast(uint)(_textContainer.getMousePosition().y / font.lineSkip());
+        line += _startLine;
+
+        if (line >= _lines.length) {
+            line = _lines.length > 0 ? (cast(uint) _lines.length) - 1 : 0;
+        }
+        return line;
+    }
+
+    private uint _getMouseColumn(uint line) {
+        if (line >= _lines.length)
+            return 0;
+
+        uint maxLength = getLineLength(line);
+        uint column = cast(uint)(_textContainer.getMousePosition().x / charSize);
+        column += _startColumn;
+
+        if (column > maxLength) {
+            column = maxLength;
+        }
+
+        return column;
+    }
+
+    private void _onWheel() {
+        int step = 1;
+        if (hasControlModifier())
+            step = 4;
+
+        Vec2i delta = getManager().input().asMouseWheel().wheel;
+        if (delta.sum() > 0) {
+            _moveUp(step);
+        }
+        else {
+            _moveDown(step);
+        }
+
+        if (!hasShiftModifier()) {
+            _selectionLine = _currentLine;
+            _selectionColumn = _currentColumn;
+        }
+        updateLines();
+    }
+
+    private void _onMouseDown() {
+        uint line = _getMouseLine();
+        uint column = _getMouseColumn(_currentLine);
+
+        if (line != _currentLine || column != _currentColumn) {
+            _currentLine = line;
+            _currentColumn = column;
+            _selectionLine = _currentLine;
+            _selectionColumn = _currentColumn;
+            _maxColumn = _currentColumn;
+            updateLines();
+        }
+        addEventListener("mousemove", &_onMouseMove);
+    }
+
+    private void _onMouseRelease() {
+        removeEventListener("mousemove", &_onMouseMove);
+    }
+
+    private void _onMouseMove() {
+        if (!_textContainer.hasFocus())
+            return;
+
+        uint line = _getMouseLine();
+        uint column = _getMouseColumn(_currentLine);
+
+        if (line != _currentLine || column != _currentColumn) {
+            _currentLine = line;
+            _currentColumn = column;
+            _maxColumn = _currentColumn;
+            updateLines();
+        }
+    }
+
     private void _onDraw() {
         uint textWindowHeight = cast(uint)(getHeight() / font.lineSkip());
-        uint halfTextWindowHeight = textWindowHeight >> 1;
-        uint startLine = 0;
-
-        if (halfTextWindowHeight > _currentLine) {
-            startLine = 0;
-        }
-        else {
-            startLine = _currentLine - halfTextWindowHeight;
-        }
-
-        uint lineOffset = _currentLine - startLine;
-
         uint textWindowWidth = cast(uint)(_textContainer.getWidth() / charSize);
-        uint halfTextWindowWidth = textWindowWidth >> 1;
-        uint startColumn = 0;
-
-        if (halfTextWindowWidth > _currentColumn) {
-            startColumn = 0;
-        }
-        else {
-            startColumn = _currentColumn - halfTextWindowWidth;
-        }
-
-        uint columnOffset = _currentColumn - startColumn;
+        uint lineOffset = _currentLine - _startLine;
+        uint columnOffset = _currentColumn - _startColumn;
 
         if (columnOffset > _lines[_currentLine].getLength())
             columnOffset = cast(uint) _lines[_currentLine].getLength();
@@ -104,14 +172,14 @@ final class TextEditor : ContentEditor {
 
         if (hasSelection()) {
             void drawSelectionLine(uint line, uint start, uint end) {
-                if (startLine > line || line > startLine + textWindowHeight)
+                if (_startLine > line || line > _startLine + textWindowHeight)
                     return;
 
-                uint selectionLineOffset = line - startLine;
+                uint selectionLineOffset = line - _startLine;
 
                 long selectionStart, selectionWidth;
                 selectionStart = start;
-                selectionStart -= startColumn;
+                selectionStart -= _startColumn;
 
                 selectionWidth = cast(long) end - cast(long) start;
 
@@ -168,11 +236,11 @@ final class TextEditor : ContentEditor {
             switch (keyEvent.button) with (InputEvent.KeyButton.Button) {
             case up:
                 int step = 1;
-                if (Atelier.input.isPressed(InputEvent.KeyButton.Button.leftControl))
+                if (hasControlModifier())
                     step = 4;
 
                 if (hasSelection()) {
-                    if (!_useSelectionInput()) {
+                    if (!hasShiftModifier()) {
                         if (_currentLine == _selectionLine) {
                             uint minColumn = min(_selectionColumn, _currentColumn);
                             _selectionColumn = minColumn;
@@ -197,7 +265,7 @@ final class TextEditor : ContentEditor {
                 else {
                     _moveUp(step);
 
-                    if (!_useSelectionInput()) {
+                    if (!hasShiftModifier()) {
                         _selectionLine = _currentLine;
                         _selectionColumn = _currentColumn;
                     }
@@ -205,11 +273,11 @@ final class TextEditor : ContentEditor {
                 break;
             case down:
                 int step = 1;
-                if (Atelier.input.isPressed(InputEvent.KeyButton.Button.leftControl))
+                if (hasControlModifier())
                     step = 4;
 
                 if (hasSelection()) {
-                    if (!_useSelectionInput()) {
+                    if (!hasShiftModifier()) {
                         if (_currentLine == _selectionLine) {
                             uint minColumn = max(_selectionColumn, _currentColumn);
                             _selectionColumn = minColumn;
@@ -234,7 +302,7 @@ final class TextEditor : ContentEditor {
                 else {
                     _moveDown(step);
 
-                    if (!_useSelectionInput()) {
+                    if (!hasShiftModifier()) {
                         _selectionLine = _currentLine;
                         _selectionColumn = _currentColumn;
                     }
@@ -242,7 +310,7 @@ final class TextEditor : ContentEditor {
                 break;
             case left:
                 if (hasSelection()) {
-                    if (!_useSelectionInput()) {
+                    if (!hasShiftModifier()) {
                         if (_currentLine == _selectionLine) {
                             uint minColumn = min(_selectionColumn, _currentColumn);
                             _selectionColumn = minColumn;
@@ -261,19 +329,19 @@ final class TextEditor : ContentEditor {
                         }
                     }
                     else {
-                        if (Atelier.input.isPressed(InputEvent.KeyButton.Button.leftControl))
+                        if (hasControlModifier())
                             _moveWordBorder(-1);
                         else
                             _moveLeft();
                     }
                 }
                 else {
-                    if (Atelier.input.isPressed(InputEvent.KeyButton.Button.leftControl))
+                    if (hasControlModifier())
                         _moveWordBorder(-1);
                     else
                         _moveLeft();
 
-                    if (!_useSelectionInput()) {
+                    if (!hasShiftModifier()) {
                         _selectionLine = _currentLine;
                         _selectionColumn = _currentColumn;
                     }
@@ -281,7 +349,7 @@ final class TextEditor : ContentEditor {
                 break;
             case right:
                 if (hasSelection()) {
-                    if (!_useSelectionInput()) {
+                    if (!hasShiftModifier()) {
                         if (_currentLine == _selectionLine) {
                             uint minColumn = max(_selectionColumn, _currentColumn);
                             _selectionColumn = minColumn;
@@ -300,19 +368,19 @@ final class TextEditor : ContentEditor {
                         }
                     }
                     else {
-                        if (Atelier.input.isPressed(InputEvent.KeyButton.Button.leftControl))
+                        if (hasControlModifier())
                             _moveWordBorder(1);
                         else
                             _moveRight();
                     }
                 }
                 else {
-                    if (Atelier.input.isPressed(InputEvent.KeyButton.Button.leftControl))
+                    if (hasControlModifier())
                         _moveWordBorder(1);
                     else
                         _moveRight();
 
-                    if (!_useSelectionInput()) {
+                    if (!hasShiftModifier()) {
                         _selectionLine = _currentLine;
                         _selectionColumn = _currentColumn;
                     }
@@ -320,28 +388,28 @@ final class TextEditor : ContentEditor {
                 break;
             case home:
                 _moveLineBorder(-1);
-                if (!_useSelectionInput()) {
+                if (!hasShiftModifier()) {
                     _selectionLine = _currentLine;
                     _selectionColumn = _currentColumn;
                 }
                 break;
             case end:
                 _moveLineBorder(1);
-                if (!_useSelectionInput()) {
+                if (!hasShiftModifier()) {
                     _selectionLine = _currentLine;
                     _selectionColumn = _currentColumn;
                 }
                 break;
             case pageup:
                 _moveFileBorder(-1);
-                if (!_useSelectionInput()) {
+                if (!hasShiftModifier()) {
                     _selectionLine = _currentLine;
                     _selectionColumn = _currentColumn;
                 }
                 break;
             case pagedown:
                 _moveFileBorder(1);
-                if (!_useSelectionInput()) {
+                if (!hasShiftModifier()) {
                     _selectionLine = _currentLine;
                     _selectionColumn = _currentColumn;
                 }
@@ -421,38 +489,69 @@ final class TextEditor : ContentEditor {
 
         uint textWindowHeight = cast(uint)(getHeight() / font.lineSkip());
         uint halfTextWindowHeight = textWindowHeight >> 1;
-        uint startLine = 0;
-        uint endLine = 0;
 
-        if (halfTextWindowHeight > _currentLine) {
-            startLine = 0;
+        if ((_borderY << 1) >= textWindowHeight) {
+            if (halfTextWindowHeight > _currentLine) {
+                _startLine = 0;
+            }
+            else {
+                _startLine = _currentLine - halfTextWindowHeight;
+            }
+
+            if (_startLine + textWindowHeight > _lines.length) {
+                _endLine = cast(uint) _lines.length;
+            }
+            else {
+                _endLine = _startLine + textWindowHeight;
+            }
         }
-        else {
-            startLine = _currentLine - halfTextWindowHeight;
+        else if (_startLine + _borderY > _currentLine) {
+            if (_currentLine < _borderY) {
+                _startLine = 0;
+            }
+            else {
+                _startLine = _currentLine - _borderY;
+            }
+            _endLine = _startLine + textWindowHeight;
+        }
+        else if (_currentLine + _borderY > _endLine) {
+            if (_currentLine + _borderY >= _lines.length) {
+                _endLine = cast(uint) _lines.length;
+            }
+            else {
+                _endLine = _currentLine + _borderY;
+            }
+            _startLine = _endLine - textWindowHeight;
         }
 
-        if (startLine + textWindowHeight > _lines.length) {
-            endLine = cast(uint) _lines.length;
-        }
-        else {
-            endLine = startLine + textWindowHeight;
-        }
-
-        uint actualTextWindowHeight = cast(uint)(cast(long) endLine - cast(long) startLine);
+        uint actualTextWindowHeight = cast(uint)(cast(long) _endLine - cast(long) _startLine);
 
         uint textWindowWidth = cast(uint)(_textContainer.getWidth() / charSize);
         uint halfTextWindowWidth = textWindowWidth >> 1;
-        uint startColumn = 0;
-        uint endColumn = 0;
 
-        if (halfTextWindowWidth > _currentColumn) {
-            startColumn = 0;
-        }
-        else {
-            startColumn = _currentColumn - halfTextWindowWidth;
-        }
+        if ((_borderX << 1) >= textWindowWidth) {
+            if (halfTextWindowWidth > _currentColumn) {
+                _startColumn = 0;
+            }
+            else {
+                _startColumn = _currentColumn - halfTextWindowWidth;
+            }
 
-        endColumn = startColumn + textWindowWidth;
+            _endColumn = _startColumn + textWindowWidth;
+        }
+        else if (_startColumn + _borderX > _currentColumn) {
+            if (_currentColumn < _borderX) {
+                _startColumn = 0;
+            }
+            else {
+                _startColumn = _currentColumn - _borderX;
+            }
+            _endColumn = _startColumn + textWindowWidth;
+        }
+        else if (_currentColumn + _borderX > _endColumn) {
+            _endColumn = _currentColumn + _borderX;
+            _startColumn = _endColumn - textWindowWidth;
+        }
 
         if (actualTextWindowHeight > _lineCountLabels.length) {
             for (size_t i = _lineCountLabels.length; i < actualTextWindowHeight; ++i) {
@@ -487,7 +586,7 @@ final class TextEditor : ContentEditor {
         }
 
         size_t index;
-        for (size_t line = startLine; line < endLine; line++) {
+        for (size_t line = _startLine; line < _endLine; line++) {
             long lineCount = 0;
             if (_currentLine == line) {
                 lineCount = _currentLine;
@@ -510,14 +609,9 @@ final class TextEditor : ContentEditor {
                 _lineCountLabels[index].setAlign(UIAlignX.right, UIAlignY.top);
             }
             _lineCountLabels[index].text = to!string(lineCount);
-            _lineTextLabels[index].text = to!string(_lines[line].getText(startColumn, endColumn));
+            _lineTextLabels[index].text = to!string(_lines[line].getText(_startColumn, _endColumn));
             index++;
         }
-    }
-
-    private bool _useSelectionInput() {
-        return Atelier.input.isPressed(InputEvent.KeyButton.Button.leftShift) ||
-            Atelier.input.isPressed(InputEvent.KeyButton.Button.rightShift);
     }
 
     bool hasControlModifier() const {

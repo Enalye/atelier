@@ -15,8 +15,8 @@ final class ImageViewer : ContentEditor {
         float _zoom = 1f;
     }
 
-    this(string path_) {
-        super(path_);
+    this(string path_, Vec2f windowSize) {
+        super(path_, windowSize);
 
         _texture = Texture.fromFile(path);
         _sprite = new Sprite(_texture);

@@ -13,8 +13,8 @@ final class InvalidContentEditor : ContentEditor {
 
     }
 
-    this(string path_) {
-        super(path_);
+    this(string path_, Vec2f windowSize) {
+        super(path_, windowSize);
 
         Label label = new Label("Format non-reconnu", Atelier.theme.font);
         label.setAlign(UIAlignX.center, UIAlignY.center);

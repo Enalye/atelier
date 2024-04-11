@@ -14,8 +14,8 @@ final class FontViewer : ContentEditor {
         Label _label;
     }
 
-    this(string path_) {
-        super(path_);
+    this(string path_, Vec2f windowSize) {
+        super(path_, windowSize);
 
         _font = TrueTypeFont.fromFile(path_);
         _label = new Label("Voix ambiguë d'un cœur qui, au zéphyr, préfère les jattes de kiwis.", _font);

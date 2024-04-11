@@ -27,8 +27,8 @@ final class AudioViewer : ContentEditor {
         }
     }
 
-    this(string path_) {
-        super(path_);
+    this(string path_, Vec2f windowSize) {
+        super(path_, windowSize);
 
         _sound = Sound.fromFile(path_);
 

@@ -321,7 +321,7 @@ class UIElement {
         if (_position == position_)
             return;
         _position = position_;
-        dispatchEvent("position");
+        dispatchEvent("position", false);
     }
 
     final Vec2f getSize() const {
@@ -353,7 +353,7 @@ class UIElement {
         }
 
         if (isDirty) {
-            dispatchEvent("size");
+            dispatchEvent("size", false);
             dispatchEventChildren("parentSize", false);
         }
     }
@@ -362,7 +362,7 @@ class UIElement {
         if (_widthLock || _size.x == width_)
             return;
         _size.x = width_;
-        dispatchEvent("size");
+        dispatchEvent("size", false);
         dispatchEventChildren("parentSize");
     }
 
@@ -370,7 +370,7 @@ class UIElement {
         if (_heightLock || _size.y == height_)
             return;
         _size.y = height_;
-        dispatchEvent("size");
+        dispatchEvent("size", false);
         dispatchEventChildren("parentSize");
     }
 
@@ -391,7 +391,7 @@ class UIElement {
         if (_pivot == pivot_)
             return;
         _pivot = pivot_;
-        dispatchEvent("pivot");
+        dispatchEvent("pivot", false);
     }
 
     final void focus() {
@@ -524,9 +524,9 @@ class UIElement {
         if (element.isAlive)
             return;
 
-        element.isAlive = true;
         element.setManager(_manager);
         element._parent = this;
+        element.isAlive = true;
         _children ~= element;
     }
 

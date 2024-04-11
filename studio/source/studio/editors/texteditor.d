@@ -36,10 +36,22 @@ final class TextEditor : ContentEditor {
         uint _currentLine, _currentColumn, _maxColumn;
         uint _selectionLine, _selectionColumn;
         uint charSize = 0;
+
+        // Historique
         bool _isHistoryEnabled = true;
         TextState _currentState;
         TextState[] _prevStates, _nextStates;
         bool _isInsertingText = false;
+
+        // Couleurs
+        Color _cursorColor;
+        Color _cursorSelectionColor;
+        Color _selectionColor;
+        Color _currentLineColor;
+        Color _stepLineColor;
+        Color _otherLineColor;
+        Color _columnBarColor;
+        Color _lineBarColor;
     }
 
     this(string path_, Vec2f windowSize) {
@@ -74,6 +86,17 @@ final class TextEditor : ContentEditor {
         _textContainer.addEventListener("key", &_onKey);
         addEventListener("draw", &_onDraw);
         addEventListener("size", &updateLines);
+
+        float accentHue = HSLColor.fromColor(Atelier.theme.accent).h;
+
+        _cursorColor = HSLColor(accentHue, 1f, 0.4f).toColor();
+        _selectionColor = HSLColor(accentHue + 120f, 1f, 0.4f).toColor();
+        _cursorSelectionColor = HSLColor(accentHue - 120f, 1f, 0.4f).toColor();
+        _currentLineColor = HSLColor(accentHue, 0.25f, 1f).toColor();
+        _stepLineColor = HSLColor(accentHue, 0.13f, 0.77f).toColor();
+        _otherLineColor = HSLColor(accentHue, 0.05f, 0.4f).toColor();
+        _columnBarColor = HSLColor(accentHue, 0.03f, 0.18f).toColor();
+        _lineBarColor = HSLColor(accentHue, 0.03f, 0.25f).toColor();
 
         updateLines();
     }
@@ -169,10 +192,10 @@ final class TextEditor : ContentEditor {
             columnOffset = cast(uint) _lines[_currentLine].getLength();
 
         Atelier.renderer.drawRect(Vec2f(64f + columnOffset * charSize, 0f),
-            Vec2f(charSize, getHeight()), Atelier.theme.container, 1f, true);
+            Vec2f(charSize, getHeight()), _columnBarColor, 1f, true);
 
         Atelier.renderer.drawRect(Vec2f(64f, lineOffset * font.lineSkip()),
-            Vec2f(getWidth(), font.lineSkip()), Atelier.theme.foreground, 1f, true);
+            Vec2f(getWidth(), font.lineSkip()), _lineBarColor, 1f, true);
 
         if (hasSelection()) {
             void drawSelectionLine(uint line, uint start, uint end) {
@@ -197,7 +220,7 @@ final class TextEditor : ContentEditor {
 
                 Atelier.renderer.drawRect(Vec2f(64f + selectionStart * charSize,
                         selectionLineOffset * font.lineSkip()), Vec2f(selectionWidth * charSize,
-                        font.lineSkip()), Atelier.theme.danger, 1f, true);
+                        font.lineSkip()), _selectionColor, 1f, true);
             }
 
             if (_selectionLine == _currentLine) {
@@ -222,9 +245,12 @@ final class TextEditor : ContentEditor {
             }
         }
 
-        Color cursorColor = Atelier.theme.accent;
+        Color cursorColor = _cursorColor;
         if (hasSelection()) {
-            cursorColor = Color(cursorColor.r, cursorColor.b, cursorColor.g);
+            if (_currentLine == _selectionLine && _currentColumn < _selectionColumn)
+                cursorColor = _cursorSelectionColor;
+            else if (_currentLine < _selectionLine)
+                cursorColor = _cursorSelectionColor;
         }
 
         Atelier.renderer.drawRect(Vec2f(64f + columnOffset * charSize,
@@ -255,8 +281,8 @@ final class TextEditor : ContentEditor {
 
         if (event.isPressed()) {
             InputEvent.KeyButton keyEvent = event.asKeyButton();
-            switch (keyEvent.button) with (InputEvent.KeyButton.Button) {
-            case up:
+            switch (keyEvent.layout) with (InputEvent.KeyButton.Button) {
+            case "Up":
                 _isInsertingText = false;
 
                 int step = 1;
@@ -295,7 +321,7 @@ final class TextEditor : ContentEditor {
                     }
                 }
                 break;
-            case down:
+            case "Down":
                 _isInsertingText = false;
 
                 int step = 1;
@@ -334,7 +360,7 @@ final class TextEditor : ContentEditor {
                     }
                 }
                 break;
-            case left:
+            case "Left":
                 _isInsertingText = false;
 
                 if (hasSelection()) {
@@ -375,7 +401,7 @@ final class TextEditor : ContentEditor {
                     }
                 }
                 break;
-            case right:
+            case "Right":
                 _isInsertingText = false;
 
                 if (hasSelection()) {
@@ -416,7 +442,7 @@ final class TextEditor : ContentEditor {
                     }
                 }
                 break;
-            case home:
+            case "Home":
                 _isInsertingText = false;
 
                 _moveLineBorder(-1);
@@ -425,7 +451,7 @@ final class TextEditor : ContentEditor {
                     _selectionColumn = _currentColumn;
                 }
                 break;
-            case end:
+            case "End":
                 _isInsertingText = false;
 
                 _moveLineBorder(1);
@@ -434,7 +460,7 @@ final class TextEditor : ContentEditor {
                     _selectionColumn = _currentColumn;
                 }
                 break;
-            case pageup:
+            case "PageUp":
                 _isInsertingText = false;
 
                 _moveFileBorder(-1);
@@ -443,7 +469,7 @@ final class TextEditor : ContentEditor {
                     _selectionColumn = _currentColumn;
                 }
                 break;
-            case pagedown:
+            case "PageDown":
                 _isInsertingText = false;
 
                 _moveFileBorder(1);
@@ -452,9 +478,8 @@ final class TextEditor : ContentEditor {
                     _selectionColumn = _currentColumn;
                 }
                 break;
-            case enter:
-            case enter2:
-            case numEnter:
+            case "Return":
+            case "Keypad Enter":
                 startState();
                 _removeSelection(0);
                 setStateRegion(_currentLine);
@@ -471,17 +496,17 @@ final class TextEditor : ContentEditor {
                 insertLine(_currentLine, endLine);
                 endState();
                 break;
-            case remove:
+            case "Delete":
                 startState();
                 _removeSelection(1);
                 endState();
                 break;
-            case backspace:
+            case "Backspace":
                 startState();
                 _removeSelection(-1);
                 endState();
                 break;
-            case c:
+            case "C":
                 if (hasControlModifier()) {
                     if (hasSelection()) {
                         Atelier.input.setClipboard(to!string(getSelection()));
@@ -492,7 +517,7 @@ final class TextEditor : ContentEditor {
                     }
                 }
                 break;
-            case x:
+            case "X":
                 if (hasControlModifier()) {
                     startState();
                     if (hasSelection()) {
@@ -513,7 +538,7 @@ final class TextEditor : ContentEditor {
                     endState();
                 }
                 break;
-            case v:
+            case "V":
                 if (hasControlModifier()) {
                     if (Atelier.input.hasClipboard()) {
                         startState();
@@ -522,12 +547,12 @@ final class TextEditor : ContentEditor {
                     }
                 }
                 break;
-            case w:
+            case "Z":
                 if (hasControlModifier()) {
                     undoHistory();
                 }
                 break;
-            case y:
+            case "Y":
                 if (hasControlModifier()) {
                     redoHistory();
                 }
@@ -647,7 +672,7 @@ final class TextEditor : ContentEditor {
             long lineCount = 0;
             if (_currentLine == line) {
                 lineCount = _currentLine;
-                _lineCountLabels[index].color = Atelier.theme.onNeutral;
+                _lineCountLabels[index].color = _currentLineColor;
                 _lineCountLabels[index].setAlign(UIAlignX.center, UIAlignY.top);
                 _lineCountLabels[index].setPosition(Vec2f(0f,
                         _lineCountLabels[index].getPosition().y));
@@ -656,10 +681,10 @@ final class TextEditor : ContentEditor {
                 _lineCountLabels[index].setPosition(Vec2f(16f,
                         _lineCountLabels[index].getPosition().y));
                 if (abs((cast(long) _currentLine) - cast(long) line) % 4 == 0) {
-                    _lineCountLabels[index].color = Color.fromHex(0xc0ccbd);
+                    _lineCountLabels[index].color = _stepLineColor;
                 }
                 else {
-                    _lineCountLabels[index].color = Color.fromHex(0x606a61);
+                    _lineCountLabels[index].color = _otherLineColor;
                 }
 
                 lineCount = cast(long) line - cast(long) _currentLine;

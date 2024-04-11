@@ -9,6 +9,7 @@ import std.array : join;
 import std.conv : to;
 import std.math : abs;
 import std.stdio;
+import std.string : fromStringz;
 import std.typecons;
 
 import bindbc.sdl;
@@ -347,6 +348,14 @@ final class InputEvent {
             sleep = SDL_SCANCODE_SLEEP,
             app1 = SDL_SCANCODE_APP1,
             app2 = SDL_SCANCODE_APP2
+        }
+
+        @property {
+            string layout() const {
+                SDL_KeyCode key = SDL_GetKeyFromScancode(cast(SDL_Scancode) button);
+                const char* name = SDL_GetKeyName(key);
+                return fromStringz(name).dup;
+            }
         }
 
         /// Touche du clavier

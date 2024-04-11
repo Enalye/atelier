@@ -60,7 +60,9 @@ struct HSLColor {
         }
         /// Ditto
         float h(float hue) {
-            if (hue < 0f)
+            if (hue > 360f)
+                hue -= 360f;
+            else if (hue < 0f)
                 hue += 360f;
             return _h = clamp(hue, 0f, 360f);
         }

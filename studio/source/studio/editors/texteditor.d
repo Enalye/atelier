@@ -39,6 +39,7 @@ final class TextEditor : ContentEditor {
         bool _isHistoryEnabled = true;
         TextState _currentState;
         TextState[] _prevStates, _nextStates;
+        bool _isInsertingText = false;
     }
 
     this(string path_, Vec2f windowSize) {
@@ -69,6 +70,7 @@ final class TextEditor : ContentEditor {
         _textContainer.addEventListener("wheel", &_onWheel);
         _textContainer.addEventListener("mousedown", &_onMouseDown);
         _textContainer.addEventListener("mouserelease", &_onMouseRelease);
+        _textContainer.addEventListener("text", &_onText);
         _textContainer.addEventListener("key", &_onKey);
         addEventListener("draw", &_onDraw);
         addEventListener("size", &updateLines);
@@ -102,6 +104,8 @@ final class TextEditor : ContentEditor {
     }
 
     private void _onWheel() {
+        _isInsertingText = false;
+
         int step = 1;
         if (hasControlModifier())
             step = 4;
@@ -228,6 +232,24 @@ final class TextEditor : ContentEditor {
                 font.lineSkip()), cursorColor, 1f, true);
     }
 
+    private void _onText() {
+        bool isInsertingText = _isInsertingText;
+        if (!_isInsertingText) {
+            startState();
+            setStateRegion(_currentLine);
+        }
+
+        string text = getManager().input.asTextInput().text;
+        insertText(to!dstring(text));
+
+        if (!isInsertingText) {
+            endState();
+            _isInsertingText = true;
+        }
+
+        updateLines();
+    }
+
     private void _onKey() {
         InputEvent event = getManager().input;
 
@@ -235,6 +257,8 @@ final class TextEditor : ContentEditor {
             InputEvent.KeyButton keyEvent = event.asKeyButton();
             switch (keyEvent.button) with (InputEvent.KeyButton.Button) {
             case up:
+                _isInsertingText = false;
+
                 int step = 1;
                 if (hasControlModifier())
                     step = 4;
@@ -272,6 +296,8 @@ final class TextEditor : ContentEditor {
                 }
                 break;
             case down:
+                _isInsertingText = false;
+
                 int step = 1;
                 if (hasControlModifier())
                     step = 4;
@@ -309,6 +335,8 @@ final class TextEditor : ContentEditor {
                 }
                 break;
             case left:
+                _isInsertingText = false;
+
                 if (hasSelection()) {
                     if (!hasShiftModifier()) {
                         if (_currentLine == _selectionLine) {
@@ -348,6 +376,8 @@ final class TextEditor : ContentEditor {
                 }
                 break;
             case right:
+                _isInsertingText = false;
+
                 if (hasSelection()) {
                     if (!hasShiftModifier()) {
                         if (_currentLine == _selectionLine) {
@@ -387,6 +417,8 @@ final class TextEditor : ContentEditor {
                 }
                 break;
             case home:
+                _isInsertingText = false;
+
                 _moveLineBorder(-1);
                 if (!hasShiftModifier()) {
                     _selectionLine = _currentLine;
@@ -394,6 +426,8 @@ final class TextEditor : ContentEditor {
                 }
                 break;
             case end:
+                _isInsertingText = false;
+
                 _moveLineBorder(1);
                 if (!hasShiftModifier()) {
                     _selectionLine = _currentLine;
@@ -401,6 +435,8 @@ final class TextEditor : ContentEditor {
                 }
                 break;
             case pageup:
+                _isInsertingText = false;
+
                 _moveFileBorder(-1);
                 if (!hasShiftModifier()) {
                     _selectionLine = _currentLine;
@@ -408,11 +444,32 @@ final class TextEditor : ContentEditor {
                 }
                 break;
             case pagedown:
+                _isInsertingText = false;
+
                 _moveFileBorder(1);
                 if (!hasShiftModifier()) {
                     _selectionLine = _currentLine;
                     _selectionColumn = _currentColumn;
                 }
+                break;
+            case enter:
+            case enter2:
+            case numEnter:
+                startState();
+                _removeSelection(0);
+                setStateRegion(_currentLine);
+                addAction(TextState.Type.update);
+                dstring endLine = _lines[_currentLine].getText(_currentColumn,
+                    getLineLength(_currentLine));
+                _lines[_currentLine].removeAt(_currentColumn, getLineLength(_currentLine));
+                _currentLine++;
+                _selectionLine = _currentLine;
+                _currentColumn = 0;
+                _selectionColumn = 0;
+                _maxColumn = 0;
+                addAction(TextState.Type.add);
+                insertLine(_currentLine, endLine);
+                endState();
                 break;
             case remove:
                 startState();
@@ -1010,6 +1067,8 @@ final class TextEditor : ContentEditor {
     }
 
     void startState() {
+        _isInsertingText = false;
+
         if (!_isHistoryEnabled)
             return;
         _nextStates.length = 0;
@@ -1048,6 +1107,8 @@ final class TextEditor : ContentEditor {
     }
 
     void undoHistory() {
+        _isInsertingText = false;
+
         if (!_prevStates.length)
             return;
 
@@ -1102,6 +1163,8 @@ final class TextEditor : ContentEditor {
     }
 
     void redoHistory() {
+        _isInsertingText = false;
+
         if (!_nextStates.length)
             return;
 

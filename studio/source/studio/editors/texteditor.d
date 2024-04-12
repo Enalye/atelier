@@ -35,6 +35,7 @@ final class TextEditor : ContentEditor {
         uint _endColumn = 0;
         uint _currentLine, _currentColumn, _maxColumn;
         uint _selectionLine, _selectionColumn;
+        Vec2u[] _bookmarks;
         uint charSize = 0;
 
         // Historique
@@ -47,6 +48,7 @@ final class TextEditor : ContentEditor {
         Color _cursorColor;
         Color _cursorSelectionColor;
         Color _selectionColor;
+        Color _bookmarkColor;
         Color _currentLineColor;
         Color _stepLineColor;
         Color _otherLineColor;
@@ -92,6 +94,7 @@ final class TextEditor : ContentEditor {
         _cursorColor = HSLColor(accentHue, 1f, 0.4f).toColor();
         _selectionColor = HSLColor(accentHue + 120f, 1f, 0.4f).toColor();
         _cursorSelectionColor = HSLColor(accentHue - 120f, 1f, 0.4f).toColor();
+        _bookmarkColor = HSLColor(accentHue + 60f, 1f, 0.4f).toColor();
         _currentLineColor = HSLColor(accentHue, 0.25f, 1f).toColor();
         _stepLineColor = HSLColor(accentHue, 0.13f, 0.77f).toColor();
         _otherLineColor = HSLColor(accentHue, 0.05f, 0.4f).toColor();
@@ -197,6 +200,18 @@ final class TextEditor : ContentEditor {
         Atelier.renderer.drawRect(Vec2f(64f, lineOffset * font.lineSkip()),
             Vec2f(getWidth(), font.lineSkip()), _lineBarColor, 1f, true);
 
+        foreach (bookmark; _bookmarks) {
+            if (_startLine > bookmark.y || bookmark.y >= _endLine ||
+                _startColumn > bookmark.x || bookmark.x >= _endColumn)
+                continue;
+
+            uint bookmarkColumnOffset = bookmark.x - _startColumn;
+            uint bookmarkLineOffset = bookmark.y - _startLine;
+            Atelier.renderer.drawRect(Vec2f(64f + bookmarkColumnOffset * charSize,
+                    bookmarkLineOffset * font.lineSkip()), Vec2f(charSize,
+                    font.lineSkip()), _bookmarkColor, 1f, true);
+        }
+
         if (hasSelection()) {
             void drawSelectionLine(uint line, uint start, uint end) {
                 if (_startLine > line || line > _startLine + textWindowHeight)
@@ -262,7 +277,6 @@ final class TextEditor : ContentEditor {
         bool isInsertingText = _isInsertingText;
         if (!_isInsertingText) {
             startState();
-            setStateRegion(_currentLine);
         }
 
         string text = getManager().input.asTextInput().text;
@@ -482,8 +496,8 @@ final class TextEditor : ContentEditor {
             case "Keypad Enter":
                 startState();
                 _removeSelection(0);
-                setStateRegion(_currentLine);
-                addAction(TextState.Type.update);
+                addAction(TextState.Type.update, _currentLine);
+                addAction(TextState.Type.add, _currentLine);
                 dstring endLine = _lines[_currentLine].getText(_currentColumn,
                     getLineLength(_currentLine));
                 _lines[_currentLine].removeAt(_currentColumn, getLineLength(_currentLine));
@@ -492,7 +506,6 @@ final class TextEditor : ContentEditor {
                 _currentColumn = 0;
                 _selectionColumn = 0;
                 _maxColumn = 0;
-                addAction(TextState.Type.add);
                 insertLine(_currentLine, endLine);
                 endState();
                 break;
@@ -505,6 +518,24 @@ final class TextEditor : ContentEditor {
                 startState();
                 _removeSelection(-1);
                 endState();
+                break;
+            case "A":
+                if (hasControlModifier()) {
+                    _isInsertingText = false;
+
+                    _selectionLine = 0;
+                    _selectionColumn = 0;
+                    _currentLine = _lines.length > 0 ? (cast(uint) _lines.length) - 1 : 0;
+                    _currentColumn = getLineLength(_currentLine);
+                    _maxColumn = _currentColumn;
+                }
+                break;
+            case "W":
+                if (hasControlModifier()) {
+                    _isInsertingText = false;
+
+                    _selectWord();
+                }
                 break;
             case "C":
                 if (hasControlModifier()) {
@@ -528,8 +559,7 @@ final class TextEditor : ContentEditor {
                         Atelier.input.setClipboard(
                             to!string(_lines[_currentLine].getText() ~ "\n"));
 
-                        setStateRegion(_currentLine);
-                        addAction(TextState.Type.remove);
+                        addAction(TextState.Type.remove, _currentLine);
                         removeLine(_currentLine);
                         _currentColumn = 0;
                         _selectionColumn = 0;
@@ -667,8 +697,16 @@ final class TextEditor : ContentEditor {
             _lineTextLabels.length = actualTextWindowHeight;
         }
 
-        size_t index;
-        for (size_t line = _startLine; line < _endLine; line++) {
+        for (size_t line = _startLine, index; line < _endLine; ++line, ++index) {
+            if (line >= _lines.length) {
+                _lineCountLabels[index].isVisible = false;
+                _lineTextLabels[index].isVisible = false;
+                continue;
+            }
+            else {
+                _lineCountLabels[index].isVisible = true;
+                _lineTextLabels[index].isVisible = true;
+            }
             long lineCount = 0;
             if (_currentLine == line) {
                 lineCount = _currentLine;
@@ -692,7 +730,6 @@ final class TextEditor : ContentEditor {
             }
             _lineCountLabels[index].text = to!string(lineCount);
             _lineTextLabels[index].text = to!string(_lines[line].getText(_startColumn, _endColumn));
-            index++;
         }
     }
 
@@ -873,6 +910,25 @@ final class TextEditor : ContentEditor {
         }
     }
 
+    private void _selectWord() {
+        _selectionLine = _currentLine;
+        _selectionColumn = _currentColumn;
+        for (; _selectionColumn > 0; --_selectionColumn) {
+            if (isWhite(getCurrentLineAt(_selectionColumn - 1)) ||
+                isPunctuation(getCurrentLineAt(_selectionColumn - 1))) {
+                break;
+            }
+        }
+
+        for (; _currentColumn < getCurrentLineSize(); ++_currentColumn) {
+            if (isWhite(getCurrentLineAt(_currentColumn)) ||
+                isPunctuation(getCurrentLineAt(_currentColumn))) {
+                break;
+            }
+        }
+        _maxColumn = _currentColumn;
+    }
+
     private void _removeSelection(int direction) {
         if (!_lines.length)
             return;
@@ -881,9 +937,8 @@ final class TextEditor : ContentEditor {
             if (direction > 0) {
                 if (_currentColumn == _lines[_currentLine].getLength()) {
                     if (_currentLine + 1 < _lines.length) {
-                        setStateRegion(_currentLine);
-                        addAction(TextState.Type.update);
-                        addAction(TextState.Type.remove);
+                        addAction(TextState.Type.update, _currentLine);
+                        addAction(TextState.Type.remove, _currentLine + 1);
 
                         _lines[_currentLine].insertAt(_currentColumn,
                             _lines[_currentLine + 1].getText());
@@ -892,17 +947,15 @@ final class TextEditor : ContentEditor {
                     }
                 }
                 else {
-                    setStateRegion(_currentLine);
-                    addAction(TextState.Type.update);
+                    addAction(TextState.Type.update, _currentLine);
                     _lines[_currentLine].removeAt(_currentColumn);
                 }
             }
             else if (direction < 0) {
                 if (_currentColumn == 0) {
                     if (_currentLine > 0) {
-                        setStateRegion(_currentLine);
-                        addAction(TextState.Type.update);
-                        addAction(TextState.Type.remove);
+                        addAction(TextState.Type.update, _currentLine);
+                        addAction(TextState.Type.remove, _currentLine);
 
                         _currentLine--;
                         _currentColumn = cast(uint) _lines[_currentLine].getLength();
@@ -913,8 +966,7 @@ final class TextEditor : ContentEditor {
                     }
                 }
                 else {
-                    setStateRegion(_currentLine);
-                    addAction(TextState.Type.update);
+                    addAction(TextState.Type.update, _currentLine);
                     _currentColumn--;
                     _lines[_currentLine].removeAt(_currentColumn);
                 }
@@ -925,14 +977,12 @@ final class TextEditor : ContentEditor {
                 uint startCol = min(_currentColumn, _selectionColumn);
                 uint endCol = max(_currentColumn, _selectionColumn);
 
-                setStateRegion(_currentLine);
-                addAction(TextState.Type.update);
+                addAction(TextState.Type.update, _currentLine);
                 _lines[_currentLine].removeAt(startCol, endCol);
             }
             else if (_currentLine < _selectionLine) {
-                setStateRegion(_currentLine);
-                addAction(TextState.Type.update);
-                addActions(TextState.Type.remove, _selectionLine);
+                addAction(TextState.Type.update, _currentLine);
+                addActions(TextState.Type.remove, _currentLine + 1, _selectionLine);
 
                 _lines[_currentLine].removeAt(_currentColumn, _lines[_currentLine].getLength());
                 _lines[_currentLine].insertAt(_currentColumn,
@@ -941,9 +991,8 @@ final class TextEditor : ContentEditor {
                 removeLines(_currentLine + 1, _selectionLine);
             }
             else if (_selectionLine < _currentLine) {
-                setStateRegion(_selectionLine);
-                addAction(TextState.Type.update);
-                addActions(TextState.Type.remove, _currentLine);
+                addAction(TextState.Type.update, _selectionLine);
+                addActions(TextState.Type.remove, _selectionLine + 1, _currentLine);
 
                 _lines[_selectionLine].removeAt(_selectionColumn,
                     _lines[_selectionLine].getLength());
@@ -981,17 +1030,16 @@ final class TextEditor : ContentEditor {
             return;
 
         if (ntext.length == 1) {
-            setStateRegion(_currentLine);
-            addAction(TextState.Type.update);
+            addAction(TextState.Type.update, _currentLine);
 
             _lines[_currentLine].insertAt(_currentColumn, ntext[0]);
             _currentColumn += ntext[0].length;
         }
         else {
-            setStateRegion(_currentLine);
-            addAction(TextState.Type.update);
-            for (uint i = 1; i < ntext.length; ++i) {
-                addAction(TextState.Type.add);
+            addAction(TextState.Type.update, _currentLine);
+            if (_currentLine + ntext.length > 1) {
+                addActions(TextState.Type.add, _currentLine + 1,
+                    cast(uint)(_currentLine + ntext.length) - 1);
             }
 
             dstring endLine = _lines[_currentLine].getText(_currentColumn,
@@ -1102,10 +1150,6 @@ final class TextEditor : ContentEditor {
         _currentState._column = _currentColumn;
     }
 
-    void setStateRegion(uint line) {
-        _currentState.region = line;
-    }
-
     void endState() {
         if (!_isHistoryEnabled)
             return;
@@ -1113,21 +1157,27 @@ final class TextEditor : ContentEditor {
         _currentState.commands.length = 0;
     }
 
-    void addAction(TextState.Type action) {
+    void addAction(TextState.Type action, uint line) {
+        addAction(action, line, line);
+    }
+
+    void addAction(TextState.Type action, uint lineToCopy, uint lineToApply) {
         if (!_isHistoryEnabled)
             return;
         TextState.Command command;
         command.type = action;
-        command.text = _lines[_currentState.region + _currentState.commands.length].getText().dup;
+        command.lineToCopy = lineToCopy;
+        command.lineToApply = lineToApply;
+        command.text = _lines[lineToCopy].getText().dup;
         _currentState.commands ~= command;
     }
 
-    void addActions(TextState.Type action, uint upTo) {
+    void addActions(TextState.Type action, uint startLine, uint endLine) {
         if (!_isHistoryEnabled)
             return;
-        uint currentLine = _currentState.region + cast(uint) _currentState.commands.length;
-        for (uint i = currentLine; i <= upTo; ++i) {
-            addAction(action);
+
+        for (uint line = startLine, lineToApply; line <= endLine; ++line, ++lineToApply) {
+            addAction(action, endLine - lineToApply, startLine);
         }
     }
 
@@ -1147,31 +1197,27 @@ final class TextEditor : ContentEditor {
         TextState nextState;
         nextState._line = _currentLine;
         nextState._column = _currentColumn;
-        nextState.region = state.region;
 
-        uint line = state.region;
         foreach (command; state.commands) {
             TextState.Command nextCommand;
             nextCommand.type = command.type;
-            if (line < _lines.length)
-                nextCommand.text = _lines[line].getText();
+            nextCommand.lineToCopy = command.lineToCopy;
+            nextCommand.lineToApply = command.lineToApply;
+            if (command.lineToCopy < _lines.length)
+                nextCommand.text = _lines[command.lineToCopy].getText();
             nextState.commands ~= nextCommand;
-            line++;
         }
 
-        line = state.region;
         foreach (command; state.commands) {
             final switch (command.type) with (TextState.Type) {
             case add:
-                removeLine(line);
+                removeLine(command.lineToApply);
                 break;
             case remove:
-                insertLine(line, command.text.dup);
-                line++;
+                insertLine(command.lineToApply, command.text.dup);
                 break;
             case update:
-                _lines[line].setText(command.text.dup);
-                line++;
+                _lines[command.lineToApply].setText(command.text.dup);
                 break;
             }
         }
@@ -1203,31 +1249,27 @@ final class TextEditor : ContentEditor {
         TextState prevState;
         prevState._line = _currentLine;
         prevState._column = _currentColumn;
-        prevState.region = state.region;
 
-        uint line = state.region;
         foreach (command; state.commands) {
             TextState.Command prevCommand;
             prevCommand.type = command.type;
-            if (line < _lines.length)
-                prevCommand.text = _lines[line].getText();
+            prevCommand.lineToCopy = command.lineToCopy;
+            prevCommand.lineToApply = command.lineToApply;
+            if (command.lineToCopy < _lines.length)
+                prevCommand.text = _lines[command.lineToCopy].getText();
             prevState.commands ~= prevCommand;
-            line++;
         }
 
-        line = state.region;
         foreach (command; state.commands) {
             final switch (command.type) with (TextState.Type) {
             case add:
-                insertLine(line, command.text.dup);
-                line++;
+                insertLine(command.lineToApply, command.text.dup);
                 break;
             case remove:
-                removeLine(line);
+                removeLine(command.lineToApply);
                 break;
             case update:
-                _lines[line].setText(command.text.dup);
-                line++;
+                _lines[command.lineToApply].setText(command.text.dup);
                 break;
             }
         }
@@ -1254,9 +1296,9 @@ private struct TextState {
     struct Command {
         Type type;
         dstring text;
+        uint lineToCopy, lineToApply;
     }
 
-    uint region;
     uint _line, _column;
     Command[] commands;
 }

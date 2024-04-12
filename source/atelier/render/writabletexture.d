@@ -119,15 +119,15 @@ final class WritableTexture : ImageData {
         SDL_Rect sdlClip = clip.toSdlRect();
 
         if (SDL_LockTexture(_texture, &sdlClip, cast(void**)&dest, &pitch) == 0) {
-            for (size_t i; i < clip.z * clip.w; i++) {
-                dest[i] = texels[i];
-            }
-            /*
+            size_t i, j;
             for (size_t y; y < clip.w; y++) {
                 for (size_t x; x < clip.z; x++) {
-                    dest[y * clip.z + x] = texels[x][y];
+                    dest[i] = texels[j];
+                    ++i;
+                    ++j;
                 }
-            }*/
+                i += (pitch >> 2) - clip.z;
+            }
             SDL_UnlockTexture(_texture);
         }
         else {

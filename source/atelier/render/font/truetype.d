@@ -15,6 +15,7 @@ import atelier.common;
 import atelier.core;
 
 import atelier.render.texture;
+import atelier.render.writabletexture;
 import atelier.render.font.font, atelier.render.font.glyph;
 
 /// Police correspondant à un fichier TrueType
@@ -24,6 +25,9 @@ final class TrueTypeFont : Font, Resource!TrueTypeFont {
         uint _size, _outline;
         Glyph[dchar] _cache;
         bool _isSmooth;
+        int _posX, _posY;
+        int _surfaceW = 1024, _surfaceH = 1024;
+        WritableTexture _texture;
     }
 
     @property {
@@ -82,6 +86,8 @@ final class TrueTypeFont : Font, Resource!TrueTypeFont {
         assert(_trueTypeFont, "can't load font");
 
         TTF_SetFontKerning(_trueTypeFont, 1);
+
+        _texture = new WritableTexture(_surfaceW, _surfaceH);
     }
 
     ~this() {
@@ -107,16 +113,40 @@ final class TrueTypeFont : Font, Resource!TrueTypeFont {
                     &ymin, &ymax, &advance))
                 return new BasicGlyph();
 
-            auto aa = Color.white.toSDL();
-            aa.a = 0;
+            SDL_Color whiteColor = Color.white.toSDL();
+            whiteColor.a = 0;
 
-            SDL_Surface* surface = TTF_RenderGlyph32_Blended(_trueTypeFont, ch, aa);
-            assert(surface);
-            Texture texture = Texture.fromSurface(surface, true, _isSmooth);
-            assert(texture);
+            SDL_Surface* surface = TTF_RenderGlyph32_Blended(_trueTypeFont, ch, whiteColor);
+            enforce(surface, "échec lors de la génération du glyphe TTF `" ~ ch ~ "`");
 
-            Glyph metrics = new BasicGlyph(true, advance, 0, 0, texture.width,
-                texture.height, 0, 0, texture.width, texture.height, texture);
+            SDL_Surface* convertedSurface = SDL_ConvertSurfaceFormat(surface,
+                SDL_PIXELFORMAT_RGBA8888, 0);
+            enforce(convertedSurface, "échec lors de la conversion de la texture");
+
+            uint ascent_ = ascent();
+            uint descent_ = descent();
+
+            if (_posX + surface.w >= _surfaceW) {
+                _posX = 0;
+                _posY += ascent_ - descent_;
+
+                if (_posY + (ascent_ - descent_) > _surfaceH) {
+                    _posY = 0;
+                    _texture = new WritableTexture(_surfaceW, _surfaceH);
+                }
+            }
+
+            _texture.update(Vec4u(_posX, _posY, surface.w, surface.h),
+                (cast(uint*) convertedSurface.pixels)[0 .. (surface.w * surface.h)]);
+
+            Glyph metrics = new BasicGlyph(true, advance, 0, 0, surface.w,
+                surface.h, _posX, _posY, surface.w, surface.h, _texture);
+
+            _posX += surface.w;
+
+            SDL_FreeSurface(surface);
+            SDL_FreeSurface(convertedSurface);
+
             _cache[ch] = metrics;
             return metrics;
         }
@@ -125,27 +155,56 @@ final class TrueTypeFont : Font, Resource!TrueTypeFont {
                     &ymin, &ymax, &advance))
                 return new BasicGlyph();
 
+            SDL_Color whiteColor = Color.white.toSDL();
+            whiteColor.a = 0;
+
+            SDL_Color blackColor = Color.white.toSDL();
+            blackColor.a = 0;
+
             TTF_SetFontOutline(_trueTypeFont, _outline);
 
-            SDL_Surface* surfaceOutline = TTF_RenderGlyph32_Blended(_trueTypeFont,
-                ch, Color.black.toSDL());
-            assert(surfaceOutline);
+            SDL_Surface* outlineSurface = TTF_RenderGlyph32_Blended(_trueTypeFont, ch, blackColor);
+            enforce(outlineSurface, "échec lors de la génération du glyphe TTF `" ~ ch ~ "`");
 
             TTF_SetFontOutline(_trueTypeFont, 0);
 
             SDL_Surface* surface = TTF_RenderGlyph32_Blended(_trueTypeFont, ch, Color.white.toSDL());
-            assert(surface);
+            enforce(surface, "échec lors de la génération du glyphe TTF `" ~ ch ~ "`");
 
             SDL_Rect srcRect = {0, 0, surface.w, surface.h};
             SDL_Rect dstRect = {_outline, _outline, surface.w, surface.h};
 
-            SDL_BlitSurface(surface, &srcRect, surfaceOutline, &dstRect);
+            SDL_BlitSurface(surface, &srcRect, outlineSurface, &dstRect);
 
-            Texture texture = Texture.fromSurface(surfaceOutline, true, _isSmooth);
-            assert(texture);
+            SDL_Surface* convertedSurface = SDL_ConvertSurfaceFormat(outlineSurface,
+                SDL_PIXELFORMAT_RGBA8888, 0);
+            enforce(convertedSurface, "échec lors de la conversion de la texture");
+
+            uint ascent_ = ascent();
+            uint descent_ = descent();
+
+            if (_posX + convertedSurface.w >= _surfaceW) {
+                _posX = 0;
+                _posY += ascent_ - descent_;
+
+                if (_posY + (ascent_ - descent_) > _surfaceH) {
+                    _posY = 0;
+                    _texture = new WritableTexture(_surfaceW, _surfaceH);
+                }
+            }
+
+            _texture.update(Vec4u(_posX, _posY, surface.w, surface.h),
+                (cast(uint*) convertedSurface.pixels)[0 .. (surface.w * surface.h)]);
+
+            Glyph metrics = new BasicGlyph(true, advance, 0, 0, surface.w,
+                surface.h, _posX, _posY, surface.w, surface.h, _texture);
+
+            _posX += surface.w;
+
             SDL_FreeSurface(surface);
-            Glyph metrics = new BasicGlyph(true, advance, 0, 0, texture.width,
-                texture.height, 0, 0, texture.width, texture.height, texture);
+            SDL_FreeSurface(outlineSurface);
+            SDL_FreeSurface(convertedSurface);
+
             _cache[ch] = metrics;
             return metrics;
         }

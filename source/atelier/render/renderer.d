@@ -286,6 +286,7 @@ final class Renderer {
 
     void drawRect(Vec2f position, Vec2f size, Color color, float alpha, bool filled) {
         const auto sdlColor = color.toSDL();
+        SDL_SetRenderDrawBlendMode(_sdlRenderer, getSDLBlend(Blend.alpha));
         SDL_SetRenderDrawColor(_sdlRenderer, sdlColor.r, sdlColor.g,
             sdlColor.b, cast(ubyte)(clamp(alpha, 0f, 1f) * 255f));
 

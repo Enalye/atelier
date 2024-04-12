@@ -54,6 +54,7 @@ final class TextEditor : ContentEditor {
         Color _otherLineColor;
         Color _columnBarColor;
         Color _lineBarColor;
+        Color[] _indentColor;
     }
 
     this(string path_, Vec2f windowSize) {
@@ -98,8 +99,14 @@ final class TextEditor : ContentEditor {
         _currentLineColor = HSLColor(accentHue, 0.25f, 1f).toColor();
         _stepLineColor = HSLColor(accentHue, 0.13f, 0.77f).toColor();
         _otherLineColor = HSLColor(accentHue, 0.05f, 0.4f).toColor();
-        _columnBarColor = HSLColor(accentHue, 0.03f, 0.18f).toColor();
-        _lineBarColor = HSLColor(accentHue, 0.03f, 0.25f).toColor();
+        _columnBarColor = HSLColor(accentHue, 0.05f, 0.18f).toColor();
+        _lineBarColor = HSLColor(accentHue, 0.05f, 0.25f).toColor();
+
+        HSLColor fgColor = HSLColor.fromColor(Atelier.theme.foreground);
+        for (int i = 0; i < 5; ++i) {
+            float t = i / 4f;
+            _indentColor ~= HSLColor(lerp(230f, 100f, t), fgColor.s * 4f, fgColor.l).toColor();
+        }
 
         updateLines();
     }
@@ -199,6 +206,18 @@ final class TextEditor : ContentEditor {
 
         Atelier.renderer.drawRect(Vec2f(64f, lineOffset * font.lineSkip()),
             Vec2f(getWidth(), font.lineSkip()), _lineBarColor, 1f, true);
+
+        if (_indentColor.length) {
+            for (uint line = _startLine, index; line < _endLine && line < _lines.length;
+                ++line, ++index) {
+                uint indent = _lines[line].getIndent() >> 2;
+                for (uint i; i < indent; ++i) {
+                    Atelier.renderer.drawRect(Vec2f(i * charSize * 4f + 64f,
+                            index * font.lineSkip()), Vec2f(charSize << 2, font.lineSkip()),
+                        _indentColor[i % _indentColor.length], 1f, true);
+                }
+            }
+        }
 
         foreach (bookmark; _bookmarks) {
             if (_startLine > bookmark.y || bookmark.y >= _endLine ||
@@ -496,17 +515,37 @@ final class TextEditor : ContentEditor {
             case "Keypad Enter":
                 startState();
                 _removeSelection(0);
-                addAction(TextState.Type.update, _currentLine);
-                addAction(TextState.Type.add, _currentLine);
-                dstring endLine = _lines[_currentLine].getText(_currentColumn,
-                    getLineLength(_currentLine));
-                _lines[_currentLine].removeAt(_currentColumn, getLineLength(_currentLine));
-                _currentLine++;
-                _selectionLine = _currentLine;
-                _currentColumn = 0;
-                _selectionColumn = 0;
-                _maxColumn = 0;
-                insertLine(_currentLine, endLine);
+                uint indent = _lines[_currentLine].getIndent();
+                if (hasShiftModifier()) {
+                    addAction(TextState.Type.add, _currentLine);
+                    insertLine(_currentLine, "", indent);
+                    _selectionLine = _currentLine;
+                    _currentColumn = indent;
+                    _selectionColumn = indent;
+                    _maxColumn = indent;
+                }
+                else if (hasControlModifier()) {
+                    _currentLine++;
+                    addAction(TextState.Type.add, _currentLine);
+                    insertLine(_currentLine, "", indent);
+                    _selectionLine = _currentLine;
+                    _currentColumn = indent;
+                    _selectionColumn = indent;
+                    _maxColumn = indent;
+                }
+                else {
+                    addAction(TextState.Type.update, _currentLine);
+                    addAction(TextState.Type.add, _currentLine + 1);
+                    dstring endLine = _lines[_currentLine].getText(_currentColumn,
+                        getLineLength(_currentLine));
+                    _lines[_currentLine].removeAt(_currentColumn, getLineLength(_currentLine));
+                    _currentLine++;
+                    _selectionLine = _currentLine;
+                    _currentColumn = indent;
+                    _selectionColumn = indent;
+                    _maxColumn = indent;
+                    insertLine(_currentLine, endLine, indent);
+                }
                 endState();
                 break;
             case "Delete":
@@ -518,6 +557,125 @@ final class TextEditor : ContentEditor {
                 startState();
                 _removeSelection(-1);
                 endState();
+                break;
+            case "Tab":
+                _isInsertingText = false;
+                startState();
+
+                if (hasShiftModifier() && hasControlModifier()) {
+                    uint targetIndent;
+                    bool isFirstLine = true;
+                    for (uint line = min(_currentLine, _selectionLine); line <= max(_currentLine,
+                            _selectionLine); ++line) {
+                        addAction(TextState.Type.update, line);
+                        uint currentIndent = _lines[line].getIndent();
+
+                        if (isFirstLine) {
+                            isFirstLine = false;
+                            targetIndent = currentIndent & ~0x2;
+                        }
+
+                        if (currentIndent > targetIndent) {
+                            uint indent = currentIndent - targetIndent;
+                            _lines[line].removeAt(0, indent);
+
+                            if (line == _currentLine) {
+                                _currentColumn = _currentColumn > indent ? (_currentColumn - indent)
+                                    : 0;
+                            }
+                            if (line == _selectionLine) {
+                                _selectionColumn = _selectionColumn > indent ? (
+                                    _selectionColumn - indent) : 0;
+                            }
+                        }
+                        else if (currentIndent < targetIndent) {
+                            uint indent = targetIndent - currentIndent;
+                            dstring txt = "";
+                            for (uint i; i < indent; ++i) {
+                                txt ~= " ";
+                            }
+                            _lines[line].insertAt(0, txt);
+
+                            if (line == _currentLine) {
+                                _currentColumn += txt.length;
+                            }
+                            if (line == _selectionLine) {
+                                _selectionColumn += txt.length;
+                            }
+                        }
+                    }
+                }
+                else if (hasShiftModifier()) {
+                    for (uint line = min(_currentLine, _selectionLine); line <= max(_currentLine,
+                            _selectionLine); ++line) {
+                        addAction(TextState.Type.update, line);
+
+                        uint currentIndent = _lines[line].getIndent();
+                        if (currentIndent > 0) {
+                            uint indent = currentIndent % 4;
+                            indent = indent > 0 ? indent : 4;
+                            _lines[line].removeAt(0, indent);
+
+                            if (line == _currentLine) {
+                                _currentColumn = _currentColumn > indent ? (_currentColumn - indent)
+                                    : 0;
+                            }
+                            if (line == _selectionLine) {
+                                _selectionColumn = _selectionColumn > indent ? (
+                                    _selectionColumn - indent) : 0;
+                            }
+                        }
+                    }
+                }
+                else if (hasControlModifier()) {
+                    for (uint line = min(_currentLine, _selectionLine); line <= max(_currentLine,
+                            _selectionLine); ++line) {
+                        addAction(TextState.Type.update, line);
+
+                        uint currentIndent = _lines[line].getIndent();
+                        uint indent = 4 - (currentIndent % 4);
+                        dstring txt = "";
+                        for (uint i; i < indent; ++i) {
+                            txt ~= " ";
+                        }
+                        _lines[line].insertAt(0, txt);
+
+                        if (line == _currentLine) {
+                            _currentColumn += txt.length;
+                        }
+                        if (line == _selectionLine) {
+                            _selectionColumn += txt.length;
+                        }
+                    }
+                }
+                else {
+                    _removeSelection(0);
+                    addAction(TextState.Type.update, _currentLine);
+                    uint indent = 4 - (_currentColumn % 4);
+                    dstring txt = "";
+                    for (uint i; i < indent; ++i) {
+                        txt ~= " ";
+                    }
+                    _lines[_currentLine].insertAt(_currentColumn, txt);
+                    _currentColumn += txt.length;
+
+                    _selectionLine = _currentLine;
+                    _selectionColumn = _currentColumn;
+                    _maxColumn = _currentColumn;
+                }
+                endState();
+                break;
+            case "Q":
+                if (hasControlModifier()) {
+                    _isInsertingText = false;
+
+                    uint tempLine = _currentLine;
+                    uint tempColumn = _currentColumn;
+                    _currentLine = _selectionLine;
+                    _currentColumn = _selectionColumn;
+                    _selectionLine = tempLine;
+                    _selectionColumn = tempColumn;
+                }
                 break;
             case "A":
                 if (hasControlModifier()) {
@@ -1076,9 +1234,14 @@ final class TextEditor : ContentEditor {
         _lines = _lines.remove(tuple(startLine, endLine + 1));
     }
 
-    void insertLine(uint line, dstring text) {
+    void insertLine(uint line, dstring text, uint indent = 0) {
         Line nline = new Line;
-        nline.setText(text);
+        dstring txt = "";
+        for (uint i; i < indent; ++i) {
+            txt ~= " ";
+        }
+        txt ~= text;
+        nline.setText(txt);
         if (line > _lines.length) {
             _lines ~= nline;
         }
@@ -1331,6 +1494,16 @@ private final class Line {
 
     void setText(dstring text) {
         _text = text.dup;
+    }
+
+    uint getIndent() const {
+        uint col;
+        for (; col < _text.length; ++col) {
+            if (!isWhite(_text[col]))
+                return col;
+        }
+
+        return col;
     }
 
     dstring getText() {

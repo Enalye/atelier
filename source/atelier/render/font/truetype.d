@@ -6,6 +6,7 @@
 module atelier.render.font.truetype;
 
 import std.conv : to;
+import std.exception : enforce;
 import std.file : read;
 import std.string : toStringz, fromStringz;
 
@@ -13,7 +14,6 @@ import bindbc.sdl;
 
 import atelier.common;
 import atelier.core;
-
 import atelier.render.texture;
 import atelier.render.writabletexture;
 import atelier.render.font.font, atelier.render.font.glyph;
@@ -117,7 +117,7 @@ final class TrueTypeFont : Font, Resource!TrueTypeFont {
             whiteColor.a = 0;
 
             SDL_Surface* surface = TTF_RenderGlyph32_Blended(_trueTypeFont, ch, whiteColor);
-            enforce(surface, "échec lors de la génération du glyphe TTF `" ~ ch ~ "`");
+            enforce(surface, "échec lors de la génération du glyphe TTF");
 
             SDL_Surface* convertedSurface = SDL_ConvertSurfaceFormat(surface,
                 SDL_PIXELFORMAT_RGBA8888, 0);
@@ -164,12 +164,12 @@ final class TrueTypeFont : Font, Resource!TrueTypeFont {
             TTF_SetFontOutline(_trueTypeFont, _outline);
 
             SDL_Surface* outlineSurface = TTF_RenderGlyph32_Blended(_trueTypeFont, ch, blackColor);
-            enforce(outlineSurface, "échec lors de la génération du glyphe TTF `" ~ ch ~ "`");
+            enforce(outlineSurface, "échec lors de la génération du glyphe TTF");
 
             TTF_SetFontOutline(_trueTypeFont, 0);
 
             SDL_Surface* surface = TTF_RenderGlyph32_Blended(_trueTypeFont, ch, Color.white.toSDL());
-            enforce(surface, "échec lors de la génération du glyphe TTF `" ~ ch ~ "`");
+            enforce(surface, "échec lors de la génération du glyphe TTF");
 
             SDL_Rect srcRect = {0, 0, surface.w, surface.h};
             SDL_Rect dstRect = {_outline, _outline, surface.w, surface.h};

@@ -322,7 +322,30 @@ final class TextEditor : ContentEditor {
                 if (hasControlModifier())
                     step = 4;
 
-                if (hasSelection()) {
+                if (hasAltModifier()) {
+                    uint startLine = min(_currentLine, _selectionLine);
+                    uint endLine = max(_currentLine, _selectionLine);
+                    step = min(startLine, step);
+
+                    if (step > 0) {
+                        startState();
+                        for (uint i = startLine - step; i <= endLine; ++i) {
+                            addAction(TextState.Type.update, i);
+                        }
+
+                        for (uint i = startLine - step, j = endLine + 1; i < startLine;
+                            ++i, ++j) {
+                            insertLine(j, _lines[i].getText());
+                        }
+
+                        removeLines(startLine - step, startLine - 1);
+
+                        _currentLine -= step;
+                        _selectionLine -= step;
+                        endState();
+                    }
+                }
+                else if (hasSelection()) {
                     if (!hasShiftModifier()) {
                         if (_currentLine == _selectionLine) {
                             uint minColumn = min(_selectionColumn, _currentColumn);
@@ -361,7 +384,41 @@ final class TextEditor : ContentEditor {
                 if (hasControlModifier())
                     step = 4;
 
-                if (hasSelection()) {
+                if (hasAltModifier()) {
+                    uint startLine = min(_currentLine, _selectionLine);
+                    uint endLine = max(_currentLine, _selectionLine);
+
+                    if (endLine >= _lines.length) {
+                        step = 0;
+                    }
+                    else {
+                        step = min(_lines.length - (endLine + 1), step);
+                    }
+
+                    if (step > 0) {
+                        startState();
+                        for (uint i = startLine; i <= endLine + step; ++i) {
+                            addAction(TextState.Type.update, i);
+                        }
+
+                        dstring[] linesToCopy;
+                        for (uint i = endLine + 1; i <= endLine + step; ++i) {
+                            linesToCopy ~= _lines[i].getText();
+                        }
+
+                        for (uint i = startLine, j; i < startLine + step; ++i, ++j) {
+                            insertLine(i, linesToCopy[j]);
+                        }
+
+                        removeLines(endLine + 1 + cast(uint) linesToCopy.length,
+                            endLine + step + cast(uint) linesToCopy.length);
+
+                        _currentLine += step;
+                        _selectionLine += step;
+                        endState();
+                    }
+                }
+                else if (hasSelection()) {
                     if (!hasShiftModifier()) {
                         if (_currentLine == _selectionLine) {
                             uint minColumn = max(_selectionColumn, _currentColumn);
@@ -899,6 +956,11 @@ final class TextEditor : ContentEditor {
     bool hasShiftModifier() const {
         return Atelier.input.isPressed(InputEvent.KeyButton.Button.leftShift) ||
             Atelier.input.isPressed(InputEvent.KeyButton.Button.rightShift);
+    }
+
+    bool hasAltModifier() const {
+        return Atelier.input.isPressed(InputEvent.KeyButton.Button.leftAlt) ||
+            Atelier.input.isPressed(InputEvent.KeyButton.Button.rightAlt);
     }
 
     bool hasSelection() const {

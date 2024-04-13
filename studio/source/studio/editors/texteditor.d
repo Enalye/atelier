@@ -18,8 +18,6 @@ import atelier;
 import studio.editors.base;
 import atelier.core.data.vera;
 
-Font font;
-
 final class TextEditor : ContentEditor {
     private {
         Surface _linesSurface;
@@ -57,13 +55,14 @@ final class TextEditor : ContentEditor {
         Color _columnBarColor;
         Color _lineBarColor;
         Color[] _indentColor;
+        Font _font;
     }
 
     this(string path_, Vec2f windowSize) {
         super(path_, windowSize);
 
-        font = TrueTypeFont.fromMemory(veraMonoFontData, 16);
-        charSize = font.getGlyph('a').advance();
+        _font = TrueTypeFont.fromMemory(veraMonoFontData, 16);
+        charSize = _font.getGlyph('a').advance();
 
         auto file = File(path_);
         foreach (textLine; file.byLine) {
@@ -87,8 +86,8 @@ final class TextEditor : ContentEditor {
         _scrollbar = new VScrollbar;
         _scrollbar.setAlign(UIAlignX.right, UIAlignY.top);
         _scrollbar.setHeight(getHeight());
-        _scrollbar.setContentSize(_lines.length * font.lineSkip());
-        _scrollbar.setContentPosition(_currentLine * font.lineSkip());
+        _scrollbar.setContentSize(_lines.length * _font.lineSkip());
+        _scrollbar.setContentPosition(_currentLine * _font.lineSkip());
         addUI(_scrollbar);
 
         _textContainer.addEventListener("wheel", &_onWheel);
@@ -103,9 +102,9 @@ final class TextEditor : ContentEditor {
         float accentHue = HSLColor.fromColor(Atelier.theme.accent).h;
 
         _cursorColor = HSLColor(accentHue, 1f, 0.4f).toColor();
-        _selectionColor = HSLColor(accentHue + 120f, 1f, 0.4f).toColor();
-        _cursorSelectionColor = HSLColor(accentHue - 120f, 1f, 0.4f).toColor();
-        _bookmarkColor = HSLColor(accentHue + 60f, 1f, 0.4f).toColor();
+        _selectionColor = HSLColor(accentHue - 120f, 1f, 0.4f).toColor();
+        _cursorSelectionColor = HSLColor(accentHue - 60f, 1f, 0.4f).toColor();
+        _bookmarkColor = HSLColor(accentHue + 120f, 1f, 0.4f).toColor();
         _currentLineColor = HSLColor(accentHue, 0.25f, 1f).toColor();
         _stepLineColor = HSLColor(accentHue, 0.13f, 0.77f).toColor();
         _otherLineColor = HSLColor(accentHue, 0.05f, 0.4f).toColor();
@@ -122,7 +121,7 @@ final class TextEditor : ContentEditor {
     }
 
     private uint _getMouseLine() {
-        uint line = cast(uint)(_textContainer.getMousePosition().y / font.lineSkip());
+        uint line = cast(uint)(_textContainer.getMousePosition().y / _font.lineSkip());
         line += _startLine;
 
         if (line >= _lines.length) {
@@ -203,19 +202,24 @@ final class TextEditor : ContentEditor {
     }
 
     private void _onDraw() {
-        uint textWindowHeight = cast(uint)(getHeight() / font.lineSkip());
+        uint textWindowHeight = cast(uint)(getHeight() / _font.lineSkip());
         uint textWindowWidth = cast(uint)(_textContainer.getWidth() / charSize);
         uint lineOffset = _currentLine - _startLine;
         uint columnOffset = _currentColumn - _startColumn;
 
-        if (columnOffset > _lines[_currentLine].getLength())
+        if (_currentLine >= _lines.length) {
+            lineOffset = 0;
+            columnOffset = 0;
+        }
+        else if (columnOffset > _lines[_currentLine].getLength()) {
             columnOffset = cast(uint) _lines[_currentLine].getLength();
+        }
 
         Atelier.renderer.drawRect(Vec2f(64f + columnOffset * charSize, 0f),
             Vec2f(charSize, getHeight()), _columnBarColor, 1f, true);
 
-        Atelier.renderer.drawRect(Vec2f(64f, lineOffset * font.lineSkip()),
-            Vec2f(getWidth(), font.lineSkip()), _lineBarColor, 1f, true);
+        Atelier.renderer.drawRect(Vec2f(64f, lineOffset * _font.lineSkip()),
+            Vec2f(getWidth(), _font.lineSkip()), _lineBarColor, 1f, true);
 
         if (_indentColor.length) {
             for (uint line = _startLine, index; line < _endLine && line < _lines.length;
@@ -223,7 +227,7 @@ final class TextEditor : ContentEditor {
                 uint indent = _lines[line].getIndent() >> 2;
                 for (uint i; i < indent; ++i) {
                     Atelier.renderer.drawRect(Vec2f(i * charSize * 4f + 64f,
-                            index * font.lineSkip()), Vec2f(charSize << 2, font.lineSkip()),
+                            index * _font.lineSkip()), Vec2f(charSize << 2, _font.lineSkip()),
                         _indentColor[i % _indentColor.length], 1f, true);
                 }
             }
@@ -237,8 +241,8 @@ final class TextEditor : ContentEditor {
             uint bookmarkColumnOffset = bookmark.x - _startColumn;
             uint bookmarkLineOffset = bookmark.y - _startLine;
             Atelier.renderer.drawRect(Vec2f(64f + bookmarkColumnOffset * charSize,
-                    bookmarkLineOffset * font.lineSkip()), Vec2f(charSize,
-                    font.lineSkip()), _bookmarkColor, 1f, true);
+                    bookmarkLineOffset * _font.lineSkip()), Vec2f(charSize,
+                    _font.lineSkip()), _bookmarkColor, 1f, true);
         }
 
         if (hasSelection()) {
@@ -263,8 +267,8 @@ final class TextEditor : ContentEditor {
                 }
 
                 Atelier.renderer.drawRect(Vec2f(64f + selectionStart * charSize,
-                        selectionLineOffset * font.lineSkip()), Vec2f(selectionWidth * charSize,
-                        font.lineSkip()), _selectionColor, 1f, true);
+                        selectionLineOffset * _font.lineSkip()), Vec2f(selectionWidth * charSize,
+                        _font.lineSkip()), _selectionColor, 1f, true);
             }
 
             if (_selectionLine == _currentLine) {
@@ -298,8 +302,20 @@ final class TextEditor : ContentEditor {
         }
 
         Atelier.renderer.drawRect(Vec2f(64f + columnOffset * charSize,
-                lineOffset * font.lineSkip()), Vec2f(charSize,
-                font.lineSkip()), cursorColor, 1f, true);
+                lineOffset * _font.lineSkip()), Vec2f(charSize,
+                _font.lineSkip()), cursorColor, 1f, true);
+
+        foreach (bookmark; _bookmarks) {
+            if (_startLine > bookmark.y || bookmark.y >= _endLine ||
+                _startColumn > bookmark.x || bookmark.x >= _endColumn)
+                continue;
+
+            uint bookmarkColumnOffset = bookmark.x - _startColumn;
+            uint bookmarkLineOffset = bookmark.y - _startLine;
+            Atelier.renderer.drawRect(Vec2f(64f + bookmarkColumnOffset * charSize,
+                    bookmarkLineOffset * _font.lineSkip()), Vec2f(charSize,
+                    _font.lineSkip()), _bookmarkColor, 1f, false);
+        }
     }
 
     private void _onText() {
@@ -563,7 +579,12 @@ final class TextEditor : ContentEditor {
             case "PageUp":
                 _isInsertingText = false;
 
-                _moveFileBorder(-1);
+                if (hasControlModifier()) {
+                    _moveToBookmark(-1);
+                }
+                else {
+                    _moveFileBorder(-1);
+                }
                 if (!hasShiftModifier()) {
                     _selectionLine = _currentLine;
                     _selectionColumn = _currentColumn;
@@ -572,7 +593,13 @@ final class TextEditor : ContentEditor {
             case "PageDown":
                 _isInsertingText = false;
 
-                _moveFileBorder(1);
+                if (hasControlModifier()) {
+                    _moveToBookmark(1);
+                }
+                else {
+                    _moveFileBorder(1);
+                }
+
                 if (!hasShiftModifier()) {
                     _selectionLine = _currentLine;
                     _selectionColumn = _currentColumn;
@@ -762,6 +789,19 @@ final class TextEditor : ContentEditor {
                     _selectWord();
                 }
                 break;
+            case "B":
+                if (hasControlModifier()) {
+                    _isInsertingText = false;
+                    _addBookmark();
+                }
+                break;
+            case "D":
+                if (hasControlModifier()) {
+                    _isInsertingText = false;
+                    _removeBookmarks(_currentLine, _currentColumn,
+                        _selectionLine, _selectionColumn);
+                }
+                break;
             case "C":
                 if (hasControlModifier()) {
                     if (hasSelection()) {
@@ -831,18 +871,18 @@ final class TextEditor : ContentEditor {
         _linesSurface.setHeight(getHeight());
         _textContainer.setSize(Vec2f(getWidth() - (64f + 9f), getHeight()));
         _scrollbar.setHeight(getHeight());
-        _scrollbar.setContentSize(_lines.length * font.lineSkip());
-        _scrollbar.setContentPosition(_currentLine * font.lineSkip());
+        _scrollbar.setContentSize(_lines.length * _font.lineSkip());
+        _scrollbar.setContentPosition(_currentLine * _font.lineSkip());
 
         updateLines();
     }
 
     private void updateLines(bool useView = false) {
-        uint textWindowHeight = cast(uint)(getHeight() / font.lineSkip());
+        uint textWindowHeight = cast(uint)(getHeight() / _font.lineSkip());
         uint halfTextWindowHeight = textWindowHeight >> 1;
 
         if (useView) {
-            float linePos = _scrollbar.getContentPosition() / font.lineSkip();
+            float linePos = _scrollbar.getContentPosition() / _font.lineSkip();
             _startLine = cast(uint)(linePos.round());
             _endLine = _startLine + textWindowHeight;
         }
@@ -882,7 +922,7 @@ final class TextEditor : ContentEditor {
 
         if (!useView) {
             _updateScrollbar = true;
-            _scrollbar.setContentPosition(_startLine * font.lineSkip());
+            _scrollbar.setContentPosition(_startLine * _font.lineSkip());
             _updateScrollbar = false;
         }
 
@@ -917,9 +957,9 @@ final class TextEditor : ContentEditor {
 
         if (actualTextWindowHeight > _lineCountLabels.length) {
             for (size_t i = _lineCountLabels.length; i < actualTextWindowHeight; ++i) {
-                Label lineCountLabel = new Label("", font);
+                Label lineCountLabel = new Label("", _font);
                 lineCountLabel.setAlign(UIAlignX.right, UIAlignY.top);
-                lineCountLabel.setPosition(Vec2f(16f, font.lineSkip() * i));
+                lineCountLabel.setPosition(Vec2f(16f, _font.lineSkip() * i));
                 _lineCountLabels ~= lineCountLabel;
                 _linesSurface.addUI(lineCountLabel);
             }
@@ -933,9 +973,9 @@ final class TextEditor : ContentEditor {
 
         if (actualTextWindowHeight > _lineTextLabels.length) {
             for (size_t i = _lineTextLabels.length; i < actualTextWindowHeight; ++i) {
-                Label lineTextLabel = new Label("", font);
+                Label lineTextLabel = new Label("", _font);
                 lineTextLabel.setAlign(UIAlignX.left, UIAlignY.top);
-                lineTextLabel.setPosition(Vec2f(0f, font.lineSkip() * i));
+                lineTextLabel.setPosition(Vec2f(0f, _font.lineSkip() * i));
                 _lineTextLabels ~= lineTextLabel;
                 _textContainer.addUI(lineTextLabel);
             }
@@ -1165,6 +1205,178 @@ final class TextEditor : ContentEditor {
         }
     }
 
+    private void _addBookmark() {
+        foreach (bookmark; _bookmarks) {
+            if (bookmark.y == _currentLine && bookmark.x == _currentColumn) {
+                return;
+            }
+        }
+        _bookmarks ~= Vec2u(_currentColumn, _currentLine);
+    }
+
+    private Vec4u _makeSelectionClip(uint lineA, uint colA, uint lineB, uint colB) {
+        uint startLine, endLine, startColumn, endColumn;
+
+        if (lineA == lineB) {
+            startLine = lineA;
+            endLine = lineA;
+            startColumn = min(colA, colB);
+            endColumn = max(colA, colB);
+        }
+        else if (lineA < lineB) {
+            startLine = lineA;
+            endLine = lineB;
+            startColumn = colA;
+            endColumn = colB;
+        }
+        else {
+            startLine = lineB;
+            endLine = lineA;
+            startColumn = colB;
+            endColumn = colA;
+        }
+
+        return Vec4u(startLine, startColumn, endLine, endColumn);
+    }
+
+    private Vec2u _moveBookmark(Vec2u bookmark, uint up, uint down, uint left, uint right) {
+        if (up >= bookmark.y)
+            bookmark.y = 0;
+        else
+            bookmark.y -= up;
+
+        if (bookmark.y + down >= _lines.length)
+            bookmark.y = _lines.length > 0 ? (cast(uint) _lines.length) - 1 : 0;
+        else
+            bookmark.y += down;
+
+        if (left >= bookmark.x)
+            bookmark.x = 0;
+        else
+            bookmark.x -= left;
+
+        if (bookmark.x + right >= getLineLength(bookmark.y))
+            bookmark.x = getLineLength(bookmark.y);
+        else
+            bookmark.x += right;
+
+        return bookmark;
+    }
+
+    private void _moveBookmarksLine(uint up, uint down, uint left, uint right,
+        uint lineA, uint lineB) {
+        if (lineA > _lines.length) {
+            lineA = _lines.length > 0 ? (cast(uint) _lines.length) - 1 : 0;
+        }
+        if (lineB > _lines.length) {
+            lineB = _lines.length > 0 ? (cast(uint) _lines.length) - 1 : 0;
+        }
+        uint endCol = getLineLength(lineB);
+        _moveBookmarks(0, 1, 0, 0, lineA, 0, lineB, endCol);
+    }
+
+    private void _moveBookmarks(uint up, uint down, uint left, uint right,
+        uint lineA, uint colA, uint lineB, uint colB) {
+        Vec4u clip = _makeSelectionClip(lineA, colA, lineB, colB);
+        uint startLine = clip.x;
+        uint startColumn = clip.y;
+        uint endLine = clip.z;
+        uint endColumn = clip.w;
+
+        if (startLine == endLine) {
+            foreach (ref bookmark; _bookmarks) {
+                if (bookmark.y == startLine && bookmark.x >= startColumn && bookmark.x <= endColumn) {
+                    bookmark = _moveBookmark(bookmark, up, down, left, right);
+                }
+            }
+        }
+        else {
+            foreach (ref bookmark; _bookmarks) {
+                if ((bookmark.y == endLine && bookmark.x <= endColumn) ||
+                    (bookmark.y == startLine && bookmark.x >= startColumn) ||
+                    (bookmark.y > startLine && bookmark.y < endLine)) {
+                    bookmark = _moveBookmark(bookmark, up, down, left, right);
+                }
+            }
+        }
+    }
+
+    private void _removeBookmarks(uint lineA, uint colA, uint lineB, uint colB) {
+        Vec4u clip = _makeSelectionClip(lineA, colA, lineB, colB);
+        uint startLine = clip.x;
+        uint startColumn = clip.y;
+        uint endLine = clip.z;
+        uint endColumn = clip.w;
+
+        if (endLine == startLine) {
+            _bookmarks = _bookmarks.remove!(a => (a.y == startLine &&
+                    a.x >= startColumn && a.x <= endColumn), SwapStrategy.unstable)();
+        }
+        else {
+            _bookmarks = _bookmarks.remove!(a => ((a.y > startLine &&
+                    a.y < endLine) || (a.y == startLine && a.x >= startColumn) ||
+                    (a.y == endLine && a.x <= endColumn)), SwapStrategy.unstable)();
+        }
+    }
+
+    private void _moveToBookmark(int direction) {
+        Vec2u target;
+        bool hasTarget;
+
+        if (direction > 0) {
+            uint endLine = max(_currentLine, _selectionLine);
+            uint endColumn;
+            if (_currentLine == _selectionLine) {
+                endColumn = max(_currentColumn, _selectionColumn);
+            }
+            else if (_currentLine > _selectionLine) {
+                endColumn = _currentColumn;
+            }
+            else {
+                endColumn = _selectionColumn;
+            }
+
+            foreach (bookmark; _bookmarks) {
+                if ((bookmark.y == endLine && bookmark.x > endColumn) || bookmark.y > endLine) {
+                    if ((bookmark.y == target.y && bookmark.x < target.x) ||
+                        bookmark.y < target.y || !hasTarget) {
+                        target = bookmark;
+                        hasTarget = true;
+                    }
+                }
+            }
+        }
+        else {
+            uint startLine = min(_currentLine, _selectionLine);
+            uint startColumn;
+            if (_currentLine == _selectionLine) {
+                startColumn = min(_currentColumn, _selectionColumn);
+            }
+            else if (_currentLine < _selectionLine) {
+                startColumn = _currentColumn;
+            }
+            else {
+                startColumn = _selectionColumn;
+            }
+
+            foreach (bookmark; _bookmarks) {
+                if ((bookmark.y == startLine && bookmark.x < startColumn) || bookmark.y < startLine) {
+                    if ((bookmark.y == target.y && bookmark.x > target.x) ||
+                        bookmark.y > target.y || !hasTarget) {
+                        target = bookmark;
+                        hasTarget = true;
+                    }
+                }
+            }
+        }
+
+        if (hasTarget) {
+            _currentLine = target.y;
+            _currentColumn = target.x;
+            _maxColumn = _currentColumn;
+        }
+    }
+
     private void _selectWord() {
         _selectionLine = _currentLine;
         _selectionColumn = _currentColumn;
@@ -1203,6 +1415,9 @@ final class TextEditor : ContentEditor {
                 }
                 else {
                     addAction(TextState.Type.update, _currentLine);
+                    _removeBookmarks(_currentLine, _currentColumn, _currentLine, _currentColumn);
+                    _moveBookmarks(0, 0, 1, 0, _currentLine, _currentColumn,
+                        _currentLine, getLineLength(_currentLine));
                     _lines[_currentLine].removeAt(_currentColumn);
                 }
             }
@@ -1223,6 +1438,9 @@ final class TextEditor : ContentEditor {
                 else {
                     addAction(TextState.Type.update, _currentLine);
                     _currentColumn--;
+                    _removeBookmarks(_currentLine, _currentColumn, _currentLine, _currentColumn);
+                    _moveBookmarks(0, 0, 1, 0, _currentLine, _currentColumn,
+                        _currentLine, getLineLength(_currentLine));
                     _lines[_currentLine].removeAt(_currentColumn);
                 }
             }
@@ -1233,6 +1451,9 @@ final class TextEditor : ContentEditor {
                 uint endCol = max(_currentColumn, _selectionColumn);
 
                 addAction(TextState.Type.update, _currentLine);
+                _removeBookmarks(_currentLine, startCol, _currentLine, endCol);
+                _moveBookmarks(0, 0, endCol - startCol, 0, _currentLine, endCol,
+                    _currentLine, getLineLength(_currentLine));
                 _lines[_currentLine].removeAt(startCol, endCol);
             }
             else if (_currentLine < _selectionLine) {
@@ -1243,6 +1464,11 @@ final class TextEditor : ContentEditor {
                 _lines[_currentLine].insertAt(_currentColumn,
                     _lines[_selectionLine].getText(_selectionColumn, getLineLength(_selectionLine)));
 
+                _moveBookmarks(_selectionLine - _currentLine, 0,
+                    _currentColumn < _selectionColumn ? _selectionColumn - _currentColumn : 0,
+                    _selectionColumn < _currentColumn ?
+                    _currentColumn - _selectionColumn : 0, _selectionLine,
+                    _selectionColumn, _selectionLine, getLineLength(_selectionLine));
                 removeLines(_currentLine + 1, _selectionLine);
             }
             else if (_selectionLine < _currentLine) {
@@ -1254,6 +1480,11 @@ final class TextEditor : ContentEditor {
                 _lines[_selectionLine].insertAt(_selectionColumn,
                     _lines[_currentLine].getText(_currentColumn, getLineLength(_currentLine)));
 
+                _moveBookmarks(_currentLine - _selectionLine, 0,
+                    _selectionColumn < _currentColumn ? _currentColumn - _selectionColumn : 0,
+                    _currentColumn < _selectionColumn ?
+                    _selectionColumn - _currentColumn : 0, _currentLine,
+                    _currentColumn, _currentLine, getLineLength(_currentLine));
                 removeLines(_selectionLine + 1, _currentLine);
                 _currentLine = _selectionLine;
                 _currentColumn = _selectionColumn;
@@ -1288,6 +1519,8 @@ final class TextEditor : ContentEditor {
             addAction(TextState.Type.update, _currentLine);
 
             _lines[_currentLine].insertAt(_currentColumn, ntext[0]);
+            _moveBookmarks(0, 0, 0, cast(uint) ntext[0].length, _currentLine,
+                _currentColumn, _currentLine, getLineLength(_currentLine));
             _currentColumn += ntext[0].length;
         }
         else {
@@ -1299,13 +1532,20 @@ final class TextEditor : ContentEditor {
 
             dstring endLine = _lines[_currentLine].getText(_currentColumn,
                 getLineLength(_currentLine));
+
+            _removeBookmarks(_currentLine, _currentColumn, _currentLine,
+                getLineLength(_currentLine));
             _lines[_currentLine].removeAt(_currentColumn, getLineLength(_currentLine));
             _lines[_currentLine].insertAt(_currentColumn, ntext[0]);
+            uint currentLine = _currentLine;
             foreach (dstring line; ntext[1 .. $]) {
                 _currentLine++;
                 insertLine(_currentLine, line);
             }
             appendAt(_currentLine, endLine);
+            _moveBookmarksLine(0, (cast(uint) ntext.length) - 1, 0, 0,
+                currentLine, cast(uint) _lines.length);
+
             _currentColumn = cast(uint) ntext[$ - 1].length;
         }
 
@@ -1318,6 +1558,7 @@ final class TextEditor : ContentEditor {
         if (line >= _lines.length)
             return;
 
+        _removeBookmarks(line, 0, line, getLineLength(line));
         _lines = _lines.remove(line);
     }
 
@@ -1328,6 +1569,7 @@ final class TextEditor : ContentEditor {
         if (endLine >= _lines.length)
             endLine = cast(uint)((cast(long) _lines.length) - 1);
 
+        _removeBookmarks(startLine, 0, endLine, getLineLength(endLine));
         _lines = _lines.remove(tuple(startLine, endLine + 1));
     }
 
@@ -1343,6 +1585,7 @@ final class TextEditor : ContentEditor {
             _lines ~= nline;
         }
         else {
+            _moveBookmarksLine(0, 1, 0, 0, line, cast(uint) _lines.length);
             _lines.insertInPlace(line, nline);
         }
     }
@@ -1352,6 +1595,7 @@ final class TextEditor : ContentEditor {
             insertLine(line, text);
         }
         else {
+            _moveBookmarks(0, 0, 0, 1, line, col, line, getLineLength(line));
             _lines[line].insertAt(col, text);
         }
     }

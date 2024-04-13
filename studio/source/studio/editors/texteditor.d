@@ -671,6 +671,7 @@ final class TextEditor : ContentEditor {
 
                         if (currentIndent > targetIndent) {
                             uint indent = currentIndent - targetIndent;
+                            _moveBookmarks(0, 0, indent, 0, line, 0, line, getLineLength(line));
                             _lines[line].removeAt(0, indent);
 
                             if (line == _currentLine) {
@@ -688,6 +689,7 @@ final class TextEditor : ContentEditor {
                             for (uint i; i < indent; ++i) {
                                 txt ~= " ";
                             }
+                            _moveBookmarks(0, 0, 0, indent, line, 0, line, getLineLength(line));
                             _lines[line].insertAt(0, txt);
 
                             if (line == _currentLine) {
@@ -708,6 +710,7 @@ final class TextEditor : ContentEditor {
                         if (currentIndent > 0) {
                             uint indent = currentIndent % 4;
                             indent = indent > 0 ? indent : 4;
+                            _moveBookmarks(0, 0, indent, 0, line, 0, line, getLineLength(line));
                             _lines[line].removeAt(0, indent);
 
                             if (line == _currentLine) {
@@ -732,6 +735,7 @@ final class TextEditor : ContentEditor {
                         for (uint i; i < indent; ++i) {
                             txt ~= " ";
                         }
+                        _moveBookmarks(0, 0, 0, indent, line, 0, line, getLineLength(line));
                         _lines[line].insertAt(0, txt);
 
                         if (line == _currentLine) {
@@ -750,6 +754,8 @@ final class TextEditor : ContentEditor {
                     for (uint i; i < indent; ++i) {
                         txt ~= " ";
                     }
+                    _moveBookmarks(0, 0, 0, indent, _currentLine,
+                        _currentColumn, _currentLine, getLineLength(_currentLine));
                     _lines[_currentLine].insertAt(_currentColumn, txt);
                     _currentColumn += txt.length;
 

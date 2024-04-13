@@ -24,6 +24,7 @@ final class TextEditor : ContentEditor {
     private {
         Surface _linesSurface;
         UIElement _textContainer;
+        VScrollbar _scrollbar;
         Line[] _lines;
         Label[] _lineCountLabels;
         Label[] _lineTextLabels;
@@ -37,6 +38,7 @@ final class TextEditor : ContentEditor {
         uint _selectionLine, _selectionColumn;
         Vec2u[] _bookmarks;
         uint charSize = 0;
+        bool _updateScrollbar;
 
         // Historique
         bool _isHistoryEnabled = true;
@@ -78,17 +80,25 @@ final class TextEditor : ContentEditor {
         _textContainer = new UIElement;
         _textContainer.focusable = true;
         _textContainer.setAlign(UIAlignX.right, UIAlignY.top);
-
-        _textContainer.setSize(Vec2f(getWidth() - 64f, getHeight()));
+        _textContainer.setPosition(Vec2f(9f, 0f));
+        _textContainer.setSize(Vec2f(getWidth() - (64f + 9f), getHeight()));
         addUI(_textContainer);
+
+        _scrollbar = new VScrollbar;
+        _scrollbar.setAlign(UIAlignX.right, UIAlignY.top);
+        _scrollbar.setHeight(getHeight());
+        _scrollbar.setContentSize(_lines.length * font.lineSkip());
+        _scrollbar.setContentPosition(_currentLine * font.lineSkip());
+        addUI(_scrollbar);
 
         _textContainer.addEventListener("wheel", &_onWheel);
         _textContainer.addEventListener("mousedown", &_onMouseDown);
         _textContainer.addEventListener("mouserelease", &_onMouseRelease);
         _textContainer.addEventListener("text", &_onText);
         _textContainer.addEventListener("key", &_onKey);
+        _scrollbar.addEventListener("handlePosition", &_onScrollbar);
         addEventListener("draw", &_onDraw);
-        addEventListener("size", &updateLines);
+        addEventListener("size", &_onSize);
 
         float accentHue = HSLColor.fromColor(Atelier.theme.accent).h;
 
@@ -810,14 +820,33 @@ final class TextEditor : ContentEditor {
         updateLines();
     }
 
-    private void updateLines() {
-        _linesSurface.setHeight(getHeight());
-        _textContainer.setSize(Vec2f(getWidth() - 64f, getHeight()));
+    private void _onScrollbar() {
+        if (!_lines.length && !_updateScrollbar)
+            return;
 
+        updateLines(true);
+    }
+
+    private void _onSize() {
+        _linesSurface.setHeight(getHeight());
+        _textContainer.setSize(Vec2f(getWidth() - (64f + 9f), getHeight()));
+        _scrollbar.setHeight(getHeight());
+        _scrollbar.setContentSize(_lines.length * font.lineSkip());
+        _scrollbar.setContentPosition(_currentLine * font.lineSkip());
+
+        updateLines();
+    }
+
+    private void updateLines(bool useView = false) {
         uint textWindowHeight = cast(uint)(getHeight() / font.lineSkip());
         uint halfTextWindowHeight = textWindowHeight >> 1;
 
-        if ((_borderY << 1) >= textWindowHeight) {
+        if (useView) {
+            float linePos = _scrollbar.getContentPosition() / font.lineSkip();
+            _startLine = cast(uint)(linePos.round());
+            _endLine = _startLine + textWindowHeight;
+        }
+        else if ((_borderY << 1) >= textWindowHeight) {
             if (halfTextWindowHeight > _currentLine) {
                 _startLine = 0;
             }
@@ -849,6 +878,12 @@ final class TextEditor : ContentEditor {
                 _endLine = _currentLine + _borderY;
             }
             _startLine = _endLine - textWindowHeight;
+        }
+
+        if (!useView) {
+            _updateScrollbar = true;
+            _scrollbar.setContentPosition(_startLine * font.lineSkip());
+            _updateScrollbar = false;
         }
 
         uint actualTextWindowHeight = cast(uint)(cast(long) _endLine - cast(long) _startLine);
@@ -1393,7 +1428,8 @@ final class TextEditor : ContentEditor {
         command.type = action;
         command.lineToCopy = lineToCopy;
         command.lineToApply = lineToApply;
-        command.text = _lines[lineToCopy].getText().dup;
+        if (lineToCopy < _lines.length)
+            command.text = _lines[lineToCopy].getText().dup;
         _currentState.commands ~= command;
     }
 

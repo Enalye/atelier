@@ -869,6 +869,11 @@ final class TextEditor : ContentEditor {
                     redoHistory();
                 }
                 break;
+            case "S":
+                if (hasControlModifier()) {
+                    saveFile();
+                }
+                break;
             default:
                 break;
             }
@@ -1824,6 +1829,23 @@ final class TextEditor : ContentEditor {
         _prevStates ~= prevState;
 
         _isHistoryEnabled = true;
+    }
+
+    void saveFile() {
+        string path_ = path();
+        string text;
+        bool isFirst = true;
+        foreach (line; _lines) {
+            if (isFirst) {
+                isFirst = false;
+            }
+            else {
+                text ~= "\n";
+            }
+            text ~= to!string(line.getText());
+        }
+
+        std.file.write(path, text);
     }
 }
 

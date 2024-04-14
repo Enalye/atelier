@@ -111,10 +111,10 @@ final class TextEditor : ContentEditor {
         _columnBarColor = HSLColor(accentHue, 0.05f, 0.18f).toColor();
         _lineBarColor = HSLColor(accentHue, 0.05f, 0.25f).toColor();
 
-        HSLColor fgColor = HSLColor.fromColor(Atelier.theme.foreground);
-        for (int i = 0; i < 5; ++i) {
-            float t = i / 4f;
-            _indentColor ~= HSLColor(lerp(230f, 100f, t), fgColor.s * 4f, fgColor.l).toColor();
+        uint indentColorCount = 6;
+        for (int i = 0; i <= indentColorCount; ++i) {
+            float t = i / cast(float) indentColorCount;
+            _indentColor ~= HSLColor(accentHue, lerp(1f, 0.77f, t) / 3f, lerp(0.42f, 0.88f, t) / 3f).toColor();
         }
 
         updateLines();
@@ -359,12 +359,20 @@ final class TextEditor : ContentEditor {
                             addAction(TextState.Type.update, i);
                         }
 
-                        for (uint i = startLine - step, j = endLine + 1; i < startLine;
-                            ++i, ++j) {
-                            insertLine(j, _lines[i].getText());
+                        dstring[] linesToSwap;
+                        for (uint i = startLine; i <= endLine; ++i) {
+                            linesToSwap ~= _lines[i].getText();
+                        }
+                        for (uint i = startLine - step; i < startLine; ++i) {
+                            linesToSwap ~= _lines[i].getText();
+                        }
+                        for (uint i = startLine - step, j; i <= endLine; ++i, ++j) {
+                            _lines[i].setText(linesToSwap[j]);
                         }
 
-                        removeLines(startLine - step, startLine - 1);
+                        Vec2u[] movedBookmarks = _moveBookmarksLine(0,
+                            (endLine - startLine) + 1, 0, 0, startLine - step, startLine - 1);
+                        _moveBookmarksLine(step, 0, 0, 0, startLine, endLine, movedBookmarks);
 
                         _currentLine -= step;
                         _selectionLine -= step;
@@ -427,17 +435,20 @@ final class TextEditor : ContentEditor {
                             addAction(TextState.Type.update, i);
                         }
 
-                        dstring[] linesToCopy;
+                        dstring[] linesToSwap;
                         for (uint i = endLine + 1; i <= endLine + step; ++i) {
-                            linesToCopy ~= _lines[i].getText();
+                            linesToSwap ~= _lines[i].getText();
+                        }
+                        for (uint i = startLine; i <= endLine; ++i) {
+                            linesToSwap ~= _lines[i].getText();
+                        }
+                        for (uint i = startLine, j; i <= endLine + step; ++i, ++j) {
+                            _lines[i].setText(linesToSwap[j]);
                         }
 
-                        for (uint i = startLine, j; i < startLine + step; ++i, ++j) {
-                            insertLine(i, linesToCopy[j]);
-                        }
-
-                        removeLines(endLine + 1 + cast(uint) linesToCopy.length,
-                            endLine + step + cast(uint) linesToCopy.length);
+                        Vec2u[] movedBookmarks = _moveBookmarksLine((endLine - startLine) + 1,
+                            0, 0, 0, endLine + 1, endLine + step);
+                        _moveBookmarksLine(0, step, 0, 0, startLine, endLine, movedBookmarks);
 
                         _currentLine += step;
                         _selectionLine += step;
@@ -1269,8 +1280,8 @@ final class TextEditor : ContentEditor {
         return bookmark;
     }
 
-    private void _moveBookmarksLine(uint up, uint down, uint left, uint right,
-        uint lineA, uint lineB) {
+    private Vec2u[] _moveBookmarksLine(uint up, uint down, uint left, uint right,
+        uint lineA, uint lineB, Vec2u[] excepted = []) {
         if (lineA > _lines.length) {
             lineA = _lines.length > 0 ? (cast(uint) _lines.length) - 1 : 0;
         }
@@ -1278,33 +1289,47 @@ final class TextEditor : ContentEditor {
             lineB = _lines.length > 0 ? (cast(uint) _lines.length) - 1 : 0;
         }
         uint endCol = getLineLength(lineB);
-        _moveBookmarks(0, 1, 0, 0, lineA, 0, lineB, endCol);
+        return _moveBookmarks(up, down, left, right, lineA, 0, lineB, endCol, excepted);
     }
 
-    private void _moveBookmarks(uint up, uint down, uint left, uint right,
-        uint lineA, uint colA, uint lineB, uint colB) {
+    private Vec2u[] _moveBookmarks(uint up, uint down, uint left, uint right,
+        uint lineA, uint colA, uint lineB, uint colB, Vec2u[] excepted = []) {
         Vec4u clip = _makeSelectionClip(lineA, colA, lineB, colB);
         uint startLine = clip.x;
         uint startColumn = clip.y;
         uint endLine = clip.z;
         uint endColumn = clip.w;
+        Vec2u[] result;
 
         if (startLine == endLine) {
-            foreach (ref bookmark; _bookmarks) {
+            __bmLoop1: foreach (ref bookmark; _bookmarks) {
                 if (bookmark.y == startLine && bookmark.x >= startColumn && bookmark.x <= endColumn) {
+                    foreach (exceptedBookmark; excepted) {
+                        if (exceptedBookmark == bookmark) {
+                            continue __bmLoop1;
+                        }
+                    }
                     bookmark = _moveBookmark(bookmark, up, down, left, right);
+                    result ~= bookmark;
                 }
             }
         }
         else {
-            foreach (ref bookmark; _bookmarks) {
+            __bmLoop2: foreach (ref bookmark; _bookmarks) {
                 if ((bookmark.y == endLine && bookmark.x <= endColumn) ||
                     (bookmark.y == startLine && bookmark.x >= startColumn) ||
                     (bookmark.y > startLine && bookmark.y < endLine)) {
+                    foreach (exceptedBookmark; excepted) {
+                        if (exceptedBookmark == bookmark) {
+                            continue __bmLoop2;
+                        }
+                    }
                     bookmark = _moveBookmark(bookmark, up, down, left, right);
+                    result ~= bookmark;
                 }
             }
         }
+        return result;
     }
 
     private void _removeBookmarks(uint lineA, uint colA, uint lineB, uint colB) {
@@ -1656,8 +1681,9 @@ final class TextEditor : ContentEditor {
             return;
         _nextStates.length = 0;
         _currentState.commands.length = 0;
-        _currentState._line = _currentLine;
-        _currentState._column = _currentColumn;
+        _currentState.line = _currentLine;
+        _currentState.column = _currentColumn;
+        _currentState.bookmarks = _bookmarks.dup;
     }
 
     void endState() {
@@ -1706,8 +1732,9 @@ final class TextEditor : ContentEditor {
         _prevStates.length--;
 
         TextState nextState;
-        nextState._line = _currentLine;
-        nextState._column = _currentColumn;
+        nextState.line = _currentLine;
+        nextState.column = _currentColumn;
+        nextState.bookmarks = _bookmarks.dup;
 
         foreach (command; state.commands) {
             TextState.Command nextCommand;
@@ -1733,8 +1760,9 @@ final class TextEditor : ContentEditor {
             }
         }
 
-        _currentLine = state._line;
-        _currentColumn = state._column;
+        _bookmarks = state.bookmarks.dup;
+        _currentLine = state.line;
+        _currentColumn = state.column;
         _selectionLine = _currentLine;
         _selectionColumn = _currentColumn;
         _maxColumn = _currentColumn;
@@ -1758,8 +1786,9 @@ final class TextEditor : ContentEditor {
         _nextStates.length--;
 
         TextState prevState;
-        prevState._line = _currentLine;
-        prevState._column = _currentColumn;
+        prevState.line = _currentLine;
+        prevState.column = _currentColumn;
+        prevState.bookmarks = _bookmarks.dup;
 
         foreach (command; state.commands) {
             TextState.Command prevCommand;
@@ -1785,8 +1814,9 @@ final class TextEditor : ContentEditor {
             }
         }
 
-        _currentLine = state._line;
-        _currentColumn = state._column;
+        _bookmarks = state.bookmarks.dup;
+        _currentLine = state.line;
+        _currentColumn = state.column;
         _selectionLine = _currentLine;
         _selectionColumn = _currentColumn;
         _maxColumn = _currentColumn;
@@ -1810,7 +1840,8 @@ private struct TextState {
         uint lineToCopy, lineToApply;
     }
 
-    uint _line, _column;
+    uint line, column;
+    Vec2u[] bookmarks;
     Command[] commands;
 }
 

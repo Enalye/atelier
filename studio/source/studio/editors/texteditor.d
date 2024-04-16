@@ -1832,7 +1832,6 @@ final class TextEditor : ContentEditor {
     }
 
     void saveFile() {
-        string path_ = path();
         string text;
         bool isFirst = true;
         foreach (line; _lines) {

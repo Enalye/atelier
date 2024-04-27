@@ -61,28 +61,7 @@ final class Label : UIElement {
     }
 
     private void _onDraw() {
-        Vec2f pos = Vec2f.zero;
-        dchar prevChar;
-        foreach (dchar ch; _text) {
-            if (ch == '\n') {
-                pos.x = 0f;
-                pos.y += _font.lineSkip * _charScale;
-                prevChar = 0;
-            }
-            else {
-                Glyph glyph = _font.getGlyph(ch);
-                if (!glyph.exists)
-                    continue;
-                pos.x += _font.getKerning(prevChar, ch) * _charScale;
-
-                float x = pos.x + glyph.offsetX * _charScale;
-                float y = pos.y - glyph.offsetY * _charScale;
-
-                glyph.draw(Vec2f(x, y), _charScale, Color.white, 1f);
-                pos.x += (glyph.advance + _charSpacing) * _charScale;
-                prevChar = ch;
-            }
-        }
+        drawText(Vec2f.zero, _text, _font, _charScale, _charSpacing);
     }
 
     size_t getIndexOf(Vec2f position_) {
@@ -176,5 +155,29 @@ final class Label : UIElement {
 
     private void _reload() {
         setSize(getTextSize());
+    }
+}
+
+void drawText(Vec2f position, dstring text, Font font, float scale = 1f, float spacing = 0f) {
+    dchar prevChar;
+    foreach (dchar ch; text) {
+        if (ch == '\n') {
+            position.x = 0f;
+            position.y += font.lineSkip * scale;
+            prevChar = 0;
+        }
+        else {
+            Glyph glyph = font.getGlyph(ch);
+            if (!glyph.exists)
+                continue;
+            position.x += font.getKerning(prevChar, ch) * scale;
+
+            float x = position.x + glyph.offsetX * scale;
+            float y = position.y - glyph.offsetY * scale;
+
+            glyph.draw(Vec2f(x, y), scale, Color.white, 1f);
+            position.x += (glyph.advance + spacing) * scale;
+            prevChar = ch;
+        }
     }
 }

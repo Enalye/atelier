@@ -17,7 +17,7 @@ void loadLibRender_animation(GrModule mod) {
     mod.setModule("render.animation");
     mod.setModuleInfo(GrLocale.fr_FR, "Animation");
     mod.setModuleDescription(GrLocale.fr_FR,
-        "Animation est une ressource définie dans un fichier `.res` (voir la page [ressources](/resources#Animation)).");
+        "Animation est une ressource définie dans un fichier `.ffd` (voir la page [ressources](/resources#Animation)).");
 
     GrType animationType = mod.addNative("Animation", [], "Image");
 

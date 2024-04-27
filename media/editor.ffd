@@ -57,6 +57,11 @@ sprite "editor:file-grimoire" {
     clip 48 16 16 16
 }
 
+sprite "editor:file-farfadet" {
+    texture "editor"
+    clip 64 16 16 16
+}
+
 sprite "editor:play" {
     texture "editor"
     clip 0 32 32 32
@@ -70,4 +75,64 @@ sprite "editor:pause" {
 sprite "editor:stop" {
     texture "editor"
     clip 64 32 32 32
+}
+
+sprite "editor:ffd-texture" {
+    texture "editor"
+    clip 0 64 16 16
+}
+
+sprite "editor:ffd-sprite" {
+    texture "editor"
+    clip 16 64 16 16
+}
+
+sprite "editor:ffd-ninepatch" {
+    texture "editor"
+    clip 32 64 16 16
+}
+
+sprite "editor:ffd-animation" {
+    texture "editor"
+    clip 48 64 16 16
+}
+
+sprite "editor:ffd-tileset" {
+    texture "editor"
+    clip 64 64 16 16
+}
+
+sprite "editor:ffd-tilemap" {
+    texture "editor"
+    clip 80 64 16 16
+}
+
+sprite "editor:ffd-sound" {
+    texture "editor"
+    clip 96 64 16 16
+}
+
+sprite "editor:ffd-music" {
+    texture "editor"
+    clip 112 64 16 16
+}
+
+sprite "editor:ffd-truetype" {
+    texture "editor"
+    clip 128 64 16 16
+}
+
+sprite "editor:ffd-bitmapfont" {
+    texture "editor"
+    clip 144 64 16 16
+}
+
+sprite "editor:ffd-particle" {
+    texture "editor"
+    clip 160 64 16 16
+}
+
+sprite "editor:ffd-level" {
+    texture "editor"
+    clip 176 64 16 16
 }

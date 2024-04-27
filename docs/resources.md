@@ -2,7 +2,7 @@
 
 Les ressources représentent tous les données externes au code qui ont besoin d’être chargé par l’application
 
-Ces ressources sont décrites au sein de fichiers [farfadets](https://github.com/Enalye/farfadet) avec l’extension `.res`.
+Ces ressources sont décrites au sein de fichiers [farfadets](https://github.com/Enalye/farfadet) avec l’extension `.ffd`.
 
 Chaque ressource est définie par un bloc avec la syntaxe suivante:
 ```

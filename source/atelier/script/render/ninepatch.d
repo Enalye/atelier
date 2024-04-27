@@ -19,7 +19,7 @@ void loadLibRender_ninepatch(GrModule mod) {
     mod.setModuleInfo(GrLocale.fr_FR,
         "Image divisé en 9 sections pouvant se mettre à l’échelle sans être étiré");
     mod.setModuleDescription(GrLocale.fr_FR,
-        "NinePatch est une ressource définie dans un fichier `.res` (voir la page [ressources](/resources#NinePatch)).");
+        "NinePatch est une ressource définie dans un fichier `.ffd` (voir la page [ressources](/resources#NinePatch)).");
 
     GrType ninepatchType = mod.addNative("NinePatch", [], "Image");
 

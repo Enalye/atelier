@@ -16,7 +16,7 @@ package void loadLibAudio_music(GrModule mod) {
     mod.setModule("audio.music");
     mod.setModuleInfo(GrLocale.fr_FR, "Représente un fichier audio");
     mod.setModuleDescription(GrLocale.fr_FR,
-        "Music est une ressource définie dans un fichier `.res` (voir la page [ressources](/resources#Music)).");
+        "Music est une ressource définie dans un fichier `.ffd` (voir la page [ressources](/resources#Music)).");
 
     GrType musicType = mod.addNative("Music");
 

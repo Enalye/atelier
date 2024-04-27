@@ -18,7 +18,7 @@ package void loadLibAudio_sound(GrModule mod) {
 Le son est entièrement décodé en mémoire.
 Il est recommandé de reserver cette classe pour des fichiers peu volumineux.");
     mod.setModuleDescription(GrLocale.fr_FR,
-        "Sound est une ressource définie dans un fichier `.res` (voir la page [ressources](/resources#Sound)).");
+        "Sound est une ressource définie dans un fichier `.ffd` (voir la page [ressources](/resources#Sound)).");
 
     GrType soundType = mod.addNative("Sound");
 

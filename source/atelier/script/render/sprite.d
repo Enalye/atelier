@@ -18,7 +18,7 @@ void loadLibRender_sprite(GrModule mod) {
     mod.setModule("render.sprite");
     mod.setModuleInfo(GrLocale.fr_FR, "Élément d’une texture");
     mod.setModuleDescription(GrLocale.fr_FR,
-        "Sprite est une ressource définie dans un fichier `.res` (voir la page [ressources](/resources#Sprite)).");
+        "Sprite est une ressource définie dans un fichier `.ffd` (voir la page [ressources](/resources#Sprite)).");
 
     GrType spriteType = mod.addNative("Sprite", [], "Image");
 

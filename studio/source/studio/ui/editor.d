@@ -11,7 +11,6 @@ import atelier;
 import farfadet;
 import studio.editors;
 import studio.project;
-import studio.ui.propertyeditor;
 import studio.ui.tabbar;
 import studio.ui.resourcelist;
 import studio.ui.newproject;
@@ -73,7 +72,6 @@ final class Editor : UIElement {
         TabBar _tabBar;
         ContentEditor[string] _contentEditors;
         ContentEditor _contentEditor;
-        PropertyEditor _propertyEditor;
         ResourceList _resourceList;
     }
 
@@ -92,11 +90,6 @@ final class Editor : UIElement {
         {
             _resourceList = new ResourceList;
             addUI(_resourceList);
-        }
-
-        {
-            _propertyEditor = new PropertyEditor;
-            addUI(_propertyEditor);
         }
 
         addEventListener("windowSize", {
@@ -159,6 +152,9 @@ final class Editor : UIElement {
                 break;
             case ".gr":
                 icon = "editor:file-grimoire";
+                break;
+            case ".ffd":
+                icon = "editor:file-farfadet";
                 break;
             default:
                 icon = "editor:file";

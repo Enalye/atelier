@@ -16,7 +16,7 @@ void loadLibRender_texture(GrModule mod) {
     mod.setModule("render.texture");
     mod.setModuleInfo(GrLocale.fr_FR, "Représente un fichier de texture");
     mod.setModuleDescription(GrLocale.fr_FR,
-        "Texture est une ressource définie dans un fichier `.res` (voir la page [ressources](/resources#Texture)).");
+        "Texture est une ressource définie dans un fichier `.ffd` (voir la page [ressources](/resources#Texture)).");
 
     GrType textureType = mod.addNative("Texture", [], "ImageData");
 

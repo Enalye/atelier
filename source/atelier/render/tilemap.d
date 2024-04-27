@@ -60,7 +60,7 @@ final class Tilemap : Image, Resource!Tilemap {
         _tileset = tilemap._tileset;
         _width = tilemap._width;
         _height = tilemap._height;
-        _tiles = tilemap._tiles;
+        _tiles = tilemap._tiles.dup;
         tileSize = tilemap.tileSize;
     }
 

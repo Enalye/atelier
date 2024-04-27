@@ -35,14 +35,14 @@ enum Atelier_Application_Extension = ".atl";
 enum Atelier_Archive_Extension = ".pqt";
 
 /// Fichier de ressource farfadet
-enum Atelier_Resource_Extension = ".res";
+enum Atelier_Resource_Extension = ".ffd";
 
 /// Fichier de ressource compilé
-enum Atelier_Resource_Compiled_Extension = ".resc";
+enum Atelier_Resource_Compiled_Extension = ".ffdt";
 
 enum Atelier_Environment_MagicWord = "atelier";
 
-enum Atelier_Resource_Compiled_MagicWord = "resc";
+enum Atelier_Resource_Compiled_MagicWord = "farfadet";
 
 static immutable Atelier_Dependencies = [
     "SDL2.dll", "SDL2_image.dll", "SDL2_ttf.dll"

@@ -15,8 +15,8 @@ import atelier.script.util;
 package void loadLibRender_font(GrModule mod) {
     mod.setModule("render.font");
     mod.setModuleInfo(GrLocale.fr_FR, "Polices de caractères");
-    mod.setModuleDescription(GrLocale.fr_FR, "TrueTypeFont est une ressource définie dans un fichier `.res` (voir la page [ressources](/resources#TrueType)).\n
-BitmapFont est une ressource définie dans un fichier `.res` (voir la page [ressources](/resources#BitmapFont)).\n
+    mod.setModuleDescription(GrLocale.fr_FR, "TrueTypeFont est une ressource définie dans un fichier `.ffd` (voir la page [ressources](/resources#TrueType)).\n
+BitmapFont est une ressource définie dans un fichier `.ffd` (voir la page [ressources](/resources#BitmapFont)).\n
 PixelFont permet de définir des polices directement en code.");
 
     mod.addNative("Font", [], "ImageData");

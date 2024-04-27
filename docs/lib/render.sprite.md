@@ -2,7 +2,7 @@
 
 Élément d’une texture
 ## Description
-Sprite est une ressource définie dans un fichier `.res` (voir la page [ressources](/resources#Sprite)).
+Sprite est une ressource définie dans un fichier `.ffd` (voir la page [ressources](/resources#Sprite)).
 
 ## Natifs
 ### Sprite

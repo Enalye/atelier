@@ -39,6 +39,10 @@ scene.addEntity(map);");
     mod.setParameters(["tileset", "width", "height"]);
     mod.addConstructor(&_ctor_tileset, tilemapType, [tilesetType, grInt, grInt]);
 
+    mod.setDescription(GrLocale.fr_FR, "Copie la tilemap");
+    mod.setParameters(["tilemap"]);
+    mod.addConstructor(&_ctor_copy, tilemapType, [tilemapType]);
+
     mod.setDescription(GrLocale.fr_FR, "Charge la ressource");
     mod.setParameters(["name"]);
     mod.addConstructor(&_ctor_name, tilemapType, [grString]);
@@ -63,6 +67,10 @@ scene.addEntity(map);");
 
 private void _ctor_tileset(GrCall call) {
     call.setNative(new Tilemap(call.getNative!Tileset(0), call.getInt(1), call.getInt(2)));
+}
+
+private void _ctor_copy(GrCall call) {
+    call.setNative(new Tilemap(call.getNative!Tilemap(0)));
 }
 
 private void _ctor_name(GrCall call) {

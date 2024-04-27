@@ -17,7 +17,7 @@ void loadLibRender_tileset(GrModule mod) {
     mod.setModule("render.tileset");
     mod.setModuleInfo(GrLocale.fr_FR, "Jeu de tuiles");
     mod.setModuleDescription(GrLocale.fr_FR,
-        "Tileset est une ressource définie dans un fichier `.res` (voir la page [ressources](/resources#Tileset))");
+        "Tileset est une ressource définie dans un fichier `.ffd` (voir la page [ressources](/resources#Tileset))");
     mod.setModuleExample(GrLocale.fr_FR, "var tileset = @Tileset(\"terrain\");
 var tilemap = @Tilemap(tileset, 20, 20);
 scene.addEntity(map);");

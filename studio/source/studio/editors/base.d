@@ -12,6 +12,7 @@ import studio.editors.imageviewer;
 import studio.editors.fontviewer;
 import studio.editors.audioviewer;
 import studio.editors.texteditor;
+import studio.editors.resourceeditor;
 import studio.editors.invalid;
 
 abstract class ContentEditor : UIElement {
@@ -45,6 +46,8 @@ abstract class ContentEditor : UIElement {
         case ".md":
         case ".gr":
             return new TextEditor(path, windowSize);
+        case ".ffd":
+            return new ResourceEditor(path, windowSize);
         default:
             return new InvalidContentEditor(path, windowSize);
         }
@@ -54,9 +57,9 @@ abstract class ContentEditor : UIElement {
         _path = path_;
         focusable = true;
 
-        setAlign(UIAlignX.left, UIAlignY.top);
-        setPosition(Vec2f(250f, 35f));
-        setSize(Vec2f(windowSize.x - 500f, windowSize.y - 35f));
+        setAlign(UIAlignX.right, UIAlignY.top);
+        setPosition(Vec2f(0f, 35f));
+        setSize(Vec2f(windowSize.x - 250f, windowSize.y - 35f));
 
         addEventListener("parentSize", &_onParentSize);
         addEventListener("register", &_onParentSize);
@@ -64,8 +67,8 @@ abstract class ContentEditor : UIElement {
     }
 
     private void _onParentSize() {
-        if(!isAlive())
+        if (!isAlive())
             return;
-        setSize(Vec2f(getParentWidth() - 500f, getParentHeight() - 35f));
+        setSize(Vec2f(getParentWidth() - 250f, getParentHeight() - 35f));
     }
 }

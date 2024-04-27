@@ -31,6 +31,7 @@ final class ResourceList : Surface {
 
         addEventListener("windowSize", {
             setSize(Vec2f(250f, Atelier.window.height - 35f));
+            _list.setHeight(max(0f, getHeight() - 102f));
         });
 
         reload();
@@ -89,7 +90,7 @@ final class ResourceList : Surface {
         }
 
         _list = new VList;
-        _list.setSize(Vec2f(getWidth(), 500f));
+        _list.setSize(Vec2f(getWidth(), max(0f, getHeight() - 102f)));
         vbox.addUI(_list);
 
         rebuildList();
@@ -328,6 +329,9 @@ private final class FileItem : Item {
             break;
         case ".gr":
             icon = new Icon("editor:file-grimoire");
+            break;
+        case ".ffd":
+            icon = new Icon("editor:file-farfadet");
             break;
         default:
             icon = new Icon("editor:file");

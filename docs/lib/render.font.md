@@ -2,9 +2,9 @@
 
 Polices de caractères
 ## Description
-TrueTypeFont est une ressource définie dans un fichier `.res` (voir la page [ressources](/resources#TrueType)).
+TrueTypeFont est une ressource définie dans un fichier `.ffd` (voir la page [ressources](/resources#TrueType)).
 
-BitmapFont est une ressource définie dans un fichier `.res` (voir la page [ressources](/resources#BitmapFont)).
+BitmapFont est une ressource définie dans un fichier `.ffd` (voir la page [ressources](/resources#BitmapFont)).
 
 PixelFont permet de définir des polices directement en code.
 

@@ -2,7 +2,7 @@
 
 Jeu de tuiles
 ## Description
-Tileset est une ressource définie dans un fichier `.res` (voir la page [ressources](/resources#Tileset))
+Tileset est une ressource définie dans un fichier `.ffd` (voir la page [ressources](/resources#Tileset))
 ```grimoire
 var tileset = @Tileset("terrain");
 var tilemap = @Tilemap(tileset, 20, 20);

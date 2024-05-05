@@ -12,7 +12,7 @@ import studio.editors.imageviewer;
 import studio.editors.fontviewer;
 import studio.editors.audioviewer;
 import studio.editors.texteditor;
-import studio.editors.resourceeditor;
+import studio.editors.res;
 import studio.editors.invalid;
 
 abstract class ContentEditor : UIElement {

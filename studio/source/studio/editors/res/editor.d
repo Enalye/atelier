@@ -3,21 +3,23 @@
  * Licence: Zlib
  * Auteur: Enalye
  */
-module studio.editors.resourceeditor;
+module studio.editors.res.editor;
 
 import atelier;
 import farfadet;
 import studio.editors.base;
+import studio.editors.res.base;
 
 final class ResourceEditor : ContentEditor {
     private {
         ResourceList _list;
+        ResourceBaseEditor _currentEditor;
     }
 
     this(string path_, Vec2f windowSize) {
         super(path_, windowSize);
 
-        _list = new ResourceList;
+        _list = new ResourceList(this);
         _list.setHeight(getHeight());
         addUI(_list);
 
@@ -34,6 +36,17 @@ final class ResourceEditor : ContentEditor {
         Farfadet ffd = Farfadet.fromFile(path);
         _list.setList(ffd);
     }
+
+    protected void select(Farfadet ffd) {
+        if (_currentEditor) {
+            _currentEditor.remove();
+        }
+
+        _currentEditor = ResourceBaseEditor.create(ffd,
+            Vec2f(getWidth() - _list.getWidth(), getHeight()));
+        _currentEditor.setAlign(UIAlignX.left, UIAlignY.top);
+        addUI(_currentEditor);
+    }
 }
 
 private final class ResourceList : UIElement {
@@ -42,9 +55,12 @@ private final class ResourceList : UIElement {
         Container _container;
         TextField _searchField;
         VList _list;
+        ResourceItem _selectedItem;
+        ResourceEditor _editor;
     }
 
-    this() {
+    this(ResourceEditor editor) {
+        _editor = editor;
         setAlign(UIAlignX.right, UIAlignY.top);
         setSize(Vec2f(250f, 0f));
         setSizeLock(true, false);
@@ -115,15 +131,32 @@ private final class ResourceList : UIElement {
 
     private void _onRemoveItem() {
     }
+
+    protected void select(ResourceItem item_) {
+        if (_selectedItem != item_) {
+            _selectedItem = item_;
+            _editor.select(_selectedItem.getFarfadet());
+        }
+
+        foreach (ResourceItem item; cast(ResourceItem[]) _list.getList()) {
+            item.updateSelection(item == item_);
+        }
+    }
 }
 
 private final class ResourceItem : UIElement {
     private {
+        Farfadet _ffd;
+        ResourceList _rlist;
         Rectangle _rect;
+        Label _label;
+        bool _isSelected;
         string _name;
     }
 
     this(ResourceList rlist, Farfadet ffd) {
+        _rlist = rlist;
+        _ffd = ffd;
         setSize(Vec2f(250f, 32f));
 
         _name = ffd.get!string(0);
@@ -139,17 +172,51 @@ private final class ResourceItem : UIElement {
         icon.setPosition(Vec2f(32f, 0f));
         addUI(icon);
 
-        Label label = new Label(_name, Atelier.theme.font);
-        label.setAlign(UIAlignX.left, UIAlignY.center);
-        label.setPosition(Vec2f(64f, 0f));
-        addUI(label);
+        _label = new Label(_name, Atelier.theme.font);
+        _label.setAlign(UIAlignX.left, UIAlignY.center);
+        _label.setPosition(Vec2f(64f, 0f));
+        addUI(_label);
 
-        addEventListener("mouseenter", { _rect.isVisible = true; });
-        addEventListener("mouseleave", { _rect.isVisible = false; });
+        addEventListener("mouseenter", &_onMouseEnter);
+        addEventListener("mouseleave", &_onMouseLeave);
         addEventListener("click", &_onClick);
     }
 
-    private void _onClick() {
+    private void _onMouseEnter() {
+        if (_isSelected) {
+            _rect.color = Atelier.theme.accent;
+            _label.color = Atelier.theme.onAccent;
+        }
+        else {
+            _rect.color = Atelier.theme.foreground;
+            _label.color = Atelier.theme.onNeutral;
+        }
+        _rect.isVisible = true;
+    }
 
+    private void _onMouseLeave() {
+        _rect.isVisible = _isSelected;
+    }
+
+    private void _onClick() {
+        _rlist.select(this);
+    }
+
+    protected void updateSelection(bool select_) {
+        if (_isSelected == select_)
+            return;
+
+        _isSelected = select_;
+
+        if (isHovered) {
+            _onMouseEnter();
+        }
+        else {
+            _onMouseLeave();
+        }
+    }
+
+    Farfadet getFarfadet() {
+        return _ffd;
     }
 }

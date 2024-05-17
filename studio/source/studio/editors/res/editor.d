@@ -47,6 +47,12 @@ final class ResourceEditor : ContentEditor {
         _currentEditor.setAlign(UIAlignX.left, UIAlignY.top);
         addUI(_currentEditor);
     }
+
+    void save() {
+        Farfadet ffd = new Farfadet;
+        _list.save(ffd, _currentEditor);
+        ffd.save(path());
+    }
 }
 
 private final class ResourceList : UIElement {
@@ -115,6 +121,18 @@ private final class ResourceList : UIElement {
         _rebuildList();
     }
 
+    void save(Farfadet ffd, ResourceBaseEditor editor) {
+        foreach (item; cast(ResourceItem[]) _list.getList()) {
+            if (item == _selectedItem) {
+                Farfadet node = editor.save(ffd);
+                _selectedItem.setFarfadet(node);
+            }
+            else {
+                ffd.addNode(item.getFarfadet());
+            }
+        }
+    }
+
     private void _rebuildList() {
         _list.clearList();
         foreach (node; _ffd.getNodes()) {
@@ -150,6 +168,7 @@ private final class ResourceItem : UIElement {
         ResourceList _rlist;
         Rectangle _rect;
         Label _label;
+        Icon _icon;
         bool _isSelected;
         string _name;
     }
@@ -167,10 +186,10 @@ private final class ResourceItem : UIElement {
         _rect.isVisible = false;
         addImage(_rect);
 
-        Icon icon = new Icon("editor:ffd-" ~ ffd.name);
-        icon.setAlign(UIAlignX.left, UIAlignY.center);
-        icon.setPosition(Vec2f(32f, 0f));
-        addUI(icon);
+        _icon = new Icon("editor:ffd-" ~ ffd.name);
+        _icon.setAlign(UIAlignX.left, UIAlignY.center);
+        _icon.setPosition(Vec2f(32f, 0f));
+        addUI(_icon);
 
         _label = new Label(_name, Atelier.theme.font);
         _label.setAlign(UIAlignX.left, UIAlignY.center);
@@ -218,5 +237,12 @@ private final class ResourceItem : UIElement {
 
     Farfadet getFarfadet() {
         return _ffd;
+    }
+
+    void setFarfadet(Farfadet ffd) {
+        _ffd = ffd;
+        _name = ffd.get!string(0);
+        _label.text = _name;
+        _icon.setIcon("editor:ffd-" ~ _ffd.name);
     }
 }

@@ -5,6 +5,7 @@
  */
 module studio.ui.editor;
 
+import std.exception : enforce;
 import std.file;
 import std.path;
 import atelier;
@@ -18,7 +19,7 @@ import studio.ui.resourcemanager;
 
 void initApp() {
     MenuBar bar = new MenuBar;
-    Editor editor = new Editor;
+    Studio studio = new Studio;
 
     Project.setDirectory(getcwd());
 
@@ -27,7 +28,7 @@ void initApp() {
         modal.addEventListener("newProject", {
             Project.create(modal.path, modal.configName, modal.sourceFile);
             Atelier.ui.popModalUI();
-            editor.updateRessourceFolders();
+            studio.updateRessourceFolders();
         });
         Atelier.ui.pushModalUI(modal);
     });
@@ -36,7 +37,7 @@ void initApp() {
         modal.addEventListener("value", {
             Project.open(modal.value);
             Atelier.ui.popModalUI();
-            editor.updateRessourceFolders();
+            studio.updateRessourceFolders();
         });
         Atelier.ui.pushModalUI(modal);
     });
@@ -53,7 +54,7 @@ void initApp() {
 
         auto modal = new ResourceFolderManager;
         modal.addEventListener("updateRessourceFolders", {
-            editor.updateRessourceFolders();
+            studio.updateRessourceFolders();
         });
         Atelier.ui.pushModalUI(modal);
     });
@@ -64,15 +65,50 @@ void initApp() {
     bar.addSeparator("Ressource");
     bar.add("Ressource", "Fermer");
     Atelier.ui.addUI(bar);
-    Atelier.ui.addUI(editor);
+    Atelier.ui.addUI(studio);
 }
 
-final class Editor : UIElement {
+final class Studio : UIElement {
+    struct ResourceInfo {
+        Farfadet farfadet;
+        string path;
+
+        string getPath(string subPath) {
+            return buildNormalizedPath(path, subPath);
+        }
+    }
+
+    static final class FarfadetCache {
+        ResourceInfo[string] resources;
+    }
+
     private static {
         TabBar _tabBar;
         ContentEditor[string] _contentEditors;
         ContentEditor _contentEditor;
         ResourceList _resourceList;
+        ResourceManager _resourceManager;
+        FarfadetCache[string] _farfadets;
+    }
+
+    static @property {
+        ResourceManager res() {
+            return _resourceManager;
+        }
+
+        ResourceInfo getResource(string type, string name) {
+            auto p = type in _farfadets;
+            enforce(p, "le type de ressource `" ~ type ~ "` n’existe pas");
+            auto res = name in p.resources;
+            enforce(res, "la ressource `" ~ name ~ "` n’existe pas");
+            return *res;
+        }
+
+        string[] getResourceList(string type) {
+            auto p = type in _farfadets;
+            enforce(p, "le type de ressource `" ~ type ~ "` n’existe pas");
+            return p.resources.keys;
+        }
     }
 
     this() {
@@ -161,6 +197,65 @@ final class Editor : UIElement {
                 break;
             }
             _tabBar.addTab(baseName(path), path, icon);
+        }
+    }
+
+    static void reloadResources() {
+        _resourceManager = new ResourceManager;
+        Archive.File[] resourceFiles;
+        foreach (path, isArchived; Project.getMedias()) {
+            Archive archive = new Archive;
+
+            path = buildNormalizedPath(Project.getMediaDir(), path);
+
+            if (isDir(path)) {
+                if (!exists(path)) {
+                    log("le dossier `" ~ path ~ "` n’existe pas");
+                    continue;
+                }
+                archive.pack(path);
+            }
+            else if (extension(path) == Atelier_Archive_Extension) {
+                if (!exists(path)) {
+                    log("l’archive `" ~ path ~ "` n’existe pas");
+                    continue;
+                }
+                archive.load(path);
+            }
+
+            foreach (file; archive) {
+                const string ext = extension(file.name);
+                switch (ext) {
+                case Atelier_Resource_Extension:
+                    resourceFiles ~= file;
+                    break;
+                default:
+                    //_resourceManager.write(file.path, file.data);
+                    break;
+                }
+            }
+        }
+
+        _farfadets.clear();
+        foreach (Archive.File file; resourceFiles) {
+            Farfadet ffd = Farfadet.fromBytes(file.data);
+            foreach (resNode; ffd.getNodes()) {
+                auto p = resNode.name in _farfadets;
+                FarfadetCache cache;
+
+                if (p) {
+                    cache = *p;
+                }
+                else {
+                    cache = new FarfadetCache;
+                    _farfadets[resNode.name] = cache;
+                }
+
+                ResourceInfo info;
+                info.farfadet = resNode;
+                info.path = buildNormalizedPath(Project.getMediaDir(), dirName(file.path));
+                cache.resources[resNode.get!string(0)] = info;
+            }
         }
     }
 }

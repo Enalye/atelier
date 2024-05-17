@@ -352,6 +352,6 @@ private final class FileItem : Item {
     }
 
     private void _onClick() {
-        Editor.editFile(_path);
+        Studio.editFile(_path);
     }
 }

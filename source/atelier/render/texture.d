@@ -129,6 +129,13 @@ final class Texture : ImageData, Resource!Texture {
         return new Texture(surface, ownSurface, isSmooth);
     }
 
+    /// Chargé depuis la mémoire
+    static Texture fromMemory(const(ubyte)[] data, bool isSmooth = false) {
+        SDL_RWops* rw = SDL_RWFromConstMem(cast(const(void)*) data.ptr, cast(int) data.length);
+        SDL_Surface* surface = IMG_Load_RW(rw, 1);
+        return Texture.fromSurface(surface, true, isSmooth);
+    }
+
     /// Chargé depuis le système de ressources
     static Texture fromResource(string filePath, bool isSmooth = false) {
         const(ubyte)[] data = Atelier.res.read(filePath);

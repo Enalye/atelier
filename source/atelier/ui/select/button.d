@@ -83,6 +83,22 @@ final class SelectButton : Button!RoundedRectangle {
         addEventListener("click", &_onClick);
     }
 
+    void setItems(string[] items) {
+        if (_list) {
+            _list.remove();
+        }
+
+        Vec2f size = Vec2f.zero;
+        _list = new SelectList(this);
+        foreach (item; _items) {
+            _list.add(item);
+            _label.text = item;
+            size = size.max(_label.getSize());
+        }
+
+        setSize(size + Vec2f(24f, 8f));
+    }
+
     private void _onClick() {
         if (_isDisplayed) {
             removeMenu();

@@ -66,8 +66,12 @@ final class NumberField : UIElement {
         }
 
         float value(float value_) {
-            _value = clamp(value_, _minValue, _maxValue);
-            _textField.value = to!string(_value);
+            value_ = clamp(value_, _minValue, _maxValue);
+            if (_value != value_) {
+                _value = value_;
+                _textField.value = to!string(_value);
+                dispatchEvent("value", false);
+            }
             return _value;
         }
     }
@@ -119,7 +123,12 @@ final class NumberField : UIElement {
         try {
             string text = _textField.value;
             text = text.replace(',', '.');
-            _value = clamp(to!float(text), _minValue, _maxValue);
+            float value_ = clamp(to!float(text), _minValue, _maxValue);
+
+            if (_value != value_) {
+                _value = value_;
+                dispatchEvent("value", false);
+            }
         }
         catch (Exception e) {
             value(0f);
@@ -143,8 +152,12 @@ final class IntegerField : UIElement {
         }
 
         int value(int value_) {
-            _value = clamp(value_, _minValue, _maxValue);
-            _textField.value = to!string(_value);
+            value_ = clamp(value_, _minValue, _maxValue);
+            if (_value != value_) {
+                _value = value_;
+                _textField.value = to!string(_value);
+                dispatchEvent("value", false);
+            }
             return _value;
         }
     }
@@ -193,7 +206,11 @@ final class IntegerField : UIElement {
     private void _onValue() {
         try {
             string text = _textField.value;
-            _value = clamp(to!int(text), _minValue, _maxValue);
+            int value_ = clamp(to!int(text), _minValue, _maxValue);
+            if (_value != value_) {
+                _value = value_;
+                dispatchEvent("value", false);
+            }
         }
         catch (Exception e) {
             value(0);

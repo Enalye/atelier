@@ -481,6 +481,9 @@ class UIElement {
     }
 
     final void dispatchEvent(string type, bool bubbleUp = true) {
+        if (_manager && _manager.blockEvents)
+            return;
+
         { // Natifs
             auto p = type in _nativeEventListeners;
             if (p) {
@@ -507,6 +510,9 @@ class UIElement {
     }
 
     final void dispatchEventChildren(string type, bool bubbleDown = true) {
+        if (_manager && _manager.blockEvents)
+            return;
+
         if (bubbleDown) {
             foreach (UIElement child; _children) {
                 child.dispatchEvent(type, false);

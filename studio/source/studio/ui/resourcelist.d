@@ -31,7 +31,9 @@ final class ResourceList : Surface {
 
         addEventListener("windowSize", {
             setSize(Vec2f(250f, Atelier.window.height - 35f));
-            _list.setHeight(max(0f, getHeight() - 102f));
+            if (_list) {
+                _list.setHeight(max(0f, getHeight() - 102f));
+            }
         });
 
         reload();
@@ -70,6 +72,7 @@ final class ResourceList : Surface {
                 hbox.addUI(new Label("Dossier:", Atelier.theme.font));
 
                 _mediaSelect = new SelectButton(folders, _currentMedia);
+                _mediaSelect.setSize(Vec2f(150f, 24f));
                 _mediaSelect.addEventListener("value", &rebuildList);
                 hbox.addUI(_mediaSelect);
 

@@ -184,7 +184,9 @@ final class IntegerField : UIElement {
         box.addUI(_incrementBtn);
 
         _incrementBtn.addEventListener("click", { value(_value + _step); });
+        _incrementBtn.addEventListener("echo", { value(_value + _step); });
         _decrementBtn.addEventListener("click", { value(_value - _step); });
+        _decrementBtn.addEventListener("echo", { value(_value - _step); });
         _textField.addEventListener("value", &_onValue);
 
         addEventListener("enable", &_onEnableChange);

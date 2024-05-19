@@ -19,6 +19,7 @@ final class SpriteResourceEditor : ResourceBaseEditor {
         string _name;
         string _textureRID;
         Vec4u _clip;
+        Vec2u _imageSize;
         Previewer _preview;
         ParameterWindow _parameterWindow;
     }
@@ -58,6 +59,8 @@ final class SpriteResourceEditor : ResourceBaseEditor {
         _parameterWindow.addEventListener("property_clip", {
             _clip = _parameterWindow.getClip();
         });
+
+        _preview.addEventListener("clip", { _parameterWindow.setClip(_clip); });
     }
 
     private void _onSize() {
@@ -86,9 +89,10 @@ private final class ParameterWindow : UIElement {
         foreach (entry; entries) {
 
         }*/
+
         VBox vbox = new VBox;
         vbox.setAlign(UIAlignX.left, UIAlignY.top);
-        vbox.setPosition(Vec2f(32f, 16f));
+        vbox.setPosition(Vec2f(24f, 24f));
         vbox.setSpacing(8f);
         vbox.setChildAlign(UIAlignX.left);
         addUI(vbox);
@@ -143,6 +147,15 @@ private final class ParameterWindow : UIElement {
         return Vec4u(_numFields[0].value(), _numFields[1].value(),
             _numFields[2].value(), _numFields[3].value());
     }
+
+    void setClip(Vec4u clip) {
+        Atelier.ui.blockEvents = true;
+        _numFields[0].value = clip.x;
+        _numFields[1].value = clip.y;
+        _numFields[2].value = clip.z;
+        _numFields[3].value = clip.w;
+        Atelier.ui.blockEvents = false;
+    }
 }
 
 private final class Previewer : UIElement {
@@ -151,19 +164,28 @@ private final class Previewer : UIElement {
         Sprite _sprite;
         float _zoom = 1f;
         SpriteResourceEditor _editor;
+        Vec2f _deltaMouse = Vec2f.zero;
+        ToolGroup _toolGroup;
     }
 
     this(SpriteResourceEditor editor) {
         _editor = editor;
 
-        HBox hbox = new HBox;
-        hbox.setAlign(UIAlignX.right, UIAlignY.top);
-        hbox.setSpacing(8f);
-        addUI(hbox);
+        {
+            HBox hbox = new HBox;
+            hbox.setAlign(UIAlignX.right, UIAlignY.top);
+            hbox.setPosition(Vec2f(0f, 4f));
+            hbox.setSpacing(4f);
+            addUI(hbox);
 
-        foreach (key; ["select", "bord", "coin"]) {
-            NeutralButton btn = new NeutralButton(key);
-            hbox.addUI(btn);
+            _toolGroup = new ToolGroup;
+            foreach (key; ["selection", "move", "corner", "side"]) {
+                ToolButton btn = new ToolButton(_toolGroup,
+                    "editor:" ~ key ~ "-button", key == "selection");
+                btn.setSize(Vec2f(32f, 32f));
+                btn.addEventListener("value", &_onToolChange);
+                hbox.addUI(btn);
+            }
         }
     }
 
@@ -171,13 +193,14 @@ private final class Previewer : UIElement {
         bool mustLoad = _texture is null;
         _zoom = 1f;
 
-        if(_sprite) {
+        if (_sprite) {
             _sprite.remove();
         }
 
         auto info = Studio.getResource("texture", rid);
         string path = info.farfadet.getNode("file").get!string(0);
         _texture = Texture.fromFile(info.getPath(path));
+        _editor._imageSize = Vec2u(_texture.width, _texture.height);
         _sprite = new Sprite(_texture);
         _sprite.position = getCenter();
         addImage(_sprite);
@@ -187,15 +210,73 @@ private final class Previewer : UIElement {
             addEventListener("wheel", &_onWheel);
             addEventListener("mousedown", &_onMouseDown);
             addEventListener("mouseup", &_onMouseUp);
+            addEventListener("mouseleave", {
+                removeEventListener("mousemove", &_onDrag);
+                removeEventListener("mousemove", &_onMoveSelection);
+                _deltaMouse = Vec2f.zero;
+            });
         }
     }
 
     private void _onMouseDown() {
-        addEventListener("mousemove", &_onDrag);
+        InputEvent.MouseButton ev = getManager().input.asMouseButton();
+        switch (ev.button) with (InputEvent.MouseButton.Button) {
+        case right:
+            addEventListener("mousemove", &_onDrag);
+            break;
+        case left:
+            Vec4f clip = _zoom * cast(Vec4f) _editor._clip;
+            Vec2f origin = _sprite.position - _sprite.size / 2f + clip.xy;
+            if (getMousePosition().isBetween(origin, origin + clip.zw)) {
+                addEventListener("mousemove", &_onMoveSelection);
+            }
+            break;
+        default:
+            break;
+        }
     }
 
     private void _onMouseUp() {
-        removeEventListener("mousemove", &_onDrag);
+        InputEvent.MouseButton ev = getManager().input.asMouseButton();
+        switch (ev.button) with (InputEvent.MouseButton.Button) {
+        case right:
+            removeEventListener("mousemove", &_onDrag);
+            break;
+        case left:
+            removeEventListener("mousemove", &_onMoveSelection);
+            _deltaMouse = Vec2f.zero;
+            break;
+        default:
+            break;
+        }
+    }
+
+    private void _onMoveSelection() {
+        InputEvent.MouseMotion ev = getManager().input.asMouseMotion();
+        _deltaMouse += ev.deltaPosition / _zoom;
+
+        Vec2i move = cast(Vec2i) _deltaMouse;
+
+        if (move.x < 0 && _editor._clip.x < -move.x) {
+            move.x = -_editor._clip.x;
+        }
+        else if (move.x > 0 && _editor._clip.x + _editor._clip.z + move.x > _editor._imageSize.x) {
+            move.x = _editor._imageSize.x - (_editor._clip.x + _editor._clip.z);
+        }
+
+        if (move.y < 0 && _editor._clip.y < -move.y) {
+            move.y = -_editor._clip.y;
+        }
+        else if (move.y > 0 && _editor._clip.y + _editor._clip.w + move.y > _editor._imageSize.y) {
+            move.y = _editor._imageSize.y - (_editor._clip.y + _editor._clip.w);
+        }
+
+        _deltaMouse -= cast(Vec2f) move;
+        _editor._clip.xy = cast(Vec2u)((cast(Vec2i) _editor._clip.xy) + move);
+
+        if (move != Vec2i.zero) {
+            dispatchEvent("clip", false);
+        }
     }
 
     private void _onDrag() {
@@ -221,5 +302,9 @@ private final class Previewer : UIElement {
         _sprite.size = (cast(Vec2f) _sprite.clip.zw) * _zoom;
         Vec2f delta = _sprite.position - getMousePosition();
         _sprite.position = delta * zoomDelta + getMousePosition();
+    }
+
+    private void _onToolChange() {
+
     }
 }

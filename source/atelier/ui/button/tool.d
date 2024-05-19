@@ -3,17 +3,18 @@
  * License: Zlib
  * Authors: Enalye
  */
-module atelier.ui.button.radio;
+module atelier.ui.button.tool;
 
 import std.exception : enforce;
 import atelier.common;
 import atelier.core;
 import atelier.render;
+import atelier.ui.core;
 import atelier.ui.button.button;
 
-final class RadioGroup {
+final class ToolGroup {
     private {
-        RadioButton[] _buttons;
+        ToolButton[] _buttons;
         int _value;
     }
 
@@ -23,7 +24,7 @@ final class RadioGroup {
         }
     }
 
-    private bool add(RadioButton button, bool isChecked) {
+    private bool add(ToolButton button, bool isChecked) {
         if (isChecked) {
             check(null);
         }
@@ -33,7 +34,7 @@ final class RadioGroup {
         return (_buttons.length == 1) || isChecked;
     }
 
-    private void check(RadioButton button_) {
+    private void check(ToolButton button_) {
         foreach (i, button; _buttons) {
             button._updateValue(button == button_);
             if (button == button_) {
@@ -43,7 +44,7 @@ final class RadioGroup {
     }
 
     private void enable(bool isEnabled) {
-        foreach (RadioButton button; _buttons) {
+        foreach (ToolButton button; _buttons) {
             button.isEnabled = isEnabled;
             if (isEnabled) {
                 button._onEnable();
@@ -55,10 +56,11 @@ final class RadioGroup {
     }
 }
 
-final class RadioButton : Button!Circle {
+final class ToolButton : Button!RoundedRectangle {
     private {
-        Circle _outline, _check;
-        RadioGroup _group;
+        RoundedRectangle _background;
+        Icon _icon;
+        ToolGroup _group;
         bool _value;
     }
 
@@ -68,24 +70,22 @@ final class RadioButton : Button!Circle {
         }
     }
 
-    this(RadioGroup group, bool isChecked = false) {
+    this(ToolGroup group, string icon, bool isChecked = false) {
         enforce(group, "groupe non-spécifié");
         _group = group;
         _value = _group.add(this, isChecked);
-        setSize(Vec2f(24f, 24f));
 
-        _outline = Circle.outline(24f, 2f);
-        _outline.position = getCenter();
-        _outline.anchor = Vec2f.half;
-        _outline.color = _value ? Atelier.theme.accent : Atelier.theme.neutral;
-        addImage(_outline);
+        _icon = new Icon(icon);
+        _icon.setAlign(UIAlignX.center, UIAlignY.center);
+        addUI(_icon);
 
-        _check = Circle.fill(14f);
-        _check.position = getCenter();
-        _check.anchor = Vec2f.half;
-        _check.color = Atelier.theme.accent;
-        _check.isVisible = _value;
-        addImage(_check);
+        setSize(_icon.getSize() + Vec2f(8f, 8f));
+
+        _background = RoundedRectangle.outline(getSize(), Atelier.theme.corner, 2f);
+        _background.anchor = Vec2f.zero;
+        _background.color = _value ? Atelier.theme.accent : Atelier.theme.neutral;
+        _background.filled = _value;
+        addImage(_background);
 
         setFxColor(_value ? Atelier.theme.accent : Atelier.theme.neutral);
 
@@ -96,6 +96,13 @@ final class RadioButton : Button!Circle {
 
         addEventListener("enable", { _group.enable(true); });
         addEventListener("disable", { _group.enable(false); });
+
+        addEventListener("size", { _background.size = getSize(); });
+    }
+
+    void setIcon(string icon) {
+        _icon.setIcon(icon);
+        setSize(_icon.getSize() + Vec2f(8f, 8f));
     }
 
     void check() {
@@ -103,8 +110,7 @@ final class RadioButton : Button!Circle {
     }
 
     private void _onEnable() {
-        _outline.alpha = Atelier.theme.activeOpacity;
-        _check.alpha = Atelier.theme.activeOpacity;
+        _background.alpha = Atelier.theme.activeOpacity;
 
         if (isHovered) {
             _onMouseEnter();
@@ -118,8 +124,7 @@ final class RadioButton : Button!Circle {
     }
 
     private void _onDisable() {
-        _outline.alpha = Atelier.theme.inactiveOpacity;
-        _check.alpha = Atelier.theme.inactiveOpacity;
+        _background.alpha = Atelier.theme.inactiveOpacity;
 
         removeEventListener("mouseenter", &_onMouseEnter);
         removeEventListener("mouseleave", &_onMouseLeave);
@@ -129,13 +134,11 @@ final class RadioButton : Button!Circle {
         Color rgb = _value ? Atelier.theme.accent : Atelier.theme.neutral;
         HSLColor hsl = HSLColor.fromColor(rgb);
         hsl.l = hsl.l * .8f;
-        _outline.color = hsl.toColor();
-        _check.color = _outline.color;
+        _background.color = hsl.toColor();
     }
 
     private void _onMouseLeave() {
-        _outline.color = _value ? Atelier.theme.accent : Atelier.theme.neutral;
-        _check.color = _outline.color;
+        _background.color = _value ? Atelier.theme.accent : Atelier.theme.neutral;
     }
 
     private void _onClick() {
@@ -150,7 +153,7 @@ final class RadioButton : Button!Circle {
         _value = value_;
         setFxColor(_value ? Atelier.theme.accent : Atelier.theme.neutral);
 
-        _check.isVisible = _value;
+        _background.filled = _value;
 
         if (isHovered) {
             _onMouseEnter();

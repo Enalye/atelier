@@ -18,4 +18,5 @@ public {
     import atelier.ui.button.radio;
     import atelier.ui.button.switch_;
     import atelier.ui.button.toggle;
+    import atelier.ui.button.tool;
 }

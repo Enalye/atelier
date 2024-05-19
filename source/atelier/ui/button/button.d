@@ -13,6 +13,7 @@ import atelier.ui.button.fx;
 abstract class Button(ImageType) : UIElement {
     private {
         ButtonFx!ImageType _fx;
+        Timer _clickTimer;
     }
 
     this() {
@@ -20,12 +21,27 @@ abstract class Button(ImageType) : UIElement {
 
         _fx = new ButtonFx!ImageType(this);
 
-        addEventListener("press", { _fx.onClick(getMousePosition()); });
-        addEventListener("unpress", { _fx.onUnclick(); });
+        addEventListener("press", {
+            _fx.onClick(getMousePosition());
+            _clickTimer.start(15);
+            addEventListener("update", &_onClickHeld);
+        });
+        addEventListener("unpress", {
+            _fx.onUnclick();
+            removeEventListener("update", &_onClickHeld);
+        });
         addEventListener("mousemove", { _fx.onUpdate(getMousePosition()); });
         addEventListener("update", { _fx.update(); });
         addEventListener("draw", { _fx.draw(); });
         addEventListener("size", { _fx.onSize(); });
+    }
+
+    private void _onClickHeld() {
+        _clickTimer.update();
+        if (!_clickTimer.isRunning) {
+            _clickTimer.start(2);
+            dispatchEvent("echo", false);
+        }
     }
 
     final void setFxColor(Color color) {

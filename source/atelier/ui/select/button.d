@@ -46,13 +46,12 @@ final class SelectButton : Button!RoundedRectangle {
         _items = items;
         _buttonColor = isAccent ? Atelier.theme.accent : Atelier.theme.neutral;
 
-        Vec2f size = Vec2f.zero;
-
         _label = new Label("", Atelier.theme.font);
         _label.setAlign(UIAlignX.center, UIAlignY.center);
         _label.color = Atelier.theme.onAccent;
         addUI(_label);
 
+        Vec2f size = Vec2f.zero;
         _list = new SelectList(this);
         foreach (item; _items) {
             _list.add(item);
@@ -64,7 +63,7 @@ final class SelectButton : Button!RoundedRectangle {
 
         if (_items.length)
             _value = _items[0];
-        value(defaultItem);
+        _label.text = value(defaultItem);
 
         setFxColor(_buttonColor);
 
@@ -81,6 +80,7 @@ final class SelectButton : Button!RoundedRectangle {
         });
         addEventListener("mouseleave", { _background.color = _buttonColor; });
         addEventListener("click", &_onClick);
+        addEventListener("size", { _background.size = getSize(); });
     }
 
     void setItems(string[] items) {
@@ -88,15 +88,16 @@ final class SelectButton : Button!RoundedRectangle {
             _list.remove();
         }
 
-        Vec2f size = Vec2f.zero;
+        Vec2f size = getSize();
         _list = new SelectList(this);
         foreach (item; _items) {
             _list.add(item);
             _label.text = item;
-            size = size.max(_label.getSize());
+            size = size.max(_label.getSize() + Vec2f(24f, 8f));
         }
+        _label.text = value();
 
-        setSize(size + Vec2f(24f, 8f));
+        setSize(size);
     }
 
     private void _onClick() {

@@ -52,6 +52,7 @@ final class UIManager {
     }
 
     bool isDebug;
+    bool blockEvents;
 
     this() {
         _elements = new Array!UIElement;

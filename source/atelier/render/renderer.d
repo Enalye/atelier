@@ -93,11 +93,13 @@ final class Renderer {
         _kernelCanvas = new Canvas(_kernelSize.x, _kernelSize.y);
         _kernelSprite = new Sprite(_kernelCanvas);
         _kernelSprite.anchor = Vec2f.half;
+        _kernelSprite.blend = Blend.canvas;
 
         _scaledCanvas = new Canvas(_kernelSize.x * _pixelSharpness,
             _kernelSize.y * _pixelSharpness, true);
         _scaledSprite = new Sprite(_scaledCanvas);
         _scaledSprite.anchor = Vec2f.half;
+        _scaledSprite.blend = Blend.canvas;
     }
 
     private void _updateScaling() {
@@ -177,6 +179,7 @@ final class Renderer {
 
     void startRenderPass() {
         pushCanvas(_kernelCanvas);
+        drawRect(Vec2f.zero, _scaledSizeEnd, Atelier.theme.background, 1f, true);
     }
 
     void endRenderPass() {
@@ -198,8 +201,8 @@ final class Renderer {
         SDL_Color sdlColor = Atelier.theme.background.toSDL();
 
         SDL_RenderPresent(_sdlRenderer);
-        SDL_SetRenderDrawColor(_sdlRenderer, sdlColor.r, sdlColor.g, sdlColor.b, 0);
-        SDL_RenderClear(_sdlRenderer);
+        //SDL_SetRenderDrawColor(_sdlRenderer, sdlColor.r, sdlColor.g, sdlColor.b, 0);
+        //SDL_RenderClear(_sdlRenderer);
     }
 
     void pushCanvas(Canvas canvas) {
@@ -280,7 +283,10 @@ final class Renderer {
             SDL_SetRenderTarget(_sdlRenderer, null);
 
         context.canvas.color = color;
-        context.canvas.alpha = alpha;
+        if (alpha < 1f) {
+            context.canvas.alpha = alpha;
+            context.canvas.blend = Blend.alpha;
+        }
         context.canvas.draw(position, size, context.clip, angle, pivot);
     }
 

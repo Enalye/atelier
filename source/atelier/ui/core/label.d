@@ -174,6 +174,7 @@ void drawText(Vec2f position, dstring text, Font font, float scale = 1f, float s
 
             float x = position.x + glyph.offsetX * scale;
             float y = position.y - glyph.offsetY * scale;
+            y += font.descent;
 
             glyph.draw(Vec2f(x, y), scale, Color.white, 1f);
             position.x += (glyph.advance + spacing) * scale;

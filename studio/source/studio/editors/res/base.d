@@ -9,21 +9,35 @@ import atelier;
 import farfadet;
 import studio.editors.res.invalid;
 import studio.editors.res.sprite;
+import studio.editors.res.texture;
 import studio.ui;
 
 abstract class ResourceBaseEditor : UIElement {
-    static ResourceBaseEditor create(Farfadet ffd, Vec2f size) {
-        Studio.reloadResources();
+    private {
+        string _path;
+    }
 
-        switch (ffd.name) {
-        case "sprite":
-            return new SpriteResourceEditor(ffd, size);
-        default:
-            return new InvalidResourceEditor(ffd, size);
+    @property {
+        string path() const {
+            return _path;
         }
     }
 
-    this(Vec2f windowSize) {
+    static ResourceBaseEditor create(string path_, Farfadet ffd, Vec2f size) {
+        Studio.reloadResources();
+
+        switch (ffd.name) {
+        case "texture":
+            return new TextureResourceEditor(path_, ffd, size);
+        case "sprite":
+            return new SpriteResourceEditor(path_, ffd, size);
+        default:
+            return new InvalidResourceEditor(path_, ffd, size);
+        }
+    }
+
+    this(string path_, Vec2f windowSize) {
+        _path = path_;
         focusable = true;
 
         setAlign(UIAlignX.right, UIAlignY.top);

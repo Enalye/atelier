@@ -26,8 +26,8 @@ final class SpriteResourceEditor : ResourceBaseEditor {
         int _tool;
     }
 
-    this(Farfadet ffd, Vec2f size) {
-        super(size);
+    this(string path_, Farfadet ffd, Vec2f size) {
+        super(path_, size);
         _ffd = ffd;
 
         _name = ffd.get!string(0);

@@ -42,7 +42,7 @@ final class ResourceEditor : ContentEditor {
             _currentEditor.remove();
         }
 
-        _currentEditor = ResourceBaseEditor.create(ffd,
+        _currentEditor = ResourceBaseEditor.create(path(), ffd,
             Vec2f(getWidth() - _list.getWidth(), getHeight()));
         _currentEditor.setAlign(UIAlignX.left, UIAlignY.top);
         addUI(_currentEditor);

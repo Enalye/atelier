@@ -14,8 +14,8 @@ final class InvalidResourceEditor : ResourceBaseEditor {
         Farfadet _ffd;
     }
 
-    this(Farfadet ffd, Vec2f size) {
-        super(size);
+    this(string path_, Farfadet ffd, Vec2f size) {
+        super(path_, size);
         _ffd = ffd;
 
         Label label = new Label("Ressource `" ~ ffd.name ~ "` non-reconnue", Atelier.theme.font);

@@ -3,7 +3,7 @@
  * Licence: Zlib
  * Auteur: Enalye
  */
-module studio.editors.res.sprite;
+module studio.editors.res.ninepatch;
 
 import std.file;
 import std.path;
@@ -14,15 +14,14 @@ import studio.editors.res.base;
 import studio.project;
 import studio.ui;
 
-final class SpriteResourceEditor : ResourceBaseEditor {
+final class NinePatchResourceEditor : ResourceBaseEditor {
     private {
         Farfadet _ffd;
         string _name;
         string _textureRID;
         Vec4u _clip;
         Vec2u _imageSize;
-        Viewer _viewer;
-        Toolbox _toolbox;
+        Previewer _preview;
         ParameterWindow _parameterWindow;
         int _tool;
     }
@@ -41,46 +40,37 @@ final class SpriteResourceEditor : ResourceBaseEditor {
             _clip = ffd.getNode("clip").get!Vec4u(0);
         }
 
-        _viewer = new Viewer(this);
-        _viewer.setAlign(UIAlignX.center, UIAlignY.top);
-        _viewer.setSize(Vec2f(size.x, max(0f, size.y - 200f)));
-        _viewer.setTextureRID(_textureRID);
-        addUI(_viewer);
+        _preview = new Previewer(this);
+        _preview.setAlign(UIAlignX.center, UIAlignY.top);
+        _preview.setSize(Vec2f(size.x, max(0f, size.y - 200f)));
+        _preview.setTextureRID(_textureRID);
+        addUI(_preview);
 
         _parameterWindow = new ParameterWindow(_textureRID, _clip);
         _parameterWindow.setAlign(UIAlignX.center, UIAlignY.bottom);
         _parameterWindow.setSize(Vec2f(size.x, min(size.y, 200f)));
         addUI(_parameterWindow);
 
-        _toolbox = new Toolbox();
-        _toolbox.setTexture(_viewer.getTexture(), _clip);
-        Atelier.ui.addUI(_toolbox);
-
         addEventListener("size", &_onSize);
 
         _parameterWindow.addEventListener("property_textureRID", {
             _textureRID = _parameterWindow.getTextureRID();
-            _viewer.setTextureRID(_textureRID);
-            _toolbox.setTexture(_viewer.getTexture(), _clip);
+            _preview.setTextureRID(_textureRID);
         });
 
         _parameterWindow.addEventListener("property_clip", {
             _clip = _parameterWindow.getClip();
-            _toolbox.setClip(_clip);
         });
 
-        _viewer.addEventListener("clip", {
-            _parameterWindow.setClip(_clip);
-            _toolbox.setClip(_clip);
+        _preview.addEventListener("clip", { _parameterWindow.setClip(_clip); });
+        _parameterWindow.addEventListener("tool", {
+            _tool = _parameterWindow.getTool();
         });
-        _toolbox.addEventListener("tool", { _tool = _toolbox.getTool(); });
-        addEventListener("register", { Atelier.ui.addUI(_toolbox); });
-        addEventListener("unregister", { _toolbox.remove(); });
     }
 
     private void _onSize() {
         Vec2f size = getSize();
-        _viewer.setSize(Vec2f(size.x, max(0f, size.y - 200f)));
+        _preview.setSize(Vec2f(size.x, max(0f, size.y - 200f)));
         _parameterWindow.setSize(Vec2f(size.x, min(size.y, 200f)));
     }
 
@@ -93,29 +83,24 @@ final class SpriteResourceEditor : ResourceBaseEditor {
     }
 }
 
-private class Toolbox : Modal {
+private final class ParameterWindow : UIElement {
     private {
-        Sprite _sprite;
+        SelectButton _textureSelect;
+        IntegerField[] _numFields;
         ToolGroup _toolGroup;
         int _tool;
     }
 
-    this() {
-        setSize(Vec2f(200f, 300f));
-        setAlign(UIAlignX.right, UIAlignY.center);
-        setPosition(Vec2f(250f, 0f));
+    this(string textureRID, Vec4u clip) {
+        /*auto entries = dirEntries(buildNormalizedPath(Project.getMediaDir(), , SpanMode.depth);
+        foreach (entry; entries) {
 
-        {
-            Label title = new Label("Outils", Atelier.theme.font);
-            title.setAlign(UIAlignX.center, UIAlignY.top);
-            title.setPosition(Vec2f(0f, 8f));
-            addUI(title);
-        }
+        }*/
 
         {
             HBox hbox = new HBox;
-            hbox.setAlign(UIAlignX.center, UIAlignY.top);
-            hbox.setPosition(Vec2f(0f, 32f));
+            hbox.setAlign(UIAlignX.right, UIAlignY.top);
+            hbox.setPosition(Vec2f(4f, 4f));
             hbox.setSpacing(4f);
             addUI(hbox);
 
@@ -128,49 +113,6 @@ private class Toolbox : Modal {
             }
         }
 
-        {
-            Rectangle rect = Rectangle.outline(Vec2f.one * (getWidth() - 16f), 1f);
-            rect.color = Atelier.theme.onNeutral;
-            rect.anchor = Vec2f(0.5f, 1f);
-            rect.position = Vec2f(getCenter().x, getHeight() - 8f);
-            addImage(rect);
-        }
-
-        addEventListener("update", {
-            if (_toolGroup.value != _tool) {
-                _tool = _toolGroup.value;
-                dispatchEvent("tool", false);
-            }
-        });
-    }
-
-    int getTool() const {
-        return _toolGroup.value();
-    }
-
-    void setTexture(Texture texture, Vec4u clip) {
-        if (_sprite)
-            _sprite.remove();
-        _sprite = new Sprite(texture, clip);
-        _sprite.anchor = Vec2f(0.5f, 1f);
-        _sprite.position = Vec2f(getCenter().x, getHeight() - 8f);
-        _sprite.fit(Vec2f.one * (getWidth() - 16f));
-        addImage(_sprite);
-    }
-
-    void setClip(Vec4u clip) {
-        if (_sprite)
-            _sprite.clip = clip;
-    }
-}
-
-private final class ParameterWindow : UIElement {
-    private {
-        SelectButton _textureSelect;
-        IntegerField[] _numFields;
-    }
-
-    this(string textureRID, Vec4u clip) {
         VBox vbox = new VBox;
         vbox.setAlign(UIAlignX.left, UIAlignY.top);
         vbox.setPosition(Vec2f(24f, 24f));
@@ -218,6 +160,13 @@ private final class ParameterWindow : UIElement {
         addEventListener("draw", {
             Atelier.renderer.drawRect(Vec2f.zero, getSize(), Atelier.theme.surface, 1f, true);
         });
+
+        addEventListener("update", {
+            if (_toolGroup.value != _tool) {
+                _tool = _toolGroup.value;
+                dispatchEvent("tool", false);
+            }
+        });
     }
 
     string getTextureRID() const {
@@ -237,21 +186,25 @@ private final class ParameterWindow : UIElement {
         _numFields[3].value = clip.w;
         Atelier.ui.blockEvents = false;
     }
+
+    int getTool() const {
+        return _toolGroup.value();
+    }
 }
 
-private final class Viewer : UIElement {
+private final class Previewer : UIElement {
     private {
         Texture _texture;
         Sprite _sprite;
         float _zoom = 1f;
-        SpriteResourceEditor _editor;
+        NinePatchResourceEditor _editor;
         Vec2f _positionMouse = Vec2f.zero;
         Vec2f _deltaMouse = Vec2f.zero;
         Vec2i _clipAnchor, _clipAnchor2;
         bool _isResizingVertical;
     }
 
-    this(SpriteResourceEditor editor) {
+    this(NinePatchResourceEditor editor) {
         _editor = editor;
     }
 
@@ -276,23 +229,16 @@ private final class Viewer : UIElement {
             addEventListener("wheel", &_onWheel);
             addEventListener("mousedown", &_onMouseDown);
             addEventListener("mouseup", &_onMouseUp);
-            addEventListener("mouseleave", &_onMouseLeave);
-            addEventListener("clickoutside", &_onMouseLeave);
+            addEventListener("mouseleave", {
+                removeEventListener("mousemove", &_onDrag);
+                removeEventListener("mousemove", &_onMakeSelection);
+                _positionMouse = Vec2f.zero;
+                removeEventListener("mousemove", &_onMoveSelection);
+                _deltaMouse = Vec2f.zero;
+                removeEventListener("mousemove", &_onMoveCorner);
+                removeEventListener("mousemove", &_onMoveSide);
+            });
         }
-    }
-
-    Texture getTexture() {
-        return _texture;
-    }
-
-    private void _onMouseLeave() {
-        _positionMouse = Vec2f.zero;
-        _deltaMouse = Vec2f.zero;
-        removeEventListener("mousemove", &_onDrag);
-        removeEventListener("mousemove", &_onMakeSelection);
-        removeEventListener("mousemove", &_onMoveSelection);
-        removeEventListener("mousemove", &_onMoveCorner);
-        removeEventListener("mousemove", &_onMoveSide);
     }
 
     private void _onMouseDown() {

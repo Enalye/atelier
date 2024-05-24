@@ -24,6 +24,14 @@ final class ResourceEditor : ContentEditor {
         addUI(_list);
 
         addEventListener("size", &_onSize);
+        addEventListener("register", {
+            if (_currentEditor)
+                addUI(_currentEditor);
+        });
+        addEventListener("unregister", {
+            if (_currentEditor)
+                _currentEditor.remove();
+        });
 
         _reloadList();
     }

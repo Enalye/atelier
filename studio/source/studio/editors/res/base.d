@@ -10,6 +10,7 @@ import farfadet;
 import studio.editors.res.invalid;
 import studio.editors.res.sprite;
 import studio.editors.res.texture;
+import studio.editors.res.ninepatch;
 import studio.ui;
 
 abstract class ResourceBaseEditor : UIElement {
@@ -31,6 +32,8 @@ abstract class ResourceBaseEditor : UIElement {
             return new TextureResourceEditor(path_, ffd, size);
         case "sprite":
             return new SpriteResourceEditor(path_, ffd, size);
+        case "ninepatch":
+            return new NinePatchResourceEditor(path_, ffd, size);
         default:
             return new InvalidResourceEditor(path_, ffd, size);
         }

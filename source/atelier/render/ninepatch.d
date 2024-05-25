@@ -74,6 +74,8 @@ final class NinePatch : Image, Resource!NinePatch {
         }
         /// Ditto
         int top(int top_) {
+            if (top_ < 0)
+                top_ = 0;
             if (_top == top_)
                 return _top;
             _top = top_;
@@ -87,6 +89,8 @@ final class NinePatch : Image, Resource!NinePatch {
         }
         /// Ditto
         int bottom(int bottom_) {
+            if (bottom_ < 0)
+                bottom_ = 0;
             if (_bottom == bottom_)
                 return _bottom;
             _bottom = bottom_;
@@ -100,6 +104,8 @@ final class NinePatch : Image, Resource!NinePatch {
         }
         /// Ditto
         int left(int left_) {
+            if (left_ < 0)
+                left_ = 0;
             if (_left == left_)
                 return _left;
             _left = left_;
@@ -113,6 +119,8 @@ final class NinePatch : Image, Resource!NinePatch {
         }
         /// Ditto
         int right(int right_) {
+            if (right_ < 0)
+                right_ = 0;
             if (_right == right_)
                 return _right;
             _right = right_;
@@ -144,10 +152,10 @@ final class NinePatch : Image, Resource!NinePatch {
         _ownSurface = true;
 
         _clip = clip_;
-        _top = top_;
-        _bottom = bottom_;
-        _left = left_;
-        _right = right_;
+        _top = top_ > 0 ? top_ : 0;
+        _bottom = bottom_ > 0 ? bottom_ : 0;
+        _left = left_ > 0 ? left_ : 0;
+        _right = right_ > 0 ? right_ : 0;
         _size = to!Vec2f(_clip.zw);
         _isDirty = true;
     }
@@ -329,7 +337,7 @@ final class NinePatch : Image, Resource!NinePatch {
         _cache.color = color;
         _cache.blend = blend;
         _cache.alpha = alpha;
-        _cache.draw(origin + position, _size, Vec4u(0, 0, _cache.width,
-                _cache.height), angle, pivot, flipX, flipY);
+        _cache.draw(origin + (position - anchor * size), _size, Vec4u(0, 0,
+                _cache.width, _cache.height), angle, pivot, flipX, flipY);
     }
 }

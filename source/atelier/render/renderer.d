@@ -303,4 +303,13 @@ final class Renderer {
         else
             SDL_RenderDrawRectF(_sdlRenderer, &rect);
     }
+
+    void drawLine(Vec2f start, Vec2f end, Color color, float alpha) {
+        const auto sdlColor = color.toSDL();
+        SDL_SetRenderDrawBlendMode(_sdlRenderer, getSDLBlend(Blend.alpha));
+        SDL_SetRenderDrawColor(_sdlRenderer, sdlColor.r, sdlColor.g,
+            sdlColor.b, cast(ubyte)(clamp(alpha, 0f, 1f) * 255f));
+
+        SDL_RenderDrawLineF(_sdlRenderer, start.x, start.y, end.x, end.y);
+    }
 }

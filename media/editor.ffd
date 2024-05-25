@@ -156,3 +156,23 @@ sprite "editor:side-button" {
     texture "editor"
     clip 160 0 12 11
 }
+
+sprite "editor:top-button" {
+    texture "editor"
+    clip 176 0 11 11
+}
+
+sprite "editor:bottom-button" {
+    texture "editor"
+    clip 192 0 11 11
+}
+
+sprite "editor:left-button" {
+    texture "editor"
+    clip 208 0 11 11
+}
+
+sprite "editor:right-button" {
+    texture "editor"
+    clip 224 0 11 11
+}

@@ -20,8 +20,10 @@ final class NinePatchResourceEditor : ResourceBaseEditor {
         string _name;
         string _textureRID;
         Vec4u _clip;
+        Vec4i _borders;
         Vec2u _imageSize;
-        Previewer _preview;
+        Viewer _viewer;
+        Toolbox _toolbox;
         ParameterWindow _parameterWindow;
         int _tool;
     }
@@ -40,79 +42,197 @@ final class NinePatchResourceEditor : ResourceBaseEditor {
             _clip = ffd.getNode("clip").get!Vec4u(0);
         }
 
-        _preview = new Previewer(this);
-        _preview.setAlign(UIAlignX.center, UIAlignY.top);
-        _preview.setSize(Vec2f(size.x, max(0f, size.y - 200f)));
-        _preview.setTextureRID(_textureRID);
-        addUI(_preview);
+        if (ffd.hasNode("top")) {
+            _borders.x = ffd.getNode("top").get!int(0);
+        }
 
-        _parameterWindow = new ParameterWindow(_textureRID, _clip);
+        if (ffd.hasNode("bottom")) {
+            _borders.y = ffd.getNode("bottom").get!int(0);
+        }
+
+        if (ffd.hasNode("left")) {
+            _borders.z = ffd.getNode("left").get!int(0);
+        }
+
+        if (ffd.hasNode("right")) {
+            _borders.w = ffd.getNode("right").get!int(0);
+        }
+
+        _viewer = new Viewer(this);
+        _viewer.setAlign(UIAlignX.center, UIAlignY.top);
+        _viewer.setSize(Vec2f(size.x, max(0f, size.y - 200f)));
+        _viewer.setTextureRID(_textureRID);
+        addUI(_viewer);
+
+        _parameterWindow = new ParameterWindow(_textureRID, _clip, _borders);
         _parameterWindow.setAlign(UIAlignX.center, UIAlignY.bottom);
         _parameterWindow.setSize(Vec2f(size.x, min(size.y, 200f)));
         addUI(_parameterWindow);
+
+        _toolbox = new Toolbox();
+        _toolbox.setTexture(_viewer.getTexture(), _clip, _borders);
+        Atelier.ui.addUI(_toolbox);
 
         addEventListener("size", &_onSize);
 
         _parameterWindow.addEventListener("property_textureRID", {
             _textureRID = _parameterWindow.getTextureRID();
-            _preview.setTextureRID(_textureRID);
+            _viewer.setTextureRID(_textureRID);
+            _toolbox.setTexture(_viewer.getTexture(), _clip, _borders);
         });
 
         _parameterWindow.addEventListener("property_clip", {
             _clip = _parameterWindow.getClip();
+            _toolbox.setClip(_clip);
         });
 
-        _preview.addEventListener("clip", { _parameterWindow.setClip(_clip); });
-        _parameterWindow.addEventListener("tool", {
-            _tool = _parameterWindow.getTool();
+        _parameterWindow.addEventListener("property_borders", {
+            _borders = _parameterWindow.getBorders();
+            _toolbox.setBorders(_borders);
         });
+
+        _viewer.addEventListener("clip", {
+            _parameterWindow.setClip(_clip);
+            _toolbox.setClip(_clip);
+        });
+
+        _viewer.addEventListener("borders", {
+            _parameterWindow.setBorders(_borders);
+            _toolbox.setBorders(_borders);
+        });
+
+        _toolbox.addEventListener("tool", { _tool = _toolbox.getTool(); });
+        addEventListener("register", { Atelier.ui.addUI(_toolbox); });
+        addEventListener("unregister", { _toolbox.remove(); });
     }
 
     private void _onSize() {
         Vec2f size = getSize();
-        _preview.setSize(Vec2f(size.x, max(0f, size.y - 200f)));
+        _viewer.setSize(Vec2f(size.x, max(0f, size.y - 200f)));
         _parameterWindow.setSize(Vec2f(size.x, min(size.y, 200f)));
     }
 
     override Farfadet save(Farfadet ffd) {
-        Farfadet node = ffd.addNode("sprite");
+        Farfadet node = ffd.addNode("ninepatch");
         node.add(_name);
         node.addNode("texture").add(_textureRID);
         node.addNode("clip").add(_clip);
+        if (_borders.x > 0)
+            node.addNode("top").add(_borders.x);
+        if (_borders.y > 0)
+            node.addNode("bottom").add(_borders.y);
+        if (_borders.z > 0)
+            node.addNode("left").add(_borders.z);
+        if (_borders.w > 0)
+            node.addNode("right").add(_borders.w);
         return node;
+    }
+}
+
+private class Toolbox : Modal {
+    private {
+        NinePatch _ninepatch;
+        ToolGroup _toolGroup;
+        int _tool;
+    }
+
+    this() {
+        setSize(Vec2f(200f, 300f));
+        setAlign(UIAlignX.right, UIAlignY.center);
+        setPosition(Vec2f(250f, 0f));
+
+        {
+            Label title = new Label("Outils", Atelier.theme.font);
+            title.setAlign(UIAlignX.center, UIAlignY.top);
+            title.setPosition(Vec2f(0f, 8f));
+            addUI(title);
+        }
+
+        {
+            VBox vbox = new VBox;
+            vbox.setAlign(UIAlignX.center, UIAlignY.top);
+            vbox.setPosition(Vec2f(0f, 32f));
+            vbox.setSpacing(4f);
+            addUI(vbox);
+
+            _toolGroup = new ToolGroup;
+
+            {
+                HBox hbox = new HBox;
+                vbox.addUI(hbox);
+
+                foreach (key; ["selection", "move", "corner", "side"]) {
+                    ToolButton btn = new ToolButton(_toolGroup,
+                        "editor:" ~ key ~ "-button", key == "selection");
+                    btn.setSize(Vec2f(32f, 32f));
+                    hbox.addUI(btn);
+                }
+            }
+
+            {
+                HBox hbox = new HBox;
+                vbox.addUI(hbox);
+
+                foreach (key; ["top", "bottom", "left", "right"]) {
+                    ToolButton btn = new ToolButton(_toolGroup, "editor:" ~ key ~ "-button", false);
+                    btn.setSize(Vec2f(32f, 32f));
+                    hbox.addUI(btn);
+                }
+            }
+        }
+
+        {
+            Rectangle rect = Rectangle.outline(Vec2f.one * (getWidth() - 16f), 1f);
+            rect.color = Atelier.theme.onNeutral;
+            rect.anchor = Vec2f(0.5f, 1f);
+            rect.position = Vec2f(getCenter().x, getHeight() - 8f);
+            addImage(rect);
+        }
+
+        addEventListener("update", {
+            if (_toolGroup.value != _tool) {
+                _tool = _toolGroup.value;
+                dispatchEvent("tool", false);
+            }
+        });
+    }
+
+    int getTool() const {
+        return _toolGroup.value();
+    }
+
+    void setTexture(Texture texture, Vec4u clip, Vec4i borders) {
+        if (_ninepatch)
+            _ninepatch.remove();
+        _ninepatch = new NinePatch(texture, clip, borders.x, borders.y, borders.z, borders.w);
+        _ninepatch.anchor = Vec2f(0.5f, 1f);
+        _ninepatch.position = Vec2f(getCenter().x, getHeight() - 8f);
+        _ninepatch.size = Vec2f.one * (getWidth() - 16f);
+        addImage(_ninepatch);
+    }
+
+    void setClip(Vec4u clip) {
+        if (_ninepatch)
+            _ninepatch.clip = clip;
+    }
+
+    void setBorders(Vec4i borders) {
+        if (_ninepatch) {
+            _ninepatch.top = borders.x;
+            _ninepatch.bottom = borders.y;
+            _ninepatch.left = borders.z;
+            _ninepatch.right = borders.w;
+        }
     }
 }
 
 private final class ParameterWindow : UIElement {
     private {
         SelectButton _textureSelect;
-        IntegerField[] _numFields;
-        ToolGroup _toolGroup;
-        int _tool;
+        IntegerField[] _clipFields, _bordersFields;
     }
 
-    this(string textureRID, Vec4u clip) {
-        /*auto entries = dirEntries(buildNormalizedPath(Project.getMediaDir(), , SpanMode.depth);
-        foreach (entry; entries) {
-
-        }*/
-
-        {
-            HBox hbox = new HBox;
-            hbox.setAlign(UIAlignX.right, UIAlignY.top);
-            hbox.setPosition(Vec2f(4f, 4f));
-            hbox.setSpacing(4f);
-            addUI(hbox);
-
-            _toolGroup = new ToolGroup;
-            foreach (key; ["selection", "move", "corner", "side"]) {
-                ToolButton btn = new ToolButton(_toolGroup,
-                    "editor:" ~ key ~ "-button", key == "selection");
-                btn.setSize(Vec2f(32f, 32f));
-                hbox.addUI(btn);
-            }
-        }
-
+    this(string textureRID, Vec4u clip, Vec4i borders) {
         VBox vbox = new VBox;
         vbox.setAlign(UIAlignX.left, UIAlignY.top);
         vbox.setPosition(Vec2f(24f, 24f));
@@ -147,25 +267,42 @@ private final class ParameterWindow : UIElement {
                 numField.addEventListener("value", {
                     dispatchEvent("property_clip", false);
                 });
-                _numFields ~= numField;
+                _clipFields ~= numField;
                 hbox.addUI(numField);
             }
 
-            _numFields[0].value = clip.x;
-            _numFields[1].value = clip.y;
-            _numFields[2].value = clip.z;
-            _numFields[3].value = clip.w;
+            _clipFields[0].value = clip.x;
+            _clipFields[1].value = clip.y;
+            _clipFields[2].value = clip.z;
+            _clipFields[3].value = clip.w;
+        }
+
+        {
+            HBox hbox = new HBox;
+            hbox.setSpacing(8f);
+            vbox.addUI(hbox);
+
+            IntegerField numField;
+            foreach (field; ["haut", "bas", "gauche", "droite"]) {
+                hbox.addUI(new Label(field ~ ":", Atelier.theme.font));
+
+                numField = new IntegerField();
+                numField.setRange(0, int.max);
+                numField.addEventListener("value", {
+                    dispatchEvent("property_borders", false);
+                });
+                _bordersFields ~= numField;
+                hbox.addUI(numField);
+            }
+
+            _bordersFields[0].value = borders.x;
+            _bordersFields[1].value = borders.y;
+            _bordersFields[2].value = borders.z;
+            _bordersFields[3].value = borders.w;
         }
 
         addEventListener("draw", {
             Atelier.renderer.drawRect(Vec2f.zero, getSize(), Atelier.theme.surface, 1f, true);
-        });
-
-        addEventListener("update", {
-            if (_toolGroup.value != _tool) {
-                _tool = _toolGroup.value;
-                dispatchEvent("tool", false);
-            }
         });
     }
 
@@ -174,25 +311,35 @@ private final class ParameterWindow : UIElement {
     }
 
     Vec4u getClip() const {
-        return Vec4u(_numFields[0].value(), _numFields[1].value(),
-            _numFields[2].value(), _numFields[3].value());
+        return Vec4u(_clipFields[0].value(), _clipFields[1].value(),
+            _clipFields[2].value(), _clipFields[3].value());
+    }
+
+    Vec4i getBorders() const {
+        return Vec4i(_bordersFields[0].value(), _bordersFields[1].value(),
+            _bordersFields[2].value(), _bordersFields[3].value());
     }
 
     void setClip(Vec4u clip) {
         Atelier.ui.blockEvents = true;
-        _numFields[0].value = clip.x;
-        _numFields[1].value = clip.y;
-        _numFields[2].value = clip.z;
-        _numFields[3].value = clip.w;
+        _clipFields[0].value = clip.x;
+        _clipFields[1].value = clip.y;
+        _clipFields[2].value = clip.z;
+        _clipFields[3].value = clip.w;
         Atelier.ui.blockEvents = false;
     }
 
-    int getTool() const {
-        return _toolGroup.value();
+    void setBorders(Vec4i borders) {
+        Atelier.ui.blockEvents = true;
+        _bordersFields[0].value = borders.x;
+        _bordersFields[1].value = borders.y;
+        _bordersFields[2].value = borders.z;
+        _bordersFields[3].value = borders.w;
+        Atelier.ui.blockEvents = false;
     }
 }
 
-private final class Previewer : UIElement {
+private final class Viewer : UIElement {
     private {
         Texture _texture;
         Sprite _sprite;
@@ -229,16 +376,24 @@ private final class Previewer : UIElement {
             addEventListener("wheel", &_onWheel);
             addEventListener("mousedown", &_onMouseDown);
             addEventListener("mouseup", &_onMouseUp);
-            addEventListener("mouseleave", {
-                removeEventListener("mousemove", &_onDrag);
-                removeEventListener("mousemove", &_onMakeSelection);
-                _positionMouse = Vec2f.zero;
-                removeEventListener("mousemove", &_onMoveSelection);
-                _deltaMouse = Vec2f.zero;
-                removeEventListener("mousemove", &_onMoveCorner);
-                removeEventListener("mousemove", &_onMoveSide);
-            });
+            addEventListener("mouseleave", &_onMouseLeave);
+            addEventListener("clickoutside", &_onMouseLeave);
         }
+    }
+
+    Texture getTexture() {
+        return _texture;
+    }
+
+    private void _onMouseLeave() {
+        _positionMouse = Vec2f.zero;
+        _deltaMouse = Vec2f.zero;
+        removeEventListener("mousemove", &_onDrag);
+        removeEventListener("mousemove", &_onMakeSelection);
+        removeEventListener("mousemove", &_onMoveSelection);
+        removeEventListener("mousemove", &_onMoveCorner);
+        removeEventListener("mousemove", &_onMoveSide);
+        removeEventListener("mousemove", &_onMoveBorder);
     }
 
     private void _onMouseDown() {
@@ -307,6 +462,13 @@ private final class Previewer : UIElement {
                 }
                 addEventListener("mousemove", &_onMoveSide);
                 break;
+            case 4: .. case 7:
+                Vec2f mousePosition = (
+                    getMousePosition() - (_sprite.position - _sprite.size / 2f)) / _zoom;
+                _clipAnchor.x = cast(int) mousePosition.x;
+                _clipAnchor.y = cast(int) mousePosition.y;
+                addEventListener("mousemove", &_onMoveBorder);
+                break;
             default:
                 break;
             }
@@ -337,6 +499,9 @@ private final class Previewer : UIElement {
                 break;
             case 3:
                 removeEventListener("mousemove", &_onMoveSide);
+                break;
+            case 4: .. case 7:
+                removeEventListener("mousemove", &_onMoveBorder);
                 break;
             default:
                 break;
@@ -437,6 +602,35 @@ private final class Previewer : UIElement {
         }
     }
 
+    private void _onMoveBorder() {
+        Vec2f mousePosition = (getMousePosition() - (_sprite.position - _sprite.size / 2f)) / _zoom;
+        mousePosition = mousePosition.clamp(Vec2f.zero, cast(Vec2f) _editor._imageSize);
+        Vec2i point = (cast(Vec2i) mousePosition) - (cast(Vec2i) _editor._clip.xy);
+        Vec4i borders = _editor._borders;
+
+        switch (_editor._tool) {
+        case 4:
+            borders.x = clamp(point.y, 0, _editor._clip.w);
+            break;
+        case 5:
+            borders.y = clamp(_editor._clip.w - point.y, 0, _editor._clip.w);
+            break;
+        case 6:
+            borders.z = clamp(point.x, 0, _editor._clip.z);
+            break;
+        case 7:
+            borders.w = clamp(_editor._clip.z - point.x, 0, _editor._clip.z);
+            break;
+        default:
+            return;
+        }
+
+        if (borders != _editor._borders) {
+            _editor._borders = borders;
+            dispatchEvent("borders", false);
+        }
+    }
+
     private void _onDrag() {
         UIManager manager = getManager();
         InputEvent.MouseMotion ev = manager.input.asMouseMotion();
@@ -444,12 +638,42 @@ private final class Previewer : UIElement {
     }
 
     private void _onDraw() {
+        Vec4f clip = _zoom * cast(Vec4f) _editor._clip;
+        Vec4f borders = _zoom * cast(Vec4f) _editor._borders;
+
+        Vec2f clipOrigin = _sprite.position - _sprite.size / 2f + clip.xy;
+
         Atelier.renderer.drawRect(_sprite.position - _sprite.size / 2f,
             _sprite.size, Atelier.theme.onNeutral, 1f, false);
 
-        Vec4f clip = _zoom * cast(Vec4f) _editor._clip;
-        Atelier.renderer.drawRect(_sprite.position - _sprite.size / 2f + clip.xy,
-            clip.zw, Atelier.theme.accent, 1f, false);
+        HSLColor hsl = HSLColor.fromColor(Atelier.theme.accent);
+
+        if (borders.x > 0f) {
+            HSLColor c = hsl;
+            c.h = c.h + 72f;
+            Atelier.renderer.drawLine(clipOrigin + Vec2f(0f, borders.x),
+                clipOrigin + Vec2f(clip.z, borders.x), c.toColor(), 1f);
+        }
+        if (borders.y > 0f) {
+            HSLColor c = hsl;
+            c.h = c.h + 144f;
+            Atelier.renderer.drawLine(clipOrigin + Vec2f(0f, clip.w - borders.y),
+                clipOrigin + Vec2f(clip.z, clip.w - borders.y), c.toColor(), 1f);
+        }
+        if (borders.z > 0f) {
+            HSLColor c = hsl;
+            c.h = c.h + 216f;
+            Atelier.renderer.drawLine(clipOrigin + Vec2f(borders.z, 0f),
+                clipOrigin + Vec2f(borders.z, clip.w), c.toColor(), 1f);
+        }
+        if (borders.w > 0f) {
+            HSLColor c = hsl;
+            c.h = c.h + 288f;
+            Atelier.renderer.drawLine(clipOrigin + Vec2f(clip.z - borders.w, 0f),
+                clipOrigin + Vec2f(clip.z - borders.w, clip.w), c.toColor(), 1f);
+        }
+
+        Atelier.renderer.drawRect(clipOrigin, clip.zw, Atelier.theme.accent, 1f, false);
     }
 
     private void _onWheel() {

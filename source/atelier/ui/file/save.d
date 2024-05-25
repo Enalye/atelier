@@ -87,7 +87,7 @@ final class SaveFile : Modal {
             addUI(fileNameBox);
 
             Label fileNameLabel = new Label("Nom du fichier:", Atelier.theme.font);
-            fileNameLabel.color = Atelier.theme.onNeutral;
+            fileNameLabel.textColor = Atelier.theme.onNeutral;
             fileNameBox.addUI(fileNameLabel);
 
             _fileNameField = new TextField;
@@ -277,7 +277,7 @@ private final class FileItem : UIElement {
         _label = new Label(_name, Atelier.theme.font);
         _label.setAlign(UIAlignX.left, UIAlignY.center);
         _label.setPosition(Vec2f(8f, 0f));
-        _label.color = Atelier.theme.onNeutral;
+        _label.textColor = Atelier.theme.onNeutral;
         addUI(_label);
 
         addEventListener("click", &_onClick);
@@ -302,13 +302,13 @@ private final class FileItem : UIElement {
             removeEventListener("mouseleave", &_onMouseLeave);
             _isSelected = true;
             _rectangle.color = Atelier.theme.accent;
-            _label.color = Atelier.theme.onAccent;
+            _label.textColor = Atelier.theme.onAccent;
             _rectangle.isVisible = true;
         }
         else {
             _isSelected = false;
             _rectangle.color = Atelier.theme.foreground;
-            _label.color = Atelier.theme.onNeutral;
+            _label.textColor = Atelier.theme.onNeutral;
             _rectangle.isVisible = isHovered();
             addEventListener("mouseenter", &_onMouseEnter);
             addEventListener("mouseleave", &_onMouseLeave);

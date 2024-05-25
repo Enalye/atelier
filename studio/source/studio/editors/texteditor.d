@@ -1022,7 +1022,7 @@ final class TextEditor : ContentEditor {
             long lineCount = 0;
             if (_currentLine == line) {
                 lineCount = _currentLine;
-                _lineCountLabels[index].color = _currentLineColor;
+                _lineCountLabels[index].textColor = _currentLineColor;
                 _lineCountLabels[index].setAlign(UIAlignX.center, UIAlignY.top);
                 _lineCountLabels[index].setPosition(Vec2f(0f,
                         _lineCountLabels[index].getPosition().y));
@@ -1031,10 +1031,10 @@ final class TextEditor : ContentEditor {
                 _lineCountLabels[index].setPosition(Vec2f(16f,
                         _lineCountLabels[index].getPosition().y));
                 if (abs((cast(long) _currentLine) - cast(long) line) % 4 == 0) {
-                    _lineCountLabels[index].color = _stepLineColor;
+                    _lineCountLabels[index].textColor = _stepLineColor;
                 }
                 else {
-                    _lineCountLabels[index].color = _otherLineColor;
+                    _lineCountLabels[index].textColor = _otherLineColor;
                 }
 
                 lineCount = cast(long) line - cast(long) _currentLine;

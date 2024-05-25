@@ -28,7 +28,7 @@ interface Glyph {
     }
 
     /// Render glyph
-    void draw(Vec2f position, float, Color, float);
+    void draw(Vec2f position, float, Color, float alpha);
 }
 
 /// Ditto

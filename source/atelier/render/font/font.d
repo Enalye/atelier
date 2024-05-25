@@ -28,4 +28,5 @@ interface Font {
     int getKerning(dchar prevChar, dchar currChar);
 
     Glyph getGlyph(dchar character);
+    Glyph getGlyphOutline(dchar character);
 }

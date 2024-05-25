@@ -103,7 +103,7 @@ final class TextField : UIElement {
         _textContainer.addImage(_caret);
 
         _label = new Label("", Atelier.theme.font);
-        _label.color = Atelier.theme.onNeutral;
+        _label.textColor = Atelier.theme.onNeutral;
         _label.setPosition(Vec2f(0f, 0f));
         _label.setAlign(UIAlignX.left, UIAlignY.center);
         _textContainer.addUI(_label);
@@ -125,13 +125,13 @@ final class TextField : UIElement {
     private void _onEnable() {
         _background.alpha = Atelier.theme.activeOpacity;
         _outline.alpha = Atelier.theme.activeOpacity;
-        _label.color = Atelier.theme.onNeutral;
+        _label.textColor = Atelier.theme.onNeutral;
     }
 
     private void _onDisable() {
         _background.alpha = Atelier.theme.inactiveOpacity;
         _outline.alpha = Atelier.theme.inactiveOpacity;
-        _label.color = Atelier.theme.neutral;
+        _label.textColor = Atelier.theme.neutral;
     }
 
     private void _onSize() {

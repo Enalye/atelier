@@ -38,12 +38,12 @@ final class ToggleButton : Button!Capsule {
 
         _inactiveLabel = new Label(inactiveText, Atelier.theme.font);
         _inactiveLabel.setAlign(UIAlignX.left, UIAlignY.center);
-        _inactiveLabel.color = _value ? Atelier.theme.onAccent : Atelier.theme.neutral;
+        _inactiveLabel.textColor = _value ? Atelier.theme.onAccent : Atelier.theme.neutral;
         addUI(_inactiveLabel);
 
         _activeLabel = new Label(activeText, Atelier.theme.font);
         _activeLabel.setAlign(UIAlignX.right, UIAlignY.center);
-        _activeLabel.color = _value ? Atelier.theme.accent : Atelier.theme.onAccent;
+        _activeLabel.textColor = _value ? Atelier.theme.accent : Atelier.theme.onAccent;
         addUI(_activeLabel);
 
         _selectionWidth = max(_inactiveLabel.getWidth(), _activeLabel.getWidth()) + 6f;
@@ -82,8 +82,8 @@ final class ToggleButton : Button!Capsule {
         _background.alpha = Atelier.theme.activeOpacity;
         _selection.alpha = Atelier.theme.activeOpacity;
 
-        _activeLabel.color = _value ? Atelier.theme.accent : Atelier.theme.onAccent;
-        _inactiveLabel.color = _value ? Atelier.theme.onAccent : Atelier.theme.neutral;
+        _activeLabel.textColor = _value ? Atelier.theme.accent : Atelier.theme.onAccent;
+        _inactiveLabel.textColor = _value ? Atelier.theme.onAccent : Atelier.theme.neutral;
 
         if (isHovered) {
             _onMouseEnter();
@@ -99,8 +99,8 @@ final class ToggleButton : Button!Capsule {
     private void _onDisable() {
         _background.alpha = Atelier.theme.inactiveOpacity;
         _selection.alpha = Atelier.theme.inactiveOpacity;
-        _inactiveLabel.color = Atelier.theme.neutral;
-        _activeLabel.color = Atelier.theme.neutral;
+        _inactiveLabel.textColor = Atelier.theme.neutral;
+        _activeLabel.textColor = Atelier.theme.neutral;
 
         removeEventListener("mouseenter", &_onMouseEnter);
         removeEventListener("mouseleave", &_onMouseLeave);
@@ -131,8 +131,8 @@ final class ToggleButton : Button!Capsule {
         _startPosition = _selection.position.x;
         _endPosition = _value ? getWidth() - (_selectionWidth / 2f + 3f) : _selectionWidth / 2f + 3f;
 
-        _activeLabel.color = _value ? Atelier.theme.accent : Atelier.theme.onAccent;
-        _inactiveLabel.color = _value ? Atelier.theme.onAccent : Atelier.theme.neutral;
+        _activeLabel.textColor = _value ? Atelier.theme.accent : Atelier.theme.onAccent;
+        _inactiveLabel.textColor = _value ? Atelier.theme.onAccent : Atelier.theme.neutral;
         setFxColor(_value ? Atelier.theme.accent : Atelier.theme.neutral);
 
         if (isHovered) {

@@ -16,7 +16,6 @@ final class MenuButton : TextButton!RoundedRectangle {
     private {
         RoundedRectangle _background;
         MenuBar _bar;
-        Label _label;
         uint _id;
     }
 

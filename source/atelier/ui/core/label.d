@@ -17,6 +17,8 @@ final class Label : UIElement {
         float _charScale = 1f, _charSpacing = 0f;
     }
 
+    Color textColor = Color.white, outlineColor = Color.black;
+
     @property {
         /// Texte affiché
         string text() const {
@@ -46,7 +48,11 @@ final class Label : UIElement {
         }
         /// Ditto
         float charSpacing(float charSpacing_) {
-            return _charSpacing = charSpacing_;
+            if (_charSpacing != charSpacing_) {
+                _charSpacing = charSpacing_;
+                _reload();
+            }
+            return _charSpacing;
         }
     }
 
@@ -61,7 +67,8 @@ final class Label : UIElement {
     }
 
     private void _onDraw() {
-        drawText(Vec2f.zero, _text, _font, _charScale, _charSpacing);
+        drawText(Vec2f(0f, font.outline + font.ascent - _font.outline), _text,
+            _font, _charScale, textColor, outlineColor, _charSpacing);
     }
 
     size_t getIndexOf(Vec2f position_) {
@@ -140,7 +147,7 @@ final class Label : UIElement {
             else {
                 const Glyph glyph = _font.getGlyph(ch);
                 lineWidth += _font.getKerning(prevChar, ch) * _charScale;
-                lineWidth += glyph.advance * _charScale;
+                lineWidth += (glyph.advance + _charSpacing) * _charScale;
                 if (lineWidth > totalSize_.x)
                     totalSize_.x = lineWidth;
                 prevChar = ch;
@@ -158,8 +165,34 @@ final class Label : UIElement {
     }
 }
 
-void drawText(Vec2f position, dstring text, Font font, float scale = 1f, float spacing = 0f) {
+void drawText(Vec2f position, dstring text, Font font, float scale = 1f,
+    Color textColor = Color.white, Color outlineColor = Color.black, float spacing = 0f) {
     dchar prevChar;
+    if (font.outline > 0) {
+        Vec2f origin = position;
+        foreach (dchar ch; text) {
+            if (ch == '\n') {
+                position.x = 0f;
+                position.y += font.lineSkip * scale;
+                prevChar = 0;
+            }
+            else {
+                Glyph glyph = font.getGlyphOutline(ch);
+                if (!glyph.exists)
+                    continue;
+                position.x += font.getKerning(prevChar, ch) * scale;
+
+                float x = position.x + glyph.offsetX * scale;
+                float y = position.y - glyph.offsetY * scale;
+
+                glyph.draw(Vec2f(x, y), scale, outlineColor, 1f);
+                position.x += (glyph.advance + spacing) * scale;
+                prevChar = ch;
+            }
+        }
+        position = origin;
+    }
+
     foreach (dchar ch; text) {
         if (ch == '\n') {
             position.x = 0f;
@@ -174,9 +207,11 @@ void drawText(Vec2f position, dstring text, Font font, float scale = 1f, float s
 
             float x = position.x + glyph.offsetX * scale;
             float y = position.y - glyph.offsetY * scale;
-            y += font.descent;
 
-            glyph.draw(Vec2f(x, y), scale, Color.white, 1f);
+            x += font.outline;
+            y += font.outline;
+
+            glyph.draw(Vec2f(x, y), scale, textColor, 1f);
             position.x += (glyph.advance + spacing) * scale;
             prevChar = ch;
         }

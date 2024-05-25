@@ -83,7 +83,7 @@ final class BrowseDir : Modal {
             addUI(searchBox);
 
             Label searchLabel = new Label("Rechercher:", Atelier.theme.font);
-            searchLabel.color = Atelier.theme.onNeutral;
+            searchLabel.textColor = Atelier.theme.onNeutral;
             searchBox.addUI(searchLabel);
 
             _searchField = new TextField;
@@ -230,7 +230,7 @@ private final class DirItem : UIElement {
         _label = new Label(baseName(_path), Atelier.theme.font);
         _label.setAlign(UIAlignX.left, UIAlignY.center);
         _label.setPosition(Vec2f(8f, 0f));
-        _label.color = Atelier.theme.onNeutral;
+        _label.textColor = Atelier.theme.onNeutral;
         addUI(_label);
 
         addEventListener("click", &_onClick);
@@ -255,13 +255,13 @@ private final class DirItem : UIElement {
             removeEventListener("mouseleave", &_onMouseLeave);
             _isSelected = true;
             _rectangle.color = Atelier.theme.accent;
-            _label.color = Atelier.theme.onAccent;
+            _label.textColor = Atelier.theme.onAccent;
             _rectangle.isVisible = true;
         }
         else {
             _isSelected = false;
             _rectangle.color = Atelier.theme.foreground;
-            _label.color = Atelier.theme.onNeutral;
+            _label.textColor = Atelier.theme.onNeutral;
             _rectangle.isVisible = isHovered();
             addEventListener("mouseenter", &_onMouseEnter);
             addEventListener("mouseleave", &_onMouseLeave);

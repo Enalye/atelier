@@ -103,7 +103,7 @@ final class ResourceFolderElement : UIElement {
             hbox.addUI(_nameField);
 
             _errorLabel = new Label("", Atelier.theme.font);
-            _errorLabel.color = Atelier.theme.danger;
+            _errorLabel.textColor = Atelier.theme.danger;
             _errorLabel.isVisible = false;
             hbox.addUI(_errorLabel);
         }

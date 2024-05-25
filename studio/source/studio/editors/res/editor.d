@@ -212,11 +212,11 @@ private final class ResourceItem : UIElement {
     private void _onMouseEnter() {
         if (_isSelected) {
             _rect.color = Atelier.theme.accent;
-            _label.color = Atelier.theme.onAccent;
+            _label.textColor = Atelier.theme.onAccent;
         }
         else {
             _rect.color = Atelier.theme.foreground;
-            _label.color = Atelier.theme.onNeutral;
+            _label.textColor = Atelier.theme.onNeutral;
         }
         _rect.isVisible = true;
     }

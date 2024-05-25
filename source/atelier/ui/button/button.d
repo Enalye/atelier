@@ -57,7 +57,7 @@ abstract class TextButton(ImageType) : Button!ImageType {
 
     this(string text_) {
         _label = new Label(text_, Atelier.theme.font);
-        _label.color = Atelier.theme.onNeutral;
+        _label.textColor = Atelier.theme.onNeutral;
         addUI(_label);
 
         setSize(_label.getSize() + _padding);
@@ -83,6 +83,6 @@ abstract class TextButton(ImageType) : Button!ImageType {
     }
 
     void setTextColor(Color color) {
-        _label.color = color;
+        _label.textColor = color;
     }
 }

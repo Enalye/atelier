@@ -135,4 +135,8 @@ final class BitmapFont : Font, Resource!BitmapFont {
             return *glyph;
         return _cacheGlyph(ch);
     }
+
+    Glyph getGlyphOutline(dchar ch) {
+        return new BasicGlyph();
+    }
 }

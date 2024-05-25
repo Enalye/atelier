@@ -48,7 +48,7 @@ final class SelectButton : Button!RoundedRectangle {
 
         _label = new Label("", Atelier.theme.font);
         _label.setAlign(UIAlignX.center, UIAlignY.center);
-        _label.color = Atelier.theme.onAccent;
+        _label.textColor = Atelier.theme.onAccent;
         addUI(_label);
 
         Vec2f size = Vec2f.zero;

@@ -61,7 +61,7 @@ final class NewProject : Modal {
             nameBox.addUI(_nameField);
 
             _nameErrorLabel = new Label("", Atelier.theme.font);
-            _nameErrorLabel.color = Atelier.theme.danger;
+            _nameErrorLabel.textColor = Atelier.theme.danger;
             _nameErrorLabel.isVisible = false;
             nameBox.addUI(_nameErrorLabel);
         }
@@ -81,7 +81,7 @@ final class NewProject : Modal {
             configBox.addUI(_configField);
 
             _configErrorLabel = new Label("", Atelier.theme.font);
-            _configErrorLabel.color = Atelier.theme.danger;
+            _configErrorLabel.textColor = Atelier.theme.danger;
             _configErrorLabel.isVisible = false;
             configBox.addUI(_configErrorLabel);
         }
@@ -107,7 +107,7 @@ final class NewProject : Modal {
             hbox.addUI(new Label(".gr", Atelier.theme.font));
 
             _sourceErrorLabel = new Label("", Atelier.theme.font);
-            _sourceErrorLabel.color = Atelier.theme.danger;
+            _sourceErrorLabel.textColor = Atelier.theme.danger;
             _sourceErrorLabel.isVisible = false;
             sourceBox.addUI(_sourceErrorLabel);
         }
@@ -142,7 +142,7 @@ final class NewProject : Modal {
             hbox.addUI(browseBtn);
 
             _pathErrorLabel = new Label("", Atelier.theme.font);
-            _pathErrorLabel.color = Atelier.theme.danger;
+            _pathErrorLabel.textColor = Atelier.theme.danger;
             _pathErrorLabel.isVisible = false;
             pathBox.addUI(_pathErrorLabel);
         }

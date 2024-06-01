@@ -19,14 +19,7 @@ package void compileAnimation(string path, const Farfadet ffd, OutStream stream)
 
     string textureRID = ffd.getNode("texture", 1).get!string(0);
 
-    Vec4u clip;
-    {
-        Farfadet clipNode = ffd.getNode("clip", 4);
-        clip.x = clipNode.get!uint(0);
-        clip.y = clipNode.get!uint(1);
-        clip.z = clipNode.get!uint(2);
-        clip.w = clipNode.get!uint(3);
-    }
+    Vec4u clip = ffd.getNode("clip", 4).get!Vec4u(0);
 
     uint frameTime;
     if (ffd.hasNode("frameTime")) {
@@ -60,8 +53,7 @@ package void compileAnimation(string path, const Farfadet ffd, OutStream stream)
 
     Vec2i margin;
     if (ffd.hasNode("margin")) {
-        Farfadet node = ffd.getNode("margin", 2);
-        margin = Vec2i(node.get!int(0), node.get!int(1));
+        margin = ffd.getNode("margin", 2).get!Vec2i(1);
     }
 
     stream.write!string(rid);

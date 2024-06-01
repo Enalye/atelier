@@ -13,7 +13,7 @@ import farfadet;
 import studio.editors;
 import studio.project;
 import studio.ui.tabbar;
-import studio.ui.resourcelist;
+import studio.ui.fileexplorer;
 import studio.ui.newproject;
 import studio.ui.resourcemanager;
 
@@ -86,9 +86,13 @@ final class Studio : UIElement {
         TabBar _tabBar;
         ContentEditor[string] _contentEditors;
         ContentEditor _contentEditor;
-        ResourceList _resourceList;
+        FileExplorer _fileExplorer;
+        UIElement _lowerPanel, _rightPanel;
         ResourceManager _resourceManager;
         FarfadetCache[string] _farfadets;
+
+        enum LeftPanelSize = 250f;
+        enum RightPanelSize = 317f;
     }
 
     static @property {
@@ -116,30 +120,100 @@ final class Studio : UIElement {
         setAlign(UIAlignX.center, UIAlignY.bottom);
 
         _tabBar = new TabBar;
-        _tabBar.setWidth(Atelier.window.width - 500f);
+        _tabBar.setWidth(max(0f, getWidth() - LeftPanelSize));
         _tabBar.setAlign(UIAlignX.left, UIAlignY.top);
-        _tabBar.setPosition(Vec2f(250f, 0f));
+        _tabBar.setPosition(Vec2f(LeftPanelSize, 0f));
         _tabBar.addEventListener("value", &_onTab);
         _tabBar.addEventListener("close", &_onTabClose);
         addUI(_tabBar);
 
         {
-            _resourceList = new ResourceList;
-            addUI(_resourceList);
+            _fileExplorer = new FileExplorer;
+            addUI(_fileExplorer);
         }
 
         addEventListener("windowSize", {
             setSize(Vec2f(Atelier.window.width, Atelier.window.height - 35f));
+            if (_rightPanel) {
+                _tabBar.setWidth(max(0f, getWidth() - (LeftPanelSize + RightPanelSize)));
+                _rightPanel.setSize(Vec2f(RightPanelSize, getHeight()));
+            }
+            else {
+                _tabBar.setWidth(max(0f, getWidth() - LeftPanelSize));
+            }
+            if (_lowerPanel) {
+                float sz = getHeight() / 2f;
+                _fileExplorer.setSize(Vec2f(LeftPanelSize, sz));
+                _lowerPanel.setSize(Vec2f(LeftPanelSize, sz));
+            }
+            else {
+                _fileExplorer.setSize(Vec2f(LeftPanelSize, getHeight()));
+            }
+
+            if (_contentEditor) {
+                _contentEditor.setSize(Vec2f(max(0f, getWidth() - (_rightPanel ?
+                    (LeftPanelSize + RightPanelSize) : LeftPanelSize)), max(0f,
+                    getHeight() - _tabBar.getHeight())));
+            }
         });
     }
 
     void updateRessourceFolders() {
-        _resourceList.updateRessourceFolders();
+        _fileExplorer.updateRessourceFolders();
+    }
+
+    private void setLowerPanel(UIElement element) {
+        if (_lowerPanel) {
+            _lowerPanel.remove();
+        }
+        _lowerPanel = element;
+
+        if (_lowerPanel) {
+            float sz = getHeight() / 2f;
+            _fileExplorer.setSize(Vec2f(LeftPanelSize, sz));
+            _fileExplorer.setAlign(UIAlignX.left, UIAlignY.top);
+            _lowerPanel.setSize(Vec2f(LeftPanelSize, sz));
+            _lowerPanel.setAlign(UIAlignX.left, UIAlignY.bottom);
+            addUI(_lowerPanel);
+        }
+        else {
+            _fileExplorer.setSize(Vec2f(LeftPanelSize, getHeight()));
+            _fileExplorer.setAlign(UIAlignX.left, UIAlignY.top);
+        }
+    }
+
+    private void setRightPanel(UIElement element) {
+        if (_rightPanel) {
+            _rightPanel.remove();
+        }
+        _rightPanel = element;
+
+        if (_rightPanel) {
+            _tabBar.setWidth(max(0f, getWidth() - (LeftPanelSize + RightPanelSize)));
+            _rightPanel.setSize(Vec2f(RightPanelSize, getHeight()));
+            _rightPanel.setAlign(UIAlignX.right, UIAlignY.bottom);
+            addUI(_rightPanel);
+
+            if (_contentEditor) {
+                _contentEditor.setSize(Vec2f(max(0f, getWidth() - (LeftPanelSize + RightPanelSize)),
+                        max(0f, getHeight() - _tabBar.getHeight())));
+            }
+        }
+        else {
+            _tabBar.setWidth(max(0f, getWidth() - LeftPanelSize));
+            if (_contentEditor) {
+                _contentEditor.setSize(Vec2f(max(0f, getWidth() - LeftPanelSize),
+                        max(0f, getHeight() - _tabBar.getHeight())));
+            }
+        }
     }
 
     private void _onTabClose() {
         string path = _tabBar.lastRemovedTab;
         _contentEditors.remove(path);
+        _fileExplorer.setSize(Vec2f(LeftPanelSize, getHeight()));
+        setLowerPanel(null);
+        setRightPanel(null);
     }
 
     private void _onTab() {
@@ -161,7 +235,16 @@ final class Studio : UIElement {
         else {
             _contentEditor = *p;
         }
+
+        _contentEditor.addEventListener("panel", {
+            setRightPanel(_contentEditor.getRightPanel());
+        });
+        _contentEditor.setAlign(UIAlignX.left, UIAlignY.bottom);
+        _contentEditor.setPosition(Vec2f(LeftPanelSize, 0f));
         addUI(_contentEditor);
+
+        setLowerPanel(_contentEditor.getPanel());
+        setRightPanel(_contentEditor.getRightPanel());
     }
 
     static void editFile(string path) {

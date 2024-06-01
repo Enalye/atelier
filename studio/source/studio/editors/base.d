@@ -61,14 +61,22 @@ abstract class ContentEditor : UIElement {
         setPosition(Vec2f(0f, 35f));
         setSize(Vec2f(windowSize.x - 250f, windowSize.y - 35f));
 
-        addEventListener("parentSize", &_onParentSize);
+        /*addEventListener("parentSize", &_onParentSize);
         addEventListener("register", &_onParentSize);
-        addEventListener("register", &focus);
+        addEventListener("register", &focus);*/
     }
 
     private void _onParentSize() {
         if (!isAlive())
             return;
-        setSize(Vec2f(getParentWidth() - 250f, getParentHeight() - 35f));
+        setSize(Vec2f(max(0f, getParentWidth() - 250f), max(0f, getParentHeight() - 35f)));
+    }
+
+    UIElement getPanel() {
+        return null;
+    }
+
+    UIElement getRightPanel() {
+        return null;
     }
 }

@@ -105,6 +105,10 @@ final class ToolButton : Button!RoundedRectangle {
         setSize(_icon.getSize() + Vec2f(8f, 8f));
     }
 
+    void setIconColor(Color color_) {
+        _icon.color = color_;
+    }
+
     void check() {
         _group.check(this);
     }

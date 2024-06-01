@@ -11,6 +11,7 @@ import studio.editors.res.invalid;
 import studio.editors.res.sprite;
 import studio.editors.res.texture;
 import studio.editors.res.ninepatch;
+import studio.editors.res.animation;
 import studio.ui;
 
 abstract class ResourceBaseEditor : UIElement {
@@ -34,6 +35,8 @@ abstract class ResourceBaseEditor : UIElement {
             return new SpriteResourceEditor(path_, ffd, size);
         case "ninepatch":
             return new NinePatchResourceEditor(path_, ffd, size);
+        case "animation":
+            return new AnimationResourceEditor(path_, ffd, size);
         default:
             return new InvalidResourceEditor(path_, ffd, size);
         }
@@ -44,8 +47,7 @@ abstract class ResourceBaseEditor : UIElement {
         focusable = true;
 
         setAlign(UIAlignX.right, UIAlignY.top);
-        setPosition(Vec2f(0f, 35f));
-        setSize(Vec2f(windowSize.x - 250f, windowSize.y - 35f));
+        setSize(windowSize);
 
         addEventListener("parentSize", &_onParentSize);
         addEventListener("register", &_onParentSize);
@@ -54,8 +56,9 @@ abstract class ResourceBaseEditor : UIElement {
     private void _onParentSize() {
         if (!isAlive())
             return;
-        setSize(Vec2f(getParentWidth() - 250f, getParentHeight() - 35f));
+        setSize(getParentSize());
     }
 
     abstract Farfadet save(Farfadet);
+    abstract UIElement getPanel();
 }

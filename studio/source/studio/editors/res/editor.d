@@ -7,6 +7,7 @@ module studio.editors.res.editor;
 
 import atelier;
 import farfadet;
+import studio.ui;
 import studio.editors.base;
 import studio.editors.res.base;
 
@@ -20,10 +21,7 @@ final class ResourceEditor : ContentEditor {
         super(path_, windowSize);
 
         _list = new ResourceList(this);
-        _list.setHeight(getHeight());
-        addUI(_list);
 
-        addEventListener("size", &_onSize);
         addEventListener("register", {
             if (_currentEditor)
                 addUI(_currentEditor);
@@ -34,10 +32,6 @@ final class ResourceEditor : ContentEditor {
         });
 
         _reloadList();
-    }
-
-    private void _onSize() {
-        _list.setHeight(getHeight());
     }
 
     private void _reloadList() {
@@ -54,12 +48,27 @@ final class ResourceEditor : ContentEditor {
             Vec2f(getWidth() - _list.getWidth(), getHeight()));
         _currentEditor.setAlign(UIAlignX.left, UIAlignY.top);
         addUI(_currentEditor);
+
+        dispatchEvent("panel", false);
     }
 
     void save() {
         Farfadet ffd = new Farfadet;
         _list.save(ffd, _currentEditor);
         ffd.save(path());
+    }
+
+    override UIElement getPanel() {
+        return _list;
+    }
+
+    override UIElement getRightPanel() {
+        if (_currentEditor) {
+            return _currentEditor.getPanel();
+        }
+        else {
+            return null;
+        }
     }
 }
 
@@ -75,9 +84,9 @@ private final class ResourceList : UIElement {
 
     this(ResourceEditor editor) {
         _editor = editor;
-        setAlign(UIAlignX.right, UIAlignY.top);
+        /*setAlign(UIAlignX.right, UIAlignY.top);
         setSize(Vec2f(250f, 0f));
-        setSizeLock(true, false);
+        setSizeLock(true, false);*/
 
         _container = new Container;
         addUI(_container);
@@ -103,7 +112,6 @@ private final class ResourceList : UIElement {
         }
 
         _list = new VList;
-        _list.setSize(Vec2f(getWidth(), 400f));
         vbox.addUI(_list);
 
         {
@@ -149,6 +157,7 @@ private final class ResourceList : UIElement {
     }
 
     private void _onSize() {
+        _list.setSize(Vec2f(getWidth(), max(0f, getHeight() - 200f)));
         _container.setSize(getSize());
     }
 

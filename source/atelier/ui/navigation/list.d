@@ -28,15 +28,19 @@ abstract class List : UIElement {
         addEventListener("size", &_onSize);
     }
 
-    void addList(UIElement element) {
+    final void setColor(Color color_) {
+        _background.color = color_;
+    }
+
+    final void addList(UIElement element) {
         _contentView.addUI(element);
     }
 
-    UIElement[] getList() {
+    final UIElement[] getList() {
         return _contentView.getChildren().array;
     }
 
-    void clearList() {
+    final void clearList() {
         _contentView.clearUI();
         _contentView.setContentPosition(0f);
     }
@@ -45,13 +49,21 @@ abstract class List : UIElement {
         _background.size = getSize();
     }
 
-    float getContentPosition() {
+    final float getContentPosition() {
         return _contentView.getContentPosition();
     }
 
-    void setContentPosition(float position) {
+    final void setContentPosition(float position) {
         _contentView.setContentPosition(position);
         _scrollbar.setContentPosition(_contentView.getContentPosition());
+    }
+
+    final float getSpacing() const {
+        return _contentView.getSpacing();
+    }
+
+    final void setSpacing(float spacing_) {
+        _contentView.setSpacing(spacing_);
     }
 }
 
@@ -73,6 +85,14 @@ final class HList : List {
         addEventListener("wheel", &_onWheel);
         _contentView.addEventListener("contentSize", &_onUpdateContent);
         _scrollbar.addEventListener("handlePosition", &_onHandlePosition);
+    }
+
+    UIAlignY getChildAlign() const {
+        return (cast(HContentView) _contentView).getChildAlign();
+    }
+
+    void setChildAlign(UIAlignY align_) {
+        (cast(HContentView) _contentView).setChildAlign(align_);
     }
 
     private void _onSize() {
@@ -120,6 +140,14 @@ final class VList : List {
         addEventListener("wheel", &_onWheel);
         _contentView.addEventListener("contentSize", &_onUpdateContent);
         _scrollbar.addEventListener("handlePosition", &_onHandlePosition);
+    }
+
+    UIAlignX getChildAlign() const {
+        return (cast(VContentView) _contentView).getChildAlign();
+    }
+
+    void setChildAlign(UIAlignX align_) {
+        (cast(VContentView) _contentView).setChildAlign(align_);
     }
 
     private void _onSize() {

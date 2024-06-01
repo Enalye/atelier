@@ -57,7 +57,6 @@ final class HScrollbar : Scrollbar {
 
     private void _onSize() {
         _background.size = getSize();
-        _handle.size = Vec2f(getHandleSize(), getHeight());
     }
 
     private void _onUpdate() {

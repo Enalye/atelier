@@ -20,7 +20,10 @@ final class TextureResourceEditor : ResourceBaseEditor {
         string _name;
         string _filePath;
         Vec2u _imageSize;
-        Previewer _preview;
+        Vec2f _position = Vec2f.zero;
+        Texture _texture;
+        Sprite _sprite;
+        float _zoom = 1f;
         ParameterWindow _parameterWindow;
     }
 
@@ -34,29 +37,14 @@ final class TextureResourceEditor : ResourceBaseEditor {
             _filePath = ffd.getNode("file").get!string(0);
         }
 
-        _preview = new Previewer(this);
-        _preview.setAlign(UIAlignX.center, UIAlignY.top);
-        _preview.setSize(Vec2f(size.x, max(0f, size.y - 200f)));
-        _preview.setFile(path(), _filePath);
-        addUI(_preview);
+        setFile(_filePath);
 
         _parameterWindow = new ParameterWindow(path(), _filePath);
-        _parameterWindow.setAlign(UIAlignX.center, UIAlignY.bottom);
-        _parameterWindow.setSize(Vec2f(size.x, min(size.y, 200f)));
-        addUI(_parameterWindow);
-
-        addEventListener("size", &_onSize);
 
         _parameterWindow.addEventListener("property_file", {
             _filePath = _parameterWindow.getFile();
-            _preview.setFile(path(), _filePath);
+            setFile(_filePath);
         });
-    }
-
-    private void _onSize() {
-        Vec2f size = getSize();
-        _preview.setSize(Vec2f(size.x, max(0f, size.y - 200f)));
-        _parameterWindow.setSize(Vec2f(size.x, min(size.y, 200f)));
     }
 
     override Farfadet save(Farfadet ffd) {
@@ -64,6 +52,82 @@ final class TextureResourceEditor : ResourceBaseEditor {
         node.add(_name);
         node.addNode("file").add(_filePath);
         return node;
+    }
+
+    override UIElement getPanel() {
+        return _parameterWindow;
+    }
+
+    void setFile(string filePath) {
+        bool mustLoad = _texture is null;
+        _zoom = 1f;
+
+        if (_sprite) {
+            _sprite.remove();
+        }
+
+        _texture = Texture.fromFile(buildNormalizedPath(dirName(path()), filePath));
+        _imageSize = Vec2u(_texture.width, _texture.height);
+        _sprite = new Sprite(_texture);
+        addImage(_sprite);
+
+        if (mustLoad) {
+            addEventListener("update", &_onUpdate);
+            addEventListener("draw", &_onDraw);
+            addEventListener("wheel", &_onWheel);
+            addEventListener("mousedown", &_onMouseDown);
+            addEventListener("mouseup", &_onMouseUp);
+            addEventListener("mouseleave", {
+                removeEventListener("mousemove", &_onDrag);
+            });
+        }
+    }
+
+    private void _onUpdate() {
+        _sprite.position = getCenter() + _position;
+    }
+
+    private void _onMouseDown() {
+        InputEvent.MouseButton ev = getManager().input.asMouseButton();
+        switch (ev.button) with (InputEvent.MouseButton.Button) {
+        case right:
+            addEventListener("mousemove", &_onDrag);
+            break;
+        default:
+            break;
+        }
+    }
+
+    private void _onMouseUp() {
+        InputEvent.MouseButton ev = getManager().input.asMouseButton();
+        switch (ev.button) with (InputEvent.MouseButton.Button) {
+        case right:
+            removeEventListener("mousemove", &_onDrag);
+            break;
+        default:
+            break;
+        }
+    }
+
+    private void _onDrag() {
+        UIManager manager = getManager();
+        InputEvent.MouseMotion ev = manager.input.asMouseMotion();
+        _position += ev.deltaPosition;
+    }
+
+    private void _onDraw() {
+        Atelier.renderer.drawRect(_sprite.position - _sprite.size / 2f,
+            _sprite.size, Atelier.theme.onNeutral, 1f, false);
+    }
+
+    private void _onWheel() {
+        UIManager manager = getManager();
+        InputEvent.MouseWheel ev = manager.input.asMouseWheel();
+        float zoomDelta = 1f + (ev.wheel.sum() * 0.25f);
+        _zoom *= zoomDelta;
+        _sprite.size = (cast(Vec2f) _sprite.clip.zw) * _zoom;
+        Vec2f delta = _sprite.position - getMousePosition();
+        _sprite.position = delta * zoomDelta + getMousePosition();
     }
 }
 
@@ -99,26 +163,42 @@ private final class ParameterWindow : UIElement {
             }
         }
 
-        VBox vbox = new VBox;
-        vbox.setAlign(UIAlignX.left, UIAlignY.top);
-        vbox.setPosition(Vec2f(24f, 24f));
-        vbox.setSpacing(8f);
-        vbox.setChildAlign(UIAlignX.left);
-        addUI(vbox);
+        VList vlist = new VList;
+        vlist.setPosition(Vec2f(8f, 8f));
+        vlist.setSize(Vec2f.zero.max(getSize() - Vec2f(8f, 8f)));
+        vlist.setAlign(UIAlignX.left, UIAlignY.top);
+        vlist.setColor(Atelier.theme.surface);
+        vlist.setSpacing(8f);
+        vlist.setChildAlign(UIAlignX.left);
+        addUI(vlist);
 
         {
-            HBox hbox = new HBox;
-            hbox.setSpacing(8f);
-            vbox.addUI(hbox);
+            LabelSeparator sep = new LabelSeparator("Propriétés", Atelier.theme.font);
+            sep.setColor(Atelier.theme.neutral);
+            sep.setPadding(Vec2f(284f, 0f));
+            sep.setSpacing(8f);
+            sep.setLineWidth(1f);
+            vlist.addList(sep);
+        }
 
-            hbox.addUI(new Label("Texture:", Atelier.theme.font));
+        {
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(284f, 0f));
+            vlist.addList(hlayout);
+
+            hlayout.addUI(new Label("Fichier:", Atelier.theme.font));
 
             _fileSelect = new SelectButton(files, filePath);
+            _fileSelect.setWidth(200f);
             _fileSelect.addEventListener("value", {
                 dispatchEvent("property_file", false);
             });
-            hbox.addUI(_fileSelect);
+            hlayout.addUI(_fileSelect);
         }
+
+        addEventListener("size", {
+            vlist.setSize(Vec2f.zero.max(getSize() - Vec2f(8f, 8f)));
+        });
 
         addEventListener("draw", {
             Atelier.renderer.drawRect(Vec2f.zero, getSize(), Atelier.theme.surface, 1f, true);
@@ -127,86 +207,5 @@ private final class ParameterWindow : UIElement {
 
     string getFile() const {
         return _fileSelect.value();
-    }
-}
-
-private final class Previewer : UIElement {
-    private {
-        Texture _texture;
-        Sprite _sprite;
-        float _zoom = 1f;
-        TextureResourceEditor _editor;
-    }
-
-    this(TextureResourceEditor editor) {
-        _editor = editor;
-    }
-
-    void setFile(string resPath, string path) {
-        bool mustLoad = _texture is null;
-        _zoom = 1f;
-
-        if (_sprite) {
-            _sprite.remove();
-        }
-
-        _texture = Texture.fromFile(buildNormalizedPath(dirName(resPath), path));
-        _editor._imageSize = Vec2u(_texture.width, _texture.height);
-        _sprite = new Sprite(_texture);
-        _sprite.position = getCenter();
-        addImage(_sprite);
-
-        if (mustLoad) {
-            addEventListener("draw", &_onDraw);
-            addEventListener("wheel", &_onWheel);
-            addEventListener("mousedown", &_onMouseDown);
-            addEventListener("mouseup", &_onMouseUp);
-            addEventListener("mouseleave", {
-                removeEventListener("mousemove", &_onDrag);
-            });
-        }
-    }
-
-    private void _onMouseDown() {
-        InputEvent.MouseButton ev = getManager().input.asMouseButton();
-        switch (ev.button) with (InputEvent.MouseButton.Button) {
-        case right:
-            addEventListener("mousemove", &_onDrag);
-            break;
-        default:
-            break;
-        }
-    }
-
-    private void _onMouseUp() {
-        InputEvent.MouseButton ev = getManager().input.asMouseButton();
-        switch (ev.button) with (InputEvent.MouseButton.Button) {
-        case right:
-            removeEventListener("mousemove", &_onDrag);
-            break;
-        default:
-            break;
-        }
-    }
-
-    private void _onDrag() {
-        UIManager manager = getManager();
-        InputEvent.MouseMotion ev = manager.input.asMouseMotion();
-        _sprite.position += ev.deltaPosition;
-    }
-
-    private void _onDraw() {
-        Atelier.renderer.drawRect(_sprite.position - _sprite.size / 2f,
-            _sprite.size, Atelier.theme.onNeutral, 1f, false);
-    }
-
-    private void _onWheel() {
-        UIManager manager = getManager();
-        InputEvent.MouseWheel ev = manager.input.asMouseWheel();
-        float zoomDelta = 1f + (ev.wheel.sum() * 0.25f);
-        _zoom *= zoomDelta;
-        _sprite.size = (cast(Vec2f) _sprite.clip.zw) * _zoom;
-        Vec2f delta = _sprite.position - getMousePosition();
-        _sprite.position = delta * zoomDelta + getMousePosition();
     }
 }

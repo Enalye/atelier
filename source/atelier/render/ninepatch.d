@@ -209,14 +209,14 @@ final class NinePatch : Image, Resource!NinePatch {
         }
 
         RasterData rasterData;
-        rasterData.top = _top;
-        rasterData.right = _right;
-        rasterData.bottom = _bottom;
-        rasterData.left = _left;
-        rasterData.clipX = _clip.x;
-        rasterData.clipY = _clip.y;
-        rasterData.clipW = _clip.z;
-        rasterData.clipH = _clip.w;
+        rasterData.top = clamp(_top, 0, _clip.w);
+        rasterData.right = clamp(_right, 0, _clip.z);
+        rasterData.bottom = clamp(_bottom, 0, _clip.w);
+        rasterData.left = clamp(_left, 0, _clip.z);
+        rasterData.clipX = clamp(_clip.x, 0, _surfaceWidth);
+        rasterData.clipY = clamp(_clip.y, 0, _surfaceHeight);
+        rasterData.clipW = clamp(_clip.z, 0, _surfaceWidth - rasterData.clipX);
+        rasterData.clipH = clamp(_clip.w, 0, _surfaceHeight - rasterData.clipY);
         rasterData.texW = _surfaceWidth;
         rasterData.texH = _surfaceHeight;
         rasterData.pixels = cast(uint*) _surface.pixels;

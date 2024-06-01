@@ -25,7 +25,7 @@ final class ControlButton : TextButton!RoundedRectangle {
 
         setFxColor(Atelier.theme.neutral);
         setTextColor(Atelier.theme.accent);
-        setSize(Vec2f(32f, 32f));
+        setSize(Vec2f(20f, 32f));
 
         _background = RoundedRectangle.fill(getSize(), Atelier.theme.corner);
         _background.color = Atelier.theme.neutral;
@@ -77,7 +77,7 @@ final class NumberField : UIElement {
     }
 
     this() {
-        setSize(Vec2f(150f, 32f));
+        setSize(Vec2f(100f, 32f));
 
         _textField = new TextField();
         _textField.value = "0";
@@ -163,13 +163,13 @@ final class IntegerField : UIElement {
     }
 
     this() {
-        setSize(Vec2f(150f, 32f));
+        setSize(Vec2f(100f, 32f));
 
         _textField = new TextField();
         _textField.value = "0";
         _textField.setAllowedCharacters("0123456789+-");
         _textField.setSize(getSize());
-        _textField.setInnerMargin(4f, 70f);
+        _textField.setInnerMargin(4f, 30f);
         addUI(_textField);
 
         HBox box = new HBox;

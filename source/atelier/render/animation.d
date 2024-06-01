@@ -52,6 +52,22 @@ final class Animation : Image, Resource!Animation {
         bool isPlaying() const {
             return _isRunning;
         }
+
+        /// L’état actuel de l’animation
+        int frame() const {
+            return _frame;
+        }
+
+        /// Ditto
+        int frameId() const {
+            if (_frame < 0 || !frames.length)
+                return -1;
+
+            if (_frame >= frames.length)
+                return -1;
+
+            return frames[_frame];
+        }
     }
 
     /// Ctor

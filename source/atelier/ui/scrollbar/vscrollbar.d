@@ -57,7 +57,6 @@ final class VScrollbar : Scrollbar {
 
     private void _onSize() {
         _background.size = getSize();
-        _handle.size = Vec2f(getWidth(), getHandleSize());
     }
 
     private void _onUpdate() {

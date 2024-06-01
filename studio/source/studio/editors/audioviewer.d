@@ -216,11 +216,21 @@ private final class SpectralView : UIElement {
     }
 
     private void _onMouseDown() {
-        addEventListener("mousemove", &_onDrag);
+        UIManager manager = getManager();
+        InputEvent.MouseButton ev = manager.input.asMouseButton();
+
+        if (ev.button == InputEvent.MouseButton.Button.right) {
+            addEventListener("mousemove", &_onDrag);
+        }
     }
 
     private void _onMouseUp() {
-        removeEventListener("mousemove", &_onDrag);
+        UIManager manager = getManager();
+        InputEvent.MouseButton ev = manager.input.asMouseButton();
+
+        if (ev.button == InputEvent.MouseButton.Button.right) {
+            removeEventListener("mousemove", &_onDrag);
+        }
     }
 
     private void _onDrag() {
@@ -257,7 +267,7 @@ private final class SpectralView : UIElement {
         UIManager manager = getManager();
         InputEvent.MouseButton ev = manager.input.asMouseButton();
 
-        if (ev.button == InputEvent.MouseButton.Button.right) {
+        if (ev.button == InputEvent.MouseButton.Button.left) {
             float pos = _images[0].virtualPosition;
             float mouseOffset = getMousePosition().x - getCenter().x;
             pos += mouseOffset / _images[0].virtualSize;

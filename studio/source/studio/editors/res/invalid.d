@@ -26,4 +26,8 @@ final class InvalidResourceEditor : ResourceBaseEditor {
     override Farfadet save(Farfadet ffd) {
         return ffd.addNode(_ffd);
     }
+
+    override UIElement getPanel() {
+        return null;
+    }
 }

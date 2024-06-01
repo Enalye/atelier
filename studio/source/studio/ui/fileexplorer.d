@@ -3,7 +3,7 @@
  * Licence: Zlib
  * Auteur: Enalye
  */
-module studio.ui.resourcelist;
+module studio.ui.fileexplorer;
 
 import std.algorithm.searching;
 import std.algorithm.mutation;
@@ -16,7 +16,7 @@ import atelier;
 import studio.project;
 import studio.ui.editor;
 
-final class ResourceList : Surface {
+final class FileExplorer : Surface {
     private {
         SelectButton _mediaSelect;
         string _currentMedia;
@@ -29,8 +29,7 @@ final class ResourceList : Surface {
         setAlign(UIAlignX.left, UIAlignY.bottom);
         setSize(Vec2f(250f, Atelier.window.height - 35f));
 
-        addEventListener("windowSize", {
-            setSize(Vec2f(250f, Atelier.window.height - 35f));
+        addEventListener("size", {
             if (_list) {
                 _list.setHeight(max(0f, getHeight() - 102f));
             }
@@ -224,12 +223,12 @@ private abstract class Item : UIElement {
 
 private final class FolderItem : Item {
     private {
-        ResourceList _rlist;
+        FileExplorer _rlist;
         Sprite _arrowSprite, _folderSprite;
         bool _isFolded;
     }
 
-    this(ResourceList rlist, string path_, uint depth_, bool isUnfolded) {
+    this(FileExplorer rlist, string path_, uint depth_, bool isUnfolded) {
         _rlist = rlist;
         _path = path_;
         _name = baseName(_path);
@@ -300,7 +299,7 @@ private final class FolderItem : Item {
 }
 
 private final class FileItem : Item {
-    this(ResourceList rlist, string path_, uint depth_) {
+    this(FileExplorer rlist, string path_, uint depth_) {
         _path = path_;
         _name = baseName(_path);
         _depth = depth_;

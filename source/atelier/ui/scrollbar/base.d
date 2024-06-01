@@ -32,6 +32,7 @@ abstract class Scrollbar : UIElement {
     this() {
         addEventListener("mousedown", &_onMouseDown);
         addEventListener("mouserelease", &_onMouseUp);
+        addEventListener("size", &_onSize);
     }
 
     final void setHandlePosition(float position) {
@@ -53,11 +54,15 @@ abstract class Scrollbar : UIElement {
 
     final void setContentSize(float size) {
         _contentSize = size;
+        _onSize();
+    }
+
+    final void _onSize() {
         float handleSize = _getScrollLength();
         if (_contentSize < handleSize) {
             handleSize = _contentSize;
         }
-        else {
+        else if (_contentSize > 0f) {
             handleSize = (handleSize * handleSize) / _contentSize;
         }
 

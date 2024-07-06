@@ -3,17 +3,17 @@
  * Licence: Zlib
  * Auteur: Enalye
  */
-module studio.editors.base;
+module studio.editor.base;
 
 import std.file;
 import std.path;
 import atelier;
-import studio.editors.imageviewer;
-import studio.editors.fontviewer;
-import studio.editors.audioviewer;
-import studio.editors.texteditor;
-import studio.editors.res;
-import studio.editors.invalid;
+import studio.editor.imageviewer;
+import studio.editor.fontviewer;
+import studio.editor.audioviewer;
+import studio.editor.texteditor;
+import studio.editor.res;
+import studio.editor.invalid;
 
 abstract class ContentEditor : UIElement {
     private {

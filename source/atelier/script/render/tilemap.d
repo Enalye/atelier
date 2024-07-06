@@ -36,7 +36,7 @@ scene.addEntity(map);");
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
 
     mod.setDescription(GrLocale.fr_FR, "Crée une tilemap depuis un tileset");
-    mod.setParameters(["tileset", "width", "height"]);
+    mod.setParameters(["tileset", "columns", "lines"]);
     mod.addConstructor(&_ctor_tileset, tilemapType, [tilesetType, grInt, grInt]);
 
     mod.setDescription(GrLocale.fr_FR, "Copie la tilemap");
@@ -48,13 +48,13 @@ scene.addEntity(map);");
     mod.addConstructor(&_ctor_name, tilemapType, [grString]);
 
     mod.setDescription(GrLocale.fr_FR, "Largeur en tuiles");
-    mod.addProperty(&_width, null, "width", tilemapType, grUInt);
+    mod.addProperty(&_columns, null, "columns", tilemapType, grUInt);
 
     mod.setDescription(GrLocale.fr_FR, "Hauteur en tuiles");
-    mod.addProperty(&_height, null, "height", tilemapType, grUInt);
+    mod.addProperty(&_lines, null, "lines", tilemapType, grUInt);
 
-    mod.setDescription(GrLocale.fr_FR, "Taille d’une tuile");
-    mod.addProperty(&_tileSize!"get", &_tileSize!"set", "tileSize", tilemapType, vec2fType);
+    //mod.setDescription(GrLocale.fr_FR, "Taille d’une tuile");
+    //mod.addProperty(&_tileSize!"get", &_tileSize!"set", "tileSize", tilemapType, vec2fType);
 
     mod.setDescription(GrLocale.fr_FR, "Récupère la tuile à la position donnée");
     mod.setParameters(["x", "y"]);
@@ -77,16 +77,16 @@ private void _ctor_name(GrCall call) {
     call.setNative(Atelier.res.get!Tilemap(call.getString(0)));
 }
 
-private void _width(GrCall call) {
+private void _columns(GrCall call) {
     Tilemap tilemap = call.getNative!Tilemap(0);
-    call.setUInt(tilemap.width);
+    call.setUInt(tilemap.columns);
 }
 
-private void _height(GrCall call) {
+private void _lines(GrCall call) {
     Tilemap tilemap = call.getNative!Tilemap(0);
-    call.setUInt(tilemap.height);
+    call.setUInt(tilemap.lines);
 }
-
+/*
 private void _tileSize(string op)(GrCall call) {
     Tilemap tilemap = call.getNative!Tilemap(0);
 
@@ -94,7 +94,7 @@ private void _tileSize(string op)(GrCall call) {
         tilemap.tileSize = call.getNative!SVec2f(1);
     }
     call.setNative(svec2(tilemap.tileSize));
-}
+}*/
 
 private void _getTile(GrCall call) {
     Tilemap tilemap = call.getNative!Tilemap(0);

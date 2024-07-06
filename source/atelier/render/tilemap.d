@@ -26,29 +26,38 @@ final class Tilemap : Image, Resource!Tilemap {
         Tileset _tileset;
         uint _currentTick;
         Tile[] _tiles;
-        uint _width, _height;
+        uint _columns, _lines;
     }
+
+    Vec2f size = Vec2f.zero;
 
     @property {
-        uint width() const {
-            return _width;
+        uint columns() const {
+            return _columns;
         }
 
-        uint height() const {
-            return _height;
+        uint lines() const {
+            return _lines;
+        }
+
+        Vec2f mapSize() const {
+            return (cast(Vec2f) _tileset.tileSize) * Vec2f(columns, lines);
+        }
+
+        Vec2f tileSize() const {
+            return size / Vec2f(_columns, _lines);
         }
     }
 
-    Vec2f tileSize = Vec2f.zero;
-
-    this(Tileset tileset, uint width, uint height) {
+    this(Tileset tileset, uint columns, uint lines) {
         _tileset = tileset;
-        _width = width;
-        _height = height;
+        _columns = columns;
+        _lines = lines;
         clip = _tileset.clip;
-        tileSize = cast(Vec2f) clip.zw;
 
-        _tiles.length = _width * _height;
+        size = (cast(Vec2f) _tileset.tileSize) * Vec2f(_columns, _lines);
+
+        _tiles.length = _columns * _lines;
         foreach (ref Tile tile; _tiles) {
             tile.id = -1;
             tile.elevation = 0;
@@ -58,10 +67,10 @@ final class Tilemap : Image, Resource!Tilemap {
     this(Tilemap tilemap) {
         super(tilemap);
         _tileset = tilemap._tileset;
-        _width = tilemap._width;
-        _height = tilemap._height;
+        _columns = tilemap._columns;
+        _lines = tilemap._lines;
         _tiles = tilemap._tiles.dup;
-        tileSize = tilemap.tileSize;
+        size = tilemap.size;
     }
 
     /// Accès à la ressource
@@ -70,67 +79,81 @@ final class Tilemap : Image, Resource!Tilemap {
     }
 
     int getTile(int x, int y) {
-        if (x < 0 || y < 0 || x >= _width || y >= _height)
+        if (x < 0 || y < 0 || x >= _columns || y >= _lines)
             return -1;
 
-        return _tiles[x + y * _width].id;
+        return _tiles[x + y * _columns].id;
     }
 
     void setTile(int x, int y, int tile) {
-        if (x < 0 || y < 0 || x >= _width || y >= _height)
+        if (x < 0 || y < 0 || x >= _columns || y >= _lines)
             return;
 
-        _tiles[x + y * _width].id = cast(short) tile;
+        _tiles[x + y * _columns].id = cast(short) tile;
     }
 
     int getTileElevation(int x, int y) {
-        if (x < 0 || y < 0 || x >= _width || y >= _height)
+        if (x < 0 || y < 0 || x >= _columns || y >= _lines)
             return -1;
 
-        return _tiles[x + y * _width].elevation;
+        return _tiles[x + y * _columns].elevation;
     }
 
     void setTileElevation(int x, int y, int elevation) {
-        if (x < 0 || y < 0 || x >= _width || y >= _height)
+        if (x < 0 || y < 0 || x >= _columns || y >= _lines)
             return;
 
-        _tiles[x + y * _width].elevation = cast(short) elevation;
+        _tiles[x + y * _columns].elevation = cast(short) elevation;
     }
 
     void setTiles(const(int[][]) tiles_) {
-        enforce(tiles_.length == _height, "taille des tuiles invalides: " ~ to!string(
-                tiles_.length) ~ " lignes au lieu de " ~ to!string(_height));
+        enforce(tiles_.length == _lines, "taille des tuiles invalides: " ~ to!string(
+                tiles_.length) ~ " lignes au lieu de " ~ to!string(_lines));
         foreach (size_t y, ref const(int[]) line; tiles_) {
-            enforce(line.length == _width, "taille des tuiles invalides: " ~ to!string(
+            enforce(line.length == _columns, "taille des tuiles invalides: " ~ to!string(
                     tiles_.length) ~ " colonnes au lieu de " ~ to!string(
-                    _width) ~ " à la ligne " ~ to!string(y));
+                    _columns) ~ " à la ligne " ~ to!string(y));
             foreach (size_t x, int tileId; line) {
-                _tiles[x + y * _width].id = cast(short) tileId;
+                _tiles[x + y * _columns].id = cast(short) tileId;
+            }
+        }
+    }
+
+    void setTiles(int x, int y, const(int[][]) tiles_) {
+        foreach (size_t col, ref const(int[]) column; tiles_) {
+            if ((col + x) >= _columns || (col + x) < 0)
+                continue;
+
+            foreach (size_t ln, int tileId; column) {
+                if ((ln + y) >= _lines || (ln + y) < 0)
+                    continue;
+
+                _tiles[(col + x) + (ln + y) * _columns].id = cast(short) tileId;
             }
         }
     }
 
     void setTilesElevation(const(int[][]) tiles_) {
-        enforce(tiles_.length == _height, "taille des tuiles invalides: " ~ to!string(
-                tiles_.length) ~ " lignes au lieu de " ~ to!string(_height));
+        enforce(tiles_.length == _lines, "taille des tuiles invalides: " ~ to!string(
+                tiles_.length) ~ " lignes au lieu de " ~ to!string(_lines));
         foreach (size_t y, ref const(int[]) line; tiles_) {
-            enforce(line.length == _width, "taille des tuiles invalides: " ~ to!string(
+            enforce(line.length == _columns, "taille des tuiles invalides: " ~ to!string(
                     tiles_.length) ~ " colonnes au lieu de " ~ to!string(
-                    _width) ~ " à la ligne " ~ to!string(y));
+                    _columns) ~ " à la ligne " ~ to!string(y));
             foreach (size_t x, int elevation; line) {
-                _tiles[x + y * _width].elevation = cast(short) elevation;
+                _tiles[x + y * _columns].elevation = cast(short) elevation;
             }
         }
     }
 
     /// Redimensionne l’image pour qu’elle puisse tenir dans une taille donnée
     override void fit(Vec2f size_) {
-        tileSize = to!Vec2f(clip.zw).fit(size_);
+        size = mapSize.fit(size_);
     }
 
     /// Redimensionne l’image pour qu’elle puisse contenir une taille donnée
     override void contain(Vec2f size_) {
-        tileSize = to!Vec2f(clip.zw).contain(size_);
+        size = mapSize.contain(size_);
     }
 
     override void update() {
@@ -148,55 +171,62 @@ final class Tilemap : Image, Resource!Tilemap {
         _tileset.alpha = alpha;
         _tileset.blend = blend;
 
-        Vec2f finalTileSize = ((cast(Vec2f) _tileset.tileSize) * tileSize) / cast(Vec2f) _tileset
-            .clip.zw;
-        Vec2f startPos = origin + position - tileSize * anchor;
+        /*Vec2f finalTileSize = ((cast(Vec2f) _tileset.tileSize) * tileSize) / cast(Vec2f) _tileset
+            .clip.zw;*/
+        //Vec2f mapSize = tileSize * Vec2f(_columns, _lines);
+        Vec2f finalTileSize = size / Vec2f(_columns, _lines);
+        Vec2f ratio = size / mapSize();
+        Vec2f finalClipSize = (cast(Vec2f) _tileset.clip.zw) * ratio;
+        import std.stdio;
+
+        Vec2f startPos = origin + position - size * anchor;
+        //writeln(finalTileSize);
         Vec2f tilePos;
 
         if (_tileset.isIsometric) {
             Vec2f halfTile = finalTileSize / 2f;
 
-            for (int y; y < _height; y++) {
-                for (int x; x < _width; x++) {
+            for (int y; y < _lines; y++) {
+                for (int x; x < _columns; x++) {
                     tilePos = startPos;
                     tilePos.x += (x - y) * halfTile.x;
                     tilePos.y += (x + y) * halfTile.y;
 
-                    int tileId = _tiles[x + y * _width].id;
-                    int elevation = _tiles[x + y * _width].elevation;
+                    int tileId = _tiles[x + y * _columns].id;
+                    int elevation = _tiles[x + y * _columns].elevation;
                     tilePos.y -= elevation;
 
                     if (tileId >= 0)
-                        _tileset.draw(tileId, tilePos, tileSize, angle);
+                        _tileset.draw(tileId, tilePos, finalClipSize, angle);
                 }
             }
         }
         else {
             int minX = 0;
             int minY = 0;
-            int maxX = _width;
-            int maxY = _height;
+            int maxX = _columns;
+            int maxY = _lines;
 
             /*if (Atelier.scene.isOnScene) {
                 Vec4f cameraClip = Atelier.scene.cameraClip;
                 minX = max(0, cast(int) floor((cameraClip.x - startPos.x) / tileSize.x));
                 minY = max(0, cast(int) floor((cameraClip.y - startPos.y) / tileSize.y));
-                maxX = min(_width, cast(int) ceil((cameraClip.z - startPos.x) / tileSize.x));
-                maxY = min(_height, cast(int) ceil((cameraClip.w - startPos.y) / tileSize.y));
+                maxX = min(_columns, cast(int) ceil((cameraClip.z - startPos.x) / tileSize.x));
+                maxY = min(_lines, cast(int) ceil((cameraClip.w - startPos.y) / tileSize.y));
             }*/
 
             for (int y = minY; y < maxY; y++) {
                 for (int x = minX; x < maxX; x++) {
                     tilePos = startPos;
-                    tilePos.x += x * tileSize.x;
-                    tilePos.y += y * tileSize.y;
+                    tilePos.x += x * finalTileSize.x;
+                    tilePos.y += y * finalTileSize.y;
 
-                    int tileId = _tiles[x + y * _width].id;
-                    int elevation = _tiles[x + y * _width].elevation;
+                    int tileId = _tiles[x + y * _columns].id;
+                    int elevation = _tiles[x + y * _columns].elevation;
                     tilePos.y -= elevation;
 
                     if (tileId >= 0)
-                        _tileset.draw(tileId, tilePos, tileSize, angle);
+                        _tileset.draw(tileId, tilePos, finalClipSize, angle);
                 }
             }
         }

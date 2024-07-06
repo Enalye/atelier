@@ -3,9 +3,9 @@
  * Licence: Zlib
  * Auteur: Enalye
  */
-module studio.editors.res;
+module studio.editor.res;
 
 public {
-    import studio.editors.res.editor;
+    import studio.editor.res.editor;
 }
 

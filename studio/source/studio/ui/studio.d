@@ -3,14 +3,14 @@
  * Licence: Zlib
  * Auteur: Enalye
  */
-module studio.ui.editor;
+module studio.ui.studio;
 
 import std.exception : enforce;
 import std.file;
 import std.path;
 import atelier;
 import farfadet;
-import studio.editors;
+import studio.editor;
 import studio.project;
 import studio.ui.tabbar;
 import studio.ui.fileexplorer;

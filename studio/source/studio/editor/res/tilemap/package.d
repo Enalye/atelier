@@ -3,9 +3,8 @@
  * Licence: Zlib
  * Auteur: Enalye
  */
-module studio.ui;
+module studio.editor.res.tilemap;
 
 public {
-    import studio.ui.studio;
-    import studio.ui.tabbar;
+    import studio.editor.res.tilemap.editor;
 }

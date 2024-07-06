@@ -3,10 +3,10 @@
  * Licence: Zlib
  * Auteur: Enalye
  */
-module studio.editors.fontviewer;
+module studio.editor.fontviewer;
 
 import atelier;
-import studio.editors.base;
+import studio.editor.base;
 
 final class FontViewer : ContentEditor {
     private {

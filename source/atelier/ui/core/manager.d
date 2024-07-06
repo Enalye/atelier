@@ -529,6 +529,13 @@ final class UIManager {
 
     /// Ajoute un élément d’interface
     void addUI(UIElement element) {
+        foreach (elt; _elements) {
+            if (elt == element) {
+                element.setManager(this);
+                element.isAlive = true;
+                return;
+            }
+        }
         _elements ~= element;
         element.setManager(this);
         element.isAlive = true;

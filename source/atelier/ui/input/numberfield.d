@@ -113,6 +113,16 @@ final class NumberField : UIElement {
         _incrementBtn.isEnabled = isEnabled;
     }
 
+    void setMinValue(int minValue) {
+        _minValue = minValue;
+        value(_value);
+    }
+
+    void setMaxValue(int maxValue) {
+        _maxValue = maxValue;
+        value(_value);
+    }
+
     void setRange(float minValue, float maxValue) {
         _minValue = minValue;
         _maxValue = maxValue;
@@ -197,6 +207,16 @@ final class IntegerField : UIElement {
         _textField.isEnabled = isEnabled;
         _decrementBtn.isEnabled = isEnabled;
         _incrementBtn.isEnabled = isEnabled;
+    }
+
+    void setMinValue(int minValue) {
+        _minValue = minValue;
+        value(_value);
+    }
+
+    void setMaxValue(int maxValue) {
+        _maxValue = maxValue;
+        value(_value);
     }
 
     void setRange(int minValue, int maxValue) {

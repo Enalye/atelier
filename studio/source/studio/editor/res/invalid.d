@@ -3,11 +3,11 @@
  * Licence: Zlib
  * Auteur: Enalye
  */
-module studio.editors.res.invalid;
+module studio.editor.res.invalid;
 
 import atelier;
 import farfadet;
-import studio.editors.res.base;
+import studio.editor.res.base;
 
 final class InvalidResourceEditor : ResourceBaseEditor {
     private {

@@ -447,7 +447,13 @@ class UIElement {
             Array!NativeEventListener evllist = new Array!NativeEventListener;
             evllist ~= listener;
             return evllist;
-        }, (Array!NativeEventListener evllist) { evllist ~= listener; });
+        }, (Array!NativeEventListener evllist) {
+            foreach (eventListener; evllist) {
+                if (eventListener == listener)
+                    return;
+            }
+            evllist ~= listener;
+        });
     }
 
     final void addEventListener(string type, GrEvent listener) {
@@ -455,7 +461,13 @@ class UIElement {
             Array!GrEvent evllist = new Array!GrEvent;
             evllist ~= listener;
             return evllist;
-        }, (Array!GrEvent evllist) { evllist ~= listener; });
+        }, (Array!GrEvent evllist) {
+            foreach (eventListener; evllist) {
+                if (eventListener == listener)
+                    return;
+            }
+            evllist ~= listener;
+        });
     }
 
     final void removeEventListener(string type, NativeEventListener listener) {
@@ -527,6 +539,15 @@ class UIElement {
     }
 
     final void addUI(UIElement element) {
+        foreach (child; _children) {
+            if (child == element) {
+                element.setManager(_manager);
+                element._parent = this;
+                element.isAlive = true;
+                return;
+            }
+        }
+
         if (element.isAlive)
             return;
 

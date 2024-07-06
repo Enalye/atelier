@@ -3,12 +3,12 @@
  * Licence: Zlib
  * Auteur: Enalye
  */
-module studio.editors.textureeditor;
+module studio.editor.imageviewer;
 
 import atelier;
-import studio.editors.base;
+import studio.editor.base;
 
-final class TextureEditor : ContentEditor {
+final class ImageViewer : ContentEditor {
     private {
         Texture _texture;
         Sprite _sprite;

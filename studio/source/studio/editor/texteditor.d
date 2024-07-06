@@ -3,7 +3,7 @@
  * Licence: Zlib
  * Auteur: Enalye
  */
-module studio.editors.texteditor;
+module studio.editor.texteditor;
 
 import std.algorithm.mutation;
 import std.array;
@@ -15,7 +15,7 @@ import std.stdio;
 import std.string;
 import std.typecons;
 import atelier;
-import studio.editors.base;
+import studio.editor.base;
 import atelier.core.data.vera;
 
 final class TextEditor : ContentEditor {

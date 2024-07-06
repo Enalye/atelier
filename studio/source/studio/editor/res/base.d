@@ -3,15 +3,17 @@
  * Licence: Zlib
  * Auteur: Enalye
  */
-module studio.editors.res.base;
+module studio.editor.res.base;
 
 import atelier;
 import farfadet;
-import studio.editors.res.invalid;
-import studio.editors.res.sprite;
-import studio.editors.res.texture;
-import studio.editors.res.ninepatch;
-import studio.editors.res.animation;
+import studio.editor.res.animation;
+import studio.editor.res.invalid;
+import studio.editor.res.ninepatch;
+import studio.editor.res.sprite;
+import studio.editor.res.texture;
+import studio.editor.res.tilemap;
+import studio.editor.res.tileset;
 import studio.ui;
 
 abstract class ResourceBaseEditor : UIElement {
@@ -37,6 +39,10 @@ abstract class ResourceBaseEditor : UIElement {
             return new NinePatchResourceEditor(path_, ffd, size);
         case "animation":
             return new AnimationResourceEditor(path_, ffd, size);
+        case "tileset":
+            return new TilesetResourceEditor(path_, ffd, size);
+        case "tilemap":
+            return new TilemapResourceEditor(path_, ffd, size);
         default:
             return new InvalidResourceEditor(path_, ffd, size);
         }

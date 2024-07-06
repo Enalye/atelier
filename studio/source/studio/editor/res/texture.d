@@ -3,14 +3,14 @@
  * Licence: Zlib
  * Auteur: Enalye
  */
-module studio.editors.res.texture;
+module studio.editor.res.texture;
 
 import std.file;
 import std.path;
 import std.math : abs;
 import atelier;
 import farfadet;
-import studio.editors.res.base;
+import studio.editor.res.base;
 import studio.project;
 import studio.ui;
 

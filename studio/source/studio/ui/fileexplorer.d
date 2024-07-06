@@ -14,7 +14,7 @@ import std.string;
 import std.typecons : No;
 import atelier;
 import studio.project;
-import studio.ui.editor;
+import studio.ui.studio;
 
 final class FileExplorer : Surface {
     private {

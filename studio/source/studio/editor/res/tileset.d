@@ -3,23 +3,29 @@
  * Licence: Zlib
  * Auteur: Enalye
  */
-module studio.editors.res.sprite;
+module studio.editor.res.tileset;
 
+import std.array : split;
+import std.conv : to, ConvException;
 import std.file;
 import std.path;
 import std.math : abs;
 import atelier;
 import farfadet;
-import studio.editors.res.base;
+import studio.editor.res.base;
 import studio.project;
 import studio.ui;
 
-final class SpriteResourceEditor : ResourceBaseEditor {
+final class TilesetResourceEditor : ResourceBaseEditor {
     private {
         Farfadet _ffd;
         string _name;
         string _textureRID;
         Vec4u _clip;
+        uint _columns, _lines, _maxCount;
+        Vec2i _margin;
+        bool _hasMaxCount;
+        uint _frameTime;
         Vec2u _imageSize;
         Vec2f _position = Vec2f.zero;
         Texture _texture;
@@ -48,29 +54,53 @@ final class SpriteResourceEditor : ResourceBaseEditor {
             _clip = ffd.getNode("clip").get!Vec4u(0);
         }
 
+        if (ffd.hasNode("frameTime")) {
+            _frameTime = ffd.getNode("frameTime").get!uint(0);
+        }
+
+        if (ffd.hasNode("columns")) {
+            _columns = ffd.getNode("columns").get!int(0);
+        }
+
+        if (ffd.hasNode("lines")) {
+            _lines = ffd.getNode("lines").get!int(0);
+        }
+
+        if (ffd.hasNode("maxCount")) {
+            _hasMaxCount = true;
+            _maxCount = ffd.getNode("maxCount").get!int(0);
+        }
+        else {
+            _maxCount = _lines * _columns;
+        }
+
+        if (ffd.hasNode("margin")) {
+            _margin = ffd.getNode("margin").get!Vec2i(0);
+        }
+
         setTextureRID(_textureRID);
 
-        _parameterWindow = new ParameterWindow(_textureRID, _clip);
+        _parameterWindow = new ParameterWindow(_textureRID, _clip, _columns,
+            _lines, _hasMaxCount, _maxCount, _margin, _frameTime);
 
         _toolbox = new Toolbox();
-        _toolbox.setTexture(getTexture(), _clip);
         Atelier.ui.addUI(_toolbox);
 
         _parameterWindow.addEventListener("property_textureRID", {
             _textureRID = _parameterWindow.getTextureRID();
             setTextureRID(_textureRID);
-            _toolbox.setTexture(getTexture(), _clip);
         });
 
         _parameterWindow.addEventListener("property_clip", {
             _clip = _parameterWindow.getClip();
-            _toolbox.setClip(_clip);
         });
 
-        addEventListener("clip", {
-            _parameterWindow.setClip(_clip);
-            _toolbox.setClip(_clip);
+        _parameterWindow.addEventListener("property_misc", {
+            _parameterWindow.getMisc(_columns, _lines, _hasMaxCount, _maxCount,
+                _margin, _frameTime);
         });
+
+        addEventListener("clip", { _parameterWindow.setClip(_clip); });
         _toolbox.addEventListener("tool", { _tool = _toolbox.getTool(); });
         addEventListener("register", { Atelier.ui.addUI(_toolbox); });
         addEventListener("unregister", { _toolbox.remove(); });
@@ -97,8 +127,8 @@ final class SpriteResourceEditor : ResourceBaseEditor {
         }
 
         auto info = Studio.getResource("texture", rid);
-        string filePath = info.farfadet.getNode("file").get!string(0);
-        _texture = Texture.fromFile(info.getPath(filePath));
+        string path = info.farfadet.getNode("file").get!string(0);
+        _texture = Texture.fromFile(info.getPath(path));
         _imageSize = Vec2u(_texture.width, _texture.height);
         _sprite = new Sprite(_texture);
         addImage(_sprite);
@@ -331,12 +361,42 @@ final class SpriteResourceEditor : ResourceBaseEditor {
     }
 
     private void _onDraw() {
-        Atelier.renderer.drawRect(_sprite.position - _sprite.size / 2f,
-            _sprite.size, Atelier.theme.onNeutral, 1f, false);
-
+        Vec2f origin = _sprite.position - _sprite.size / 2f;
         Vec4f clip = _zoom * cast(Vec4f) _clip;
-        Atelier.renderer.drawRect(_sprite.position - _sprite.size / 2f + clip.xy,
-            clip.zw, Atelier.theme.accent, 1f, false);
+
+        Atelier.renderer.drawRect(origin, _sprite.size, Atelier.theme.onNeutral, 1f, false);
+
+        uint maxCount = _hasMaxCount ? _maxCount : (_columns * _lines);
+
+        Color startFrameColor = Atelier.theme.accent;
+        HSLColor hsl = HSLColor.fromColor(startFrameColor);
+        hsl.h = hsl.h + 180f;
+        Color otherFrameColor = hsl.toColor();
+
+        uint frame;
+        __gridLoop: for (uint y; y < _lines; ++y) {
+            for (uint x; x < _columns; ++x) {
+                if (frame >= maxCount) {
+                    break __gridLoop;
+                }
+
+                Vec2f animClip = Vec2f(x, y) * (clip.zw + cast(Vec2f) _margin);
+
+                Color color;
+                if (frame == 0) {
+                    color = startFrameColor;
+                }
+                else {
+                    color = otherFrameColor;
+                }
+
+                drawText(origin + clip.xy + Vec2f(2f, clip.w - 2f) + animClip,
+                    to!dstring(frame), Atelier.theme.font, 1f, color);
+                Atelier.renderer.drawRect(origin + clip.xy + animClip, clip.zw, color, 1f, false);
+
+                frame++;
+            }
+        }
     }
 
     private void _onWheel() {
@@ -352,13 +412,12 @@ final class SpriteResourceEditor : ResourceBaseEditor {
 
 private class Toolbox : Modal {
     private {
-        Sprite _sprite;
         ToolGroup _toolGroup;
         int _tool;
     }
 
     this() {
-        setSize(Vec2f(200f, 300f));
+        setSize(Vec2f(200f, 100f));
         setAlign(UIAlignX.left, UIAlignY.top);
         setPosition(Vec2f(258f, 75f));
 
@@ -385,14 +444,6 @@ private class Toolbox : Modal {
             }
         }
 
-        {
-            Rectangle rect = Rectangle.outline(Vec2f.one * (getWidth() - 16f), 1f);
-            rect.color = Atelier.theme.onNeutral;
-            rect.anchor = Vec2f(0.5f, 1f);
-            rect.position = Vec2f(getCenter().x, getHeight() - 8f);
-            addImage(rect);
-        }
-
         addEventListener("update", {
             if (_toolGroup.value != _tool) {
                 _tool = _toolGroup.value;
@@ -404,30 +455,18 @@ private class Toolbox : Modal {
     int getTool() const {
         return _toolGroup.value();
     }
-
-    void setTexture(Texture texture, Vec4u clip) {
-        if (_sprite)
-            _sprite.remove();
-        _sprite = new Sprite(texture, clip);
-        _sprite.anchor = Vec2f(0.5f, 1f);
-        _sprite.position = Vec2f(getCenter().x, getHeight() - 8f);
-        _sprite.fit(Vec2f.one * (getWidth() - 16f));
-        addImage(_sprite);
-    }
-
-    void setClip(Vec4u clip) {
-        if (_sprite)
-            _sprite.clip = clip;
-    }
 }
 
 private final class ParameterWindow : UIElement {
     private {
         SelectButton _textureSelect;
-        IntegerField[] _numFields;
+        IntegerField[] _clipFields, _marginFields, _countFields;
+        IntegerField _frameTimeField;
+        Checkbox _hasMaxCountCB;
     }
 
-    this(string textureRID, Vec4u clip) {
+    this(string textureRID, Vec4u clip, uint columns, uint lines, bool hasMaxCount,
+        uint maxCount, Vec2i margin, uint frameTime) {
         VList vlist = new VList;
         vlist.setPosition(Vec2f(8f, 8f));
         vlist.setSize(Vec2f.zero.max(getSize() - Vec2f(8f, 8f)));
@@ -473,10 +512,11 @@ private final class ParameterWindow : UIElement {
         {
             foreach (field; ["Position X", "Position Y", "Largeur", "Hauteur"]) {
                 IntegerField numField = new IntegerField();
+                numField.setMinValue(0);
                 numField.addEventListener("value", {
                     dispatchEvent("property_clip", false);
                 });
-                _numFields ~= numField;
+                _clipFields ~= numField;
 
                 HLayout hlayout = new HLayout;
                 hlayout.setPadding(Vec2f(284f, 0f));
@@ -486,10 +526,106 @@ private final class ParameterWindow : UIElement {
                 hlayout.addUI(numField);
             }
 
-            _numFields[0].value = clip.x;
-            _numFields[1].value = clip.y;
-            _numFields[2].value = clip.z;
-            _numFields[3].value = clip.w;
+            _clipFields[0].value = clip.x;
+            _clipFields[1].value = clip.y;
+            _clipFields[2].value = clip.z;
+            _clipFields[3].value = clip.w;
+        }
+
+        {
+            foreach (field; ["Marge X", "Marge Y"]) {
+                IntegerField numField = new IntegerField();
+                numField.addEventListener("value", {
+                    dispatchEvent("property_misc", false);
+                });
+                _marginFields ~= numField;
+
+                HLayout hlayout = new HLayout;
+                hlayout.setPadding(Vec2f(284f, 0f));
+                vlist.addList(hlayout);
+
+                hlayout.addUI(new Label(field ~ ":", Atelier.theme.font));
+                hlayout.addUI(numField);
+            }
+
+            _marginFields[0].value = margin.x;
+            _marginFields[1].value = margin.y;
+        }
+
+        {
+            LabelSeparator sep = new LabelSeparator("Tuiles", Atelier.theme.font);
+            sep.setColor(Atelier.theme.neutral);
+            sep.setPadding(Vec2f(284f, 0f));
+            sep.setSpacing(8f);
+            sep.setLineWidth(1f);
+            vlist.addList(sep);
+        }
+
+        {
+            foreach (field; ["Colonnes", "Lignes", "Limite"]) {
+                IntegerField numField = new IntegerField();
+                numField.setMinValue(0);
+                numField.addEventListener("value", {
+                    dispatchEvent("property_misc", false);
+                });
+                _countFields ~= numField;
+
+                if (field == "Limite") {
+                    numField.isEnabled = hasMaxCount;
+
+                    _hasMaxCountCB = new Checkbox(hasMaxCount);
+                    _hasMaxCountCB.addEventListener("value", {
+                        dispatchEvent("property_misc", false);
+                        numField.isEnabled = _hasMaxCountCB.value;
+                    });
+
+                    HLayout hlayout = new HLayout;
+                    hlayout.setPadding(Vec2f(284f, 0f));
+                    vlist.addList(hlayout);
+
+                    hlayout.addUI(new Label("Limiter ?", Atelier.theme.font));
+                    hlayout.addUI(_hasMaxCountCB);
+                }
+
+                {
+                    HLayout hlayout = new HLayout;
+                    hlayout.setPadding(Vec2f(284f, 0f));
+                    vlist.addList(hlayout);
+
+                    hlayout.addUI(new Label(field ~ ":", Atelier.theme.font));
+                    hlayout.addUI(numField);
+                }
+            }
+
+            _countFields[0].value = columns;
+            _countFields[1].value = lines;
+            _countFields[2].value = maxCount;
+        }
+
+        {
+            LabelSeparator sep = new LabelSeparator("Tuiles Animées", Atelier.theme.font);
+            sep.setColor(Atelier.theme.neutral);
+            sep.setPadding(Vec2f(284f, 0f));
+            sep.setSpacing(8f);
+            sep.setLineWidth(1f);
+            vlist.addList(sep);
+        }
+
+        {
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(284f, 0f));
+            vlist.addList(hlayout);
+
+            hlayout.addUI(new Label("Délai inter-images:", Atelier.theme.font));
+
+            _frameTimeField = new IntegerField();
+            _frameTimeField.setMinValue(0);
+            _frameTimeField.addEventListener("value", {
+                dispatchEvent("property_misc", false);
+            });
+            hlayout.addUI(_frameTimeField);
+
+            _frameTimeField.value = frameTime;
         }
 
         addEventListener("size", {
@@ -506,16 +642,26 @@ private final class ParameterWindow : UIElement {
     }
 
     Vec4u getClip() const {
-        return Vec4u(_numFields[0].value(), _numFields[1].value(),
-            _numFields[2].value(), _numFields[3].value());
+        return Vec4u(_clipFields[0].value(), _clipFields[1].value(),
+            _clipFields[2].value(), _clipFields[3].value());
     }
 
     void setClip(Vec4u clip) {
         Atelier.ui.blockEvents = true;
-        _numFields[0].value = clip.x;
-        _numFields[1].value = clip.y;
-        _numFields[2].value = clip.z;
-        _numFields[3].value = clip.w;
+        _clipFields[0].value = clip.x;
+        _clipFields[1].value = clip.y;
+        _clipFields[2].value = clip.z;
+        _clipFields[3].value = clip.w;
         Atelier.ui.blockEvents = false;
+    }
+
+    void getMisc(ref uint columns, ref uint lines, ref bool hasMaxCount,
+        ref uint maxCount, ref Vec2i margin, ref uint frameTime) {
+        columns = _countFields[0].value;
+        lines = _countFields[1].value;
+        maxCount = _countFields[2].value;
+        hasMaxCount = _hasMaxCountCB.value;
+        margin = Vec2i(_marginFields[0].value, _marginFields[1].value);
+        frameTime = _frameTimeField.value;
     }
 }

@@ -3,12 +3,12 @@
  * Licence: Zlib
  * Auteur: Enalye
  */
-module studio.editors.audioviewer;
+module studio.editor.audioviewer;
 
 import std.conv : to;
 import std.math;
 import atelier;
-import studio.editors.base;
+import studio.editor.base;
 
 final class AudioViewer : ContentEditor {
     private {

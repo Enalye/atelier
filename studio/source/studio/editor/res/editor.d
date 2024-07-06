@@ -3,13 +3,13 @@
  * Licence: Zlib
  * Auteur: Enalye
  */
-module studio.editors.res.editor;
+module studio.editor.res.editor;
 
 import atelier;
 import farfadet;
 import studio.ui;
-import studio.editors.base;
-import studio.editors.res.base;
+import studio.editor.base;
+import studio.editor.res.base;
 
 final class ResourceEditor : ContentEditor {
     private {
@@ -157,7 +157,7 @@ private final class ResourceList : UIElement {
     }
 
     private void _onSize() {
-        _list.setSize(Vec2f(getWidth(), max(0f, getHeight() - 200f)));
+        _list.setSize(Vec2f(getWidth(), max(0f, getHeight() - 100f)));
         _container.setSize(getSize());
     }
 

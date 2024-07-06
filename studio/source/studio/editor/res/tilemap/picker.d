@@ -1,0 +1,194 @@
+/** 
+ * Droits d’auteur: Enalye
+ * Licence: Zlib
+ * Auteur: Enalye
+ */
+module studio.editor.res.tilemap.picker;
+
+import std.file;
+import std.path;
+import std.math : abs;
+import atelier;
+import farfadet;
+import studio.editor.res.base;
+import studio.project;
+import studio.ui;
+import studio.editor.res.tilemap.selection;
+
+package final class TilePicker : UIElement {
+    private {
+        Tileset _tileset;
+        Tilemap _tilemap;
+        Vec2i _startSelection, _endSelection, _tileSelection, _hoverSelection;
+        Vec2f _position = Vec2f.zero;
+        float _zoom = 1f;
+        bool _isRect;
+    }
+
+    TilesSelection selection;
+
+    this() {
+        setSize(Vec2f(300f, 400f));
+
+        {
+            Rectangle rect = Rectangle.outline(getSize(), 1f);
+            rect.color = Atelier.theme.onNeutral;
+            rect.anchor = Vec2f.zero;
+            rect.position = Vec2f.zero;
+            addImage(rect);
+        }
+    }
+
+    void setTileset(Tileset tileset) {
+        bool mustLoad = _tilemap is null;
+        if (_tilemap)
+            _tilemap.remove();
+        _tilemap = new Tilemap(tileset, tileset.columns, tileset.lines);
+        _tilemap.anchor = Vec2f.zero;
+        addImage(_tilemap);
+
+        int id;
+        __tilesetLoop: for (int y; y < tileset.lines; ++y) {
+            for (int x; x < tileset.columns; ++x) {
+                _tilemap.setTile(x, y, id);
+                id++;
+                if (id > tileset.maxCount)
+                    break __tilesetLoop;
+            }
+        }
+
+        if (mustLoad) {
+            addEventListener("update", &_onUpdate);
+            addEventListener("draw", &_onDraw);
+            addEventListener("wheel", &_onWheel);
+            addEventListener("mousedown", &_onMouseDown);
+            addEventListener("mouseup", &_onMouseUp);
+            addEventListener("mouseleave", &_onMouseLeave);
+            addEventListener("clickoutside", &_onMouseLeave);
+        }
+    }
+
+    private void _onUpdate() {
+        _tilemap.position = _position;
+    }
+
+    private void _onMouseLeave() {
+        removeEventListener("mousemove", &_onDrag);
+        removeEventListener("mousemove", &_onRectSelection);
+        removeEventListener("mousemove", &_onTileSelection);
+    }
+
+    private void _onMouseDown() {
+        InputEvent.MouseButton ev = getManager().input.asMouseButton();
+        switch (ev.button) with (InputEvent.MouseButton.Button) {
+        case right:
+            addEventListener("mousemove", &_onDrag);
+            break;
+        case left:
+            if (_isRect) {
+                _startSelection = cast(Vec2i)((getMousePosition() - _position) / _tilemap.tileSize);
+                _startSelection = _startSelection.clamp(Vec2i.zero,
+                    Vec2i(_tilemap.columns, _tilemap.lines) - 1);
+                _endSelection = _startSelection;
+            }
+            else {
+                _tileSelection = _tileSelection.clamp(Vec2i.zero,
+                    Vec2i(_tilemap.columns, _tilemap.lines) - 1);
+                _tileSelection = cast(Vec2i)((getMousePosition() - _position) / _tilemap.tileSize);
+            }
+            addEventListener("mousemove", _isRect ? &_onRectSelection : &_onTileSelection);
+            break;
+        default:
+            break;
+        }
+    }
+
+    private void _onMouseUp() {
+        InputEvent.MouseButton ev = getManager().input.asMouseButton();
+        switch (ev.button) with (InputEvent.MouseButton.Button) {
+        case right:
+            removeEventListener("mousemove", &_onDrag);
+            break;
+        case left:
+            removeEventListener("mousemove", _isRect ? &_onRectSelection : &_onTileSelection);
+            if (_isRect) {
+                Vec2i startTile = _startSelection.min(_endSelection);
+                Vec2i endTile = _startSelection.max(_endSelection) + Vec2i.one - startTile;
+                getTilesAt(startTile.x, startTile.y, endTile.x, endTile.y);
+            }
+            else {
+                getTilesAt(_tileSelection.x, _tileSelection.y, 1, 1);
+            }
+            dispatchEvent("value", false);
+            break;
+        default:
+            break;
+        }
+    }
+
+    private void getTilesAt(int x, int y, uint width_, uint height_) {
+        x = max(0, x);
+        y = max(0, y);
+        width_ = min(width_, _tilemap.columns - cast(int) x);
+        height_ = min(height_, _tilemap.lines - cast(int) y);
+
+        selection.width = width_;
+        selection.height = height_;
+        selection.tiles = new int[][](width_, height_);
+
+        for (int iy; iy < height_; ++iy) {
+            for (int ix; ix < width_; ++ix) {
+                selection.tiles[ix][iy] = _tilemap.getTile(x + ix, y + iy);
+            }
+        }
+        selection.isValid = true;
+    }
+
+    private void _onDrag() {
+        UIManager manager = getManager();
+        InputEvent.MouseMotion ev = manager.input.asMouseMotion();
+        _position += ev.deltaPosition;
+    }
+
+    private void _onWheel() {
+        UIManager manager = getManager();
+        InputEvent.MouseWheel ev = manager.input.asMouseWheel();
+        float zoomDelta = 1f + (ev.wheel.sum() * 0.25f);
+        _zoom *= zoomDelta;
+        _tilemap.size = _tilemap.mapSize * _zoom;
+        Vec2f delta = _tilemap.position - getMousePosition();
+        _tilemap.position = delta * zoomDelta + getMousePosition();
+    }
+
+    private void _onDraw() {
+        if (_isRect) {
+            Vec2f startPos = cast(Vec2f) _startSelection.min(_endSelection);
+            Vec2f endPos = cast(Vec2f) _startSelection.max(_endSelection);
+
+            startPos = startPos * _tilemap.tileSize;
+            endPos = (endPos + 1) * _tilemap.tileSize;
+            Atelier.renderer.drawRect(_position + startPos, endPos - startPos,
+                Atelier.theme.accent, 1f, false);
+        }
+        else {
+            Vec2f pos = (cast(Vec2f) _tileSelection) * _tilemap.tileSize;
+            Atelier.renderer.drawRect(_position + pos, _tilemap.tileSize,
+                Atelier.theme.accent, 1f, false);
+        }
+    }
+
+    void setRectMode(bool isRect) {
+        _isRect = isRect;
+    }
+
+    private void _onRectSelection() {
+        _endSelection = cast(Vec2i)((getMousePosition() - _position) / _tilemap.tileSize);
+        _endSelection = _endSelection.clamp(Vec2i.zero, Vec2i(_tilemap.columns, _tilemap.lines) - 1);
+    }
+
+    private void _onTileSelection() {
+        _tileSelection = cast(Vec2i)((getMousePosition() - _position) / _tilemap.tileSize);
+        _tileSelection = _tileSelection.clamp(Vec2i.zero,
+            Vec2i(_tilemap.columns, _tilemap.lines) - 1);
+    }
+}

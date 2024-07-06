@@ -3,10 +3,10 @@
  * Licence: Zlib
  * Auteur: Enalye
  */
-module studio.editors.invalid;
+module studio.editor.invalid;
 
 import atelier;
-import studio.editors.base;
+import studio.editor.base;
 
 final class InvalidContentEditor : ContentEditor {
     private {

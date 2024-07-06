@@ -176,3 +176,18 @@ sprite "editor:right-button" {
     texture "editor"
     clip 224 0 11 11
 }
+
+sprite "editor:brush-button" {
+    texture "editor"
+    clip 112 16 9 9
+}
+
+sprite "editor:eraser-button" {
+    texture "editor"
+    clip 128 16 11 9
+}
+
+sprite "editor:bucket-button" {
+    texture "editor"
+    clip 144 16 8 13
+}

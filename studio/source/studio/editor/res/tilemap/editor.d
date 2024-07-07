@@ -33,6 +33,8 @@ final class TilemapResourceEditor : ResourceBaseEditor {
         ParameterWindow _parameterWindow;
         int _tool;
         TilesSelection _selection;
+        bool _isApplyingTool;
+        Tilemap _previewSelectionTM;
     }
 
     this(string path_, Farfadet ffd, Vec2f size) {
@@ -70,6 +72,7 @@ final class TilemapResourceEditor : ResourceBaseEditor {
         _toolbox.addEventListener("tool", {
             _tool = _toolbox.getTool();
             _selection = _toolbox.getSelection();
+            updateSelectionPreview();
         });
         addEventListener("register", { Atelier.ui.addUI(_toolbox); });
         addEventListener("unregister", { _toolbox.remove(); });
@@ -168,7 +171,18 @@ final class TilemapResourceEditor : ResourceBaseEditor {
             Atelier.input.isPressed(InputEvent.KeyButton.Button.rightControl);
     }
 
+    bool hasShiftModifier() const {
+        return Atelier.input.isPressed(InputEvent.KeyButton.Button.leftShift) ||
+            Atelier.input.isPressed(InputEvent.KeyButton.Button.rightShift);
+    }
+
+    bool hasAltModifier() const {
+        return Atelier.input.isPressed(InputEvent.KeyButton.Button.leftAlt) ||
+            Atelier.input.isPressed(InputEvent.KeyButton.Button.rightAlt);
+    }
+
     private void _onMouseLeave() {
+        _isApplyingTool = false;
         _positionMouse = Vec2f.zero;
         _deltaMouse = Vec2f.zero;
         removeEventListener("mousemove", &_onDrag);
@@ -186,11 +200,13 @@ final class TilemapResourceEditor : ResourceBaseEditor {
             addEventListener("mousemove", &_onDrag);
             break;
         case left:
+            _isApplyingTool = true;
             switch (_tool) {
             case 0:
                 _positionMouse = (getMousePosition() - (_tilemap.position - _tilemap.size / 2f)) / _zoom;
                 if (hasControlModifier()) {
                     addEventListener("mousemove", &_onCopyTool);
+                    _onCopyTool();
                 }
                 else {
                     addEventListener("mousemove", &_onPasteTool);
@@ -230,6 +246,7 @@ final class TilemapResourceEditor : ResourceBaseEditor {
             removeEventListener("mousemove", &_onDrag);
             break;
         case left:
+            _isApplyingTool = false;
             switch (_tool) {
             case 0:
                 removeEventListener("mousemove", &_onCopyTool);
@@ -286,6 +303,20 @@ final class TilemapResourceEditor : ResourceBaseEditor {
             }
         }
         _selection.isValid = true;
+
+        updateSelectionPreview();
+    }
+
+    private void updateSelectionPreview() {
+        if (_previewSelectionTM) {
+            _previewSelectionTM.remove();
+        }
+
+        _previewSelectionTM = new Tilemap(_tileset, _selection.width, _selection.height);
+        _previewSelectionTM.setTiles(0, 0, _selection.tiles);
+        _previewSelectionTM.anchor = Vec2f.zero;
+        _previewSelectionTM.isVisible = false;
+        addImage(_previewSelectionTM);
     }
 
     private void _onPasteTool() {
@@ -355,17 +386,44 @@ final class TilemapResourceEditor : ResourceBaseEditor {
         Atelier.renderer.drawRect(_tilemap.position - _tilemap.size / 2f,
             _tilemap.size, Atelier.theme.onNeutral, 1f, false);
 
+        if (_previewSelectionTM) {
+            _previewSelectionTM.isVisible = false;
+        }
+
         switch (_tool) {
         case 0:
-            Vec4i rect = getSelectionRect();
-            Vec2i startPos = rect.xy;
-            Vec2i endPos = rect.zw;
-
             if (hasControlModifier()) {
-                Vec2f origin = _tilemap.position - _tilemap.size / 2f;
-                Atelier.renderer.drawRect(origin + (cast(Vec2f) startPos) * _tilemap.tileSize,
-                    cast(Vec2f)(startPos + 1 - endPos) * _tilemap.tileSize,
-                    Atelier.theme.danger, 1f, false);
+                if (_isApplyingTool) {
+                    Vec4i rect = getSelectionRect();
+                    Vec2i startPos = rect.xy;
+                    Vec2i endPos = rect.zw;
+
+                    Vec2f origin = _tilemap.position - _tilemap.size / 2f;
+                    Atelier.renderer.drawRect(origin + (cast(Vec2f) startPos) * _tilemap.tileSize,
+                        cast(Vec2f)(endPos + 1 - startPos) * _tilemap.tileSize,
+                        Atelier.theme.danger, 1f, false);
+                }
+            }
+            else {
+                if (_selection.isValid) {
+                    Vec2f positionMouse = (
+                        getMousePosition() - (_tilemap.position - _tilemap.size / 2f)) / _zoom;
+                    Vec2i pos = (cast(Vec2i) positionMouse) / cast(Vec2i) _tileset.tileSize;
+
+                    Vec2f origin = _tilemap.position - _tilemap.size / 2f;
+
+                    if (_previewSelectionTM) {
+                        _previewSelectionTM.isVisible = true;
+                        _previewSelectionTM.size = Vec2f(_selection.width,
+                            _selection.height) * _tilemap.tileSize;
+                        _previewSelectionTM.position = origin + (cast(Vec2f) pos) *
+                            _tilemap.tileSize;
+                    }
+
+                    Atelier.renderer.drawRect(origin + (cast(Vec2f) pos) * _tilemap.tileSize,
+                        Vec2f(_selection.width, _selection.height) * _tilemap.tileSize, _isApplyingTool ?
+                        Atelier.theme.accent : Atelier.theme.onAccent, 1f, false);
+                }
             }
             break;
         default:

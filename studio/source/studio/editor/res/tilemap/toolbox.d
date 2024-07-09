@@ -5,6 +5,7 @@
  */
 module studio.editor.res.tilemap.toolbox;
 
+import std.conv : to;
 import std.file;
 import std.path;
 import std.math : abs;
@@ -21,10 +22,13 @@ package class Toolbox : Modal {
         ToolGroup _toolGroup;
         int _tool;
         TilePicker _tilePicker;
+        HBox _brushSizeBox;
+        Label _brushSizeLabel;
+        IntegerField _brushSizeField;
     }
 
     this() {
-        setSize(Vec2f(300f, 600f));
+        setSize(Vec2f(256f, 512f));
         setAlign(UIAlignX.left, UIAlignY.top);
         setPosition(Vec2f(258f, 75f));
 
@@ -63,6 +67,20 @@ package class Toolbox : Modal {
         _tilePicker.setPosition(Vec2f(0f, 8f));
         _tilePicker.addEventListener("value", { dispatchEvent("tool", false); });
 
+        _brushSizeBox = new HBox;
+        _brushSizeBox.setAlign(UIAlignX.center, UIAlignY.top);
+        _brushSizeBox.setPosition(Vec2f(0f, 76f));
+
+        _brushSizeLabel = new Label("Taille: ", Atelier.theme.font);
+        _brushSizeBox.addUI(_brushSizeLabel);
+
+        _brushSizeField = new IntegerField;
+        _brushSizeField.setRange(1, 32);
+        _brushSizeField.addEventListener("value", {
+            dispatchEvent("tool", false);
+        });
+        _brushSizeBox.addUI(_brushSizeField);
+
         _onToolChange();
     }
 
@@ -73,6 +91,19 @@ package class Toolbox : Modal {
         case 0:
             addUI(_tilePicker);
             _tilePicker.setRectMode(true);
+            break;
+        case 1:
+            addUI(_tilePicker);
+            addUI(_brushSizeBox);
+            _tilePicker.setRectMode(false);
+            break;
+        case 2:
+            addUI(_brushSizeBox);
+            _tilePicker.setRectMode(false);
+            break;
+        case 3:
+            addUI(_tilePicker);
+            _tilePicker.setRectMode(false);
             break;
         default:
             break;
@@ -87,6 +118,10 @@ package class Toolbox : Modal {
 
     TilesSelection getSelection() {
         return _tilePicker.selection;
+    }
+
+    int getBrushSize() {
+        return _brushSizeField.value;
     }
 
     void setTileset(Tileset tileset) {

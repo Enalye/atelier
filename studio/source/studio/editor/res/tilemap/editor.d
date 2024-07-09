@@ -33,6 +33,8 @@ final class TilemapResourceEditor : ResourceBaseEditor {
         ParameterWindow _parameterWindow;
         int _tool;
         TilesSelection _selection;
+        int _brushSize = 1;
+        int _brushTileId;
         bool _isApplyingTool;
         Tilemap _previewSelectionTM;
     }
@@ -72,6 +74,10 @@ final class TilemapResourceEditor : ResourceBaseEditor {
         _toolbox.addEventListener("tool", {
             _tool = _toolbox.getTool();
             _selection = _toolbox.getSelection();
+            _brushSize = _toolbox.getBrushSize();
+            if (_selection.isValid && _selection.width >= 1 && _selection.height >= 1) {
+                _brushTileId = _selection.tiles[0][0];
+            }
             updateSelectionPreview();
         });
         addEventListener("register", { Atelier.ui.addUI(_toolbox); });
@@ -186,11 +192,11 @@ final class TilemapResourceEditor : ResourceBaseEditor {
         _positionMouse = Vec2f.zero;
         _deltaMouse = Vec2f.zero;
         removeEventListener("mousemove", &_onDrag);
-        removeEventListener("mousemove", &_onCopyTool);
-        removeEventListener("mousemove", &_onPasteTool);
-        //removeEventListener("mousemove", &_onEraserTool);
-        //removeEventListener("mousemove", &_onFillTool);
-        //removeEventListener("mousemove", &_onMoveSide);
+        removeEventListener("mousemove", &_onCopySelectionTool);
+        removeEventListener("mousemove", &_onPasteSelectionTool);
+        removeEventListener("mousemove", &_onCopyBrushTool);
+        removeEventListener("mousemove", &_onPasteBrushTool);
+        removeEventListener("mousemove", &_onEraserTool);
     }
 
     private void _onMouseDown() {
@@ -205,31 +211,34 @@ final class TilemapResourceEditor : ResourceBaseEditor {
             case 0:
                 _positionMouse = (getMousePosition() - (_tilemap.position - _tilemap.size / 2f)) / _zoom;
                 if (hasControlModifier()) {
-                    addEventListener("mousemove", &_onCopyTool);
-                    _onCopyTool();
+                    addEventListener("mousemove", &_onCopySelectionTool);
+                    _onCopySelectionTool();
                 }
                 else {
-                    addEventListener("mousemove", &_onPasteTool);
-                    _onPasteTool();
+                    addEventListener("mousemove", &_onPasteSelectionTool);
+                    _onPasteSelectionTool();
                 }
                 break;
-                /*case 1:
-                Vec4f clip = _zoom * cast(Vec4f) _clip;
-                Vec2f origin = _tilemap.position - _tilemap.size / 2f + clip.xy;
-                if (getMousePosition().isBetween(origin, origin + clip.zw)) {
-                    addEventListener("mousemove", &_onEraserTool);
+            case 1:
+                _positionMouse = (getMousePosition() - (_tilemap.position - _tilemap.size / 2f)) / _zoom;
+                if (hasControlModifier()) {
+                    addEventListener("mousemove", &_onCopyBrushTool);
+                    _onCopyBrushTool();
+                }
+                else {
+                    addEventListener("mousemove", &_onPasteBrushTool);
+                    _onPasteBrushTool();
                 }
                 break;
             case 2:
-                Vec2f positionMouse = (getMousePosition() - (_tilemap.position - _tilemap.size / 2f)) / _zoom;
-                bool isResizingRight = positionMouse.x >= (_clip.x + _clip.z / 2f);
-                bool isResizingBottom = positionMouse.y >= (_clip.y + _clip.w / 2f);
-
-                _clipAnchor.x = _clip.x + (isResizingRight ? 0 : _clip.z);
-                _clipAnchor.y = _clip.y + (isResizingBottom ? 0 : _clip.w);
-
-                addEventListener("mousemove", &_onFillTool);
-                break;*/
+                _positionMouse = (getMousePosition() - (_tilemap.position - _tilemap.size / 2f)) / _zoom;
+                addEventListener("mousemove", &_onEraserTool);
+                _onEraserTool();
+                break;
+            case 3:
+                _positionMouse = (getMousePosition() - (_tilemap.position - _tilemap.size / 2f)) / _zoom;
+                _onFillTool();
+                break;
             default:
                 break;
             }
@@ -249,17 +258,19 @@ final class TilemapResourceEditor : ResourceBaseEditor {
             _isApplyingTool = false;
             switch (_tool) {
             case 0:
-                removeEventListener("mousemove", &_onCopyTool);
-                removeEventListener("mousemove", &_onPasteTool);
+                removeEventListener("mousemove", &_onCopySelectionTool);
+                removeEventListener("mousemove", &_onPasteSelectionTool);
                 _positionMouse = Vec2f.zero;
                 break;
-                /*case 1:
-                removeEventListener("mousemove", &_onEraserTool);
-                _deltaMouse = Vec2f.zero;
+            case 1:
+                removeEventListener("mousemove", &_onCopyBrushTool);
+                removeEventListener("mousemove", &_onPasteBrushTool);
+                _positionMouse = Vec2f.zero;
                 break;
             case 2:
-                removeEventListener("mousemove", &_onFillTool);
-                break;*/
+                removeEventListener("mousemove", &_onEraserTool);
+                _positionMouse = Vec2f.zero;
+                break;
             default:
                 break;
             }
@@ -285,7 +296,7 @@ final class TilemapResourceEditor : ResourceBaseEditor {
         return Vec4i(startPos, endPos);
     }
 
-    private void _onCopyTool() {
+    private void _onCopySelectionTool() {
         Vec4i rect = getSelectionRect();
         Vec2i startPos = rect.xy;
         Vec2i endPos = rect.zw;
@@ -319,7 +330,7 @@ final class TilemapResourceEditor : ResourceBaseEditor {
         addImage(_previewSelectionTM);
     }
 
-    private void _onPasteTool() {
+    private void _onPasteSelectionTool() {
         Vec2f endPositionMouse = (getMousePosition() - (_tilemap.position - _tilemap.size / 2f)) / _zoom;
         Vec2i tilePos = (cast(Vec2i) endPositionMouse) / cast(Vec2i) _tileset.tileSize;
         tilePos = tilePos.clamp(Vec2i.zero, Vec2i(_tilemap.columns, _tilemap.lines));
@@ -328,53 +339,88 @@ final class TilemapResourceEditor : ResourceBaseEditor {
             _tilemap.setTiles(tilePos.x, tilePos.y, _selection.tiles);
         }
     }
-    /*
-    private void _onEraserTool() {
-        InputEvent.MouseMotion ev = getManager().input.asMouseMotion();
-        _deltaMouse += ev.deltaPosition / _zoom;
 
-        Vec2i move = cast(Vec2i) _deltaMouse;
+    private Vec2i getTilePos() {
+        Vec2f mousePos = (getMousePosition() - (_tilemap.position - _tilemap.size / 2f)) / _zoom;
+        Vec2i tilePos = (cast(Vec2i) mousePos) / cast(Vec2i) _tileset.tileSize;
+        tilePos = tilePos.clamp(Vec2i.zero, Vec2i(_tilemap.columns, _tilemap.lines) - 1);
+        return tilePos;
+    }
 
-        if (move.x < 0 && _clip.x < -move.x) {
-            move.x = -_clip.x;
-        }
-        else if (move.x > 0 && _clip.x + _clip.z + move.x > _imageSize.x) {
-            move.x = _imageSize.x - (_clip.x + _clip.z);
-        }
+    private void _onCopyBrushTool() {
+        Vec2i tilePos = getTilePos();
+        _brushTileId = _tilemap.getTile(tilePos.x, tilePos.y);
+    }
 
-        if (move.y < 0 && _clip.y < -move.y) {
-            move.y = -_clip.y;
-        }
-        else if (move.y > 0 && _clip.y + _clip.w + move.y > _imageSize.y) {
-            move.y = _imageSize.y - (_clip.y + _clip.w);
-        }
+    private void _pasteBrushTool(int id) {
+        Vec2i tilePos = getTilePos();
+        int offset = _brushSize & 0x1;
+        Vec2i startTile = tilePos - ((_brushSize >> 1) + offset);
+        float brushSize2 = (_brushSize / 2f) - (offset ? 0.5f : 0f);
+        Vec2f center = (cast(Vec2f) tilePos) - (offset ? Vec2f.zero : Vec2f.half);
 
-        _deltaMouse -= cast(Vec2f) move;
-        _clip.xy = cast(Vec2u)((cast(Vec2i) _clip.xy) + move);
-
-        if (move != Vec2i.zero) {
-            dispatchEvent("clip", false);
+        for (int y; y <= _brushSize + offset; ++y) {
+            for (int x; x <= _brushSize + offset; ++x) {
+                Vec2i tile = startTile + Vec2i(x, y);
+                if (tile.x < 0 || tile.y < 0 || tile.x >= _tilemap.columns ||
+                    tile.y >= _tilemap.lines || (cast(Vec2f) tile).distance(center) > brushSize2)
+                    continue;
+                _tilemap.setTile(tile.x, tile.y, id);
+            }
         }
     }
 
+    private void _onPasteBrushTool() {
+        _pasteBrushTool(_brushTileId);
+    }
+
+    private void _onEraserTool() {
+        _pasteBrushTool(-1);
+    }
+
     private void _onFillTool() {
-        Vec2f mousePosition = (getMousePosition() - (_tilemap.position - _tilemap.size / 2f)) / _zoom;
-        mousePosition = mousePosition.clamp(Vec2f.zero, cast(Vec2f) _imageSize);
-        Vec2i corner = cast(Vec2i) mousePosition;
+        Vec2i tilePos = getTilePos();
+        _fillTilesAt(tilePos.x, tilePos.y, _brushTileId);
+    }
 
-        Vec4i rect;
-        rect.xy = corner.min(_clipAnchor);
-        rect.zw = corner.max(_clipAnchor);
-
-        Vec4u clip;
-        clip.xy = cast(Vec2u) rect.xy;
-        clip.zw = cast(Vec2u)(rect.zw - rect.xy);
-
-        if (clip != _clip) {
-            _clip = clip;
-            dispatchEvent("clip", false);
+    private void _fillTilesAt(int x, int y, int value) {
+        Vec2i[] getNeighbors(ref Vec2i tile) {
+            Vec2i[] neighbors;
+            if (tile.x > 0)
+                neighbors ~= Vec2i(tile.x - 1, tile.y);
+            if (tile.x + 1 < _tilemap.columns)
+                neighbors ~= Vec2i(tile.x + 1, tile.y);
+            if (tile.y > 0)
+                neighbors ~= Vec2i(tile.x, tile.y - 1);
+            if (tile.y + 1 < _tilemap.lines)
+                neighbors ~= Vec2i(tile.x, tile.y + 1);
+            return neighbors;
         }
-    }*/
+
+        x = clamp(x, 0, _tilemap.columns - 1);
+        y = clamp(y, 0, _tilemap.lines - 1);
+
+        if (_tilemap.getTile(x, y) == value)
+            return;
+
+        const int valueToReplace = _tilemap.getTile(x, y);
+
+        Vec2i[] frontiers;
+        frontiers ~= Vec2i(x, y);
+        _tilemap.setTile(x, y, value);
+
+        while (frontiers.length) {
+            Vec2i current = frontiers[0];
+            frontiers = frontiers[1 .. $];
+
+            foreach (ref neighbor; getNeighbors(current)) {
+                if (_tilemap.getTile(neighbor.x, neighbor.y) != valueToReplace)
+                    continue;
+                _tilemap.setTile(neighbor.x, neighbor.y, value);
+                frontiers ~= neighbor;
+            }
+        }
+    }
 
     private void _onDrag() {
         UIManager manager = getManager();

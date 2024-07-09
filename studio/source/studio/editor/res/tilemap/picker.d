@@ -28,11 +28,11 @@ package final class TilePicker : UIElement {
     TilesSelection selection;
 
     this() {
-        setSize(Vec2f(300f, 400f));
+        setSize(Vec2f(256f, 384f));
 
         {
             Rectangle rect = Rectangle.outline(getSize(), 1f);
-            rect.color = Atelier.theme.onNeutral;
+            rect.color = Atelier.theme.neutral;
             rect.anchor = Vec2f.zero;
             rect.position = Vec2f.zero;
             addImage(rect);

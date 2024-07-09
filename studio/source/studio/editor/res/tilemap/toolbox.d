@@ -86,6 +86,7 @@ package class Toolbox : Modal {
 
     private void _onToolChange() {
         _tilePicker.remove();
+        _brushSizeBox.remove();
 
         switch (_toolGroup.value()) {
         case 0:

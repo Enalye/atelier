@@ -23,15 +23,17 @@ final class FileExplorer : Surface {
         VList _list;
         string[] _unfoldedFolders;
         TextField _searchField;
+        bool _isMediaDir;
     }
 
-    this() {
+    this(bool isMediaDir) {
+        _isMediaDir = isMediaDir;
         setAlign(UIAlignX.left, UIAlignY.bottom);
         setSize(Vec2f(250f, Atelier.window.height - 35f));
 
         addEventListener("size", {
             if (_list) {
-                _list.setHeight(max(0f, getHeight() - 102f));
+                _list.setHeight(max(0f, getHeight() - (_isMediaDir ? 104f : 64f)));
             }
         });
 
@@ -57,42 +59,42 @@ final class FileExplorer : Surface {
         addUI(vbox);
 
         string[] folders;
-        foreach (name, isArchived; Project.getMedias()) {
-            folders ~= name;
+        if (_isMediaDir) {
+            foreach (name, isArchived; Project.getMedias()) {
+                folders ~= name;
+            }
         }
 
-        if (folders.length) {
-            {
-                HBox hbox = new HBox;
-                hbox.setMargin(Vec2f(16f, 0f));
-                hbox.setSpacing(4f);
-                vbox.addUI(hbox);
+        if (_isMediaDir && folders.length) {
+            HBox hbox = new HBox;
+            hbox.setMargin(Vec2f(16f, 0f));
+            hbox.setSpacing(4f);
+            vbox.addUI(hbox);
 
-                hbox.addUI(new Label("Dossier:", Atelier.theme.font));
+            hbox.addUI(new Label("Dossier:", Atelier.theme.font));
 
-                _mediaSelect = new SelectButton(folders, _currentMedia);
-                _mediaSelect.setSize(Vec2f(150f, 24f));
-                _mediaSelect.addEventListener("value", &rebuildList);
-                hbox.addUI(_mediaSelect);
+            _mediaSelect = new SelectButton(folders, _currentMedia);
+            _mediaSelect.setSize(Vec2f(150f, 24f));
+            _mediaSelect.addEventListener("value", &rebuildList);
+            hbox.addUI(_mediaSelect);
 
-                _currentMedia = _mediaSelect.value;
-            }
-            {
-                HBox hbox = new HBox;
-                hbox.setSpacing(4f);
-                hbox.setMargin(Vec2f(16f, 0f));
-                vbox.addUI(hbox);
+            _currentMedia = _mediaSelect.value;
+        }
+        if ((_isMediaDir && folders.length) || !_isMediaDir) {
+            HBox hbox = new HBox;
+            hbox.setSpacing(4f);
+            hbox.setMargin(Vec2f(16f, 0f));
+            vbox.addUI(hbox);
 
-                hbox.addUI(new Icon("editor:magnify"));
-                _searchField = new TextField;
-                _searchField.setWidth(200f);
-                _searchField.addEventListener("value", &rebuildList);
-                hbox.addUI(_searchField);
-            }
+            hbox.addUI(new Icon("editor:magnify"));
+            _searchField = new TextField;
+            _searchField.setWidth(200f);
+            _searchField.addEventListener("value", &rebuildList);
+            hbox.addUI(_searchField);
         }
 
         _list = new VList;
-        _list.setSize(Vec2f(getWidth(), max(0f, getHeight() - 102f)));
+        _list.setSize(Vec2f(getWidth(), max(0f, getHeight() - (_isMediaDir ? 104f : 64f))));
         vbox.addUI(_list);
 
         rebuildList();
@@ -100,16 +102,23 @@ final class FileExplorer : Surface {
 
     void rebuildList() {
         _list.clearList();
-        if (!_mediaSelect)
+        if (!_mediaSelect && _isMediaDir)
             return;
-        _currentMedia = _mediaSelect.value;
 
         string search = _searchField ? _searchField.value : "";
-        string mediaPath = buildNormalizedPath(Project.getMediaDir(), _currentMedia);
+        string folderPath;
+
+        if (_isMediaDir) {
+            _currentMedia = _mediaSelect.value;
+            folderPath = buildNormalizedPath(Project.getMediaDir(), _currentMedia);
+        }
+        else {
+            folderPath = Project.getSourceDir();
+        }
 
         if (search.length) {
-            if (exists(mediaPath)) {
-                foreach (entry; dirEntries(mediaPath, SpanMode.depth)) {
+            if (exists(folderPath)) {
+                foreach (entry; dirEntries(folderPath, SpanMode.depth)) {
                     if (entry.isDir() || entry.indexOf(search, No.caseSentitive) == -1)
                         continue;
 
@@ -118,7 +127,7 @@ final class FileExplorer : Surface {
                 return;
             }
         }
-        foreach (elt; _buildFolder(mediaPath, 0)) {
+        foreach (elt; _buildFolder(folderPath, 0)) {
             _list.addList(elt);
         }
 

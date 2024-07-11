@@ -68,6 +68,58 @@ void initApp() {
     Atelier.ui.addUI(studio);
 }
 
+private final class ExplorerToggleButton : TextButton!Rectangle {
+    private {
+        Rectangle _background;
+    }
+
+    this(string text_) {
+        super(text_);
+
+        setFxColor(Atelier.theme.neutral);
+        setTextColor(Atelier.theme.onNeutral);
+        setSize(Vec2f(Studio.LeftPanelSize / 2f, 35f));
+
+        _background = Rectangle.fill(getSize());
+        _background.color = Atelier.theme.background;
+        _background.anchor = Vec2f.zero;
+        addImage(_background);
+
+        addEventListener("mouseenter", &_onMouseEnter);
+        addEventListener("mouseleave", &_onMouseLeave);
+
+        addEventListener("enable", &_onEnable);
+        addEventListener("disable", &_onDisable);
+    }
+
+    private void _onEnable() {
+        _background.alpha = Atelier.theme.activeOpacity;
+        setTextColor(Atelier.theme.onNeutral);
+
+        addEventListener("mouseenter", &_onMouseEnter);
+        addEventListener("mouseleave", &_onMouseLeave);
+    }
+
+    private void _onDisable() {
+        _background.alpha = Atelier.theme.inactiveOpacity;
+        setTextColor(Atelier.theme.neutral);
+
+        removeEventListener("mouseenter", &_onMouseEnter);
+        removeEventListener("mouseleave", &_onMouseLeave);
+    }
+
+    private void _onMouseEnter() {
+        Color rgb = Atelier.theme.neutral;
+        HSLColor hsl = HSLColor.fromColor(rgb);
+        hsl.l = hsl.l * .8f;
+        _background.color = hsl.toColor();
+    }
+
+    private void _onMouseLeave() {
+        _background.color = Atelier.theme.accent;
+    }
+}
+
 final class Studio : UIElement {
     struct ResourceInfo {
         Farfadet farfadet;
@@ -86,10 +138,11 @@ final class Studio : UIElement {
         TabBar _tabBar;
         ContentEditor[string] _contentEditors;
         ContentEditor _contentEditor;
-        FileExplorer _fileExplorer;
+        FileExplorer _mediaExplorer, _sourceExplorer;
         UIElement _lowerPanel, _rightPanel;
         ResourceManager _resourceManager;
         FarfadetCache[string] _farfadets;
+        TabGroup _explorerTab;
 
         enum LeftPanelSize = 250f;
         enum RightPanelSize = 317f;
@@ -128,8 +181,29 @@ final class Studio : UIElement {
         addUI(_tabBar);
 
         {
-            _fileExplorer = new FileExplorer;
-            addUI(_fileExplorer);
+            _explorerTab = new TabGroup;
+            _explorerTab.setAlign(UIAlignX.left, UIAlignY.top);
+            addUI(_explorerTab);
+
+            _explorerTab.addTab("Média", "media", "");
+            _explorerTab.addTab("Source", "source", "");
+            _explorerTab.select("media");
+
+            _explorerTab.addEventListener("value", &_onExplorerTab);
+
+            _mediaExplorer = new FileExplorer(true);
+            _mediaExplorer.setPosition(Vec2f(0f, _explorerTab.getHeight()));
+            _mediaExplorer.setAlign(UIAlignX.left, UIAlignY.top);
+            addUI(_mediaExplorer);
+
+            _sourceExplorer = new FileExplorer(false);
+            _sourceExplorer.setPosition(Vec2f(0f, _explorerTab.getHeight()));
+            _sourceExplorer.setAlign(UIAlignX.left, UIAlignY.top);
+
+            _explorerTab.addEventListener("size", {
+                _mediaExplorer.setPosition(Vec2f(0f, _explorerTab.getHeight()));
+                _sourceExplorer.setPosition(Vec2f(0f, _explorerTab.getHeight()));
+            });
         }
 
         addEventListener("windowSize", {
@@ -142,12 +216,15 @@ final class Studio : UIElement {
                 _tabBar.setWidth(max(0f, getWidth() - LeftPanelSize));
             }
             if (_lowerPanel) {
-                float sz = getHeight() / 2f;
-                _fileExplorer.setSize(Vec2f(LeftPanelSize, sz));
+                float sz = (getHeight() - _explorerTab.getHeight()) / 2f;
+                _mediaExplorer.setSize(Vec2f(LeftPanelSize, sz));
+                _sourceExplorer.setSize(Vec2f(LeftPanelSize, sz));
                 _lowerPanel.setSize(Vec2f(LeftPanelSize, sz));
             }
             else {
-                _fileExplorer.setSize(Vec2f(LeftPanelSize, getHeight()));
+                float sz = getHeight() - _explorerTab.getHeight();
+                _mediaExplorer.setSize(Vec2f(LeftPanelSize, sz));
+                _sourceExplorer.setSize(Vec2f(LeftPanelSize, sz));
             }
 
             if (_contentEditor) {
@@ -159,7 +236,23 @@ final class Studio : UIElement {
     }
 
     void updateRessourceFolders() {
-        _fileExplorer.updateRessourceFolders();
+        _mediaExplorer.updateRessourceFolders();
+        _sourceExplorer.updateRessourceFolders();
+    }
+
+    private void _onExplorerTab() {
+        switch (_explorerTab.value) {
+        case "media":
+            _sourceExplorer.remove();
+            addUI(_mediaExplorer);
+            break;
+        case "source":
+            _mediaExplorer.remove();
+            addUI(_sourceExplorer);
+            break;
+        default:
+            break;
+        }
     }
 
     private void setLowerPanel(UIElement element) {
@@ -169,16 +262,21 @@ final class Studio : UIElement {
         _lowerPanel = element;
 
         if (_lowerPanel) {
-            float sz = getHeight() / 2f;
-            _fileExplorer.setSize(Vec2f(LeftPanelSize, sz));
-            _fileExplorer.setAlign(UIAlignX.left, UIAlignY.top);
+            float sz = (getHeight() - _explorerTab.getHeight()) / 2f;
+            _mediaExplorer.setSize(Vec2f(LeftPanelSize, sz));
+            _mediaExplorer.setAlign(UIAlignX.left, UIAlignY.top);
+            _sourceExplorer.setSize(Vec2f(LeftPanelSize, sz));
+            _sourceExplorer.setAlign(UIAlignX.left, UIAlignY.top);
             _lowerPanel.setSize(Vec2f(LeftPanelSize, sz));
             _lowerPanel.setAlign(UIAlignX.left, UIAlignY.bottom);
             addUI(_lowerPanel);
         }
         else {
-            _fileExplorer.setSize(Vec2f(LeftPanelSize, getHeight()));
-            _fileExplorer.setAlign(UIAlignX.left, UIAlignY.top);
+            float sz = getHeight() - _explorerTab.getHeight();
+            _mediaExplorer.setSize(Vec2f(LeftPanelSize, sz));
+            _mediaExplorer.setAlign(UIAlignX.left, UIAlignY.top);
+            _sourceExplorer.setSize(Vec2f(LeftPanelSize, sz));
+            _sourceExplorer.setAlign(UIAlignX.left, UIAlignY.top);
         }
     }
 
@@ -211,7 +309,8 @@ final class Studio : UIElement {
     private void _onTabClose() {
         string path = _tabBar.lastRemovedTab;
         _contentEditors.remove(path);
-        _fileExplorer.setSize(Vec2f(LeftPanelSize, getHeight()));
+        _mediaExplorer.setSize(Vec2f(LeftPanelSize, getHeight()));
+        _sourceExplorer.setSize(Vec2f(LeftPanelSize, getHeight()));
         setLowerPanel(null);
         setRightPanel(null);
     }

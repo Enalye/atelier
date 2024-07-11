@@ -36,6 +36,10 @@ final class Project {
         return buildNormalizedPath(_directory, "media");
     }
 
+    static string getSourceDir() {
+        return buildNormalizedPath(_directory, "source");
+    }
+
     static bool isOpen() {
         return _isOpen;
     }
@@ -112,6 +116,17 @@ final class Project {
             return (bool[string]).init;
 
         return _currentConfig.getMedias();
+    }
+
+    static string getSource() {
+        if (!isOpen())
+            return "";
+
+        return _currentConfig.getSource();
+    }
+
+    static string getSourcePath() {
+        return buildNormalizedPath(getSourceDir(), getSource());
     }
 
     static void run() {

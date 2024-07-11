@@ -8,6 +8,7 @@ module studio.editor.base;
 import std.file;
 import std.path;
 import atelier;
+import studio.editor.codeeditor;
 import studio.editor.imageviewer;
 import studio.editor.fontviewer;
 import studio.editor.audioviewer;
@@ -44,8 +45,9 @@ abstract class ContentEditor : UIElement {
         case ".log":
         case ".ini":
         case ".md":
-        case ".gr":
             return new TextEditor(path, windowSize);
+        case ".gr":
+            return new CodeEditor(path, windowSize);
         case ".ffd":
             return new ResourceEditor(path, windowSize);
         default:

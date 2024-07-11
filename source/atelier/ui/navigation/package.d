@@ -9,4 +9,5 @@ public {
     import atelier.ui.navigation.breadcrumbs;
     import atelier.ui.navigation.list;
     import atelier.ui.navigation.tabbar;
+    import atelier.ui.navigation.tabgroup;
 }

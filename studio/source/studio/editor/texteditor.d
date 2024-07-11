@@ -18,7 +18,7 @@ import atelier;
 import studio.editor.base;
 import atelier.core.data.vera;
 
-final class TextEditor : ContentEditor {
+class TextEditor : ContentEditor {
     private {
         Surface _linesSurface;
         UIElement _textContainer;
@@ -118,6 +118,10 @@ final class TextEditor : ContentEditor {
         }
 
         updateLines();
+    }
+
+    UIElement getTextContainer() {
+        return _textContainer;
     }
 
     private uint _getMouseLine() {
@@ -875,11 +879,16 @@ final class TextEditor : ContentEditor {
                 }
                 break;
             default:
+                onKeyboardEvent(keyEvent.layout);
                 break;
             }
         }
 
         updateLines();
+    }
+
+    void onKeyboardEvent(string key) {
+
     }
 
     private void _onScrollbar() {
@@ -1120,6 +1129,14 @@ final class TextEditor : ContentEditor {
         }
 
         _maxColumn = _currentColumn;
+    }
+
+    int getCurrentColumn() const {
+        return _currentColumn;
+    }
+
+    int getCurrentLine() const {
+        return _currentLine;
     }
 
     int getCurrentLineSize() {

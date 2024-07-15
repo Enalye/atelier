@@ -391,7 +391,7 @@ final class TilesetResourceEditor : ResourceBaseEditor {
                 }
 
                 drawText(origin + clip.xy + Vec2f(2f, clip.w - 2f) + animClip,
-                    to!dstring(frame), Atelier.theme.font, 1f, color);
+                    to!dstring(frame), Atelier.theme.font, color);
                 Atelier.renderer.drawRect(origin + clip.xy + animClip, clip.zw, color, 1f, false);
 
                 frame++;

@@ -14,9 +14,12 @@ import std.math;
 import std.stdio;
 import std.string;
 import std.typecons;
+
 import atelier;
-import studio.editor.base;
 import atelier.core.data.vera;
+
+import studio.editor.base;
+import studio.syntax;
 
 class TextEditor : ContentEditor {
     private {
@@ -25,7 +28,7 @@ class TextEditor : ContentEditor {
         VScrollbar _scrollbar;
         Line[] _lines;
         Label[] _lineCountLabels;
-        Label[] _lineTextLabels;
+        ColoredLabel[] _lineTextLabels;
         uint _borderX = 10;
         uint _borderY = 5;
         uint _startLine = 0;
@@ -56,6 +59,9 @@ class TextEditor : ContentEditor {
         Color _lineBarColor;
         Color[] _indentColor;
         Font _font;
+
+        // Coloration
+        SyntaxHighlighter _syntaxHightlighter;
     }
 
     this(string path_, Vec2f windowSize) {
@@ -116,6 +122,8 @@ class TextEditor : ContentEditor {
             float t = i / cast(float) indentColorCount;
             _indentColor ~= HSLColor(accentHue, lerp(1f, 0.77f, t) / 3f, lerp(0.42f, 0.88f, t) / 3f).toColor();
         }
+
+        _syntaxHightlighter = new SyntaxHighlighter;
 
         updateLines();
     }
@@ -908,6 +916,10 @@ class TextEditor : ContentEditor {
         updateLines();
     }
 
+    void setSyntaxHighlighter(SyntaxHighlighter syntaxHightlighter) {
+        _syntaxHightlighter = syntaxHightlighter;
+    }
+
     private void updateLines(bool useView = false) {
         uint textWindowHeight = cast(uint)(getHeight() / _font.lineSkip());
         uint halfTextWindowHeight = textWindowHeight >> 1;
@@ -1004,7 +1016,7 @@ class TextEditor : ContentEditor {
 
         if (actualTextWindowHeight > _lineTextLabels.length) {
             for (size_t i = _lineTextLabels.length; i < actualTextWindowHeight; ++i) {
-                Label lineTextLabel = new Label("", _font);
+                ColoredLabel lineTextLabel = new ColoredLabel("", _font);
                 lineTextLabel.setAlign(UIAlignX.left, UIAlignY.top);
                 lineTextLabel.setPosition(Vec2f(0f, _font.lineSkip() * i));
                 _lineTextLabels ~= lineTextLabel;
@@ -1049,8 +1061,13 @@ class TextEditor : ContentEditor {
                 lineCount = cast(long) line - cast(long) _currentLine;
                 _lineCountLabels[index].setAlign(UIAlignX.right, UIAlignY.top);
             }
-            _lineCountLabels[index].text = to!string(lineCount);
+
+            _syntaxHightlighter.setLine(line, _lines[line].getText());
+            _lineTextLabels[index].tokens = _syntaxHightlighter.getColorTokens(line,
+                _startColumn, _endColumn);
             _lineTextLabels[index].text = to!string(_lines[line].getText(_startColumn, _endColumn));
+
+            _lineCountLabels[index].text = to!string(lineCount);
         }
     }
 
@@ -1453,6 +1470,9 @@ class TextEditor : ContentEditor {
         if (!_lines.length)
             return;
 
+        _currentColumn = clamp(_currentColumn, 0, getLineLength(_currentLine));
+        _selectionColumn = clamp(_selectionColumn, 0, getLineLength(_selectionLine));
+
         if (!hasSelection()) {
             if (direction > 0) {
                 if (_currentColumn == _lines[_currentLine].getLength()) {
@@ -1501,7 +1521,8 @@ class TextEditor : ContentEditor {
         else {
             if (_currentLine == _selectionLine) {
                 uint startCol = min(_currentColumn, _selectionColumn);
-                uint endCol = max(_currentColumn, _selectionColumn);
+                uint endCol = clamp(max(_currentColumn, _selectionColumn), 0,
+                    getLineLength(_currentLine));
 
                 addAction(TextState.Type.update, _currentLine);
                 _removeBookmarks(_currentLine, startCol, _currentLine, endCol);
@@ -1671,7 +1692,8 @@ class TextEditor : ContentEditor {
         dstring result;
         if (_currentLine == _selectionLine) {
             uint startCol = min(_selectionColumn, _currentColumn);
-            uint endCol = max(_selectionColumn, _currentColumn);
+            uint endCol = clamp(max(_selectionColumn, _currentColumn), 0,
+                getLineLength(_currentLine));
             result = _lines[_currentLine].getText(startCol, endCol);
         }
         else if (_currentLine < _selectionLine) {
@@ -1777,7 +1799,15 @@ class TextEditor : ContentEditor {
                 insertLine(command.lineToApply, command.text.dup);
                 break;
             case update:
-                _lines[command.lineToApply].setText(command.text.dup);
+                // Note: Sécurité dans certains cas où il y a eu une suppression
+                // en fin de fichier et qu’on Ctrl+Z.
+                // Flemme de vérifier pourquoi.
+                // Défaut de ce correctif: des lignes inutiles sont créés en fin de fichier
+                // quand on Ctrl+Z.
+                if (command.lineToApply >= _lines.length)
+                    insertLine(command.lineToApply, command.text.dup);
+                else
+                    _lines[command.lineToApply].setText(command.text.dup);
                 break;
             }
         }
@@ -1904,6 +1934,9 @@ private final class Line {
     }
 
     void removeAt(size_t col) {
+        if (col >= _text.length)
+            return;
+
         dchar[] text = cast(dchar[]) _text;
         text = text.remove!(SwapStrategy.stable)(col);
         _text = cast(dstring) text;

@@ -21,6 +21,7 @@ import studio.editor.base;
 import atelier.core.data.vera;
 import studio.editor.texteditor;
 import studio.project;
+import studio.syntax;
 
 final class CodeEditor : TextEditor {
     private {
@@ -45,6 +46,8 @@ final class CodeEditor : TextEditor {
 
         _compiler.addFile(sourceFile);
         _compiler.compile(GrOption.all, GrLocale.fr_FR);
+
+        setSyntaxHighlighter(new GrimoireSyntaxHighlighter);
     }
 
     override void onKeyboardEvent(string key) {

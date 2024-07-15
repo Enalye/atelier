@@ -410,7 +410,7 @@ final class AnimationResourceEditor : ResourceBaseEditor {
 
                     drawText(origin + clip.xy + Vec2f(clip.z - 12f,
                             clip.w - 2f) + animClip, to!dstring(_toolbox._animation.frame),
-                        Atelier.theme.font, 1f, currentFrameColor);
+                        Atelier.theme.font, currentFrameColor);
                 }
                 else if (frame == 0) {
                     color = startFrameColor;
@@ -420,7 +420,7 @@ final class AnimationResourceEditor : ResourceBaseEditor {
                 }
 
                 drawText(origin + clip.xy + Vec2f(2f, clip.w - 2f) + animClip,
-                    to!dstring(frame), Atelier.theme.font, 1f, color);
+                    to!dstring(frame), Atelier.theme.font, color);
                 Atelier.renderer.drawRect(origin + clip.xy + animClip, clip.zw, color, 1f, false);
 
                 frame++;

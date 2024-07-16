@@ -1067,7 +1067,7 @@ class TextEditor : ContentEditor {
                 _startColumn, _endColumn);
             _lineTextLabels[index].text = to!string(_lines[line].getText(_startColumn, _endColumn));
 
-            _lineCountLabels[index].text = to!string(lineCount);
+            _lineCountLabels[index].text = to!string(lineCount + 1);
         }
     }
 
@@ -1088,6 +1088,12 @@ class TextEditor : ContentEditor {
 
     bool hasSelection() const {
         return _selectionLine != _currentLine || _selectionColumn != _currentColumn;
+    }
+
+    void gotoPosition(uint line, uint column) {
+        _selectionLine = _currentLine = line;
+        _selectionColumn = _currentColumn = column;
+        updateLines();
     }
 
     void _moveUp(int step) {

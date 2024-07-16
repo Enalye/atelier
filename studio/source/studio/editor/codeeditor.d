@@ -22,6 +22,7 @@ import atelier.core.data.vera;
 import studio.editor.texteditor;
 import studio.project;
 import studio.syntax;
+import studio.ui;
 
 final class CodeEditor : TextEditor {
     private {
@@ -45,7 +46,9 @@ final class CodeEditor : TextEditor {
         }
 
         _compiler.addFile(sourceFile);
-        _compiler.compile(GrOption.all, GrLocale.fr_FR);
+        if (!_compiler.compile(GrOption.all, GrLocale.fr_FR)) {
+            writeln(_compiler.getError().prettify(GrLocale.fr_FR));
+        }
 
         setSyntaxHighlighter(new GrimoireSyntaxHighlighter);
     }
@@ -53,7 +56,29 @@ final class CodeEditor : TextEditor {
     override void onKeyboardEvent(string key) {
         switch (key) with (InputEvent.KeyButton.Button) {
         case "K":
-            _compiler.fetchDefinition(path(), getCurrentColumn(), getCurrentLine());
+            GrDefinition definition = _compiler.fetchDefinition(path(),
+                getCurrentLine() + 1, getCurrentColumn() + 1);
+
+            GrLexeme decl = definition.getDeclaration();
+            if (decl.type == GrLexeme.Type.nothing)
+                break;
+
+            import std.stdio;
+            writeln(decl.getFile(), " - ", decl.line, ":", decl.column);
+
+            uint line = cast(uint) decl.rawLine;
+            uint column = cast(uint) decl.column;
+
+            if (path() == decl.getFile()) {
+                gotoPosition(line, column);
+            }
+            else {
+                Studio.editFile(decl.getFile());
+                CodeEditor editor = cast(CodeEditor) Studio.getCurrentEditor();
+                if (editor) {
+                    editor.gotoPosition(line, column);
+                }
+            }
             break;
         case "I":
             break;

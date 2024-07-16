@@ -346,6 +346,10 @@ final class Studio : UIElement {
         setRightPanel(_contentEditor.getRightPanel());
     }
 
+    static ContentEditor getCurrentEditor() {
+        return _contentEditor;
+    }
+
     static void editFile(string path) {
         if (_tabBar.hasTab(path)) {
             _tabBar.select(path);

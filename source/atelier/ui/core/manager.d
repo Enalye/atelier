@@ -106,7 +106,7 @@ final class UIManager {
         case none:
             break;
         case keyButton:
-            if (_focusedElement) {
+            if (_focusedElement && _focusedElement.getManager()) {
                 _focusedElement.dispatchEvent("key");
             }
             break;

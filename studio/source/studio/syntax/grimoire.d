@@ -547,7 +547,7 @@ final class GrimoireSyntaxHighlighter : SyntaxHighlighter {
                     current++;
                     break;
                 case '}':
-                    if (line.scopeLevel[$ - 1].interpolationLevel > 0) {
+                    if (line.scopeLevel.length > 1 && line.scopeLevel[$ - 1].interpolationLevel > 0) {
                         line.scopeLevel[$ - 1].interpolationLevel--;
                         addToken(Token.Type.string_);
                         current++;

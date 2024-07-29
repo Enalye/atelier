@@ -14,6 +14,7 @@ import studio.editor.res.base;
 final class ResourceEditor : ContentEditor {
     private {
         ResourceList _list;
+        ResourceBaseEditor[] _editors;
         ResourceBaseEditor _currentEditor;
     }
 
@@ -42,13 +43,29 @@ final class ResourceEditor : ContentEditor {
     protected void select(Farfadet ffd) {
         if (_currentEditor) {
             _currentEditor.remove();
+            _currentEditor = null;
         }
 
-        _currentEditor = ResourceBaseEditor.create(path(), ffd,
-            Vec2f(getWidth() - _list.getWidth(), getHeight()));
-        _currentEditor.setAlign(UIAlignX.left, UIAlignY.top);
-        addUI(_currentEditor);
+        string type = ffd.name;
+        string rid;
+        if (ffd.getCount() > 0) {
+            rid = ffd.get!string(0);
+        }
 
+        foreach (editor; _editors) {
+            if (editor.type == type && editor.rid == rid) {
+                _currentEditor = editor;
+                break;
+            }
+        }
+        if (!_currentEditor) {
+            _currentEditor = ResourceBaseEditor.create(path(), ffd,
+                Vec2f(getWidth() - _list.getWidth(), getHeight()));
+            _currentEditor.setAlign(UIAlignX.left, UIAlignY.top);
+            _editors ~= _currentEditor;
+        }
+
+        addUI(_currentEditor);
         dispatchEvent("panel", false);
     }
 

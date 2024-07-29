@@ -51,6 +51,7 @@ final class CodeEditor : TextEditor {
         }
 
         setSyntaxHighlighter(new GrimoireSyntaxHighlighter);
+        updateLines();
     }
 
     override void onKeyboardEvent(string key) {
@@ -64,6 +65,7 @@ final class CodeEditor : TextEditor {
                 break;
 
             import std.stdio;
+
             writeln(decl.getFile(), " - ", decl.line, ":", decl.column);
 
             uint line = cast(uint) decl.rawLine;
@@ -81,6 +83,10 @@ final class CodeEditor : TextEditor {
             }
             break;
         case "I":
+            GrDefinition definition = _compiler.fetchDefinition(path(),
+                getCurrentLine() + 1, getCurrentColumn() + 1);
+
+            writeln(definition.getName());
             break;
         default:
             break;

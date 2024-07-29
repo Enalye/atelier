@@ -41,7 +41,7 @@ final class TilesetResourceEditor : ResourceBaseEditor {
     }
 
     this(string path_, Farfadet ffd, Vec2f size) {
-        super(path_, size);
+        super(path_, ffd, size);
         _ffd = ffd;
 
         _name = ffd.get!string(0);

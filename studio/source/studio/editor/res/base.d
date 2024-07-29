@@ -18,12 +18,20 @@ import studio.ui;
 
 abstract class ResourceBaseEditor : UIElement {
     private {
-        string _path;
+        string _path, _type, _rid;
     }
 
     @property {
         string path() const {
             return _path;
+        }
+
+        string type() const {
+            return _type;
+        }
+
+        string rid() const {
+            return _rid;
         }
     }
 
@@ -48,8 +56,12 @@ abstract class ResourceBaseEditor : UIElement {
         }
     }
 
-    this(string path_, Vec2f windowSize) {
+    this(string path_, Farfadet ffd, Vec2f windowSize) {
         _path = path_;
+        _type = ffd.name;
+        if (ffd.getCount() > 0) {
+            _rid = ffd.get!string(0);
+        }
         focusable = true;
 
         setAlign(UIAlignX.right, UIAlignY.top);

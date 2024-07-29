@@ -308,7 +308,13 @@ final class Studio : UIElement {
 
     private void _onTabClose() {
         string path = _tabBar.lastRemovedTab;
-        _contentEditors.remove(path);
+
+        auto p = path in _contentEditors;
+        if (p) {
+            p.onClose();
+            _contentEditors.remove(path);
+        }
+
         _mediaExplorer.setSize(Vec2f(LeftPanelSize, getHeight()));
         _sourceExplorer.setSize(Vec2f(LeftPanelSize, getHeight()));
         setLowerPanel(null);

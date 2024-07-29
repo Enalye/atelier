@@ -99,6 +99,10 @@ final class AudioViewer : ContentEditor {
             }
         }
     }
+
+    override void onClose() {
+        stop();
+    }
 }
 
 private final class MediaPlayer : UIElement {

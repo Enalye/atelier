@@ -920,7 +920,7 @@ class TextEditor : ContentEditor {
         _syntaxHightlighter = syntaxHightlighter;
     }
 
-    private void updateLines(bool useView = false) {
+    void updateLines(bool useView = false) {
         uint textWindowHeight = cast(uint)(getHeight() / _font.lineSkip());
         uint halfTextWindowHeight = textWindowHeight >> 1;
 

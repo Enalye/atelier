@@ -68,7 +68,7 @@ final class GrimoireSyntaxHighlighter : SyntaxHighlighter {
                 case '#':
                     current++;
 
-                    if (text[current] == '{') {
+                    if (current < text.length && text[current] == '{') {
                         current++;
                         addToken(Token.Type.none);
                         line.scopeLevel[$ - 1].interpolationLevel++;

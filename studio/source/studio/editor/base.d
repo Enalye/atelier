@@ -81,4 +81,6 @@ abstract class ContentEditor : UIElement {
     UIElement getRightPanel() {
         return null;
     }
+
+    void onClose() {}
 }

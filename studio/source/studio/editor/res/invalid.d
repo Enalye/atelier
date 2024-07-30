@@ -8,14 +8,15 @@ module studio.editor.res.invalid;
 import atelier;
 import farfadet;
 import studio.editor.res.base;
+import studio.editor.res.editor;
 
 final class InvalidResourceEditor : ResourceBaseEditor {
     private {
         Farfadet _ffd;
     }
 
-    this(string path_, Farfadet ffd, Vec2f size) {
-        super(path_, ffd, size);
+    this(ResourceEditor editor, string path_, Farfadet ffd, Vec2f size) {
+        super(editor, path_, ffd, size);
         _ffd = ffd;
 
         Label label = new Label("Ressource `" ~ ffd.name ~ "` non-reconnue", Atelier.theme.font);

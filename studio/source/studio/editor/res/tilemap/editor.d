@@ -13,6 +13,7 @@ import farfadet;
 import studio.project;
 import studio.ui;
 import studio.editor.res.base;
+import studio.editor.res.editor;
 import studio.editor.res.tilemap.toolbox;
 import studio.editor.res.tilemap.parameter;
 import studio.editor.res.tilemap.selection;
@@ -39,8 +40,8 @@ final class TilemapResourceEditor : ResourceBaseEditor {
         Tilemap _previewSelectionTM;
     }
 
-    this(string path_, Farfadet ffd, Vec2f size) {
-        super(path_, ffd, size);
+    this(ResourceEditor editor, string path_, Farfadet ffd, Vec2f size) {
+        super(editor, path_, ffd, size);
         _ffd = ffd;
 
         _name = ffd.get!string(0);

@@ -7,6 +7,7 @@ module studio.ui.studio;
 
 import std.exception : enforce;
 import std.file;
+import std.functional : toDelegate;
 import std.path;
 import atelier;
 import farfadet;
@@ -17,34 +18,55 @@ import studio.ui.fileexplorer;
 import studio.ui.newproject;
 import studio.ui.resourcemanager;
 
+private {
+    Studio _studio;
+}
+
+private void _onNewProject() {
+    auto modal = new NewProject;
+    modal.addEventListener("newProject", {
+        Project.create(modal.path, modal.configName, modal.sourceFile);
+        Atelier.ui.popModalUI();
+        _studio.updateRessourceFolders();
+    });
+    Atelier.ui.pushModalUI(modal);
+}
+
+private void _onOpenProject() {
+    auto modal = new BrowseDir(Project.getDirectory());
+    modal.addEventListener("value", {
+        Project.open(modal.value);
+        Atelier.ui.popModalUI();
+        _studio.updateRessourceFolders();
+    });
+    Atelier.ui.pushModalUI(modal);
+}
+
+private void _onBuildProject() {
+    if (Project.isOpen()) {
+        Project.build();
+    }
+}
+
+private void _onRunProject() {
+    if (Project.isOpen()) {
+        Project.run();
+    }
+}
+
 void initApp() {
     MenuBar bar = new MenuBar;
-    Studio studio = new Studio;
+    _studio = new Studio;
 
     Project.setDirectory(getcwd());
 
-    bar.add("Projet", "Nouveau Projet").addEventListener("click", {
-        auto modal = new NewProject;
-        modal.addEventListener("newProject", {
-            Project.create(modal.path, modal.configName, modal.sourceFile);
-            Atelier.ui.popModalUI();
-            studio.updateRessourceFolders();
-        });
-        Atelier.ui.pushModalUI(modal);
-    });
-    bar.add("Projet", "Ouvrir").addEventListener("click", {
-        auto modal = new BrowseDir(Project.getDirectory());
-        modal.addEventListener("value", {
-            Project.open(modal.value);
-            Atelier.ui.popModalUI();
-            studio.updateRessourceFolders();
-        });
-        Atelier.ui.pushModalUI(modal);
-    });
+    bar.add("Projet", "Nouveau Projet (Ctrl+N)").addEventListener("click",
+        toDelegate(&_onNewProject));
+    bar.add("Projet", "Ouvrir (Ctrl+O)").addEventListener("click", toDelegate(&_onOpenProject));
     bar.add("Projet", "Fermer").addEventListener("click", { Project.close(); });
     bar.addSeparator("Projet");
-    bar.add("Projet", "Lancer").addEventListener("click", { Project.run(); });
-    bar.add("Projet", "Exporter").addEventListener("click", { Project.build(); });
+    bar.add("Projet", "Lancer (F5)").addEventListener("click", toDelegate(&_onRunProject));
+    bar.add("Projet", "Exporter (F6)").addEventListener("click", toDelegate(&_onBuildProject));
     bar.addSeparator("Projet");
     bar.add("Projet", "Quitter").addEventListener("click", { Atelier.close(); });
 
@@ -54,18 +76,18 @@ void initApp() {
 
         auto modal = new ResourceFolderManager;
         modal.addEventListener("updateRessourceFolders", {
-            studio.updateRessourceFolders();
+            _studio.updateRessourceFolders();
         });
         Atelier.ui.pushModalUI(modal);
     });
     bar.addSeparator("Ressource");
     bar.add("Ressource", "Nouvelle Ressource");
-    bar.add("Ressource", "Enregistrer");
-    bar.add("Ressource", "Enregistrer Sous…");
+    bar.add("Ressource", "Enregistrer (Ctrl+S)");
+    bar.add("Ressource", "Enregistrer Sous… (Ctrl+Shift+S)");
     bar.addSeparator("Ressource");
     bar.add("Ressource", "Fermer");
     Atelier.ui.addUI(bar);
-    Atelier.ui.addUI(studio);
+    Atelier.ui.addUI(_studio);
 }
 
 private final class ExplorerToggleButton : TextButton!Rectangle {
@@ -233,6 +255,42 @@ final class Studio : UIElement {
                     getHeight() - _tabBar.getHeight())));
             }
         });
+
+        addEventListener("globalkey", &_onKey);
+    }
+
+    private void _onKey() {
+        InputEvent event = getManager().input;
+
+        if (event.isPressed()) {
+            InputEvent.KeyButton keyEvent = event.asKeyButton();
+            switch (keyEvent.button) with (InputEvent.KeyButton.Button) {
+            case s:
+                if (_contentEditor && hasControlModifier()) {
+                    _contentEditor.save();
+                }
+                break;
+            case n:
+                _onNewProject();
+                break;
+            case o:
+                _onOpenProject();
+                break;
+            case f5:
+                _onRunProject();
+                break;
+            case f6:
+                _onBuildProject();
+                break;
+            default:
+                break;
+            }
+        }
+    }
+
+    bool hasControlModifier() const {
+        return Atelier.input.isPressed(InputEvent.KeyButton.Button.leftControl) ||
+            Atelier.input.isPressed(InputEvent.KeyButton.Button.rightControl);
     }
 
     void updateRessourceFolders() {
@@ -354,6 +412,10 @@ final class Studio : UIElement {
 
     static ContentEditor getCurrentEditor() {
         return _contentEditor;
+    }
+
+    static void setDirty(string path, bool isDirty) {
+        _tabBar.setDirty(path, isDirty);
     }
 
     static void editFile(string path) {

@@ -109,6 +109,7 @@ final class UIManager {
             if (_focusedElement && _focusedElement.getManager()) {
                 _focusedElement.dispatchEvent("key");
             }
+            dispatchEvent("globalkey");
             break;
         case mouseButton:
             auto mouseButtonEvent = event.asMouseButton();

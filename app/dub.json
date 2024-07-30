@@ -18,6 +18,14 @@
             "targetName": "atelier"
         },
         {
+            "name": "atelier_dev_debug",
+            "versions": [
+                "AtelierDev"
+            ],
+            "targetPath": "../bin",
+            "targetName": "atelier"
+        },
+        {
             "name": "atelier_redist",
             "versions": [
                 "AtelierRedist"
@@ -27,6 +35,14 @@
                 "-entry:mainCRTStartup"
             ],
             "targetPath": "../export",
+            "targetName": "redist"
+        },
+        {
+            "name": "atelier_redist_debug",
+            "versions": [
+                "AtelierRedist"
+            ],
+            "targetPath": "../bin",
             "targetName": "redist"
         }
     ]

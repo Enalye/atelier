@@ -11,6 +11,7 @@ import std.math : abs;
 import atelier;
 import farfadet;
 import studio.editor.res.base;
+import studio.editor.res.editor;
 import studio.project;
 import studio.ui;
 
@@ -27,8 +28,8 @@ final class TextureResourceEditor : ResourceBaseEditor {
         ParameterWindow _parameterWindow;
     }
 
-    this(string path_, Farfadet ffd, Vec2f size) {
-        super(path_, ffd, size);
+    this(ResourceEditor editor, string path_, Farfadet ffd, Vec2f size) {
+        super(editor, path_, ffd, size);
         _ffd = ffd;
 
         _name = ffd.get!string(0);

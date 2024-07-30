@@ -15,6 +15,7 @@ import studio.editor.audioviewer;
 import studio.editor.texteditor;
 import studio.editor.res;
 import studio.editor.invalid;
+import studio.ui;
 
 abstract class ContentEditor : UIElement {
     private {
@@ -68,6 +69,10 @@ abstract class ContentEditor : UIElement {
         addEventListener("register", &focus);*/
     }
 
+    final void setDirty() {
+        Studio.setDirty(path(), true);
+    }
+
     private void _onParentSize() {
         if (!isAlive())
             return;
@@ -82,5 +87,9 @@ abstract class ContentEditor : UIElement {
         return null;
     }
 
-    void onClose() {}
+    void onClose() {
+    }
+
+    void save() {
+    }
 }

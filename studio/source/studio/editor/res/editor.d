@@ -59,7 +59,7 @@ final class ResourceEditor : ContentEditor {
             }
         }
         if (!_currentEditor) {
-            _currentEditor = ResourceBaseEditor.create(path(), ffd,
+            _currentEditor = ResourceBaseEditor.create(this, path(), ffd,
                 Vec2f(getWidth() - _list.getWidth(), getHeight()));
             _currentEditor.setAlign(UIAlignX.left, UIAlignY.top);
             _editors ~= _currentEditor;
@@ -69,7 +69,7 @@ final class ResourceEditor : ContentEditor {
         dispatchEvent("panel", false);
     }
 
-    void save() {
+    override void save() {
         Farfadet ffd = new Farfadet;
         _list.save(ffd, _currentEditor);
         ffd.save(path());

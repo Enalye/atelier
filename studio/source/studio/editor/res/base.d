@@ -8,6 +8,7 @@ module studio.editor.res.base;
 import atelier;
 import farfadet;
 import studio.editor.res.animation;
+import studio.editor.res.editor;
 import studio.editor.res.invalid;
 import studio.editor.res.ninepatch;
 import studio.editor.res.sprite;
@@ -18,6 +19,7 @@ import studio.ui;
 
 abstract class ResourceBaseEditor : UIElement {
     private {
+        ResourceEditor _editor;
         string _path, _type, _rid;
     }
 
@@ -35,28 +37,29 @@ abstract class ResourceBaseEditor : UIElement {
         }
     }
 
-    static ResourceBaseEditor create(string path_, Farfadet ffd, Vec2f size) {
+    static ResourceBaseEditor create(ResourceEditor editor, string path_, Farfadet ffd, Vec2f size) {
         Studio.reloadResources();
 
         switch (ffd.name) {
         case "texture":
-            return new TextureResourceEditor(path_, ffd, size);
+            return new TextureResourceEditor(editor, path_, ffd, size);
         case "sprite":
-            return new SpriteResourceEditor(path_, ffd, size);
+            return new SpriteResourceEditor(editor, path_, ffd, size);
         case "ninepatch":
-            return new NinePatchResourceEditor(path_, ffd, size);
+            return new NinePatchResourceEditor(editor, path_, ffd, size);
         case "animation":
-            return new AnimationResourceEditor(path_, ffd, size);
+            return new AnimationResourceEditor(editor, path_, ffd, size);
         case "tileset":
-            return new TilesetResourceEditor(path_, ffd, size);
+            return new TilesetResourceEditor(editor, path_, ffd, size);
         case "tilemap":
-            return new TilemapResourceEditor(path_, ffd, size);
+            return new TilemapResourceEditor(editor, path_, ffd, size);
         default:
-            return new InvalidResourceEditor(path_, ffd, size);
+            return new InvalidResourceEditor(editor, path_, ffd, size);
         }
     }
 
-    this(string path_, Farfadet ffd, Vec2f windowSize) {
+    this(ResourceEditor editor, string path_, Farfadet ffd, Vec2f windowSize) {
+        _editor = editor;
         _path = path_;
         _type = ffd.name;
         if (ffd.getCount() > 0) {
@@ -75,6 +78,10 @@ abstract class ResourceBaseEditor : UIElement {
         if (!isAlive())
             return;
         setSize(getParentSize());
+    }
+
+    final void setDirty() {
+        _editor.setDirty();
     }
 
     abstract Farfadet save(Farfadet);

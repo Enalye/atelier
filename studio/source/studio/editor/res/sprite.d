@@ -11,6 +11,7 @@ import std.math : abs;
 import atelier;
 import farfadet;
 import studio.editor.res.base;
+import studio.editor.res.editor;
 import studio.project;
 import studio.ui;
 
@@ -34,8 +35,8 @@ final class SpriteResourceEditor : ResourceBaseEditor {
         int _tool;
     }
 
-    this(string path_, Farfadet ffd, Vec2f size) {
-        super(path_, ffd, size);
+    this(ResourceEditor editor, string path_, Farfadet ffd, Vec2f size) {
+        super(editor, path_, ffd, size);
         _ffd = ffd;
 
         _name = ffd.get!string(0);
@@ -60,16 +61,19 @@ final class SpriteResourceEditor : ResourceBaseEditor {
             _textureRID = _parameterWindow.getTextureRID();
             setTextureRID(_textureRID);
             _toolbox.setTexture(getTexture(), _clip);
+            setDirty();
         });
 
         _parameterWindow.addEventListener("property_clip", {
             _clip = _parameterWindow.getClip();
             _toolbox.setClip(_clip);
+            setDirty();
         });
 
         addEventListener("clip", {
             _parameterWindow.setClip(_clip);
             _toolbox.setClip(_clip);
+            setDirty();
         });
         _toolbox.addEventListener("tool", { _tool = _toolbox.getTool(); });
         addEventListener("register", { Atelier.ui.addUI(_toolbox); });

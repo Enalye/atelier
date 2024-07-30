@@ -23,7 +23,10 @@
     "configurations": [
         {
             "name": "debug",
-            "targetPath": "../bin"
+            "targetPath": "../bin",
+            "versions": [
+                "StudioDebug"
+            ]
         },
         {
             "name": "export",

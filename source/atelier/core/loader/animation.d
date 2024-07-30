@@ -53,7 +53,7 @@ package void compileAnimation(string path, const Farfadet ffd, OutStream stream)
 
     Vec2i margin;
     if (ffd.hasNode("margin")) {
-        margin = ffd.getNode("margin", 2).get!Vec2i(1);
+        margin = ffd.getNode("margin", 2).get!Vec2i(0);
     }
 
     stream.write!string(rid);

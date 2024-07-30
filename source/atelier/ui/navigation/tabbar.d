@@ -60,6 +60,15 @@ final class TabBar : UIElement {
         select(tab);
     }
 
+    void setDirty(string id, bool isDirty) {
+        Tab[] tabs = cast(Tab[]) _list.getList();
+        foreach (Tab tab; tabs) {
+            if (tab._id == id) {
+                tab.setDirty(isDirty);
+            }
+        }
+    }
+
     void select(string id) {
         Tab[] tabs = cast(Tab[]) _list.getList();
 
@@ -136,6 +145,7 @@ private final class Tab : UIElement {
         Icon _icon;
         IconButton _removeBtn;
         bool _isSelected;
+        Circle _dirtyCircle;
     }
 
     this(TabBar bar, string name, string id, string icon) {
@@ -149,7 +159,8 @@ private final class Tab : UIElement {
             addUI(_icon);
         }
         _nameLabel = new Label(name, Atelier.theme.font);
-        _nameLabel.setAlign(UIAlignX.center, UIAlignY.center);
+        _nameLabel.setAlign(UIAlignX.left, UIAlignY.center);
+        _nameLabel.setPosition(Vec2f(32f, 0f));
         addUI(_nameLabel);
 
         _removeBtn = new IconButton("editor:exit");
@@ -159,13 +170,7 @@ private final class Tab : UIElement {
         _removeBtn.isVisible = false;
         addUI(_removeBtn);
 
-        if (_icon) {
-            setSize(Vec2f(_nameLabel.getWidth() + _icon.getWidth() + _removeBtn.getWidth() + 32f,
-                    32f));
-        }
-        else {
-            setSize(Vec2f(_nameLabel.getWidth() + _removeBtn.getWidth() + 16f, 32f));
-        }
+        _updateSize();
 
         _rect = Rectangle.fill(getSize());
         _rect.anchor = Vec2f.zero;
@@ -177,6 +182,36 @@ private final class Tab : UIElement {
         addEventListener("mouseleaveinside", { _removeBtn.isVisible = false; });
 
         addEventListener("click", &_onClick);
+    }
+
+    private void _updateSize() {
+        if (_icon) {
+            setSize(Vec2f(_nameLabel.getWidth() + _icon.getWidth() + _removeBtn.getWidth() + 32f + (_dirtyCircle ?
+                    16f : 0f), 32f));
+        }
+        else {
+            setSize(Vec2f(_nameLabel.getWidth() + _removeBtn.getWidth() + 16f + (_dirtyCircle ?
+                    16f : 0f), 32f));
+        }
+        if (_rect) {
+            _rect.size = getSize();
+        }
+    }
+
+    void setDirty(bool isDirty) {
+        if (isDirty && !_dirtyCircle) {
+            _dirtyCircle = Circle.fill(getHeight() / 3f);
+            _dirtyCircle.color = Atelier.theme.accent;
+            _dirtyCircle.anchor = Vec2f(0f, .5f);
+            _dirtyCircle.position = Vec2f(getWidth() - 24f, getHeight() / 2f);
+            addImage(_dirtyCircle);
+            _updateSize();
+        }
+        else if (!isDirty && _dirtyCircle) {
+            _dirtyCircle.remove();
+            _dirtyCircle = null;
+            _updateSize();
+        }
     }
 
     private void _onClick() {

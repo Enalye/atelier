@@ -2,10 +2,10 @@
 	"fileVersion": 1,
 	"versions": {
 		"audio-formats": "3.0.2",
-		"bindbc-common": "0.1.5",
+		"bindbc-common": "0.1.6",
 		"bindbc-loader": "1.1.5",
 		"bindbc-openal": "1.1.0",
-		"bindbc-sdl": "1.4.7",
+		"bindbc-sdl": "1.4.8",
 		"farfadet": {"path":"farfadet"},
 		"grimoire": {"path":"grimoire"}
 	}

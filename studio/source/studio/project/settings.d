@@ -129,14 +129,31 @@ final class Project {
         return buildNormalizedPath(getSourceDir(), getSource());
     }
 
+    version (StudioDebug) {
+        enum Studio_Atelier_Exe = "atelier.exe";
+    }
+    else {
+        enum Studio_Atelier_Exe = "atelier.exe";
+    }
+
     static void run() {
-        string engine = relativePath("atelier.exe", thisExePath());
-        spawnProcess([engine, "run", _directory]);
+        string engine = relativePath(Studio_Atelier_Exe, thisExePath());
+        try {
+            spawnProcess([engine, "run", _directory]);
+        }
+        catch (Exception e) {
+            log("[Studio] Impossible d’appeler " ~ engine);
+        }
     }
 
     static void build() {
-        string engine = relativePath("atelier.exe", thisExePath());
-        spawnProcess([engine, "build", _directory]);
+        string engine = relativePath(Studio_Atelier_Exe, thisExePath());
+        try {
+            spawnProcess([engine, "export", _directory]);
+        }
+        catch (Exception e) {
+            log("[Studio] Impossible d’appeler " ~ engine);
+        }
     }
 
     static void updateTitle() {

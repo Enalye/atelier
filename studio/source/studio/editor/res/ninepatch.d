@@ -78,26 +78,31 @@ final class NinePatchResourceEditor : ResourceBaseEditor {
             _textureRID = _parameterWindow.getTextureRID();
             setTextureRID(_textureRID);
             _toolbox.setTexture(getTexture(), _clip, _borders);
+            setDirty();
         });
 
         _parameterWindow.addEventListener("property_clip", {
             _clip = _parameterWindow.getClip();
             _toolbox.setClip(_clip);
+            setDirty();
         });
 
         _parameterWindow.addEventListener("property_borders", {
             _borders = _parameterWindow.getBorders();
             _toolbox.setBorders(_borders);
+            setDirty();
         });
 
         addEventListener("clip", {
             _parameterWindow.setClip(_clip);
             _toolbox.setClip(_clip);
+            setDirty();
         });
 
         addEventListener("borders", {
             _parameterWindow.setBorders(_borders);
             _toolbox.setBorders(_borders);
+            setDirty();
         });
 
         _toolbox.addEventListener("tool", { _tool = _toolbox.getTool(); });

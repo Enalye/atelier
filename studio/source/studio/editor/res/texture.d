@@ -45,6 +45,7 @@ final class TextureResourceEditor : ResourceBaseEditor {
         _parameterWindow.addEventListener("property_file", {
             _filePath = _parameterWindow.getFile();
             setFile(_filePath);
+            setDirty();
         });
     }
 

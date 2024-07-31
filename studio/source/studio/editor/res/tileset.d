@@ -90,15 +90,18 @@ final class TilesetResourceEditor : ResourceBaseEditor {
         _parameterWindow.addEventListener("property_textureRID", {
             _textureRID = _parameterWindow.getTextureRID();
             setTextureRID(_textureRID);
+            setDirty();
         });
 
         _parameterWindow.addEventListener("property_clip", {
             _clip = _parameterWindow.getClip();
+            setDirty();
         });
 
         _parameterWindow.addEventListener("property_misc", {
             _parameterWindow.getMisc(_columns, _lines, _hasMaxCount, _maxCount,
                 _margin, _frameTime);
+            setDirty();
         });
 
         addEventListener("clip", { _parameterWindow.setClip(_clip); });
@@ -112,6 +115,14 @@ final class TilesetResourceEditor : ResourceBaseEditor {
         node.add(_name);
         node.addNode("texture").add(_textureRID);
         node.addNode("clip").add(_clip);
+        node.addNode("lines").add(_lines);
+        node.addNode("columns").add(_columns);
+        if (_maxCount > 0) {
+            node.addNode("maxCount").add(_maxCount);
+        }
+        node.addNode("margin").add(_margin);
+        node.addNode("frameTime").add(_frameTime);
+        //node.addNode("tileFrame").add(); // TODO: à faire
         return node;
     }
 

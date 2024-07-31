@@ -60,6 +60,11 @@ final class TabBar : UIElement {
         select(tab);
     }
 
+    void clearTabs() {
+        _list.clearList();
+        dispatchEvent("close", false);
+    }
+
     void setDirty(string id, bool isDirty) {
         Tab[] tabs = cast(Tab[]) _list.getList();
         foreach (Tab tab; tabs) {

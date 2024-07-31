@@ -24,6 +24,7 @@ final class TilemapResourceEditor : ResourceBaseEditor {
         string _name;
         string _tilesetRID;
         Vec2u _gridSize;
+        int[][] _gridTiles;
         Vec2f _position = Vec2f.zero;
         Tileset _tileset;
         Tilemap _tilemap;
@@ -54,6 +55,10 @@ final class TilemapResourceEditor : ResourceBaseEditor {
             _gridSize = ffd.getNode("size").get!Vec2u(0);
         }
 
+        if (ffd.hasNode("tiles")) {
+            _gridTiles = ffd.getNode("tiles").get!(int[][])(0);
+        }
+
         setTilesetRID(_tilesetRID);
 
         _parameterWindow = new ParameterWindow(_tilesetRID, _gridSize);
@@ -65,13 +70,19 @@ final class TilemapResourceEditor : ResourceBaseEditor {
             _tilesetRID = _parameterWindow.getTilesetRID();
             setTilesetRID(_tilesetRID);
             _toolbox.setTileset(getTileset());
+            setDirty();
         });
 
         _parameterWindow.addEventListener("property_size", {
             _gridSize = _parameterWindow.getGridSize();
+            setDirty();
         });
 
-        addEventListener("gridSize", { _parameterWindow.setGridSize(_gridSize); });
+        addEventListener("gridSize", {
+            _parameterWindow.setGridSize(_gridSize);
+            setDirty();
+        });
+
         _toolbox.addEventListener("tool", {
             _tool = _toolbox.getTool();
             _selection = _toolbox.getSelection();
@@ -90,6 +101,15 @@ final class TilemapResourceEditor : ResourceBaseEditor {
         node.add(_name);
         node.addNode("tileset").add(_tilesetRID);
         node.addNode("size").add(_gridSize);
+
+        if (_tilemap) {
+            _gridTiles = _tilemap.getTiles();
+        }
+
+        if (_gridSize.sum() > 0) {
+            node.addNode("tiles").add(_gridTiles);
+        }
+
         return node;
     }
 
@@ -102,6 +122,7 @@ final class TilemapResourceEditor : ResourceBaseEditor {
         _zoom = 1f;
 
         if (_tilemap) {
+            _gridTiles = _tilemap.getTiles();
             _tilemap.remove();
         }
 
@@ -148,11 +169,7 @@ final class TilemapResourceEditor : ResourceBaseEditor {
         _tilemap = new Tilemap(_tileset, _gridSize.x, _gridSize.y);
         addImage(_tilemap);
 
-        for (int y; y < _gridSize.y; ++y) {
-            for (int x; x < _gridSize.x; ++x) {
-                _tilemap.setTile(x, y, 0);
-            }
-        }
+        _tilemap.setTiles(_gridTiles);
 
         if (mustLoad) {
             addEventListener("update", &_onUpdate);

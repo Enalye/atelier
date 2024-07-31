@@ -119,6 +119,18 @@ final class Tilemap : Image, Resource!Tilemap {
         }
     }
 
+    int[][] getTiles() {
+        int[][] tiles = new int[][](_columns, _lines);
+
+        for (size_t y; y < _lines; ++y) {
+            for (size_t x; x < _columns; ++x) {
+                tiles[x][y] = _tiles[x + y * _columns].id;
+            }
+        }
+
+        return tiles;
+    }
+
     void setTiles(int x, int y, const(int[][]) tiles_) {
         foreach (size_t col, ref const(int[]) column; tiles_) {
             if ((col + x) >= _columns || (col + x) < 0)

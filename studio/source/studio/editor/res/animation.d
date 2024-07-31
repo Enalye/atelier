@@ -104,11 +104,13 @@ final class AnimationResourceEditor : ResourceBaseEditor {
             _toolbox.setTexture(getTexture(), _clip, _columns, _lines, _maxCount);
             _toolbox.setParameters(_frameTime, _frames, _columns, _lines,
                 _hasMaxCount ? _maxCount : (_columns * _lines), _margin);
+            setDirty();
         });
 
         _parameterWindow.addEventListener("property_clip", {
             _clip = _parameterWindow.getClip();
             _toolbox.setClip(_clip);
+            setDirty();
         });
 
         _parameterWindow.addEventListener("property_misc", {
@@ -116,11 +118,13 @@ final class AnimationResourceEditor : ResourceBaseEditor {
                 _margin, _repeat, _frameTime, _frames);
             _toolbox.setParameters(_frameTime, _frames, _columns, _lines,
                 _hasMaxCount ? _maxCount : (_columns * _lines), _margin);
+            setDirty();
         });
 
         addEventListener("clip", {
             _parameterWindow.setClip(_clip);
             _toolbox.setClip(_clip);
+            setDirty();
         });
         _toolbox.addEventListener("tool", { _tool = _toolbox.getTool(); });
         addEventListener("register", { Atelier.ui.addUI(_toolbox); });
@@ -132,6 +136,15 @@ final class AnimationResourceEditor : ResourceBaseEditor {
         node.add(_name);
         node.addNode("texture").add(_textureRID);
         node.addNode("clip").add(_clip);
+        node.addNode("frameTime").add(_frameTime);
+        node.addNode("frames").add(_frames);
+        node.addNode("repeat").add(_repeat);
+        node.addNode("lines").add(_lines);
+        node.addNode("columns").add(_columns);
+        if (_maxCount > 0) {
+            node.addNode("maxCount").add(_maxCount);
+        }
+        node.addNode("margin").add(_margin);
         return node;
     }
 

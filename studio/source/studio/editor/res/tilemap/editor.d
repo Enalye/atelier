@@ -97,7 +97,7 @@ final class TilemapResourceEditor : ResourceBaseEditor {
     }
 
     override Farfadet save(Farfadet ffd) {
-        Farfadet node = ffd.addNode("sprite");
+        Farfadet node = ffd.addNode("tilemap");
         node.add(_name);
         node.addNode("tileset").add(_tilesetRID);
         node.addNode("size").add(_gridSize);
@@ -255,7 +255,13 @@ final class TilemapResourceEditor : ResourceBaseEditor {
                 break;
             case 3:
                 _positionMouse = (getMousePosition() - (_tilemap.position - _tilemap.size / 2f)) / _zoom;
-                _onFillTool();
+                Vec2i tilePos = getTilePos();
+                if (hasControlModifier()) {
+                    _fillTilesAt(tilePos.x, tilePos.y, -1);
+                }
+                else {
+                    _fillTilesAt(tilePos.x, tilePos.y, _brushTileId);
+                }
                 break;
             default:
                 break;
@@ -355,6 +361,7 @@ final class TilemapResourceEditor : ResourceBaseEditor {
 
         if (_selection.isValid) {
             _tilemap.setTiles(tilePos.x, tilePos.y, _selection.tiles);
+            setDirty();
         }
     }
 
@@ -386,6 +393,7 @@ final class TilemapResourceEditor : ResourceBaseEditor {
                 _tilemap.setTile(tile.x, tile.y, id);
             }
         }
+        setDirty();
     }
 
     private void _onPasteBrushTool() {
@@ -394,11 +402,6 @@ final class TilemapResourceEditor : ResourceBaseEditor {
 
     private void _onEraserTool() {
         _pasteBrushTool(-1);
-    }
-
-    private void _onFillTool() {
-        Vec2i tilePos = getTilePos();
-        _fillTilesAt(tilePos.x, tilePos.y, _brushTileId);
     }
 
     private void _fillTilesAt(int x, int y, int value) {
@@ -438,6 +441,7 @@ final class TilemapResourceEditor : ResourceBaseEditor {
                 frontiers ~= neighbor;
             }
         }
+        setDirty();
     }
 
     private void _onDrag() {

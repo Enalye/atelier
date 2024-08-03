@@ -27,6 +27,7 @@ final class TilesetResourceEditor : ResourceBaseEditor {
         Vec2i _margin;
         bool _hasMaxCount;
         uint _frameTime;
+        Vec2i[] _tileFrames;
         Vec2u _imageSize;
         Vec2f _position = Vec2f.zero;
         Texture _texture;
@@ -79,10 +80,14 @@ final class TilesetResourceEditor : ResourceBaseEditor {
             _margin = ffd.getNode("margin").get!Vec2i(0);
         }
 
+        foreach (tileFrame; ffd.getNodes("tileFrame", 2)) {
+            _tileFrames ~= tileFrame.get!Vec2i(0);
+        }
+
         setTextureRID(_textureRID);
 
         _parameterWindow = new ParameterWindow(_textureRID, _clip, _columns,
-            _lines, _hasMaxCount, _maxCount, _margin, _frameTime);
+            _lines, _hasMaxCount, _maxCount, _margin, _frameTime, _tileFrames);
 
         _toolbox = new Toolbox();
         Atelier.ui.addUI(_toolbox);
@@ -104,6 +109,11 @@ final class TilesetResourceEditor : ResourceBaseEditor {
             setDirty();
         });
 
+        _parameterWindow.addEventListener("property_tileFrames", {
+            _tileFrames = _parameterWindow.getTileFrames();
+            setDirty();
+        });
+
         addEventListener("clip", { _parameterWindow.setClip(_clip); });
         _toolbox.addEventListener("tool", { _tool = _toolbox.getTool(); });
         addEventListener("register", { Atelier.ui.addUI(_toolbox); });
@@ -111,7 +121,7 @@ final class TilesetResourceEditor : ResourceBaseEditor {
     }
 
     override Farfadet save(Farfadet ffd) {
-        Farfadet node = ffd.addNode("sprite");
+        Farfadet node = ffd.addNode("tileset");
         node.add(_name);
         node.addNode("texture").add(_textureRID);
         node.addNode("clip").add(_clip);
@@ -122,7 +132,10 @@ final class TilesetResourceEditor : ResourceBaseEditor {
         }
         node.addNode("margin").add(_margin);
         node.addNode("frameTime").add(_frameTime);
-        //node.addNode("tileFrame").add(); // TODO: à faire
+        _tileFrames = _parameterWindow.getTileFrames();
+        foreach (Vec2i tileFrame; _tileFrames) {
+            node.addNode("tileFrame").add(tileFrame);
+        }
         return node;
     }
 
@@ -475,10 +488,11 @@ private final class ParameterWindow : UIElement {
         IntegerField[] _clipFields, _marginFields, _countFields;
         IntegerField _frameTimeField;
         Checkbox _hasMaxCountCB;
+        VList _tileFramesList;
     }
 
     this(string textureRID, Vec4u clip, uint columns, uint lines, bool hasMaxCount,
-        uint maxCount, Vec2i margin, uint frameTime) {
+        uint maxCount, Vec2i margin, uint frameTime, Vec2i[] tileFrames) {
         VList vlist = new VList;
         vlist.setPosition(Vec2f(8f, 8f));
         vlist.setSize(Vec2f.zero.max(getSize() - Vec2f(8f, 8f)));
@@ -640,6 +654,38 @@ private final class ParameterWindow : UIElement {
             _frameTimeField.value = frameTime;
         }
 
+        {
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(284f, 0f));
+            vlist.addList(hlayout);
+
+            hlayout.addUI(new Label("Trames:", Atelier.theme.font));
+
+            _tileFramesList = new VList;
+            _tileFramesList.setSize(Vec2f(300f, 250f));
+
+            AccentButton addBtn = new AccentButton("Ajouter");
+            addBtn.addEventListener("click", {
+                auto elt = new TileFrameElement(0, 0);
+                _tileFramesList.addList(elt);
+                elt.addEventListener("tileFrame", {
+                    dispatchEvent("property_tileFrames", false);
+                });
+                dispatchEvent("property_tileFrames", false);
+            });
+            hlayout.addUI(addBtn);
+
+            vlist.addList(_tileFramesList);
+
+            foreach (tileFrame; tileFrames) {
+                auto elt = new TileFrameElement(tileFrame.x, tileFrame.y);
+                elt.addEventListener("tileFrame", {
+                    dispatchEvent("property_tileFrames", false);
+                });
+                _tileFramesList.addList(elt);
+            }
+        }
+
         addEventListener("size", {
             vlist.setSize(Vec2f.zero.max(getSize() - Vec2f(8f, 8f)));
         });
@@ -675,5 +721,53 @@ private final class ParameterWindow : UIElement {
         hasMaxCount = _hasMaxCountCB.value;
         margin = Vec2i(_marginFields[0].value, _marginFields[1].value);
         frameTime = _frameTimeField.value;
+    }
+
+    Vec2i[] getTileFrames() {
+        Vec2i[] tileFrames;
+        TileFrameElement[] elements = cast(TileFrameElement[]) _tileFramesList.getList();
+        foreach (TileFrameElement element; elements) {
+            tileFrames ~= element.getFrame();
+        }
+        return tileFrames;
+    }
+}
+
+final class TileFrameElement : UIElement {
+    private {
+        IntegerField _sourceTileField, _destTileField;
+        DangerButton _removeBtn;
+    }
+
+    this(int sourceTileId, int destTileId) {
+        setSize(Vec2f(300f, 48f));
+
+        HBox hbox = new HBox;
+        hbox.setAlign(UIAlignX.left, UIAlignY.center);
+        hbox.setSpacing(8f);
+        addUI(hbox);
+
+        _sourceTileField = new IntegerField;
+        _sourceTileField.value = sourceTileId;
+        _sourceTileField.addEventListener("value", &_onTileChange);
+        hbox.addUI(_sourceTileField);
+
+        _destTileField = new IntegerField;
+        _destTileField.value = destTileId;
+        _destTileField.addEventListener("value", &_onTileChange);
+        hbox.addUI(_destTileField);
+
+        _removeBtn = new DangerButton("Retirer");
+        _removeBtn.setAlign(UIAlignX.right, UIAlignY.center);
+        _removeBtn.addEventListener("click", { _onTileChange(); remove(); });
+        hbox.addUI(_removeBtn);
+    }
+
+    private void _onTileChange() {
+        dispatchEvent("tileFrame", false);
+    }
+
+    Vec2i getFrame() {
+        return Vec2i(_sourceTileField.value, _destTileField.value);
     }
 }

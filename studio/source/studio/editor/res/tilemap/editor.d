@@ -169,7 +169,7 @@ final class TilemapResourceEditor : ResourceBaseEditor {
         _tilemap = new Tilemap(_tileset, _gridSize.x, _gridSize.y);
         addImage(_tilemap);
 
-        _tilemap.setTiles(_gridTiles);
+        _tilemap.setTiles(0, 0, _gridTiles);
 
         if (mustLoad) {
             addEventListener("update", &_onUpdate);

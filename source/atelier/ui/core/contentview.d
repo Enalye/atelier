@@ -69,6 +69,8 @@ final class HContentView : ContentView {
 
     this() {
         addEventListener("update", &_onUpdate);
+        addEventListener("addchild", &_onUpdate);
+        addEventListener("removechild", &_onUpdate);
     }
 
     void setChildAlign(UIAlignY align_) {
@@ -104,6 +106,8 @@ final class VContentView : ContentView {
 
     this() {
         addEventListener("update", &_onUpdate);
+        addEventListener("addchild", &_onUpdate);
+        addEventListener("removechild", &_onUpdate);
     }
 
     void setChildAlign(UIAlignX align_) {

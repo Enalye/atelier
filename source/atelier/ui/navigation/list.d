@@ -53,6 +53,18 @@ abstract class List : UIElement {
         return _contentView.getContentPosition();
     }
 
+    final Vec2f getContentSize() {
+        return _contentView.getContentSize();
+    }
+
+    final float getContentWidth() {
+        return _contentView.getContentWidth();
+    }
+
+    final float getContentHeight() {
+        return _contentView.getContentHeight();
+    }
+
     final void setContentPosition(float position) {
         _contentView.setContentPosition(position);
         _scrollbar.setContentPosition(_contentView.getContentPosition());

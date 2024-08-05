@@ -10,6 +10,7 @@ import farfadet;
 import studio.ui;
 import studio.editor.base;
 import studio.editor.res.base;
+import studio.editor.res.item;
 
 final class ResourceEditor : ContentEditor {
     private {
@@ -44,6 +45,11 @@ final class ResourceEditor : ContentEditor {
         if (_currentEditor) {
             _currentEditor.remove();
             _currentEditor = null;
+        }
+
+        if (!ffd) {
+            dispatchEvent("panel", false);
+            return;
         }
 
         string type = ffd.name;
@@ -134,12 +140,15 @@ private final class ResourceList : UIElement {
         {
             HBox hbox = new HBox;
             hbox.setSpacing(4f);
-            hbox.setMargin(Vec2f(16f, 0f));
             vbox.addUI(hbox);
 
-            AccentButton addBtn = new AccentButton("+ Ajouter");
+            AccentButton addBtn = new AccentButton("Ajouter");
             addBtn.addEventListener("click", &_onAddItem);
             hbox.addUI(addBtn);
+
+            NeutralButton editBtn = new NeutralButton("Modifier");
+            editBtn.addEventListener("click", &_onEditItem);
+            hbox.addUI(editBtn);
 
             DangerButton remBtn = new DangerButton("Supprimer");
             remBtn.addEventListener("click", &_onRemoveItem);
@@ -174,24 +183,106 @@ private final class ResourceList : UIElement {
     }
 
     private void _onSize() {
-        _list.setSize(Vec2f(getWidth(), max(0f, getHeight() - 100f)));
+        _list.setSize(Vec2f(getWidth(), max(0f, getHeight() - 112f)));
         _container.setSize(getSize());
     }
 
     private void _onAddItem() {
+        auto modal = new AddResourceItem;
+        modal.addEventListener("apply", {
+            Farfadet ffd = _ffd.addNode(modal.getType()).add(modal.getName());
+            _rebuildList();
+            _editor.setDirty();
+
+            foreach (item; cast(ResourceItem[]) _list.getList()) {
+                if (item._ffd == ffd) {
+                    select(item);
+                    _list.setContentPosition(_list.getContentHeight());
+                    break;
+                }
+            }
+        });
+        Atelier.ui.pushModalUI(modal);
+    }
+
+    private void _onEditItem() {
+        if (!_selectedItem)
+            return;
+
+        Farfadet ffd = _selectedItem._ffd;
+        auto modal = new EditResourceItem(ffd.get!string(0));
+        modal.addEventListener("apply", {
+            ffd.clear();
+            ffd.add(modal.getName());
+            _rebuildList();
+            _editor.setDirty();
+        });
+        Atelier.ui.pushModalUI(modal);
     }
 
     private void _onRemoveItem() {
+        if (!_selectedItem)
+            return;
+
+        Farfadet ffd = _selectedItem._ffd;
+        auto modal = new RemoveResourceItem(ffd.get!string(0));
+        modal.addEventListener("apply", {
+            _ffd.removeNode(ffd);
+            _rebuildList();
+            _editor.setDirty();
+            select(null);
+        });
+        Atelier.ui.pushModalUI(modal);
     }
 
     protected void select(ResourceItem item_) {
         if (_selectedItem != item_) {
             _selectedItem = item_;
-            _editor.select(_selectedItem.getFarfadet());
+            _editor.select(_selectedItem ? _selectedItem.getFarfadet() : null);
         }
 
         foreach (ResourceItem item; cast(ResourceItem[]) _list.getList()) {
             item.updateSelection(item == item_);
+        }
+    }
+
+    private void moveUp(ResourceItem item_) {
+        Farfadet[] nodes = _ffd.getNodes();
+        _ffd.clearNodes(false);
+        for (size_t i = 1; i < nodes.length; ++i) {
+            if (nodes[i] == item_._ffd) {
+                nodes[i] = nodes[i - 1];
+                nodes[i - 1] = item_._ffd;
+                break;
+            }
+        }
+        _ffd.setNodes(nodes);
+        _rebuildList();
+
+        foreach (ResourceItem item; cast(ResourceItem[]) _list.getList()) {
+            if (item._ffd == item_._ffd) {
+                select(item);
+            }
+        }
+    }
+
+    private void moveDown(ResourceItem item_) {
+        Farfadet[] nodes = _ffd.getNodes();
+        _ffd.clearNodes(false);
+        for (size_t i = 0; (i + 1) < nodes.length; ++i) {
+            if (nodes[i] == item_._ffd) {
+                nodes[i] = nodes[i + 1];
+                nodes[i + 1] = item_._ffd;
+                break;
+            }
+        }
+        _ffd.setNodes(nodes);
+        _rebuildList();
+
+        foreach (ResourceItem item; cast(ResourceItem[]) _list.getList()) {
+            if (item._ffd == item_._ffd) {
+                select(item);
+            }
         }
     }
 }
@@ -205,14 +296,17 @@ private final class ResourceItem : UIElement {
         Icon _icon;
         bool _isSelected;
         string _name;
+        HBox _hbox;
+        IconButton _upBtn, _downBtn;
     }
 
     this(ResourceList rlist, Farfadet ffd) {
         _rlist = rlist;
         _ffd = ffd;
-        setSize(Vec2f(250f, 32f));
+        setSize(Vec2f(241f, 32f));
 
-        _name = ffd.get!string(0);
+        if (ffd.getCount() > 0)
+            _name = ffd.get!string(0);
 
         _rect = Rectangle.fill(getSize());
         _rect.anchor = Vec2f.zero;
@@ -230,6 +324,24 @@ private final class ResourceItem : UIElement {
         _label.setPosition(Vec2f(64f, 0f));
         addUI(_label);
 
+        {
+            _hbox = new HBox;
+            _hbox.setAlign(UIAlignX.right, UIAlignY.center);
+            _hbox.setSpacing(2f);
+            addUI(_hbox);
+
+            _upBtn = new IconButton("editor:arrow-small-up");
+            _upBtn.addEventListener("click", { _rlist.moveUp(this); });
+            _hbox.addUI(_upBtn);
+
+            _downBtn = new IconButton("editor:arrow-small-down");
+            _downBtn.addEventListener("click", { _rlist.moveDown(this); });
+            _hbox.addUI(_downBtn);
+
+            _hbox.isVisible = false;
+            _hbox.isEnabled = false;
+        }
+
         addEventListener("mouseenter", &_onMouseEnter);
         addEventListener("mouseleave", &_onMouseLeave);
         addEventListener("click", &_onClick);
@@ -245,10 +357,22 @@ private final class ResourceItem : UIElement {
             _label.textColor = Atelier.theme.onNeutral;
         }
         _rect.isVisible = true;
+        _hbox.isVisible = true;
+        _hbox.isEnabled = true;
     }
 
     private void _onMouseLeave() {
+        if (_isSelected) {
+            _rect.color = Atelier.theme.accent;
+            _label.textColor = Atelier.theme.onAccent;
+        }
+        else {
+            _rect.color = Atelier.theme.foreground;
+            _label.textColor = Atelier.theme.onNeutral;
+        }
         _rect.isVisible = _isSelected;
+        _hbox.isVisible = false;
+        _hbox.isEnabled = false;
     }
 
     private void _onClick() {

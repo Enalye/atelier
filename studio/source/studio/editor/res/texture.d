@@ -38,9 +38,9 @@ final class TextureResourceEditor : ResourceBaseEditor {
             _filePath = ffd.getNode("file").get!string(0);
         }
 
-        setFile(_filePath);
-
         _parameterWindow = new ParameterWindow(path(), _filePath);
+        _filePath = _parameterWindow.getFile();
+        setFile(_filePath);
 
         _parameterWindow.addEventListener("property_file", {
             _filePath = _parameterWindow.getFile();
@@ -68,7 +68,15 @@ final class TextureResourceEditor : ResourceBaseEditor {
             _sprite.remove();
         }
 
-        _texture = Texture.fromFile(buildNormalizedPath(dirName(path()), filePath));
+        if (!filePath.length)
+            return;
+
+        filePath = buildNormalizedPath(dirName(path()), filePath);
+
+        if (!exists(filePath))
+            return;
+
+        _texture = Texture.fromFile(filePath);
         _imageSize = Vec2u(_texture.width, _texture.height);
         _sprite = new Sprite(_texture);
         addImage(_sprite);

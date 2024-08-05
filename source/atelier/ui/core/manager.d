@@ -156,6 +156,10 @@ final class UIManager {
                             isDiscarded = true;
                         }
                     }
+
+                    if (!isDiscarded) {
+                        dispatchEvent("clickoutside");
+                    }
                 }
 
                 foreach (UIElement element; _mouseDownElements) {

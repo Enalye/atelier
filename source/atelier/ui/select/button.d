@@ -116,6 +116,6 @@ final class SelectButton : Button!RoundedRectangle {
     package void displayMenu() {
         _list.runState("visible");
         UIManager manager = getManager();
-        manager.addUI(_list);
+        manager.pushModalUI(_list);
     }
 }

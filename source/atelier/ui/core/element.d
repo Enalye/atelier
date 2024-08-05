@@ -555,6 +555,8 @@ class UIElement {
         element._parent = this;
         element.isAlive = true;
         _children ~= element;
+
+        dispatchEvent("addchild", false);
     }
 
     final void clearUI() {
@@ -562,14 +564,17 @@ class UIElement {
             child.remove();
         }
         _children.clear();
+        dispatchEvent("removechild", false);
     }
 
     final void addImage(Image image) {
         _images ~= image;
+        dispatchEvent("addimage", false);
     }
 
     final void clearImages() {
         _images.clear();
+        dispatchEvent("removeimage", false);
     }
 
     final void remove() {

@@ -24,9 +24,9 @@ void initApp() {
 
     Project.setDirectory(getcwd());
 
-    bar.add("Projet", "Nouveau Projet (Ctrl+N)").addEventListener("click",
-        &(studio._onNewProject));
-    bar.add("Projet", "Ouvrir (Ctrl+O)").addEventListener("click", &(studio._onOpenProject));
+    bar.add("Projet", "Nouveau Projet (Ctrl+Shift+N)")
+        .addEventListener("click", &(studio._onNewProject));
+    bar.add("Projet", "Ouvrir (Ctrl+Shift+O)").addEventListener("click", &(studio._onOpenProject));
     bar.add("Projet", "Fermer").addEventListener("click", &(studio._onCloseProject));
     bar.addSeparator("Projet");
     bar.add("Projet", "Lancer (F5)").addEventListener("click", &(studio._onRunProject));
@@ -34,14 +34,13 @@ void initApp() {
     bar.addSeparator("Projet");
     bar.add("Projet", "Quitter").addEventListener("click", { Atelier.close(); });
 
-    bar.add("Ressource", "Gérer les Dossiers").addEventListener("click",
+    bar.add("Fichier", "Gérer les Dossiers").addEventListener("click",
         &(studio._onManageFolders));
-    bar.addSeparator("Ressource");
-    bar.add("Ressource", "Nouvelle Ressource");
-    bar.add("Ressource", "Enregistrer (Ctrl+S)").addEventListener("click", &(studio._onSave));
-    bar.add("Ressource", "Enregistrer Sous… (Ctrl+Shift+S)");
-    bar.addSeparator("Ressource");
-    bar.add("Ressource", "Fermer");
+    bar.addSeparator("Fichier");
+    bar.add("Fichier", "Nouveau (Ctrl+N)");
+    bar.add("Fichier", "Ouvrir (Ctrl+O)");
+    bar.add("Fichier", "Enregistrer (Ctrl+S)").addEventListener("click", &(studio._onSave));
+    bar.add("Fichier", "Fermer");
     Atelier.ui.addUI(bar);
     Atelier.ui.addUI(studio);
 }
@@ -222,6 +221,7 @@ final class Studio : UIElement {
         {
             _explorerTab = new TabGroup;
             _explorerTab.setAlign(UIAlignX.left, UIAlignY.top);
+            _explorerTab.setWidth(LeftPanelSize);
             addUI(_explorerTab);
 
             _explorerTab.addTab("Média", "media", "");

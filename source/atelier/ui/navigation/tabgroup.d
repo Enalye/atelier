@@ -14,7 +14,6 @@ import atelier.ui.navigation.list;
 
 final class TabGroup : UIElement {
     private {
-        HBox _hbox;
         string _value;
     }
 
@@ -25,24 +24,32 @@ final class TabGroup : UIElement {
     }
 
     this() {
-        _hbox = new HBox;
-        _hbox.setAlign(UIAlignX.left, UIAlignY.top);
-        addUI(_hbox);
+        setHeight(32f);
+        setSizeLock(false, true);
 
-        setSize(_hbox.getSize());
-        setSizeLock(true, true);
-
-        _hbox.addEventListener("size", &_onSize);
+        addEventListener("size", &_onSize);
     }
 
     private void _onSize() {
-        setSizeLock(false, false);
-        setSize(_hbox.getSize());
-        setSizeLock(true, true);
+        float count = getChildren().length;
+        float childWidth = 0f;
+        if (count > 0) {
+            childWidth = getWidth() / count;
+        }
+        float posX = 0f;
+        foreach (child; getChildren()) {
+            child.setWidth(childWidth);
+            child.setPosition(Vec2f(posX, 0f));
+            posX += childWidth;
+        }
+
+        import std.stdio;
+
+        writeln("onSize: ", getWidth(), ", ", count, ", ", childWidth);
     }
 
     bool hasTab(string id) {
-        Tab[] tabs = cast(Tab[]) _hbox.getChildren().array;
+        Tab[] tabs = cast(Tab[]) getChildren().array;
 
         foreach (Tab tab; tabs) {
             if (tab._id == id && tab.isAlive())
@@ -53,12 +60,13 @@ final class TabGroup : UIElement {
 
     void addTab(string name, string id, string icon = "") {
         Tab tab = new Tab(this, name, id, icon);
-        _hbox.addUI(tab);
+        addUI(tab);
+        _onSize();
         select(tab);
     }
 
     void select(string id) {
-        Tab[] tabs = cast(Tab[]) _hbox.getChildren().array;
+        Tab[] tabs = cast(Tab[]) getChildren().array;
 
         bool hasValue;
         foreach (Tab tab; tabs) {
@@ -88,7 +96,7 @@ final class TabGroup : UIElement {
     }
 
     private void select(Tab tab_) {
-        Tab[] tabs = cast(Tab[]) _hbox.getChildren().array;
+        Tab[] tabs = cast(Tab[]) getChildren().array;
 
         foreach (Tab tab; tabs) {
             tab.updateValue(tab_ == tab);
@@ -101,7 +109,7 @@ final class TabGroup : UIElement {
     }
 
     private void unselect(Tab tab_) {
-        Tab[] tabs = cast(Tab[]) _hbox.getChildren().array;
+        Tab[] tabs = cast(Tab[]) getChildren().array;
 
         for (int i; i < (cast(int) tabs.length); ++i) {
             if (tab_ == tabs[i]) {
@@ -137,6 +145,7 @@ private final class Tab : UIElement {
     this(TabGroup group, string name, string id, string icon) {
         _group = group;
         _id = id;
+        setAlign(UIAlignX.left, UIAlignY.top);
 
         if (icon.length) {
             _icon = new Icon(icon);
@@ -148,12 +157,14 @@ private final class Tab : UIElement {
         _nameLabel.setAlign(UIAlignX.center, UIAlignY.center);
         addUI(_nameLabel);
 
-        if (_icon) {
+        setHeight(32f);
+
+        /*if (_icon) {
             setSize(Vec2f(_nameLabel.getWidth() + _icon.getWidth() + 32f, 32f));
         }
         else {
             setSize(Vec2f(_nameLabel.getWidth() + 16f, 32f));
-        }
+        }*/
 
         _rect = Rectangle.fill(getSize());
         _rect.anchor = Vec2f.zero;
@@ -161,6 +172,7 @@ private final class Tab : UIElement {
         addImage(_rect);
 
         addEventListener("click", &_onClick);
+        addEventListener("size", { _rect.size = getSize(); });
     }
 
     private void _onClick() {

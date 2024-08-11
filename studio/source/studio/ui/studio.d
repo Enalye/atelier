@@ -13,10 +13,12 @@ import atelier;
 import farfadet;
 import studio.editor;
 import studio.project;
-import studio.ui.tabbar;
 import studio.ui.fileexplorer;
+import studio.ui.newfile;
 import studio.ui.newproject;
+import studio.ui.openfile;
 import studio.ui.resourcemanager;
+import studio.ui.tabbar;
 
 void initApp() {
     MenuBar bar = new MenuBar;
@@ -37,9 +39,9 @@ void initApp() {
     bar.add("Fichier", "Gérer les Dossiers").addEventListener("click",
         &(studio._onManageFolders));
     bar.addSeparator("Fichier");
-    bar.add("Fichier", "Nouveau (Ctrl+N)");
-    bar.add("Fichier", "Ouvrir (Ctrl+O)");
-    bar.add("Fichier", "Enregistrer (Ctrl+S)").addEventListener("click", &(studio._onSave));
+    bar.add("Fichier", "Nouveau (Ctrl+N)").addEventListener("click", &(studio._onNewFile));
+    bar.add("Fichier", "Ouvrir (Ctrl+O)").addEventListener("click", &(studio._onOpenFile));
+    bar.add("Fichier", "Enregistrer (Ctrl+S)").addEventListener("click", &(studio._onSaveFile));
     bar.add("Fichier", "Fermer");
     Atelier.ui.addUI(bar);
     Atelier.ui.addUI(studio);
@@ -372,7 +374,35 @@ final class Studio : UIElement {
         }
     }
 
-    private void _onSave() {
+    private void _onNewFile() {
+        if (!Project.isOpen())
+            return;
+
+        auto modal = new NewFile(_explorerTab.value == "source");
+        modal.addEventListener("newFile", {
+            string filePath = modal.getFilePath();
+            std.file.write(filePath, "");
+            Atelier.ui.popModalUI();
+            updateRessourceFolders();
+            editFile(filePath);
+        });
+        Atelier.ui.pushModalUI(modal);
+    }
+
+    private void _onOpenFile() {
+        if (!Project.isOpen())
+            return;
+
+        auto modal = new OpenFile;
+        modal.addEventListener("openFile", {
+            string filePath = modal.getFilePath();
+            Atelier.ui.popModalUI();
+            editFile(filePath);
+        });
+        Atelier.ui.pushModalUI(modal);
+    }
+
+    private void _onSaveFile() {
         if (_contentEditor) {
             _contentEditor.save();
             setDirty(_contentEditor.path, false);
@@ -398,14 +428,28 @@ final class Studio : UIElement {
             switch (keyEvent.button) with (InputEvent.KeyButton.Button) {
             case s:
                 if (hasControlModifier()) {
-                    _onSave();
+                    _onSaveFile();
                 }
                 break;
             case n:
-                _onNewProject();
+                if (hasControlModifier()) {
+                    if (hasShiftModifier()) {
+                        _onNewProject();
+                    }
+                    else {
+                        _onNewFile();
+                    }
+                }
                 break;
             case o:
-                _onOpenProject();
+                if (hasControlModifier()) {
+                    if (hasShiftModifier()) {
+                        _onOpenProject();
+                    }
+                    else {
+                        _onOpenFile();
+                    }
+                }
                 break;
             case f5:
                 _onRunProject();
@@ -422,6 +466,11 @@ final class Studio : UIElement {
     bool hasControlModifier() const {
         return Atelier.input.isPressed(InputEvent.KeyButton.Button.leftControl) ||
             Atelier.input.isPressed(InputEvent.KeyButton.Button.rightControl);
+    }
+
+    bool hasShiftModifier() const {
+        return Atelier.input.isPressed(InputEvent.KeyButton.Button.leftShift) ||
+            Atelier.input.isPressed(InputEvent.KeyButton.Button.rightShift);
     }
 
     void updateRessourceFolders() {
@@ -625,6 +674,9 @@ final class Studio : UIElement {
         foreach (Archive.File file; resourceFiles) {
             Farfadet ffd = Farfadet.fromBytes(file.data);
             foreach (resNode; ffd.getNodes()) {
+                if (resNode.getCount() == 0)
+                    continue;
+
                 auto p = resNode.name in _farfadets;
                 FarfadetCache cache;
 
@@ -639,6 +691,7 @@ final class Studio : UIElement {
                 ResourceInfo info;
                 info.farfadet = resNode;
                 info.path = buildNormalizedPath(Project.getMediaDir(), dirName(file.path));
+
                 cache.resources[resNode.get!string(0)] = info;
             }
         }

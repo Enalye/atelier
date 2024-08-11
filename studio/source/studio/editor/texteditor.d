@@ -77,6 +77,10 @@ class TextEditor : ContentEditor {
             _lines ~= line;
         }
 
+        if (!_lines.length) {
+            _lines ~= new Line;
+        }
+
         _linesSurface = new Surface;
         _linesSurface.setAlign(UIAlignX.left, UIAlignY.top);
         _linesSurface.setSize(Vec2f(64f, getHeight()));

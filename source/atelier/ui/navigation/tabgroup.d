@@ -42,10 +42,6 @@ final class TabGroup : UIElement {
             child.setPosition(Vec2f(posX, 0f));
             posX += childWidth;
         }
-
-        import std.stdio;
-
-        writeln("onSize: ", getWidth(), ", ", count, ", ", childWidth);
     }
 
     bool hasTab(string id) {

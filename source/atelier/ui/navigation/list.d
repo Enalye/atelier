@@ -77,6 +77,9 @@ abstract class List : UIElement {
     final void setSpacing(float spacing_) {
         _contentView.setSpacing(spacing_);
     }
+
+    protected abstract float _getContentLength() const;
+    abstract void moveToElement(size_t index);
 }
 
 final class HList : List {
@@ -132,6 +135,31 @@ final class HList : List {
 
         _scrollbar.addEventListener("handlePosition", &_onHandlePosition);
     }
+
+    protected override float _getContentLength() const {
+        return _contentView.getContentWidth();
+    }
+
+    override void moveToElement(size_t index) {
+        UIElement[] elements = _contentView.getChildren().array;
+        if (index == 0) {
+            setContentPosition(0);
+        }
+        else if (index + 1 >= elements.length) {
+            setContentPosition(_getContentLength());
+        }
+        else {
+            float elementPos = elements[index].getPosition().x + _contentView.getContentPosition();
+            float elementSize = elements[index].getWidth();
+
+            if (elementPos < _contentView.getContentPosition()) {
+                setContentPosition(elementPos);
+            }
+            else if (elementPos + elementSize > _contentView.getContentPosition() + getHeight()) {
+                setContentPosition((elementPos + elementSize) - getWidth());
+            }
+        }
+    }
 }
 
 final class VList : List {
@@ -186,5 +214,30 @@ final class VList : List {
         _scrollbar.setContentPosition(_contentView.getContentPosition());
 
         _scrollbar.addEventListener("handlePosition", &_onHandlePosition);
+    }
+
+    protected override float _getContentLength() const {
+        return _contentView.getContentHeight();
+    }
+
+    override void moveToElement(size_t index) {
+        UIElement[] elements = _contentView.getChildren().array;
+        if (index == 0) {
+            setContentPosition(0);
+        }
+        else if (index + 1 >= elements.length) {
+            setContentPosition(_getContentLength());
+        }
+        else {
+            float elementPos = elements[index].getPosition().y + _contentView.getContentPosition();
+            float elementSize = elements[index].getHeight();
+
+            if (elementPos < _contentView.getContentPosition()) {
+                setContentPosition(elementPos);
+            }
+            else if (elementPos + elementSize > _contentView.getContentPosition() + getHeight()) {
+                setContentPosition((elementPos + elementSize) - getHeight());
+            }
+        }
     }
 }

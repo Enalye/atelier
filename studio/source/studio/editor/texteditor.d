@@ -1749,6 +1749,7 @@ class TextEditor : ContentEditor {
 
     void addAction(TextState.Type action, uint line) {
         addAction(action, line, line);
+        setDirty();
     }
 
     void addAction(TextState.Type action, uint lineToCopy, uint lineToApply) {

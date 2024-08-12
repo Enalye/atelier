@@ -348,9 +348,13 @@ final class SpriteResourceEditor : ResourceBaseEditor {
         InputEvent.MouseWheel ev = manager.input.asMouseWheel();
         float zoomDelta = 1f + (ev.wheel.sum() * 0.25f);
         _zoom *= zoomDelta;
+
+        Vec2f mouseOffset = getMousePosition() - getCenter();
+        Vec2f delta = (mouseOffset - _position) / _sprite.size;
         _sprite.size = (cast(Vec2f) _sprite.clip.zw) * _zoom;
-        Vec2f delta = _sprite.position - getMousePosition();
-        _sprite.position = delta * zoomDelta + getMousePosition();
+        Vec2f delta2 = (mouseOffset - _position) / _sprite.size;
+
+        _position += (delta2 - delta) * _sprite.size;
     }
 }
 

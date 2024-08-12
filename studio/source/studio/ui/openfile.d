@@ -55,6 +55,8 @@ final class OpenFile : Modal {
             _searchField.setWidth(400f);
             _searchField.addEventListener("value", &_onSearch);
             vbox.addUI(_searchField);
+
+            Atelier.ui.setFocus(_searchField);
         }
 
         {

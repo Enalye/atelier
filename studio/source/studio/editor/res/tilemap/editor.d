@@ -508,8 +508,12 @@ final class TilemapResourceEditor : ResourceBaseEditor {
         InputEvent.MouseWheel ev = manager.input.asMouseWheel();
         float zoomDelta = 1f + (ev.wheel.sum() * 0.25f);
         _zoom *= zoomDelta;
+
+        Vec2f mouseOffset = getMousePosition() - getCenter();
+        Vec2f delta = (mouseOffset - _position) / _tilemap.size;
         _tilemap.size = _tilemap.mapSize * _zoom;
-        Vec2f delta = _tilemap.position - getMousePosition();
-        _tilemap.position = delta * zoomDelta + getMousePosition();
+        Vec2f delta2 = (mouseOffset - _position) / _tilemap.size;
+
+        _position += (delta2 - delta) * _tilemap.size;
     }
 }

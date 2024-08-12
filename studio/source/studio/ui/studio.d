@@ -28,7 +28,7 @@ void initApp() {
 
     bar.add("Projet", "Nouveau Projet (Ctrl+Shift+N)")
         .addEventListener("click", &(studio._onNewProject));
-    bar.add("Projet", "Ouvrir (Ctrl+Shift+O)").addEventListener("click", &(studio._onOpenProject));
+    bar.add("Projet", "Ouvrir (Ctrl+O)").addEventListener("click", &(studio._onOpenProject));
     bar.add("Projet", "Fermer").addEventListener("click", &(studio._onCloseProject));
     bar.addSeparator("Projet");
     bar.add("Projet", "Lancer (F5)").addEventListener("click", &(studio._onRunProject));
@@ -40,7 +40,7 @@ void initApp() {
         &(studio._onManageFolders));
     bar.addSeparator("Fichier");
     bar.add("Fichier", "Nouveau (Ctrl+N)").addEventListener("click", &(studio._onNewFile));
-    bar.add("Fichier", "Ouvrir (Ctrl+O)").addEventListener("click", &(studio._onOpenFile));
+    bar.add("Fichier", "Ouvrir (Ctrl+P)").addEventListener("click", &(studio._onOpenFile));
     bar.add("Fichier", "Enregistrer (Ctrl+S)").addEventListener("click", &(studio._onSaveFile));
     bar.add("Fichier", "Fermer");
     Atelier.ui.addUI(bar);
@@ -443,12 +443,12 @@ final class Studio : UIElement {
                 break;
             case o:
                 if (hasControlModifier()) {
-                    if (hasShiftModifier()) {
-                        _onOpenProject();
-                    }
-                    else {
-                        _onOpenFile();
-                    }
+                    _onOpenProject();
+                }
+                break;
+            case p:
+                if (hasControlModifier()) {
+                    _onOpenFile();
                 }
                 break;
             case f5:

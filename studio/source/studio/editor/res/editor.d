@@ -34,6 +34,12 @@ final class ResourceEditor : ContentEditor {
         });
 
         _reloadList();
+        {
+            ResourceItem[] elements = cast(ResourceItem[]) _list._list.getList();
+            if (elements.length > 0) {
+                _list.select(elements[0]);
+            }
+        }
     }
 
     private void _reloadList() {

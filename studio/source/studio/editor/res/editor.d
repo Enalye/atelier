@@ -162,6 +162,7 @@ private final class ResourceList : UIElement {
         }
 
         addEventListener("size", &_onSize);
+        addEventListener("globalkey", &_onKey);
     }
 
     void setList(Farfadet ffd) {
@@ -193,6 +194,50 @@ private final class ResourceList : UIElement {
         _container.setSize(getSize());
     }
 
+    private void _onKey() {
+        InputEvent.KeyButton event = getManager().input.asKeyButton();
+
+        if (event.isPressed() && hasControlModifier()) {
+            switch (event.button) with (InputEvent.KeyButton.Button) {
+            case up:
+                ResourceItem[] items = cast(ResourceItem[]) _list.getList();
+                for (size_t i; i < items.length; ++i) {
+                    if (_selectedItem == items[i]) {
+                        if (i == 0) {
+                            this.select(items[$ - 1]);
+                        }
+                        else {
+                            this.select(items[i - 1]);
+                        }
+                        break;
+                    }
+                }
+                break;
+            case down:
+                ResourceItem[] items = cast(ResourceItem[]) _list.getList();
+                for (size_t i; i < items.length; ++i) {
+                    if (_selectedItem == items[i]) {
+                        if (i + 1 >= items.length) {
+                            this.select(items[0]);
+                        }
+                        else {
+                            this.select(items[i + 1]);
+                        }
+                        break;
+                    }
+                }
+                break;
+            default:
+                break;
+            }
+        }
+    }
+
+    bool hasControlModifier() const {
+        return Atelier.input.isPressed(InputEvent.KeyButton.Button.leftControl) ||
+            Atelier.input.isPressed(InputEvent.KeyButton.Button.rightControl);
+    }
+
     private void _onAddItem() {
         auto modal = new AddResourceItem;
         modal.addEventListener("apply", {
@@ -203,7 +248,6 @@ private final class ResourceList : UIElement {
             foreach (item; cast(ResourceItem[]) _list.getList()) {
                 if (item._ffd == ffd) {
                     select(item);
-                    _list.setContentPosition(_list.getContentHeight());
                     break;
                 }
             }
@@ -247,8 +291,13 @@ private final class ResourceList : UIElement {
             _editor.select(_selectedItem ? _selectedItem.getFarfadet() : null);
         }
 
+        size_t i;
         foreach (ResourceItem item; cast(ResourceItem[]) _list.getList()) {
+            if (item == item_) {
+                _list.moveToElement(i);
+            }
             item.updateSelection(item == item_);
+            i++;
         }
     }
 

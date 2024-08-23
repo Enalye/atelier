@@ -43,12 +43,14 @@ final class ResourceEditor : ContentEditor {
     }
 
     private void _reloadList() {
+        onClose();
         Farfadet ffd = Farfadet.fromFile(path);
         _list.setList(ffd);
     }
 
     protected void select(Farfadet ffd) {
         if (_currentEditor) {
+            _currentEditor.onClose();
             _currentEditor.remove();
             _currentEditor = null;
         }
@@ -97,6 +99,12 @@ final class ResourceEditor : ContentEditor {
         }
         else {
             return null;
+        }
+    }
+
+    override void onClose() {
+        foreach (ResourceBaseEditor editor; _editors) {
+            editor.onClose();
         }
     }
 }

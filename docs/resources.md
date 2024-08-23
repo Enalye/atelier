@@ -219,8 +219,8 @@ Les musiques permettent de jouer de l’audio et sont décodés au fur et à mes
 music "maMusique" {
     file "maMusique.ogg"
     volume 1.0
-    loopStart 5.0
-    loopEnd 60.0
+    intro 5.0
+    outro 60.0
 }
 ```
 Paramètres:
@@ -228,10 +228,10 @@ Paramètres:
     - chemin relatif du fichier (string)
  * `volume` (optionnel)
     - volume (0~1) (float)
- * `loopStart` (optionnel)
-    - temps (en secondes) où la musique redémarre après avoir atteint `loopEnd` (float)
- * `loopEnd` (optionnel)
-    - temps (en secondes) où la musique boucle à `loopStart` (float)
+ * `intro` (optionnel)
+    - temps (en secondes) où la musique redémarre après avoir atteint `outro` (float)
+ * `outro` (optionnel)
+    - temps (en secondes) où la musique boucle à `intro` (float)
 
 ## TrueType
 Les polices truetype (TTF) permettent de générer du texte à l’écran.

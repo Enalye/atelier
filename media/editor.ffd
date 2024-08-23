@@ -201,3 +201,18 @@ sprite "editor:arrow-small-down" {
     texture "editor"
     clip 119 32 7 8
 }
+
+sprite "editor:play-position" {
+    texture "editor"
+    clip 112 48 16 11
+}
+
+sprite "editor:intro-position" {
+    texture "editor"
+    clip 128 48 16 11
+}
+
+sprite "editor:outro-position" {
+    texture "editor"
+    clip 144 48 16 11
+}

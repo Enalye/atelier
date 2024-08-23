@@ -10,7 +10,9 @@ import farfadet;
 import studio.editor.res.animation;
 import studio.editor.res.editor;
 import studio.editor.res.invalid;
+import studio.editor.res.music;
 import studio.editor.res.ninepatch;
+import studio.editor.res.sound;
 import studio.editor.res.sprite;
 import studio.editor.res.texture;
 import studio.editor.res.tilemap;
@@ -53,6 +55,10 @@ abstract class ResourceBaseEditor : UIElement {
             return new TilesetResourceEditor(editor, path_, ffd, size);
         case "tilemap":
             return new TilemapResourceEditor(editor, path_, ffd, size);
+        case "sound":
+            return new SoundResourceEditor(editor, path_, ffd, size);
+        case "music":
+            return new MusicResourceEditor(editor, path_, ffd, size);
         default:
             return new InvalidResourceEditor(editor, path_, ffd, size);
         }
@@ -86,4 +92,6 @@ abstract class ResourceBaseEditor : UIElement {
 
     abstract Farfadet save(Farfadet);
     abstract UIElement getPanel();
+    void onClose() {
+    }
 }

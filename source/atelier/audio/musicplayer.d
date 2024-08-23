@@ -41,22 +41,7 @@ final class MusicPlayer : AudioPlayer {
         _delayStopFrame = -1;
         _delayPauseFrame = -1;
 
-        _startLoopFrame = 0;
-        _endLoopFrame = cast(int) _music.samples;
-
-        if (_music.loopStart > 0f) {
-            _startLoopFrame = clamp(cast(int)(_music.loopStart * _music.sampleRate),
-                0, cast(int) _music.samples);
-        }
-
-        if (_music.loopEnd > 0f) {
-            _endLoopFrame = clamp(cast(int)(_music.loopEnd * _music.sampleRate),
-                _startLoopFrame, cast(int) _music.samples);
-        }
-
-        if (_startLoopFrame >= _endLoopFrame) {
-            _startLoopFrame = 0;
-        }
+        setLoop(_music.intro, _music.outro);
 
         _initDecoder();
         if (startPosition > 0f) {
@@ -64,6 +49,25 @@ final class MusicPlayer : AudioPlayer {
                 0, cast(int) _music.samples);
             _decoder.seekPosition(startFrame);
             _currentFrame = startFrame;
+        }
+    }
+
+    void setLoop(float intro, float outro) {
+        _startLoopFrame = 0;
+        _endLoopFrame = cast(int) _music.samples;
+
+        if (intro > 0f) {
+            _startLoopFrame = clamp(cast(int)(intro * _music.sampleRate), 0,
+                cast(int) _music.samples);
+        }
+
+        if (outro > 0f) {
+            _endLoopFrame = clamp(cast(int)(outro * _music.sampleRate),
+                _startLoopFrame, cast(int) _music.samples);
+        }
+
+        if (_startLoopFrame >= _endLoopFrame) {
+            _startLoopFrame = 0;
         }
     }
 

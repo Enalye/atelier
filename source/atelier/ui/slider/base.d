@@ -24,7 +24,9 @@ abstract class Slider : UIElement {
         }
         /// Ditto
         float value01(float value_) {
-            return _value = _offset = value_;
+            _value = _offset = _lastOffset = value_;
+            dispatchEvent("value", false);
+            return _value;
         }
 
         /// Rounded value between the min and max values specified.
@@ -33,7 +35,9 @@ abstract class Slider : UIElement {
         }
         /// Ditto
         int ivalue(int value_) {
-            return cast(int)(_value = _offset = rlerp(_minValue, _maxValue, value_));
+            _value = _offset = _lastOffset = rlerp(_minValue, _maxValue, value_);
+            dispatchEvent("value", false);
+            return cast(int) lerp(_minValue, _maxValue, _value);
         }
 
         /// Value between the min and max values specified.
@@ -42,7 +46,9 @@ abstract class Slider : UIElement {
         }
         /// Ditto
         float fvalue(float value_) {
-            return _value = _offset = rlerp(_minValue, _maxValue, value_);
+            _value = _offset = _lastOffset = rlerp(_minValue, _maxValue, value_);
+            dispatchEvent("value", false);
+            return lerp(_minValue, _maxValue, _value);
         }
 
         /// Value (from 0 to 1) before being processed/clamped/etc. \

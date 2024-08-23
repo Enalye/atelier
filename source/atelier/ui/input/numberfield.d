@@ -83,14 +83,12 @@ final class NumberField : UIElement {
         _textField.value = "0";
         _textField.setAllowedCharacters("0123456789+-.,");
         _textField.setSize(getSize());
-        _textField.setInnerMargin(4f, 70f);
+        _textField.setInnerMargin(4f, 30f);
         addUI(_textField);
 
         HBox box = new HBox;
         box.setAlign(UIAlignX.right, UIAlignY.center);
         box.setChildAlign(UIAlignY.center);
-        //box.setPosition(Vec2f(2f, 0f));
-        //box.setSpacing(2f);
         addUI(box);
 
         _decrementBtn = new ControlButton("-");
@@ -100,7 +98,9 @@ final class NumberField : UIElement {
         box.addUI(_incrementBtn);
 
         _incrementBtn.addEventListener("click", { value(_value + _step); });
+        _incrementBtn.addEventListener("echo", { value(_value + _step); });
         _decrementBtn.addEventListener("click", { value(_value - _step); });
+        _decrementBtn.addEventListener("echo", { value(_value - _step); });
         _textField.addEventListener("value", &_onValue);
 
         addEventListener("enable", &_onEnableChange);

@@ -17,6 +17,7 @@ import studio.editor.res.sprite;
 import studio.editor.res.texture;
 import studio.editor.res.tilemap;
 import studio.editor.res.tileset;
+import studio.editor.res.truetype;
 import studio.ui;
 
 abstract class ResourceBaseEditor : UIElement {
@@ -59,6 +60,8 @@ abstract class ResourceBaseEditor : UIElement {
             return new SoundResourceEditor(editor, path_, ffd, size);
         case "music":
             return new MusicResourceEditor(editor, path_, ffd, size);
+        case "truetype":
+            return new TrueTypeResourceEditor(editor, path_, ffd, size);
         default:
             return new InvalidResourceEditor(editor, path_, ffd, size);
         }

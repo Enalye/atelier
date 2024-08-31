@@ -64,9 +64,16 @@ struct Color {
     }
 
     static {
-        /// Take a 0xFFFFFF color format.
+        /// Prend une couleur RVB au format 0xFFFFFF.
         Color fromHex(uint rgbValue) {
             return Color((rgbValue >> 16) & 0xFF, (rgbValue >> 8) & 0xFF, rgbValue & 0xFF);
+        }
+
+        /// Récupère une couleur depuis le format SDL.
+        Color fromSDL(SDL_Color sdlColor) {
+            Color color;
+            color.set(sdlColor.r, sdlColor.g, sdlColor.b);
+            return color;
         }
     }
 

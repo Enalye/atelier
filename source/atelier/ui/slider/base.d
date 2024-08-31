@@ -25,7 +25,6 @@ abstract class Slider : UIElement {
         /// Ditto
         float value01(float value_) {
             _value = _offset = _lastOffset = value_;
-            dispatchEvent("value", false);
             return _value;
         }
 
@@ -36,7 +35,6 @@ abstract class Slider : UIElement {
         /// Ditto
         int ivalue(int value_) {
             _value = _offset = _lastOffset = rlerp(_minValue, _maxValue, value_);
-            dispatchEvent("value", false);
             return cast(int) lerp(_minValue, _maxValue, _value);
         }
 
@@ -47,7 +45,6 @@ abstract class Slider : UIElement {
         /// Ditto
         float fvalue(float value_) {
             _value = _offset = _lastOffset = rlerp(_minValue, _maxValue, value_);
-            dispatchEvent("value", false);
             return lerp(_minValue, _maxValue, _value);
         }
 
@@ -111,13 +108,10 @@ abstract class Slider : UIElement {
 
     /// Ctor
     this() {
-        addEventListener("mouseup", &relocateSlider);
-        addEventListener("mousedown", &relocateSlider);
-        addEventListener("mousemove", {
-            if (isPressed)
-                relocateSlider();
+        addEventListener("press", { addEventListener("update", &_onClickHeld); });
+        addEventListener("unpress", {
+            removeEventListener("update", &_onClickHeld);
         });
-        addEventListener("update", &_onUpdate);
     }
 
     private void _onUpdate() {
@@ -135,7 +129,7 @@ abstract class Slider : UIElement {
     }
 
     /// Process the slider position.
-    protected void relocateSlider() {
+    protected void _onClickHeld() {
         if (_step == 0f) {
             _offset = 0f;
             _value = 0f;
@@ -160,6 +154,9 @@ abstract class Slider : UIElement {
 
         if (_lastOffset != _offset) {
             _lastOffset = _offset;
+            _value = (_offset < 0f) ? 0f : ((_offset > 1f) ? 1f : _offset); //Clamp the value.
+            if (_step > 0f)
+                _value = std.math.round(_value / _step) * _step; //Snap the value.
             dispatchEvent("value", false);
         }
     }

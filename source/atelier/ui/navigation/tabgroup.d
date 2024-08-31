@@ -58,10 +58,14 @@ final class TabGroup : UIElement {
         Tab tab = new Tab(this, name, id, icon);
         addUI(tab);
         _onSize();
-        select(tab);
+        _selectTab(tab, false);
     }
 
-    void select(string id) {
+    void selectTab(string id) {
+        _selectTab(id, false);
+    }
+
+    private void _selectTab(string id, bool dispatch) {
         Tab[] tabs = cast(Tab[]) getChildren().array;
 
         bool hasValue;
@@ -75,7 +79,9 @@ final class TabGroup : UIElement {
         if (!tabs.length) {
             if (_value != "") {
                 _value = "";
-                dispatchEvent("value", false);
+                if (dispatch) {
+                    dispatchEvent("value", false);
+                }
                 return;
             }
         }
@@ -87,11 +93,13 @@ final class TabGroup : UIElement {
 
         if (_value != id) {
             _value = id;
-            dispatchEvent("value", false);
+            if (dispatch) {
+                dispatchEvent("value", false);
+            }
         }
     }
 
-    private void select(Tab tab_) {
+    private void _selectTab(Tab tab_, bool dispatch) {
         Tab[] tabs = cast(Tab[]) getChildren().array;
 
         foreach (Tab tab; tabs) {
@@ -100,7 +108,9 @@ final class TabGroup : UIElement {
 
         if (_value != tab_._id) {
             _value = tab_._id;
-            dispatchEvent("value", false);
+            if (dispatch) {
+                dispatchEvent("value", false);
+            }
         }
     }
 
@@ -175,7 +185,7 @@ private final class Tab : UIElement {
         if (_isSelected)
             return;
 
-        _group.select(this);
+        _group._selectTab(this, true);
     }
 
     private void updateValue(bool value) {

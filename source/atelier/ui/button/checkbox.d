@@ -23,7 +23,7 @@ final class Checkbox : Button!RoundedRectangle {
         }
 
         bool value(bool value_) {
-            _updateValue(value_);
+            _updateValue(value_, false);
             return _value;
         }
     }
@@ -97,10 +97,10 @@ final class Checkbox : Button!RoundedRectangle {
     }
 
     private void _onClick() {
-        _updateValue(!_value);
+        _updateValue(!_value, true);
     }
 
-    private void _updateValue(bool value_) {
+    private void _updateValue(bool value_, bool dispatch) {
         if (_value == value_)
             return;
 
@@ -118,6 +118,8 @@ final class Checkbox : Button!RoundedRectangle {
             _onMouseLeave();
         }
 
-        dispatchEvent("value", false);
+        if (dispatch) {
+            dispatchEvent("value", false);
+        }
     }
 }

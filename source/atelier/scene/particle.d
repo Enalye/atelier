@@ -147,6 +147,10 @@ final class ParticleSource : Resource!ParticleSource {
         _effects ~= effect;
     }
 
+    void clearEffects() {
+        _effects.length = 0;
+    }
+
     void update() {
         if (_interval > 0) {
             _emitterTime--;
@@ -255,6 +259,11 @@ final class ParticleSource : Resource!ParticleSource {
         _spriteSize = _sprite.size;
     }
 
+    void setSprite(Sprite sprite) {
+        _sprite = sprite;
+        _spriteSize = _sprite.size;
+    }
+
     void setBlend(Blend blend) {
         _blend = blend;
     }
@@ -301,9 +310,9 @@ final class ParticleSource : Resource!ParticleSource {
     }
 
     void setSpread(float minAngle, float maxAngle, float spreadAngle) {
-        _minAngle = minAngle;
-        _maxAngle = maxAngle;
-        _spreadAngle = spreadAngle;
+        _minAngle = degToRad(minAngle);
+        _maxAngle = degToRad(maxAngle);
+        _spreadAngle = degToRad(spreadAngle);
     }
 
     private void _emitSpread() {

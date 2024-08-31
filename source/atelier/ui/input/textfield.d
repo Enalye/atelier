@@ -45,7 +45,6 @@ final class TextField : UIElement {
             _caretIndex = to!uint(_text.length);
             _selectionIndex = _caretIndex;
             _label.text = text_;
-            dispatchEvent("value", false);
             return text_;
         }
 

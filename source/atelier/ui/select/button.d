@@ -36,7 +36,6 @@ final class SelectButton : Button!RoundedRectangle {
             if (_items.canFind(value_)) {
                 _value = value_;
                 _label.text = _value;
-                dispatchEvent("value", false);
             }
             return _value;
         }
@@ -95,7 +94,7 @@ final class SelectButton : Button!RoundedRectangle {
             _label.text = item;
             size = size.max(_label.getSize() + Vec2f(24f, 8f));
         }
-        _label.text = value();
+        _label.text = _value;
 
         setSize(size);
     }

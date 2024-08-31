@@ -50,7 +50,7 @@ final class NewFile : Modal {
 
             _typeTab.addTab("Média", "media", "");
             _typeTab.addTab("Source", "source", "");
-            _typeTab.select("media");
+            _typeTab.selectTab("media");
 
             _typeTab.addEventListener("value", &_onTypeTab);
         }

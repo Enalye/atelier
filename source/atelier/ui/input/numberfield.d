@@ -70,7 +70,6 @@ final class NumberField : UIElement {
             if (_value != value_) {
                 _value = value_;
                 _textField.value = to!string(_value);
-                dispatchEvent("value", false);
             }
             return _value;
         }
@@ -97,10 +96,34 @@ final class NumberField : UIElement {
         _incrementBtn = new ControlButton("+");
         box.addUI(_incrementBtn);
 
-        _incrementBtn.addEventListener("click", { value(_value + _step); });
-        _incrementBtn.addEventListener("echo", { value(_value + _step); });
-        _decrementBtn.addEventListener("click", { value(_value - _step); });
-        _decrementBtn.addEventListener("echo", { value(_value - _step); });
+        _incrementBtn.addEventListener("click", {
+            float oldValue = _value;
+            value(_value + _step);
+            if (_value != oldValue) {
+                dispatchEvent("value", false);
+            }
+        });
+        _incrementBtn.addEventListener("echo", {
+            float oldValue = _value;
+            value(_value + _step);
+            if (_value != oldValue) {
+                dispatchEvent("value", false);
+            }
+        });
+        _decrementBtn.addEventListener("click", {
+            float oldValue = _value;
+            value(_value - _step);
+            if (_value != oldValue) {
+                dispatchEvent("value", false);
+            }
+        });
+        _decrementBtn.addEventListener("echo", {
+            float oldValue = _value;
+            value(_value - _step);
+            if (_value != oldValue) {
+                dispatchEvent("value", false);
+            }
+        });
         _textField.addEventListener("value", &_onValue);
 
         addEventListener("enable", &_onEnableChange);
@@ -166,7 +189,6 @@ final class IntegerField : UIElement {
             if (_value != value_) {
                 _value = value_;
                 _textField.value = to!string(_value);
-                dispatchEvent("value", false);
             }
             return _value;
         }
@@ -193,10 +215,34 @@ final class IntegerField : UIElement {
         _incrementBtn = new ControlButton("+");
         box.addUI(_incrementBtn);
 
-        _incrementBtn.addEventListener("click", { value(_value + _step); });
-        _incrementBtn.addEventListener("echo", { value(_value + _step); });
-        _decrementBtn.addEventListener("click", { value(_value - _step); });
-        _decrementBtn.addEventListener("echo", { value(_value - _step); });
+        _incrementBtn.addEventListener("click", {
+            int oldValue = _value;
+            value(_value + _step);
+            if (_value != oldValue) {
+                dispatchEvent("value", false);
+            }
+        });
+        _incrementBtn.addEventListener("echo", {
+            int oldValue = _value;
+            value(_value + _step);
+            if (_value != oldValue) {
+                dispatchEvent("value", false);
+            }
+        });
+        _decrementBtn.addEventListener("click", {
+            int oldValue = _value;
+            value(_value - _step);
+            if (_value != oldValue) {
+                dispatchEvent("value", false);
+            }
+        });
+        _decrementBtn.addEventListener("echo", {
+            int oldValue = _value;
+            value(_value - _step);
+            if (_value != oldValue) {
+                dispatchEvent("value", false);
+            }
+        });
         _textField.addEventListener("value", &_onValue);
 
         addEventListener("enable", &_onEnableChange);

@@ -228,7 +228,7 @@ final class Studio : UIElement {
 
             _explorerTab.addTab("Média", "media", "");
             _explorerTab.addTab("Source", "source", "");
-            _explorerTab.select("media");
+            _explorerTab.selectTab("media");
 
             _explorerTab.addEventListener("value", &_onExplorerTab);
 
@@ -600,7 +600,7 @@ final class Studio : UIElement {
 
     static void editFile(string path) {
         if (_tabBar.hasTab(path)) {
-            _tabBar.select(path);
+            _tabBar.selectTab(path);
         }
         else {
             string icon;

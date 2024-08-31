@@ -25,7 +25,7 @@ final class SwitchButton : Button!Capsule {
         }
 
         bool value(bool value_) {
-            _updateValue(value_);
+            _updateValue(value_, false);
             return _value;
         }
     }
@@ -92,10 +92,10 @@ final class SwitchButton : Button!Capsule {
     }
 
     private void _onClick() {
-        _updateValue(!_value);
+        _updateValue(!_value, true);
     }
 
-    private void _updateValue(bool value_) {
+    private void _updateValue(bool value_, bool dispatch) {
         if (_value == value_)
             return;
 
@@ -114,7 +114,9 @@ final class SwitchButton : Button!Capsule {
             _onMouseLeave();
         }
 
-        dispatchEvent("value", false);
+        if (dispatch) {
+            dispatchEvent("value", false);
+        }
     }
 
     private void _onUpdate() {

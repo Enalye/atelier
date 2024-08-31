@@ -77,6 +77,16 @@ sprite "editor:stop" {
     clip 64 32 32 32
 }
 
+sprite "editor:play-once" {
+    texture "editor"
+    clip 96 32 32 32
+}
+
+sprite "editor:clear" {
+    texture "editor"
+    clip 128 32 32 32
+}
+
 sprite "editor:ffd-texture" {
     texture "editor"
     clip 0 64 16 16
@@ -194,25 +204,32 @@ sprite "editor:bucket-button" {
 
 sprite "editor:arrow-small-up" {
     texture "editor"
-    clip 112 32 7 8
+    clip 0 80 7 8
 }
 
 sprite "editor:arrow-small-down" {
     texture "editor"
-    clip 119 32 7 8
+    clip 7 80 7 8
 }
 
 sprite "editor:play-position" {
     texture "editor"
-    clip 112 48 16 11
+    clip 16 80 16 11
 }
 
 sprite "editor:intro-position" {
     texture "editor"
-    clip 128 48 16 11
+    clip 32 80 16 11
 }
 
 sprite "editor:outro-position" {
     texture "editor"
-    clip 144 48 16 11
+    clip 48 80 16 11
+}
+
+tileset "editor:splines" {
+    texture "editor"
+    clip 0 96 32 32
+    columns 16
+    lines 2
 }

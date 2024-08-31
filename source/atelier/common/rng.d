@@ -64,14 +64,17 @@ final class RNG {
             return minValue + rand01!T() * delta;
         }
         else static if (is(T == uint)) {
-            long delta = (maxValue - minValue);
-            if (delta == 0) {
+            if (maxValue == minValue) {
                 return minValue;
             }
-            else if (delta < 0) {
-                return cast(T)(_rand() % -delta) + maxValue;
+            if (maxValue < minValue) {
+                long delta = (minValue - maxValue);
+                return cast(T)(_rand() % delta) + maxValue;
             }
-            return cast(T)(_rand() % delta) + minValue;
+            else {
+                long delta = (maxValue - minValue);
+                return cast(T)(_rand() % delta) + minValue;
+            }
         }
         else static if (is(T == int)) {
             long delta = (maxValue - minValue);

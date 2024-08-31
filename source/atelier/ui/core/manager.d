@@ -282,7 +282,7 @@ final class UIManager {
 
         if (_pressedElement == element) {
             //The previous element is now unhovered.
-            if (_hoveredElement != _pressedElement) {
+            if (_hoveredElement && _hoveredElement != _pressedElement) {
                 _hoveredElement.isHovered = false;
             }
 

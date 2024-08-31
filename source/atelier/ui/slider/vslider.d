@@ -45,7 +45,6 @@ final class VSlider : Slider {
         addImage(_circle);
 
         addEventListener("size", &_onSizeChange);
-        addEventListener("value", &_onValueChange);
         addEventListener("mouseenter", &_onMouseEnter);
         addEventListener("mouseleave", &_onMouseLeave);
         addEventListener("mousedown", &_onMouseDown);
@@ -106,6 +105,8 @@ final class VSlider : Slider {
     }
 
     private void _onUpdate() {
+        _onValueChange();
+
         if (_hoverTimer.isRunning) {
             _hoverTimer.update();
             float t = easeInOutSine(_hoverTimer.value01);

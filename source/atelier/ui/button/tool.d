@@ -26,7 +26,7 @@ final class ToolGroup {
 
     private bool add(ToolButton button, bool isChecked) {
         if (isChecked) {
-            check(null);
+            _check(null, false);
         }
 
         _buttons ~= button;
@@ -34,9 +34,9 @@ final class ToolGroup {
         return (_buttons.length == 1) || isChecked;
     }
 
-    private void check(ToolButton button_) {
+    private void _check(ToolButton button_, bool dispatch) {
         foreach (i, button; _buttons) {
-            button._updateValue(button == button_);
+            button._updateValue(button == button_, dispatch);
             if (button == button_) {
                 _value = cast(int) i;
             }
@@ -110,7 +110,11 @@ final class ToolButton : Button!RoundedRectangle {
     }
 
     void check() {
-        _group.check(this);
+        _group._check(this, false);
+    }
+
+    private void _check() {
+        _group._check(this, true);
     }
 
     private void _onEnable() {
@@ -147,10 +151,10 @@ final class ToolButton : Button!RoundedRectangle {
 
     private void _onClick() {
         if (!_value)
-            check();
+            _check();
     }
 
-    private void _updateValue(bool value_) {
+    private void _updateValue(bool value_, bool dispatch) {
         if (_value == value_)
             return;
 
@@ -166,6 +170,8 @@ final class ToolButton : Button!RoundedRectangle {
             _onMouseLeave();
         }
 
-        dispatchEvent("value", false);
+        if (dispatch) {
+            dispatchEvent("value", false);
+        }
     }
 }

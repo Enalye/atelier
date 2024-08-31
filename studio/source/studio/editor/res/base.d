@@ -12,6 +12,7 @@ import studio.editor.res.editor;
 import studio.editor.res.invalid;
 import studio.editor.res.music;
 import studio.editor.res.ninepatch;
+import studio.editor.res.particle;
 import studio.editor.res.sound;
 import studio.editor.res.sprite;
 import studio.editor.res.texture;
@@ -56,6 +57,8 @@ abstract class ResourceBaseEditor : UIElement {
             return new TilesetResourceEditor(editor, path_, ffd, size);
         case "tilemap":
             return new TilemapResourceEditor(editor, path_, ffd, size);
+        case "particle":
+            return new ParticleResourceEditor(editor, path_, ffd, size);
         case "sound":
             return new SoundResourceEditor(editor, path_, ffd, size);
         case "music":

@@ -38,7 +38,11 @@ final class SelectItem : TextButton!RoundedRectangle {
 
         addEventListener("mouseenter", { _background.isVisible = true; });
         addEventListener("mouseleave", { _background.isVisible = false; });
-        addEventListener("click", { _button.value = text; _button.removeMenu(); });
+        addEventListener("click", {
+            _button.value = text;
+            _button.removeMenu();
+            _button.dispatchEvent("value", false);
+        });
         addEventListener("size", { _background.size = getSize(); });
     }
 }

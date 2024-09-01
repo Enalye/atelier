@@ -139,7 +139,7 @@ Détermine à partir d’où la position de l’interface sera calculé par rapp
 
     mod.setDescription(GrLocale.fr_FR, "Retire l’interface de l’arborescence.");
     mod.setParameters(["ui"]);
-    mod.addFunction(&_remove, "remove", [elementType]);
+    mod.addFunction(&_removeUI, "removeUI", [elementType]);
 }
 
 private void _ctor(GrCall call) {
@@ -345,7 +345,7 @@ private void _removeEventListener(GrCall call) {
     ui.removeEventListener(key, event);
 }
 
-private void _remove(GrCall call) {
+private void _removeUI(GrCall call) {
     UIElement ui = call.getNative!UIElement(0);
-    ui.remove();
+    ui.removeUI();
 }

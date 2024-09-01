@@ -80,7 +80,7 @@ final class PathField : UIElement {
         _isEditing = !_isEditing;
 
         if (_isEditing) {
-            _breadcrumbs.remove();
+            _breadcrumbs.removeUI();
             _background.isVisible = false;
             _outline.isVisible = false;
             _textField.value = _path;
@@ -91,7 +91,7 @@ final class PathField : UIElement {
             addEventListener("clickoutside", &_onClickOut);
         }
         else {
-            _textField.remove();
+            _textField.removeUI();
             _background.isVisible = true;
             _outline.isVisible = true;
             addUI(_breadcrumbs);

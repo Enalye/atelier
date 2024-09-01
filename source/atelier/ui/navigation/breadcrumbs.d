@@ -67,12 +67,12 @@ final class Breadcrumbs : UIElement {
     void removePath() {
         if (!_parts.length)
             return;
-        _parts[$ - 1].remove();
+        _parts[$ - 1].removeUI();
         _parts.length--;
 
         if (!_separators.length)
             return;
-        _separators[$ - 1].remove();
+        _separators[$ - 1].removeUI();
         _separators.length--;
     }
 
@@ -101,12 +101,12 @@ final class Breadcrumbs : UIElement {
 
     private void _onCrumbClick(size_t index) {
         for (size_t i = index + 1; i < _parts.length; ++i) {
-            _parts[i].remove();
+            _parts[i].removeUI();
         }
         _parts.length = index + 1;
 
         for (size_t i = index; i < _separators.length; ++i) {
-            _separators[i].remove();
+            _separators[i].removeUI();
         }
         _separators.length = index;
 

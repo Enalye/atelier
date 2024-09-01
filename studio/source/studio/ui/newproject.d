@@ -154,7 +154,7 @@ final class NewProject : Modal {
         addUI(validationBox);
 
         auto cancelBtn = new NeutralButton("Annuler");
-        cancelBtn.addEventListener("click", { remove(); });
+        cancelBtn.addEventListener("click", { removeUI(); });
         validationBox.addUI(cancelBtn);
 
         _createBtn = new AccentButton("Créer");

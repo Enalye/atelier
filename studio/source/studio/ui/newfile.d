@@ -37,7 +37,7 @@ final class NewFile : Modal {
             IconButton exitBtn = new IconButton("editor:exit");
             exitBtn.setAlign(UIAlignX.right, UIAlignY.top);
             exitBtn.setPosition(Vec2f(4f, 4f));
-            exitBtn.addEventListener("click", &remove);
+            exitBtn.addEventListener("click", &removeUI);
             addUI(exitBtn);
         }
 
@@ -62,7 +62,7 @@ final class NewFile : Modal {
             addUI(validationBox);
 
             auto cancelBtn = new NeutralButton("Annuler");
-            cancelBtn.addEventListener("click", &remove);
+            cancelBtn.addEventListener("click", &removeUI);
             validationBox.addUI(cancelBtn);
 
             _createBtn = new AccentButton("Créer");

@@ -30,7 +30,7 @@ final class ResourceEditor : ContentEditor {
         });
         addEventListener("unregister", {
             if (_currentEditor)
-                _currentEditor.remove();
+                _currentEditor.removeUI();
         });
 
         _reloadList();
@@ -51,7 +51,7 @@ final class ResourceEditor : ContentEditor {
     protected void select(Farfadet ffd) {
         if (_currentEditor) {
             _currentEditor.onClose();
-            _currentEditor.remove();
+            _currentEditor.removeUI();
             _currentEditor = null;
         }
 

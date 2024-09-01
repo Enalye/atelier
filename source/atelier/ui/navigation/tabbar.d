@@ -57,7 +57,7 @@ final class TabBar : UIElement {
     void addTab(string name, string id, string icon = "") {
         Tab tab = new Tab(this, name, id, icon);
         _list.addList(tab);
-        _selectTab(tab);
+        _selectTab(tab, false);
     }
 
     void clearTabs() {
@@ -112,7 +112,7 @@ final class TabBar : UIElement {
         }
     }
 
-    private void _selectTab(Tab tab_) {
+    private void _selectTab(Tab tab_, bool dispatch) {
         Tab[] tabs = cast(Tab[]) _list.getList();
 
         foreach (Tab tab; tabs) {
@@ -121,7 +121,9 @@ final class TabBar : UIElement {
 
         if (_value != tab_._id) {
             _value = tab_._id;
-            dispatchEvent("value", false);
+            if (dispatch) {
+                dispatchEvent("value", false);
+            }
         }
     }
 
@@ -231,7 +233,7 @@ private final class Tab : UIElement {
         if (_isSelected)
             return;
 
-        _bar._selectTab(this);
+        _bar._selectTab(this, true);
     }
 
     private void updateValue(bool value) {
@@ -243,7 +245,7 @@ private final class Tab : UIElement {
         if (_isSelected) {
             _bar.unselect(this);
         }
-        remove();
+        removeUI();
         _bar._lastRemovedTab = _id;
         _bar.dispatchEvent("close", false);
     }

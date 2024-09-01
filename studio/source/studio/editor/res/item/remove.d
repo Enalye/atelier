@@ -26,7 +26,7 @@ final class RemoveResourceItem : Modal {
             addUI(hbox);
 
             NeutralButton cancelBtn = new NeutralButton("Annuler");
-            cancelBtn.addEventListener("click", &remove);
+            cancelBtn.addEventListener("click", &removeUI);
             hbox.addUI(cancelBtn);
 
             DangerButton applyBtn = new DangerButton("Supprimer");
@@ -37,6 +37,6 @@ final class RemoveResourceItem : Modal {
 
     private void _onApply() {
         dispatchEvent("apply", false);
-        remove();
+        removeUI();
     }
 }

@@ -45,7 +45,7 @@ final class OpenFile : Modal {
             IconButton exitBtn = new IconButton("editor:exit");
             exitBtn.setAlign(UIAlignX.right, UIAlignY.top);
             exitBtn.setPosition(Vec2f(4f, 4f));
-            exitBtn.addEventListener("click", &remove);
+            exitBtn.addEventListener("click", &removeUI);
             addUI(exitBtn);
         }
 
@@ -85,7 +85,7 @@ final class OpenFile : Modal {
             }
             break;
         case escape:
-            this.remove();
+            this.removeUI();
             break;
         case up:
             if (_selectedItemIndex == 0) {

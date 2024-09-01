@@ -107,7 +107,7 @@ final class NinePatchResourceEditor : ResourceBaseEditor {
 
         _toolbox.addEventListener("tool", { _tool = _toolbox.getTool(); });
         addEventListener("register", { Atelier.ui.addUI(_toolbox); });
-        addEventListener("unregister", { _toolbox.remove(); });
+        addEventListener("unregister", { _toolbox.removeUI(); });
     }
 
     override Farfadet save(Farfadet ffd) {

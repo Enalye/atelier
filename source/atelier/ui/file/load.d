@@ -48,7 +48,7 @@ final class LoadFile : Modal {
         GhostButton exitBtn = new GhostButton("X");
         exitBtn.setAlign(UIAlignX.right, UIAlignY.top);
         exitBtn.setPosition(Vec2f(4f, 4f));
-        exitBtn.addEventListener("click", &remove);
+        exitBtn.addEventListener("click", &removeUI);
         addUI(exitBtn);
 
         HBox headerBox = new HBox;
@@ -102,7 +102,7 @@ final class LoadFile : Modal {
         addUI(footerBox);
 
         auto cancelBtn = new NeutralButton("Annuler");
-        cancelBtn.addEventListener("click", &remove);
+        cancelBtn.addEventListener("click", &removeUI);
         footerBox.addUI(cancelBtn);
 
         _validateBtn = new AccentButton("Ouvrir");

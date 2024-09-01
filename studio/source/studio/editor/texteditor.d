@@ -1013,7 +1013,7 @@ class TextEditor : ContentEditor {
         }
         else if (actualTextWindowHeight < _lineCountLabels.length) {
             for (size_t i = actualTextWindowHeight; i < _lineCountLabels.length; ++i) {
-                _lineCountLabels[i].remove();
+                _lineCountLabels[i].removeUI();
             }
             _lineCountLabels.length = actualTextWindowHeight;
         }
@@ -1029,7 +1029,7 @@ class TextEditor : ContentEditor {
         }
         else if (actualTextWindowHeight < _lineTextLabels.length) {
             for (size_t i = actualTextWindowHeight; i < _lineTextLabels.length; ++i) {
-                _lineTextLabels[i].remove();
+                _lineTextLabels[i].removeUI();
             }
             _lineTextLabels.length = actualTextWindowHeight;
         }

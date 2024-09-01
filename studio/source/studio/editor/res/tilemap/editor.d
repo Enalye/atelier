@@ -93,7 +93,7 @@ final class TilemapResourceEditor : ResourceBaseEditor {
             updateSelectionPreview();
         });
         addEventListener("register", { Atelier.ui.addUI(_toolbox); });
-        addEventListener("unregister", { _toolbox.remove(); });
+        addEventListener("unregister", { _toolbox.removeUI(); });
     }
 
     override Farfadet save(Farfadet ffd) {

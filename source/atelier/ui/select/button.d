@@ -84,7 +84,7 @@ final class SelectButton : Button!RoundedRectangle {
 
     void setItems(string[] items) {
         if (_list) {
-            _list.remove();
+            _list.removeUI();
         }
 
         Vec2f size = getSize();

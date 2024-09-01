@@ -7,6 +7,7 @@ module studio.ui.studio;
 
 import std.exception : enforce;
 import std.file;
+import std.format;
 import std.functional : toDelegate;
 import std.path;
 import atelier;
@@ -19,6 +20,7 @@ import studio.ui.newproject;
 import studio.ui.openfile;
 import studio.ui.resourcemanager;
 import studio.ui.tabbar;
+import studio.ui.warning;
 
 void initApp() {
     MenuBar bar = new MenuBar;
@@ -312,7 +314,7 @@ final class Studio : UIElement {
     private void _hideLastProjects() {
         if (!_lastProjectsBox)
             return;
-        _lastProjectsBox.remove();
+        _lastProjectsBox.removeUI();
         _lastProjectsBox = null;
     }
 
@@ -351,7 +353,7 @@ final class Studio : UIElement {
 
             if (_contentEditor) {
                 _contentEditor.onClose();
-                _contentEditor.remove();
+                _contentEditor.removeUI();
                 _contentEditor = null;
             }
             _contentEditors.clear();
@@ -481,11 +483,11 @@ final class Studio : UIElement {
     private void _onExplorerTab() {
         switch (_explorerTab.value) {
         case "media":
-            _sourceExplorer.remove();
+            _sourceExplorer.removeUI();
             addUI(_mediaExplorer);
             break;
         case "source":
-            _mediaExplorer.remove();
+            _mediaExplorer.removeUI();
             addUI(_sourceExplorer);
             break;
         default:
@@ -495,7 +497,7 @@ final class Studio : UIElement {
 
     private void setLowerPanel(UIElement element) {
         if (_lowerPanel) {
-            _lowerPanel.remove();
+            _lowerPanel.removeUI();
         }
         _lowerPanel = element;
 
@@ -520,7 +522,7 @@ final class Studio : UIElement {
 
     private void setRightPanel(UIElement element) {
         if (_rightPanel) {
-            _rightPanel.remove();
+            _rightPanel.removeUI();
         }
         _rightPanel = element;
 
@@ -561,7 +563,7 @@ final class Studio : UIElement {
 
     private void _onTab() {
         if (_contentEditor) {
-            _contentEditor.remove();
+            _contentEditor.removeUI();
             _contentEditor = null;
         }
 
@@ -631,6 +633,7 @@ final class Studio : UIElement {
                 break;
             }
             _tabBar.addTab(baseName(path), path, icon);
+            _tabBar.dispatchEvent("value", false);
         }
     }
 
@@ -672,7 +675,16 @@ final class Studio : UIElement {
 
         _farfadets.clear();
         foreach (Archive.File file; resourceFiles) {
-            Farfadet ffd = Farfadet.fromBytes(file.data);
+            Farfadet ffd;
+            try {
+                ffd = Farfadet.fromBytes(file.data);
+            }
+            catch (FarfadetSyntaxException e) {
+                showWarning("Fichier corrompu",
+                    format!"Le fichier `%s` est corrompu:\nLigne %d col. %d: %s"(file.path,
+                        e.tokenLine, e.tokenColumn, e.msg));
+                continue;
+            }
             foreach (resNode; ffd.getNodes()) {
                 if (resNode.getCount() == 0)
                     continue;

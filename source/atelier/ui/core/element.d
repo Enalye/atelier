@@ -561,7 +561,7 @@ class UIElement {
 
     final void clearUI() {
         foreach (child; _children) {
-            child.remove();
+            child.removeUI();
         }
         _children.clear();
         dispatchEvent("removechild", false);
@@ -577,7 +577,7 @@ class UIElement {
         dispatchEvent("removeimage", false);
     }
 
-    final void remove() {
+    final void removeUI() {
         isAlive = false;
         setManager(null);
         _parent = null;

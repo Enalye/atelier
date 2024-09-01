@@ -117,7 +117,7 @@ final class TilesetResourceEditor : ResourceBaseEditor {
         addEventListener("clip", { _parameterWindow.setClip(_clip); });
         _toolbox.addEventListener("tool", { _tool = _toolbox.getTool(); });
         addEventListener("register", { Atelier.ui.addUI(_toolbox); });
-        addEventListener("unregister", { _toolbox.remove(); });
+        addEventListener("unregister", { _toolbox.removeUI(); });
     }
 
     override Farfadet save(Farfadet ffd) {
@@ -763,7 +763,7 @@ final class TileFrameElement : UIElement {
 
         _removeBtn = new DangerButton("Retirer");
         _removeBtn.setAlign(UIAlignX.right, UIAlignY.center);
-        _removeBtn.addEventListener("click", { _onTileChange(); remove(); });
+        _removeBtn.addEventListener("click", { _onTileChange(); removeUI(); });
         hbox.addUI(_removeBtn);
     }
 

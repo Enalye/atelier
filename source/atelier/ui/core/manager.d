@@ -555,19 +555,19 @@ final class UIManager {
     void popModalUI() {
         if (!_modalStack.length)
             return;
-        _modalStack[$ - 1].remove();
+        _modalStack[$ - 1].removeUI();
         _modalStack.length--;
     }
 
     /// Supprime toutes les interfaces
     void clearUI() {
         foreach (UIElement element; _modalStack) {
-            element.remove();
+            element.removeUI();
         }
         _modalStack.length = 0;
 
         foreach (UIElement element; _elements) {
-            element.remove();
+            element.removeUI();
         }
         _elements.clear();
     }

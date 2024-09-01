@@ -153,7 +153,7 @@ final class ColorPicker : Modal {
             IconButton exitBtn = new IconButton("editor:exit");
             exitBtn.setAlign(UIAlignX.right, UIAlignY.top);
             exitBtn.setPosition(Vec2f(4f, 4f));
-            exitBtn.addEventListener("click", &remove);
+            exitBtn.addEventListener("click", &removeUI);
             addUI(exitBtn);
         }
 
@@ -466,7 +466,7 @@ final class ColorPicker : Modal {
             validationBox.addUI(resetBtn);
 
             NeutralButton cancelBtn = new NeutralButton("Annuler");
-            cancelBtn.addEventListener("click", &remove);
+            cancelBtn.addEventListener("click", &removeUI);
             validationBox.addUI(cancelBtn);
 
             AccentButton applyBtn = new AccentButton("Appliquer");
@@ -480,11 +480,11 @@ final class ColorPicker : Modal {
     private void _onSystemChange() {
         switch (_systemTab.value) {
         case "rgb":
-            _hslLayout.remove();
+            _hslLayout.removeUI();
             addUI(_rgbLayout);
             break;
         case "hsl":
-            _rgbLayout.remove();
+            _rgbLayout.removeUI();
             addUI(_hslLayout);
             break;
         default:

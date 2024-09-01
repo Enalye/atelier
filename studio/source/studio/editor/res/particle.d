@@ -1184,7 +1184,7 @@ private final class EffectElement : UIElement {
         modal.addEventListener("effect.remove", {
             dispatchEvent("effect", false);
             Atelier.ui.popModalUI();
-            remove();
+            removeUI();
         });
         Atelier.ui.pushModalUI(modal);
     }
@@ -1235,7 +1235,7 @@ final class EditEffect : Modal {
             IconButton exitBtn = new IconButton("editor:exit");
             exitBtn.setAlign(UIAlignX.right, UIAlignY.top);
             exitBtn.setPosition(Vec2f(4f, 4f));
-            exitBtn.addEventListener("click", &remove);
+            exitBtn.addEventListener("click", &removeUI);
             addUI(exitBtn);
         }
 
@@ -1261,7 +1261,7 @@ final class EditEffect : Modal {
 
             if (isNew) {
                 NeutralButton cancelBtn = new NeutralButton("Annuler");
-                cancelBtn.addEventListener("click", &remove);
+                cancelBtn.addEventListener("click", &removeUI);
                 validationBox.addUI(cancelBtn);
 
                 AccentButton createBtn = new AccentButton("Créer");
@@ -1278,7 +1278,7 @@ final class EditEffect : Modal {
                 validationBox.addUI(removeBtn);
 
                 NeutralButton cancelBtn = new NeutralButton("Annuler");
-                cancelBtn.addEventListener("click", &remove);
+                cancelBtn.addEventListener("click", &removeUI);
                 validationBox.addUI(cancelBtn);
 
                 AccentButton applyBtn = new AccentButton("Appliquer");

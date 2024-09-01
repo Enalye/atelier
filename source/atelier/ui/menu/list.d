@@ -112,7 +112,7 @@ final class MenuList : UIElement {
     private void _onRemove() {
         removeEventListener("state", &_onRemove);
         if (getState() == "hidden") {
-            remove();
+            removeUI();
         }
     }
 

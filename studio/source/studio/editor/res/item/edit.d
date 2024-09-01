@@ -53,7 +53,7 @@ final class EditResourceItem : Modal {
             addUI(hbox);
 
             NeutralButton cancelBtn = new NeutralButton("Annuler");
-            cancelBtn.addEventListener("click", &remove);
+            cancelBtn.addEventListener("click", &removeUI);
             hbox.addUI(cancelBtn);
 
             _applyBtn = new AccentButton("Modifier");
@@ -64,7 +64,7 @@ final class EditResourceItem : Modal {
 
     private void _onApply() {
         dispatchEvent("apply", false);
-        remove();
+        removeUI();
     }
 
     private void _onUpdateName() {

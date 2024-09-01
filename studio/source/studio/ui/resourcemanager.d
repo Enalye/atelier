@@ -52,7 +52,7 @@ final class ResourceFolderManager : Modal {
         addUI(hbox);
 
         NeutralButton cancelBtn = new NeutralButton("Annuler");
-        cancelBtn.addEventListener("click", &remove);
+        cancelBtn.addEventListener("click", &removeUI);
         hbox.addUI(cancelBtn);
 
         AccentButton applyBtn = new AccentButton("Appliquer");
@@ -73,7 +73,7 @@ final class ResourceFolderManager : Modal {
         }
         Project.save();
         dispatchEvent("updateRessourceFolders", false);
-        remove();
+        removeUI();
     }
 }
 
@@ -120,7 +120,7 @@ final class ResourceFolderElement : UIElement {
             hbox.addUI(_archivedCheckbox);
 
             _removeBtn = new DangerButton("Retirer");
-            _removeBtn.addEventListener("click", &remove);
+            _removeBtn.addEventListener("click", &removeUI);
             hbox.addUI(_removeBtn);
         }
 

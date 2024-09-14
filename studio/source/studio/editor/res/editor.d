@@ -249,7 +249,32 @@ private final class ResourceList : UIElement {
     private void _onAddItem() {
         auto modal = new AddResourceItem;
         modal.addEventListener("apply", {
-            Farfadet ffd = _ffd.addNode(modal.getType()).add(modal.getName());
+            string type = modal.getType();
+            string subType;
+            switch (type) {
+            case "grid (bool)":
+                type = "grid";
+                subType = "bool";
+                break;
+            case "grid (int)":
+                type = "grid";
+                subType = "int";
+                break;
+            case "grid (uint)":
+                type = "grid";
+                subType = "uint";
+                break;
+            case "grid (float)":
+                type = "grid";
+                subType = "float";
+                break;
+            default:
+                break;
+            }
+            Farfadet ffd = _ffd.addNode(type).add(modal.getName());
+            if (subType.length) {
+                ffd.addNode("type").add!string(subType);
+            }
             _rebuildList();
             _editor.setDirty();
 

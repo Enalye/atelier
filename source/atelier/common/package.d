@@ -11,6 +11,7 @@ public {
     import atelier.common.cli;
     import atelier.common.color;
     import atelier.common.constants;
+    import atelier.common.grid;
     import atelier.common.hslcolor;
     import atelier.common.json;
     import atelier.common.level;

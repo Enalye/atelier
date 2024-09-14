@@ -9,10 +9,12 @@ import atelier;
 import farfadet;
 import studio.editor.res.animation;
 import studio.editor.res.editor;
+import studio.editor.res.grid;
 import studio.editor.res.invalid;
 import studio.editor.res.music;
 import studio.editor.res.ninepatch;
 import studio.editor.res.particle;
+import studio.editor.res.scene;
 import studio.editor.res.sound;
 import studio.editor.res.sprite;
 import studio.editor.res.texture;
@@ -65,6 +67,22 @@ abstract class ResourceBaseEditor : UIElement {
             return new MusicResourceEditor(editor, path_, ffd, size);
         case "truetype":
             return new TrueTypeResourceEditor(editor, path_, ffd, size);
+        case "scene":
+            return new SceneResourceEditor(editor, path_, ffd, size);
+        case "grid":
+            switch (ffd.getNode("type").get!string(0)) {
+            case "bool":
+                return new GridResourceEditor!bool(editor, path_, ffd, size);
+            case "int":
+                return new GridResourceEditor!int(editor, path_, ffd, size);
+            case "uint":
+                return new GridResourceEditor!uint(editor, path_, ffd, size);
+            case "float":
+                return new GridResourceEditor!float(editor, path_, ffd, size);
+            default:
+                break;
+            }
+            goto default;
         default:
             return new InvalidResourceEditor(editor, path_, ffd, size);
         }

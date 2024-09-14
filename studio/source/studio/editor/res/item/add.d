@@ -41,7 +41,8 @@ final class AddResourceItem : Modal {
             _typeSelector = new SelectButton([
                 "texture", "sprite", "ninepatch", "animation", "tileset",
                 "tilemap", "sound", "music", "truetype", "bitmapfont", "particle",
-                "level"
+                "scene", "entity", "grid (bool)", "grid (int)", "grid (uint)",
+                "grid (float)"
             ], "texture", false);
             hbox.addUI(_typeSelector);
         }

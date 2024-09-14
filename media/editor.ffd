@@ -142,9 +142,19 @@ sprite "editor:ffd-particle" {
     clip 160 64 16 16
 }
 
-sprite "editor:ffd-level" {
+sprite "editor:ffd-scene" {
     texture "editor"
     clip 176 64 16 16
+}
+
+sprite "editor:ffd-entity" {
+    texture "editor"
+    clip 192 64 16 16
+}
+
+sprite "editor:ffd-grid" {
+    texture "editor"
+    clip 208 64 16 16
 }
 
 sprite "editor:selection-button" {
@@ -200,6 +210,11 @@ sprite "editor:eraser-button" {
 sprite "editor:bucket-button" {
     texture "editor"
     clip 144 16 8 13
+}
+
+sprite "editor:elevation-button" {
+    texture "editor"
+    clip 160 16 14 13
 }
 
 sprite "editor:arrow-small-up" {

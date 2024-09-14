@@ -136,12 +136,12 @@ final class NumberField : UIElement {
         _incrementBtn.isEnabled = isEnabled;
     }
 
-    void setMinValue(int minValue) {
+    void setMinValue(float minValue) {
         _minValue = minValue;
         value(_value);
     }
 
-    void setMaxValue(int maxValue) {
+    void setMaxValue(float maxValue) {
         _maxValue = maxValue;
         value(_value);
     }

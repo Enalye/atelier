@@ -3,19 +3,19 @@
  * Licence: Zlib
  * Auteur: Enalye
  */
-module studio.editor.res.tilemap.selection;
+module studio.editor.res.grid.selection;
 
 import atelier;
 
-package struct TilesSelection {
-    int[][] tiles;
+package struct TilesSelection(T) {
+    T[][] tiles;
     uint width, height;
     bool isValid;
 
     void flipH() {
         if (!isValid)
             return;
-        int[][] result = new int[][](width, height);
+        T[][] result = new T[][](width, height);
         for (int iy; iy < height; ++iy) {
             for (int ix; ix < width; ++ix) {
                 result[width - (ix + 1)][iy] = tiles[ix][iy];
@@ -27,7 +27,7 @@ package struct TilesSelection {
     void flipV() {
         if (!isValid)
             return;
-        int[][] result = new int[][](width, height);
+        T[][] result = new T[][](width, height);
         for (int iy; iy < height; ++iy) {
             for (int ix; ix < width; ++ix) {
                 result[ix][height - (iy + 1)] = tiles[ix][iy];
@@ -36,7 +36,7 @@ package struct TilesSelection {
         tiles = result;
     }
 
-    int getFirst(int default_ = -1) const {
+    T getFirst(T default_) const {
         if (width > 0 && height > 0)
             return tiles[0][0];
         return default_;

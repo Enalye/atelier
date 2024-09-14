@@ -421,10 +421,10 @@ final class TilemapResourceEditor : ResourceBaseEditor {
         x = clamp(x, 0, _tilemap.columns - 1);
         y = clamp(y, 0, _tilemap.lines - 1);
 
-        if (_tilemap.getTile(x, y) == value)
-            return;
-
         const int valueToReplace = _tilemap.getTile(x, y);
+
+        if (valueToReplace == value)
+            return;
 
         Vec2i[] frontiers;
         frontiers ~= Vec2i(x, y);

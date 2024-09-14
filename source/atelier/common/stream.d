@@ -48,7 +48,7 @@ class OutStream {
     }
 
     /// Ajoute une structure
-    void write(T)(const ref T value) if (is(T == struct)) {
+    void write(T)(const T value) if (is(T == struct)) {
         static foreach (i, field; value.tupleof) {
             write!(typeof(field))(value.tupleof[i]);
         }

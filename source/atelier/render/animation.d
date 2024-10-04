@@ -166,6 +166,13 @@ final class Animation : Image, Resource!Animation {
 
     /// Render the current frame.
     override void draw(Vec2f origin = Vec2f.zero) {
+        /*{ // DEBUG
+            import std.stdio;
+
+            writeln("data:", _imageData, ", fr:", frames.length, ", c:",
+                columns, ", l:", lines, " sz:", size, " anch:", anchor);
+        }*/
+
         if (_frame < 0 || !frames.length)
             return;
 

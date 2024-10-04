@@ -75,6 +75,8 @@ final class TilemapResourceEditor : ResourceBaseEditor {
 
         _parameterWindow.addEventListener("property_size", {
             _gridSize = _parameterWindow.getGridSize();
+            _tilemap.setDimensions(_gridSize.x, _gridSize.y);
+            _tilemap.size = _tilemap.mapSize * _zoom;
             setDirty();
         });
 
@@ -126,42 +128,54 @@ final class TilemapResourceEditor : ResourceBaseEditor {
             _tilemap.remove();
         }
 
-        auto tilesetRes = Studio.getResource("tileset", rid);
-        auto textureRes = Studio.getResource("texture",
-            tilesetRes.farfadet.getNode("texture").get!string(0));
-        string filePath = textureRes.farfadet.getNode("file").get!string(0);
-        Texture texture = Texture.fromFile(textureRes.getPath(filePath));
-
+        Texture texture;
         Vec4u tilesetClip;
         uint tilesetColumns, tilesetLines, tilesetMaxCount;
-        if (tilesetRes.farfadet.hasNode("clip")) {
-            tilesetClip = tilesetRes.farfadet.getNode("clip").get!Vec4u(0);
-        }
-        if (tilesetRes.farfadet.hasNode("columns")) {
-            tilesetColumns = tilesetRes.farfadet.getNode("columns").get!uint(0);
-        }
-        if (tilesetRes.farfadet.hasNode("lines")) {
-            tilesetLines = tilesetRes.farfadet.getNode("lines").get!uint(0);
-        }
-        tilesetMaxCount = tilesetColumns * tilesetLines;
-        if (tilesetRes.farfadet.hasNode("maxCount")) {
-            tilesetMaxCount = tilesetRes.farfadet.getNode("maxCount").get!uint(0);
-        }
 
-        bool isIsometric;
-        if (tilesetRes.farfadet.hasNode("isIsometric")) {
-            isIsometric = tilesetRes.farfadet.getNode("isIsometric", 1).get!bool(0);
-        }
+        if (Studio.hasResource("tileset", rid)) {
+            auto tilesetRes = Studio.getResource("tileset", rid);
+            string textureRID = tilesetRes.farfadet.getNode("texture").get!string(0);
+            if (Studio.hasResource("texture", textureRID)) {
+                auto textureRes = Studio.getResource("texture", textureRID);
+                string filePath = textureRes.farfadet.getNode("file").get!string(0);
+                texture = Texture.fromFile(textureRes.getPath(filePath));
+            }
+            else {
+                texture = Atelier.res.get!Texture("editor:?");
+            }
 
-        uint frameTime;
-        if (tilesetRes.farfadet.hasNode("frameTime")) {
-            frameTime = tilesetRes.farfadet.getNode("frameTime", 1).get!uint(0);
-        }
+            if (tilesetRes.farfadet.hasNode("clip")) {
+                tilesetClip = tilesetRes.farfadet.getNode("clip").get!Vec4u(0);
+            }
+            if (tilesetRes.farfadet.hasNode("columns")) {
+                tilesetColumns = tilesetRes.farfadet.getNode("columns").get!uint(0);
+            }
+            if (tilesetRes.farfadet.hasNode("lines")) {
+                tilesetLines = tilesetRes.farfadet.getNode("lines").get!uint(0);
+            }
+            tilesetMaxCount = tilesetColumns * tilesetLines;
+            if (tilesetRes.farfadet.hasNode("maxCount")) {
+                tilesetMaxCount = tilesetRes.farfadet.getNode("maxCount").get!uint(0);
+            }
 
-        int[] tileFrames;
-        foreach (node; tilesetRes.farfadet.getNodes("tileFrame")) {
-            tileFrames ~= node.get!int(0);
-            tileFrames ~= node.get!int(1);
+            bool isIsometric;
+            if (tilesetRes.farfadet.hasNode("isIsometric")) {
+                isIsometric = tilesetRes.farfadet.getNode("isIsometric", 1).get!bool(0);
+            }
+
+            uint frameTime;
+            if (tilesetRes.farfadet.hasNode("frameTime")) {
+                frameTime = tilesetRes.farfadet.getNode("frameTime", 1).get!uint(0);
+            }
+
+            int[] tileFrames;
+            foreach (node; tilesetRes.farfadet.getNodes("tileFrame")) {
+                tileFrames ~= node.get!int(0);
+                tileFrames ~= node.get!int(1);
+            }
+        }
+        else {
+            texture = Atelier.res.get!Texture("editor:?");
         }
 
         _tileset = new Tileset(texture, tilesetClip, tilesetColumns,

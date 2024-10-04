@@ -100,9 +100,14 @@ final class SpriteResourceEditor : ResourceBaseEditor {
             _sprite.remove();
         }
 
-        auto info = Studio.getResource("texture", rid);
-        string filePath = info.farfadet.getNode("file").get!string(0);
-        _texture = Texture.fromFile(info.getPath(filePath));
+        if (Studio.hasResource("texture", rid)) {
+            auto info = Studio.getResource("texture", rid);
+            string filePath = info.farfadet.getNode("file").get!string(0);
+            _texture = Texture.fromFile(info.getPath(filePath));
+        }
+        else {
+            _texture = Atelier.res.get!Texture("editor:?");
+        }
         _imageSize = Vec2u(_texture.width, _texture.height);
         _sprite = new Sprite(_texture);
         addImage(_sprite);

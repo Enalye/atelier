@@ -104,6 +104,10 @@ final class SoundResourceEditor : ResourceBaseEditor {
             _music.volume = _volume;
         }
 
+        if (!_music) {
+            return;
+        }
+
         if (!_musicPlayer) {
             _musicPlayer = new MusicPlayer(_music, 0f,
                 _startPosition * _music.samples / _music.sampleRate);
@@ -317,6 +321,9 @@ private final class MediaPlayer : UIElement {
     private void _onUpdate() {
         if (Atelier.input.isDown(InputEvent.KeyButton.Button.space)) {
             _onPlay();
+        }
+        else if (Atelier.input.isDown(InputEvent.KeyButton.Button.escape)) {
+            _onStop();
         }
     }
 

@@ -142,6 +142,10 @@ final class MusicResourceEditor : ResourceBaseEditor {
             _music.volume = _volume;
         }
 
+        if (!_music) {
+            return;
+        }
+
         if (!_musicPlayer) {
             _music.intro = _hasIntro ? _introPosition : 0f;
             _music.outro = _hasOutro ? _outroPosition : 0f;
@@ -540,6 +544,9 @@ private final class MediaPlayer : UIElement {
     private void _onUpdate() {
         if (Atelier.input.isDown(InputEvent.KeyButton.Button.space)) {
             _onPlay();
+        }
+        else if (Atelier.input.isDown(InputEvent.KeyButton.Button.escape)) {
+            _onStop();
         }
 
         if (_toolGroup.value != _tool) {

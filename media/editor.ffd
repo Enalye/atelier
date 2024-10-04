@@ -248,3 +248,12 @@ tileset "editor:splines" {
     columns 16
     lines 2
 }
+
+texture "editor:?" {
+    file "empty.png"
+}
+
+sprite "editor:?" {
+    texture "editor:?"
+    clip 240 0 16 16
+}

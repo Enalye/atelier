@@ -78,6 +78,14 @@ final class Tilemap : Image, Resource!Tilemap {
         return new Tilemap(this);
     }
 
+    void setDimensions(uint columns_, uint lines_) {
+        int[][] tiles_ = getTiles();
+        _lines = lines_;
+        _columns = columns_;
+        _tiles.length = _columns * _lines;
+        setTiles(0, 0, tiles_);
+    }
+
     int getTile(int x, int y) {
         if (x < 0 || y < 0 || x >= _columns || y >= _lines)
             return -1;

@@ -66,7 +66,7 @@ package final class ParameterWindow : UIElement {
         {
             foreach (field; ["Largeur", "Hauteur"]) {
                 IntegerField numField = new IntegerField();
-                numField.setMinValue(0);
+                numField.setMinValue(1);
                 numField.addEventListener("value", {
                     dispatchEvent("property_size", false);
                 });

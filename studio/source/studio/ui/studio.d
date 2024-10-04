@@ -192,12 +192,40 @@ final class Studio : UIElement {
         ResourceManager res() {
             return _resourceManager;
         }
+    }
+
+    static {
+        bool hasResource(string type, string name) {
+            auto p = type in _farfadets;
+            if (!p) {
+                return false;
+            }
+            auto res = name in p.resources;
+            if (!res) {
+                return false;
+            }
+            return true;
+        }
 
         ResourceInfo getResource(string type, string name) {
             auto p = type in _farfadets;
             enforce(p, "le type de ressource `" ~ type ~ "` n’existe pas");
             auto res = name in p.resources;
             enforce(res, "la ressource `" ~ name ~ "` n’existe pas");
+            return *res;
+        }
+
+        ResourceInfo getSafeResource(T)(string name, string default_ = "") {
+            auto p = T.stringof in _farfadets;
+            enforce(p, "le type de ressource `" ~ T.stringof ~ "` n’existe pas");
+            auto res = name in p.resources;
+            if (!default_.length) {
+                enforce(res, "la ressource `" ~ name ~ "` n’existe pas");
+                return *res;
+            }
+            else if (!res) {
+                return Atelier.res.get!T(default_);
+            }
             return *res;
         }
 

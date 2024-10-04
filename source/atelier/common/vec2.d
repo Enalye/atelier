@@ -332,7 +332,7 @@ struct Vec2(T) {
     /// While conserving the x/y ratio, returns the largest vector possible that fits inside the other vector. (like a size) \
     /// Does not modify this vector.
     Vec2!T fit(const Vec2!T v) const {
-        if (v == Vec2!T.zero)
+        if (v.x == 0 || v.y == 0 || x == 0 || y == 0)
             return v;
         return (x / y) < (v.x / v.y) ? Vec2!T(x * v.y / y, v.y) : Vec2!T(v.x, y * v.x / x);
     }
@@ -340,7 +340,7 @@ struct Vec2(T) {
     /// While conserving the x/y ratio, returns the smallest vector possible that can contain the other vector. (like a size) \
     /// Does not modify this vector.
     Vec2!T contain(const Vec2!T v) const {
-        if (v == Vec2!T.zero)
+        if (v.x == 0 || v.y == 0 || x == 0 || y == 0)
             return v;
         return (x / y) < (v.x / v.y) ? Vec2!T(v.x, y * v.x / x) : Vec2!T(x * v.y / y, v.y);
     }

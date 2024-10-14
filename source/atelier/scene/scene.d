@@ -21,27 +21,143 @@ import atelier.scene.entity;
 import atelier.scene.particle;
 import atelier.scene.solid;
 
+enum Entity_Max = ushort.max;
+enum Entity_Size = Entity_Max + 1;
+
+union EntityID {
+    struct {
+        ushort version_;
+        ushort address;
+    }
+
+    uint id;
+
+    alias id this;
+
+    this(uint id_) {
+        id = id_;
+    }
+}
+
+struct RenderComponent {
+    bool isVisible = true;
+    Image image;
+    Canvas canvas;
+    Sprite sprite;
+}
+
+struct ParticleComponent {
+    ParticleSource source;
+    EntityID id;
+    bool isFront;
+}
+
+interface IEntityComponentPool {
+    ushort addComponent(EntityID id);
+    void removeComponent(EntityID id);
+}
+
+alias SystemUpdater = void function(Scene scene);
+alias SystemRenderer = void function(Scene scene, Vec2f offset, bool isFront);
+
+void updateParticleSystem(Scene scene) {
+    EntityComponentPool!ParticleComponent pool = scene.getComponentPool!ParticleComponent();
+    foreach (ref ParticleComponent component; pool.each()) {
+        component.source.update(*scene.getWorldPosition(component.id));
+    }
+}
+
+void drawParticleSystem(Scene scene, Vec2f offset, bool isFront) {
+    EntityComponentPool!ParticleComponent pool = scene.getComponentPool!ParticleComponent();
+    foreach (ref ParticleComponent component; pool.each()) {
+        if (component.isFront != isFront)
+            continue;
+        component.source.draw(offset);
+    }
+}
+
+final class EntityComponentPool(T) : IEntityComponentPool {
+    private {
+        T[Entity_Size] _components;
+        ushort _top = 0u;
+        EntityID[Entity_Size] _slots;
+        ushort[Entity_Size] _addresses;
+    }
+
+    pragma(inline, true) T* getComponent(EntityID id) {
+        EntityID slot = _slots[id.address];
+        return cast(T*)(slot.version_ * (cast(size_t)&_components[slot.address]));
+    }
+
+    /// À n’utiliser que juste après addComponent.
+    pragma(inline, true) T* getInternalComponent(ushort internal) {
+        return &_components[internal];
+    }
+
+    /// Retourne l’id interne du composant ne pouvant être utilisé qu’avec getInternalComponent.
+    /// Cet identifiant n’est valide qu’immédiatement après qu’addComponent a été appelé.
+    pragma(inline, true) ushort addComponent(EntityID id) {
+        EntityID* slot = &_slots[id.address];
+        slot.address = cast(ushort)((slot.version_ ^ 0x1) * _top + (slot.version_ * slot.address));
+        _addresses[slot.address] = id.address;
+        _top += slot.version_ ^ 0x1;
+        slot.version_ = 1;
+        return slot.address;
+    }
+
+    pragma(inline, true) void removeComponent(EntityID id) {
+        EntityID* slot = &_slots[id.address];
+        if (slot.version_ == 0) {
+            return;
+        }
+        slot.version_ = 0;
+        _top--;
+        EntityID* otherSlot = &_slots[_addresses[_top]];
+        _components[slot.address] = _components[_top];
+        otherSlot.address = slot.address;
+    }
+
+    T[] each() {
+        return _components[0 .. _top];
+    }
+}
+
+struct EntityPool {
+    Vec2f[Entity_Size] localPositions;
+    Vec2f[Entity_Size] worldPositions;
+    ushort[][Entity_Size] children;
+    ushort[Entity_Size] parents;
+    RenderComponent[Entity_Size] renders;
+    IEntityComponentPool[string] componentPools;
+
+    ushort top = 0u;
+    ushort availableAddressesTop = 0u;
+
+    ushort[Entity_Size] availableAddresses;
+    EntityID[Entity_Size] slots;
+    ushort[Entity_Size] reverseTranslationTable;
+    SystemUpdater[] systemsUpdatedBefore, systemsUpdatedAfter;
+    SystemRenderer[] systemsDrawnBefore, systemsDrawnAfter;
+}
+
 /// Représente un contexte contenant des entités
 final class Scene {
     private {
         Canvas _canvas;
         Sprite _sprite;
         UIManager _uiManager;
-        Array!Actor _actors;
-        Array!Solid _solids;
-        Array!Entity _entities;
-        Array!ParticleSource _particleSources;
         bool _isAlive = true;
         bool _isVisible = true;
         Vec2i _size;
+        Camera[] _cameras;
+        EntityPool _entityPool;
     }
 
     string name;
-    Vec2f position = Vec2f.zero;
-    Vec2f parallax = Vec2f.one;
     string[] tags;
     int zOrder;
-    bool showColliders;
+    Vec2f position = Vec2f.zero;
+    Vec2f parallax = Vec2f.one;
     Vec2f mousePosition = Vec2f.zero;
 
     @property {
@@ -72,14 +188,6 @@ final class Scene {
         Vec2f globalPosition() const {
             return position + Atelier.scene.camera.getPosition() * parallax;
         }
-
-        Array!Solid solids() {
-            return _solids;
-        }
-
-        Array!Actor actors() {
-            return _actors;
-        }
     }
 
     this() {
@@ -87,123 +195,279 @@ final class Scene {
 
         _uiManager = new UIManager();
         _uiManager.isSceneUI = true;
-        _entities = new Array!Entity;
-        _particleSources = new Array!ParticleSource;
 
         _canvas = new Canvas(_size.x, _size.y);
         _sprite = new Sprite(_canvas);
         _sprite.anchor = Vec2f.half;
 
-        _actors = new Array!Actor;
-        _solids = new Array!Solid;
+        for (ushort i; i < Entity_Max; ++i) {
+            _entityPool.localPositions[i] = Vec2f.zero;
+        }
+        for (ushort i; i < Entity_Max; ++i) {
+            _entityPool.worldPositions[i] = Vec2f.zero;
+        }
+        for (ushort i; i < Entity_Max; ++i) {
+            _entityPool.parents[i] = i;
+        }
+
+        addSystemUpdate(&updateParticleSystem, false);
+        addSystemRender(&drawParticleSystem, false);
+        addSystemRender(&drawParticleSystem, true);
     }
 
-    private void _sortEntities() {
-        sort!((a, b) => (a.zOrder > b.zOrder), SwapStrategy.stable)(_entities.array);
+    /// Vérifie si l’identifiant est valide
+    bool hasEntity(EntityID id) {
+        return _entityPool.slots[id.address].version_ == id.version_;
     }
 
-    void addEntity(Entity entity) {
-        enforce(!entity.scene, "entité déjà enregistrée dans une scène");
-        entity.scene = this;
-        _entities ~= entity;
-        _sortEntities();
+    /// Génère un nouvel identifiant d’entité
+    EntityID createEntity() {
+        EntityID id;
+        if (_entityPool.availableAddressesTop) {
+            //Retire la dernière adresse disponible dans la liste
+            --_entityPool.availableAddressesTop;
+            id.address = _entityPool.availableAddresses[_entityPool.availableAddressesTop];
+        }
+        else {
+            //Ou on utilise une nouvelle adresse
+            id.address = _entityPool.top;
+        }
+
+        //Ajoute la valeur à la pile
+        id.version_ = _entityPool.slots[id.address].version_;
+        _entityPool.slots[id.address].address = _entityPool.top;
+        _entityPool.reverseTranslationTable[_entityPool.top] = id.address;
+
+        ++_entityPool.top;
+
+        return id;
     }
 
-    void removeEntity(Entity entity) {
-        if (entity.scene != this)
+    /// Supprime l’entité
+    void removeEntity(EntityID id) {
+        if (_entityPool.slots[id.address].version_ != id.version_) {
             return;
-        entity.scene = null;
+        }
 
-        foreach (idx, element; _entities) {
-            if (element == entity) {
-                _entities.mark(idx);
+        ushort internal = _entityPool.slots[id.address].address;
+
+        //Ajoute l’adresse à la pile des emplacements disponibles
+        _entityPool.availableAddresses[_entityPool.availableAddressesTop] = id.address;
+        _entityPool.availableAddressesTop++;
+
+        _entityPool.top--;
+
+        //Augmente la génération de l’emplacement qui sera libéré
+        _entityPool.slots[id.address].version_++;
+        _entityPool.slots[id.address].address = _entityPool.top;
+
+        foreach (componentPool; _entityPool.componentPools) {
+            componentPool.removeComponent(id);
+        }
+
+        //Prend la dernière valeur de la pile et comble le trou
+        if (internal < _entityPool.top) {
+            ushort otherAddress = _entityPool.reverseTranslationTable[_entityPool.top];
+
+            _entityPool.localPositions[internal] = _entityPool.localPositions[_entityPool.top];
+            _entityPool.worldPositions[internal] = _entityPool.worldPositions[_entityPool.top];
+            _entityPool.children[internal] = _entityPool.children[_entityPool.top];
+            _entityPool.renders[internal] = _entityPool.renders[_entityPool.top];
+
+            if (_entityPool.children[internal].length) {
+                foreach (child; _entityPool.children[internal]) {
+                    _entityPool.parents[child] = internal;
+                }
+            }
+
+            if (_entityPool.parents[_entityPool.top] == _entityPool.top) {
+                _entityPool.parents[internal] = internal;
+            }
+            else {
+                ushort parent = _entityPool.parents[_entityPool.top];
+                _entityPool.parents[internal] = parent;
+
+                for (ushort y; y < _entityPool.children[parent].length; ++y) {
+                    ushort child = _entityPool.children[parent][y];
+                    _entityPool.parents[child] = internal;
+                }
+            }
+
+            _entityPool.slots[otherAddress].address = internal;
+            _entityPool.reverseTranslationTable[internal] = otherAddress;
+        }
+    }
+
+    /// Supprime les entités
+    void clearEntities() {
+        _entityPool.top = 0u;
+        _entityPool.availableAddressesTop = 0u;
+
+        for (ushort i; i < Entity_Size; ++i) {
+            _entityPool.slots[i].version_++;
+        }
+        for (ushort i; i < Entity_Size; ++i) {
+            RenderComponent* renderComponent = &_entityPool.renders[i];
+            renderComponent.isVisible = true;
+            renderComponent.image = null;
+            renderComponent.canvas = null;
+            renderComponent.sprite = null;
+        }
+    }
+
+    void _render(Vec2f offset) {
+        for (ushort i; i < _entityPool.top; ++i) {
+            RenderComponent* renderComponent = &_entityPool.renders[i];
+
+            if (!renderComponent.isVisible || _entityPool.parents[i] != i) {
+                continue;
+            }
+
+            Vec2f renderPosition = _entityPool.localPositions[i] + offset;
+
+            if (renderComponent.canvas) {
+                Atelier.renderer.pushCanvas(renderComponent.canvas);
+                if (renderComponent.image) {
+                    renderComponent.image.draw(Vec2f.zero);
+                }
+                if (_entityPool.children[i].length) {
+                    foreach (child; _entityPool.children[i]) {
+                        _renderChild(child, Vec2f.zero);
+                    }
+                }
+                Atelier.renderer.popCanvas();
+                renderComponent.sprite.draw(renderPosition);
+            }
+            else {
+                if (renderComponent.image) {
+                    renderComponent.image.draw(renderPosition);
+                }
+                if (_entityPool.children[i].length) {
+                    foreach (child; _entityPool.children[i]) {
+                        _renderChild(child, renderPosition);
+                    }
+                }
             }
         }
-        _entities.sweep();
-        _sortEntities();
     }
 
-    void addParticleSource(ParticleSource source) {
-        enforce(!source.scene, "source déjà enregistrée dans une scène");
-        source.scene = this;
-        _particleSources ~= source;
-    }
+    void _renderChild(short i, Vec2f offset) {
+        Vec2f renderPosition = _entityPool.localPositions[i] + offset;
+        RenderComponent* renderComponent = &_entityPool.renders[i];
 
-    void removeParticleSource(ParticleSource source) {
-        if (source.scene != this)
+        if (!renderComponent.isVisible) {
             return;
-        source.scene = null;
+        }
 
-        foreach (idx, element; _particleSources) {
-            if (element == source) {
-                _particleSources.mark(idx);
+        if (renderComponent.canvas) {
+            Atelier.renderer.pushCanvas(renderComponent.canvas);
+            if (renderComponent.image) {
+                renderComponent.image.draw(Vec2f.zero);
+            }
+            if (_entityPool.children[i].length) {
+                foreach (child; _entityPool.children[i]) {
+                    _renderChild(child, Vec2f.zero);
+                }
+            }
+            Atelier.renderer.popCanvas();
+            renderComponent.sprite.draw(renderPosition);
+        }
+        else {
+            if (renderComponent.image) {
+                renderComponent.image.draw(renderPosition);
+            }
+            if (_entityPool.children[i].length) {
+                foreach (child; _entityPool.children[i]) {
+                    _renderChild(child, renderPosition);
+                }
             }
         }
-        _particleSources.sweep();
     }
 
-    void addActor(Actor actor) {
-        enforce(!actor.scene, "acteur déjà enregistré dans une scène");
-        actor.scene = this;
-        _actors ~= actor;
+    void _updateWorldPositions() {
+        for (ushort i; i < _entityPool.top; ++i) {
+            if (_entityPool.parents[i] != i) {
+                continue;
+            }
 
-        if (actor.entity) {
-            if (actor.entity.scene || actor.entity.parent)
-                actor.entity.remove();
-            addEntity(actor.entity);
-        }
-    }
-
-    void removeActor(Actor actor) {
-        if (actor.scene != this)
-            return;
-        actor.scene = null;
-
-        foreach (idx, element; _actors) {
-            if (element == actor) {
-                _actors.mark(idx);
+            _entityPool.worldPositions[i] = _entityPool.localPositions[i];
+            if (_entityPool.children[i].length) {
+                foreach (child; _entityPool.children[i]) {
+                    _updateWorldPositions(child, _entityPool.worldPositions[i]);
+                }
             }
         }
-        _actors.sweep();
-
-        if (actor.entity) {
-            removeEntity(actor.entity);
-        }
     }
 
-    void addSolid(Solid solid) {
-        enforce(!solid.scene, "solide déjà enregistré dans une scène");
-        solid.scene = this;
-        _solids ~= solid;
+    void _updateWorldPositions(ushort i, Vec2f parentPosition) {
+        _entityPool.worldPositions[i] = parentPosition + _entityPool.localPositions[i];
 
-        if (solid.entity) {
-            if (solid.entity.scene || solid.entity.parent)
-                solid.entity.remove();
-            addEntity(solid.entity);
-        }
-    }
-
-    void removeSolid(Solid solid) {
-        if (solid.scene != this)
-            return;
-        solid.scene = null;
-
-        foreach (idx, element; _solids) {
-            if (element == solid) {
-                _solids.mark(idx);
+        if (_entityPool.children[i].length) {
+            foreach (child; _entityPool.children[i]) {
+                _updateWorldPositions(child, _entityPool.worldPositions[i]);
             }
         }
-        _solids.sweep();
+    }
 
-        if (solid.entity) {
-            removeEntity(solid.entity);
+    Vec2f* getWorldPosition(EntityID id) {
+        short internal = _entityPool.slots[id.address].address;
+        return &_entityPool.worldPositions[internal];
+    }
+
+    Vec2f* getLocalPosition(EntityID id) {
+        short internal = _entityPool.slots[id.address].address;
+        return &_entityPool.localPositions[internal];
+    }
+
+    RenderComponent* getRender(EntityID id) {
+        short internal = _entityPool.slots[id.address].address;
+        return &_entityPool.renders[internal];
+    }
+
+    EntityComponentPool!T getComponentPool(T)() {
+        return cast(EntityComponentPool!T) _entityPool.componentPools.require(T.stringof, {
+            EntityComponentPool!T pool = new EntityComponentPool!T;
+            return pool;
+        }());
+    }
+
+    void addSystemUpdate(SystemUpdater system, bool isBefore) {
+        if (isBefore) {
+            _entityPool.systemsUpdatedBefore ~= system;
+        }
+        else {
+            _entityPool.systemsUpdatedAfter ~= system;
         }
     }
 
+    void addSystemRender(SystemRenderer system, bool isBefore) {
+        if (isBefore) {
+            _entityPool.systemsDrawnBefore ~= system;
+        }
+        else {
+            _entityPool.systemsDrawnAfter ~= system;
+        }
+    }
+
+    T* getComponent(T)(EntityID id) {
+        return getComponentPool!(T).getComponent(id);
+    }
+
+    T* addComponent(T)(EntityID id) {
+        EntityComponentPool!T pool = getComponentPool!(T);
+        return pool.getInternalComponent(pool.addComponent(id));
+    }
+
+    void removeComponent(T)(EntityID id) {
+        getComponentPool!(T).removeComponent(id);
+    }
+
+    /// Ajoute un élément d’interface
     void addUI(UIElement ui) {
         _uiManager.addUI(ui);
     }
 
+    /// Supprime les interfaces
     void clearUI() {
         _uiManager.clearUI();
     }
@@ -223,25 +487,16 @@ final class Scene {
         }
         _uiManager.dispatch(event);
     }
-
+    /*
     private Array!T _getArray(T)() {
         static if (is(T == Entity)) {
             return _entities;
         }
-        else static if (is(T == ParticleSource)) {
-            return _particleSources;
-        }
-        else static if (is(T == Actor)) {
-            return _actors;
-        }
-        else static if (is(T == Solid)) {
-            return _solids;
-        }
         else {
             static assert(false, "type non-supporté");
         }
-    }
-
+    }*/
+    /*
     T findByName(T)(string name) {
         foreach (element; _getArray!T()) {
             if (element.name == name)
@@ -261,34 +516,18 @@ final class Scene {
             result ~= element;
         }
         return result;
-    }
-
-    Solid collideAt(Vec2i point, Vec2i halfSize) {
-        foreach (Solid solid; _solids) {
-            if (solid.collideWith(point, halfSize))
-                return solid;
-        }
-        return null;
-    }
+    }*/
 
     void update() {
         _uiManager.cameraPosition = _sprite.size / 2f - globalPosition;
         _uiManager.update();
 
-        foreach (entity; _entities) {
-            entity.update();
+        foreach (system; _entityPool.systemsUpdatedBefore) {
+            system(this);
         }
-
-        foreach (source; _particleSources) {
-            source.update();
-        }
-
-        foreach (actor; _actors) {
-            actor.update();
-        }
-
-        foreach (solid; _solids) {
-            solid.update();
+        _updateWorldPositions();
+        foreach (system; _entityPool.systemsUpdatedAfter) {
+            system(this);
         }
     }
 
@@ -296,53 +535,22 @@ final class Scene {
         if (!_isAlive)
             return;
         _isAlive = false;
-
-        foreach (entity; _entities) {
-            entity.scene = null;
-        }
-        _entities.clear();
-
-        foreach (source; _particleSources) {
-            source.scene = null;
-        }
-        _particleSources.clear();
-
-        foreach (actor; _actors) {
-            actor.scene = null;
-        }
-        _actors.clear();
-
-        foreach (solid; _solids) {
-            solid.scene = null;
-        }
-        _solids.clear();
     }
 
     void render() {
-        Vec2f offset = _sprite.size / 2f - globalPosition;
+        /*Vec2f offset = _sprite.size / 2f - globalPosition;
         foreach (entity; _entities) {
             entity.draw(offset);
+        }*/
+
+        Vec2f offset = _sprite.size / 2f - globalPosition;
+        foreach (system; _entityPool.systemsDrawnBefore) {
+            system(this, offset, false);
         }
-
-        foreach (source; _particleSources) {
-            source.draw(offset);
+        _render(offset);
+        foreach (system; _entityPool.systemsDrawnAfter) {
+            system(this, offset, true);
         }
-
-        if (showColliders) {
-            foreach (actor; _actors) {
-                Vec2f pos = offset + cast(Vec2f)(actor.position - actor.hitbox);
-                Atelier.renderer.drawRect(pos, (cast(Vec2f) actor.hitbox) * 2f,
-                    Color.blue, 1f, false);
-            }
-
-            foreach (solid; _solids) {
-                Vec2f pos = offset + cast(Vec2f)(solid.position - solid.hitbox);
-                Atelier.renderer.drawRect(pos, (cast(Vec2f) solid.hitbox) * 2f,
-                    Color.red, 1f, false);
-            }
-
-        }
-
         _uiManager.draw();
     }
 

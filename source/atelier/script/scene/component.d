@@ -13,7 +13,7 @@ import atelier.core;
 import atelier.scene;
 import atelier.render;
 import atelier.script.util;
-
+/*
 package void loadLibScene_component(GrModule mod) {
     mod.setModule("scene.component");
     mod.setModuleInfo(GrLocale.fr_FR, "Composant d’une entité");
@@ -95,3 +95,4 @@ private void _disconnect(GrCall call) {
     AudioComponent audioComponent = call.getNative!AudioComponent(0);
     audioComponent.disconnect();
 }
+*/

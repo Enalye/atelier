@@ -12,7 +12,7 @@ import atelier.core;
 import atelier.scene.collider;
 import atelier.scene.scene;
 import atelier.scene.solid;
-
+/*
 final class Actor : Collider {
     private {
         bool _hasPhysics = true;
@@ -115,3 +115,4 @@ final class Actor : Collider {
         return _mountedSolid == solid;
     }
 }
+*/

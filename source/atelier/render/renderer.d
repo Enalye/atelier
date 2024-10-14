@@ -179,7 +179,11 @@ final class Renderer {
 
     void startRenderPass() {
         pushCanvas(_kernelCanvas);
-        drawRect(Vec2f.zero, _scaledSizeEnd, Atelier.theme.background, 1f, true);
+        SDL_Color sdlColor = Atelier.theme.background.toSDL();
+        SDL_SetRenderDrawBlendMode(_sdlRenderer, getSDLBlend(Blend.none));
+        SDL_SetRenderDrawColor(_sdlRenderer, sdlColor.r, sdlColor.g, sdlColor.b, 255);
+        const SDL_Rect rect = {0, 0, _kernelCanvas.width, _kernelCanvas.height};
+        SDL_RenderFillRect(_sdlRenderer, &rect);
     }
 
     void endRenderPass() {
@@ -198,11 +202,7 @@ final class Renderer {
         _scaledSprite.size = scaledSize;
         _scaledSprite.draw(Vec2f(Atelier.window.width, Atelier.window.height) / 2f);
 
-        SDL_Color sdlColor = Atelier.theme.background.toSDL();
-
         SDL_RenderPresent(_sdlRenderer);
-        //SDL_SetRenderDrawColor(_sdlRenderer, sdlColor.r, sdlColor.g, sdlColor.b, 0);
-        //SDL_RenderClear(_sdlRenderer);
     }
 
     void pushCanvas(Canvas canvas) {

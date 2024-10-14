@@ -11,7 +11,7 @@ import atelier.common;
 import atelier.scene.actor;
 import atelier.scene.scene;
 import atelier.scene.collider;
-
+/*
 final class Solid : Collider {
     private {
         bool _isTempCollidable = true;
@@ -134,3 +134,4 @@ final class Solid : Collider {
                 .down);
     }
 }
+*/

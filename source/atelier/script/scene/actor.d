@@ -13,7 +13,7 @@ import atelier.scene;
 import atelier.script.util;
 
 package void loadLibScene_actor(GrModule mod) {
-    mod.setModule("scene.actor");
+    /*mod.setModule("scene.actor");
     mod.setModuleInfo(GrLocale.fr_FR, "Acteur physique d’une scène");
 
     GrType actorType = mod.addNative("Actor", [], "Collider");
@@ -42,9 +42,9 @@ package void loadLibScene_actor(GrModule mod) {
 
     mod.setDescription(GrLocale.fr_FR, "Détache l’acteur du solide");
     mod.setParameters(["actor"]);
-    mod.addFunction(&_dismount, "dismount", [actorType]);
+    mod.addFunction(&_dismount, "dismount", [actorType]);*/
 }
-
+/*
 private void _ctor(GrCall call) {
     call.setNative(new Actor);
 }
@@ -85,3 +85,4 @@ private void _dismount(GrCall call) {
     Actor actor = call.getNative!Actor(0);
     actor.dismount();
 }
+*/

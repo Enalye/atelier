@@ -61,7 +61,7 @@ final class Atelier {
         InputManager _inputManager;
         ResourceManager _resourceManager;
         AudioMixer _audioMixer;
-        SceneManager _sceneManager;
+        World _sceneManager;
         RNG _rng;
         Theme _theme;
     }
@@ -101,7 +101,7 @@ final class Atelier {
         }
 
         /// Le gestionnaire de scènes
-        SceneManager scene() {
+        World scene() {
             return _sceneManager;
         }
 
@@ -153,7 +153,7 @@ final class Atelier {
         _uiManager = new UIManager();
         _inputManager = new InputManager();
         _audioMixer = new AudioMixer();
-        _sceneManager = new SceneManager();
+        _sceneManager = new World();
         _resourceManager = new ResourceManager();
         _rng = new RNG();
         _theme = new Theme();

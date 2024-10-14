@@ -8,7 +8,7 @@ module atelier.scene.camera;
 import atelier.common;
 import atelier.core;
 import atelier.render;
-import atelier.scene.entity;
+import atelier.scene.scene;
 
 interface CameraPositioner {
     void update();
@@ -46,20 +46,22 @@ private final class MoveCameraPosition : CameraPositioner {
 private final class FollowCameraPosition : CameraPositioner {
     private {
         Camera _camera;
-        Entity _entity;
+        Scene _scene;
+        EntityID _id;
         Vec2f _damping;
         Vec2f _deadZone = Vec2f.zero;
     }
 
-    this(Camera camera, Entity entity, Vec2f damping, Vec2f deadZone) {
+    this(Camera camera, Scene scene, EntityID id, Vec2f damping, Vec2f deadZone) {
         _camera = camera;
-        _entity = entity;
+        _scene = scene;
+        _id = id;
         _damping = damping.clamp(Vec2f.zero, Vec2f.one);
         _deadZone = deadZone.abs();
     }
 
     void update() {
-        Vec2f entityPos = _entity.scenePosition();
+        Vec2f entityPos = *_scene.getWorldPosition(_id);
         Vec2f position = _camera._position;
 
         if (position.x < entityPos.x - _deadZone.x) {
@@ -222,8 +224,8 @@ final class Camera {
         _positioner = new MoveCameraPosition(this, position_, frames, spline);
     }
 
-    void follow(Entity entity, Vec2f damping, Vec2f deadZone) {
-        _positioner = new FollowCameraPosition(this, entity, damping, deadZone);
+    void follow(Scene scene, EntityID id, Vec2f damping, Vec2f deadZone) {
+        _positioner = new FollowCameraPosition(this, scene, id, damping, deadZone);
     }
 
     void stop() {

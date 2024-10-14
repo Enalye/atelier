@@ -3,7 +3,7 @@
  * Licence: Zlib
  * Auteur: Enalye
  */
-module atelier.scene.manager;
+module atelier.scene.world;
 
 import std.algorithm;
 
@@ -18,23 +18,13 @@ import atelier.scene.particle;
 import atelier.scene.scene;
 
 /// Gère les différentes scènes
-final class SceneManager {
+final class World {
     private {
         Array!Scene _scenes;
-        Vec4f _cameraClip;
-        bool _isOnScene;
         Camera _camera;
     }
 
     @property {
-        bool isOnScene() const {
-            return _isOnScene;
-        }
-
-        Vec4f cameraClip() const {
-            return _cameraClip;
-        }
-
         Camera camera() {
             return _camera;
         }
@@ -55,15 +45,19 @@ final class SceneManager {
     }
 
     void load(string rid) {
-        clear();
-        LevelBuilder level = Atelier.res.get!LevelBuilder(rid);
-        _scenes.array = level.build();
-        _sortScenes();
+        //clear();
+        //LevelBuilder level = Atelier.res.get!LevelBuilder(rid);
+        //_scenes.array = level.build();
+        //_sortScenes();
     }
 
     void addScene(Scene scene) {
         _scenes ~= scene;
         _sortScenes();
+    }
+
+    void removeScene(Scene scene) {
+        scene.remove(); // Temporaire
     }
 
     Scene findSceneByName(string name) {
@@ -129,23 +123,20 @@ final class SceneManager {
     void draw(Vec2f origin) {
         Atelier.renderer.pushCanvas(_camera.canvas);
         foreach (scene; _scenes) {
-            Canvas canvas = scene.canvas;
-            Vec2f delta = _camera.getPosition() * scene.parallax;
-            Vec2f cameraOffset = -(scene.position + delta);
+            /* if (scene.isVisible) {
+                Atelier.renderer.pushCanvas(Atelier.renderer.size.x,
+                    Atelier.renderer.size.y, Blend.alpha);*/
+            //    scene.render();
+            /*    Atelier.renderer.popCanvasAndDraw(origin,
+                    Atelier.renderer.size, 0f, Vec2f.half, Color.white, 1f);
+            }*/
 
-            _cameraClip = Vec4f(cameraOffset.x, cameraOffset.y,
-                cameraOffset.x + canvas.width, cameraOffset.y + canvas.height);
-
-            _isOnScene = true;
-
-            Atelier.renderer.pushCanvas(canvas);
-            scene.render();
-            Atelier.renderer.popCanvas();
-
-            _isOnScene = false;
-
-            if (scene.isVisible)
+            if (scene.isVisible) {
+                Atelier.renderer.pushCanvas(scene.canvas);
+                scene.render();
+                Atelier.renderer.popCanvas();
                 scene.draw(origin);
+            }
         }
         Atelier.renderer.popCanvas();
         _camera.draw();

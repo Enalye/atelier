@@ -14,7 +14,7 @@ import atelier.core;
 import atelier.render;
 import atelier.scene.component;
 import atelier.scene.scene;
-
+/*
 /// Entité présente dans une scène
 final class Entity {
     private {
@@ -205,3 +205,4 @@ final class Entity {
         _components.remove(T.stringof);
     }
 }
+*/

@@ -9,7 +9,7 @@ import atelier.audio;
 import atelier.common;
 import atelier.scene.component;
 import atelier.scene.entity;
-
+/*
 final class AudioComponent : EntityComponent {
     private {
         AudioBus _audioBus;
@@ -51,3 +51,4 @@ final class AudioComponent : EntityComponent {
         _audioBus.disconnect();
     }
 }
+*/

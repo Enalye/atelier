@@ -105,7 +105,7 @@ scene.addParticleSource(src);");
     mod.addFunction(&_setRelativeSpriteAngle, "setRelativeSpriteAngle", [
             sourceType, grBool
         ]);
-
+    /*
     mod.setDescription(GrLocale.fr_FR, "La source suit l’entité.");
     mod.setParameters(["source", "entity"]);
     mod.addFunction(&_attachTo, "attachTo", [sourceType, entityType]);
@@ -118,7 +118,7 @@ scene.addParticleSource(src);");
         "Détache la source de l’entité/scène auquel elle était attaché.");
     mod.setParameters(["source"]);
     mod.addFunction(&_detach, "detach", [sourceType]);
-
+*/
     mod.setDescription(GrLocale.fr_FR, "Paramètre la durée de vie des particules (en frames).");
     mod.setParameters(["source", "minLifetime", "maxLifetime"]);
     mod.addFunction(&_setLifetime, "setLifetime", [sourceType, grUInt, grUInt]);
@@ -392,7 +392,7 @@ private void _setRelativeSpriteAngle(GrCall call) {
     GrBool isRelative = call.getBool(1);
     source.setRelativeSpriteAngle(isRelative);
 }
-
+/*
 private void _attachTo(GrCall call) {
     ParticleSource source = call.getNative!ParticleSource(0);
     Entity entity = call.getNative!Entity(1);
@@ -408,7 +408,7 @@ private void _detach(GrCall call) {
     ParticleSource source = call.getNative!ParticleSource(0);
     source.attachTo(null);
 }
-
+*/
 private void _setLifetime(GrCall call) {
     ParticleSource source = call.getNative!ParticleSource(0);
     GrUInt minTtl = call.getUInt(1);

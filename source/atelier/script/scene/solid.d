@@ -11,7 +11,7 @@ import atelier.common;
 import atelier.core;
 import atelier.scene;
 import atelier.script.util;
-
+/*
 package void loadLibScene_solid(GrModule mod) {
     mod.setModule("scene.solid");
     mod.setModuleInfo(GrLocale.fr_FR, "Obstacle physique aux acteurs d’une scène.");
@@ -41,3 +41,4 @@ private void _move(GrCall call) {
     list.setNatives(solid.move(x, y));
     call.setList(list);
 }
+*/

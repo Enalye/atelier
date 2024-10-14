@@ -12,14 +12,14 @@ import atelier.core.runtime;
 
 package void compileLevel(string path, const Farfadet ffd, OutStream stream) {
     const string rid = ffd.get!string(0);
-    LevelBuilder level = new LevelBuilder(ffd);
+    //LevelBuilder level = new LevelBuilder(ffd);
     stream.write!string(rid);
-    level.serialize(stream);
+    //level.serialize(stream);
 }
 
 package void loadLevel(InStream stream) {
     const string rid = stream.read!string();
-    LevelBuilder level = new LevelBuilder;
-    level.deserialize(stream);
-    Atelier.res.store(rid, { return level; });
+    //LevelBuilder level = new LevelBuilder;
+    //level.deserialize(stream);
+    //Atelier.res.store(rid, { return level; });
 }

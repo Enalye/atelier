@@ -14,29 +14,32 @@ import atelier.scene;
 import atelier.render;
 import atelier.script.util;
 
+final class Entity {
+    Scene scene;
+    EntityID id;
+}
+
 package void loadLibScene_entity(GrModule mod) {
     mod.setModule("scene.entity");
     mod.setModuleInfo(GrLocale.fr_FR, "Élément d’une scène");
-    mod.setModuleExample(GrLocale.fr_FR, "var player = @Entity;
-player.addImage(@Sprite(\"player\"));
-scene.addEntity(player);");
+    mod.setModuleExample(GrLocale.fr_FR, "var player = scene.createEntity();
+player.addImage(@Sprite(\"player\"));");
 
-    GrType entityType = mod.addNative("Entity");
     GrType imageType = grGetNativeType("Image");
     GrType canvasType = grGetNativeType("Canvas");
     GrType spriteType = grGetNativeType("Sprite");
-    GrType audioComponentType = grGetNativeType("AudioComponent");
+    //GrType audioComponentType = grGetNativeType("AudioComponent");
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
 
-    mod.addConstructor(&_ctor, entityType);
+    //mod.addConstructor(&_ctor, entityType);
 
-    mod.addProperty(&_name!"get", &_name!"set", "name", entityType, grString);
-    mod.addProperty(&_position!"get", &_position!"set", "position", entityType, vec2fType);
-    mod.addProperty(&_zOrder!"get", &_zOrder!"set", "zOrder", entityType, grInt);
-    mod.addProperty(&_isVisible!"get", &_isVisible!"set", "isVisible", entityType, grBool);
+    //mod.addProperty(&_name!"get", &_name!"set", "name", entityType, grString);
+    //mod.addProperty(&_position!"get", &_position!"set", "position", entityType, vec2fType);
+    //mod.addProperty(&_zOrder!"get", &_zOrder!"set", "zOrder", entityType, grInt);
+    //mod.addProperty(&_isVisible!"get", &_isVisible!"set", "isVisible", entityType, grBool);
 
-    mod.addProperty(&_audio, null, "audio", entityType, audioComponentType);
-
+    //mod.addProperty(&_audio, null, "audio", entityType, audioComponentType);
+    /*
     mod.setDescription(GrLocale.fr_FR, "Récupère les tags de l’entité");
     mod.setParameters(["entity"]);
     mod.addFunction(&_getTags, "getTags", [entityType]);
@@ -48,15 +51,15 @@ scene.addEntity(player);");
     mod.setDescription(GrLocale.fr_FR, "Vérifie si l’entité possède le tag");
     mod.setParameters(["entity", "tag"]);
     mod.addFunction(&_hasTag, "hasTag", [entityType, grString], [grBool]);
-
-    mod.setDescription(GrLocale.fr_FR, "Ajoute une entité en tant qu’enfant de cette entité");
+*/
+    /*   mod.setDescription(GrLocale.fr_FR, "Ajoute une entité en tant qu’enfant de cette entité");
     mod.setParameters(["parent", "child"]);
     mod.addFunction(&_addChild, "addChild", [entityType, entityType]);
 
     mod.setDescription(GrLocale.fr_FR, "Ajoute une image à l’entité");
     mod.setParameters(["entity", "image"]);
     mod.addFunction(&_addImage, "addImage", [entityType, imageType]);
-
+ */ /*
     mod.setDescription(GrLocale.fr_FR, "Crée un canvas de rendu de l’entité");
     mod.setParameters(["entity", "width", "height"]);
     mod.addFunction(&_setCanvas, "setCanvas", [entityType, grUInt, grUInt]);
@@ -76,12 +79,10 @@ scene.addEntity(player);");
     mod.setDescription(GrLocale.fr_FR, "Supprime le canvas de l’entité");
     mod.setParameters(["entity"]);
     mod.addFunction(&_removeCanvas, "removeCanvas", [entityType]);
-
-    mod.setDescription(GrLocale.fr_FR, "Supprime l’entité");
-    mod.setParameters(["entity"]);
-    mod.addFunction(&_remove, "remove", [entityType]);
+*/
 }
 
+/*
 private void _ctor(GrCall call) {
     call.setNative(new Entity);
 }
@@ -94,16 +95,8 @@ private void _name(string op)(GrCall call) {
     }
     call.setString(entity.name);
 }
-
-private void _position(string op)(GrCall call) {
-    Entity entity = call.getNative!Entity(0);
-
-    static if (op == "set") {
-        entity.position = call.getNative!SVec2f(1);
-    }
-    call.setNative(svec2(entity.position));
-}
-
+*/
+/*
 private void _zOrder(string op)(GrCall call) {
     Entity entity = call.getNative!Entity(0);
 
@@ -207,3 +200,4 @@ private void _remove(GrCall call) {
     Entity entity = call.getNative!Entity(0);
     entity.remove();
 }
+*/

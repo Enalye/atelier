@@ -65,8 +65,8 @@ final class ParticleSource : Resource!ParticleSource {
         bool _isVisible = true;
         bool _isRelativePosition;
         bool _isRelativeSpriteAngle;
-        bool _isAttachedToCamera;
-        Entity _attachedEntity;
+        //bool _isAttachedToCamera;
+        //EntityID _attachedEntity;
         uint _interval;
         int _emitterTime;
         uint _minCount, _maxCount;
@@ -81,9 +81,9 @@ final class ParticleSource : Resource!ParticleSource {
 
         // Zone
         Vec2f _area = Vec2f.zero;
+        Vec2f _origin = Vec2f.zero;
     }
 
-    Scene scene;
     Vec2f position = Vec2f.zero;
     string name;
     string[] tags;
@@ -105,9 +105,6 @@ final class ParticleSource : Resource!ParticleSource {
     this(ParticleSource source) {
         _particles = new Array!Particle;
 
-        scene = null;
-        _isAttachedToCamera = false;
-        _attachedEntity = null;
         _emitterTime = 0;
         _interval = 0;
 
@@ -151,7 +148,7 @@ final class ParticleSource : Resource!ParticleSource {
         _effects.length = 0;
     }
 
-    void update() {
+    void update(Vec2f offset) {
         if (_interval > 0) {
             _emitterTime--;
             if (_emitterTime <= 0) {
@@ -160,16 +157,16 @@ final class ParticleSource : Resource!ParticleSource {
             }
         }
 
-        Vec2f origin;
-        if (_isRelativePosition) {
-            origin = position;
+        _origin = position + offset;
+        /*if (_isRelativePosition) {
+            origin += position;
             if (_attachedEntity) {
                 origin += _attachedEntity.scenePosition();
             }
             else if (_isAttachedToCamera && scene) {
                 origin += scene.globalPosition;
             }
-        }
+        }*/
 
         foreach (i, particle; _particles) {
             foreach (ParticleEffect effect; _effects) {
@@ -179,7 +176,7 @@ final class ParticleSource : Resource!ParticleSource {
                 }
             }
             if (_isRelativePosition)
-                particle.origin = origin;
+                particle.origin = _origin;
             particle.update();
 
             if (particle.frame > particle.ttl) {
@@ -187,17 +184,6 @@ final class ParticleSource : Resource!ParticleSource {
             }
         }
         _particles.sweep();
-    }
-
-    Vec2f getOrigin() {
-        Vec2f origin = position;
-        if (_attachedEntity) {
-            origin += _attachedEntity.scenePosition();
-        }
-        else if (_isAttachedToCamera && scene) {
-            origin += scene.globalPosition;
-        }
-        return origin;
     }
 
     void draw(Vec2f origin) {
@@ -235,9 +221,9 @@ final class ParticleSource : Resource!ParticleSource {
     }
 
     void remove() {
-        if (scene) {
+        /*if (scene) {
             scene.removeParticleSource(this);
-        }
+        }*/
     }
 
     void emit() {
@@ -285,16 +271,16 @@ final class ParticleSource : Resource!ParticleSource {
         _minCount = minCount;
         _maxCount = maxCount;
     }
-
-    void attachTo(Entity entity) {
+/*
+    void attachTo(EntityID entity) {
         _isAttachedToCamera = false;
-        _attachedEntity = entity;
+        //_attachedEntity = entity;
     }
 
     void attachToCamera() {
         _isAttachedToCamera = true;
-        _attachedEntity = null;
-    }
+        //_attachedEntity = null;
+    }*/
 
     void setMode(ParticleMode mode) {
         _mode = mode;
@@ -321,10 +307,9 @@ final class ParticleSource : Resource!ParticleSource {
         float angle = Atelier.rng.rand(_minAngle, _maxAngle) - (_spreadAngle / 2f);
         float spreadPerParticle = _spreadAngle / particleCount;
 
-        Vec2f origin = getOrigin();
         for (int i; i < particleCount; ++i) {
             Particle particle = new Particle;
-            particle.origin = origin;
+            particle.origin = _origin;
             particle.position = Vec2f.angled(angle) * distance;
             particle.angle = angle;
             particle.pivotAngle = angle;
@@ -340,14 +325,13 @@ final class ParticleSource : Resource!ParticleSource {
         float angle = Atelier.rng.rand(_minAngle, _maxAngle) - (_spreadAngle / 2f);
         float spreadPerParticle = _spreadAngle / particleCount;
 
-        Vec2f origin = getOrigin();
         Vec2f offset = -_area / 2f;
         for (int i; i < particleCount; ++i) {
             float x = Atelier.rng.rand01();
             float y = Atelier.rng.rand01();
 
             Particle particle = new Particle;
-            particle.origin = origin;
+            particle.origin = _origin;
             particle.position = Vec2f(x, y) * _area + offset;
             particle.angle = angle;
             particle.pivotAngle = angle;
@@ -363,15 +347,13 @@ final class ParticleSource : Resource!ParticleSource {
         float angle = Atelier.rng.rand(_minAngle, _maxAngle) - (_spreadAngle / 2f);
         float spreadPerParticle = _spreadAngle / particleCount;
 
-        Vec2f origin = getOrigin();
-
         for (int i; i < particleCount; ++i) {
             float phi = Atelier.rng.rand01() * PI * 2f;
             float rho = Atelier.rng.rand01();
             Vec2f pos = sqrt(rho) * Vec2f.angled(phi);
 
             Particle particle = new Particle;
-            particle.origin = origin;
+            particle.origin = _origin;
             particle.position = pos * _area / 2f;
             particle.angle = angle;
             particle.pivotAngle = angle;

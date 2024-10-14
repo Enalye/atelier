@@ -13,7 +13,7 @@ import atelier.scene.actor;
 import atelier.scene.entity;
 import atelier.scene.scene;
 import atelier.scene.solid;
-
+/*
 final class Collision {
     Actor actor;
     Solid solid;
@@ -104,3 +104,4 @@ abstract class Collider {
         }
     }
 }
+*/

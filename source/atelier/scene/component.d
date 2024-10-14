@@ -7,7 +7,7 @@ module atelier.scene.component;
 
 import atelier.common;
 import atelier.scene.entity;
-
+/*
 abstract class EntityComponent {
     private {
         Entity _entity;
@@ -25,3 +25,4 @@ abstract class EntityComponent {
 
     void update();
 }
+*/

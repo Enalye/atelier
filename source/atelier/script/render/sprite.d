@@ -31,9 +31,9 @@ void loadLibRender_sprite(GrModule mod) {
 
     mod.addConstructor(&_ctor_imageData, spriteType, [imageDataType]);
 
-    mod.addConstructor(&_ctor_scene, spriteType, [sceneType]);
+    //mod.addConstructor(&_ctor_scene, spriteType, [sceneType]);
 
-    mod.addConstructor(&_ctor_entity, spriteType, [entityType]);
+    //mod.addConstructor(&_ctor_entity, spriteType, [entityType]);
 
     mod.addProperty(&_size!"get", &_size!"set", "size", spriteType, vec2fType);
 }
@@ -51,12 +51,13 @@ private void _ctor_scene(GrCall call) {
 }
 
 private void _ctor_entity(GrCall call) {
-    Canvas canvas = call.getNative!Entity(0).canvas;
+    /*Canvas canvas = call.getNative!Entity(0).canvas;
     if (canvas) {
         call.setNative(new Sprite(canvas));
         return;
     }
-    call.raise("NullError");
+    call.raise("NullError");*/
+    call.raise("DeprecatedError");
 }
 
 private void _size(string op)(GrCall call) {

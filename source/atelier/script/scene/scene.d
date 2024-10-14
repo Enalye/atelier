@@ -18,16 +18,21 @@ package void loadLibScene_scene(GrModule mod) {
     mod.setModule("scene.scene");
     mod.setModuleInfo(GrLocale.fr_FR, "Défini un calque où évolue des entités");
     mod.setModuleExample(GrLocale.fr_FR, "var scene = @Scene;
-addScene(scene);");
+@Level.addScene(scene);");
 
     GrType sceneType = mod.addNative("Scene");
 
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
-    GrType entityType = grGetNativeType("Entity");
-    GrType actorType = grGetNativeType("Actor");
-    GrType solidType = grGetNativeType("Solid");
+    GrType entityType = mod.addAlias("Entity", grUInt);
+    GrType imageType = grGetNativeType("Image");
     GrType particleSourceType = grGetNativeType("ParticleSource");
     GrType canvasType = grGetNativeType("Canvas");
+    GrType spriteType = grGetNativeType("Sprite");
+
+    /*GrType actorType = grGetNativeType("Actor");
+    GrType solidType = grGetNativeType("Solid");
+    GrType particleSourceType = grGetNativeType("ParticleSource");
+    GrType canvasType = grGetNativeType("Canvas");*/
     GrType uiType = grGetNativeType("UIElement");
 
     mod.setParameters(["width", "height"]);
@@ -41,10 +46,10 @@ addScene(scene);");
 
     mod.addProperty(&_zOrder!"get", &_zOrder!"set", "zOrder", entityType, grInt);
     mod.addProperty(&_isVisible!"get", &_isVisible!"set", "isVisible", sceneType, grBool);
-    mod.addProperty(&_isAlive, null, "isAlive", sceneType, grBool);
+    /*mod.addProperty(&_isAlive, null, "isAlive", sceneType, grBool);
     mod.addProperty(&_showColliders!"get", &_showColliders!"set",
-        "showColliders", sceneType, grBool);
-    mod.addProperty(&_canvas, null, "canvas", sceneType, canvasType);
+        "showColliders", sceneType, grBool);*/
+    /*    mod.addProperty(&_canvas, null, "canvas", sceneType, canvasType);
 
     mod.setDescription(GrLocale.fr_FR,
         "Récupère l’entité correspondant au nom donné dans la scène");
@@ -97,7 +102,7 @@ addScene(scene);");
     mod.addFunction(&_findByTag!Solid, "findSolidByTag", [
             sceneType, grList(grString)
         ], [grList(solidType)]);
-
+*/
     mod.setDescription(GrLocale.fr_FR, "Récupère les tags de la scène");
     mod.setParameters(["scene"]);
     mod.addFunction(&_getTags, "getTags", [sceneType], [grList(grString)]);
@@ -110,10 +115,39 @@ addScene(scene);");
     mod.setParameters(["scene", "tag"]);
     mod.addFunction(&_hasTag, "hasTag", [sceneType, grString], [grBool]);
 
-    mod.setDescription(GrLocale.fr_FR, "Ajoute une entité à la scène");
+    mod.setDescription(GrLocale.fr_FR, "Crée une entité dans la scène");
     mod.setParameters(["scene", "entity"]);
-    mod.addFunction(&_addEntity, "addEntity", [sceneType, entityType]);
+    mod.addFunction(&_createEntity, "createEntity", [sceneType], [entityType]);
 
+    mod.setDescription(GrLocale.fr_FR, "Retire une entité de la scène");
+    mod.setParameters(["scene", "entity"]);
+    mod.addFunction(&_removeEntity, "removeEntity", [sceneType, entityType]);
+
+    mod.setDescription(GrLocale.fr_FR, "Modifie la position de l’entité");
+    mod.setParameters(["scene", "entity", "x", "y"]);
+    mod.addFunction(&_setPosition, "setPosition", [
+            sceneType, entityType, grFloat, grFloat
+        ]);
+
+    mod.setDescription(GrLocale.fr_FR, "Récupère la position de l’entité");
+    mod.setParameters(["scene", "entity"]);
+    mod.addFunction(&_getPosition, "getPosition", [sceneType, entityType], [
+            grFloat, grFloat
+        ]);
+
+    mod.setDescription(GrLocale.fr_FR, "Associe une image à l’entité");
+    mod.setParameters(["scene", "entity", "image"]);
+    mod.addFunction(&_setImage, "setImage", [
+            sceneType, entityType, grOptional(imageType)
+        ]);
+
+    mod.setDescription(GrLocale.fr_FR, "Associe une source de particules à l’entité");
+    mod.setParameters(["scene", "entity", "source"]);
+    mod.addFunction(&_setParticleSource, "setParticleSource", [
+            sceneType, entityType, grOptional(particleSourceType)
+        ]);
+
+    /*
     mod.setDescription(GrLocale.fr_FR, "Ajoute une source de particules à la scène");
     mod.setParameters(["scene", "source"]);
     mod.addFunction(&_addParticleSource, "addParticleSource", [
@@ -127,7 +161,7 @@ addScene(scene);");
     mod.setDescription(GrLocale.fr_FR, "Ajoute un acteur à la scène");
     mod.setParameters(["scene", "actor"]);
     mod.addFunction(&_addActor, "addActor", [sceneType, actorType]);
-
+*/
     mod.setDescription(GrLocale.fr_FR, "Ajoute un élément d’interface à la scène");
     mod.setParameters(["scene", "ui"]);
     mod.addFunction(&_addUI, "addUI", [sceneType, uiType]);
@@ -135,10 +169,6 @@ addScene(scene);");
     mod.setDescription(GrLocale.fr_FR, "Supprime les élements d’interface de la scène");
     mod.setParameters(["scene"]);
     mod.addFunction(&_clearUI, "clearUI", [sceneType]);
-
-    mod.setDescription(GrLocale.fr_FR, "Supprime la scène");
-    mod.setParameters(["scene"]);
-    mod.addFunction(&_remove, "remove", [sceneType]);
 }
 
 private void _ctor(GrCall call) {
@@ -185,7 +215,7 @@ private void _isVisible(string op)(GrCall call) {
     }
     call.setBool(scene.isVisible);
 }
-
+/*
 private void _isAlive(GrCall call) {
     Scene scene = call.getNative!Scene(0);
     call.setBool(scene.isAlive);
@@ -199,8 +229,8 @@ private void _showColliders(string op)(GrCall call) {
     }
 
     call.setBool(scene.showColliders);
-}
-
+}*/
+/*
 private void _canvas(GrCall call) {
     Scene scene = call.getNative!Scene(0);
     call.setNative(scene.canvas);
@@ -222,7 +252,7 @@ private void _findByTag(T)(GrCall call) {
     result.setNatives(scene.findByTag!T(call.getList(1).getStrings!string()));
     call.setList(result);
 }
-
+*/
 private void _getTags(GrCall call) {
     Scene scene = call.getNative!Scene(0);
     GrList list = new GrList;
@@ -256,12 +286,54 @@ private void _hasTag(GrCall call) {
     call.setBool(false);
 }
 
-private void _addEntity(GrCall call) {
+private void _createEntity(GrCall call) {
     Scene scene = call.getNative!Scene(0);
-    Entity entity = call.getNative!Entity(1);
-    scene.addEntity(entity);
+    EntityID id = scene.createEntity();
+    call.setUInt(id);
 }
 
+private void _removeEntity(GrCall call) {
+    Scene scene = call.getNative!Scene(0);
+    EntityID id = call.getUInt(1);
+    scene.removeEntity(id);
+}
+
+private void _setPosition(GrCall call) {
+    Scene scene = call.getNative!Scene(0);
+    EntityID id = call.getUInt(1);
+    Vec2f* position = scene.getLocalPosition(id);
+    position.x = call.getFloat(2);
+    position.y = call.getFloat(3);
+}
+
+private void _getPosition(GrCall call) {
+    Scene scene = call.getNative!Scene(0);
+    EntityID id = call.getUInt(1);
+    Vec2f* position = scene.getLocalPosition(id);
+    call.setFloat(position.x);
+    call.setFloat(position.y);
+}
+
+private void _setImage(GrCall call) {
+    Scene scene = call.getNative!Scene(0);
+    EntityID id = call.getUInt(1);
+    RenderComponent* render = scene.getRender(id);
+    render.image = call.isNull(2) ? null : call.getNative!Image(2);
+}
+
+private void _setParticleSource(GrCall call) {
+    Scene scene = call.getNative!Scene(0);
+    EntityID id = call.getUInt(1);
+    if (call.isNull(2)) {
+        scene.removeComponent!ParticleComponent(id);
+    }
+    else {
+        ParticleComponent* part = scene.addComponent!ParticleComponent(id);
+        part.source = call.getNative!ParticleSource(2);
+        part.id = id;
+    }
+}
+/*
 private void _addParticleSource(GrCall call) {
     Scene scene = call.getNative!Scene(0);
     ParticleSource source = call.getNative!ParticleSource(1);
@@ -279,7 +351,7 @@ private void _addSolid(GrCall call) {
     Solid solid = call.getNative!Solid(1);
     scene.addSolid(solid);
 }
-
+*/
 private void _addUI(GrCall call) {
     Scene scene = call.getNative!Scene(0);
     UIElement ui = call.getNative!UIElement(1);
@@ -289,9 +361,4 @@ private void _addUI(GrCall call) {
 private void _clearUI(GrCall call) {
     Scene scene = call.getNative!Scene(0);
     scene.clearUI();
-}
-
-private void _remove(GrCall call) {
-    Scene scene = call.getNative!Scene(0);
-    scene.remove();
 }

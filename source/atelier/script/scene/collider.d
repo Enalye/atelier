@@ -11,7 +11,7 @@ import atelier.common;
 import atelier.core;
 import atelier.scene;
 import atelier.script.util;
-
+/*
 package void loadLibScene_collider(GrModule mod) {
     mod.setModule("scene.collider");
     mod.setModuleInfo(GrLocale.fr_FR, "Objet physique d’une scène");
@@ -152,3 +152,4 @@ private void _entity(string op)(GrCall call) {
         call.setNull();
     }
 }
+*/

@@ -17,7 +17,7 @@ import atelier.common.hslcolor;
 import atelier.common.resource;
 import atelier.common.stream;
 import atelier.common.vec2;
-
+/*
 private abstract class ImageBuilder {
     private {
         Vec2f _position = Vec2f.zero;
@@ -1036,3 +1036,4 @@ final class LevelBuilder : Resource!LevelBuilder {
         }
     }
 }
+*/

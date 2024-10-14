@@ -18,14 +18,12 @@ import atelier.script.scene.solid;
 
 package(atelier.script) GrModuleLoader[] getLibLoaders_scene() {
     return [
-        &loadLibScene_actor,
+        &loadLibScene_level, &loadLibScene_scene, &loadLibScene_entity,
+        &loadLibScene_particle,
+        /*&loadLibScene_actor,
         &loadLibScene_camera,
         &loadLibScene_collider,
         &loadLibScene_component,
-        &loadLibScene_entity,
-        &loadLibScene_level,
-        &loadLibScene_particle,
-        &loadLibScene_scene,
-        &loadLibScene_solid
+        &loadLibScene_solid*/
     ];
 }

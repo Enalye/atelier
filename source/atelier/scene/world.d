@@ -17,11 +17,20 @@ import atelier.scene.entity;
 import atelier.scene.particle;
 import atelier.scene.scene;
 
+alias SystemEntityUpdater = void function(Scene scene);
+alias SystemEntityRenderer = void function(Scene scene, Vec2f offset);
+alias SystemUpdater = void function(Scene scene);
+alias SystemRenderer = void function(Scene scene, Vec2f offset, bool isFront);
+
 /// Gère les différentes scènes
 final class World {
     private {
         Array!Scene _scenes;
         Camera _camera;
+        SystemUpdater[string] _systemUpdaters;
+        SystemRenderer[string] _systemRenderers;
+        SystemEntityUpdater[string] _systemEntityUpdaters;
+        SystemEntityRenderer[string] _systemEntityRenderers;
     }
 
     @property {
@@ -34,6 +43,58 @@ final class World {
         _scenes = new Array!Scene;
         _camera = new Camera;
     }
+
+    void registerSystem(T)(string name, T system) {
+        static if (is(T == SystemUpdater)) {
+            _systemUpdaters[name] = system;
+        }
+        else static if (is(T == SystemRenderer)) {
+            _systemRenderers[name] = system;
+        }
+        else static if (is(T == SystemEntityUpdater)) {
+            _systemEntityUpdaters[name] = system;
+        }
+        else static if (is(T == SystemEntityRenderer)) {
+            _systemEntityRenderers[name] = system;
+        }
+        else
+            static assert(false, "undefined system type `" ~ T.stringof ~ "`");
+    }
+
+    T getSystem(T)(string name) {
+        T* p;
+        static if (is(T == SystemUpdater)) {
+            p = name in _systemUpdaters;
+        }
+        else static if (is(T == SystemRenderer)) {
+            p = name in _systemRenderers;
+        }
+        else static if (is(T == SystemEntityUpdater)) {
+            p = name in _systemEntityUpdaters;
+        }
+        else static if (is(T == SystemEntityRenderer)) {
+            p = name in _systemEntityRenderers;
+        }
+        else
+            static assert(false, "undefined system type `" ~ T.stringof ~ "`");
+        return *p;
+    }
+    /*
+    void registerSystemUpdater(string name, SystemUpdater system) {
+        _systemUpdaters[name] = system;
+    }
+
+    void registerSystemRenderer(string name, SystemRenderer system) {
+        _systemRenderers[name] = system;
+    }
+
+    void registerEntitySystemUpdater(string name, SystemEntityUpdater system) {
+        _systemEntityUpdaters[name] = system;
+    }
+
+    void registerEntitySystemRenderer(string name, SystemEntityRenderer system) {
+        _systemEntityRenderers[name] = system;
+    }*/
 
     private void _sortScenes() {
         sort!((a, b) => (a.zOrder > b.zOrder), SwapStrategy.stable)(_scenes.array);

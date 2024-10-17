@@ -115,6 +115,42 @@ package void loadLibScene_scene(GrModule mod) {
     mod.setParameters(["scene", "tag"]);
     mod.addFunction(&_hasTag, "hasTag", [sceneType, grString], [grBool]);
 
+    mod.setDescription(GrLocale.fr_FR, "Ajoute une étape système de calcul avant les entités");
+    mod.setParameters(["scene", "name"]);
+    mod.addFunction(&_addSystemUpdate!true, "addSystemUpdate", [
+            sceneType, grString
+        ]);
+
+    mod.setDescription(GrLocale.fr_FR, "Ajoute une étape système de calcul après les entités");
+    mod.setParameters(["scene", "name"]);
+    mod.addFunction(&_addSystemUpdate!false, "addSystemUpdateLate", [
+            sceneType, grString
+        ]);
+
+    mod.setDescription(GrLocale.fr_FR, "Ajoute une étape système de rendu avant les entités");
+    mod.setParameters(["scene", "name", "isAfterEntities"]);
+    mod.addFunction(&_addSystemRender!true, "addSystemRender", [
+            sceneType, grString
+        ]);
+
+    mod.setDescription(GrLocale.fr_FR, "Ajoute une étape système de rendu après les entités");
+    mod.setParameters(["scene", "name", "isAfterEntities"]);
+    mod.addFunction(&_addSystemRender!false, "addSystemRenderLate", [
+            sceneType, grString
+        ]);
+
+    mod.setDescription(GrLocale.fr_FR, "Change le mode de calcul des entités");
+    mod.setParameters(["scene", "name"]);
+    mod.addFunction(&_setSystemEntityUpdate, "setSystemEntityUpdate", [
+            sceneType, grString
+        ]);
+
+    mod.setDescription(GrLocale.fr_FR, "Change le mode de rendu des entités");
+    mod.setParameters(["scene", "name"]);
+    mod.addFunction(&_setSystemEntityRender, "setSystemEntityRender", [
+            sceneType, grString
+        ]);
+
     mod.setDescription(GrLocale.fr_FR, "Crée une entité dans la scène");
     mod.setParameters(["scene", "entity"]);
     mod.addFunction(&_createEntity, "createEntity", [sceneType], [entityType]);
@@ -142,9 +178,9 @@ package void loadLibScene_scene(GrModule mod) {
         ]);
 
     mod.setDescription(GrLocale.fr_FR, "Associe une source de particules à l’entité");
-    mod.setParameters(["scene", "entity", "source"]);
+    mod.setParameters(["scene", "entity", "source", "isInFront"]);
     mod.addFunction(&_setParticleSource, "setParticleSource", [
-            sceneType, entityType, grOptional(particleSourceType)
+            sceneType, entityType, grOptional(particleSourceType), grBool
         ]);
 
     /*
@@ -286,6 +322,54 @@ private void _hasTag(GrCall call) {
     call.setBool(false);
 }
 
+private void _addSystemUpdate(bool isBefore)(GrCall call) {
+    Scene scene = call.getNative!Scene(0);
+    SystemUpdater system = Atelier.scene.getSystem!SystemUpdater(call.getString(1));
+
+    if (system) {
+        scene.addSystemUpdate(system, isBefore);
+    }
+    else {
+        call.raise("UndefinedSystemError");
+    }
+}
+
+private void _addSystemRender(bool isBefore)(GrCall call) {
+    Scene scene = call.getNative!Scene(0);
+    SystemRenderer system = Atelier.scene.getSystem!SystemRenderer(call.getString(1));
+
+    if (system) {
+        scene.addSystemRender(system, isBefore);
+    }
+    else {
+        call.raise("UndefinedSystemError");
+    }
+}
+
+private void _setSystemEntityUpdate(GrCall call) {
+    Scene scene = call.getNative!Scene(0);
+    SystemEntityUpdater system = Atelier.scene.getSystem!SystemEntityUpdater(call.getString(1));
+
+    if (system) {
+        scene.setSystemEntityUpdate(system);
+    }
+    else {
+        call.raise("UndefinedSystemError");
+    }
+}
+
+private void _setSystemEntityRender(GrCall call) {
+    Scene scene = call.getNative!Scene(0);
+    SystemEntityRenderer system = Atelier.scene.getSystem!SystemEntityRenderer(call.getString(1));
+
+    if (system) {
+        scene.setSystemEntityRender(system);
+    }
+    else {
+        call.raise("UndefinedSystemError");
+    }
+}
+
 private void _createEntity(GrCall call) {
     Scene scene = call.getNative!Scene(0);
     EntityID id = scene.createEntity();
@@ -331,6 +415,7 @@ private void _setParticleSource(GrCall call) {
         ParticleComponent* part = scene.addComponent!ParticleComponent(id);
         part.source = call.getNative!ParticleSource(2);
         part.id = id;
+        part.isFront = call.getBool(3);
     }
 }
 /*

@@ -159,6 +159,7 @@ final class Atelier {
         _theme = new Theme();
 
         setupDefaultResourceLoaders(_resourceManager);
+        registerEntitySystems();
     }
 
     void addArchive(string path) {

@@ -3,16 +3,16 @@
  * Licence: Zlib
  * Auteur: Enalye
  */
-module atelier.script.scene.camera;
+module atelier.script.world.camera;
 
 import grimoire;
 import atelier.common;
 import atelier.core;
-import atelier.scene;
+import atelier.world;
 import atelier.script.util;
 
-package void loadLibScene_camera(GrModule mod) {
-    mod.setModule("scene.camera");
+package void loadLibWorld_camera(GrModule mod) {
+    mod.setModule("world.camera");
     mod.setModuleInfo(GrLocale.fr_FR, "Point de vue du joueur");
     mod.setModuleExample(GrLocale.fr_FR,
         "@Camera.follow(player, @Vec2f(1f, 0.2f), @Vec2f(0f, 100f));
@@ -61,15 +61,15 @@ package void loadLibScene_camera(GrModule mod) {
 }
 
 private void _getPosition(GrCall call) {
-    call.setNative(svec2(Atelier.scene.camera.getPosition()));
+    call.setNative(svec2(Atelier.world.camera.getPosition()));
 }
 
 private void _setPosition(GrCall call) {
-    Atelier.scene.camera.setPosition(call.getNative!SVec2f(0));
+    Atelier.world.camera.setPosition(call.getNative!SVec2f(0));
 }
 
 private void _moveTo(GrCall call) {
-    Atelier.scene.camera.moveTo(call.getNative!SVec2f(0), call.getUInt(1),
+    Atelier.world.camera.moveTo(call.getNative!SVec2f(0), call.getUInt(1),
         call.getEnum!Spline(2));
 }
 /*
@@ -77,21 +77,21 @@ private void _follow(GrCall call) {
     Entity entity = call.getNative!Entity(0);
     Vec2f damping = call.getNative!SVec2f(1);
     Vec2f deadZone = call.getNative!SVec2f(2);
-    Atelier.scene.camera.follow(entity, damping, deadZone);
+    Atelier.world.camera.follow(entity, damping, deadZone);
 }*/
 
 private void _stop(GrCall call) {
-    Atelier.scene.camera.stop();
+    Atelier.world.camera.stop();
 }
 
 private void _zoom(GrCall call) {
-    Atelier.scene.camera.zoom(call.getFloat(0), call.getUInt(1), call.getEnum!Spline(2));
+    Atelier.world.camera.zoom(call.getFloat(0), call.getUInt(1), call.getEnum!Spline(2));
 }
 
 private void _shake(GrCall call) {
-    Atelier.scene.camera.shake(call.getFloat(0));
+    Atelier.world.camera.shake(call.getFloat(0));
 }
 
 private void _rumble(GrCall call) {
-    Atelier.scene.camera.rumble(call.getFloat(0), call.getUInt(1), call.getEnum!Spline(2));
+    Atelier.world.camera.rumble(call.getFloat(0), call.getUInt(1), call.getEnum!Spline(2));
 }

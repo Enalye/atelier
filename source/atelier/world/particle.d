@@ -3,15 +3,41 @@
  * Licence: Zlib
  * Auteur: Enalye
  */
-module atelier.scene.particle;
+module atelier.world.particle;
 
 import std.random;
 import std.math;
 import atelier.common;
 import atelier.core;
 import atelier.render;
-import atelier.scene.entity;
-import atelier.scene.scene;
+import atelier.world.scene;
+import atelier.world.world;
+
+package(atelier.world) void registerSystems_particle(World world) {
+    world.registerSystem!SystemUpdater("particle", &_updateSystem);
+    world.registerSystem!SystemRenderer("particle", &_renderSystem);
+}
+
+struct ParticleComponent {
+    ParticleSource source;
+    bool isFront;
+}
+
+private void _updateSystem(Scene scene, void*) {
+    EntityComponentPool!ParticleComponent pool = scene.getComponentPool!ParticleComponent();
+    foreach (EntityID id, ParticleComponent* component; pool) {
+        component.source.update(scene.getPosition(id).worldPosition);
+    }
+}
+
+private void _renderSystem(Scene scene, void*, Vec2f offset, bool isFront) {
+    EntityComponentPool!ParticleComponent pool = scene.getComponentPool!ParticleComponent();
+    foreach (EntityID id, ParticleComponent* component; pool) {
+        if (component.isFront != isFront)
+            continue;
+        component.source.draw(offset);
+    }
+}
 
 private final class Particle {
     int frame, ttl;
@@ -271,7 +297,7 @@ final class ParticleSource : Resource!ParticleSource {
         _minCount = minCount;
         _maxCount = maxCount;
     }
-/*
+    /*
     void attachTo(EntityID entity) {
         _isAttachedToCamera = false;
         //_attachedEntity = entity;

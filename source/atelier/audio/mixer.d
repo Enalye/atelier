@@ -12,7 +12,6 @@ import std.string : fromStringz;
 import bindbc.sdl;
 
 import atelier.common;
-import atelier.scene;
 import atelier.audio.bus;
 import atelier.audio.config;
 import atelier.audio.effect;

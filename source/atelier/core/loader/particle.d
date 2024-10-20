@@ -12,7 +12,7 @@ import std.format : format;
 import farfadet;
 import atelier.common;
 import atelier.render;
-import atelier.scene;
+import atelier.world;
 import atelier.core.runtime;
 
 private struct ParticleEffectInfo {

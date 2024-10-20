@@ -3,12 +3,12 @@
  * Licence: Zlib
  * Auteur: Enalye
  */
-module atelier.scene.camera;
+module atelier.world.camera;
 
 import atelier.common;
 import atelier.core;
 import atelier.render;
-import atelier.scene.scene;
+import atelier.world.scene;
 
 interface CameraPositioner {
     void update();
@@ -61,7 +61,7 @@ private final class FollowCameraPosition : CameraPositioner {
     }
 
     void update() {
-        Vec2f entityPos = *_scene.getWorldPosition(_id);
+        Vec2f entityPos = _scene.getPosition(_id).worldPosition;
         Vec2f position = _camera._position;
 
         if (position.x < entityPos.x - _deadZone.x) {

@@ -3,19 +3,19 @@
  * Licence: Zlib
  * Auteur: Enalye
  */
-module atelier.script.scene.level;
+module atelier.script.world.world;
 
 import grimoire;
 
 import atelier.common;
 import atelier.core;
 import atelier.render;
-import atelier.scene;
+import atelier.world;
 import atelier.ui;
 import atelier.script.util;
 
-package void loadLibScene_level(GrModule mod) {
-    mod.setModule("scene.level");
+package void loadLibWorld_world(GrModule mod) {
+    mod.setModule("scene.world");
     mod.setModuleInfo(GrLocale.fr_FR, "Niveau actuel");
 
     GrType levelType = mod.addNative("Level");
@@ -92,16 +92,16 @@ package void loadLibScene_level(GrModule mod) {
 
 private void _addScene(GrCall call) {
     Scene scene = call.getNative!Scene(0);
-    Atelier.scene.addScene(scene);
+    Atelier.world.addScene(scene);
 }
 
 private void _removeScene(GrCall call) {
     Scene scene = call.getNative!Scene(0);
-    Atelier.scene.removeScene(scene);
+    Atelier.world.removeScene(scene);
 }
 
 private void _findSceneByName(GrCall call) {
-    Scene scene = Atelier.scene.findSceneByName(call.getString(0));
+    Scene scene = Atelier.world.findSceneByName(call.getString(0));
     if (scene) {
         call.setNative(scene);
         return;
@@ -110,14 +110,14 @@ private void _findSceneByName(GrCall call) {
 }
 
 private void _findScenesByTag(GrCall call) {
-    Scene[] scenes = Atelier.scene.findScenesByTag(call.getList(0).getStrings!string());
+    Scene[] scenes = Atelier.world.findScenesByTag(call.getList(0).getStrings!string());
     GrList result = new GrList;
     result.setNatives(scenes);
     call.setList(result);
 }
 /*
 private void _findByName(T)(GrCall call) {
-    T element = Atelier.scene.findByName!T(call.getString(0));
+    T element = Atelier.world.findByName!T(call.getString(0));
     if (element) {
         call.setNative(element);
         return;
@@ -127,7 +127,7 @@ private void _findByName(T)(GrCall call) {
 
 private void _findByTag(T)(GrCall call) {
     GrList result = new GrList;
-    result.setNatives(Atelier.scene.findByTag!T(call.getList(0).getStrings!string()));
+    result.setNatives(Atelier.world.findByTag!T(call.getList(0).getStrings!string()));
     call.setList(result);
 }
 */

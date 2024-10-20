@@ -12,7 +12,6 @@ import std.algorithm.comparison : min, max;
 
 import atelier.common;
 import atelier.core;
-import atelier.scene;
 import atelier.render.image;
 import atelier.render.tileset;
 
@@ -227,8 +226,8 @@ final class Tilemap : Image, Resource!Tilemap {
             int maxX = _columns;
             int maxY = _lines;
 
-            /*if (Atelier.scene.isOnScene) {
-                Vec4f cameraClip = Atelier.scene.cameraClip;
+            /*if (Atelier.world.isOnScene) {
+                Vec4f cameraClip = Atelier.world.cameraClip;
                 minX = max(0, cast(int) floor((cameraClip.x - startPos.x) / tileSize.x));
                 minY = max(0, cast(int) floor((cameraClip.y - startPos.y) / tileSize.y));
                 maxX = min(_columns, cast(int) ceil((cameraClip.z - startPos.x) / tileSize.x));

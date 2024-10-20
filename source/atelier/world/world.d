@@ -3,7 +3,7 @@
  * Licence: Zlib
  * Auteur: Enalye
  */
-module atelier.scene.world;
+module atelier.world.world;
 
 import std.algorithm;
 
@@ -12,21 +12,29 @@ import atelier.core;
 import atelier.input;
 import atelier.render;
 import atelier.ui;
-import atelier.scene.camera;
-import atelier.scene.entity;
-import atelier.scene.particle;
-import atelier.scene.scene;
+import atelier.world.camera;
+import atelier.world.grid;
+import atelier.world.particle;
+import atelier.world.scene;
 
 alias SystemEntityUpdater = void function(Scene scene);
 alias SystemEntityRenderer = void function(Scene scene, Vec2f offset);
-alias SystemUpdater = void function(Scene scene);
-alias SystemRenderer = void function(Scene scene, Vec2f offset, bool isFront);
+alias SystemInitializer = void* function(Scene scene);
+alias SystemUpdater = void function(Scene scene, void* context);
+alias SystemRenderer = void function(Scene scene, void* context, Vec2f offset, bool isFront);
+
+void registerSystems(World world) {
+    registerSystems_scene(world);
+    registerSystems_particle(world);
+    registerSystems_grid(world);
+}
 
 /// Gère les différentes scènes
 final class World {
     private {
         Array!Scene _scenes;
         Camera _camera;
+        SystemInitializer[string] _systemInitializers;
         SystemUpdater[string] _systemUpdaters;
         SystemRenderer[string] _systemRenderers;
         SystemEntityUpdater[string] _systemEntityUpdaters;
@@ -45,7 +53,10 @@ final class World {
     }
 
     void registerSystem(T)(string name, T system) {
-        static if (is(T == SystemUpdater)) {
+        static if (is(T == SystemInitializer)) {
+            _systemInitializers[name] = system;
+        }
+        else static if (is(T == SystemUpdater)) {
             _systemUpdaters[name] = system;
         }
         else static if (is(T == SystemRenderer)) {
@@ -63,7 +74,13 @@ final class World {
 
     T getSystem(T)(string name) {
         T* p;
-        static if (is(T == SystemUpdater)) {
+        static if (is(T == SystemInitializer)) {
+            p = name in _systemInitializers;
+            if (!p) {
+                return null;
+            }
+        }
+        else static if (is(T == SystemUpdater)) {
             p = name in _systemUpdaters;
         }
         else static if (is(T == SystemRenderer)) {
@@ -79,22 +96,6 @@ final class World {
             static assert(false, "undefined system type `" ~ T.stringof ~ "`");
         return *p;
     }
-    /*
-    void registerSystemUpdater(string name, SystemUpdater system) {
-        _systemUpdaters[name] = system;
-    }
-
-    void registerSystemRenderer(string name, SystemRenderer system) {
-        _systemRenderers[name] = system;
-    }
-
-    void registerEntitySystemUpdater(string name, SystemEntityUpdater system) {
-        _systemEntityUpdaters[name] = system;
-    }
-
-    void registerEntitySystemRenderer(string name, SystemEntityRenderer system) {
-        _systemEntityRenderers[name] = system;
-    }*/
 
     private void _sortScenes() {
         sort!((a, b) => (a.zOrder > b.zOrder), SwapStrategy.stable)(_scenes.array);

@@ -11,7 +11,6 @@ import std.exception : enforce;
 import farfadet;
 import atelier.core;
 import atelier.render;
-import atelier.scene;
 import atelier.common.color;
 import atelier.common.hslcolor;
 import atelier.common.resource;

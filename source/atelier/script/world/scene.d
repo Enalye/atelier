@@ -3,18 +3,18 @@
  * Licence: Zlib
  * Auteur: Enalye
  */
-module atelier.script.scene.scene;
+module atelier.script.world.scene;
 
 import grimoire;
 
 import atelier.common;
 import atelier.core;
 import atelier.render;
-import atelier.scene;
+import atelier.world;
 import atelier.ui;
 import atelier.script.util;
 
-package void loadLibScene_scene(GrModule mod) {
+package void loadLibWorld_scene(GrModule mod) {
     mod.setModule("scene.scene");
     mod.setModuleInfo(GrLocale.fr_FR, "Défini un calque où évolue des entités");
     mod.setModuleExample(GrLocale.fr_FR, "var scene = @Scene;
@@ -64,44 +64,6 @@ package void loadLibScene_scene(GrModule mod) {
     mod.addFunction(&_findByTag!Entity, "findEntitiesByTag", [
             sceneType, grList(grString)
         ], [grList(entityType)]);
-
-    mod.setDescription(GrLocale.fr_FR,
-        "Récupère la source correspondant au nom donné dans la scène");
-    mod.setParameters(["name"]);
-    mod.addFunction(&_findByName!ParticleSource, "findParticleSourceByName",
-        [sceneType, grString], [grOptional(particleSourceType)]);
-
-    mod.setDescription(GrLocale.fr_FR,
-        "Récupère les sources possédants le tag indiqué dans la scène");
-    mod.setParameters(["tags"]);
-    mod.addFunction(&_findByTag!ParticleSource, "findParticleSourcesByTag",
-        [sceneType, grList(grString)], [grList(particleSourceType)]);
-
-    mod.setDescription(GrLocale.fr_FR,
-        "Récupère l’acteur correspondant au nom donné dans la scène");
-    mod.setParameters(["name"]);
-    mod.addFunction(&_findByName!Actor, "findActorByName", [sceneType,
-            grString], [grOptional(actorType)]);
-
-    mod.setDescription(GrLocale.fr_FR,
-        "Récupère les acteurs possédants le tag indiqué dans la scène");
-    mod.setParameters(["tags"]);
-    mod.addFunction(&_findByTag!Actor, "findActorsByTag", [
-            sceneType, grList(grString)
-        ], [grList(actorType)]);
-
-    mod.setDescription(GrLocale.fr_FR,
-        "Récupère le solide correspondant au nom donné dans la scène");
-    mod.setParameters(["name"]);
-    mod.addFunction(&_findByName!Solid, "findSolidByName", [sceneType,
-            grString], [grOptional(solidType)]);
-
-    mod.setDescription(GrLocale.fr_FR,
-        "Récupère les solides possédants le tag indiqué dans la scène");
-    mod.setParameters(["tags"]);
-    mod.addFunction(&_findByTag!Solid, "findSolidByTag", [
-            sceneType, grList(grString)
-        ], [grList(solidType)]);
 */
     mod.setDescription(GrLocale.fr_FR, "Récupère les tags de la scène");
     mod.setParameters(["scene"]);
@@ -177,27 +139,6 @@ package void loadLibScene_scene(GrModule mod) {
             sceneType, entityType, grOptional(imageType)
         ]);
 
-    mod.setDescription(GrLocale.fr_FR, "Associe une source de particules à l’entité");
-    mod.setParameters(["scene", "entity", "source", "isInFront"]);
-    mod.addFunction(&_setParticleSource, "setParticleSource", [
-            sceneType, entityType, grOptional(particleSourceType), grBool
-        ]);
-
-    /*
-    mod.setDescription(GrLocale.fr_FR, "Ajoute une source de particules à la scène");
-    mod.setParameters(["scene", "source"]);
-    mod.addFunction(&_addParticleSource, "addParticleSource", [
-            sceneType, particleSourceType
-        ]);
-
-    mod.setDescription(GrLocale.fr_FR, "Ajoute un solide à la scène");
-    mod.setParameters(["scene", "solid"]);
-    mod.addFunction(&_addSolid, "addSolid", [sceneType, solidType]);
-
-    mod.setDescription(GrLocale.fr_FR, "Ajoute un acteur à la scène");
-    mod.setParameters(["scene", "actor"]);
-    mod.addFunction(&_addActor, "addActor", [sceneType, actorType]);
-*/
     mod.setDescription(GrLocale.fr_FR, "Ajoute un élément d’interface à la scène");
     mod.setParameters(["scene", "ui"]);
     mod.addFunction(&_addUI, "addUI", [sceneType, uiType]);
@@ -324,10 +265,12 @@ private void _hasTag(GrCall call) {
 
 private void _addSystemUpdate(bool isBefore)(GrCall call) {
     Scene scene = call.getNative!Scene(0);
-    SystemUpdater system = Atelier.scene.getSystem!SystemUpdater(call.getString(1));
+    string name = call.getString(1);
+    SystemUpdater system = Atelier.world.getSystem!SystemUpdater(name);
 
     if (system) {
-        scene.addSystemUpdate(system, isBefore);
+        void* context = scene.getSystemContext(name);
+        scene.addSystemUpdate(system, context, isBefore);
     }
     else {
         call.raise("UndefinedSystemError");
@@ -336,10 +279,12 @@ private void _addSystemUpdate(bool isBefore)(GrCall call) {
 
 private void _addSystemRender(bool isBefore)(GrCall call) {
     Scene scene = call.getNative!Scene(0);
-    SystemRenderer system = Atelier.scene.getSystem!SystemRenderer(call.getString(1));
+    string name = call.getString(1);
+    SystemRenderer system = Atelier.world.getSystem!SystemRenderer(name);
 
     if (system) {
-        scene.addSystemRender(system, isBefore);
+        void* context = scene.getSystemContext(name);
+        scene.addSystemRender(system, context, isBefore);
     }
     else {
         call.raise("UndefinedSystemError");
@@ -348,7 +293,7 @@ private void _addSystemRender(bool isBefore)(GrCall call) {
 
 private void _setSystemEntityUpdate(GrCall call) {
     Scene scene = call.getNative!Scene(0);
-    SystemEntityUpdater system = Atelier.scene.getSystem!SystemEntityUpdater(call.getString(1));
+    SystemEntityUpdater system = Atelier.world.getSystem!SystemEntityUpdater(call.getString(1));
 
     if (system) {
         scene.setSystemEntityUpdate(system);
@@ -360,7 +305,7 @@ private void _setSystemEntityUpdate(GrCall call) {
 
 private void _setSystemEntityRender(GrCall call) {
     Scene scene = call.getNative!Scene(0);
-    SystemEntityRenderer system = Atelier.scene.getSystem!SystemEntityRenderer(call.getString(1));
+    SystemEntityRenderer system = Atelier.world.getSystem!SystemEntityRenderer(call.getString(1));
 
     if (system) {
         scene.setSystemEntityRender(system);
@@ -385,17 +330,17 @@ private void _removeEntity(GrCall call) {
 private void _setPosition(GrCall call) {
     Scene scene = call.getNative!Scene(0);
     EntityID id = call.getUInt(1);
-    Vec2f* position = scene.getLocalPosition(id);
-    position.x = call.getFloat(2);
-    position.y = call.getFloat(3);
+    PositionComponent* position = scene.getPosition(id);
+    position.localPosition.x = call.getFloat(2);
+    position.localPosition.y = call.getFloat(3);
 }
 
 private void _getPosition(GrCall call) {
     Scene scene = call.getNative!Scene(0);
     EntityID id = call.getUInt(1);
-    Vec2f* position = scene.getLocalPosition(id);
-    call.setFloat(position.x);
-    call.setFloat(position.y);
+    PositionComponent* position = scene.getPosition(id);
+    call.setFloat(position.localPosition.x);
+    call.setFloat(position.localPosition.y);
 }
 
 private void _setImage(GrCall call) {
@@ -405,38 +350,6 @@ private void _setImage(GrCall call) {
     render.image = call.isNull(2) ? null : call.getNative!Image(2);
 }
 
-private void _setParticleSource(GrCall call) {
-    Scene scene = call.getNative!Scene(0);
-    EntityID id = call.getUInt(1);
-    if (call.isNull(2)) {
-        scene.removeComponent!ParticleComponent(id);
-    }
-    else {
-        ParticleComponent* part = scene.addComponent!ParticleComponent(id);
-        part.source = call.getNative!ParticleSource(2);
-        part.id = id;
-        part.isFront = call.getBool(3);
-    }
-}
-/*
-private void _addParticleSource(GrCall call) {
-    Scene scene = call.getNative!Scene(0);
-    ParticleSource source = call.getNative!ParticleSource(1);
-    scene.addParticleSource(source);
-}
-
-private void _addActor(GrCall call) {
-    Scene scene = call.getNative!Scene(0);
-    Actor actor = call.getNative!Actor(1);
-    scene.addActor(actor);
-}
-
-private void _addSolid(GrCall call) {
-    Scene scene = call.getNative!Scene(0);
-    Solid solid = call.getNative!Solid(1);
-    scene.addSolid(solid);
-}
-*/
 private void _addUI(GrCall call) {
     Scene scene = call.getNative!Scene(0);
     UIElement ui = call.getNative!UIElement(1);

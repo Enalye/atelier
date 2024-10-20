@@ -12,7 +12,7 @@ import atelier.script.common;
 import atelier.script.core;
 import atelier.script.input;
 import atelier.script.render;
-import atelier.script.scene;
+import atelier.script.world;
 import atelier.script.ui;
 
 /// Charge la bibliothèque
@@ -33,7 +33,7 @@ private GrModuleLoader[] getLibraryLoaders() {
     static foreach (pack; [
             &getLibLoaders_audio, &getLibLoaders_common, &getLibLoaders_core,
             &getLibLoaders_input, &getLibLoaders_render,
-            &getLibLoaders_scene, &getLibLoaders_ui,
+            &getLibLoaders_world, &getLibLoaders_ui,
         ]) {
         loaders ~= pack();
     }

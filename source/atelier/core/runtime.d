@@ -16,9 +16,9 @@ import atelier.audio;
 import atelier.common;
 import atelier.input;
 import atelier.render;
-import atelier.scene;
 import atelier.script;
 import atelier.ui;
+import atelier.world;
 
 import atelier.core.loader;
 import atelier.core.logger;
@@ -61,7 +61,7 @@ final class Atelier {
         InputManager _inputManager;
         ResourceManager _resourceManager;
         AudioMixer _audioMixer;
-        World _sceneManager;
+        World _world;
         RNG _rng;
         Theme _theme;
     }
@@ -101,8 +101,8 @@ final class Atelier {
         }
 
         /// Le gestionnaire de scènes
-        World scene() {
-            return _sceneManager;
+        World world() {
+            return _world;
         }
 
         /// Générateur standard de pseudo-aléatoire
@@ -153,13 +153,13 @@ final class Atelier {
         _uiManager = new UIManager();
         _inputManager = new InputManager();
         _audioMixer = new AudioMixer();
-        _sceneManager = new World();
+        _world = new World();
         _resourceManager = new ResourceManager();
         _rng = new RNG();
         _theme = new Theme();
 
         setupDefaultResourceLoaders(_resourceManager);
-        registerEntitySystems();
+        registerSystems(_world);
     }
 
     void addArchive(string path) {
@@ -293,7 +293,7 @@ final class Atelier {
 
         _audioMixer.clear();
         _uiManager.clearUI();
-        _sceneManager.clear();
+        _world.clear();
         _theme.setDefault();
 
         if (_mustReloadResources) {
@@ -365,7 +365,7 @@ final class Atelier {
                     }
                 }
 
-                _sceneManager.update(inputEvents);
+                _world.update(inputEvents);
                 _uiManager.update();
 
                 accumulator -= 1f;
@@ -373,7 +373,7 @@ final class Atelier {
 
             // Rendu
             _renderer.startRenderPass();
-            _sceneManager.draw(cast(Vec2f) _renderer.center);
+            _world.draw(cast(Vec2f) _renderer.center);
             _uiManager.draw();
             _renderer.endRenderPass();
         }

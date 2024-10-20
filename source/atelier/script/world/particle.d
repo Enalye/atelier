@@ -3,17 +3,17 @@
  * Licence: Zlib
  * Auteur: Enalye
  */
-module atelier.script.scene.particle;
+module atelier.script.world.particle;
 
 import grimoire;
 
 import atelier.common;
 import atelier.core;
-import atelier.scene;
+import atelier.world;
 import atelier.render;
 import atelier.script.util;
 
-package void loadLibScene_particle(GrModule mod) {
+package void loadLibWorld_particle(GrModule mod) {
     mod.setModule("scene.particle");
     mod.setModuleInfo(GrLocale.fr_FR, "Système de particules");
     mod.setModuleExample(GrLocale.fr_FR, "var src = @ParticleSource;
@@ -32,20 +32,27 @@ src.setPivotDistance(0, 60, 50f, 150f, Spline.sineInOut);
 src.setPivotDistance(60, 100, 150f, 100f, Spline.sineInOut);
 src.start(5);
 
-scene.addParticleSource(src);");
+scene.setParticleSource(entity, src, false);");
 
     GrType sourceType = mod.addNative("ParticleSource");
     mod.setDescription(GrLocale.fr_FR, "Mode d’émission des particules");
     GrType modeType = mod.addEnum("ParticleMode", grNativeEnum!ParticleMode());
 
+    GrType sceneType = grGetNativeType("Scene");
     GrType splineType = grGetEnumType("Spline");
     GrType blendType = grGetEnumType("Blend");
-    GrType entityType = grGetNativeType("Entity");
+    GrType entityType = grUInt;
     GrType colorType = grGetNativeType("Color");
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
 
     mod.addConstructor(&_ctor, sourceType);
     mod.addConstructor(&_ctor_str, sourceType, [grString]);
+
+    mod.setDescription(GrLocale.fr_FR, "Associe une source de particules à l’entité");
+    mod.setParameters(["scene", "entity", "source", "isInFront"]);
+    mod.addFunction(&_setParticleSource, "setParticleSource", [
+            sceneType, entityType, grOptional(sourceType), grBool
+        ]);
 
     mod.addProperty(&_name!"get", &_name!"set", "name", sourceType, grString);
     mod.addProperty(&_position!"get", &_position!"set", "position", sourceType, vec2fType);
@@ -282,6 +289,19 @@ private void _ctor(GrCall call) {
 private void _ctor_str(GrCall call) {
     ParticleSource source = Atelier.res.get!ParticleSource(call.getString(0));
     call.setNative(source);
+}
+
+private void _setParticleSource(GrCall call) {
+    Scene scene = call.getNative!Scene(0);
+    EntityID id = call.getUInt(1);
+    if (call.isNull(2)) {
+        scene.removeComponent!ParticleComponent(id);
+    }
+    else {
+        ParticleComponent* part = scene.addComponent!ParticleComponent(id);
+        part.source = call.getNative!ParticleSource(2);
+        part.isFront = call.getBool(3);
+    }
 }
 
 private void _name(string op)(GrCall call) {

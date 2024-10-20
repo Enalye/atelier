@@ -11,7 +11,6 @@ import atelier.common;
 import atelier.core;
 import atelier.input;
 import atelier.render;
-import atelier.scene;
 import atelier.script.util;
 
 void loadLibRender_sprite(GrModule mod) {
@@ -45,7 +44,7 @@ private void _ctor_str(GrCall call) {
 private void _ctor_imageData(GrCall call) {
     call.setNative(new Sprite(call.getNative!ImageData(0)));
 }
-
+/+
 private void _ctor_scene(GrCall call) {
     call.setNative(new Sprite(call.getNative!Scene(0).canvas));
 }
@@ -58,7 +57,7 @@ private void _ctor_entity(GrCall call) {
     }
     call.raise("NullError");*/
     call.raise("DeprecatedError");
-}
+}+/
 
 private void _size(string op)(GrCall call) {
     Sprite sprite = call.getNative!Sprite(0);

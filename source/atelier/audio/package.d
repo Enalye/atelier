@@ -9,9 +9,11 @@ public {
     import atelier.audio.bus;
     import atelier.audio.player;
     import atelier.audio.config;
+    import atelier.audio.delay;
     import atelier.audio.effect;
     import atelier.audio.fader;
     import atelier.audio.gain;
+    import atelier.audio.lowpass;
     import atelier.audio.mixer;
     import atelier.audio.music;
     import atelier.audio.musicplayer;

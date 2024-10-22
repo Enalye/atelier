@@ -122,7 +122,9 @@ final class AudioBus {
         _players.sweep();
 
         foreach (i, effect; _effects) {
-            effect.process(mixBuffer);
+            if (!effect.bypass) {
+                effect.process(mixBuffer);
+            }
 
             if (!effect.isAlive)
                 _effects.mark(i);

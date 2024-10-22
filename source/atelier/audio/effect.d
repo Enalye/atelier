@@ -16,11 +16,20 @@ abstract class AudioEffect {
         alias Callback = void function();
         Callback[] _callbacks;
         bool _isAlive = true;
+        bool _bypass = false;
     }
 
     @property {
         bool isAlive() const {
             return _isAlive;
+        }
+
+        bool bypass() const {
+            return _bypass;
+        }
+
+        bool bypass(bool bypass_) {
+            return _bypass = bypass_;
         }
     }
 

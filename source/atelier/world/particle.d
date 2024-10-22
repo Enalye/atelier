@@ -21,6 +21,16 @@ package(atelier.world) void registerSystems_particle(World world) {
 struct ParticleComponent {
     ParticleSource source;
     bool isFront;
+
+    void onInit() {
+        source = null;
+        isFront = false;
+    }
+
+    void onDestroy() {
+        source = null;
+        isFront = false;
+    }
 }
 
 private void _updateSystem(Scene scene, void*) {

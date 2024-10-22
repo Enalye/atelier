@@ -78,10 +78,14 @@ final class EntityComponentPool(T) : IEntityComponentPool {
 
     pragma(inline, true) T* addComponent(EntityID id) {
         EntityID* slot = &_slots[id.address];
-        slot.address = cast(ushort)((slot.version_ ^ 0x1) * _top + (slot.version_ * slot.address));
+        if (slot.version_ == 1) {
+            return &_components[slot.address].component;
+        }
+        slot.address = _top;
         _components[slot.address].id = id;
-        _top += slot.version_ ^ 0x1;
+        _top++;
         slot.version_ = 1;
+        _components[slot.address].component.onInit();
         return &_components[slot.address].component;
     }
 
@@ -91,6 +95,7 @@ final class EntityComponentPool(T) : IEntityComponentPool {
             return;
         }
         slot.version_ = 0;
+        _components[slot.address].component.destroy();
         _top--;
         EntityID* otherSlot = &_slots[_components[_top].id];
         _components[slot.address] = _components[_top];
@@ -321,7 +326,7 @@ final class Scene {
         void* context;
         if (!p) {
             auto initializer = Atelier.world.getSystem!SystemInitializer(name);
-            if(initializer) {
+            if (initializer) {
                 context = initializer(this);
             }
             _entityPool.systemContexts[name] = context;
@@ -372,6 +377,16 @@ final class Scene {
         }
         else {
             return getComponentPool!(T).getComponent(id);
+        }
+    }
+
+    T* getOrAddComponent(T)(EntityID id) {
+        EntityComponentPool!T pool = getComponentPool!(T);
+        if (pool.hasComponent(id)) {
+            return pool.getComponent(id);
+        }
+        else {
+            return pool.addComponent(id);
         }
     }
 
@@ -444,7 +459,8 @@ final class Scene {
     }*/
 
     void update() {
-        _uiManager.cameraPosition = _sprite.size / 2f - globalPosition;
+        Vec2f offset = _sprite.size / 2f - globalPosition;
+        _uiManager.cameraPosition = offset;
         _uiManager.update();
 
         foreach (system; _entityPool.systemUpdatersBack) {

@@ -14,16 +14,26 @@ package(atelier.world) void registerSystems_grid(World world) {
     world.registerSystem!SystemInitializer("grid", &_initSystem);
 }
 
-struct TilePositionComponent {
-    Vec2f originPosition = Vec2f.zero;
-    Vec2i tilePosition;
-    float timer = 0f;
-}
-
 final class GridSystem {
     Vec2f tileSize = Vec2f(32f, 32f);
     uint duration = 30;
     SplineFunc splineFunc = getSplineFunc(Spline.linear);
+}
+
+struct TilePositionComponent {
+    Vec2f originPosition;
+    Vec2i tilePosition;
+    float timer;
+
+    void onInit() {
+        originPosition = Vec2f.zero;
+        tilePosition = Vec2i.zero;
+        timer = 0f;
+    }
+
+    void onDestroy() {
+
+    }
 }
 
 private void* _initSystem(Scene scene) {

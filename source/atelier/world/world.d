@@ -12,6 +12,7 @@ import atelier.core;
 import atelier.input;
 import atelier.render;
 import atelier.ui;
+import atelier.world.audio;
 import atelier.world.camera;
 import atelier.world.grid;
 import atelier.world.particle;
@@ -24,9 +25,10 @@ alias SystemUpdater = void function(Scene scene, void* context);
 alias SystemRenderer = void function(Scene scene, void* context, Vec2f offset, bool isFront);
 
 void registerSystems(World world) {
-    registerSystems_scene(world);
-    registerSystems_particle(world);
+    registerSystems_audio(world);
     registerSystems_grid(world);
+    registerSystems_particle(world);
+    registerSystems_scene(world);
 }
 
 /// Gère les différentes scènes

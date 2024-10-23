@@ -79,7 +79,7 @@ struct AudioComponent {
         if (d < 0f) {
             if (withDelay) {
                 delay.leftDelay = 0f;
-                delay.rightDelay = -0.02f * d;
+                delay.rightDelay = -0.002f * d;
             }
             lowPass.leftDamping = 0f;
             lowPass.rightDamping = -d * 0.9f;
@@ -87,7 +87,7 @@ struct AudioComponent {
         else if (d > 0f) {
             if (withDelay) {
                 delay.rightDelay = 0f;
-                delay.leftDelay = 0.02f * d;
+                delay.leftDelay = 0.002f * d;
             }
             lowPass.leftDamping = d * 0.9f;
             lowPass.rightDamping = 0f;

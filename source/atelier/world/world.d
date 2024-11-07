@@ -15,6 +15,7 @@ import atelier.ui;
 import atelier.world.audio;
 import atelier.world.camera;
 import atelier.world.grid;
+import atelier.world.lighting;
 import atelier.world.particle;
 import atelier.world.scene;
 
@@ -27,6 +28,7 @@ alias SystemRenderer = void function(Scene scene, void* context, Vec2f offset, b
 void registerSystems(World world) {
     registerSystems_audio(world);
     registerSystems_grid(world);
+    registerSystems_lighting(world);
     registerSystems_particle(world);
     registerSystems_scene(world);
 }
@@ -78,9 +80,6 @@ final class World {
         T* p;
         static if (is(T == SystemInitializer)) {
             p = name in _systemInitializers;
-            if (!p) {
-                return null;
-            }
         }
         else static if (is(T == SystemUpdater)) {
             p = name in _systemUpdaters;
@@ -96,6 +95,10 @@ final class World {
         }
         else
             static assert(false, "undefined system type `" ~ T.stringof ~ "`");
+
+        if (!p) {
+            return null;
+        }
         return *p;
     }
 
@@ -106,6 +109,8 @@ final class World {
     void clear() {
         _scenes.clear();
         _camera.setPosition(Vec2f.zero);
+        _camera.rumble(0f);
+        _camera.shake(0f);
     }
 
     void load(string rid) {
@@ -186,6 +191,7 @@ final class World {
 
     void draw(Vec2f origin) {
         Atelier.renderer.pushCanvas(_camera.canvas);
+        Vec2f offset = (cast(Vec2f) Atelier.renderer.size) / 2f - _camera.getPosition();
         foreach (scene; _scenes) {
             /* if (scene.isVisible) {
                 Atelier.renderer.pushCanvas(Atelier.renderer.size.x,
@@ -196,10 +202,10 @@ final class World {
             }*/
 
             if (scene.isVisible) {
-                Atelier.renderer.pushCanvas(scene.canvas);
-                scene.render();
-                Atelier.renderer.popCanvas();
-                scene.draw(origin);
+                //Atelier.renderer.pushCanvas(scene.canvas);
+                scene.render(offset);
+                //Atelier.renderer.popCanvas();
+                //scene.draw(origin);
             }
         }
         Atelier.renderer.popCanvas();

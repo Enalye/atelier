@@ -26,12 +26,31 @@ Créer manuellement cet objet permet de lui appliquer des effets avant de lancer
     mod.addConstructor(&_ctor, musicPlayerType, [musicType]);
 
     //mod.addProperty(&_volume!"get", &_volume!"set", "volume", musicType, grFloat);
+    mod.addFunction(&_pause, "pause", [musicPlayerType, grFloat]);
+    mod.addFunction(&_resume, "resume", [musicPlayerType, grFloat]);
+    mod.addFunction(&_stop, "stop", [musicPlayerType, grFloat]);
 }
 
 private void _ctor(GrCall call) {
     Music music = call.getNative!Music(0);
     call.setNative(new MusicPlayer(music));
 }
+
+private void _pause(GrCall call) {
+    MusicPlayer player = call.getNative!MusicPlayer(0);
+    player.pause(call.getFloat(1));
+}
+
+private void _resume(GrCall call) {
+    MusicPlayer player = call.getNative!MusicPlayer(0);
+    player.resume(call.getFloat(1));
+}
+
+private void _stop(GrCall call) {
+    MusicPlayer player = call.getNative!MusicPlayer(0);
+    player.stop(call.getFloat(1));
+}
+
 /*
 private void _volume(string op)(GrCall call) {
     Music music = call.getNative!Music(0);

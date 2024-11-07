@@ -39,6 +39,7 @@ package void loadLibRender_image(GrModule mod) {
     mod.addFunction(&_fit, "fit", [imageType, grFloat, grFloat]);
     mod.addFunction(&_contain, "contain", [imageType, grFloat, grFloat]);
     mod.addFunction(&_remove, "remove", [imageType]);
+    mod.addFunction(&_update, "update", [imageType]);
 }
 
 private void _clip(string op)(GrCall call) {
@@ -169,4 +170,9 @@ private void _contain(GrCall call) {
 private void _remove(GrCall call) {
     Image image = call.getNative!Image(0);
     image.remove();
+}
+
+private void _update(GrCall call) {
+    Image image = call.getNative!Image(0);
+    image.update();
 }

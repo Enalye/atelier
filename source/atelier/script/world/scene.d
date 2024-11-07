@@ -5,6 +5,8 @@
  */
 module atelier.script.world.scene;
 
+import std.algorithm;
+
 import grimoire;
 
 import atelier.common;
@@ -15,16 +17,16 @@ import atelier.ui;
 import atelier.script.util;
 
 package void loadLibWorld_scene(GrModule mod) {
-    mod.setModule("scene.scene");
+    mod.setModule("world.scene");
     mod.setModuleInfo(GrLocale.fr_FR, "Défini un calque où évolue des entités");
     mod.setModuleExample(GrLocale.fr_FR, "var scene = @Scene;
-@Level.addScene(scene);");
+@World.addScene(scene);");
 
     GrType sceneType = mod.addNative("Scene");
 
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
-    GrType entityType = mod.addAlias("Entity", grUInt);
     GrType imageType = grGetNativeType("Image");
+    GrType entityType = grGetNativeType("Entity");
     GrType particleSourceType = grGetNativeType("ParticleSource");
     GrType canvasType = grGetNativeType("Canvas");
     GrType spriteType = grGetNativeType("Sprite");
@@ -44,7 +46,7 @@ package void loadLibWorld_scene(GrModule mod) {
     mod.setDescription(GrLocale.fr_FR, "Position de la souris dans la scène");
     mod.addProperty(&_mousePosition, null, "mousePosition", sceneType, vec2fType);
 
-    mod.addProperty(&_zOrder!"get", &_zOrder!"set", "zOrder", entityType, grInt);
+    mod.addProperty(&_zOrder!"get", &_zOrder!"set", "zOrder", sceneType, grInt);
     mod.addProperty(&_isVisible!"get", &_isVisible!"set", "isVisible", sceneType, grBool);
     /*mod.addProperty(&_isAlive, null, "isAlive", sceneType, grBool);
     mod.addProperty(&_showColliders!"get", &_showColliders!"set",
@@ -57,14 +59,14 @@ package void loadLibWorld_scene(GrModule mod) {
     mod.addFunction(&_findByName!Entity, "findEntityByName", [
             sceneType, grString
         ], [grOptional(entityType)]);
-
+*/
     mod.setDescription(GrLocale.fr_FR,
         "Récupère les entités possédants le tag indiqué dans la scène");
     mod.setParameters(["tags"]);
-    mod.addFunction(&_findByTag!Entity, "findEntitiesByTag", [
-            sceneType, grList(grString)
-        ], [grList(entityType)]);
-*/
+    mod.addFunction(&_findByTag, "findByTag", [sceneType, grList(grString)], [
+            grList(entityType)
+        ]);
+
     mod.setDescription(GrLocale.fr_FR, "Récupère les tags de la scène");
     mod.setParameters(["scene"]);
     mod.addFunction(&_getTags, "getTags", [sceneType], [grList(grString)]);
@@ -111,32 +113,6 @@ package void loadLibWorld_scene(GrModule mod) {
     mod.setParameters(["scene", "name"]);
     mod.addFunction(&_setSystemEntityRender, "setSystemEntityRender", [
             sceneType, grString
-        ]);
-
-    mod.setDescription(GrLocale.fr_FR, "Crée une entité dans la scène");
-    mod.setParameters(["scene", "entity"]);
-    mod.addFunction(&_createEntity, "createEntity", [sceneType], [entityType]);
-
-    mod.setDescription(GrLocale.fr_FR, "Retire une entité de la scène");
-    mod.setParameters(["scene", "entity"]);
-    mod.addFunction(&_removeEntity, "removeEntity", [sceneType, entityType]);
-
-    mod.setDescription(GrLocale.fr_FR, "Modifie la position de l’entité");
-    mod.setParameters(["scene", "entity", "x", "y"]);
-    mod.addFunction(&_setPosition, "setPosition", [
-            sceneType, entityType, grFloat, grFloat
-        ]);
-
-    mod.setDescription(GrLocale.fr_FR, "Récupère la position de l’entité");
-    mod.setParameters(["scene", "entity"]);
-    mod.addFunction(&_getPosition, "getPosition", [sceneType, entityType], [
-            grFloat, grFloat
-        ]);
-
-    mod.setDescription(GrLocale.fr_FR, "Associe une image à l’entité");
-    mod.setParameters(["scene", "entity", "image"]);
-    mod.addFunction(&_setImage, "setImage", [
-            sceneType, entityType, grOptional(imageType)
         ]);
 
     mod.setDescription(GrLocale.fr_FR, "Ajoute un élément d’interface à la scène");
@@ -222,14 +198,25 @@ private void _findByName(T)(GrCall call) {
     }
     call.setNull();
 }
-
-private void _findByTag(T)(GrCall call) {
+*/
+private void _findByTag(GrCall call) {
     Scene scene = call.getNative!Scene(0);
     GrList result = new GrList;
-    result.setNatives(scene.findByTag!T(call.getList(1).getStrings!string()));
+
+    __componentLoop: foreach (id, component; scene.getComponentPool!TagComponent()) {
+        foreach (GrString tag; call.getList(1).getStrings()) {
+            if (!canFind(component.tags, tag.str())) {
+                continue __componentLoop;
+            }
+            SEntity entity = new SEntity;
+            entity.scene = scene;
+            entity.id = id;
+            result.pushBack(GrValue(entity));
+        }
+    }
     call.setList(result);
 }
-*/
+
 private void _getTags(GrCall call) {
     Scene scene = call.getNative!Scene(0);
     GrList list = new GrList;

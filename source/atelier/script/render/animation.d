@@ -47,6 +47,18 @@ void loadLibRender_animation(GrModule mod) {
     mod.addProperty(&_columns!"get", &_columns!"set", "columns", animationType, grUInt);
     mod.addProperty(&_lines!"get", &_lines!"set", "lines", animationType, grUInt);
     mod.addProperty(&_maxCount!"get", &_maxCount!"set", "maxCount", animationType, grUInt);
+
+    mod.setParameters(["animation"]);
+    mod.addFunction(&_start, "start", [animationType]);
+
+    mod.setParameters(["animation"]);
+    mod.addFunction(&_stop, "stop", [animationType]);
+
+    mod.setParameters(["animation"]);
+    mod.addFunction(&_pause, "pause", [animationType]);
+
+    mod.setParameters(["animation"]);
+    mod.addFunction(&_resume, "resume", [animationType]);
 }
 
 private void _ctor_str(GrCall call) {
@@ -135,4 +147,24 @@ private void _maxCount(string op)(GrCall call) {
         animation.maxCount = call.getUInt(1);
     }
     call.setUInt(animation.maxCount);
+}
+
+private void _start(GrCall call) {
+    Animation animation = call.getNative!Animation(0);
+    animation.start();
+}
+
+private void _stop(GrCall call) {
+    Animation animation = call.getNative!Animation(0);
+    animation.stop();
+}
+
+private void _pause(GrCall call) {
+    Animation animation = call.getNative!Animation(0);
+    animation.pause();
+}
+
+private void _resume(GrCall call) {
+    Animation animation = call.getNative!Animation(0);
+    animation.resume();
 }

@@ -36,7 +36,7 @@ package void loadLibWorld_camera(GrModule mod) {
     mod.addStatic(&_moveTo, cameraType, "moveTo", [
             vec2fType, grUInt, splineType
         ]);
-/*
+    /*
     mod.setDescription(GrLocale.fr_FR, "Déplace la caméra en suivant une cible");
     mod.setParameters(["target", "damping", "deadzone"]);
     mod.addStatic(&_follow, cameraType, "follow", [
@@ -57,7 +57,11 @@ package void loadLibWorld_camera(GrModule mod) {
 
     mod.setDescription(GrLocale.fr_FR, "Fait trembler la caméra");
     mod.setParameters(["trauma", "frames", "spline"]);
-    mod.addStatic(&_rumble, cameraType, "rumble", [grFloat, grUInt, splineType]);
+    mod.addStatic(&_rumble1, cameraType, "rumble", [grFloat, grUInt, splineType]);
+
+    mod.setDescription(GrLocale.fr_FR, "Fait trembler la caméra");
+    mod.setParameters(["trauma"]);
+    mod.addStatic(&_rumble2, cameraType, "rumble", [grFloat]);
 }
 
 private void _getPosition(GrCall call) {
@@ -92,6 +96,10 @@ private void _shake(GrCall call) {
     Atelier.world.camera.shake(call.getFloat(0));
 }
 
-private void _rumble(GrCall call) {
+private void _rumble1(GrCall call) {
     Atelier.world.camera.rumble(call.getFloat(0), call.getUInt(1), call.getEnum!Spline(2));
+}
+
+private void _rumble2(GrCall call) {
+    Atelier.world.camera.rumble(call.getFloat(0));
 }

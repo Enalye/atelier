@@ -287,8 +287,9 @@ final class ParticleResourceEditor : ResourceBaseEditor {
     }
 
     private void _onUpdate() {
-        _particleSource.update();
-        _particleSource.position = getCenter() + _position + Vec2f(0f, _player.getHeight() / -2f);
+        Vec2f offset = getCenter() + _position + Vec2f(0f, _player.getHeight() / -2f);
+        _particleSource.update(offset);
+        _particleSource.position = offset;
     }
 
     private void _onMouseLeave() {

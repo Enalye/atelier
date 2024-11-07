@@ -19,11 +19,33 @@ package void loadLibAudio_lowpass(GrModule mod) {
     GrType lowPassType = mod.addNative("AudioLowPassFilter", [], "AudioEffect");
 
     mod.addConstructor(&_ctor, lowPassType);
+
+    mod.addProperty(&_leftDamping!"get", &_leftDamping!"set",
+        "leftDamping", lowPassType, grFloat);
+    mod.addProperty(&_rightDamping!"get", &_rightDamping!"set",
+        "rightDamping", lowPassType, grFloat);
 }
 
 private void _ctor(GrCall call) {
-    AudioLowPassFilter lowPass = new AudioLowPassFilter;
-    lowPass.leftDamping = .8f;
-    lowPass.rightDamping = .8f;
-    call.setNative(lowPass);
+    call.setNative(new AudioLowPassFilter);
+}
+
+private void _leftDamping(string op)(GrCall call) {
+    AudioLowPassFilter lowPass = call.getNative!AudioLowPassFilter(0);
+
+    static if (op == "set") {
+        lowPass.leftDamping = call.getFloat(1);
+    }
+
+    call.setFloat(lowPass.leftDamping);
+}
+
+private void _rightDamping(string op)(GrCall call) {
+    AudioLowPassFilter lowPass = call.getNative!AudioLowPassFilter(0);
+
+    static if (op == "set") {
+        lowPass.rightDamping = call.getFloat(1);
+    }
+
+    call.setFloat(lowPass.rightDamping);
 }

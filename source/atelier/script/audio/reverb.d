@@ -21,6 +21,7 @@ package void loadLibAudio_reverb(GrModule mod) {
     mod.addConstructor(&_ctor, reverbType, [grFloat, grFloat]);
 
     mod.addFunction(&_setMix, "setMix", [reverbType, grFloat, grFloat]);
+    mod.addFunction(&_setDamping, "setDamping", [reverbType, grFloat, grFloat]);
 }
 
 private void _ctor(GrCall call) {
@@ -31,4 +32,9 @@ private void _ctor(GrCall call) {
 private void _setMix(GrCall call) {
     AudioReverb reverb = call.getNative!AudioReverb(0);
     reverb.setMix(call.getFloat(1), call.getFloat(2));
+}
+
+private void _setDamping(GrCall call) {
+    AudioReverb reverb = call.getNative!AudioReverb(0);
+    reverb.setDamping(call.getFloat(1), call.getFloat(2));
 }

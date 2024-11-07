@@ -98,21 +98,57 @@ private void _loadVec(int dimension)(GrModule mod) {
                 "Type, \"half\", [], [vec", type, "Type]);");
         }
 
-        // Angle
-        /*static if (dimension == 2 || dimension == 3) {
-            mixin("mod.addFunction(&_angle!(dimension, type), \"angle\", [vec",
-                type, "Type, vec", type, "Type], [grFloat]);");
-        }*/
-
-        // Rotate
-        static if (dimension == 2) {
-            /*mixin("mod.addFunction(&_rotate2!(type), \"rotate\", [vec",
-                type, "Type, "Type, grFloat], [grFloat]);");*/
+        static if (dimension >= 2) {
+            mixin("mod.addFunction(&_xy!(dimension, type), \"xy\", [vec", type,
+                "Type], [gr", type, ", gr", type, "]);");
         }
-        /*else static if (dimension == 3) {
-            mixin("mod.addFunction(&_rotate3!(type), \"rotate\", [vec",
-                type, "Type, vec", type, "Type, grFloat], [vecFloatType]);");
-        }*/
+
+        static if (dimension == 2) {
+            static if (type == "Float" || type == "Double") {
+                // Angled
+                mixin("mod.addStatic(&_angled!(dimension, type), vec", type,
+                    "Type, \"angled\", [gr", type, "], [vec", type, "Type]);");
+
+                // Angle
+                mixin("mod.addFunction(&_angle!(dimension, type), \"angle\", [vec",
+                    type, "Type], [gr", type, "]);");
+
+                // Rotate
+                mixin("mod.addFunction(&_rotate!(dimension, type), \"rotate\", [vec",
+                    type, "Type, gr", type, "], [vec", type, "Type]);");
+
+                // Rotated
+                mixin("mod.addFunction(&_rotated!(dimension, type), \"rotated\", [vec",
+                    type, "Type, gr", type, "], [vec", type, "Type]);");
+
+                // Length
+                mixin("mod.addFunction(&_length!(dimension, type), \"length\", [vec",
+                    type, "Type], [gr", type, "]);");
+
+                // Length Squared
+                mixin("mod.addFunction(&_length!(dimension, type), \"lengthSquared\", [vec",
+                    type, "Type], [gr", type, "]);");
+
+                // Normalize
+                mixin("mod.addFunction(&_normalize!(dimension, type), \"normalize\", [vec",
+                    type, "Type], [vec", type, "Type]);");
+
+                // Normalized
+                mixin("mod.addFunction(&_normalized!(dimension, type), \"normalized\", [vec",
+                    type, "Type], [vec", type, "Type]);");
+
+                // Dot
+                mixin("mod.addFunction(&_dot!(dimension, type), \"dot\", [vec",
+                    type, "Type, vec", type, "Type], [gr", type, "]);");
+
+                // Cross
+                mixin("mod.addFunction(&_cross!(dimension, type), \"cross\", [vec",
+                    type, "Type, vec", type, "Type], [gr", type, "]);");
+            }
+
+            mixin("mod.addFunction(&_distance!(dimension, type), \"distance\", [vec",
+                type, "Type, vec", type, "Type], [gr", type, "]);");
+        }
     }
 }
 
@@ -186,18 +222,88 @@ private void _half(int dimension, string type)(GrCall call) {
     mixin("vec._vector = SVec", dimension, "!(Gr", type, ").half;");
     call.setNative(vec);
 }
-/*
-private void _angle(int dimension, string type)(GrCall call) {
-    mixin("SVec", dimension, "!Gr", type, " v1 = call.getNative!(SVec",
-        dimension, "!Gr", type, ")(1);");
-    mixin("SVec", dimension, "!Gr", type, " v2 = call.getNative!(SVec",
-        dimension, "!Gr", type, ")(1);");
-    call.setFloat(v1.angle(v2));
+
+private void _xy(int dimension, string type)(GrCall call) {
+    mixin("SVec", dimension, "!Gr", type, " v = call.getNative!(SVec",
+        dimension, "!Gr", type, ")(0);");
+    mixin("call.set", type, "(v._vector.x);");
+    mixin("call.set", type, "(v._vector.y);");
 }
 
-private void _rotate3(string type)(GrCall call) {
-    mixin("vec3 v1 = cast(vec3) call.getNative!(SVec3!Gr", type, ")(0);");
-    mixin("vec3 v2 = cast(vec3) call.getNative!(SVec3!Gr", type, ")(1);");
-    call.setNative(sVec3(rotate(v1, v2, call.getFloat(2))));
+private void _angled(int dimension, string type)(GrCall call) {
+    mixin("SVec", dimension, "!Gr", type, " vec = new SVec", dimension, "!Gr", type, ";");
+    mixin("vec._vector = SVec", dimension, "!(Gr", type, ").angled(call.get", type, "(0));");
 }
-*/
+
+private void _angle(int dimension, string type)(GrCall call) {
+    mixin("SVec", dimension, "!Gr", type, " v = call.getNative!(SVec",
+        dimension, "!Gr", type, ")(0);");
+    mixin("call.set", type, "(v._vector.angle());");
+}
+
+private void _rotate(int dimension, string type)(GrCall call) {
+    mixin("SVec", dimension, "!Gr", type, " v = call.getNative!(SVec",
+        dimension, "!Gr", type, ")(0);");
+    mixin("Gr", type, " angle = call.get", type, "(1);");
+    call.setNative(v._vector.rotate(angle));
+}
+
+private void _rotated(int dimension, string type)(GrCall call) {
+    mixin("SVec", dimension, "!Gr", type, " v = call.getNative!(SVec",
+        dimension, "!Gr", type, ")(0);");
+    mixin("Gr", type, " angle = call.get", type, "(1);");
+    mixin("SVec", dimension, "!Gr", type, " vec = new SVec", dimension, "!Gr", type, ";");
+    vec._vector = v._vector.rotate(angle);
+    call.setNative(vec);
+}
+
+private void _length(int dimension, string type)(GrCall call) {
+    mixin("SVec", dimension, "!Gr", type, " v = call.getNative!(SVec",
+        dimension, "!Gr", type, ")(0);");
+    mixin("call.set", type, "(v._vector.length());");
+}
+
+private void _lengthSquared(int dimension, string type)(GrCall call) {
+    mixin("SVec", dimension, "!Gr", type, " v = call.getNative!(SVec",
+        dimension, "!Gr", type, ")(0);");
+    mixin("call.set", type, "(v._vector.lengthSquared());");
+}
+
+private void _normalize(int dimension, string type)(GrCall call) {
+    mixin("SVec", dimension, "!Gr", type, " v = call.getNative!(SVec",
+        dimension, "!Gr", type, ")(0);");
+    v._vector.normalize();
+    call.setNative(v);
+}
+
+private void _normalized(int dimension, string type)(GrCall call) {
+    mixin("SVec", dimension, "!Gr", type, " v = call.getNative!(SVec",
+        dimension, "!Gr", type, ")(0);");
+    mixin("SVec", dimension, "!Gr", type, " vec = new SVec", dimension, "!Gr", type, ";");
+    vec._vector = v._vector.normalized();
+    call.setNative(vec);
+}
+
+private void _dot(int dimension, string type)(GrCall call) {
+    mixin("SVec", dimension, "!Gr", type, " v1 = call.getNative!(SVec",
+        dimension, "!Gr", type, ")(0);");
+    mixin("SVec", dimension, "!Gr", type, " v2 = call.getNative!(SVec",
+        dimension, "!Gr", type, ")(1);");
+    mixin("call.set", type, "(v1._vector.dot(v2._vector));");
+}
+
+private void _cross(int dimension, string type)(GrCall call) {
+    mixin("SVec", dimension, "!Gr", type, " v1 = call.getNative!(SVec",
+        dimension, "!Gr", type, ")(0);");
+    mixin("SVec", dimension, "!Gr", type, " v2 = call.getNative!(SVec",
+        dimension, "!Gr", type, ")(1);");
+    mixin("call.set", type, "(v1._vector.cross(v2._vector));");
+}
+
+private void _distance(int dimension, string type)(GrCall call) {
+    mixin("SVec", dimension, "!Gr", type, " v1 = call.getNative!(SVec",
+        dimension, "!Gr", type, ")(0);");
+    mixin("SVec", dimension, "!Gr", type, " v2 = call.getNative!(SVec",
+        dimension, "!Gr", type, ")(1);");
+    mixin("call.set", type, "(v1._vector.distance(v2._vector));");
+}

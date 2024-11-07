@@ -33,6 +33,11 @@ final class AudioReverb : AudioEffect {
         _rightReverb.wet = wet;
     }
 
+    void setDamping(float left, float right) {
+        _leftReverb.damping = left;
+        _rightReverb.damping = right;
+    }
+
     override void process(ref float[Atelier_Audio_BufferSize] buffer) {
         Channels!(float) leftChannels, rightChannnels;
         for (size_t i; i < Atelier_Audio_BufferSize; i += Atelier_Audio_Channels) {
@@ -58,14 +63,17 @@ private struct Reverb(uint channels, uint steps) {
     private {
         Diffuser!(channels, steps) _diffuser;
         FeedbackLoop!(channels) _feedbackLoop;
+        Channels!float _lowPass;
     }
 
     float dry = 0.5f;
     float wet = 0.5f;
+    float damping = 0.8f;
 
     void setup(float roomSizeMs, float rt60) {
         _diffuser.setup(roomSizeMs);
         _feedbackLoop.setup(roomSizeMs, rt60);
+        _lowPass[] = 0f;
     }
 
     Channels!float process(Channels!float input) {
@@ -73,6 +81,8 @@ private struct Reverb(uint channels, uint steps) {
         Channels!float output = _feedbackLoop.process(diffuse);
 
         static foreach (uint ch; 0 .. channels) {
+            output[ch] = damping * _lowPass[ch] + (1f - damping) * output[ch];
+            _lowPass[ch] = output[ch];
             output[ch] = output[ch] * wet + input[ch] * dry;
         }
         return output;

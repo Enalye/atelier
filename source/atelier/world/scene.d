@@ -51,6 +51,17 @@ struct RenderComponent {
     Sprite sprite;
 }
 
+struct TagComponent {
+    string[] tags;
+
+    void onInit() {
+        tags.length = 0;
+    }
+
+    void onDestroy() {
+    }
+}
+
 interface IEntityComponentPool {
     void removeComponent(EntityID id);
 }
@@ -65,6 +76,10 @@ final class EntityComponentPool(T) : IEntityComponentPool {
         Pair[Entity_Size] _components;
         ushort _top = 0u;
         EntityID[Entity_Size] _slots;
+    }
+
+    pragma(inline, true) size_t getCount() const {
+        return _top;
     }
 
     pragma(inline, true) bool hasComponent(EntityID id) {
@@ -480,13 +495,14 @@ final class Scene {
         _isAlive = false;
     }
 
-    void render() {
+    void render(Vec2f offset) {
         /*Vec2f offset = _sprite.size / 2f - globalPosition;
         foreach (entity; _entities) {
             entity.draw(offset);
         }*/
 
-        Vec2f offset = _sprite.size / 2f - globalPosition;
+        //Vec2f offset = _sprite.size / 2f - globalPosition;
+        //offset = - globalPosition;
         foreach (system; _entityPool.systemRenderersBack) {
             system[0](this, system[1], offset, false);
         }

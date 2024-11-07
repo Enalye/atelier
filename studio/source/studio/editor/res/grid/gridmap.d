@@ -12,7 +12,7 @@ import std.algorithm.comparison : min, max;
 
 import atelier.common;
 import atelier.core;
-import atelier.scene;
+import atelier.world;
 import atelier.render.image;
 import atelier.render.tileset;
 

@@ -38,7 +38,6 @@ scene.setParticleSource(entity, src, false);");
     mod.setDescription(GrLocale.fr_FR, "Mode d’émission des particules");
     GrType modeType = mod.addEnum("ParticleMode", grNativeEnum!ParticleMode());
 
-    GrType sceneType = grGetNativeType("Scene");
     GrType splineType = grGetEnumType("Spline");
     GrType blendType = grGetEnumType("Blend");
     GrType entityType = grUInt;
@@ -49,9 +48,9 @@ scene.setParticleSource(entity, src, false);");
     mod.addConstructor(&_ctor_str, sourceType, [grString]);
 
     mod.setDescription(GrLocale.fr_FR, "Associe une source de particules à l’entité");
-    mod.setParameters(["scene", "entity", "source", "isInFront"]);
+    mod.setParameters(["entity", "source", "isInFront"]);
     mod.addFunction(&_setParticleSource, "setParticleSource", [
-            sceneType, entityType, grOptional(sourceType), grBool
+            entityType, grOptional(sourceType), grBool
         ]);
 
     mod.addProperty(&_name!"get", &_name!"set", "name", sourceType, grString);
@@ -292,15 +291,15 @@ private void _ctor_str(GrCall call) {
 }
 
 private void _setParticleSource(GrCall call) {
-    Scene scene = call.getNative!Scene(0);
-    EntityID id = call.getUInt(1);
+    SEntity entity = call.getNative!SEntity(0);
+
     if (call.isNull(2)) {
-        scene.removeComponent!ParticleComponent(id);
+        entity.scene.removeComponent!ParticleComponent(entity.id);
     }
     else {
-        ParticleComponent* part = scene.addComponent!ParticleComponent(id);
-        part.source = call.getNative!ParticleSource(2);
-        part.isFront = call.getBool(3);
+        ParticleComponent* part = entity.scene.addComponent!ParticleComponent(entity.id);
+        part.source = call.getNative!ParticleSource(1);
+        part.isFront = call.getBool(2);
     }
 }
 

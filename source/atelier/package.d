@@ -14,7 +14,7 @@ version (AtelierCore) {
         import atelier.doc;
         import atelier.input;
         import atelier.render;
-        import atelier.scene;
+        import atelier.world;
         import atelier.script;
         import atelier.ui;
     }

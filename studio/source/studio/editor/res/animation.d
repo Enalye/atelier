@@ -132,7 +132,7 @@ final class AnimationResourceEditor : ResourceBaseEditor {
     }
 
     override Farfadet save(Farfadet ffd) {
-        Farfadet node = ffd.addNode("sprite");
+        Farfadet node = ffd.addNode("animation");
         node.add(_name);
         node.addNode("texture").add(_textureRID);
         node.addNode("clip").add(_clip);
@@ -415,6 +415,7 @@ final class AnimationResourceEditor : ResourceBaseEditor {
         Color otherFrameColor = hsl.toColor();
 
         uint frame;
+
         __gridLoop: for (uint y; y < _lines; ++y) {
             for (uint x; x < _columns; ++x) {
                 if (frame >= maxCount) {

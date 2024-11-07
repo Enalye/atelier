@@ -120,6 +120,14 @@ final class CameraShaker {
         _rumbleSplineFunc = getSplineFunc(spline);
     }
 
+    void rumble(float trauma) {
+        _initRumble = trauma;
+        _targetRumble = trauma;
+        _rumbleTrauma = trauma;
+        _rumbleFrame = 0;
+        _rumbleFrames = 0;
+    }
+
     void update() {
         if (_rumbleFrame < _rumbleFrames) {
             float t = (cast(float) _rumbleFrame) / cast(float) _rumbleFrames;
@@ -242,6 +250,10 @@ final class Camera {
 
     void rumble(float trauma, uint frames, Spline spline) {
         _shaker.rumble(trauma, frames, spline);
+    }
+
+    void rumble(float trauma) {
+        _shaker.rumble(trauma);
     }
 
     void update() {

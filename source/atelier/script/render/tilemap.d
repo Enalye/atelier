@@ -53,8 +53,11 @@ scene.addEntity(map);");
     mod.setDescription(GrLocale.fr_FR, "Hauteur en tuiles");
     mod.addProperty(&_lines, null, "lines", tilemapType, grUInt);
 
-    //mod.setDescription(GrLocale.fr_FR, "Taille d’une tuile");
-    //mod.addProperty(&_tileSize!"get", &_tileSize!"set", "tileSize", tilemapType, vec2fType);
+    mod.setDescription(GrLocale.fr_FR, "Taille d’une tuile");
+    mod.addProperty(&_tileSize, null, "tileSize", tilemapType, vec2fType);
+    
+    mod.setDescription(GrLocale.fr_FR, "Taille d’une tuile");
+    mod.addProperty(&_mapSize, null, "mapSize", tilemapType, vec2fType);
 
     mod.setDescription(GrLocale.fr_FR, "Récupère la tuile à la position donnée");
     mod.setParameters(["x", "y"]);
@@ -86,15 +89,16 @@ private void _lines(GrCall call) {
     Tilemap tilemap = call.getNative!Tilemap(0);
     call.setUInt(tilemap.lines);
 }
-/*
-private void _tileSize(string op)(GrCall call) {
-    Tilemap tilemap = call.getNative!Tilemap(0);
 
-    static if (op == "set") {
-        tilemap.tileSize = call.getNative!SVec2f(1);
-    }
+private void _tileSize(GrCall call) {
+    Tilemap tilemap = call.getNative!Tilemap(0);
     call.setNative(svec2(tilemap.tileSize));
-}*/
+}
+
+private void _mapSize(GrCall call) {
+    Tilemap tilemap = call.getNative!Tilemap(0);
+    call.setNative(svec2(tilemap.mapSize));
+}
 
 private void _getTile(GrCall call) {
     Tilemap tilemap = call.getNative!Tilemap(0);

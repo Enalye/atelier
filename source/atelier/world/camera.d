@@ -173,6 +173,12 @@ final class CameraZoomer {
         }
     }
 
+    void reset() {
+        _zoomSize = _nominalSize;
+        _zoomFrame = 0;
+        _zoomFrames = 0;
+    }
+
     void zoom(float zoomLevel, uint frames, Spline spline) {
         _initZoom = _currentZoom;
         _targetZoom = max(1f, zoomLevel);
@@ -217,6 +223,13 @@ final class Camera {
 
         _shaker = new CameraShaker;
         _zoomer = new CameraZoomer;
+    }
+
+    void reset() {
+        _shaker.reset();
+        _zoomer.reset();
+        _positioner = null;
+        _position = Vec2f(_canvas.width, _canvas.height) / 2f;
     }
 
     Vec2f getPosition() {

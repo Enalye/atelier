@@ -108,9 +108,7 @@ final class World {
 
     void clear() {
         _scenes.clear();
-        _camera.setPosition(Vec2f.zero);
-        _camera.rumble(0f);
-        _camera.shake(0f);
+        _camera.reset();
     }
 
     void load(string rid) {

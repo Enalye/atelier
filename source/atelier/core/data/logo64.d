@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.core.data.logo64;
 
 /// Logo 64×64

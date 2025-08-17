@@ -1,11 +1,7 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.render.rectangle;
 
 import std.conv : to;
+import std.math.traits : isNormal;
 
 import atelier.common;
 import atelier.core;
@@ -91,8 +87,8 @@ final class Rectangle : Image {
     private void _cacheTexture() {
         _isDirty = false;
 
-        _cache = (_size.x >= 1f && _size.y >= 1f) ? new WritableTexture(cast(uint) _size.x,
-            cast(uint) _size.y) : null;
+        _cache = (_size.x >= 1f && _size.y >= 1f && isNormal(_size.x) && isNormal(_size.y)) ? new WritableTexture(
+            cast(uint) _size.x, cast(uint) _size.y) : null;
 
         if (!_cache)
             return;

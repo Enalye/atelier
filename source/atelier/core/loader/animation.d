@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.core.loader.animation;
 
 import std.exception : enforce;

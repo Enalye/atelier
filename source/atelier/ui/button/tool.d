@@ -22,6 +22,13 @@ final class ToolGroup {
         int value() const {
             return _value;
         }
+
+        int value(int value_) {
+            if (_value != value_ && value_ < _buttons.length) {
+                _check(_buttons[value_], true);
+            }
+            return _value;
+        }
     }
 
     private bool add(ToolButton button, bool isChecked) {

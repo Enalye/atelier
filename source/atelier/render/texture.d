@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.render.texture;
 
 import std.string;
@@ -31,6 +26,10 @@ final class Texture : ImageData, Resource!Texture {
     }
 
     @property {
+        bool isSmooth() const {
+            return _isSmooth;
+        }
+
         /// Width in texels.
         pragma(inline) override uint width() const {
             return _width;

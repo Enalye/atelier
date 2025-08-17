@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.script.input.input;
 
 import std.traits;
@@ -81,9 +76,9 @@ void loadLibInput_input(GrModule mod) {
 
     mod.setDescription(GrLocale.fr_FR, "L’événement correspond-il a l’action ?");
     mod.setParameters(["action", "event"]);
-    mod.addStatic(&_isAction, inputType, "isAction", [grString, inputEvent], [
-            grBool
-        ]);
+    mod.addStatic(&_isEventInAction, inputType, "isEventInAction", [
+            grString, inputEvent
+        ], [grBool]);
 
     mod.setDescription(GrLocale.fr_FR, "Associe un événement à une action");
     mod.setParameters(["action", "event"]);
@@ -158,8 +153,8 @@ private void _hasAction(GrCall call) {
     call.setBool(Atelier.input.hasAction(call.getString(0)));
 }
 
-private void _isAction(GrCall call) {
-    call.setBool(Atelier.input.isAction(call.getString(0), call.getNative!InputEvent(1)));
+private void _isEventInAction(GrCall call) {
+    call.setBool(Atelier.input.isEventInAction(call.getString(0), call.getNative!InputEvent(1)));
 }
 
 private void _addActionEvent(GrCall call) {
@@ -171,7 +166,7 @@ private void _removeActionEvents(GrCall call) {
 }
 
 private void _isActionActivated(GrCall call) {
-    call.setBool(Atelier.input.activated(call.getString(0)));
+    call.setBool(Atelier.input.isActionActivated(call.getString(0)));
 }
 
 private void _getActionStrength(GrCall call) {

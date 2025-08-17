@@ -19,11 +19,17 @@ enum Atelier_Version_ID = Atelier_Version_Major * 1000 + Atelier_Version_Minor;
 enum Atelier_Project_File = "atelier.ffd";
 
 // Initialisation fenêtre
-enum Atelier_Window_Width_Default = 800;
+enum Atelier_Window_Width = 640;
 
-enum Atelier_Window_Height_Default = 600;
+enum Atelier_Window_Height = 360;
+
+enum Atelier_Window_Title = "Projet Numé";
+
+enum Atelier_Window_Icon = "icon.png";
 
 enum Atelier_Window_Enabled_Default = true;
+
+enum Atelier_Media_Dir = "media";
 
 /// Fichier de configuration
 enum Atelier_Configuration_Extension = ".acf";
@@ -39,6 +45,12 @@ enum Atelier_Resource_Extension = ".ffd";
 
 /// Fichier de ressource compilé
 enum Atelier_Resource_Compiled_Extension = ".ffdt";
+
+/// Fichier de script grimoire
+enum Atelier_Script_Extension = ".gr";
+
+/// Fichier de bytecode grimoire
+enum Atelier_Bytecode_Extension = ".grb";
 
 enum Atelier_Environment_MagicWord = "atelier";
 

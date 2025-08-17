@@ -100,6 +100,12 @@ final class HList : List {
         addEventListener("wheel", &_onWheel);
         _contentView.addEventListener("contentSize", &_onUpdateContent);
         _scrollbar.addEventListener("handlePosition", &_onHandlePosition);
+        _contentView.addEventListener("addchild", {
+            dispatchEvent("addlist", false);
+        });
+        _contentView.addEventListener("removechild", {
+            dispatchEvent("removelist", false);
+        });
     }
 
     UIAlignY getChildAlign() const {
@@ -180,6 +186,12 @@ final class VList : List {
         addEventListener("wheel", &_onWheel);
         _contentView.addEventListener("contentSize", &_onUpdateContent);
         _scrollbar.addEventListener("handlePosition", &_onHandlePosition);
+        _contentView.addEventListener("addchild", {
+            dispatchEvent("addlist", false);
+        });
+        _contentView.addEventListener("removechild", {
+            dispatchEvent("removelist", false);
+        });
     }
 
     UIAlignX getChildAlign() const {

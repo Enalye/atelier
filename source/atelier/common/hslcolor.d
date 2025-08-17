@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.common.hslcolor;
 
 import std.math;

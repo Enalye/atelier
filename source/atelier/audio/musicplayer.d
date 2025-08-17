@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.audio.musicplayer;
 
 import audioformats;
@@ -23,6 +18,7 @@ final class MusicPlayer : AudioPlayer {
         SDL_AudioStream* _stream;
         AudioStream _decoder;
         float[] _decoderBuffer;
+        float _volume = 1f;
     }
 
     @property {
@@ -50,6 +46,14 @@ final class MusicPlayer : AudioPlayer {
             _decoder.seekPosition(startFrame);
             _currentFrame = startFrame;
         }
+    }
+
+    void setVolume(float volume) {
+        _volume = volume;
+    }
+
+    float getVolume() const {
+        return _volume;
     }
 
     void setLoop(float intro, float outro) {
@@ -190,11 +194,11 @@ final class MusicPlayer : AudioPlayer {
         if (framesRead >= 0) {
             framesRead >>= 2;
 
-            const float volume = _music.volume;
+            const float totalVolume = _music.volume * _volume;
             for (int i = _delayStartFrame * Atelier_Audio_Channels; i < (
                     (_delayStartFrame + framesToRead) * Atelier_Audio_Channels); i += 2) {
-                buffer[i] *= volume;
-                buffer[i + 1] *= volume;
+                buffer[i] *= totalVolume;
+                buffer[i + 1] *= totalVolume;
             }
         }
         else {

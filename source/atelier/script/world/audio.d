@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.script.world.audio;
 
 import grimoire;
@@ -17,7 +12,7 @@ package void loadLibWorld_audio(GrModule mod) {
     mod.setModule("world.audio");
     mod.setModuleInfo(GrLocale.fr_FR, "Gestion des entités sur une grille");
     mod.setModuleExample(GrLocale.fr_FR, "scene.setTilePosition(entity, 0, 0);");
-
+/*
     GrType sceneType = grGetNativeType("Scene");
     GrType entityType = grUInt;
     GrType audioPlayerType = grGetNativeType("AudioPlayer");
@@ -61,9 +56,9 @@ package void loadLibWorld_audio(GrModule mod) {
 
     mod.setDescription(GrLocale.fr_FR, "Déconnecte le bus audio de l’entité");
     mod.setParameters(["scene", "entity"]);
-    mod.addFunction(&_disconnect, "disconnectAudio", [sceneType, entityType]);
+    mod.addFunction(&_disconnect, "disconnectAudio", [sceneType, entityType]);*/
 }
-
+/*
 private void _playSound(GrCall call) {
     Scene scene = call.getNative!Scene(0);
     EntityID id = call.getUInt(1);
@@ -117,3 +112,4 @@ private void _disconnect(GrCall call) {
     AudioComponent* audio = scene.getOrAddComponent!AudioComponent(id);
     audio.disconnect();
 }
+*/

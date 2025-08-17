@@ -1,8 +1,4 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
+
 module atelier.ui.core.layout;
 
 import atelier.common;
@@ -64,10 +60,10 @@ final class HLayout : Layout {
             spacing = extraSpace / ((cast(int) getChildren().length) - 1);
         }
 
-        foreach (UIElement child; getChildren()) {
+        foreach (const size_t i, UIElement child; getChildren()) {
             child.setAlign(UIAlignX.left, _childAlign);
             child.setPosition(Vec2f(newSize.x, _margin.y));
-            newSize.x += child.getWidth() + spacing;
+            newSize.x += child.getWidth() + ((i + 1 < getChildren().length) ? spacing : 0f);
             newSize.y = max(newSize.y, child.getHeight() + _margin.y * 2f);
         }
         newSize.x = max(_padding.x, newSize.x + _margin.x);
@@ -109,10 +105,10 @@ final class VLayout : Layout {
             spacing = extraSpace / ((cast(int) getChildren().length) - 1);
         }
 
-        foreach (UIElement child; getChildren()) {
+        foreach (const size_t i, UIElement child; getChildren()) {
             child.setAlign(_childAlign, UIAlignY.top);
             child.setPosition(Vec2f(_margin.x, newSize.y));
-            newSize.y += child.getHeight() + spacing;
+            newSize.y += child.getHeight() + ((i + 1 < getChildren().length) ? spacing : 0f);
             newSize.x = max(newSize.x, child.getWidth() + _margin.x * 2f);
         }
         newSize.y = max(_padding.y, newSize.y + _margin.y);

@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.ui.core.manager;
 
 import std.algorithm;
@@ -183,27 +178,27 @@ final class UIManager {
             }
             break;
         case mouseWheel:
-            if (_hoveredElement) {
+            if (_hoveredElement && _hoveredElement.getManager() == this) {
                 _hoveredElement.dispatchEvent("wheel");
             }
             break;
         case controllerButton:
-            if (_focusedElement) {
+            if (_focusedElement && _focusedElement.getManager() == this) {
                 _focusedElement.dispatchEvent("button");
             }
             break;
         case controllerAxis:
-            if (_focusedElement) {
+            if (_focusedElement && _focusedElement.getManager() == this) {
                 _focusedElement.dispatchEvent("axis");
             }
             break;
         case textInput:
-            if (_focusedElement) {
+            if (_focusedElement && _focusedElement.getManager() == this) {
                 _focusedElement.dispatchEvent("text");
             }
             break;
         case dropFile:
-            if (_focusedElement) {
+            if (_focusedElement && _focusedElement.getManager() == this) {
                 _focusedElement.dispatchEvent("file");
             }
             break;
@@ -398,7 +393,9 @@ final class UIManager {
                 children.mark(i);
             }
         }
-        children.sweep(true);
+        if (children.sweep(true)) {
+            element.dispatchEvent("removechild", false);
+        }
 
         element.dispatchEvent("update", false);
     }
@@ -417,7 +414,7 @@ final class UIManager {
         return position;
     }
 
-    bool isSceneUI;
+    bool isWorldUI;
     Vec2f cameraPosition = Vec2f.zero;
 
     /// Draw
@@ -437,7 +434,13 @@ final class UIManager {
         if (!element.isVisible || element.getWidth() <= 0f || element.getHeight() <= 0f)
             return;
 
-        Atelier.renderer.pushCanvas(cast(uint) element.getWidth(), cast(uint) element.getHeight());
+        Canvas canvas = element.getCanvas();
+        if (canvas) {
+            Atelier.renderer.pushCanvas(canvas);
+        }
+        else {
+            Atelier.renderer.pushCanvas(cast(uint) element.getWidth(), cast(uint) element.getHeight());
+        }
 
         foreach (Image image; element.getImages()) {
             if (image.isVisible)
@@ -519,6 +522,9 @@ final class UIManager {
     }
 
     private void _dispatchEvent(string type, UIElement element) {
+        if (element.getManager() != this)
+            return;
+
         foreach (UIElement child; element.getChildren()) {
             _dispatchEvent(type, child);
         }

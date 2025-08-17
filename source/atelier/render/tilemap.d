@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.render.tilemap;
 
 import std.conv : to;
@@ -18,8 +13,7 @@ import atelier.render.tileset;
 final class Tilemap : Image, Resource!Tilemap {
     private {
         struct Tile {
-            short id;
-            short elevation;
+            int id;
         }
 
         Tileset _tileset;
@@ -29,6 +23,7 @@ final class Tilemap : Image, Resource!Tilemap {
     }
 
     Vec2f size = Vec2f.zero;
+    int defaultTile = -1;
 
     @property {
         uint columns() const {
@@ -40,11 +35,17 @@ final class Tilemap : Image, Resource!Tilemap {
         }
 
         Vec2f mapSize() const {
+            if (!_tileset)
+                return Vec2f.zero;
             return (cast(Vec2f) _tileset.tileSize) * Vec2f(columns, lines);
         }
 
         Vec2f tileSize() const {
             return size / Vec2f(_columns, _lines);
+        }
+
+        Tileset tileset() {
+            return _tileset;
         }
     }
 
@@ -58,8 +59,16 @@ final class Tilemap : Image, Resource!Tilemap {
 
         _tiles.length = _columns * _lines;
         foreach (ref Tile tile; _tiles) {
-            tile.id = -1;
-            tile.elevation = 0;
+            tile.id = defaultTile;
+        }
+    }
+
+    this(uint columns, uint lines) {
+        _columns = columns;
+        _lines = lines;
+        _tiles.length = _columns * _lines;
+        foreach (ref Tile tile; _tiles) {
+            tile.id = defaultTile;
         }
     }
 
@@ -77,40 +86,41 @@ final class Tilemap : Image, Resource!Tilemap {
         return new Tilemap(this);
     }
 
+    void setTileset(Tileset tileset) {
+        _tileset = tileset;
+        clip = _tileset.clip;
+    }
+
     void setDimensions(uint columns_, uint lines_) {
         int[][] tiles_ = getTiles();
         _lines = lines_;
         _columns = columns_;
         _tiles.length = _columns * _lines;
+        foreach (ref Tile tile; _tiles) {
+            tile.id = defaultTile;
+        }
         setTiles(0, 0, tiles_);
     }
 
     int getTile(int x, int y) {
         if (x < 0 || y < 0 || x >= _columns || y >= _lines)
-            return -1;
+            return defaultTile;
 
         return _tiles[x + y * _columns].id;
     }
 
-    void setTile(int x, int y, int tile) {
+    void setRawTile(int index, int tileId) {
+        if (index >= _tiles.length)
+            return;
+
+        _tiles[index].id = tileId;
+    }
+
+    void setTile(int x, int y, int tileId) {
         if (x < 0 || y < 0 || x >= _columns || y >= _lines)
             return;
 
-        _tiles[x + y * _columns].id = cast(short) tile;
-    }
-
-    int getTileElevation(int x, int y) {
-        if (x < 0 || y < 0 || x >= _columns || y >= _lines)
-            return -1;
-
-        return _tiles[x + y * _columns].elevation;
-    }
-
-    void setTileElevation(int x, int y, int elevation) {
-        if (x < 0 || y < 0 || x >= _columns || y >= _lines)
-            return;
-
-        _tiles[x + y * _columns].elevation = cast(short) elevation;
+        _tiles[x + y * _columns].id = tileId;
     }
 
     void setTiles(const(int[][]) tiles_) {
@@ -121,17 +131,41 @@ final class Tilemap : Image, Resource!Tilemap {
                     tiles_.length) ~ " colonnes au lieu de " ~ to!string(
                     _columns) ~ " à la ligne " ~ to!string(y));
             foreach (size_t x, int tileId; line) {
-                _tiles[x + y * _columns].id = cast(short) tileId;
+                _tiles[x + y * _columns].id = tileId;
             }
         }
     }
 
+    int[] getRawTiles() {
+        return cast(int[]) _tiles;
+    }
+
     int[][] getTiles() {
-        int[][] tiles = new int[][](_columns, _lines);
+        int[][] tiles = new int[][](_lines, _columns);
 
         for (size_t y; y < _lines; ++y) {
             for (size_t x; x < _columns; ++x) {
-                tiles[x][y] = _tiles[x + y * _columns].id;
+                tiles[y][x] = _tiles[x + y * _columns].id;
+            }
+        }
+
+        return tiles;
+    }
+
+    int[][] getTiles(int x, int y, int w, int h) {
+        int[][] tiles = new int[][](h, w);
+
+        int sx = w < 0 ? -1 : 1;
+        int sy = h < 0 ? -1 : 1;
+
+        w += x;
+        h += y;
+
+        for (uint y2; y < h; y += sy, ++y2) {
+            int xt = x;
+            for (uint x2; xt < w; xt += sx, ++x2) {
+                tiles[y2][x2] = (xt >= _columns || y >= _lines || xt < 0 || y < 0) ? defaultTile
+                    : _tiles[xt + y * _columns].id;
             }
         }
 
@@ -139,28 +173,15 @@ final class Tilemap : Image, Resource!Tilemap {
     }
 
     void setTiles(int x, int y, const(int[][]) tiles_) {
-        foreach (size_t col, ref const(int[]) column; tiles_) {
-            if ((col + x) >= _columns || (col + x) < 0)
+        foreach (size_t ln, ref const(int[]) lines; tiles_) {
+            if ((ln + y) >= _lines || (ln + y) < 0)
                 continue;
 
-            foreach (size_t ln, int tileId; column) {
-                if ((ln + y) >= _lines || (ln + y) < 0)
+            foreach (size_t col, int tileId; lines) {
+                if ((col + x) >= _columns || (col + x) < 0)
                     continue;
 
-                _tiles[(col + x) + (ln + y) * _columns].id = cast(short) tileId;
-            }
-        }
-    }
-
-    void setTilesElevation(const(int[][]) tiles_) {
-        enforce(tiles_.length == _lines, "taille des tuiles invalides: " ~ to!string(
-                tiles_.length) ~ " lignes au lieu de " ~ to!string(_lines));
-        foreach (size_t y, ref const(int[]) line; tiles_) {
-            enforce(line.length == _columns, "taille des tuiles invalides: " ~ to!string(
-                    tiles_.length) ~ " colonnes au lieu de " ~ to!string(
-                    _columns) ~ " à la ligne " ~ to!string(y));
-            foreach (size_t x, int elevation; line) {
-                _tiles[x + y * _columns].elevation = cast(short) elevation;
+                _tiles[(col + x) + (ln + y) * _columns].id = tileId;
             }
         }
     }
@@ -176,6 +197,11 @@ final class Tilemap : Image, Resource!Tilemap {
     }
 
     override void update() {
+        if (!_tileset) {
+            _currentTick = 0;
+            return;
+        }
+
         _currentTick++;
         if (_currentTick >= _tileset.frameTime) {
             _currentTick = 0;
@@ -185,7 +211,45 @@ final class Tilemap : Image, Resource!Tilemap {
         }
     }
 
+    void drawLine(int y, Vec2f origin = Vec2f.zero) {
+        if (!_tileset || y < 0 || y > _lines) {
+            return;
+        }
+
+        _tileset.color = color;
+        _tileset.alpha = alpha;
+        _tileset.blend = blend;
+
+        Vec2f finalTileSize = size / Vec2f(_columns, _lines);
+        Vec2f ratio = size / mapSize();
+        Vec2f finalClipSize = (cast(Vec2f) _tileset.clip.zw) * ratio;
+
+        Vec2f startPos = origin + position - size * anchor;
+        Vec2f tilePos;
+
+        int minX = 0;
+        int maxX = _columns;
+
+        for (int x = minX; x < maxX; x++) {
+            tilePos = startPos;
+            tilePos.x += x * finalTileSize.x;
+            tilePos.y += y * finalTileSize.y;
+            int index = x + y * _columns;
+
+            if (index >= _tiles.length)
+                break;
+            int tileId = _tiles[index].id;
+
+            if (tileId >= 0)
+                _tileset.draw(tileId, tilePos, finalClipSize, angle);
+        }
+    }
+
     override void draw(Vec2f origin = Vec2f.zero) {
+        if (!_tileset) {
+            return;
+        }
+
         _tileset.color = color;
         _tileset.alpha = alpha;
         _tileset.blend = blend;
@@ -199,7 +263,6 @@ final class Tilemap : Image, Resource!Tilemap {
         import std.stdio;
 
         Vec2f startPos = origin + position - size * anchor;
-        //writeln(finalTileSize);
         Vec2f tilePos;
 
         if (_tileset.isIsometric) {
@@ -212,8 +275,6 @@ final class Tilemap : Image, Resource!Tilemap {
                     tilePos.y += (x + y) * halfTile.y;
 
                     int tileId = _tiles[x + y * _columns].id;
-                    int elevation = _tiles[x + y * _columns].elevation;
-                    tilePos.y -= elevation;
 
                     if (tileId >= 0)
                         _tileset.draw(tileId, tilePos, finalClipSize, angle);
@@ -241,8 +302,6 @@ final class Tilemap : Image, Resource!Tilemap {
                     tilePos.y += y * finalTileSize.y;
 
                     int tileId = _tiles[x + y * _columns].id;
-                    int elevation = _tiles[x + y * _columns].elevation;
-                    tilePos.y -= elevation;
 
                     if (tileId >= 0)
                         _tileset.draw(tileId, tilePos, finalClipSize, angle);

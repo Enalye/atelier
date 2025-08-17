@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.script.world.grid;
 
 import grimoire;
@@ -18,7 +13,7 @@ package void loadLibWorld_grid(GrModule mod) {
     mod.setModule("world.grid");
     mod.setModuleInfo(GrLocale.fr_FR, "Gestion des entités sur une grille");
     mod.setModuleExample(GrLocale.fr_FR, "scene.setTilePosition(entity, 0, 0);");
-
+/*
     GrType sceneType = grGetNativeType("Scene");
     GrType entityType = grGetNativeType("Entity");
     GrType splineType = grGetEnumType("Spline");
@@ -46,9 +41,9 @@ package void loadLibWorld_grid(GrModule mod) {
     mod.setParameters(["entity", "position"]);
     mod.addFunction(&_moveTilePosition, "moveTilePosition", [
             entityType, vec2iType
-        ]);
+        ]);*/
 }
-
+/*
 private void _setGridTileSize(GrCall call) {
     Scene scene = call.getNative!Scene(0);
     GridSystem context = cast(GridSystem) scene.getSystemContext("grid");
@@ -95,4 +90,4 @@ private void _moveTilePosition(GrCall call) {
         TilePositionComponent* tile = entity.scene.addComponent!TilePositionComponent(entity.id);
         tile.tilePosition = call.getNative!SVec2i(1);
     }
-}
+}*/

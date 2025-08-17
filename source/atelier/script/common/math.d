@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.script.common.math;
 
 import grimoire;
@@ -32,6 +27,12 @@ package void loadLibCommon_math(GrModule mod) {
     mod.setDescription(GrLocale.fr_FR, "Retourne un bruit simplex en 3D.");
     mod.setParameters(["x", "y", "z"]);
     mod.addFunction(&_noise3, "noise", [grFloat, grFloat, grFloat], [grFloat]);
+
+    mod.setDescription(GrLocale.fr_FR, "Interpolation linéaire pour s’approcher d’un angle.");
+    mod.setParameters(["value", "target", "step"]);
+    mod.addFunction(&_sapproachDeg, "sapproachDeg", [
+            grFloat, grFloat, grFloat
+        ], [grFloat]);
 }
 
 private void _dbToVol(GrCall call) {
@@ -52,4 +53,8 @@ private void _noise2(GrCall call) {
 
 private void _noise3(GrCall call) {
     call.setFloat(noise(call.getFloat(0), call.getFloat(1), call.getFloat(2)));
+}
+
+private void _sapproachDeg(GrCall call) {
+    call.setFloat(sapproachDeg(call.getFloat(0), call.getFloat(1), call.getFloat(2)));
 }

@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.ui.core.label;
 
 import std.algorithm.comparison : min;
@@ -72,7 +67,7 @@ final class Label : UIElement {
     }
 
     private void _onDraw() {
-        drawText(Vec2f(0f, font.outline + font.ascent - _font.outline), _text,
+        drawText(Vec2f(0f, _font.outline + _font.ascent), _text,
             _font, textColor, outlineColor, _charScale, _charSpacing);
     }
 
@@ -151,7 +146,7 @@ final class ColoredLabel : UIElement {
     }
 
     private void _onDraw() {
-        drawText(Vec2f(0f, font.outline + font.ascent - _font.outline), _text,
+        drawText(Vec2f(0f, _font.outline + _font.ascent), _text,
             _font, tokens, _charScale, _charSpacing);
     }
 
@@ -278,6 +273,9 @@ void drawText(Vec2f position, dstring text, Font font, Color textColor = Color.w
                 float x = position.x + glyph.offsetX * scale;
                 float y = position.y - glyph.offsetY * scale;
 
+                x += font.outline;
+                y -= font.outline;
+
                 glyph.draw(Vec2f(x, y), scale, outlineColor, 1f);
                 position.x += (glyph.advance + spacing) * scale;
                 prevChar = ch;
@@ -298,11 +296,12 @@ void drawText(Vec2f position, dstring text, Font font, Color textColor = Color.w
                 continue;
             position.x += font.getKerning(prevChar, ch) * scale;
 
+            //import atelier.core;
+
+            //Atelier.log(ch, ", ", glyph.offsetY);
+
             float x = position.x + glyph.offsetX * scale;
             float y = position.y - glyph.offsetY * scale;
-
-            x += font.outline;
-            y += font.outline;
 
             glyph.draw(Vec2f(x, y), scale, textColor, 1f);
             position.x += (glyph.advance + spacing) * scale;
@@ -314,7 +313,6 @@ void drawText(Vec2f position, dstring text, Font font, Color textColor = Color.w
 void drawText(Vec2f position, dstring text, Font font,
     ColoredLabel.Token[] tokens = [], float scale = 1f, float spacing = 0f) {
     dchar prevChar;
-
     size_t colorTokenIndex = 0;
     Color textColor = Color.white;
     Color outlineColor = Color.black;
@@ -346,6 +344,9 @@ void drawText(Vec2f position, dstring text, Font font,
                 float x = position.x + glyph.offsetX * scale;
                 float y = position.y - glyph.offsetY * scale;
 
+                x += font.outline;
+                y -= font.outline;
+
                 glyph.draw(Vec2f(x, y), scale, outlineColor, 1f);
                 position.x += (glyph.advance + spacing) * scale;
                 prevChar = ch;
@@ -373,12 +374,82 @@ void drawText(Vec2f position, dstring text, Font font,
             float x = position.x + glyph.offsetX * scale;
             float y = position.y - glyph.offsetY * scale;
 
-            x += font.outline;
-            y += font.outline;
-
             glyph.draw(Vec2f(x, y), scale, textColor, 1f);
             position.x += (glyph.advance + spacing) * scale;
             prevChar = ch;
         }
     }
+}
+
+struct ColoredTextFormat {
+    string text;
+    ColoredLabel.Token[] tokens;
+}
+
+ColoredTextFormat formatColoredText(string text) {
+    ColoredTextFormat result;
+
+    size_t _parseCode(size_t i) {
+        size_t startIdx = i;
+        if (text[i] == '[')
+            i++;
+
+        string code;
+        for (; i < text.length; ++i) {
+            if (text[i] == ']') {
+                i++;
+                break;
+            }
+            else {
+                code ~= text[i];
+            }
+        }
+        ColoredLabel.Token token;
+        token.index = result.text.length;
+        switch (code) {
+        case "white":
+            token.textColor = Color.white;
+            break;
+        case "red":
+            token.textColor = Color.red;
+            break;
+        case "blue":
+            token.textColor = Color.blue;
+            break;
+        case "green":
+            token.textColor = Color.green;
+            break;
+        case "yellow":
+            token.textColor = Color.yellow;
+            break;
+        case "orange":
+            token.textColor = Color.orange;
+            break;
+        case "black":
+            token.textColor = Color.black;
+            break;
+        case "cyan":
+            token.textColor = Color.cyan;
+            break;
+        case "pink":
+            token.textColor = Color.pink;
+            break;
+        default:
+            result.text ~= text[startIdx .. i];
+            return i;
+        }
+        result.tokens ~= token;
+        return i;
+    }
+
+    for (size_t i; i < text.length; ++i) {
+        if (text[i] == '[') {
+            i = _parseCode(i);
+        }
+        if (i < text.length) {
+            result.text ~= text[i];
+        }
+    }
+
+    return result;
 }

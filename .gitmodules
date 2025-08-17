@@ -4,3 +4,6 @@
 [submodule "farfadet"]
 	path = farfadet
 	url = https://github.com/Enalye/farfadet
+[submodule "minuit"]
+	path = minuit
+	url = https://github.com/Enalye/minuit.git

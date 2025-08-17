@@ -1,16 +1,24 @@
 module atelier.common.cli;
 
-import std.conv : to;
+import std.conv : to, ConvException;
 import std.exception : enforce;
 import std.string;
 
 import atelier.core;
 
 /// Décrit une erreur syntaxique
-private final class CliException : Exception {
+final class CliException : Exception {
     import std.exception : basicExceptionCtors;
 
     mixin basicExceptionCtors;
+
+    private string _command;
+
+    @property {
+        string command() const {
+            return _command;
+        }
+    }
 }
 
 /// Outil de gestion de ligne de commande
@@ -62,12 +70,36 @@ final class Cli {
                 return _requiredParams[index];
             }
 
+            /// Ditto
+            T getRequiredParamAs(T)(size_t index) const {
+                string value = getRequiredParam(index);
+                try {
+                    return to!T(value);
+                }
+                catch (ConvException e) {
+                    throw new CliException("le paramètre à l’index `" ~ to!string(
+                            index) ~ "` n’est pas de type `" ~ T.sizeof ~ "`");
+                }
+            }
+
             /// Retourne le paramètre optionel demandé
             string getOptionalParam(size_t index) const {
                 enforce!CliException(index < _optionalParams.length, "l’index `" ~ to!string(
                         index) ~ "` dépasse le nombre de paramètres optionels `" ~ to!string(
                         _requiredParams.length) ~ "`");
                 return _optionalParams[index];
+            }
+
+            /// Ditto
+            T getOptionalParamAs(T)(size_t index) const {
+                string value = getOptionalParam(index);
+                try {
+                    return to!T(value);
+                }
+                catch (ConvException e) {
+                    throw new CliException("le paramètre à l’index `" ~ to!string(
+                            index) ~ "` n’est pas de type `" ~ T.sizeof ~ "`");
+                }
             }
         }
 
@@ -126,12 +158,36 @@ final class Cli {
             return _requiredParams[index];
         }
 
+        /// Ditto
+        T getRequiredParamAs(T)(size_t index) const {
+            string value = getRequiredParam(index);
+            try {
+                return to!T(value);
+            }
+            catch (ConvException e) {
+                throw new CliException("le paramètre à l’index `" ~ to!string(
+                        index) ~ "` n’est pas de type `" ~ T.sizeof ~ "`");
+            }
+        }
+
         /// Retourne le paramètre optionel demandé
         string getOptionalParam(size_t index) const {
             enforce!CliException(index < _optionalParams.length, "l’index `" ~ to!string(
                     index) ~ "` dépasse le nombre de paramètres optionels `" ~ to!string(
-                    _requiredParams.length) ~ "`");
+                    _optionalParams.length) ~ "`");
             return _optionalParams[index];
+        }
+
+        /// Ditto
+        T getOptionalParamAs(T)(size_t index) const {
+            string value = getOptionalParam(index);
+            try {
+                return to!T(value);
+            }
+            catch (ConvException e) {
+                throw new CliException("le paramètre à l’index `" ~ to!string(
+                        index) ~ "` n’est pas de type `" ~ T.sizeof ~ "`");
+            }
         }
 
         /// Vérifie la présence d’une option
@@ -231,7 +287,7 @@ final class Cli {
     }
 
     /// Ctor
-    this(string name) {
+    this(string name = "") {
         _name = name;
     }
 
@@ -308,12 +364,17 @@ final class Cli {
             string _exeName;
         }
 
-        this(Cli cli, string[] args) {
+        this(Cli cli, string[] args, bool isExe = true) {
             _cli = cli;
 
-            enforce!CliException(args.length >= 1, "arguments manquant");
-            _exeName = args[0];
-            _args = args[1 .. $];
+            if (isExe) {
+                enforce!CliException(args.length >= 1, "arguments manquant");
+                _exeName = args[0];
+                _args = args[1 .. $];
+            }
+            else {
+                _args = args;
+            }
         }
 
         void run() {
@@ -437,46 +498,52 @@ final class Cli {
     }
 
     string getHelp() {
-        string result = "Options:\n";
-        foreach (option; _options) {
-            string msg = "  ";
-            if (option._shortName.length && option._longName.length)
-                msg ~= "-" ~ option._shortName ~ "|--" ~ option._longName;
-            else if (option._shortName.length)
-                msg ~= "-" ~ option._shortName;
-            else if (option._longName.length)
-                msg ~= "--" ~ option._longName;
-            else
-                continue;
+        string result;
+        if (_options.length) {
+            result = "Options:\n";
+            foreach (option; _options) {
+                string msg = "  ";
+                if (option._shortName.length && option._longName.length)
+                    msg ~= "-" ~ option._shortName ~ "|--" ~ option._longName;
+                else if (option._shortName.length)
+                    msg ~= "-" ~ option._shortName;
+                else if (option._longName.length)
+                    msg ~= "--" ~ option._longName;
+                else
+                    continue;
 
-            foreach (param; option._requiredParams) {
-                msg ~= " <" ~ param ~ ">";
-            }
-            foreach (param; option._optionalParams) {
-                msg ~= " [" ~ param ~ "]";
-            }
-            msg = leftJustify(msg, 24);
-            if (msg[$ - 1] != ' ')
-                msg ~= "\n" ~ leftJustify("", 24);
+                foreach (param; option._requiredParams) {
+                    msg ~= " <" ~ param ~ ">";
+                }
+                foreach (param; option._optionalParams) {
+                    msg ~= " [" ~ param ~ "]";
+                }
+                msg = leftJustify(msg, 24);
+                if (msg[$ - 1] != ' ')
+                    msg ~= "\n" ~ leftJustify("", 24);
 
-            msg ~= option._info;
-            result ~= msg ~ "\n";
+                msg ~= option._info;
+                result ~= msg ~ "\n";
+            }
         }
-        result ~= "\nCommandes:\n";
-        foreach (command; _commands) {
-            string msg = "  " ~ command._name;
-            foreach (param; command._requiredParams) {
-                msg ~= " <" ~ param ~ ">";
-            }
-            foreach (param; command._optionalParams) {
-                msg ~= " [" ~ param ~ "]";
-            }
-            msg = leftJustify(msg, 24);
-            if (msg[$ - 1] != ' ')
-                msg ~= "\n" ~ leftJustify("", 24);
 
-            msg ~= command._info;
-            result ~= msg ~ "\n";
+        if (_commands.length) {
+            result ~= "\nCommandes:\n";
+            foreach (command; _commands) {
+                string msg = "  " ~ command._name;
+                foreach (param; command._requiredParams) {
+                    msg ~= " <" ~ param ~ ">";
+                }
+                foreach (param; command._optionalParams) {
+                    msg ~= " [" ~ param ~ "]";
+                }
+                msg = leftJustify(msg, 24);
+                if (msg[$ - 1] != ' ')
+                    msg ~= "\n" ~ leftJustify("", 24);
+
+                msg ~= command._info;
+                result ~= msg ~ "\n";
+            }
         }
         return result;
     }
@@ -492,7 +559,13 @@ final class Cli {
 
         string result;
         {
-            string msg = "Usage:\n  " ~ _name ~ " " ~ command._name;
+            string msg;
+            if (_name.length) {
+                msg = "Usage:\n  " ~ _name ~ " " ~ command._name;
+            }
+            else {
+                msg = "Usage:\n  " ~ command._name;
+            }
             foreach (param; command._requiredParams) {
                 msg ~= " <" ~ param ~ ">";
             }
@@ -502,7 +575,7 @@ final class Cli {
             result ~= msg ~ "\n";
         }
 
-        {
+        if (command._options.length) {
             result ~= "\nOptions:\n";
             foreach (option; command._options) {
                 string msg = "  ";
@@ -533,20 +606,16 @@ final class Cli {
     }
 
     /// Analyse une liste d’arguments en ligne de commande
-    void parse(string[] args) {
-        State state = new State(this, args);
+    void parse(string[] args, bool isExe = true) {
+        State state = new State(this, args, isExe);
         try {
             state.run();
         }
         catch (CliException e) {
-            log("\033[1;91mErreur:\033[0;0m " ~ e.msg);
-
             if (state._command) {
-                log("\n", getHelp(state._command._name));
+                e._command = state._command._name;
             }
-            else {
-                log("\n", getHelp());
-            }
+            throw e;
         }
     }
 }

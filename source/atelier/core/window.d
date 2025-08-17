@@ -1,12 +1,8 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.core.window;
 
 import std.exception : enforce;
 import std.string : toStringz, fromStringz;
+import std.file : read;
 
 import bindbc.sdl;
 
@@ -82,7 +78,7 @@ final class Window {
             _icon = null;
         }
 
-        const(ubyte)[] data = Atelier.res.read(filePath);
+        const(ubyte)[] data = cast(const(ubyte)[]) read(filePath);
         SDL_RWops* rw = SDL_RWFromConstMem(cast(const(void)*) data.ptr, cast(int) data.length);
         _icon = IMG_Load_RW(rw, 1);
 

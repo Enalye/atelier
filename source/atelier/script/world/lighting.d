@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.script.world.lighting;
 
 import grimoire;
@@ -19,6 +14,8 @@ package void loadLibWorld_lighting(GrModule mod) {
     mod.setModuleInfo(GrLocale.fr_FR, "Gestion de la lumière");
     mod.setModuleExample(GrLocale.fr_FR, "");
 
+    GrType lightningType = mod.addNative("Lightning");
+
     GrType darknessType = mod.addNative("Darkness");
     GrType fadedDarknessType = mod.addNative("FadedDarkness", [], "Darkness");
 
@@ -26,40 +23,44 @@ package void loadLibWorld_lighting(GrModule mod) {
     GrType pointLightType = mod.addNative("PointLight", [], "Light");
     GrType fadedLightType = mod.addNative("FadedLight", [], "Light");
 
-    GrType sceneType = grGetNativeType("Scene");
     GrType entityType = grGetNativeType("Entity");
     GrType splineType = grGetEnumType("Spline");
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
     GrType colorType = grGetNativeType("Color");
 
+    mod.setDescription(GrLocale.fr_FR, "Définit l’éclairage global");
+    mod.setParameters(["brightness"]);
+    mod.addStatic(&_setBrightness, lightningType, "setBrightness", [
+            grFloat
+        ]);
+
+    /*
     mod.addProperty(&_darkness!"get", &_darkness!"set", "darkness",
         entityType, grOptional(darknessType));
     mod.addProperty(&_light!"get", &_light!"set", "light", entityType, grOptional(lightType));
+*/
 
-    mod.setDescription(GrLocale.fr_FR, "Définit l’éclairage global");
-    mod.setParameters(["scene", "illumination"]);
-    mod.addFunction(&_setGlobalIllumination, "setGlobalIllumination", [
-            sceneType, grFloat
-        ]);
-
+    /*
     mod.setParameters(["position", "size"]);
     mod.addConstructor(&_ctor_pointLight, pointLightType, [vec2fType, vec2fType]);
 
-    mod.addProperty(&_pointLight_intensity!"get",
-        &_pointLight_intensity!"set", "intensity", pointLightType, grFloat);
+    mod.addProperty(&_pointLight_brightness!"get",
+        &_pointLight_brightness!"set", "brightness", pointLightType, grFloat);
     mod.addProperty(&_pointLight_color!"get",
         &_pointLight_color!"set", "color", pointLightType, colorType);
     mod.addProperty(&_pointLight_size!"get",
-        &_pointLight_size!"set", "size", pointLightType, vec2fType);
-
+        &_pointLight_size!"set", "size", pointLightType, vec2fType);*/
 }
 
-private void _setGlobalIllumination(GrCall call) {
-    Scene scene = call.getNative!Scene(0);
-    LightingSystem context = cast(LightingSystem) scene.getSystemContext("lighting");
-    context.globalIllumination = call.getFloat(1);
+private void _setBrightness(GrCall call) {
+    Atelier.world.lighting.setBrightness(call.getFloat(0));
 }
 
+private void _getBrightnessAt(GrCall call) {
+    const float value = Atelier.world.lighting.getBrightnessAt(call.getNative!SVec2i(0));
+    call.setFloat(value);
+}
+/*
 private void _darkness(string op)(GrCall call) {
     SEntity entity = call.getNative!SEntity(0);
     DarknessComponent* darkness = entity.scene.getComponent!DarknessComponent(entity.id);
@@ -96,14 +97,14 @@ private void _ctor_pointLight(GrCall call) {
     call.setNative(new PointLight(call.getNative!SVec2f(0), call.getNative!SVec2f(1)));
 }
 
-private void _pointLight_intensity(string op)(GrCall call) {
+private void _pointLight_brightness(string op)(GrCall call) {
     PointLight pointLight = call.getNative!PointLight(0);
 
     static if (op == "set") {
-        pointLight.intensity = call.getFloat(1);
+        pointLight.brightness = call.getFloat(1);
     }
 
-    call.setFloat(pointLight.intensity);
+    call.setFloat(pointLight.brightness);
 }
 
 private void _pointLight_color(string op)(GrCall call) {
@@ -125,3 +126,4 @@ private void _pointLight_size(string op)(GrCall call) {
 
     call.setNative(svec2(pointLight.size));
 }
+*/

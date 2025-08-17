@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.audio.output;
 
 import core.thread;
@@ -31,11 +26,6 @@ final class AudioOutput {
         _openAudio(deviceName);
     }
 
-    /// Déinit
-    ~this() {
-        _closeAudio();
-    }
-
     /// Initialise le module audio
     private void _openAudio(string deviceName) {
         SDL_AudioSpec desired, obtained;
@@ -58,6 +48,11 @@ final class AudioOutput {
     }
 
     /// Ferme le module audio
+    void close() {
+        _closeAudio();
+    }
+
+    /// Ditto
     private void _closeAudio() {
         SDL_CloseAudioDevice(_deviceId);
         _deviceId = 0;

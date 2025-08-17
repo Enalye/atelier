@@ -1,14 +1,9 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.world.grid;
 
 import atelier.common;
 import atelier.world.scene;
 import atelier.world.world;
-
+/*
 package(atelier.world) void registerSystems_grid(World world) {
     world.registerSystem!SystemUpdater("grid", &_updateSystem);
     world.registerSystem!SystemInitializer("grid", &_initSystem);
@@ -61,3 +56,4 @@ private void _updateSystem(Scene scene, void* context) {
         }
     }
 }
+*/

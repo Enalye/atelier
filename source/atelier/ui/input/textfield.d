@@ -29,6 +29,7 @@ final class TextField : UIElement {
         float _targetOffset = 0f, _currentOffset = 0f;
         bool _updateMouseMove;
         Vec2f _innerMargins = Vec2f(4f, 4f);
+        bool _hasBackground = true;
     }
 
     @property {
@@ -61,6 +62,18 @@ final class TextField : UIElement {
             if (_caretIndex > _limit)
                 _caretIndex = _limit;
             return _limit;
+        }
+
+        bool hasBackground() const {
+            return _hasBackground;
+        }
+
+        bool hasBackground(bool hasBackground_) {
+            _hasBackground = hasBackground_;
+            if (!_hasBackground) {
+                _background.alpha = 0f;
+            }
+            return _hasBackground;
         }
     }
 
@@ -122,13 +135,13 @@ final class TextField : UIElement {
     }
 
     private void _onEnable() {
-        _background.alpha = Atelier.theme.activeOpacity;
+        _background.alpha = _hasBackground ? Atelier.theme.activeOpacity : 0f;
         _outline.alpha = Atelier.theme.activeOpacity;
         _label.textColor = Atelier.theme.onNeutral;
     }
 
     private void _onDisable() {
-        _background.alpha = Atelier.theme.inactiveOpacity;
+        _background.alpha = _hasBackground ? Atelier.theme.inactiveOpacity : 0f;
         _outline.alpha = Atelier.theme.inactiveOpacity;
         _label.textColor = Atelier.theme.neutral;
     }

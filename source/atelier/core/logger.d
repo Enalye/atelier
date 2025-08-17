@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.core.logger;
 
 import std.concurrency;
@@ -19,7 +14,7 @@ private {
     bool _isInit, _isRedist;
 }
 
-void openLogger(bool isRedist) {
+package void _logger_openLogger(bool isRedist) {
     if (_isInit)
         return;
     _isRedist = isRedist;
@@ -46,7 +41,7 @@ private struct LoggerTermination {
     Tid tid;
 }
 
-void closeLogger() {
+package void _logger_closeLogger() {
     _loggerTid.send(LoggerTermination(thisTid()));
     enforce(receiveOnly!Tid == _loggerTid);
     if (!_isRedist) {
@@ -54,7 +49,7 @@ void closeLogger() {
     }
 }
 
-void log(T...)(T args) {
+package void _logger_log(T...)(T args) {
     string msg;
     static foreach (arg; args) {
         msg ~= to!string(arg);

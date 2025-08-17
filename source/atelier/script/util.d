@@ -1,19 +1,9 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.script.util;
 
 import grimoire;
 
 import atelier.common;
 import atelier.world;
-
-final class SEntity {
-    Scene scene;
-    EntityID id;
-}
 
 final class SVec2(T) {
     Vec2!T _vector;

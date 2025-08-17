@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.common.grid;
 
 import std.conv : to;
@@ -10,7 +5,7 @@ import std.exception : enforce;
 import atelier.common.resource;
 
 final class Grid(T) : Resource!Grid {
-    static assert(__traits(isArithmetic, T));
+    //static assert(__traits(isArithmetic, T));
 
     private {
         T[] _values;
@@ -27,6 +22,9 @@ final class Grid(T) : Resource!Grid {
         uint lines() const {
             return _lines;
         }
+    }
+
+    this() {
     }
 
     this(uint columns, uint lines) {
@@ -52,6 +50,24 @@ final class Grid(T) : Resource!Grid {
     /// Accès à la ressource
     Grid fetch() {
         return new Grid(this);
+    }
+
+    void setDimensions(uint columns_, uint lines_) {
+        T[][] values_ = getValues();
+        _lines = lines_;
+        _columns = columns_;
+        _values.length = _columns * _lines;
+        for (size_t i; i < _values.length; ++i) {
+            _values[i] = defaultValue;
+        }
+        setValues(0, 0, values_);
+    }
+
+    T getValue(int id) {
+        if (id < 0 || id >= _values.length)
+            return defaultValue;
+
+        return _values[id];
     }
 
     T getValue(int x, int y) {
@@ -81,29 +97,29 @@ final class Grid(T) : Resource!Grid {
         }
     }
 
-    T[][] getValues() {
-        T[][] values = new T[][](_columns, _lines);
-
-        for (size_t y; y < _lines; ++y) {
-            for (size_t x; x < _columns; ++x) {
-                values[x][y] = _values[x + y * _columns];
-            }
-        }
-
-        return values;
-    }
-
     void setValues(int x, int y, const(T[][]) values) {
-        foreach (size_t col, ref const(T[]) column; values) {
-            if ((col + x) >= _columns || (col + x) < 0)
+        foreach (size_t ln, ref const(T[]) lines; values) {
+            if ((ln + y) >= _lines || (ln + y) < 0)
                 continue;
 
-            foreach (size_t ln, T value; column) {
-                if ((ln + y) >= _lines || (ln + y) < 0)
+            foreach (size_t col, T value; lines) {
+                if ((col + x) >= _columns || (col + x) < 0)
                     continue;
 
                 _values[(col + x) + (ln + y) * _columns] = value;
             }
         }
+    }
+
+    T[][] getValues() {
+        T[][] values = new T[][](_lines, _columns);
+
+        for (size_t y; y < _lines; ++y) {
+            for (size_t x; x < _columns; ++x) {
+                values[y][x] = _values[x + y * _columns];
+            }
+        }
+
+        return values;
     }
 }

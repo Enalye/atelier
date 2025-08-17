@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.input.data;
 
 package enum _gameControllerDb = "# Game Controller DB for SDL in 2.0.16 format

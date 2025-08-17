@@ -1,11 +1,5 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.ui.select.button;
 
-import std.algorithm.searching : canFind;
 import atelier.common;
 import atelier.core;
 import atelier.render;
@@ -19,25 +13,52 @@ final class SelectButton : Button!RoundedRectangle {
         SelectList _list;
         bool _isDisplayed;
         string[] _items;
-        string _value;
+        uint _ivalue;
         Label _label;
         Color _buttonColor;
+        UIAlignX _listAlignX = UIAlignX.left;
+        UIAlignY _listAlignY = UIAlignY.top;
     }
 
     @property {
         string value() const {
-            return _value;
+            if (!_items.length)
+                return "";
+
+            return _items[_ivalue];
         }
 
         string value(string value_) {
-            if (_value == value_)
-                return _value;
-
-            if (_items.canFind(value_)) {
-                _value = value_;
-                _label.text = _value;
+            if (!_items.length) {
+                _ivalue = 0;
+                return "";
             }
-            return _value;
+
+            if (_items[_ivalue] == value_)
+                return _items[_ivalue];
+
+            for (uint i; i < _items.length; ++i) {
+                if (_items[i] == value_) {
+                    _ivalue = i;
+                    _label.text = _items[_ivalue];
+                }
+            }
+
+            return _items[_ivalue];
+        }
+
+        uint ivalue() const {
+            return _ivalue;
+        }
+
+        uint ivalue(uint ivalue_) {
+            if (_ivalue == ivalue_ || ivalue_ > _items.length)
+                return _ivalue;
+
+            _ivalue = ivalue_;
+            _label.text = _items[_ivalue];
+
+            return _ivalue;
         }
     }
 
@@ -59,9 +80,6 @@ final class SelectButton : Button!RoundedRectangle {
         }
 
         setSize(size + Vec2f(24f, 8f));
-
-        if (_items.length)
-            _value = _items[0];
         _label.text = value(defaultItem);
 
         setFxColor(_buttonColor);
@@ -82,10 +100,25 @@ final class SelectButton : Button!RoundedRectangle {
         addEventListener("size", { _background.size = getSize(); });
     }
 
+    void setListAlign(UIAlignX alignX, UIAlignY alignY) {
+        _listAlignX = alignX;
+        _listAlignY = alignY;
+    }
+
+    UIAlignX getListAlignX() const {
+        return _listAlignX;
+    }
+
+    UIAlignY getListAlignY() const {
+        return _listAlignY;
+    }
+
     void setItems(string[] items) {
         if (_list) {
             _list.removeUI();
         }
+
+        _items = items;
 
         Vec2f size = getSize();
         _list = new SelectList(this);
@@ -94,7 +127,7 @@ final class SelectButton : Button!RoundedRectangle {
             _label.text = item;
             size = size.max(_label.getSize() + Vec2f(24f, 8f));
         }
-        _label.text = _value;
+        _label.text = _items.length > 0 ? _items[_ivalue] : "";
 
         setSize(size);
     }

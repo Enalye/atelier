@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.script.world.world;
 
 import grimoire;
@@ -19,8 +14,30 @@ package void loadLibWorld_world(GrModule mod) {
     mod.setModuleInfo(GrLocale.fr_FR, "Niveau actuel");
 
     GrType worldType = mod.addNative("World");
-    GrType sceneType = grGetNativeType("Scene");
     GrType entityType = grGetNativeType("Entity");
+    GrType actorType = grGetNativeType("Actor");
+
+    mod.setDescription(GrLocale.fr_FR, "Lance/Arrête le mode de combat");
+    mod.setParameters(["isInCombat"]);
+    mod.addStatic(&_setCombat, worldType, "setCombat", [grBool]);
+
+    mod.setDescription(GrLocale.fr_FR, "Ajoute l’entité à la scène");
+    mod.setParameters(["entity"]);
+    mod.addStatic(&_addEntity, worldType, "addEntity", [entityType]);
+
+    mod.setDescription(GrLocale.fr_FR, "Récupère l’entité par son nom");
+    mod.setParameters(["name"]);
+    mod.addStatic(&_find, worldType, "find", [grString], [
+            grOptional(entityType)
+        ]);
+
+    mod.setDescription(GrLocale.fr_FR, "Récupère l’instance du joueur");
+    mod.setParameters([]);
+    mod.addStatic(&_getPlayer, worldType, "getPlayer", [], [
+            grOptional(actorType)
+        ]);
+
+    /+GrType sceneType = grGetNativeType("Scene");
     GrType particleSourceType = grGetNativeType("ParticleSource");
     GrType actorType = grGetNativeType("Actor");
     GrType solidType = grGetNativeType("Solid");
@@ -92,13 +109,39 @@ package void loadLibWorld_world(GrModule mod) {
     mod.setParameters(["tags"]);
     mod.addStatic(&_findByTag!Solid, worldType, "findSolidsByTag",
         [grList(grString)], [grList(solidType)]);*/
+    
++/
+
 }
 
-private void _addScene(GrCall call) {
-    Scene scene = call.getNative!Scene(0);
-    Atelier.world.addScene(scene);
+private void _setCombat(GrCall call) {
+    Atelier.world.setCombat(call.getBool(0));
 }
 
+private void _addEntity(GrCall call) {
+    Atelier.world.addEntity(call.getNative!Entity(0));
+}
+
+private void _find(GrCall call) {
+    Entity entity = Atelier.world.find(call.getString(0));
+    if (entity) {
+        call.setNative(entity);
+    }
+    else {
+        call.setNull();
+    }
+}
+
+private void _getPlayer(GrCall call) {
+    Actor actor = Atelier.world.player;
+    if (actor) {
+        call.setNative(actor);
+    }
+    else {
+        call.setNull();
+    }
+}
+/+
 private void _clear(GrCall call) {
     Atelier.world.clear();
 }
@@ -139,3 +182,4 @@ private void _findByTag(T)(GrCall call) {
     call.setList(result);
 }
 */
++/

@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.render.util;
 
 import bindbc.sdl;
@@ -37,7 +32,9 @@ enum Blend {
     modular,
     multiply,
     canvas,
-    mask
+    mask,
+    blackAndWhiteMask,
+    whiteAndBlackMask,
 }
 
 /// Récupère l’option SDL de composition
@@ -60,5 +57,11 @@ package SDL_BlendMode getSDLBlend(Blend blend) {
     case mask:
         return SDL_ComposeCustomBlendMode(SDL_BLENDFACTOR_ONE, SDL_BLENDFACTOR_ZERO, SDL_BLENDOPERATION_ADD,
             SDL_BLENDFACTOR_DST_ALPHA, SDL_BLENDFACTOR_ZERO, SDL_BLENDOPERATION_ADD);
+    case blackAndWhiteMask:
+        return SDL_ComposeCustomBlendMode(SDL_BLENDFACTOR_ZERO, SDL_BLENDFACTOR_ONE, SDL_BLENDOPERATION_ADD,
+            SDL_BLENDFACTOR_ZERO, SDL_BLENDFACTOR_SRC_COLOR, SDL_BLENDOPERATION_ADD);
+    case whiteAndBlackMask:
+        return SDL_ComposeCustomBlendMode(SDL_BLENDFACTOR_ZERO, SDL_BLENDFACTOR_ONE, SDL_BLENDOPERATION_ADD,
+            SDL_BLENDFACTOR_ZERO, SDL_BLENDFACTOR_ONE_MINUS_SRC_COLOR, SDL_BLENDOPERATION_ADD);
     }
 }

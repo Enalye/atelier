@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.render.tileset;
 
 import std.conv : to;
@@ -22,7 +17,7 @@ import atelier.render.util;
 final class Tileset : Resource!Tileset {
     private {
         ImageData _imageData;
-        short[short] _tileFrames;
+        int[int] _tileFrames;
     }
 
     Vec4u clip;
@@ -74,11 +69,11 @@ final class Tileset : Resource!Tileset {
         blend = tileset.blend;
     }
 
-    void setTileFrame(short previousTile, short nextTile) {
+    void setTileFrame(int previousTile, int nextTile) {
         _tileFrames[previousTile] = nextTile;
     }
 
-    short getTileFrame(short previousTile) {
+    int getTileFrame(int previousTile) {
         auto p = previousTile in _tileFrames;
         return p ? *p : previousTile;
     }

@@ -1,636 +1,1371 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.world.scene;
 
 import std.algorithm;
+import std.conv : to, ConvException;
 import std.exception : enforce;
-import std.typecons : Tuple, tuple;
 
-import atelier.audio;
+import farfadet;
 import atelier.common;
 import atelier.core;
-import atelier.input;
 import atelier.render;
-import atelier.ui;
-import atelier.world.camera;
-import atelier.world.particle;
-import atelier.world.world;
+import atelier.world.weather;
+import atelier.world.entity;
 
-package(atelier.world) void registerSystems_scene(World world) {
-    world.registerSystem!SystemEntityUpdater("linear", &updateEntitySystem_linear);
-    world.registerSystem!SystemEntityRenderer("linear", &renderEntitySystem_linear);
-    world.registerSystem!SystemEntityUpdater("recursive", &updateEntitySystem_recursive);
-    world.registerSystem!SystemEntityRenderer("recursive", &renderEntitySystem_recursive);
-}
+final class Scene : Resource!Scene {
+    final class TerrainLayer {
+        private {
+            string _name;
+            uint _level;
+            TerrainMap _terrainMap;
+            Tileset _tileset;
+            Tilemap _tilemap;
+            string _terrainRID;
+        }
 
-private enum Entity_Max = ushort.max;
-private enum Entity_Size = Entity_Max + 1;
+        @property {
+            uint level() const {
+                return _level;
+            }
+        }
 
-union EntityID {
-    struct {
-        ushort version_;
-        ushort address;
+        this(uint width, uint height) {
+            _tilemap = new Tilemap(width, height);
+        }
+
+        this(TerrainLayer other) {
+            _name = other._name;
+            _level = other._level;
+            _terrainRID = other._terrainRID;
+            _tilemap = new Tilemap(other._tilemap);
+        }
+
+        void setup() {
+            _terrainMap = Atelier.res.get!TerrainMap(_terrainRID);
+            _tileset = Atelier.res.get!Tileset(_terrainMap.tileset);
+            _tilemap.setTileset(_tileset);
+            _tilemap.size = _tilemap.mapSize();
+        }
+
+        void load(const(Farfadet) ffd) {
+            _name = ffd.get!string(0);
+
+            if (ffd.hasNode("level")) {
+                _level = ffd.getNode("level").get!uint(0);
+            }
+
+            if (ffd.hasNode("terrain")) {
+                _terrainRID = ffd.getNode("terrain").get!string(0);
+            }
+
+            if (ffd.hasNode("tiles")) {
+                _tilemap.setTiles(ffd.getNode("tiles").get!(int[][])(0));
+            }
+        }
+
+        void serialize(OutStream stream) {
+            stream.write!string(_name);
+            stream.write!uint(_level);
+            stream.write!string(_terrainRID);
+            stream.write!(int[][])(_tilemap.getTiles());
+        }
+
+        void deserialize(InStream stream) {
+            _name = stream.read!string();
+            _level = stream.read!uint();
+            _terrainRID = stream.read!string();
+            _tilemap.setTiles(0, 0, stream.read!(int[][])());
+        }
+
+        void drawLine(int y, Vec2f offset) {
+            _tilemap.drawLine(y, offset);
+        }
     }
 
-    uint id;
+    final class ParallaxLayer {
+        private {
+            string _name;
+            float _distance = 1f;
+            Tilemap _tilemap;
+            string _tilesetRID;
+            uint _columns, _lines;
+        }
 
-    alias id this;
+        @property {
+            float distance() const {
+                return _distance;
+            }
+        }
 
-    this(uint id_) {
-        id = id_;
+        this(uint width_, uint height_) {
+            _columns = width_;
+            _lines = height_;
+            _tilemap = new Tilemap(_columns, _lines);
+        }
+
+        this(ParallaxLayer other) {
+            _name = other._name;
+            _columns = other._columns;
+            _lines = other._lines;
+            _distance = other._distance;
+            _tilesetRID = other._tilesetRID;
+            _tilemap = new Tilemap(other._tilemap);
+        }
+
+        void setup() {
+            _tilemap.setTileset(Atelier.res.get!Tileset(_tilesetRID));
+            _tilemap.size = _tilemap.mapSize();
+        }
+
+        void setSize(uint width_, uint height_) {
+            _columns = width_;
+            _lines = height_;
+            _tilemap.setDimensions(_columns, _lines);
+        }
+
+        uint getWidth() const {
+            return _columns;
+        }
+
+        uint getHeight() const {
+            return _lines;
+        }
+
+        void load(const(Farfadet) ffd) {
+            _name = ffd.get!string(0);
+
+            if (ffd.hasNode("distance")) {
+                _distance = ffd.getNode("distance").get!float(0);
+            }
+
+            if (ffd.hasNode("size")) {
+                Farfadet sizeNode = ffd.getNode("size");
+                _columns = sizeNode.get!uint(0);
+                _lines = sizeNode.get!uint(1);
+                _tilemap.setDimensions(_columns, _lines);
+            }
+
+            if (ffd.hasNode("tileset")) {
+                _tilesetRID = ffd.getNode("tileset").get!string(0);
+            }
+
+            if (ffd.hasNode("tiles")) {
+                _tilemap.setTiles(ffd.getNode("tiles").get!(int[][])(0));
+            }
+        }
+
+        void serialize(OutStream stream) {
+            stream.write!string(_name);
+            stream.write!float(_distance);
+            stream.write!uint(_columns);
+            stream.write!uint(_lines);
+            stream.write!string(_tilesetRID);
+            stream.write!(int[][])(_tilemap.getTiles());
+        }
+
+        void deserialize(InStream stream) {
+            _name = stream.read!string();
+            _distance = stream.read!float();
+            _columns = stream.read!uint();
+            _lines = stream.read!uint();
+            _tilesetRID = stream.read!string();
+            _tilemap.setTiles(0, 0, stream.read!(int[][])());
+        }
+
+        void draw(Vec2f offset) {
+            _tilemap.draw(offset);
+        }
     }
-}
 
-struct RenderComponent {
-    bool isVisible = true;
-    Image image;
-    Canvas canvas;
-    Sprite sprite;
-}
+    final class CollisionLayer {
+        private {
+            string _name;
+            int _level;
+            Grid!int _grid;
+        }
 
-struct TagComponent {
-    string[] tags;
+        @property {
+            int level() const {
+                return _level;
+            }
+        }
 
-    void onInit() {
-        tags.length = 0;
+        this(uint width, uint height) {
+            _grid = new Grid!int(width, height);
+        }
+
+        this(CollisionLayer other) {
+            _name = other._name;
+            _level = other._level;
+            _grid = new Grid!int(other._grid);
+        }
+
+        void load(Farfadet ffd) {
+            _name = ffd.get!string(0);
+
+            if (ffd.hasNode("level")) {
+                _level = ffd.getNode("level").get!int(0);
+            }
+
+            if (ffd.hasNode("tiles")) {
+                _grid.setValues(0, 0, ffd.getNode("tiles").get!(int[][])(0));
+            }
+        }
+
+        void serialize(OutStream stream) {
+            stream.write!string(_name);
+            stream.write!uint(_level);
+            stream.write!(int[][])(_grid.getValues());
+        }
+
+        void deserialize(InStream stream) {
+            _name = stream.read!string();
+            _level = stream.read!uint();
+            _grid.setValues(0, 0, stream.read!(int[][])());
+        }
+
+        int getId(int x, int y) {
+            switch (_grid.getValue(x, y)) {
+            case 0:
+                return 0b1111;
+            case 1:
+                return 0b1110;
+            case 2:
+                return 0b1101;
+            case 3:
+                return 0b0100;
+            case 4:
+                return 0b1000;
+            case 5:
+                return 0b1010;
+            case 6:
+                return 0b0011;
+            case 7:
+                return 0b0110;
+            case 8:
+                return 0b1001;
+            case 9:
+                return 0b0111;
+            case 10:
+                return 0b1011;
+            case 11:
+                return 0b0010;
+            case 12:
+                return 0b0001;
+            case 13:
+                return 0b0101;
+            case 14:
+                return 0b1100;
+            default:
+                return 0;
+            }
+        }
     }
 
-    void onDestroy() {
+    final class TopologicMap {
+        private {
+            string _terrainRID;
+            TerrainMap _terrainMap;
+            Tileset _tileset;
+            Tilemap[] _lowerTilemaps, _upperTilemaps;
+            Grid!int _levelGrid;
+            Grid!int _brushGrid;
+            Grid!bool _cliffGrid;
+        }
+
+        @property {
+            Tilemap[] lowerTilemaps() {
+                return _lowerTilemaps;
+            }
+
+            Tilemap[] upperTilemaps() {
+                return _upperTilemaps;
+            }
+
+            Tileset tileset() {
+                return _tileset;
+            }
+
+            string terrainRID() {
+                return _terrainRID;
+            }
+        }
+
+        this() {
+            _levelGrid = new Grid!int(_columns + 1, _lines + _levels);
+            _brushGrid = new Grid!int(_columns + 1, _lines + _levels);
+            _cliffGrid = new Grid!bool(_columns + 1, _lines + _levels);
+
+            _levelGrid.defaultValue = -1;
+            _brushGrid.defaultValue = 0;
+            _cliffGrid.defaultValue = false;
+        }
+
+        void setup() {
+            _terrainMap = Atelier.res.get!TerrainMap(_terrainRID);
+            _tileset = Atelier.res.get!Tileset(_terrainMap.tileset);
+            updateLevels();
+
+            foreach (i, tilemap; _lowerTilemaps) {
+                tilemap.setTileset(_tileset);
+                tilemap.size = tilemap.mapSize();
+                tilemap.anchor = Vec2f.zero;
+                tilemap.position = Vec2f(columns, lines) * -8f - Vec2f(0f, i << 4);
+            }
+            foreach (i, tilemap; _upperTilemaps) {
+                tilemap.setTileset(_tileset);
+                tilemap.size = tilemap.mapSize();
+                tilemap.anchor = Vec2f.zero;
+                tilemap.position = Vec2f(columns, lines) * -8f - Vec2f(0f, i << 4);
+            }
+
+            updateTiles();
+        }
+
+        void setupWireframe(TopologicMap baseMap) {
+            _terrainRID = "wireframe";
+            _levelGrid.setValues(0, 0, baseMap._levelGrid.getValues());
+            _brushGrid.setValues(0, 0, baseMap._brushGrid.getValues());
+        }
+
+        void setDimensions(uint columns, uint lines) {
+            _levelGrid.setDimensions(columns + 1, lines + _levels);
+            _brushGrid.setDimensions(columns + 1, lines + _levels);
+            _cliffGrid.setDimensions(columns + 1, lines + _levels);
+
+            foreach (i, tilemap; _lowerTilemaps) {
+                tilemap.setDimensions(columns, lines + cast(uint) i);
+                tilemap.size = tilemap.mapSize();
+                tilemap.anchor = Vec2f.zero;
+                tilemap.position = Vec2f(columns, lines) * -8f - Vec2f(0f, i << 4);
+            }
+            foreach (i, tilemap; _upperTilemaps) {
+                tilemap.setDimensions(columns, lines + cast(uint) i);
+                tilemap.size = tilemap.mapSize();
+                tilemap.anchor = Vec2f.zero;
+                tilemap.position = Vec2f(columns, lines) * -8f - Vec2f(0f, i << 4);
+            }
+        }
+
+        int getLevel(int x, int y) {
+            return _levelGrid.getValue(x, y);
+        }
+
+        void load(const(Farfadet) ffd) {
+            if (!ffd.hasNode("topography"))
+                return;
+
+            Farfadet node = ffd.getNode("topography");
+
+            if (node.hasNode("terrain")) {
+                _terrainRID = node.getNode("terrain").get!string(0);
+            }
+
+            if (node.hasNode("levels")) {
+                _levelGrid.setValues(0, 0, node.getNode("levels").get!(int[][])(0));
+            }
+            if (node.hasNode("brushes")) {
+                _brushGrid.setValues(0, 0, node.getNode("brushes").get!(int[][])(0));
+            }
+        }
+
+        void serialize(OutStream stream) {
+            stream.write!string(_terrainRID);
+            stream.write!(int[][])(_levelGrid.getValues());
+            stream.write!(int[][])(_brushGrid.getValues());
+        }
+
+        void deserialize(InStream stream) {
+            _terrainRID = stream.read!string();
+            _levelGrid.setValues(0, 0, stream.read!(int[][])());
+            _brushGrid.setValues(0, 0, stream.read!(int[][])());
+        }
+
+        void updateLevels() {
+            if (_lowerTilemaps.length > _levels) {
+                _lowerTilemaps.length = _levels;
+            }
+            else if (_lowerTilemaps.length < _levels) {
+                for (size_t i = _lowerTilemaps.length; i < _levels; ++i) {
+                    _lowerTilemaps ~= new Tilemap(_columns, _lines + cast(uint) i);
+                }
+            }
+
+            if (_upperTilemaps.length > _levels) {
+                _upperTilemaps.length = _levels;
+            }
+            else if (_upperTilemaps.length < _levels) {
+                for (size_t i = _upperTilemaps.length; i < _levels; ++i) {
+                    _upperTilemaps ~= new Tilemap(_columns, _lines + cast(uint) i);
+                }
+            }
+        }
+
+        void processCliff(int x, int y, Vec2i[4] neighborsOffset) {
+            Vec2i neighbor;
+            int neighborLevel;
+            int neighborBrush;
+            TerrainMap.Brush brush, currentBrush;
+            int[4] levels;
+            int minLevel, maxLevel;
+            foreach (int i, Vec2i neighborOffset; neighborsOffset) {
+                neighbor = Vec2i(x, y) + neighborOffset;
+                neighborBrush = _brushGrid.getValue(neighbor.x, neighbor.y);
+                neighborLevel = _levelGrid.getValue(neighbor.x, neighbor.y);
+                currentBrush = _terrainMap.getBrush(neighborBrush);
+
+                if (i == 0) {
+                    minLevel = neighborLevel;
+                    maxLevel = minLevel;
+                }
+                else if (neighborLevel > maxLevel) {
+                    maxLevel = neighborLevel;
+                }
+                else if (neighborLevel < minLevel) {
+                    minLevel = neighborLevel;
+                }
+
+                levels[i] = neighborLevel;
+
+                if (currentBrush && brush) {
+                    if (currentBrush.id != brush.id) {
+                        break;
+                    }
+                }
+                if (currentBrush) {
+                    brush = currentBrush;
+                }
+            }
+
+            if (!brush) {
+                brush = _terrainMap.getBrush(0);
+            }
+
+            for (int level; level < _levels; ++level) {
+                int tileValue = 0;
+                for (int i; i < 4; ++i) {
+                    if (levels[i] < level) {
+                        tileValue |= 0x1 << i;
+                    }
+                    else if (levels[i] == level) {
+                        tileValue |= 0x1 << (i + 4);
+                    }
+                    else if (levels[i] > level) {
+                        tileValue |= 0x1 << (i + 8);
+                    }
+                }
+
+                int[] lowerTiles, upperTiles;
+                for (int i; i < TerrainMap.Brush.cliffIndexes.length; ++i) {
+                    TerrainMap.Brush.CliffInfo info = TerrainMap.Brush.cliffIndexes[i];
+                    if (tileValue == info.index) {
+                        if (info.isUpperLayer) {
+                            upperTiles = brush.cliffs[i];
+                        }
+                        else {
+                            lowerTiles = brush.cliffs[i];
+                        }
+                        break;
+                    }
+                }
+                if (lowerTiles.length == 0 && upperTiles.length == 0) {
+                    for (int i; i < TerrainMap.Brush.composedCliffIndexes.length;
+                        ++i) {
+                        TerrainMap.Brush.ComposedCliffInfo info =
+                            TerrainMap.Brush.composedCliffIndexes[i];
+                        if (tileValue == info.index) {
+                            if (info.firstTile >= 0) {
+                                TerrainMap.Brush.CliffInfo firstCliffInfo =
+                                    TerrainMap.Brush.cliffIndexes[info.firstTile];
+
+                                if (firstCliffInfo.isUpperLayer) {
+                                    upperTiles = brush.cliffs[info.firstTile];
+                                }
+                                else {
+                                    lowerTiles = brush.cliffs[info.firstTile];
+                                }
+                            }
+
+                            if (info.secondTile >= 0) {
+                                TerrainMap.Brush.CliffInfo secondCliffInfo =
+                                    TerrainMap.Brush.cliffIndexes[info.secondTile];
+
+                                if (secondCliffInfo.isUpperLayer) {
+                                    upperTiles = brush.cliffs[info.secondTile];
+                                }
+                                else {
+                                    lowerTiles = brush.cliffs[info.secondTile];
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+
+                int lowerTileId = -1;
+                int upperTileId = -1;
+
+                if (upperTiles.length) {
+                    upperTileId = upperTiles[(x + y) % upperTiles.length];
+                }
+
+                if (lowerTiles.length) {
+                    lowerTileId = lowerTiles[(x + y) % lowerTiles.length];
+                }
+
+                if (lowerTileId >= 0) {
+                    _lowerTilemaps[level].setTile(x, y, lowerTileId);
+                }
+
+                _upperTilemaps[level].setTile(x, y, upperTileId);
+            }
+        }
+
+        void processTile(int x, int y, Vec2i[4] neighborsOffset) {
+            int tileId = 0;
+            uint tileIndex = 0;
+            Vec2i neighbor;
+            int neighborBrush;
+            int neighborLevel;
+            bool neighborCliff;
+            TerrainMap.Brush brush, currentBrush;
+            int level = int.max;
+
+            foreach (int i, Vec2i neighborOffset; neighborsOffset) {
+                neighbor = Vec2i(x, y) + neighborOffset;
+                neighborBrush = _brushGrid.getValue(neighbor.x, neighbor.y);
+                neighborLevel = _levelGrid.getValue(neighbor.x, neighbor.y);
+                neighborCliff = _cliffGrid.getValue(neighbor.x, neighbor.y);
+                currentBrush = _terrainMap.getBrush(neighborBrush);
+
+                if (neighborLevel < level) {
+                    level = neighborLevel;
+                }
+
+                if (currentBrush && brush) {
+                    if (currentBrush.id != brush.id) {
+                        tileIndex = -1;
+                        break;
+                    }
+                }
+                if (currentBrush) {
+                    brush = currentBrush;
+                }
+
+                if (neighborBrush != -1 || neighborCliff) {
+                    tileIndex |= 0x1 << i;
+                }
+            }
+
+            if (!brush) {
+                brush = _terrainMap.getBrush(0);
+            }
+            int[] tiles = brush.tiles[tileIndex];
+            if (tiles.length) {
+                tileId = tiles[(x + y) % tiles.length];
+            }
+            foreach (size_t i, Tilemap tilemap; _lowerTilemaps) {
+                tilemap.setTile(x, y, (level == i) ? tileId : -1);
+            }
+        }
+
+        void updateTiles() {
+            if (!_terrainMap)
+                return;
+
+            immutable Vec2i[4] innerOffsets = [
+                Vec2i(0, 0), Vec2i(1, 0), Vec2i(1, 1), Vec2i(0, 1)
+            ];
+
+            immutable Vec2i[8] cliffNodeOffsets = [
+                Vec2i(-1, -1), Vec2i(0, -1), Vec2i(1, -1), Vec2i(-1, 0),
+                Vec2i(1, 0), Vec2i(-1, 1), Vec2i(0, 1), Vec2i(1, 1),
+            ];
+
+            // Cache des jonctions de falaises
+            for (uint y; y < _lines + _levels; ++y) {
+                for (uint x; x < _columns + 1; ++x) {
+                    int level = _levelGrid.getValue(x, y);
+                    _cliffGrid.setValue(x, y, false);
+
+                    foreach (offset; cliffNodeOffsets) {
+                        Vec2i neighbor = Vec2i(x, y) + offset;
+                        int neighborLevel = _levelGrid.getValue(neighbor.x, neighbor.y);
+                        if (neighborLevel != level) {
+                            _cliffGrid.setValue(x, y, true);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            uint maxY = _lines + max(0, (cast(int) _levels) - 1);
+
+            // Terrain
+            processTile(0, 0, innerOffsets);
+            processTile(_columns, 0, innerOffsets);
+            processTile(_columns, maxY, innerOffsets);
+            processTile(0, maxY, innerOffsets);
+
+            for (uint x = 1; x < _columns; ++x) {
+                processTile(x, 0, innerOffsets);
+                processTile(x, maxY, innerOffsets);
+            }
+
+            for (uint y = 1; y < maxY; ++y) {
+                processTile(0, y, innerOffsets);
+                processTile(_columns, y, innerOffsets);
+
+                for (uint x = 1; x < _columns; ++x) {
+                    processTile(x, y, innerOffsets);
+                }
+            }
+
+            // Falaises
+            processCliff(0, 0, innerOffsets);
+            processCliff(_columns, 0, innerOffsets);
+            processCliff(_columns, maxY, innerOffsets);
+            processCliff(0, maxY, innerOffsets);
+
+            for (uint x = 1; x < _columns; ++x) {
+                processCliff(x, 0, innerOffsets);
+                processCliff(x, maxY, innerOffsets);
+            }
+
+            for (uint y = 1; y < maxY; ++y) {
+                processCliff(0, y, innerOffsets);
+                processCliff(_columns, y, innerOffsets);
+
+                for (uint x = 1; x < _columns; ++x) {
+                    processCliff(x, y, innerOffsets);
+                }
+            }
+        }
     }
-}
 
-interface IEntityComponentPool {
-    void removeComponent(EntityID id);
-}
-
-final class EntityComponentPool(T) : IEntityComponentPool {
     private {
-        struct Pair {
-            T component;
-            EntityID id;
-        }
-
-        Pair[Entity_Size] _components;
-        ushort _top = 0u;
-        EntityID[Entity_Size] _slots;
+        EntityBuilder[] _entities;
+        LightBuilder[] _lights;
+        TerrainLayer[] _terrainlayers;
+        ParallaxLayer[] _parallaxLayers;
+        CollisionLayer[] _collisionLayers;
+        TopologicMap _topologicMap, _topologicWireframeMap;
+        string _name;
+        uint _columns, _lines;
+        int _levels;
+        uint _mainLevel;
+        float _brightness = 1f;
+        string _weatherType;
+        float _weatherValue = 1f;
     }
-
-    pragma(inline, true) size_t getCount() const {
-        return _top;
-    }
-
-    pragma(inline, true) bool hasComponent(EntityID id) {
-        return _slots[id.address].version_ > 0;
-    }
-
-    pragma(inline, true) T* getComponent(EntityID id) {
-        EntityID slot = _slots[id.address];
-        return cast(T*)(slot.version_ * (cast(size_t)&_components[slot.address].component));
-    }
-
-    pragma(inline, true) T* addComponent(EntityID id) {
-        EntityID* slot = &_slots[id.address];
-        if (slot.version_ == 1) {
-            return &_components[slot.address].component;
-        }
-        slot.address = _top;
-        _components[slot.address].id = id;
-        _top++;
-        slot.version_ = 1;
-        _components[slot.address].component.onInit();
-        return &_components[slot.address].component;
-    }
-
-    pragma(inline, true) void removeComponent(EntityID id) {
-        EntityID* slot = &_slots[id.address];
-        if (slot.version_ == 0) {
-            return;
-        }
-        slot.version_ = 0;
-        _components[slot.address].component.destroy();
-        _top--;
-        EntityID* otherSlot = &_slots[_components[_top].id];
-        _components[slot.address] = _components[_top];
-        otherSlot.address = slot.address;
-    }
-
-    int opApply(int delegate(EntityID, T*) dlg) {
-        int result;
-
-        for (ushort i; i < _top; ++i) {
-            Pair* pair = &_components[i];
-            result = dlg(pair.id, &pair.component);
-
-            if (result)
-                break;
-        }
-
-        return result;
-    }
-}
-
-struct PositionComponent {
-    Vec2f localPosition;
-    Vec2f worldPosition;
-}
-
-struct EntityPool {
-    PositionComponent[Entity_Size] positions;
-    ushort[][Entity_Size] children;
-    ushort[Entity_Size] parents;
-    RenderComponent[Entity_Size] renders;
-    IEntityComponentPool[string] componentPools;
-
-    ushort top = 0u;
-    ushort availableAddressesTop = 0u;
-
-    ushort[Entity_Size] availableAddresses;
-    EntityID[Entity_Size] slots;
-    ushort[Entity_Size] reverseTranslationTable;
-
-    void*[string] systemContexts;
-    Tuple!(SystemUpdater, void*)[] systemUpdatersBack, systemUpdatersFront;
-    Tuple!(SystemRenderer, void*)[] systemRenderersBack, systemRenderersFront;
-    SystemEntityUpdater systemEntityUpdater;
-    SystemEntityRenderer systemEntityRenderer;
-}
-
-/// Représente un contexte contenant des entités
-final class Scene {
-    private {
-        Canvas _canvas;
-        Sprite _sprite;
-        UIManager _uiManager;
-        bool _isAlive = true;
-        bool _isVisible = true;
-        Vec2i _size;
-        Camera[] _cameras;
-        EntityPool _entityPool;
-    }
-
-    string name;
-    string[] tags;
-    int zOrder;
-    Vec2f position = Vec2f.zero;
-    Vec2f parallax = Vec2f.one;
-    Vec2f mousePosition = Vec2f.zero;
 
     @property {
-        int width() const {
-            return _size.x;
+        uint columns() const {
+            return _columns;
         }
 
-        int height() const {
-            return _size.y;
+        uint lines() const {
+            return _lines;
         }
 
-        bool isAlive() const {
-            return _isAlive;
+        uint levels() const {
+            return _levels;
         }
 
-        Canvas canvas() {
-            return _canvas;
+        float brightness() const {
+            return _brightness;
         }
 
-        bool isVisible() const {
-            return _isVisible;
+        string weatherType() const {
+            return _weatherType;
         }
 
-        bool isVisible(bool isVisible_) {
-            return _isVisible = isVisible_;
+        float weatherValue() const {
+            return _weatherValue;
         }
 
-        Vec2f globalPosition() const {
-            return position + Atelier.world.camera.getPosition() * parallax;
+        TopologicMap topologicMap() {
+            return _topologicMap;
+        }
+
+        TopologicMap topologicWireframeMap() {
+            return _topologicWireframeMap;
+        }
+
+        TerrainLayer[] terrainLayers() {
+            return _terrainlayers;
+        }
+
+        ParallaxLayer[] parallaxLayers() {
+            return _parallaxLayers;
+        }
+
+        CollisionLayer[] collisionLayers() {
+            return _collisionLayers;
+        }
+
+        EntityBuilder[] entities() {
+            return _entities;
+        }
+
+        LightBuilder[] lights() {
+            return _lights;
         }
     }
 
     this() {
-        _size = Atelier.renderer.size;
-
-        _uiManager = new UIManager();
-        _uiManager.isSceneUI = true;
-
-        _canvas = new Canvas(_size.x, _size.y);
-        _sprite = new Sprite(_canvas);
-        _sprite.anchor = Vec2f.half;
-
-        for (ushort i; i < Entity_Max; ++i) {
-            _entityPool.positions[i].localPosition = Vec2f.zero;
-            _entityPool.positions[i].worldPosition = Vec2f.zero;
-        }
-        for (ushort i; i < Entity_Max; ++i) {
-            _entityPool.parents[i] = i;
-        }
-
-        setSystemEntityRender(&renderEntitySystem_recursive);
-        setSystemEntityUpdate(&updateEntitySystem_recursive);
+        _topologicMap = new TopologicMap;
+        _topologicWireframeMap = new TopologicMap;
     }
 
-    /// Vérifie si l’identifiant est valide
-    bool hasEntity(EntityID id) {
-        return _entityPool.slots[id.address].version_ == id.version_;
+    Scene fetch() {
+        return this;
     }
 
-    /// Génère un nouvel identifiant d’entité
-    EntityID createEntity() {
-        EntityID id;
-        if (_entityPool.availableAddressesTop) {
-            //Retire la dernière adresse disponible dans la liste
-            --_entityPool.availableAddressesTop;
-            id.address = _entityPool.availableAddresses[_entityPool.availableAddressesTop];
-        }
-        else {
-            //Ou on utilise une nouvelle adresse
-            id.address = _entityPool.top;
+    void setup() {
+        _topologicMap.setup();
+        _topologicWireframeMap.setup();
+
+        foreach (layer; _terrainlayers) {
+            layer.setup();
         }
 
-        //Ajoute la valeur à la pile
-        id.version_ = _entityPool.slots[id.address].version_;
-        _entityPool.slots[id.address].address = _entityPool.top;
-        _entityPool.reverseTranslationTable[_entityPool.top] = id.address;
-
-        ++_entityPool.top;
-
-        return id;
+        foreach (layer; _parallaxLayers) {
+            layer.setup();
+        }
     }
 
-    /// Supprime l’entité
-    void removeEntity(EntityID id) {
-        if (_entityPool.slots[id.address].version_ != id.version_) {
-            return;
+    void load(const(Farfadet) ffd) {
+        _name = ffd.get!string(0);
+
+        if (ffd.hasNode("size")) {
+            Farfadet node = ffd.getNode("size");
+            _columns = node.get!uint(0);
+            _lines = node.get!uint(1);
+            _topologicMap.setDimensions(_columns, _lines);
+            _topologicWireframeMap.setDimensions(_columns, _lines);
         }
 
-        ushort internal = _entityPool.slots[id.address].address;
-
-        //Ajoute l’adresse à la pile des emplacements disponibles
-        _entityPool.availableAddresses[_entityPool.availableAddressesTop] = id.address;
-        _entityPool.availableAddressesTop++;
-
-        _entityPool.top--;
-
-        //Augmente la génération de l’emplacement qui sera libéré
-        _entityPool.slots[id.address].version_++;
-        _entityPool.slots[id.address].address = _entityPool.top;
-
-        foreach (componentPool; _entityPool.componentPools) {
-            componentPool.removeComponent(id);
+        if (ffd.hasNode("levels")) {
+            _levels = ffd.getNode("levels").get!(int)(0);
         }
 
-        //Prend la dernière valeur de la pile et comble le trou
-        if (internal < _entityPool.top) {
-            ushort otherAddress = _entityPool.reverseTranslationTable[_entityPool.top];
+        if (ffd.hasNode("mainLevel")) {
+            _mainLevel = ffd.getNode("mainLevel").get!(uint)(0);
+        }
 
-            _entityPool.positions[internal] = _entityPool.positions[_entityPool.top];
-            _entityPool.children[internal] = _entityPool.children[_entityPool.top];
-            _entityPool.renders[internal] = _entityPool.renders[_entityPool.top];
+        if (ffd.hasNode("brightness")) {
+            _brightness = ffd.getNode("brightness").get!(float)(0);
+        }
 
-            if (_entityPool.children[internal].length) {
-                foreach (child; _entityPool.children[internal]) {
-                    _entityPool.parents[child] = internal;
-                }
+        if (ffd.hasNode("weather")) {
+            Farfadet weatherNode = ffd.getNode("weather");
+            _weatherType = weatherNode.get!(string)(0);
+            _weatherValue = weatherNode.get!(float)(1);
+        }
+
+        _topologicMap.load(ffd);
+        _topologicWireframeMap.load(ffd);
+        _topologicWireframeMap.setupWireframe(_topologicMap);
+
+        foreach (layerNode; ffd.getNodes("terrainLayer")) {
+            TerrainLayer layer = new TerrainLayer(_columns, _lines);
+            layer.load(layerNode);
+            _terrainlayers ~= layer;
+        }
+
+        foreach (layerNode; ffd.getNodes("parallaxLayer")) {
+            ParallaxLayer layer = new ParallaxLayer(_columns, _lines);
+            layer.load(layerNode);
+            _parallaxLayers ~= layer;
+        }
+
+        foreach (layerNode; ffd.getNodes("collisionLayer")) {
+            CollisionLayer layer = new CollisionLayer(_columns, _lines);
+            layer.load(layerNode);
+            _collisionLayers ~= layer;
+        }
+
+        sort!((a, b) => (a.level < b.level), SwapStrategy.stable)(
+            _collisionLayers);
+
+        foreach (entityNode; ffd.getNodes("entity")) {
+            EntityBuilder entity = new EntityBuilder(entityNode);
+            _entities ~= entity;
+        }
+
+        foreach (lightNode; ffd.getNodes("light")) {
+            LightBuilder light = new LightBuilder(lightNode);
+            _lights ~= light;
+        }
+    }
+
+    void serialize(OutStream stream) {
+        stream.write!string(_name);
+        stream.write!uint(_columns);
+        stream.write!uint(_lines);
+        stream.write!int(_levels);
+        stream.write!uint(_mainLevel);
+        stream.write!float(_brightness);
+        stream.write!string(_weatherType);
+        stream.write!float(_weatherValue);
+
+        _topologicMap.serialize(stream);
+
+        stream.write!uint(cast(uint) _terrainlayers.length);
+        foreach (layer; _terrainlayers) {
+            layer.serialize(stream);
+        }
+
+        stream.write!uint(cast(uint) _parallaxLayers.length);
+        foreach (layer; _parallaxLayers) {
+            layer.serialize(stream);
+        }
+
+        stream.write!uint(cast(uint) _collisionLayers.length);
+        foreach (layer; _collisionLayers) {
+            layer.serialize(stream);
+        }
+
+        stream.write!uint(cast(uint) _entities.length);
+        foreach (EntityBuilder entity; _entities) {
+            entity.serialize(stream);
+        }
+
+        stream.write!uint(cast(uint) _lights.length);
+        foreach (LightBuilder light; _lights) {
+            light.serialize(stream);
+        }
+    }
+
+    void deserialize(InStream stream) {
+        _name = stream.read!string();
+        _columns = stream.read!uint();
+        _lines = stream.read!uint();
+        _levels = stream.read!int();
+        _mainLevel = stream.read!uint();
+        _brightness = stream.read!float();
+        _weatherType = stream.read!string();
+        _weatherValue = stream.read!float();
+
+        _topologicMap.setDimensions(_columns, _lines);
+        _topologicMap.deserialize(stream);
+        _topologicWireframeMap.setDimensions(_columns, _lines);
+        _topologicWireframeMap.setupWireframe(_topologicMap);
+
+        const uint terrainCount = stream.read!uint();
+        for (uint i; i < terrainCount; ++i) {
+            TerrainLayer layer = new TerrainLayer(_columns, _lines);
+            layer.deserialize(stream);
+            _terrainlayers ~= layer;
+        }
+
+        const uint parallaxCount = stream.read!uint();
+        for (uint i; i < parallaxCount; ++i) {
+            ParallaxLayer layer = new ParallaxLayer(_columns, _lines);
+            layer.deserialize(stream);
+            _parallaxLayers ~= layer;
+        }
+
+        const uint collisionCount = stream.read!uint();
+        for (uint i; i < collisionCount; ++i) {
+            CollisionLayer layer = new CollisionLayer(_columns, _lines);
+            layer.deserialize(stream);
+            _collisionLayers ~= layer;
+        }
+
+        const uint entityCount = stream.read!uint();
+        _entities = new EntityBuilder[entityCount];
+        for (uint i; i < entityCount; ++i) {
+            _entities[i] = new EntityBuilder(stream);
+        }
+
+        const uint lightCount = stream.read!uint();
+        _lights = new LightBuilder[lightCount];
+        for (uint i; i < lightCount; ++i) {
+            _lights[i] = new LightBuilder(stream);
+        }
+    }
+
+    int getBaseZ(Vec2i pos) {
+        Vec2i coords = (pos - 8) / 16;
+        return _topologicMap.getLevel(coords.x, coords.y) * 16;
+    }
+
+    int getLevel(int x, int y) {
+        return _topologicMap.getLevel(x, y);
+    }
+
+    int getMaterial(Vec3i pos) {
+        if (pos.z < 0 || _levels <= 0)
+            return 0;
+
+        Vec3i coords;
+        Vec2i subCoords;
+
+        coords.x = pos.x / 16;
+        coords.y = pos.y / 16;
+        coords.z = pos.z / 16;
+
+        if (coords.z >= _levels)
+            coords.z = _levels - 1;
+
+        int tileId = -1;
+
+        foreach_reverse (layer; _terrainlayers) {
+            if (coords.z != cast(int) layer.level)
+                continue;
+
+            tileId = layer._tilemap.getTile(coords.x, coords.y);
+            if (tileId >= 0) {
+                subCoords.x = (pos.x / 8) & 0x1;
+                subCoords.y = (pos.y / 8) & 0x1;
+
+                return _topologicMap._terrainMap.getMaterial(tileId, subCoords);
             }
+        }
 
-            if (_entityPool.parents[_entityPool.top] == _entityPool.top) {
-                _entityPool.parents[internal] = internal;
-            }
-            else {
-                ushort parent = _entityPool.parents[_entityPool.top];
-                _entityPool.parents[internal] = parent;
+        coords.x = pos.x / 16;
+        coords.y = pos.y / 16;
 
-                for (ushort y; y < _entityPool.children[parent].length; ++y) {
-                    ushort child = _entityPool.children[parent][y];
-                    _entityPool.parents[child] = internal;
-                }
-            }
+        tileId = _topologicMap._upperTilemaps[coords.z].getTile(coords.x, coords.y);
+        if (tileId < 0) {
+            tileId = _topologicMap._lowerTilemaps[coords.z].getTile(coords.x, coords.y);
+        }
 
-            _entityPool.slots[otherAddress].address = internal;
-            _entityPool.reverseTranslationTable[internal] = otherAddress;
+        subCoords.x = (pos.x / 8) & 0x1;
+        subCoords.y = (pos.y / 8) & 0x1;
+
+        return _topologicMap._terrainMap.getMaterial(tileId, subCoords);
+    }
+}
+
+final class LightBuilder {
+    enum Type {
+        pointLight
+    }
+
+    private {
+        Type _type;
+        string _name;
+        Vec2i _position;
+        float _radius = 0f;
+        Color _color = Color.white;
+        float _brightness = 1f;
+    }
+
+    @property {
+        Type type() const {
+            return _type;
+        }
+
+        string name() const {
+            return _name;
+        }
+
+        Vec2i position() const {
+            return _position;
+        }
+
+        float radius() const {
+            return _radius;
+        }
+
+        Color color() const {
+            return _color;
+        }
+
+        float brightness() const {
+            return _brightness;
         }
     }
 
-    /// Supprime les entités
-    void clearEntities() {
-        _entityPool.top = 0u;
-        _entityPool.availableAddressesTop = 0u;
+    this(Farfadet ffd) {
+        try {
+            _type = to!Type(ffd.get!string(0));
+        }
+        catch (Exception e) {
+            _type = Type.pointLight;
+        }
 
-        for (ushort i; i < Entity_Size; ++i) {
-            _entityPool.slots[i].version_++;
+        if (ffd.hasNode("name")) {
+            _name = ffd.getNode("name").get!string(0);
         }
-        for (ushort i; i < Entity_Size; ++i) {
-            RenderComponent* renderComponent = &_entityPool.renders[i];
-            renderComponent.isVisible = true;
-            renderComponent.image = null;
-            renderComponent.canvas = null;
-            renderComponent.sprite = null;
-        }
-    }
 
-    EntityComponentPool!T getComponentPool(T)() {
-        return cast(EntityComponentPool!T) _entityPool.componentPools.require(T.stringof, {
-            EntityComponentPool!T pool = new EntityComponentPool!T;
-            return pool;
-        }());
-    }
+        if (ffd.hasNode("position")) {
+            _position = ffd.getNode("position").get!Vec2i(0);
+        }
 
-    void* getSystemContext(string name) {
-        auto p = name in _entityPool.systemContexts;
-        void* context;
-        if (!p) {
-            auto initializer = Atelier.world.getSystem!SystemInitializer(name);
-            if (initializer) {
-                context = initializer(this);
-            }
-            _entityPool.systemContexts[name] = context;
+        if (ffd.hasNode("radius")) {
+            _radius = ffd.getNode("radius").get!float(0);
         }
-        else {
-            context = *p;
-        }
-        return context;
-    }
 
-    void addSystemUpdate(SystemUpdater system, void* context, bool isBefore) {
-        if (isBefore) {
-            _entityPool.systemUpdatersBack ~= tuple(system, context);
+        if (ffd.hasNode("color")) {
+            Farfadet colorNode = ffd.getNode("color");
+            _color = Color(colorNode.get!float(0), colorNode.get!float(1),
+                colorNode.get!float(2));
         }
-        else {
-            _entityPool.systemUpdatersFront ~= tuple(system, context);
+
+        if (ffd.hasNode("brightness")) {
+            _brightness = ffd.getNode("brightness").get!float(0);
         }
     }
 
-    void addSystemRender(SystemRenderer system, void* context, bool isBefore) {
-        if (isBefore) {
-            _entityPool.systemRenderersBack ~= tuple(system, context);
-        }
-        else {
-            _entityPool.systemRenderersFront ~= tuple(system, context);
-        }
+    this(InStream stream) {
+        _type = stream.read!Type();
+        _name = stream.read!string();
+        _position = stream.read!Vec2i();
+        _radius = stream.read!float();
+        _color = stream.read!Color();
+        _brightness = stream.read!float();
     }
 
-    void setSystemEntityUpdate(SystemEntityUpdater system) {
-        _entityPool.systemEntityUpdater = system;
+    void serialize(OutStream stream) {
+        stream.write!Type(_type);
+        stream.write!string(_name);
+        stream.write!Vec2i(_position);
+        stream.write!float(_radius);
+        stream.write!Color(_color);
+        stream.write!float(_brightness);
+    }
+}
+
+final class EntityBuilder {
+    enum Type {
+        prop,
+        actor,
+        trigger,
+        teleporter,
+        note
     }
 
-    void setSystemEntityRender(SystemEntityRenderer system) {
-        _entityPool.systemEntityRenderer = system;
-    }
-
-    alias getPosition = getComponent!PositionComponent;
-    alias getRender = getComponent!RenderComponent;
-
-    T* getComponent(T)(EntityID id) {
-        static if (is(T == PositionComponent)) {
-            short internal = _entityPool.slots[id.address].address;
-            return &_entityPool.positions[internal];
-        }
-        else static if (is(T == RenderComponent)) {
-            short internal = _entityPool.slots[id.address].address;
-            return &_entityPool.renders[internal];
-        }
-        else {
-            return getComponentPool!(T).getComponent(id);
-        }
-    }
-
-    T* getOrAddComponent(T)(EntityID id) {
-        EntityComponentPool!T pool = getComponentPool!(T);
-        if (pool.hasComponent(id)) {
-            return pool.getComponent(id);
-        }
-        else {
-            return pool.addComponent(id);
+    private {
+        Type _type;
+        EntityData _data;
+        union {
+            PropBuilderData _prop;
+            ActorBuilderData _actor;
+            TriggerBuilderData _trigger;
+            TeleporterBuilderData _teleporter;
+            NoteBuilderData _note;
         }
     }
 
-    T* addComponent(T)(EntityID id) {
-        return getComponentPool!(T).addComponent(id);
+    @property {
+        Type type() const {
+            return _type;
+        }
+
+        const(EntityData) data() const {
+            return _data;
+        }
+
+        PropBuilderData prop() {
+            return _prop;
+        }
+
+        ActorBuilderData actor() {
+            return _actor;
+        }
+
+        TriggerBuilderData trigger() {
+            return _trigger;
+        }
+
+        TeleporterBuilderData teleporter() {
+            return _teleporter;
+        }
+
+        NoteBuilderData note() {
+            return _note;
+        }
     }
 
-    bool hasComponent(T)(EntityID id) {
-        return getComponentPool!(T).hasComponent(id);
-    }
+    this(Farfadet ffd) {
+        try {
+            _type = to!Type(ffd.get!string(0));
+        }
+        catch (Exception e) {
+            _type = Type.prop;
+        }
 
-    void removeComponent(T)(EntityID id) {
-        getComponentPool!(T).removeComponent(id);
-    }
+        _data.load(ffd);
 
-    /// Ajoute un élément d’interface
-    void addUI(UIElement ui) {
-        _uiManager.addUI(ui);
-    }
-
-    /// Supprime les interfaces
-    void clearUI() {
-        _uiManager.clearUI();
-    }
-
-    void dispatch(InputEvent event) {
-        switch (event.type) with (InputEvent.Type) {
-        case mouseButton:
-            Vec2f pos = event.asMouseButton().position;
-            mousePosition = pos - (_sprite.size / 2f - globalPosition);
+        final switch (_type) with (Type) {
+        case prop:
+            _prop = new PropBuilderData(ffd);
             break;
-        case mouseMotion:
-            Vec2f pos = event.asMouseMotion().position;
-            mousePosition = pos - (_sprite.size / 2f - globalPosition);
+        case actor:
+            _actor = new ActorBuilderData(ffd);
             break;
-        default:
+        case trigger:
+            _trigger = new TriggerBuilderData(ffd);
+            break;
+        case teleporter:
+            _teleporter = new TeleporterBuilderData(ffd);
+            break;
+        case note:
+            _note = new NoteBuilderData(ffd);
             break;
         }
-        _uiManager.dispatch(event);
-    }
-    /*
-    private Array!T _getArray(T)() {
-        static if (is(T == Entity)) {
-            return _entities;
-        }
-        else {
-            static assert(false, "type non-supporté");
-        }
-    }*/
-    /*
-    T findByName(T)(string name) {
-        foreach (element; _getArray!T()) {
-            if (element.name == name)
-                return element;
-        }
-        return null;
     }
 
-    T[] findByTag(T)(string[] tags) {
-        T[] result;
-        __elementLoop: foreach (element; _getArray!T()) {
-            foreach (string tag; tags) {
-                if (!canFind(element.tags, tag)) {
-                    continue __elementLoop;
-                }
-            }
-            result ~= element;
-        }
-        return result;
-    }*/
+    this(InStream stream) {
+        _type = stream.read!Type();
+        _data.deserialize(stream);
 
-    void update() {
-        Vec2f offset = _sprite.size / 2f - globalPosition;
-        _uiManager.cameraPosition = offset;
-        _uiManager.update();
-
-        foreach (system; _entityPool.systemUpdatersBack) {
-            system[0](this, system[1]);
-        }
-        if (_entityPool.systemEntityUpdater) {
-            _entityPool.systemEntityUpdater(this);
-        }
-        foreach (system; _entityPool.systemUpdatersFront) {
-            system[0](this, system[1]);
+        final switch (_type) with (Type) {
+        case prop:
+            _prop = new PropBuilderData(stream);
+            break;
+        case actor:
+            _actor = new ActorBuilderData(stream);
+            break;
+        case trigger:
+            _trigger = new TriggerBuilderData(stream);
+            break;
+        case teleporter:
+            _teleporter = new TeleporterBuilderData(stream);
+            break;
+        case note:
+            _note = new NoteBuilderData(stream);
+            break;
         }
     }
 
-    void remove() {
-        if (!_isAlive)
-            return;
-        _isAlive = false;
-    }
+    void serialize(OutStream stream) {
+        stream.write!Type(_type);
+        _data.serialize(stream);
 
-    void render(Vec2f offset) {
-        /*Vec2f offset = _sprite.size / 2f - globalPosition;
-        foreach (entity; _entities) {
-            entity.draw(offset);
-        }*/
-
-        //Vec2f offset = _sprite.size / 2f - globalPosition;
-        //offset = - globalPosition;
-        foreach (system; _entityPool.systemRenderersBack) {
-            system[0](this, system[1], offset, false);
-        }
-        if (_entityPool.systemEntityRenderer) {
-            _entityPool.systemEntityRenderer(this, offset);
-        }
-        foreach (system; _entityPool.systemRenderersFront) {
-            system[0](this, system[1], offset, true);
-        }
-        _uiManager.draw();
-    }
-
-    void draw(Vec2f origin) {
-        if (_isVisible) {
-            _sprite.draw(origin);
+        final switch (_type) with (Type) {
+        case prop:
+            _prop.serialize(stream);
+            break;
+        case actor:
+            _actor.serialize(stream);
+            break;
+        case trigger:
+            _trigger.serialize(stream);
+            break;
+        case teleporter:
+            _teleporter.serialize(stream);
+            break;
+        case note:
+            _note.serialize(stream);
+            break;
         }
     }
 }
 
-void updateEntitySystem_linear(Scene scene) {
-    for (ushort i; i < scene._entityPool.top; ++i) {
-        scene._entityPool.positions[i].worldPosition = scene._entityPool.positions[i].localPosition;
+final class PropBuilderData {
+    private {
+        float _angle = 180f;
+        string _rid;
+        string _graphic;
+    }
+
+    @property {
+        string rid() const {
+            return _rid;
+        }
+
+        string graphic() const {
+            return _graphic;
+        }
+
+        float angle() const {
+            return _angle;
+        }
+    }
+
+    this(Farfadet ffd) {
+        if (ffd.hasNode("rid")) {
+            _rid = ffd.getNode("rid").get!string(0);
+        }
+
+        if (ffd.hasNode("graphic")) {
+            _graphic = ffd.getNode("graphic").get!string(0);
+        }
+
+        if (ffd.hasNode("angle")) {
+            _angle = ffd.getNode("angle").get!float(0);
+        }
+    }
+
+    this(InStream stream) {
+        _rid = stream.read!string();
+        _graphic = stream.read!string();
+        _angle = stream.read!float();
+    }
+
+    void serialize(OutStream stream) {
+        stream.write!string(_rid);
+        stream.write!string(_graphic);
+        stream.write!float(_angle);
     }
 }
 
-void renderEntitySystem_linear(Scene scene, Vec2f offset) {
-    for (ushort i; i < scene._entityPool.top; ++i) {
-        RenderComponent* renderComponent = &scene._entityPool.renders[i];
-        if (renderComponent.isVisible && renderComponent.image) {
-            Vec2f renderPosition = scene._entityPool.positions[i].worldPosition + offset;
-            renderComponent.image.draw(renderPosition);
+final class ActorBuilderData {
+    private {
+        float _angle = 180f;
+        string _rid;
+        string _graphic;
+    }
+
+    @property {
+        string rid() const {
+            return _rid;
         }
+
+        string graphic() const {
+            return _graphic;
+        }
+
+        float angle() const {
+            return _angle;
+        }
+    }
+
+    this(Farfadet ffd) {
+        if (ffd.hasNode("rid")) {
+            _rid = ffd.getNode("rid").get!string(0);
+        }
+
+        if (ffd.hasNode("graphic")) {
+            _graphic = ffd.getNode("graphic").get!string(0);
+        }
+
+        if (ffd.hasNode("angle")) {
+            _angle = ffd.getNode("angle").get!float(0);
+        }
+    }
+
+    this(InStream stream) {
+        _rid = stream.read!string();
+        _graphic = stream.read!string();
+        _angle = stream.read!float();
+    }
+
+    void serialize(OutStream stream) {
+        stream.write!string(_rid);
+        stream.write!string(_graphic);
+        stream.write!float(_angle);
     }
 }
 
-void updateEntitySystem_recursive(Scene scene) {
-    for (ushort i; i < scene._entityPool.top; ++i) {
-        if (scene._entityPool.parents[i] != i) {
-            continue;
+final class TriggerBuilderData {
+    private {
+        string _event;
+        Vec3i _hitbox;
+    }
+
+    @property {
+        string event() const {
+            return _event;
         }
 
-        scene._entityPool.positions[i].worldPosition = scene._entityPool.positions[i].localPosition;
-        if (scene._entityPool.children[i].length) {
-            foreach (child; scene._entityPool.children[i]) {
-                _updateEntitySystem_recursive_child(scene, child,
-                    scene._entityPool.positions[i].worldPosition);
-            }
+        Vec3i hitbox() const {
+            return _hitbox;
         }
+    }
+
+    this(Farfadet ffd) {
+        if (ffd.hasNode("event")) {
+            _event = ffd.getNode("event").get!string(0);
+        }
+        if (ffd.hasNode("hitbox")) {
+            _hitbox = ffd.getNode("hitbox").get!Vec3i(0);
+        }
+    }
+
+    this(InStream stream) {
+        _event = stream.read!string();
+        _hitbox = stream.read!Vec3i();
+    }
+
+    void serialize(OutStream stream) {
+        stream.write!string(_event);
+        stream.write!Vec3i(_hitbox);
     }
 }
 
-private void _updateEntitySystem_recursive_child(Scene scene, ushort i, Vec2f parentPosition) {
-    scene._entityPool.positions[i].worldPosition = parentPosition +
-        scene._entityPool.positions[i].localPosition;
+final class TeleporterBuilderData {
+    private {
+        string _scene;
+        string _target;
+        uint _direction;
+        Vec3i _hitbox;
+    }
 
-    if (scene._entityPool.children[i].length) {
-        foreach (child; scene._entityPool.children[i]) {
-            _updateEntitySystem_recursive_child(scene, child,
-                scene._entityPool.positions[i].worldPosition);
+    @property {
+        string scene() const {
+            return _scene;
         }
+
+        string target() const {
+            return _target;
+        }
+
+        uint direction() const {
+            return _direction;
+        }
+
+        Vec3i hitbox() const {
+            return _hitbox;
+        }
+    }
+
+    this(Farfadet ffd) {
+        if (ffd.hasNode("scene")) {
+            _scene = ffd.getNode("scene").get!string(0);
+        }
+        if (ffd.hasNode("target")) {
+            _target = ffd.getNode("target").get!string(0);
+        }
+        if (ffd.hasNode("direction")) {
+            _direction = ffd.getNode("direction").get!uint(0);
+        }
+        if (ffd.hasNode("hitbox")) {
+            _hitbox = ffd.getNode("hitbox").get!Vec3i(0);
+        }
+    }
+
+    this(InStream stream) {
+        _scene = stream.read!string();
+        _target = stream.read!string();
+        _direction = stream.read!uint();
+        _hitbox = stream.read!Vec3i();
+    }
+
+    void serialize(OutStream stream) {
+        stream.write!string(_scene);
+        stream.write!string(_target);
+        stream.write!uint(_direction);
+        stream.write!Vec3i(_hitbox);
     }
 }
 
-void renderEntitySystem_recursive(Scene scene, Vec2f offset) {
-    for (ushort i; i < scene._entityPool.top; ++i) {
-        RenderComponent* renderComponent = &scene._entityPool.renders[i];
-
-        if (!renderComponent.isVisible || scene._entityPool.parents[i] != i) {
-            continue;
-        }
-
-        Vec2f renderPosition = scene._entityPool.positions[i].localPosition + offset;
-
-        if (renderComponent.canvas) {
-            Atelier.renderer.pushCanvas(renderComponent.canvas);
-            if (renderComponent.image) {
-                renderComponent.image.draw(Vec2f.zero);
-            }
-            if (scene._entityPool.children[i].length) {
-                foreach (child; scene._entityPool.children[i]) {
-                    _renderEntitySystem_recursive_child(scene, child, Vec2f.zero);
-                }
-            }
-            Atelier.renderer.popCanvas();
-            renderComponent.sprite.draw(renderPosition);
-        }
-        else {
-            if (renderComponent.image) {
-                renderComponent.image.draw(renderPosition);
-            }
-            if (scene._entityPool.children[i].length) {
-                foreach (child; scene._entityPool.children[i]) {
-                    _renderEntitySystem_recursive_child(scene, child, renderPosition);
-                }
-            }
-        }
-    }
-}
-
-private void _renderEntitySystem_recursive_child(Scene scene, short i, Vec2f offset) {
-    Vec2f renderPosition = scene._entityPool.positions[i].localPosition + offset;
-    RenderComponent* renderComponent = &scene._entityPool.renders[i];
-
-    if (!renderComponent.isVisible) {
-        return;
+final class NoteBuilderData {
+    private {
+        Vec2i _size;
     }
 
-    if (renderComponent.canvas) {
-        Atelier.renderer.pushCanvas(renderComponent.canvas);
-        if (renderComponent.image) {
-            renderComponent.image.draw(Vec2f.zero);
+    @property {
+        Vec2i size() const {
+            return _size;
         }
-        if (scene._entityPool.children[i].length) {
-            foreach (child; scene._entityPool.children[i]) {
-                _renderEntitySystem_recursive_child(scene, child, Vec2f.zero);
-            }
-        }
-        Atelier.renderer.popCanvas();
-        renderComponent.sprite.draw(renderPosition);
     }
-    else {
-        if (renderComponent.image) {
-            renderComponent.image.draw(renderPosition);
+
+    this(Farfadet ffd) {
+        if (ffd.hasNode("size")) {
+            _size = ffd.getNode("size").get!Vec2i(0);
         }
-        if (scene._entityPool.children[i].length) {
-            foreach (child; scene._entityPool.children[i]) {
-                _renderEntitySystem_recursive_child(scene, child, renderPosition);
-            }
-        }
+    }
+
+    this(InStream stream) {
+        _size = stream.read!Vec2i();
+    }
+
+    void serialize(OutStream stream) {
+        stream.write!Vec2i(_size);
     }
 }

@@ -71,7 +71,7 @@ final class Archive : IArchive {
                     }
                 }
                 catch (Exception e) {
-                    log("Erreur d’archivage: ", entry.name, " - ", e.msg);
+                    Atelier.log("Erreur d’archivage: ", entry.name, " - ", e.msg);
                 }
             }
         }

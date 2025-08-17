@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.render.font;
 
 public {
@@ -11,6 +6,7 @@ public {
     import atelier.render.font.glyph;
     import atelier.render.font.pixelfont;
     import atelier.render.font.pixelfontbordered;
+    import atelier.render.font.pixelfontset;
     import atelier.render.font.pixelfontshadowed;
     import atelier.render.font.pixelfontstandard;
     import atelier.render.font.truetype;

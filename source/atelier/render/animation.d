@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.render.animation;
 
 import std.conv : to;
@@ -106,6 +101,13 @@ final class Animation : Image, Resource!Animation {
     void start() {
         _currentTick = 0;
         _frame = 0;
+        _isRunning = true;
+    }
+
+    /// Démarre l’animation au hasard
+    void startRand() {
+        _currentTick = Atelier.rng.rand(frameTime);
+        _frame = Atelier.rng.rand(cast(uint) frames.length);
         _isRunning = true;
     }
 

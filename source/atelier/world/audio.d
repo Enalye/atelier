@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.world.audio;
 
 import atelier.common;
@@ -11,7 +6,7 @@ import atelier.audio;
 import atelier.world.scene;
 import atelier.world.world;
 import atelier.world.camera;
-
+/*
 package(atelier.world) void registerSystems_audio(World world) {
     world.registerSystem!SystemUpdater("audio", &_updateSystem);
 }
@@ -114,3 +109,4 @@ private void _updateSystem(Scene scene, void* context) {
         audio.spacialize(offset);
     }
 }
+*/

@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.audio.config;
 
 enum Atelier_Audio_SampleRate = 48_000;

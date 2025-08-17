@@ -18,7 +18,7 @@ final class TabGroup : UIElement {
     }
 
     @property {
-        string value() {
+        string value() const {
             return _value;
         }
     }
@@ -155,13 +155,23 @@ private final class Tab : UIElement {
 
         if (icon.length) {
             _icon = new Icon(icon);
-            _icon.setAlign(UIAlignX.left, UIAlignY.center);
-            _icon.setPosition(Vec2f(8f, 0f));
+
+            if (name.length) {
+                _icon.setAlign(UIAlignX.left, UIAlignY.center);
+                _icon.setPosition(Vec2f(8f, 0f));
+            }
+            else {
+                _icon.setAlign(UIAlignX.center, UIAlignY.center);
+            }
+
             addUI(_icon);
         }
-        _nameLabel = new Label(name, Atelier.theme.font);
-        _nameLabel.setAlign(UIAlignX.center, UIAlignY.center);
-        addUI(_nameLabel);
+
+        if (name.length) {
+            _nameLabel = new Label(name, Atelier.theme.font);
+            _nameLabel.setAlign(UIAlignX.center, UIAlignY.center);
+            addUI(_nameLabel);
+        }
 
         setHeight(32f);
 

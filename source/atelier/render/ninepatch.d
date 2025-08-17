@@ -1,13 +1,9 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.render.ninepatch;
 
 import std.conv : to;
 import std.algorithm.comparison : min;
 import std.exception;
+import std.math.traits : isNormal;
 
 import bindbc.sdl;
 
@@ -195,8 +191,8 @@ final class NinePatch : Image, Resource!NinePatch {
         if (_surface is null || _clip.z <= (_left + _right) || _clip.w <= (_top + _bottom))
             return;
 
-        _cache = (_size.x >= 1f && _size.y >= 1f) ? new WritableTexture(cast(uint) _size.x,
-            cast(uint) _size.y) : null;
+        _cache = (_size.x >= 1f && _size.y >= 1f && isNormal(_size.x) && isNormal(_size.y)) ? new WritableTexture(
+            cast(uint) _size.x, cast(uint) _size.y) : null;
 
         if (!_cache)
             return;

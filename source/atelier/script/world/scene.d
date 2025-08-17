@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.script.world.scene;
 
 import std.algorithm;
@@ -21,7 +16,7 @@ package void loadLibWorld_scene(GrModule mod) {
     mod.setModuleInfo(GrLocale.fr_FR, "Défini un calque où évolue des entités");
     mod.setModuleExample(GrLocale.fr_FR, "var scene = @Scene;
 @World.addScene(scene);");
-
+/+
     GrType sceneType = mod.addNative("Scene");
 
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
@@ -121,9 +116,9 @@ package void loadLibWorld_scene(GrModule mod) {
 
     mod.setDescription(GrLocale.fr_FR, "Supprime les élements d’interface de la scène");
     mod.setParameters(["scene"]);
-    mod.addFunction(&_clearUI, "clearUI", [sceneType]);
+    mod.addFunction(&_clearUI, "clearUI", [sceneType]);+/
 }
-
+/+
 private void _ctor(GrCall call) {
     call.setNative(new Scene);
 }
@@ -347,3 +342,4 @@ private void _clearUI(GrCall call) {
     Scene scene = call.getNative!Scene(0);
     scene.clearUI();
 }
++/

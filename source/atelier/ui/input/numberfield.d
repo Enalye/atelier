@@ -152,6 +152,10 @@ final class NumberField : UIElement {
         value(_value);
     }
 
+    void setStep(float step_) {
+        _step = step_;
+    }
+
     private void _onValue() {
         try {
             string text = _textField.value;
@@ -269,6 +273,10 @@ final class IntegerField : UIElement {
         _minValue = minValue;
         _maxValue = maxValue;
         value(_value);
+    }
+
+    void setStep(int step_) {
+        _step = step_;
     }
 
     private void _onValue() {

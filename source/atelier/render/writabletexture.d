@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.render.writabletexture;
 
 import std.conv : to;
@@ -90,7 +85,10 @@ final class WritableTexture : ImageData {
             SDL_DestroyTexture(_texture);
         _texture = SDL_CreateTexture(Atelier.renderer.sdlRenderer,
             SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, _width, _height);
-        enforce(_texture, "error occurred while converting a surface to a texture format.");
+        //enforce(_texture, "error occurred while converting a surface to a texture format.");
+        if (!_texture) {
+            Atelier.log("TEXTURE INVALIDE");
+        }
 
         updateSettings();
     }

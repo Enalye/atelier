@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.render.canvas;
 
 import std.conv : to;
@@ -41,6 +36,10 @@ final class Canvas : ImageData {
         /// loaded ?
         bool isLoaded() const {
             return true;
+        }
+
+        bool isSmooth() const {
+            return _isSmooth;
         }
 
         /// Width in texels.

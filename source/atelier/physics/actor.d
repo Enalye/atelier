@@ -1,0 +1,430 @@
+module atelier.physics.actor;
+
+import std.math;
+
+import atelier.common;
+import atelier.core;
+import atelier.physics.system;
+import atelier.physics.collider;
+import atelier.physics.solid;
+import atelier.world;
+
+final class ActorCollider : Collider {
+    private {
+        SolidCollider _riding;
+    }
+
+    this(Vec3u size_) {
+        super(size_);
+        _type = Type.actor;
+    }
+
+    this(ActorCollider other) {
+        super(other);
+    }
+
+    override Collider fetch() {
+        return new ActorCollider(this);
+    }
+
+    override void moveTile(Vec3i moveDir,
+        Physics.CollisionHit.Type type = Physics.CollisionHit.Type.none) {
+        if (moveDir == Vec3i.zero)
+            return;
+
+        Vec3i stepDir = moveDir.sign();
+        Atelier.log("STEP: ", stepDir);
+
+        Vec3i walkDir;
+        Vec3i totalMoveDir;
+        while (walkDir != moveDir) {
+            bool[3] axis;
+            Vec3i[3] potentialWalks;
+
+            potentialWalks[0] = walkDir;
+            potentialWalks[1] = walkDir;
+            potentialWalks[2] = walkDir;
+            potentialWalks[0].x += stepDir.x;
+            potentialWalks[1].y += stepDir.y;
+            potentialWalks[2].z += stepDir.z;
+
+            float[3] dists;
+
+            Vec3f v = cast(Vec3f) moveDir;
+
+            dists[0] = v.cross(cast(Vec3f) potentialWalks[0]).lengthSquared();
+            dists[1] = v.cross(cast(Vec3f) potentialWalks[1]).lengthSquared();
+            dists[2] = v.cross(cast(Vec3f) potentialWalks[2]).lengthSquared();
+
+            Vec3f maxDir;
+            maxDir.x = moveDir.x != 0 ? dists[0] : int.max;
+            maxDir.y = moveDir.y != 0 ? dists[1] : int.max;
+            maxDir.z = moveDir.z != 0 ? dists[2] : int.max;
+
+            if (maxDir.x < maxDir.y) {
+                if (maxDir.x < maxDir.z) {
+                    walkDir.x += stepDir.x;
+                    axis[0] = true;
+                }
+                else if (maxDir.x > maxDir.z) {
+                    walkDir.z += stepDir.z;
+                    axis[2] = true;
+                }
+                else {
+                    walkDir.x += stepDir.x;
+                    axis[0] = true;
+                    walkDir.z += stepDir.z;
+                    axis[2] = true;
+                }
+            }
+            else if (maxDir.x > maxDir.y) {
+                if (maxDir.y < maxDir.z) {
+                    walkDir.y += stepDir.y;
+                    axis[1] = true;
+                }
+                else if (maxDir.y > maxDir.z) {
+                    walkDir.z += stepDir.z;
+                    axis[2] = true;
+                }
+                else {
+                    walkDir.y += stepDir.y;
+                    axis[1] = true;
+                    walkDir.z += stepDir.z;
+                    axis[2] = true;
+                }
+            }
+            else {
+                if (maxDir.y < maxDir.z) {
+                    walkDir.x += stepDir.x;
+                    axis[0] = true;
+                    walkDir.y += stepDir.y;
+                    axis[1] = true;
+                }
+                else if (maxDir.y > maxDir.z) {
+                    walkDir.z += stepDir.z;
+                    axis[2] = true;
+                }
+                else {
+                    walkDir.x += stepDir.x;
+                    axis[0] = true;
+                    walkDir.y += stepDir.y;
+                    axis[1] = true;
+                    walkDir.z += stepDir.z;
+                    axis[2] = true;
+                }
+            }
+
+            if (axis[0]) {
+                Vec3i hitPosition = entity.getTilePosition() + Vec3i(stepDir.x, 0, 0);
+                Physics.TerrainHit terrainHit = Atelier.physics.hitTileTerrain(hitPosition, hitbox);
+                if (terrainHit.isColliding) {
+                    //Physics.CollisionHit data;
+                    //data.normal = terrainHit.normal;
+                    //data.type = hitType;
+                    //entity.onCollide(data);
+                }
+                else {
+                    //_moveTileRaw(entity, Vec3i(stepDir.x, 0, 0), terrainHit.height);
+                    totalMoveDir.x += stepDir.x;
+                }
+            }
+            if (axis[1]) {
+                Vec3i hitPosition = entity.getTilePosition() + Vec3i(0, stepDir.y, 0);
+                Physics.TerrainHit terrainHit = Atelier.physics.hitTileTerrain(hitPosition, hitbox);
+                if (terrainHit.isColliding) {
+                    //Physics.CollisionHit data;
+                    //data.normal = terrainHit.normal;
+                    //data.type = hitType;
+                    //entity.onCollide(data);
+                }
+                else {
+                    //_moveTileRaw(entity, Vec3i(0, stepDir.y, 0), terrainHit.height);
+                    totalMoveDir.y += stepDir.y;
+                }
+            }
+            if (axis[2]) {
+                Vec3i hitPosition = entity.getTilePosition() + Vec3i(0, 0, stepDir.z);
+                Physics.TerrainHit terrainHit = Atelier.physics.hitTileTerrain(hitPosition, hitbox);
+                if (terrainHit.isColliding) {
+                    //Physics.CollisionHit data;
+                    //data.normal = terrainHit.normal;
+                    //data.type = hitType;
+                    //entity.onCollide(data);
+                }
+                else {
+                    //_moveTileRaw(entity, Vec3i(0, 0, stepDir.z), terrainHit.height);
+                    totalMoveDir.z += stepDir.z;
+                }
+            }
+        }
+
+        if (totalMoveDir != Vec3i.zero) {
+            _moveTileRaw(entity, totalMoveDir, 0);
+        }
+    }
+
+    override void move(Vec3f moveDir,
+        Physics.CollisionHit.Type hitType = Physics.CollisionHit.Type.none) {
+        Vec3f subMove = entity.getSubPosition();
+        subMove += moveDir;
+        Vec3i gridMovement = cast(Vec3i) subMove.round();
+        subMove -= cast(Vec3f) gridMovement;
+        entity.setSubPosition(subMove);
+
+        if (gridMovement == Vec3i.zero)
+            return;
+
+        Vec3i stepDir = gridMovement.sign();
+
+        Vec3i walkDir;
+        while (walkDir != gridMovement) {
+            bool[3] axis;
+            Vec3i[3] potentialWalks;
+
+            potentialWalks[0] = walkDir;
+            potentialWalks[1] = walkDir;
+            potentialWalks[2] = walkDir;
+            potentialWalks[0].x += stepDir.x;
+            potentialWalks[1].y += stepDir.y;
+            potentialWalks[2].z += stepDir.z;
+
+            float[3] dists;
+
+            Vec3f v = cast(Vec3f) gridMovement;
+
+            dists[0] = v.cross(cast(Vec3f) potentialWalks[0]).lengthSquared();
+            dists[1] = v.cross(cast(Vec3f) potentialWalks[1]).lengthSquared();
+            dists[2] = v.cross(cast(Vec3f) potentialWalks[2]).lengthSquared();
+
+            Vec3f maxDir;
+            maxDir.x = gridMovement.x != 0 ? dists[0] : int.max;
+            maxDir.y = gridMovement.y != 0 ? dists[1] : int.max;
+            maxDir.z = gridMovement.z != 0 ? dists[2] : int.max;
+
+            if (maxDir.x < maxDir.y) {
+                if (maxDir.x < maxDir.z) {
+                    walkDir.x += stepDir.x;
+                    axis[0] = true;
+                }
+                else if (maxDir.x > maxDir.z) {
+                    walkDir.z += stepDir.z;
+                    axis[2] = true;
+                }
+                else {
+                    walkDir.x += stepDir.x;
+                    axis[0] = true;
+                    walkDir.z += stepDir.z;
+                    axis[2] = true;
+                }
+            }
+            else if (maxDir.x > maxDir.y) {
+                if (maxDir.y < maxDir.z) {
+                    walkDir.y += stepDir.y;
+                    axis[1] = true;
+                }
+                else if (maxDir.y > maxDir.z) {
+                    walkDir.z += stepDir.z;
+                    axis[2] = true;
+                }
+                else {
+                    walkDir.y += stepDir.y;
+                    axis[1] = true;
+                    walkDir.z += stepDir.z;
+                    axis[2] = true;
+                }
+            }
+            else {
+                if (maxDir.y < maxDir.z) {
+                    walkDir.x += stepDir.x;
+                    axis[0] = true;
+                    walkDir.y += stepDir.y;
+                    axis[1] = true;
+                }
+                else if (maxDir.y > maxDir.z) {
+                    walkDir.z += stepDir.z;
+                    axis[2] = true;
+                }
+                else {
+                    walkDir.x += stepDir.x;
+                    axis[0] = true;
+                    walkDir.y += stepDir.y;
+                    axis[1] = true;
+                    walkDir.z += stepDir.z;
+                    axis[2] = true;
+                }
+            }
+
+            if (axis[0]) {
+                Vec3i hitPosition = entity.getPosition() + Vec3i(stepDir.x, 0, 0);
+                Physics.TerrainHit terrainHit = Atelier.physics.hitTerrain(hitPosition, hitbox);
+                if (terrainHit.isColliding) {
+                    Physics.CollisionHit data;
+                    data.normal = terrainHit.normal;
+                    data.type = hitType;
+                    entity.onCollide(data);
+                }
+                else {
+                    Physics.SolidHit solidHit = Atelier.physics.collidesAt(hitPosition, hitbox);
+                    if (solidHit.isColliding) {
+                        Physics.CollisionHit data;
+                        switch (solidHit.solid.shape) with (SolidCollider.Shape) {
+                        case slopeLeft:
+                        case slopeRight:
+                            int deltaZ = solidHit.baseZ - hitPosition.z;
+                            if ((stepDir.x > 0 && solidHit.solid.shape == SolidCollider.Shape.slopeLeft) ||
+                                (stepDir.x < 0 &&
+                                    solidHit.solid.shape == SolidCollider.Shape.slopeRight)) {
+                                goto default;
+                            }
+                            Physics.SolidHit solidHitUp = Atelier.physics.collidesAt(hitPosition + Vec3i(0,
+                                    0, deltaZ), hitbox);
+                            if (solidHitUp.isColliding) {
+                                data.solid = solidHit.solid;
+                                data.normal = Vec3f(0, 0, deltaZ > 0 ? -1 : 1);
+                                data.type = hitType;
+                                entity.onCollide(data);
+                            }
+                            else {
+                                entity.moveRaw(Vec3i(stepDir.x, 0, deltaZ),
+                                    solidHit.baseZ, solidHit.solid.entity.getMaterial());
+                            }
+                            break;
+                        default:
+                            data.solid = solidHit.solid;
+                            data.normal = Vec3f(-stepDir.x, 0, 0);
+                            data.type = hitType;
+                            entity.onCollide(data);
+                            break;
+                        }
+                        break;
+                    }
+                    else {
+                        _moveRaw(entity, Vec3i(stepDir.x, 0, 0), terrainHit.height);
+                    }
+                }
+            }
+            if (axis[1]) {
+                Vec3i hitPosition = entity.getPosition() + Vec3i(0, stepDir.y, 0);
+                Physics.TerrainHit terrainHit = Atelier.physics.hitTerrain(hitPosition, hitbox);
+                if (terrainHit.isColliding) {
+                    Physics.CollisionHit data;
+                    data.normal = terrainHit.normal;
+                    data.type = hitType;
+                    entity.onCollide(data);
+                }
+                else {
+                    Physics.SolidHit solidHit = Atelier.physics.collidesAt(hitPosition, hitbox);
+                    if (solidHit.isColliding) {
+                        Physics.CollisionHit data;
+                        switch (solidHit.solid.shape) with (SolidCollider.Shape) {
+                        case slopeUp:
+                        case slopeDown:
+                            int deltaZ = solidHit.baseZ - hitPosition.z;
+                            if ((stepDir.y > 0 && solidHit.solid.shape == SolidCollider.Shape.slopeUp) ||
+                                (stepDir.y < 0 &&
+                                    solidHit.solid.shape == SolidCollider.Shape.slopeDown)) {
+                                goto default;
+                            }
+                            Physics.SolidHit solidHitUp = Atelier.physics.collidesAt(hitPosition + Vec3i(0,
+                                    0, deltaZ), hitbox);
+                            if (solidHitUp.isColliding) {
+                                data.solid = solidHit.solid;
+                                data.normal = Vec3f(0, 0, deltaZ > 0 ? -1 : 1);
+                                data.type = hitType;
+                                entity.onCollide(data);
+                            }
+                            else {
+                                entity.moveRaw(Vec3i(0, stepDir.y, deltaZ),
+                                    solidHit.baseZ, solidHit.solid.entity.getMaterial());
+                            }
+                            break;
+                        default:
+                            data.solid = solidHit.solid;
+                            data.normal = Vec3f(0, -stepDir.y, 0);
+                            data.type = hitType;
+                            entity.onCollide(data);
+                            break;
+                        }
+                        break;
+                    }
+                    else {
+                        _moveRaw(entity, Vec3i(0, stepDir.y, 0), terrainHit.height);
+                    }
+                }
+            }
+            if (axis[2]) {
+                Vec3i hitPosition = entity.getPosition() + Vec3i(0, 0, stepDir.z);
+                Physics.TerrainHit terrainHit = Atelier.physics.hitTerrain(hitPosition, hitbox);
+                if (terrainHit.isColliding) {
+                    Physics.CollisionHit data;
+                    data.normal = Vec3f(0f, 0f, 1f);
+                    data.type = hitType;
+                    entity.onCollide(data);
+                }
+                else {
+                    Physics.SolidHit solidHit = Atelier.physics.collidesAt(hitPosition, hitbox);
+                    if (solidHit.isColliding) {
+                        Physics.CollisionHit data;
+                        data.solid = solidHit.solid;
+                        data.normal = Vec3f(0, 0, -stepDir.z);
+                        data.type = hitType;
+                        entity.onCollide(data);
+                        break;
+                    }
+                    else {
+                        _moveRaw(entity, Vec3i(0, 0, stepDir.z), terrainHit.height);
+                    }
+                }
+            }
+        }
+    }
+
+    private void _moveTileRaw(Entity entity, Vec3i dir, int baseZ) {
+        //int material = Atelier.world.scene.getTileMaterial(entity.getTilePosition());
+        //entity.moveTileRaw(dir, baseZ, material);
+        Atelier.log("movetileraw: ", dir);
+        entity.moveTileRaw(dir);
+    }
+
+    private void _moveRaw(Entity entity, Vec3i dir, int baseZ) {
+        Physics.SolidUnderHit hit = Atelier.physics.getSolidUnder(this);
+
+        int material;
+        if (hit.isUnder && hit.baseZ >= baseZ) {
+            baseZ = hit.baseZ;
+            material = hit.solid.entity.getMaterial();
+        }
+        else {
+            material = Atelier.world.scene.getMaterial(entity.getPosition());
+        }
+
+        entity.moveRaw(dir, baseZ, material);
+    }
+
+    /// Est-ce que l’acteur est sur le solide ?
+    bool isRiding(SolidCollider solid) {
+        return (solid.left <= right) && (solid.right >= left) &&
+            (solid.up <= down) && (solid.down >= up) && (solid.top == bottom);
+    }
+
+    /// Vérifie s’il y a collision entre ce solide et une boite
+    Physics.ActorHit collidesWith(Vec3i point_, Vec3i hitbox_) {
+        Physics.ActorHit hit;
+        hit.actor = this;
+
+        //if (!_isTempCollidable || !_isCollidable) {
+        //    return hit;
+        //}
+
+        point_.x -= hitbox_.x - (hitbox_.x >> 1);
+        point_.y -= hitbox_.y - (hitbox_.y >> 1);
+
+        if (!((left < (point_.x + hitbox_.x)) && (up < (point_.y + hitbox_.y)) &&
+                (bottom < (point_.z + hitbox_.z)) && (right > point_.x) && (down > point_.y)
+                && (top > point_.z)))
+            return hit;
+
+        hit.isColliding = true;
+        return hit;
+    }
+}

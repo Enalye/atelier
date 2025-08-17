@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.core.loader.tilemap;
 
 import std.exception : enforce;
@@ -26,13 +21,8 @@ package void compileTilemap(string path, const Farfadet ffd, OutStream stream) {
     uint height = sizeNode.get!int(1);
 
     int[][] tiles;
-    if(ffd.hasNode("tiles")) {
+    if (ffd.hasNode("tiles")) {
         tiles = ffd.getNode("tiles", 1).get!(int[][])(0);
-    }
-
-    int[][] heightmap;
-    if(ffd.hasNode("heightmap")) {
-        tiles = ffd.getNode("heightmap", 1).get!(int[][])(0);
     }
 
     stream.write!string(rid);
@@ -40,7 +30,6 @@ package void compileTilemap(string path, const Farfadet ffd, OutStream stream) {
     stream.write!uint(height);
     stream.write!string(tilesetRID);
     stream.write!(int[][])(tiles);
-    stream.write!(int[][])(heightmap);
 }
 
 package void loadTilemap(InStream stream) {
@@ -49,15 +38,12 @@ package void loadTilemap(InStream stream) {
     const uint height = stream.read!uint();
     const string tilesetRID = stream.read!string();
     const int[][] tiles = stream.read!(int[][])();
-    const int[][] heightmap = stream.read!(int[][])();
 
     Atelier.res.store(rid, {
         Tileset tileset = Atelier.res.get!Tileset(tilesetRID);
         Tilemap tilemap = new Tilemap(tileset, width, height);
         if (tiles.length)
             tilemap.setTiles(tiles);
-        if (heightmap.length)
-            tilemap.setTilesElevation(heightmap);
         return tilemap;
     });
 }

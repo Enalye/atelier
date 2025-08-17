@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.common.vec2;
 
 import std.math;
@@ -168,6 +163,17 @@ struct Vec2(T) {
     /// Retourne la valeur la plus grande valeur
     T max() const {
         return x > y ? x : y;
+    }
+
+    /// Retourne -1, 0 ou 1 en fonction de l’orientation de chaque axe
+    Vec2!T sign() const {
+        static if (__traits(isFloating, T))
+            return Vec2!T(x != .0 ? (x > .0 ? 1.0 : -1.0) : 0.0, y != .0 ? (y > .0 ? 1.0 : -1.0)
+                    : 0.0);
+        else static if (__traits(isUnsigned, T))
+            return Vec2!T(x != 0U ? 1U : 0U, y != 0U ? 1U : 0U);
+        else
+            return Vec2!T(x != 0 ? (x > 0 ? 1 : -1) : 0, y != 0 ? (y > 0 ? 1 : -1) : 0);
     }
 
     /// Remove negative components.

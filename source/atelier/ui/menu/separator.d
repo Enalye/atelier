@@ -18,7 +18,7 @@ final class MenuSeparator : UIElement {
     }
 
     this() {
-        _line = new Rectangle(Vec2f(getWidth(), 2f), true, 2f);
+        _line = Rectangle.fill(Vec2f(getWidth(), 2f));
         _line.color = Atelier.theme.neutral;
         _line.anchor = Vec2f(0f, 0.5f);
         _line.alpha = 1f;

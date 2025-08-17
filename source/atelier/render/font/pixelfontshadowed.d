@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.render.font.pixelfontshadowed;
 
 import std.conv : to;
@@ -14,7 +9,7 @@ import atelier.render.imagedata;
 import atelier.render.util;
 import atelier.render.writabletexture;
 
-final class PixelFontShadowed : PixelFont {
+final class PixelFontShadowed : PixelFont, Resource!PixelFontShadowed {
     private {
         Glyph[dchar] _glyphs;
         Glyph _unknownGlyph;
@@ -91,6 +86,10 @@ final class PixelFontShadowed : PixelFont {
         _texture = new WritableTexture(_surfaceW, _surfaceH);
     }
 
+    PixelFontShadowed fetch() {
+        return this;
+    }
+
     override void addCharacter(dchar ch, int[] glyphData, int width, int height, int descent) {
         struct RasterData {
             int[] glyph;
@@ -146,7 +145,7 @@ final class PixelFontShadowed : PixelFont {
         }, &rasterData);
 
         _glyphs[ch] = new PixelGlyphShadowed(true, (rasterData.w + 1) + _spacing,
-            (rasterData.h + rasterData.descent) - _ascent, rasterData.x,
+            rasterData.h + rasterData.descent, rasterData.x,
             rasterData.y, rasterData.w, rasterData.h, _weight, _texture);
 
         _posX += rasterData.w * _weight * 2 + 1;
@@ -170,7 +169,7 @@ private final class PixelGlyphShadowed : Glyph {
         }
         /// Width to advance cursor from previous position.
         int advance() const {
-            return _advance + 1;
+            return _advance;
         }
         /// Offset
         int offsetX() const {

@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.render;
 
 public {
@@ -13,6 +8,7 @@ public {
     import atelier.render.font;
     import atelier.render.image;
     import atelier.render.imagedata;
+    import atelier.render.multidiranimation;
     import atelier.render.ninepatch;
     import atelier.render.rectangle;
     import atelier.render.renderer;

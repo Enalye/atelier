@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.ui.core.box;
 
 import atelier.common;
@@ -60,10 +55,10 @@ final class HBox : Box {
     private void _onUpdate() {
         Vec2f newSize = Vec2f(_margin.x, _padding.y);
 
-        foreach (UIElement child; getChildren()) {
+        foreach (const size_t i, UIElement child; getChildren()) {
             child.setAlign(UIAlignX.left, _childAlign);
             child.setPosition(Vec2f(newSize.x, _margin.y));
-            newSize.x += child.getWidth() + _spacing;
+            newSize.x += child.getWidth() + ((i + 1 < getChildren().length) ? _spacing : 0f);
             newSize.y = max(newSize.y, child.getHeight() + _margin.y * 2f);
         }
         newSize.x = max(_padding.x, newSize.x + _margin.x);
@@ -92,10 +87,10 @@ final class VBox : Box {
     private void _onUpdate() {
         Vec2f newSize = Vec2f(_padding.x, _margin.y);
 
-        foreach (UIElement child; getChildren()) {
+        foreach (const size_t i, UIElement child; getChildren()) {
             child.setAlign(_childAlign, UIAlignY.top);
             child.setPosition(Vec2f(_margin.x, newSize.y));
-            newSize.y += child.getHeight() + _spacing;
+            newSize.y += child.getHeight() + ((i + 1 < getChildren().length) ? _spacing : 0f);
             newSize.x = max(newSize.x, child.getWidth() + _margin.x * 2f);
         }
         newSize.y = max(_padding.y, newSize.y + _margin.y);

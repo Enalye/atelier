@@ -1,0 +1,41 @@
+{
+	"authors": [
+		"enalye"
+	],
+	"copyright": "Copyright © 2024, enalye",
+	"description": "Jeu",
+	"license": "proprietary",
+	"name": "editor",
+    "targetName": "editor",
+    "workingDirectory": "../..",
+    "targetType": "executable",
+    "dependencies": {
+        "example": {
+            "path": "../"
+        }
+    },
+	"subConfigurations": {
+		"atelier": "editor"
+	},
+    "configurations": [
+        {
+            "name": "example_editor_debug",
+            "targetPath": "../../bin",
+            "dflags": [
+                "-gf"
+            ]
+        },
+        {
+            "name": "example_editor_export",
+            "targetType": "executable",
+            "versions": [
+                "AtelierEditor"
+            ],
+            "lflags": [
+                "-subsystem:windows",
+                "-entry:mainCRTStartup"
+            ],
+            "targetPath": "../../export"
+        }
+    ]
+}

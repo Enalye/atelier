@@ -26,6 +26,8 @@ final class AccentButton : TextButton!RoundedRectangle {
         _background.anchor = Vec2f.zero;
         addImage(_background);
 
+        addEventListener("size", { _background.size = getSize(); });
+
         addEventListener("mouseenter", &_onMouseEnter);
         addEventListener("mouseleave", &_onMouseLeave);
 

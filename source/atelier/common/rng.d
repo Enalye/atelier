@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.common.rng;
 
 import std.math;
@@ -44,7 +39,7 @@ final class RNG {
             return rand01!T() * maxValue;
         }
         else static if (is(T == uint)) {
-            return _rand() % maxValue;
+            return maxValue > 1 ? _rand() % maxValue : 0;
         }
         else static if (is(T == int)) {
             if (maxValue == 0) {
@@ -85,6 +80,27 @@ final class RNG {
                 return cast(T)(_rand() % -delta) + maxValue;
             }
             return cast(T)(_rand() % delta) + minValue;
+        }
+    }
+
+    T randVariance(T)(T value, T variance) {
+        static if (__traits(isUnsigned, T)) {
+            variance >>= 1;
+            if (value < variance) {
+                value = 0;
+            }
+            else {
+                value -= variance;
+            }
+            return value + rand(variance);
+        }
+        else static if (__traits(isIntegral, T)) {
+            value -= variance >> 1;
+            return value + rand(variance);
+        }
+        else static if (__traits(isFloating, T)) {
+            value -= variance / 2f;
+            return value + rand(variance);
         }
     }
 

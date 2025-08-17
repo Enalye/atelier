@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.audio.mixer;
 
 import std.stdio;
@@ -16,10 +11,12 @@ import atelier.audio.bus;
 import atelier.audio.config;
 import atelier.audio.effect;
 import atelier.audio.fader;
+import atelier.audio.input;
 import atelier.audio.music;
 import atelier.audio.musicplayer;
 import atelier.audio.output;
 import atelier.audio.player;
+import atelier.audio.recorder;
 import atelier.audio.sound;
 import atelier.audio.soundplayer;
 
@@ -27,6 +24,7 @@ import atelier.audio.soundplayer;
 final class AudioMixer {
     private {
         AudioOutput _output;
+        AudioInput _input;
         AudioBus _masterBus, _trackBus;
         MusicPlayer[] _tracks;
     }
@@ -49,7 +47,27 @@ final class AudioMixer {
     ~this() {
     }
 
+    void close() {
+        closeInput();
+        _output.close();
+    }
+
+    void openInput(string deviceName = "") {
+        closeInput();
+        _input = new AudioInput(deviceName);
+    }
+
+    void closeInput() {
+        if (_input) {
+            _input.clear();
+            _input = null;
+        }
+    }
+
     void clear() {
+        if (_input) {
+            _input.clear();
+        }
         _masterBus.clear();
         _trackBus.clear();
         _trackBus.connectTo(_masterBus);
@@ -67,6 +85,13 @@ final class AudioMixer {
         }
 
         return devices;
+    }
+
+    /// Enregistre un son depuis l’entrée audio
+    void record(AudioRecorder recorder) {
+        if (_input) {
+            _input.record(recorder);
+        }
     }
 
     /// Joue un son sur le bus maître

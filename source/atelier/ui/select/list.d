@@ -75,7 +75,30 @@ package final class SelectList : UIElement {
     }
 
     private void _updatePosition() {
-        setPosition(_button.getAbsolutePosition() + Vec2f(0f, _button.getHeight() + 4f));
+        Vec2f pos = _button.getAbsolutePosition();
+
+        final switch (_button.getListAlignX()) with (UIAlignX) {
+        case left:
+            break;
+        case center:
+            pos.x += (_button.getWidth() - getWidth()) / 2f;
+            break;
+        case right:
+            pos.x += _button.getWidth() - getWidth();
+            break;
+        }
+
+        final switch (_button.getListAlignY()) with (UIAlignY) {
+        case top:
+        case center:
+            pos.y += _button.getHeight() + 4f;
+            break;
+        case bottom:
+            pos.y -= getHeight() + 4f;
+            break;
+        }
+
+        setPosition(pos);
     }
 
     private void _onSizeChange() {

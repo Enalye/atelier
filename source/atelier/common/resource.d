@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.common.resource;
 
 import std.typecons;
@@ -38,6 +33,7 @@ final class ResourceManager {
         FileData[string] _files;
         Loader[string] _loaders;
         void*[string] _caches;
+        Loader _ignoredLoader;
     }
 
     /// Données d’une ressource
@@ -76,11 +72,18 @@ final class ResourceManager {
             auto p = getPrototype(name);
             return p.fetch();
         }
+
+        /// Vérifie la présence d’une ressource
+        bool has(string name) {
+            auto p = (name in _data);
+            return (p !is null);
+        }
     }
 
     /// Init
     this() {
-
+        _ignoredLoader.compile = (string, const Farfadet, OutStream) {};
+        _ignoredLoader.load = (InStream) {};
     }
 
     /// Charge un fichier
@@ -110,6 +113,10 @@ final class ResourceManager {
         loader.compile = compilerFunc;
         loader.load = loaderFunc;
         _loaders[type] = loader;
+    }
+
+    void setLoaderIgnored(string type) {
+        _loaders[type] = _ignoredLoader;
     }
 
     Loader getLoader(string type) const {
@@ -153,5 +160,14 @@ final class ResourceManager {
         auto p = T.stringof in _caches;
         enforce(p, "la ressource `" ~ name ~ "` n’existe pas");
         return cast(T)(cast(Cache!T)*p).get(name);
+    }
+
+    /// Vérifie la présence d’une ressource
+    bool has(T)(string name) if (is(T == class) && is(T : Resource!T)) {
+        static assert(!__traits(isAbstractClass, T), "`" ~ T.stringof ~ "` est une classe abstraite");
+        auto p = T.stringof in _caches;
+        if (!p)
+            return false;
+        return (cast(Cache!T)*p).has(name);
     }
 }

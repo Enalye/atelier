@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.core.boot;
 
 import grimoire;
@@ -14,11 +9,11 @@ import std.zlib;
 import atelier.common;
 import atelier.script;
 import atelier.core.runtime;
-
+/*
 export extern (C) void boot(string[] args) {
     string windowTitle = "Atelier ~ v" ~ Atelier_Version_Display;
-    uint windowWidth = Atelier_Window_Width_Default;
-    uint windowHeight = Atelier_Window_Height_Default;
+    uint windowWidth = Atelier_Window_Width;
+    uint windowHeight = Atelier_Window_Height;
     bool windowEnabled = Atelier_Window_Enabled_Default;
     string windowIcon;
 
@@ -78,3 +73,4 @@ export extern (C) void boot(string[] args) {
 
     atelier.run();
 }
+*/

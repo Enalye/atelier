@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.script.input.event;
 
 import std.traits;
@@ -56,7 +51,9 @@ void loadLibInput_event(GrModule mod) {
 
     mod.setDescription(GrLocale.fr_FR, "L’événement correspond-il à l’action ?");
     mod.setParameters(["event", "action"]);
-    mod.addFunction(&_isAction, "isAction", [inputEvent, grString], [grBool]);
+    mod.addFunction(&_isEventInAction, "isEventInAction", [inputEvent, grString], [
+            grBool
+        ]);
 
     mod.setDescription(GrLocale.fr_FR, "La touche est-elle active ?");
     mod.addFunction(&_inputEvent_isPressed, "isPressed", [inputEvent], [grBool]);
@@ -198,8 +195,8 @@ private void _type(GrCall call) {
     call.setEnum(call.getNative!InputEvent(0).type);
 }
 
-private void _isAction(GrCall call) {
-    call.setBool(Atelier.input.isAction(call.getString(1), call.getNative!InputEvent(0)));
+private void _isEventInAction(GrCall call) {
+    call.setBool(Atelier.input.isEventInAction(call.getString(1), call.getNative!InputEvent(0)));
 }
 
 private void _inputEvent_isPressed(GrCall call) {

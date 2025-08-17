@@ -37,6 +37,7 @@ class UIElement {
         Array!Image _images;
         Array!NativeEventListener[string] _nativeEventListeners;
         Array!GrEvent[string] _scriptEventListeners;
+        Canvas _canvas;
 
         UIAlignX _alignX = UIAlignX.center;
         UIAlignY _alignY = UIAlignY.center;
@@ -249,6 +250,14 @@ class UIElement {
         return _images;
     }
 
+    final Canvas getCanvas() {
+        return _canvas;
+    }
+
+    final void setCanvas(Canvas canvas) {
+        _canvas = canvas;
+    }
+
     final Vec2f getMousePosition() const {
         return _mousePosition;
     }
@@ -273,7 +282,7 @@ class UIElement {
     final Vec2f getElementOrigin() const {
         Vec2f position = getPosition() + offset;
 
-        if (_manager && _manager.isSceneUI && !_parent) {
+        if (_manager && _manager.isWorldUI && !_parent) {
             return _manager.cameraPosition + position - getSize() * scale * 0.5f;
         }
 
@@ -511,7 +520,7 @@ class UIElement {
             if (p) {
                 Array!GrEvent evllist = *p;
                 foreach (listener; evllist) {
-                    Atelier.vm.callEvent(listener);
+                    Atelier.script.callEvent(listener);
                 }
             }
         }
@@ -568,6 +577,7 @@ class UIElement {
     }
 
     final void addImage(Image image) {
+        image.isAlive = true;
         _images ~= image;
         dispatchEvent("addimage", false);
     }

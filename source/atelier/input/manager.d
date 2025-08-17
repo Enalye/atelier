@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.input.manager;
 
 version (linux) {
@@ -44,6 +39,7 @@ final class InputManager {
         // Input handlers
         InputMap _map;
         Controller[] _controllers;
+        bool _isLocked;
 
         Vec2f _mousePosition = Vec2f.zero, _deltaMousePosition = Vec2f.zero;
         Vec2i _mouseWheel;
@@ -56,7 +52,13 @@ final class InputManager {
         struct ActionState {
             string id;
             bool activated = false;
+            bool echo = false;
             double strength = 0.0;
+            uint echoFrame = 0;
+            uint echoTriggers = 0;
+            uint slowDuration = 3;
+            uint slowDelay = 15;
+            uint fastDelay = 5;
 
             this(string id_) {
                 id = id_;
@@ -118,6 +120,10 @@ final class InputManager {
     /// Renseigne le presse-papier
     void setClipboard(string text) {
         SDL_SetClipboardText(toStringz(text));
+    }
+
+    void setLock(bool isLocked) {
+        _isLocked = isLocked;
     }
 
     /// Récupère les événements (clavier/souris/manette/etc)
@@ -426,6 +432,7 @@ final class InputManager {
             InputMap.Action action = _map.getAction(actionState.id);
             bool actionActivated = false;
             double actionStrength = 0.0;
+            bool wasActivated = actionState.activated;
 
             foreach (InputEvent event; action.events) {
                 double eventStrength = 0.0;
@@ -454,6 +461,31 @@ final class InputManager {
 
                 actionActivated = true;
                 actionStrength += eventStrength;
+            }
+
+            if (!wasActivated && actionActivated) {
+                actionState.echo = true;
+                actionState.echoFrame++;
+            }
+            else if (actionActivated) {
+                actionState.echo = false;
+                actionState.echoFrame++;
+                if (actionState.echoTriggers < actionState.slowDuration) {
+                    if ((actionState.echoFrame % actionState.slowDelay) == 0) {
+                        actionState.echoTriggers++;
+                        actionState.echoFrame = 0;
+                        actionState.echo = true;
+                    }
+                }
+                else if ((actionState.echoFrame % actionState.fastDelay) == 0) {
+                    actionState.echoFrame = 0;
+                    actionState.echo = true;
+                }
+            }
+            else {
+                actionState.echo = false;
+                actionState.echoFrame = 0;
+                actionState.echoTriggers = 0;
             }
 
             actionState.activated = actionActivated;
@@ -538,6 +570,21 @@ final class InputManager {
         return _controllerButtonStates[button].isKeyStatePressed();
     }
 
+    bool hasCtrl() {
+        return isPressed(InputEvent.KeyButton.Button.leftControl) ||
+            isPressed(InputEvent.KeyButton.Button.rightControl);
+    }
+
+    bool hasShift() {
+        return isPressed(InputEvent.KeyButton.Button.leftShift) ||
+            isPressed(InputEvent.KeyButton.Button.rightShift);
+    }
+
+    bool hasAlt() {
+        return isPressed(InputEvent.KeyButton.Button.leftAlt) ||
+            isPressed(InputEvent.KeyButton.Button.rightAlt);
+    }
+
     /// Retourne la valeur de l’axe
     double getAxis(InputEvent.ControllerAxis.Axis axis) const {
         return _controllerAxisValues[axis];
@@ -560,7 +607,7 @@ final class InputManager {
     }
 
     /// Cet événement correspond-t’il a une action ?
-    bool isAction(string id, InputEvent event) {
+    bool isEventInAction(string id, InputEvent event) {
         InputMap.Action action = _map.getAction(id);
         return action ? action.match(event) : false;
     }
@@ -575,22 +622,53 @@ final class InputManager {
         _map.removeActionEvents(id);
     }
 
+    void setActionEcho(string id, uint slowDelay, uint slowDuration, uint fastDelay) {
+        auto action = id in _actionStates;
+        if (!action)
+            return;
+
+        action.slowDelay = slowDelay;
+        action.slowDuration = slowDuration;
+        action.fastDelay = fastDelay;
+    }
+
     /// L’action est-t’elle activée ?
-    bool activated(string id) const {
+    bool isActionActivated(string id) const {
+        if (_isLocked)
+            return false;
+
         auto action = id in _actionStates;
         return action ? (*action).activated : false;
     }
 
+    /// L’action est-t’elle activée ?
+    bool isActionEcho(string id) const {
+        if (_isLocked)
+            return false;
+
+        auto action = id in _actionStates;
+        return action ? (*action).echo : false;
+    }
+
     double getActionStrength(string id) const {
+        if (_isLocked)
+            return 0f;
+
         auto action = id in _actionStates;
         return action ? (*action).strength : 0.0;
     }
 
     double getActionAxis(string negativeId, string positiveId) {
+        if (_isLocked)
+            return 0f;
+
         return getActionStrength(positiveId) - getActionStrength(negativeId);
     }
 
     Vec2f getActionVector(string leftAction, string rightAction, string upAction, string downAction) {
+        if (_isLocked)
+            return Vec2f.zero;
+
         return Vec2f(getActionStrength(rightAction) - getActionStrength(leftAction),
             getActionStrength(downAction) - getActionStrength(upAction));
     }

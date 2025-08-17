@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.render.renderer;
 
 import std.exception : enforce;
@@ -205,7 +200,14 @@ final class Renderer {
         SDL_RenderPresent(_sdlRenderer);
     }
 
-    void pushCanvas(Canvas canvas) {
+    void clearCanvas(Color color, float alpha) {
+        SDL_Color sdlColor = color.toSDL();
+        ubyte sdlAlpha = cast(ubyte)(alpha * 255f);
+        SDL_SetRenderDrawColor(_sdlRenderer, sdlColor.r, sdlColor.g, sdlColor.b, sdlAlpha);
+        SDL_RenderClear(_sdlRenderer);
+    }
+
+    void pushCanvas(Canvas canvas, bool clearSurface = true) {
         CanvasContext context;
         _idxContext++;
 
@@ -226,7 +228,10 @@ final class Renderer {
 
         SDL_SetRenderTarget(_sdlRenderer, context.canvas.target);
         SDL_SetRenderDrawColor(_sdlRenderer, sdlColor.r, sdlColor.g, sdlColor.b, 0);
-        SDL_RenderClear(_sdlRenderer);
+
+        if (clearSurface) {
+            SDL_RenderClear(_sdlRenderer);
+        }
     }
 
     void pushCanvas(uint width, uint height, Blend blend = Blend.canvas) {

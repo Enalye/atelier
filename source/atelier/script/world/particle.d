@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.script.world.particle;
 
 import grimoire;
@@ -34,6 +29,27 @@ src.start(5);
 
 scene.setParticleSource(entity, src, false);");
 
+    GrType sourceType = mod.addNative("ParticleSource");
+    GrType particleType = mod.addNative("Particle", [], "Entity");
+
+    mod.setDescription(GrLocale.fr_FR, "Position relative à l’entité");
+    mod.setParameters(["particle", "x", "y", "z"]);
+    mod.addFunction(&_setRelativePosition, "setRelativePosition", [
+            particleType, grFloat, grFloat, grFloat
+        ]);
+
+    mod.setDescription(GrLocale.fr_FR, "Décalage de l’entité en coordonnées polaires");
+    mod.setParameters(["particle", "dist"]);
+    mod.addFunction(&_setRelativeDistance, "setRelativeDistance", [
+            particleType, grFloat
+        ]);
+
+    mod.setDescription(GrLocale.fr_FR, "Décalage de l’entité en coordonnées polaires");
+    mod.setParameters(["particle", "angle"]);
+    mod.addFunction(&_setRelativeAngle, "setRelativeAngle", [
+            particleType, grFloat
+        ]);
+    /+
     GrType sourceType = mod.addNative("ParticleSource");
     mod.setDescription(GrLocale.fr_FR, "Mode d’émission des particules");
     GrType modeType = mod.addEnum("ParticleMode", grNativeEnum!ParticleMode());
@@ -277,9 +293,34 @@ scene.setParticleSource(entity, src, false);");
         "source", "startFrame", "endFrame", "startAlpha", "endAlpha", "spline"
     ]);
     mod.addFunction(&_setEffectInterval!("Float", "Alpha"), "setAlpha",
-        [sourceType, grUInt, grUInt, grFloat, grFloat, splineType]);
+        [sourceType, grUInt, grUInt, grFloat, grFloat, splineType]);+/
 }
 
+private void _attachTo(GrCall call) {
+    Particle particle = call.getNative!Particle(0);
+    Entity entity = call.getNative!Entity(1);
+    particle.attachTo(entity);
+}
+
+private void _setRelativePosition(GrCall call) {
+    Particle particle = call.getNative!Particle(0);
+    particle.setRelativePosition(Vec3f(
+            call.getFloat(1),
+            call.getFloat(2),
+            call.getFloat(3)));
+}
+
+private void _setRelativeDistance(GrCall call) {
+    Particle particle = call.getNative!Particle(0);
+    particle.setRelativeDistance(call.getFloat(1));
+}
+
+private void _setRelativeAngle(GrCall call) {
+    Particle particle = call.getNative!Particle(0);
+    particle.setRelativeAngle(call.getFloat(1));
+}
+
+/+
 private void _ctor(GrCall call) {
     ParticleSource source = new ParticleSource;
     call.setNative(source);
@@ -540,3 +581,4 @@ private void _setEffectColorInterval(GrCall call) {
     effect.setFrames(startFrame, endFrame);
     source.addEffect(effect);
 }
++/

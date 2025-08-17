@@ -3,7 +3,7 @@
         "enalye"
     ],
     "copyright": "Copyright © 2023, Enalye",
-    "description": "Moteur 2D pour Grimoire",
+    "description": "Moteur de jeu 2D",
     "license": "Zlib",
     "name": "atelier",
     "targetName": "atelier",
@@ -15,9 +15,11 @@
         "farfadet": {
             "path": "farfadet"
         },
+        "minuit": {
+            "path": "minuit"
+        },
         "bindbc-sdl": "~>1.4.2",
-        "audio-formats": "~>3.0.1",
-        "bindbc-openal": "~>1.1.0"
+        "audio-formats": "~>3.0.1"
     },
     "versions": [
         "BindSDL_Static",
@@ -49,61 +51,58 @@
     ],
     "configurations": [
         {
-            "name": "atelier_debug",
-            "targetPath": "bin",
-            "targetType": "executable",
+            "name": "debug",
+            "targetType": "library",
             "targetName": "atelier_debug",
             "dflags": [
                 "-gf"
             ],
             "versions": [
-                "AtelierDebug",
-                "AtelierExe"
+                "AtelierDebug"
             ]
         },
         {
-            "name": "atelier_core",
+            "name": "etabli_debug",
+            "targetType": "library",
+            "targetName": "atelier_etabli_debug",
+            "versions": [
+                "AtelierEditor",
+                "AtelierDebug"
+            ]
+        },
+        {
+            "name": "etabli",
+            "targetType": "library",
+            "targetName": "atelier_etabli",
+            "versions": [
+                "AtelierEditor"
+            ]
+        },
+        {
+            "name": "export",
             "targetType": "library",
             "targetName": "atelier",
-            "targetPath": "../bin",
-            "versions": [
-                "AtelierCore"
-            ]
-        },
-        {
-            "name": "atelier_dll",
-            "targetType": "dynamicLibrary",
             "targetPath": "export",
-            "targetName": "atelier",
-            "versions": [
-                "AtelierDLL"
+            "lflags": [
+                "-subsystem:windows",
+                "-entry:mainCRTStartup"
             ]
         },
         {
-            "name": "atelier_dll_debug",
-            "targetType": "dynamicLibrary",
-            "targetPath": "bin",
+            "name": "etabli_export",
+            "targetType": "library",
             "targetName": "atelier",
-            "versions": [
-                "AtelierDLL"
-            ]
-        },
-        {
-            "name": "atelier_doc",
-            "targetType": "executable",
-            "targetName": "atelier_doc",
-            "targetPath": "../bin",
-            "dflags": [
-                "-gf"
+            "targetPath": "export",
+            "lflags": [
+                "-subsystem:windows",
+                "-entry:mainCRTStartup"
             ],
             "versions": [
-                "AtelierDoc",
-                "AtelierExe"
+                "AtelierEditor"
             ]
         }
     ],
     "subPackages": [
-        "./app",
-        "./studio"
+        "./example"
     ]
 }

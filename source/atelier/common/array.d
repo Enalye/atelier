@@ -1,11 +1,5 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.common.array;
 
-import std.algorithm;
 import std.parallelism;
 import std.range;
 import std.typecons;
@@ -112,11 +106,13 @@ final class IArray(T, size_t _capacity, bool _useParallelism = false) {
     }
 
     /// Supprime tous les éléments marqué pour suppression
-    void sweep() {
+    bool sweep() {
+        bool hasSwep = _removeTop > 0u;
         for (size_t i = 0u; i < _removeTop; i++) {
             pop(_removeTable[i]);
         }
         _removeTop = 0u;
+        return hasSwep;
     }
 
     static if (_useParallelism) {
@@ -338,14 +334,30 @@ final class Array(T, bool _useParallelism = false) {
 
     /// Marque un élément à supprimer
     void mark(size_t index) {
-        _removeTable ~= index;
+        if (!_removeTable.length || index <= _removeTable[$ - 1]) {
+            _removeTable ~= index;
+            return;
+        }
+
+        ptrdiff_t top = (cast(ptrdiff_t) _removeTable.length) - 2;
+        while (top > 0) {
+            if (index <= _removeTable[top]) {
+                if (index < _removeTable[top]) {
+                    _removeTable = _removeTable[0 .. top + 1] ~ index ~ _removeTable[top + 1 .. $ -
+                        1];
+                }
+                return;
+            }
+            top--;
+        }
+
+        _removeTable = index ~ _removeTable;
     }
 
     /// Supprime tous les éléments marqué pour suppression
-    void sweep(bool isStable = false) {
+    bool sweep(bool isStable = false) {
+        bool hasSwep = _removeTable.length > 0;
         if (isStable) {
-            sort!("a > b", SwapStrategy.unstable)(_removeTable);
-
             T[] result;
             for (size_t i; i < _dataTable.length; ++i) {
                 if (_removeTable.length && i == _removeTable[$ - 1]) {
@@ -357,12 +369,19 @@ final class Array(T, bool _useParallelism = false) {
             }
             _dataTable = result;
         }
-        else {
+        else if (_dataTable.length > 0 && _removeTable.length > 0) {
+            ptrdiff_t top = (cast(ptrdiff_t) _dataTable.length) - 1;
             foreach (size_t index; _removeTable) {
-                pop(index);
+                //Prend la première valeur de la pile et comble le trou
+                if (index < top) {
+                    _dataTable[index] = _dataTable[top];
+                }
+                top--;
             }
+            _dataTable.length = top + 1;
         }
         _removeTable.length = 0u;
+        return hasSwep;
     }
 
     static if (_useParallelism) {
@@ -399,7 +418,7 @@ final class Array(T, bool _useParallelism = false) {
         int opApply(int delegate(ref T) dlg) {
             int result;
 
-            foreach (value; _dataTable) {
+            foreach (ref value; _dataTable) {
                 result = dlg(value);
 
                 if (result)
@@ -413,7 +432,7 @@ final class Array(T, bool _useParallelism = false) {
         int opApplyReverse(int delegate(ref T) dlg) {
             int result;
 
-            foreach_reverse (value; _dataTable) {
+            foreach_reverse (ref value; _dataTable) {
                 result = dlg(value);
 
                 if (result)
@@ -428,7 +447,7 @@ final class Array(T, bool _useParallelism = false) {
     int opApply(int delegate(const ref T) dlg) const {
         int result;
 
-        foreach (value; _dataTable) {
+        foreach (ref value; _dataTable) {
             result = dlg(value);
 
             if (result)
@@ -442,7 +461,7 @@ final class Array(T, bool _useParallelism = false) {
     int opApplyReverse(int delegate(const ref T) dlg) const {
         int result;
 
-        foreach_reverse (value; _dataTable) {
+        foreach_reverse (ref value; _dataTable) {
             result = dlg(value);
 
             if (result)
@@ -486,7 +505,7 @@ final class Array(T, bool _useParallelism = false) {
         int opApply(int delegate(const size_t, ref T) dlg) {
             int result;
 
-            foreach (size_t i, T value; _dataTable) {
+            foreach (size_t i, ref T value; _dataTable) {
                 result = dlg(i, value);
 
                 if (result)
@@ -500,7 +519,7 @@ final class Array(T, bool _useParallelism = false) {
         int opApplyReverse(int delegate(const size_t, ref T) dlg) {
             int result;
 
-            foreach_reverse (size_t i, T value; _dataTable) {
+            foreach_reverse (size_t i, ref T value; _dataTable) {
                 result = dlg(i, value);
 
                 if (result)
@@ -515,7 +534,7 @@ final class Array(T, bool _useParallelism = false) {
     int opApply(int delegate(const size_t, const ref T) dlg) const {
         int result;
 
-        foreach (size_t i, const T value; _dataTable) {
+        foreach (size_t i, const ref T value; _dataTable) {
             result = dlg(i, value);
 
             if (result)
@@ -529,7 +548,7 @@ final class Array(T, bool _useParallelism = false) {
     int opApplyReverse(int delegate(const size_t, const ref T) dlg) const {
         int result;
 
-        foreach_reverse (size_t i, const T value; _dataTable) {
+        foreach_reverse (size_t i, const ref T value; _dataTable) {
             result = dlg(i, value);
 
             if (result)

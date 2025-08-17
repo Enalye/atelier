@@ -27,6 +27,8 @@ final class OutlinedButton : TextButton!RoundedRectangle {
         _background.thickness = 2f;
         addImage(_background);
 
+        addEventListener("size", { _background.size = getSize(); });
+
         addEventListener("mouseenter", &_onMouseEnter);
         addEventListener("mouseleave", &_onMouseLeave);
 

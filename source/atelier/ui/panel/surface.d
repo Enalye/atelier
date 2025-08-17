@@ -16,7 +16,7 @@ class Surface : UIElement {
     }
 
     this() {
-        _background = new Rectangle(getSize(), true, 1f);
+        _background = Rectangle.fill(getSize());
         _background.color = Atelier.theme.surface;
         _background.anchor = Vec2f.zero;
         addImage(_background);

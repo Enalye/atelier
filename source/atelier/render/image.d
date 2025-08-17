@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.render.image;
 
 import std.conv : to;
@@ -38,6 +33,10 @@ abstract class Image {
     @property {
         bool isAlive() const {
             return _isAlive;
+        }
+
+        bool isAlive(bool value) {
+            return _isAlive = value;
         }
     }
 

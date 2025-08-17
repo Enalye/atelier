@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.audio;
 
 public {
@@ -20,6 +15,8 @@ public {
     import atelier.audio.panner;
     import atelier.audio.player;
     import atelier.audio.reverb;
+    import atelier.audio.recorder;
+    import atelier.audio.recorderplayer;
     import atelier.audio.sound;
     import atelier.audio.soundplayer;
     import atelier.audio.spacializer;

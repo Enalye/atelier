@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.script.world.camera;
 
 import grimoire;
@@ -36,12 +31,12 @@ package void loadLibWorld_camera(GrModule mod) {
     mod.addStatic(&_moveTo, cameraType, "moveTo", [
             vec2fType, grUInt, splineType
         ]);
-    /*
+
     mod.setDescription(GrLocale.fr_FR, "Déplace la caméra en suivant une cible");
     mod.setParameters(["target", "damping", "deadzone"]);
     mod.addStatic(&_follow, cameraType, "follow", [
             entityType, vec2fType, vec2fType
-        ]);*/
+        ]);
 
     mod.setDescription(GrLocale.fr_FR, "Arrête la caméra");
     mod.setParameters();
@@ -76,13 +71,13 @@ private void _moveTo(GrCall call) {
     Atelier.world.camera.moveTo(call.getNative!SVec2f(0), call.getUInt(1),
         call.getEnum!Spline(2));
 }
-/*
+
 private void _follow(GrCall call) {
     Entity entity = call.getNative!Entity(0);
     Vec2f damping = call.getNative!SVec2f(1);
     Vec2f deadZone = call.getNative!SVec2f(2);
     Atelier.world.camera.follow(entity, damping, deadZone);
-}*/
+}
 
 private void _stop(GrCall call) {
     Atelier.world.camera.stop();

@@ -74,6 +74,16 @@ final class TabBar : UIElement {
         }
     }
 
+    bool getDirty(string id) {
+        const(Tab[]) tabs = cast(const(Tab[])) _list.getList();
+        foreach (const Tab tab; tabs) {
+            if (tab._id == id) {
+                return tab.getDirty();
+            }
+        }
+        return false;
+    }
+
     void selectTab(string id) {
         _selectTab(id, false);
     }
@@ -193,9 +203,7 @@ private final class Tab : UIElement {
         addImage(_rect);
 
         addEventListener("mouseenterinside", { _removeBtn.isVisible = true; });
-
         addEventListener("mouseleaveinside", { _removeBtn.isVisible = false; });
-
         addEventListener("click", &_onClick);
     }
 
@@ -227,6 +235,10 @@ private final class Tab : UIElement {
             _dirtyCircle = null;
             _updateSize();
         }
+    }
+
+    bool getDirty() const {
+        return _dirtyCircle !is null;
     }
 
     private void _onClick() {

@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.render.font.pixelfontstandard;
 
 import std.conv : to;
@@ -14,7 +9,7 @@ import atelier.render.imagedata;
 import atelier.render.util;
 import atelier.render.writabletexture;
 
-final class PixelFontStandard : PixelFont {
+final class PixelFontStandard : PixelFont, Resource!PixelFontStandard {
     private {
         Glyph[dchar] _glyphs;
         Glyph _unknownGlyph;
@@ -91,6 +86,10 @@ final class PixelFontStandard : PixelFont {
         _texture = new WritableTexture(_surfaceW, _surfaceH);
     }
 
+    PixelFontStandard fetch() {
+        return this;
+    }
+
     override void addCharacter(dchar ch, int[] glyphData, int width, int height, int descent) {
         struct RasterData {
             int[] glyph;
@@ -143,7 +142,7 @@ final class PixelFontStandard : PixelFont {
         }, &rasterData);
 
         _glyphs[ch] = new PixelGlyphStandard(true, (rasterData.w + 1) + _spacing,
-            (rasterData.h + rasterData.descent) - _ascent, rasterData.x,
+            (rasterData.h << 1) + rasterData.descent, rasterData.x,
             rasterData.y, rasterData.w, rasterData.h, _weight, _texture);
 
         _posX += rasterData.w * _weight;
@@ -220,6 +219,7 @@ private final class PixelGlyphStandard : Glyph {
         _imageData.color = color;
         _imageData.blend = Blend.alpha;
         _imageData.alpha = alpha;
+        position.y += _height;
         _imageData.draw(position, Vec2f(_width * scale, _height * scale),
             Vec4u(_x, _y, _width, _height), 0f);
     }

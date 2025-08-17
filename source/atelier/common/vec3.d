@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.common.vec3;
 
 import std.math;
@@ -171,6 +166,33 @@ struct Vec3(T) {
         return px * px + py * py + pz * pz;
     }
 
+    /// Dot product of the 2 vectors.
+    T dot(const Vec3!T v) const {
+        return x * v.x + y * v.y + z * v.z;
+    }
+
+    /// Cross product of the 2 vectors.
+    Vec3!T cross(const Vec3!T v) const {
+        return Vec3!T((y * v.z) - (z * v.y), (x * v.z) - (z * v.x), (x * v.y) - (y * v.x));
+    }
+
+    /// Reflect this vector inside another one that represents the area change.
+    Vec3!T reflect(const Vec3!T v) const {
+        static if (__traits(isFloating, T)) {
+            const T dotNI2 = 2.0 * x * v.x + y * v.y + z * v.z;
+            return Vec3!T(cast(T)(x - dotNI2 * v.x), cast(T)(y - dotNI2 * v.y),
+                cast(T)(z - dotNI2 * v.z));
+        }
+        else {
+            const T dotNI2 = 2 * x * v.x + y * v.y + z * v.z;
+            static if (__traits(isUnsigned, T))
+                return Vec3!T(cast(int)(x) - cast(int)(dotNI2 * v.x),
+                    cast(int)(y) - cast(int)(dotNI2 * v.y), cast(int)(z) - cast(int)(dotNI2 * v.z));
+            else
+                return Vec3!T(x - dotNI2 * v.x, y - dotNI2 * v.y, z - dotNI2 * v.z);
+        }
+    }
+
     /// The smaller vector possible between the two.
     Vec3!T min(const Vec3!T v) const {
         return Vec3!T(x < v.x ? x : v.x, y < v.y ? y : v.y, z < v.z ? z : v.z);
@@ -189,6 +211,18 @@ struct Vec3(T) {
     /// Retourne la valeur la plus grande valeur
     T max() const {
         return x > y ? (x > z ? x : z) : (y > z ? y : z);
+    }
+
+    /// Retourne -1, 0 ou 1 en fonction de l’orientation de chaque axe
+    Vec3!T sign() const {
+        static if (__traits(isFloating, T))
+            return Vec3!T(x != .0 ? (x > .0 ? 1.0 : -1.0) : 0.0, y != .0 ? (y > .0 ?
+                    1.0 : -1.0) : 0.0, z != .0 ? (z > .0 ? 1.0 : -1.0) : 0.0);
+        else static if (__traits(isUnsigned, T))
+            return Vec3!T(x != 0U ? 1U : 0U, y != 0U ? 1U : 0U, z != 0U ? 1U : 0U);
+        else
+            return Vec3!T(x != 0 ? (x > 0 ? 1 : -1) : 0, y != 0 ? (y > 0 ?
+                    1 : -1) : 0, z != 0 ? (z > 0 ? 1 : -1) : 0);
     }
 
     /// Remove negative components.
@@ -360,6 +394,10 @@ struct Vec3(T) {
         import std.typecons : tuple;
 
         return tuple(x, y, z).toHash();
+    }
+
+    Vec2!T proj2D() const {
+        return Vec2!T(x, y - z);
     }
 }
 

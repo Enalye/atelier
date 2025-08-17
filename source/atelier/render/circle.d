@@ -1,13 +1,9 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.render.circle;
 
 import std.conv : to;
 import std.algorithm.comparison : min, max;
 import std.math : ceil, abs;
+import std.math.traits : isNormal;
 
 import atelier.common;
 import atelier.core;
@@ -97,7 +93,7 @@ final class Circle : Image {
 
         uint size = cast(uint) ceil(_radius * 2f);
 
-        _cache = (_radius >= 1f) ? new WritableTexture(size, size) : null;
+        _cache = (_radius >= 1f && isNormal(_radius)) ? new WritableTexture(size, size) : null;
 
         if (!_cache)
             return;

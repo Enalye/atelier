@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.common.vec4;
 
 import bindbc.sdl;
@@ -87,6 +82,14 @@ struct Vec4(T) {
         w = nzw.y;
     }
 
+    static if (__traits(isFloating, T)) {
+        /// Returns an interpolated vector from this vector to the end vector by a factor. \
+        /// Does not modify this vector.
+        Vec4!T lerp(Vec4!T end, float t) const {
+            return (this * (1.0 - t)) + (end * t);
+        }
+    }
+
     bool opEquals(const Vec4!T v) const {
         return (x == v.x) && (y == v.y) && (z == v.z) && (w == v.w);
     }
@@ -133,6 +136,51 @@ struct Vec4(T) {
             SDL_Rect sdlRect = {x, y, z, w};
             return sdlRect;
         }
+    }
+
+    /// Plus petit vecteur possible entre les deux
+    Vec4!T min(const Vec4!T v) const {
+        return Vec4!T(x < v.x ? x : v.x, y < v.y ? y : v.y, z < v.z ? z : v.z, w < v.w ? w : v.w);
+    }
+
+    /// Plus grand vecteur possible entre les deux
+    Vec4!T max(const Vec4!T v) const {
+        return Vec4!T(x > v.x ? x : v.x, y > v.y ? y : v.y, z > v.z ? z : v.z, w > v.w ? w : v.w);
+    }
+
+    /// Retourne la valeur la plus petite valeur
+    T min() const {
+        return x < y ? (x < z ? (x < w ? x : w) : (z < w ? z : w)) : (y < z ? (y < w ? y : w) : (z < w ? z
+                : w));
+    }
+
+    /// Retourne la valeur la plus grande valeur
+    T max() const {
+        return x > y ? (x > z ? (x > w ? x : w) : (z > w ? z : w)) : (y > z ? (y > w ? y : w) : (z > w ? z
+                : w));
+    }
+
+    /// Retourne -1, 0 ou 1 en fonction de l’orientation de chaque axe
+    Vec4!T sign() const {
+        static if (__traits(isFloating, T))
+            return Vec4!T(x != .0 ? (x > .0 ? 1.0 : -1.0) : 0.0, y != .0 ? (y > .0 ?
+                    1.0 : -1.0) : 0.0, z != .0 ? (z > .0 ? 1.0 : -1.0) : 0.0, w != .0 ? (w > .0 ? 1.0 : -1.0)
+                    : 0.0);
+        else static if (__traits(isUnsigned, T))
+            return Vec4!T(x != 0U ? 1U : 0U, y != 0U ? 1U : 0U, z != 0U ? 1U : 0U, w != 0U ? 1U : 0U);
+        else
+            return Vec4!T(x != 0 ? (x > 0 ? 1 : -1) : 0, y != 0 ? (y > 0 ?
+                    1 : -1) : 0, z != 0 ? (z > 0 ? 1 : -1) : 0, w != 0 ? (w > 0 ? 1 : -1) : 0);
+    }
+
+    /// Retire la composante négative
+    Vec4!T abs() const {
+        static if (__traits(isFloating, T))
+            return Vec4!T(x < .0 ? -x : x, y < .0 ? -y : y, z < .0 ? -z : z, w < .0 ? -w : w);
+        else static if (__traits(isUnsigned, T))
+            return Vec4!T(x < 0U ? -x : x, y < 0U ? -y : y, z < 0U ? -z : z, w < 0U ? -w : w);
+        else
+            return Vec4!T(x < 0 ? -x : x, y < 0 ? -y : y, z < 0 ? -z : z, w < 0 ? -w : w);
     }
 }
 

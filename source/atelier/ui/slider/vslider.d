@@ -23,24 +23,24 @@ final class VSlider : Slider {
         scrollAngle = 270f;
         setSize(Vec2f(32f, 200f));
 
-        _backgroundBar = new Rectangle(Vec2f(scrollLength, 2f), true, 1f);
+        _backgroundBar = Rectangle.fill(Vec2f(scrollLength, 2f));
         _backgroundBar.color = Atelier.theme.neutral;
         _backgroundBar.angle = scrollAngle;
         addImage(_backgroundBar);
 
-        _progressBar = new Rectangle(Vec2f(scrollLength, 2f), true, 1f);
+        _progressBar = Rectangle.fill(Vec2f(scrollLength, 2f));
         _progressBar.anchor = Vec2f(0f, .5f);
         _progressBar.pivot = Vec2f(0f, .5f);
         _progressBar.angle = scrollAngle;
         _progressBar.color = Atelier.theme.accent;
         addImage(_progressBar);
 
-        _hoverCircle = new Circle(16f, true, 0f);
+        _hoverCircle = Circle.fill(16f);
         _hoverCircle.color = Atelier.theme.accent;
         _hoverCircle.alpha = 0f;
         addImage(_hoverCircle);
 
-        _circle = new Circle(16f, true, 0f);
+        _circle = Circle.fill(16f);
         _circle.color = Atelier.theme.accent;
         addImage(_circle);
 

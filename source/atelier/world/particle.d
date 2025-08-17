@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.world.particle;
 
 import std.random;
@@ -12,43 +7,9 @@ import atelier.core;
 import atelier.render;
 import atelier.world.scene;
 import atelier.world.world;
+import atelier.world.entity;
 
-package(atelier.world) void registerSystems_particle(World world) {
-    world.registerSystem!SystemUpdater("particle", &_updateSystem);
-    world.registerSystem!SystemRenderer("particle", &_renderSystem);
-}
-
-struct ParticleComponent {
-    ParticleSource source;
-    bool isFront;
-
-    void onInit() {
-        source = null;
-        isFront = false;
-    }
-
-    void onDestroy() {
-        source = null;
-        isFront = false;
-    }
-}
-
-private void _updateSystem(Scene scene, void*) {
-    EntityComponentPool!ParticleComponent pool = scene.getComponentPool!ParticleComponent();
-    foreach (EntityID id, ParticleComponent* component; pool) {
-        component.source.update(scene.getPosition(id).worldPosition);
-    }
-}
-
-private void _renderSystem(Scene scene, void*, Vec2f offset, bool isFront) {
-    EntityComponentPool!ParticleComponent pool = scene.getComponentPool!ParticleComponent();
-    foreach (EntityID id, ParticleComponent* component; pool) {
-        if (component.isFront != isFront)
-            continue;
-        component.source.draw(offset);
-    }
-}
-
+/+
 private final class Particle {
     int frame, ttl;
 
@@ -101,8 +62,8 @@ final class ParticleSource : Resource!ParticleSource {
         bool _isVisible = true;
         bool _isRelativePosition;
         bool _isRelativeSpriteAngle;
-        //bool _isAttachedToCamera;
-        //EntityID _attachedEntity;
+        bool _isAttachedToCamera;
+        Entity _attachedEntity;
         uint _interval;
         int _emitterTime;
         uint _minCount, _maxCount;
@@ -489,3 +450,4 @@ alias ColorParticleEffect = OnceParticleEffect!(Color, "color");
 alias ColorIntervalParticleEffect = IntervalParticleEffect!(Color, "color");
 alias AlphaParticleEffect = OnceParticleEffect!(float, "alpha");
 alias AlphaIntervalParticleEffect = IntervalParticleEffect!(float, "alpha");
++/

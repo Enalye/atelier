@@ -1,8 +1,3 @@
-/** 
- * Droits d’auteur: Enalye
- * Licence: Zlib
- * Auteur: Enalye
- */
 module atelier.core.runtime;
 
 import core.thread;
@@ -15,32 +10,28 @@ import grimoire;
 import atelier.audio;
 import atelier.common;
 import atelier.input;
+import atelier.physics;
 import atelier.render;
 import atelier.script;
 import atelier.ui;
 import atelier.world;
+import atelier.console;
+import atelier.locale;
+import atelier.etabli;
 
 import atelier.core.loader;
 import atelier.core.logger;
 import atelier.core.theme;
 import atelier.core.window;
-
-private void _print(string msg) {
-    log(msg);
-}
+import atelier.core.vignette;
+import atelier.core.overlay;
 
 final class Atelier {
     static private {
-        // Grimoire
-        alias CompileFunc = GrBytecode delegate(GrLibrary[]);
-        GrEngine _engine;
-        GrLibrary[] _libraries;
-        GrBytecode _bytecode;
-        CompileFunc _compileFunc;
-
         // Informations
         bool _isRedist, _isRunning;
         bool _mustReload, _mustReloadResources, _mustReloadScript;
+        string[] _startCommands;
 
         // Événements
         GrEvent _inputEvent, _lateInputEvent;
@@ -49,21 +40,46 @@ final class Atelier {
         string[] _archives;
         Archive.File[] _resourceFiles, _compiledResourceFiles;
 
+        alias ResourceLoaderFunc = void function(ResourceManager);
+        alias ModuleLoaderFunc = GrModuleLoader[]function();
+        ResourceLoaderFunc _loader;
+
         // IPS
         float _currentFps;
         long _tickStartFrame;
         int _nominalFPS = 60;
+        uint _freezeFrames = 0;
+        float _timeScale = 1f;
+
+        bool _isSlowingDown = false;
+        uint _slowDownFrames = 0;
+        float _slowDownFactor = 1f;
+        float _currentSlowDownFactor = 1f;
+        uint _slowDownDurationIn;
+        uint _slowDownDurationOut;
+        SplineFunc _slowDownSplineFuncIn;
+        SplineFunc _slowDownSplineFuncOut;
 
         // Modules
         Window _window;
         Renderer _renderer;
         UIManager _uiManager;
         InputManager _inputManager;
+        Physics _physics;
         ResourceManager _resourceManager;
         AudioMixer _audioMixer;
         World _world;
+        Console _console;
+        Script _script;
         RNG _rng;
         Theme _theme;
+        Overlay _overlay;
+        Vignette _vignette;
+        Locale _locale;
+
+        version (AtelierEditor) {
+            Etabli _etabli;
+        }
     }
 
     static @property pragma(inline) {
@@ -100,9 +116,19 @@ final class Atelier {
             return _inputManager;
         }
 
-        /// Le gestionnaire de scènes
+        /// Le gestionnaire de la physique
+        Physics physics() {
+            return _physics;
+        }
+
+        /// Le gestionnaire du monde
         World world() {
             return _world;
+        }
+
+        /// Le terminal de commande
+        Console console() {
+            return _console;
         }
 
         /// Générateur standard de pseudo-aléatoire
@@ -110,13 +136,45 @@ final class Atelier {
             return _rng;
         }
 
-        /// La machine virtuelle Grimoire
-        GrEngine vm() {
-            return _engine;
+        /// Système de script
+        Script script() {
+            return _script;
         }
 
         Theme theme() {
             return _theme;
+        }
+
+        Locale locale() {
+            return _locale;
+        }
+
+        /// Éditeur
+        version (AtelierEditor) {
+            Etabli etabli() {
+                return _etabli;
+            }
+        }
+        else {
+            Etabli etabli() {
+                enforce(false, "[Atelier] Atelier n’est pas en configuration d’éditeur");
+                return null;
+            }
+        }
+    }
+
+    static void openLogger(bool isRedist_) {
+        _logger_openLogger(isRedist_);
+    }
+
+    static void closeLogger() {
+        _logger_closeLogger();
+    }
+
+    static void log(T...)(T args) {
+        _logger_log(args);
+        if (_console) {
+            _console.log(args);
         }
     }
 
@@ -131,17 +189,66 @@ final class Atelier {
 
     static void close() {
         _isRunning = false;
+
+        if (_audioMixer) {
+            _audioMixer.close();
+        }
     }
 
-    this(uint windowWidth, uint windowHeight, string windowTitle) {
-        this(false, null, [], windowWidth, windowHeight, windowTitle);
+    static void addStartCommand(string command) {
+        _startCommands ~= command;
     }
 
-    this(bool isRedist_, CompileFunc compileFunc, GrLibrary[] libraries,
-        uint windowWidth, uint windowHeight, string windowTitle) {
+    static void setVignette(bool enable, Color color, uint duration) {
+        _vignette.set(enable, color, duration);
+    }
+
+    static void setOverlay(Color color, float alpha, uint duration, Spline spline) {
+        _overlay.set(color, alpha, duration, spline);
+    }
+
+    static void freeze(uint frames) {
+        _freezeFrames = frames;
+    }
+
+    static void setTimeScale(float scale) {
+        _timeScale = scale;
+    }
+
+    static float getTimeScale() {
+        return _timeScale;
+    }
+
+    static void slowDown(float factor, uint inDuration, uint outDuration, Spline inSpline, Spline outSpline) {
+        if (_isSlowingDown)
+            return;
+
+        _slowDownFactor = clamp(factor, 0f, 1f);
+        _slowDownDurationIn = inDuration;
+        _slowDownDurationOut = outDuration;
+        _slowDownSplineFuncIn = getSplineFunc(inSpline);
+        _slowDownSplineFuncOut = getSplineFunc(outSpline);
+        _isSlowingDown = true;
+        _slowDownFrames = 0;
+
+        if (_slowDownDurationIn == 0) {
+            _currentSlowDownFactor = _slowDownFactor;
+
+            if (_slowDownDurationOut == 0) {
+                _currentSlowDownFactor = 1f;
+                _isSlowingDown = false;
+            }
+        }
+    }
+
+    this(uint windowWidth, uint windowHeight, string windowTitle, ResourceLoaderFunc resLoader, ModuleLoaderFunc libLoader) {
+        this(false, windowWidth, windowHeight, windowTitle, resLoader, libLoader);
+    }
+
+    this(bool isRedist_, uint windowWidth,
+        uint windowHeight, string windowTitle,
+        ResourceLoaderFunc resLoader, ModuleLoaderFunc libLoader) {
         _isRedist = isRedist_;
-        _compileFunc = compileFunc;
-        _libraries = libraries;
         _isRunning = true;
 
         // Initialisation des modules
@@ -153,13 +260,26 @@ final class Atelier {
         _uiManager = new UIManager();
         _inputManager = new InputManager();
         _audioMixer = new AudioMixer();
-        _world = new World();
         _resourceManager = new ResourceManager();
+        _world = new World();
+        _physics = new Physics();
         _rng = new RNG();
         _theme = new Theme();
+        _console = new Console();
+        _script = new Script(libLoader);
+        _vignette = new Vignette();
+        _overlay = new Overlay();
+        _locale = new Locale();
 
+        version (AtelierEditor) {
+            _etabli = new Etabli;
+        }
+
+        _loader = resLoader;
         setupDefaultResourceLoaders(_resourceManager);
-        registerSystems(_world);
+        if (_loader) {
+            _loader(_resourceManager);
+        }
     }
 
     void addArchive(string path) {
@@ -190,6 +310,9 @@ final class Atelier {
                     break;
                 case Atelier_Resource_Compiled_Extension:
                     _compiledResourceFiles ~= file;
+                    break;
+                case Atelier_Script_Extension:
+                    _script.addFile(file);
                     break;
                 default:
                     res.write(file.path, file.data);
@@ -260,54 +383,64 @@ final class Atelier {
         log("  > Effectué en " ~ to!string(loadDuration) ~ "sec");
     }
 
-    private void _startVM() {
-        if (!_bytecode)
-            return;
-
-        log("[ATELIER] Initialisation de la machine virtuelle...");
-        long startTime = Clock.currStdTime();
-
-        _engine = new GrEngine(Atelier_Version_ID);
-
-        foreach (GrLibrary library; _libraries) {
-            _engine.addLibrary(library);
-        }
-
-        enforce(_engine.load(_bytecode), "version du bytecode invalide");
-
-        _engine.callEvent("app");
-
-        _inputEvent = _engine.getEvent("input", [grGetNativeType("InputEvent")]);
-        _lateInputEvent = _engine.getEvent("lateInput", [
-                grGetNativeType("InputEvent")
-            ]);
-
-        _engine.setPrintOutput(&_print);
-
-        double loadDuration = (cast(double)(Clock.currStdTime() - startTime) / 10_000_000.0);
-        log("  > Effectué en " ~ to!string(loadDuration) ~ "sec");
-    }
-
     void _reload() {
         _mustReload = false;
 
         _audioMixer.clear();
         _uiManager.clearUI();
         _world.clear();
+        _physics.clear();
         _theme.setDefault();
+        _console.clear();
+        _vignette.clear();
+        _overlay.clear();
 
         if (_mustReloadResources) {
             _resourceManager = new ResourceManager();
             setupDefaultResourceLoaders(_resourceManager);
+            if (_loader) {
+                _loader(_resourceManager);
+            }
             _resourceFiles.length = 0;
             _compiledResourceFiles.length = 0;
             loadResources();
         }
 
-        if (_mustReloadScript && _compileFunc) {
-            _bytecode = _compileFunc(_libraries);
+        if (_mustReloadScript) {
+            _script.reload();
         }
-        _startVM();
+        _script.start();
+    }
+
+    void loadArchives() {
+        version (AtelierDebug) {
+            string configPath = buildNormalizedPath(getcwd(), "config.ffd");
+            if (!exists(configPath))
+                return;
+
+            Farfadet configFfd = Farfadet.fromFile(configPath);
+            foreach (mediaNode; configFfd.getNodes("media")) {
+                string folder = mediaNode.get!string(0);
+                bool isArchived = mediaNode.get!bool(1);
+
+                string path = buildNormalizedPath(getcwd(), "media", folder);
+
+                if (!exists(path)) {
+                    Atelier.log("Aucune archive `", folder, "` trouvé");
+                    continue;
+                }
+                addArchive(path);
+            }
+        }
+        else {
+            auto entries = dirEntries("media", SpanMode.shallow);
+            foreach (entry; entries) {
+                if (!entry.isDir)
+                    continue;
+
+                addArchive(entry);
+            }
+        }
     }
 
     void loadResources() {
@@ -317,13 +450,16 @@ final class Atelier {
     }
 
     void run() {
-        if (_compileFunc) {
-            _bytecode = _compileFunc(_libraries);
-        }
-        _startVM();
+        _script.reload();
+        _script.start();
 
         _tickStartFrame = Clock.currStdTime();
         float accumulator = 0f;
+
+        foreach (command; _startCommands) {
+            _console.runCommand(command);
+        }
+        _startCommands.length = 0;
 
         while (!_inputManager.hasQuit() && _isRunning) {
             long deltaTicks = Clock.currStdTime() - _tickStartFrame;
@@ -331,7 +467,28 @@ final class Atelier {
             _currentFps = (deltatime == .0f) ? .0f : (10_000_000f / cast(float)(deltaTicks));
             _tickStartFrame = Clock.currStdTime();
 
-            accumulator += deltatime;
+            if (_isSlowingDown) {
+                if (_slowDownFrames > _slowDownDurationIn) {
+                    float t = (_slowDownFrames - _slowDownDurationIn) / cast(float) _slowDownDurationOut;
+                    _currentSlowDownFactor = lerp(_slowDownFactor, 1f, _slowDownSplineFuncOut(t));
+                    _slowDownFrames++;
+
+                    if (_slowDownFrames > (_slowDownDurationIn + _slowDownDurationOut)) {
+                        _isSlowingDown = false;
+                        _currentSlowDownFactor = 1f;
+                    }
+                }
+                else {
+                    float t = _slowDownFrames / cast(float) _slowDownDurationIn;
+                    _currentSlowDownFactor = lerp(1f, _slowDownFactor, _slowDownSplineFuncIn(t));
+                    _slowDownFrames++;
+
+                    if (_slowDownFrames > _slowDownDurationIn) {
+                        _currentSlowDownFactor = _slowDownFactor;
+                    }
+                }
+            }
+            accumulator += deltatime * _currentSlowDownFactor * _timeScale;
 
             if (_mustReload) {
                 _reload();
@@ -339,50 +496,70 @@ final class Atelier {
 
             // Màj
             while (accumulator >= 1f) {
+                if (_freezeFrames > 0) {
+                    accumulator -= 1f;
+                    _freezeFrames--;
+                    continue;
+                }
+
                 InputEvent[] inputEvents = _inputManager.pollEvents();
 
                 _window.update();
 
                 foreach (InputEvent event; inputEvents) {
-                    _uiManager.dispatch(event);
-                }
-
-                if (_engine) {
-                    if (_engine.hasTasks) {
-                        _engine.process();
-                    }
-
-                    if (_engine.isPanicking) {
-                        string err = "panique: " ~ _engine.panicMessage ~ "\n";
-                        foreach (trace; _engine.stackTraces) {
-                            err ~= "[" ~ to!string(
-                                trace.pc) ~ "] dans " ~ trace.name ~ " à " ~ trace.file ~ "(" ~ to!string(
-                                trace.line) ~ "," ~ to!string(trace.column) ~ ")\n";
-                        }
-                        _engine = null;
-                        log(err);
-                        return;
+                    if (!_console.dispatch(event)) {
+                        _uiManager.dispatch(event);
                     }
                 }
+                //long startTime = Clock.currStdTime();
 
+                _script.update();
                 _world.update(inputEvents);
+                _physics.update();
+                _vignette.update();
                 _uiManager.update();
+                _overlay.update();
 
+                //double loadDuration = (cast(double)(Clock.currStdTime() - startTime) / 10_000_000.0);
+
+                /*if (loadDuration < _minDur) {
+                    _minDur = loadDuration;
+                }
+                if (loadDuration > _maxDur) {
+                    _maxDur = loadDuration;
+                }
+                import std.stdio;
+
+                writeln("World.draw(ms) min: ", _minDur, ", max: ", _maxDur, " curr: ", loadDuration);
+*/
                 accumulator -= 1f;
             }
 
             // Rendu
+
             _renderer.startRenderPass();
+            long startTime = Clock.currStdTime();
             _world.draw(cast(Vec2f) _renderer.center);
+            _vignette.draw();
+            _overlay.draw();
             _uiManager.draw();
+            double loadDuration = (cast(double)(Clock.currStdTime() - startTime) / 10_000.0);
             _renderer.endRenderPass();
+            if (loadDuration < _minDur) {
+                _minDur = loadDuration;
+            }
+            if (loadDuration > _maxDur) {
+                _maxDur = loadDuration;
+            }
+            import std.stdio;
+
+            //writeln("World.draw(ms) min: ", _minDur, ", max: ", _maxDur, " curr: ", loadDuration);
+
         }
+
+        close();
     }
 
-    void callEvent(GrEvent event, GrValue[] parameters = []) {
-        if (!_engine)
-            return;
-
-        _engine.callEvent(event, parameters);
-    }
+    double _minDur = 1000.0;
+    double _maxDur = 0.0;
 }

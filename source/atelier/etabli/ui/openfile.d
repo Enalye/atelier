@@ -9,7 +9,11 @@ import std.typecons : No;
 import std.file;
 import std.string;
 
-import atelier;
+import atelier.common;
+import atelier.core;
+import atelier.input;
+import atelier.ui;
+import atelier.render;
 
 import atelier.etabli.ui.studio;
 

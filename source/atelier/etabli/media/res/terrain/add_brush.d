@@ -1,6 +1,9 @@
 module atelier.etabli.media.res.terrain.add_brush;
 
-import atelier;
+import atelier.common;
+import atelier.core;
+import atelier.ui;
+import atelier.render;
 
 final class AddBrushElement : Modal {
     private {

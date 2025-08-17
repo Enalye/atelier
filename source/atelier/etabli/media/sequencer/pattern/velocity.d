@@ -1,6 +1,10 @@
 module atelier.etabli.media.sequencer.pattern.velocity;
 
-import atelier;
+import atelier.common;
+import atelier.core;
+import atelier.ui;
+import atelier.render;
+
 import atelier.etabli.media.sequencer.pattern.editor;
 import atelier.etabli.media.sequencer.pattern.note;
 

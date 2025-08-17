@@ -6,7 +6,11 @@ import std.path;
 import std.math : abs;
 
 import farfadet;
-import atelier;
+
+import atelier.common;
+import atelier.core;
+import atelier.ui;
+import atelier.render;
 
 import atelier.etabli.ui;
 import atelier.etabli.media.res.base;

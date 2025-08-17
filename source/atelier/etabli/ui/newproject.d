@@ -2,7 +2,11 @@ module atelier.etabli.ui.newproject;
 
 import std.path;
 import std.file;
-import atelier;
+
+import atelier.common;
+import atelier.core;
+import atelier.ui;
+import atelier.render;
 
 final class NewProject : Modal {
     private {

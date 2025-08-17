@@ -1,6 +1,9 @@
 module atelier.etabli.media.res.scene.terrain.add;
 
-import atelier;
+import atelier.common;
+import atelier.core;
+import atelier.ui;
+import atelier.render;
 
 final class AddTerrainElement : Modal {
     private {

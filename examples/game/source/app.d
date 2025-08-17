@@ -1,5 +1,7 @@
 import atelier;
 
+import game;
+
 extern (C) __gshared string[] rt_options = [
 	"gcopt=initReserve:128 minPoolSize:256 parallel:2"
 ];

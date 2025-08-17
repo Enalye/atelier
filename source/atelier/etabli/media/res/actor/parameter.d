@@ -1,7 +1,12 @@
 module atelier.etabli.media.res.actor.parameter;
 
-import atelier;
 import farfadet;
+
+import atelier.common;
+import atelier.core;
+import atelier.physics;
+import atelier.ui;
+import atelier.render;
 import atelier.etabli.ui;
 import atelier.etabli.media.res.entity_render;
 

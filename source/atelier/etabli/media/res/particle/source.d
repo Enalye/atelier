@@ -1,8 +1,13 @@
 module atelier.etabli.media.res.particle.source;
 
 import std.math;
-import atelier;
+
 import grimoire;
+
+import atelier.common;
+import atelier.core;
+import atelier.ui;
+import atelier.world;
 import atelier.etabli.media.res.entity_render;
 import atelier.etabli.media.res.particle.editor;
 

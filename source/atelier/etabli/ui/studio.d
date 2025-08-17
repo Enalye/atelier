@@ -4,10 +4,14 @@ import std.exception : enforce;
 import std.process;
 
 import farfadet;
-import atelier;
+
+import atelier.common;
+import atelier.core;
+import atelier.input;
+import atelier.ui;
+import atelier.render;
 
 import atelier.etabli.media;
-
 import atelier.etabli.ui.fileexplorer;
 import atelier.etabli.ui.newfile;
 import atelier.etabli.ui.newproject;

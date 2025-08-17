@@ -1,6 +1,9 @@
 module atelier.etabli.media.sequencer.item.remove;
 
-import atelier;
+import atelier.common;
+import atelier.core;
+import atelier.ui;
+import atelier.render;
 
 final class RemoveSequencerItem : Modal {
     this(string name_) {

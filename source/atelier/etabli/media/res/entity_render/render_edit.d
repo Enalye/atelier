@@ -2,7 +2,11 @@ module atelier.etabli.media.res.entity_render.render_edit;
 
 import std.array : split;
 import std.conv : to, ConvException;
-import atelier;
+
+import atelier.common;
+import atelier.core;
+import atelier.ui;
+import atelier.render;
 import atelier.etabli.ui;
 import atelier.etabli.media.res.entity_render.render_data;
 

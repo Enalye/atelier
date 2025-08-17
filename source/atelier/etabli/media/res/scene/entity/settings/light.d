@@ -1,6 +1,10 @@
 module atelier.etabli.media.res.scene.entity.settings.light;
 
-import atelier;
+import atelier.common;
+import atelier.core;
+import atelier.ui;
+import atelier.render;
+
 import atelier.etabli.ui;
 import atelier.etabli.media.res.scene.common;
 

@@ -1,6 +1,10 @@
 module atelier.etabli.media.sequencer.pattern.toolbox;
 
-import atelier;
+import atelier.common;
+import atelier.core;
+import atelier.input;
+import atelier.ui;
+import atelier.render;
 
 package class PatternSequencerToolbox : Modal {
     private {

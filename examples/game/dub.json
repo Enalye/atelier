@@ -1,0 +1,50 @@
+{
+	"authors": [
+		"enalye"
+	],
+	"copyright": "Copyright © 2024, enalye",
+	"description": "Exemple de Jeu",
+	"license": "Zlib",
+	"name": "game",
+    "targetName": "example_game",
+    "workingDirectory": "../../",
+    "dependencies": {
+        "atelier": {
+            "path": "../../"
+        }
+    },
+    "configurations": [
+        {
+            "name": "game",
+            "targetPath": "../bin",
+            "targetType": "executable",
+            "targetName": "example",
+            "dflags": [
+                "-gf"
+            ],
+            "subConfigurations": {
+                "atelier": "debug"
+            }
+        },
+        {
+            "name": "game_lib",
+            "targetPath": "../bin",
+            "targetType": "library",
+            "targetName": "example",
+            "dflags": [
+                "-gf"
+            ],
+            "subConfigurations": {
+                "atelier": "etabli_debug"
+            }
+        },
+        {
+            "name": "game_export",
+            "lflags": [
+                "-subsystem:windows",
+                "-entry:mainCRTStartup"
+            ],
+            "targetPath": "../export"
+        }
+    ]
+}

@@ -1,6 +1,6 @@
 module atelier.etabli.media.res.grid.selection;
 
-import atelier;
+import atelier.common;
 
 package struct TilesSelection(T) {
     T[][] tiles;

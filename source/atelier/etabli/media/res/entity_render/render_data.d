@@ -1,7 +1,11 @@
 module atelier.etabli.media.res.entity_render.render_data;
 
-import atelier;
 import farfadet;
+
+import atelier.common;
+import atelier.core;
+import atelier.render;
+import atelier.world;
 import atelier.etabli.ui;
 
 final class EntityRenderData {

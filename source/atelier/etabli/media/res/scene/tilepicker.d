@@ -6,7 +6,11 @@ import std.math : abs;
 
 import farfadet;
 
-import atelier;
+import atelier.common;
+import atelier.core;
+import atelier.input;
+import atelier.ui;
+import atelier.render;
 
 import atelier.etabli.media.res.base;
 import atelier.etabli.media.res.scene.selection;

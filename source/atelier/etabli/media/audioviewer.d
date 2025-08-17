@@ -3,8 +3,11 @@ module atelier.etabli.media.audioviewer;
 import std.conv : to;
 import std.math;
 
-import atelier;
-
+import atelier.audio;
+import atelier.common;
+import atelier.core;
+import atelier.input;
+import atelier.ui;
 import atelier.etabli.media.base;
 import atelier.etabli.media.spectralimage;
 

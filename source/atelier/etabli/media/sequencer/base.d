@@ -1,12 +1,17 @@
 module atelier.etabli.media.sequencer.base;
 
-import atelier;
 import farfadet;
+
+import atelier.common;
+import atelier.core;
+import atelier.ui;
+import atelier.render;
+
+import atelier.etabli.ui;
 import atelier.etabli.media.sequencer.editor;
 import atelier.etabli.media.sequencer.invalid;
 import atelier.etabli.media.sequencer.pattern;
 import atelier.etabli.media.sequencer.tracklist;
-import atelier.etabli.ui;
 
 package abstract class SequencerBaseEditor : UIElement {
     private {

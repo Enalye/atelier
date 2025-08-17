@@ -1,6 +1,10 @@
 module atelier.etabli.media.res.scene.entity.settings.trigger;
 
-import atelier;
+import atelier.common;
+import atelier.ui;
+import atelier.core;
+import atelier.render;
+
 import atelier.etabli.ui;
 import atelier.etabli.media.res.scene.common;
 import atelier.etabli.media.res.scene.entity.settings.base;

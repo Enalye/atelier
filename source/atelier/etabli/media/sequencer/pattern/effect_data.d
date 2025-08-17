@@ -1,9 +1,13 @@
 module atelier.etabli.media.sequencer.pattern.effect_data;
 
-import atelier;
+import atelier.common;
+import atelier.core;
+import atelier.ui;
+import atelier.render;
+
+import atelier.etabli.ui;
 import atelier.etabli.media.sequencer.pattern.editor;
 import atelier.etabli.media.sequencer.pattern.effect;
-import atelier.etabli.ui;
 
 package class PatternSequencerEffectDataWindow : Modal {
     private {

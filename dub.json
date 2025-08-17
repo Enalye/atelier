@@ -54,6 +54,7 @@
             "name": "debug",
             "targetType": "library",
             "targetName": "atelier_debug",
+            "targetPath": "bin",
             "dflags": [
                 "-gf"
             ],
@@ -65,6 +66,7 @@
             "name": "etabli_debug",
             "targetType": "library",
             "targetName": "atelier_etabli_debug",
+            "targetPath": "bin",
             "versions": [
                 "AtelierEditor",
                 "AtelierDebug"
@@ -74,6 +76,7 @@
             "name": "etabli",
             "targetType": "library",
             "targetName": "atelier_etabli",
+            "targetPath": "bin",
             "versions": [
                 "AtelierEditor"
             ]
@@ -103,6 +106,7 @@
         }
     ],
     "subPackages": [
-        "./example"
+        "./examples/game",
+        "./examples/editor"
     ]
 }

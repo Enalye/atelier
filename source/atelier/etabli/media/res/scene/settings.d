@@ -5,7 +5,10 @@ import std.conv : to;
 import std.path;
 import std.file;
 
-import atelier;
+import atelier.common;
+import atelier.core;
+import atelier.ui;
+import atelier.render;
 
 import atelier.etabli.ui;
 import atelier.etabli.media.res.scene.common;

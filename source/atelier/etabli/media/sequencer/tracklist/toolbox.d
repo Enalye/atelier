@@ -1,6 +1,11 @@
 module atelier.etabli.media.sequencer.tracklist.toolbox;
 
-import atelier;
+import atelier.common;
+import atelier.core;
+import atelier.input;
+import atelier.ui;
+import atelier.render;
+
 import atelier.etabli.media.sequencer.tracklist.editor;
 
 package class TracklistSequencerToolbox : Modal {

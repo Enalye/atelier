@@ -3,8 +3,15 @@ module atelier.etabli.media.res.scene.parameter;
 import std.file;
 import std.path;
 import std.math : abs;
-import atelier;
+
 import farfadet;
+
+import atelier.common;
+import atelier.core;
+import atelier.input;
+import atelier.ui;
+import atelier.render;
+
 import atelier.etabli.media.res.base;
 import atelier.etabli.media.res.scene.common;
 import atelier.etabli.media.res.scene.settings;

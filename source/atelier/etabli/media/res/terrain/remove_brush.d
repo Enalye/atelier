@@ -1,6 +1,10 @@
 module atelier.etabli.media.res.terrain.remove_brush;
 
-import atelier;
+import atelier.common;
+import atelier.core;
+import atelier.ui;
+import atelier.render;
+
 import atelier.etabli.ui;
 
 final class RemoveBrushElement : Modal {

@@ -3,24 +3,24 @@
 		"enalye"
 	],
 	"copyright": "Copyright © 2024, enalye",
-	"description": "Jeu",
-	"license": "proprietary",
+	"description": "Exemple d’éditeur de Jeu",
+	"license": "Zlib",
 	"name": "editor",
-    "targetName": "editor",
-    "workingDirectory": "../..",
-    "targetType": "executable",
+    "targetName": "example_editor",
+    "workingDirectory": "../../",
     "dependencies": {
-        "example": {
-            "path": "../"
+        "atelier:game": {
+            "path": "../../"
         }
     },
 	"subConfigurations": {
-		"atelier": "editor"
+        "atelier:game": "game_lib"
 	},
     "configurations": [
         {
             "name": "example_editor_debug",
             "targetPath": "../../bin",
+            "targetType": "executable",
             "dflags": [
                 "-gf"
             ]

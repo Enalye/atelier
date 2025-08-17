@@ -1,9 +1,13 @@
 module atelier.etabli.media.sequencer.tracklist.tempo_data;
 
-import atelier;
+import atelier.common;
+import atelier.core;
+import atelier.ui;
+import atelier.render;
+
+import atelier.etabli.ui;
 import atelier.etabli.media.sequencer.tracklist.editor;
 import atelier.etabli.media.sequencer.tracklist.tempo;
-import atelier.etabli.ui;
 
 package class TracklistSequencerTempoDataWindow : Modal {
     private {

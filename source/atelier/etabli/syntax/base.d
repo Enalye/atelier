@@ -1,6 +1,8 @@
 module atelier.etabli.syntax.base;
 
-import atelier;
+import atelier.common;
+import atelier.render;
+import atelier.ui;
 
 class SyntaxHighlighter {
     private {

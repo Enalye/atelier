@@ -1,6 +1,8 @@
 module atelier.etabli.media.res.tilemap.selection;
 
-import atelier;
+import atelier.common;
+import atelier.ui;
+import atelier.render;
 
 package(atelier.etabli.media.res.tilemap) struct TilesSelection {
     int[][] tiles;

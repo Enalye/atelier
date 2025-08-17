@@ -1,7 +1,8 @@
 module atelier.etabli.core.midi.device;
 
 import minuit;
-import atelier;
+
+import atelier.common;
 import atelier.etabli.core.midi.player;
 
 private {

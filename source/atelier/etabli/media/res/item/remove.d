@@ -1,6 +1,8 @@
 module atelier.etabli.media.res.item.remove;
 
-import atelier;
+import atelier.common;
+import atelier.core;
+import atelier.ui;
 
 final class RemoveResourceItem : Modal {
     this(string name_) {

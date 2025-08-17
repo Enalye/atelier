@@ -5,8 +5,11 @@ import std.path;
 import std.math : abs;
 
 import farfadet;
-import atelier;
 
+import atelier.common;
+import atelier.input;
+import atelier.ui;
+import atelier.world;
 import atelier.etabli.ui;
 import atelier.etabli.media.res.base;
 import atelier.etabli.media.res.editor;

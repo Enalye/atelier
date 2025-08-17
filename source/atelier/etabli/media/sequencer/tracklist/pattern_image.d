@@ -3,7 +3,9 @@ module atelier.etabli.media.sequencer.tracklist.pattern_image;
 import std.conv : to;
 import std.algorithm.comparison : min, max;
 import std.math : ceil, abs;
-import atelier;
+import atelier.common;
+import atelier.ui;
+import atelier.render;
 
 final class PatternImage : Image {
     private {

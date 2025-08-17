@@ -2,8 +2,16 @@ module atelier.etabli.media.sequencer.pattern.editor;
 
 import std.conv : to;
 import std.math : floor;
-import atelier;
+
 import farfadet;
+
+import atelier.audio;
+import atelier.common;
+import atelier.core;
+import atelier.input;
+import atelier.ui;
+import atelier.render;
+
 import atelier.etabli.core;
 import atelier.etabli.ui;
 import atelier.etabli.media.sequencer.base;

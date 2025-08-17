@@ -1,6 +1,8 @@
 module atelier.etabli.media.res.item.add;
 
-import atelier;
+import atelier.common;
+import atelier.core;
+import atelier.ui;
 
 final class AddResourceItem : Modal {
     private {

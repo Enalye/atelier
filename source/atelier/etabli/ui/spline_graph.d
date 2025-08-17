@@ -2,7 +2,9 @@ module atelier.etabli.ui.spline_graph;
 
 import std.conv : to;
 import std.math : round;
-import atelier;
+import atelier.common;
+import atelier.ui;
+import atelier.render;
 
 final class SplineGraph : UIElement {
     private {

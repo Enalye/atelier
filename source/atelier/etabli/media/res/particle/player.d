@@ -1,6 +1,9 @@
 module atelier.etabli.media.res.particle.player;
 
-import atelier;
+import atelier.common;
+import atelier.core;
+import atelier.input;
+import atelier.ui;
 import atelier.etabli.ui;
 import atelier.etabli.media.res.particle.editor;
 import atelier.etabli.media.res.entity_render;

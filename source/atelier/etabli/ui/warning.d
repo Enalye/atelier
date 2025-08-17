@@ -1,6 +1,9 @@
 module atelier.etabli.ui.warning;
 
-import atelier;
+import atelier.common;
+import atelier.core;
+import atelier.ui;
+import atelier.render;
 
 final class WarningModal : Modal {
     static {

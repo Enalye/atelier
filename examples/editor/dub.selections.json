@@ -1,0 +1,12 @@
+{
+	"fileVersion": 1,
+	"versions": {
+		"audio-formats": "3.0.2",
+		"bindbc-common": "0.1.6",
+		"bindbc-loader": "1.1.5",
+		"bindbc-sdl": "1.4.8",
+		"farfadet": {"path":"../../farfadet"},
+		"grimoire": {"path":"../../grimoire"},
+		"minuit": {"path":"../../minuit"}
+	}
+}

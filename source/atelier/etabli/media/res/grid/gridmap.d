@@ -5,7 +5,10 @@ import std.exception : enforce;
 import std.math : floor, ceil;
 import std.algorithm.comparison : min, max;
 
-import atelier;
+import atelier.common;
+import atelier.core;
+import atelier.ui;
+import atelier.render;
 
 final class GridMap(T) : Image {
     private {

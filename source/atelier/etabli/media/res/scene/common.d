@@ -3,8 +3,15 @@ module atelier.etabli.media.res.scene.common;
 import std.conv : to;
 import std.math : round;
 import std.exception;
-import atelier;
+
 import farfadet;
+
+import atelier.common;
+import atelier.core;
+import atelier.ui;
+import atelier.render;
+import atelier.world;
+
 import atelier.etabli.ui;
 import atelier.etabli.media.res.scene.terrain;
 import atelier.etabli.media.res.scene.parallax;

@@ -1,6 +1,9 @@
 module atelier.etabli.media.res.scene.parallax.duplicate;
 
-import atelier;
+import atelier.common;
+import atelier.core;
+import atelier.ui;
+import atelier.render;
 
 final class DuplicateParallaxElement : Modal {
     private {

@@ -3,8 +3,10 @@ module atelier.etabli.core.midi.player;
 import std.algorithm : clamp, sort;
 import std.conv : to;
 import core.thread;
-import atelier;
+
 import minuit;
+
+import atelier.common;
 import atelier.etabli.core.midi.clock;
 import atelier.etabli.core.midi.device;
 

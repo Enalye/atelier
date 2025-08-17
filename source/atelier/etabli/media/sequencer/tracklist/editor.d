@@ -4,8 +4,16 @@ import std.algorithm : sort;
 import std.conv : to;
 import std.math : floor;
 import std.path : setExtension, buildNormalizedPath, dirName;
-import atelier;
+
 import farfadet;
+
+import atelier.audio;
+import atelier.common;
+import atelier.core;
+import atelier.input;
+import atelier.ui;
+import atelier.render;
+
 import atelier.etabli.core;
 import atelier.etabli.ui;
 import atelier.etabli.media.sequencer.base;

@@ -1,8 +1,14 @@
 module atelier.etabli.media.sequencer.pattern.note;
 
 import std.conv : to;
-import atelier;
+
 import farfadet;
+
+import atelier.common;
+import atelier.core;
+import atelier.ui;
+import atelier.render;
+
 import atelier.etabli.media.sequencer.pattern.editor;
 
 package final class Note {

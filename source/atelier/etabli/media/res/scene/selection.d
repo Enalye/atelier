@@ -1,6 +1,8 @@
 module atelier.etabli.media.res.scene.selection;
 
-import atelier;
+import atelier.common;
+import atelier.ui;
+import atelier.render;
 
 package(atelier.etabli.media.res.scene) struct TilesSelection {
     int[][] tiles;

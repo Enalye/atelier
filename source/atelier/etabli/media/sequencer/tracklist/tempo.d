@@ -1,8 +1,14 @@
 module atelier.etabli.media.sequencer.tracklist.tempo;
 
 import std.conv : to;
-import atelier;
+
 import farfadet;
+
+import atelier.common;
+import atelier.core;
+import atelier.ui;
+import atelier.render;
+
 import atelier.etabli.media.sequencer.tracklist.editor;
 
 package final class Tempo {

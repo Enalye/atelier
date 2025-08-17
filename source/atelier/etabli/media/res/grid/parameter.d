@@ -3,8 +3,12 @@ module atelier.etabli.media.res.grid.parameter;
 import std.file;
 import std.path;
 import std.math : abs;
-import atelier;
+
 import farfadet;
+
+import atelier.common;
+import atelier.core;
+import atelier.ui;
 import atelier.etabli.media.res.base;
 import atelier.etabli.ui;
 

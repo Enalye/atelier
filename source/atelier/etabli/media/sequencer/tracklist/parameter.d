@@ -1,6 +1,10 @@
 module atelier.etabli.media.sequencer.tracklist.parameter;
 
-import atelier;
+import atelier.common;
+import atelier.core;
+import atelier.ui;
+import atelier.render;
+
 import atelier.etabli.core;
 import atelier.etabli.ui;
 

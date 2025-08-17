@@ -1,7 +1,12 @@
 module atelier.etabli.media.sequencer.invalid;
 
-import atelier;
 import farfadet;
+
+import atelier.common;
+import atelier.core;
+import atelier.ui;
+import atelier.render;
+
 import atelier.etabli.media.sequencer.base;
 import atelier.etabli.media.sequencer.editor;
 

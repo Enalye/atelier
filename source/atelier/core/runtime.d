@@ -77,7 +77,7 @@ final class Atelier {
         Vignette _vignette;
         Locale _locale;
 
-        version (AtelierEditor) {
+        version (AtelierEtabli) {
             Etabli _etabli;
         }
     }
@@ -150,7 +150,7 @@ final class Atelier {
         }
 
         /// Éditeur
-        version (AtelierEditor) {
+        version (AtelierEtabli) {
             Etabli etabli() {
                 return _etabli;
             }
@@ -271,7 +271,7 @@ final class Atelier {
         _overlay = new Overlay();
         _locale = new Locale();
 
-        version (AtelierEditor) {
+        version (AtelierEtabli) {
             _etabli = new Etabli;
         }
 

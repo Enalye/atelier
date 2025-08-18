@@ -115,7 +115,7 @@ package final class MediaPlayer : UIElement {
     }
 
     private void _onReload() {
-        version (AtelierEditor) {
+        version (AtelierEtabli) {
             Atelier.script.setCustomFiles(Atelier.etabli.getScripts());
             Atelier.script.reload();
             Atelier.script.start();

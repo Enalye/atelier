@@ -154,7 +154,7 @@ abstract class Entity {
                 _graphic = graphic;
                 _graphic.start();
                 _graphic.setAngle(_angle);
-                version (AtelierEditor) {
+                version (AtelierEtabli) {
                 }
                 else {
                     Atelier.world.addRenderedEntity(this);
@@ -304,7 +304,7 @@ abstract class Entity {
                 _graphic.setAngle(_angle);
 
                 if (!wasRendered) {
-                    version (AtelierEditor) {
+                    version (AtelierEtabli) {
                     }
                     else {
                         Atelier.world.addRenderedEntity(this);
@@ -347,7 +347,7 @@ abstract class Entity {
         _graphic.start();
         _graphic.setAngle(_angle);
         if (!wasRendered) {
-            version (AtelierEditor) {
+            version (AtelierEtabli) {
             }
             else {
                 Atelier.world.addRenderedEntity(this);
@@ -559,7 +559,7 @@ abstract class Entity {
     }
 
     final void move(Vec3f dir) {
-        version (AtelierEditor) {
+        version (AtelierEtabli) {
             moveRaw(dir);
         }
         else {
@@ -573,7 +573,7 @@ abstract class Entity {
     }
 
     void reloadTerrainInfo() {
-        version (AtelierEditor) {
+        version (AtelierEtabli) {
             _baseZ = 0;
         }
         else {

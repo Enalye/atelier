@@ -23,28 +23,37 @@
                 "-gf"
             ],
             "subConfigurations": {
-                "atelier": "debug"
+                "atelier": "atelier_debug"
             }
         },
         {
-            "name": "game_lib",
+            "name": "game_editor_debug",
             "targetPath": "../bin",
             "targetType": "library",
             "targetName": "example",
-            "dflags": [
-                "-gf"
-            ],
             "subConfigurations": {
                 "atelier": "etabli_debug"
             }
         },
         {
+            "name": "game_editor",
+            "targetPath": "../bin",
+            "targetType": "library",
+            "targetName": "example",
+            "subConfigurations": {
+                "atelier": "etabli"
+            }
+        },
+        {
             "name": "game_export",
+            "targetPath": "../export",
             "lflags": [
                 "-subsystem:windows",
                 "-entry:mainCRTStartup"
             ],
-            "targetPath": "../export"
+            "subConfigurations": {
+                "atelier": "atelier"
+            }
         }
     ]
 }

@@ -1,6 +1,6 @@
 module atelier.script.system;
 
-version (AtelierEditor) {
+version (AtelierEtabli) {
     import std.file : exists;
 }
 
@@ -31,7 +31,7 @@ final class Script {
         Archive.File[] _files;
         bool _isEnabled = true;
 
-        version (AtelierEditor) {
+        version (AtelierEtabli) {
             string[] _customFiles;
         }
 
@@ -96,7 +96,7 @@ final class Script {
         return loaders;
     }
 
-    version (AtelierEditor) {
+    version (AtelierEtabli) {
         void setCustomFiles(string[] files) {
             _customFiles = files;
         }
@@ -119,7 +119,7 @@ final class Script {
 
         long startTime = Clock.currStdTime();
 
-        version (AtelierEditor) {
+        version (AtelierEtabli) {
             Atelier.log("[ATELIER] Compilation des scripts personnalisés...");
         }
         else {
@@ -131,7 +131,7 @@ final class Script {
             compiler.addLibrary(library);
         }
 
-        version (AtelierEditor) {
+        version (AtelierEtabli) {
             foreach (sourceFile; _customFiles) {
                 if (exists(sourceFile)) {
                     compiler.addFile(sourceFile);
@@ -155,7 +155,7 @@ final class Script {
     }
 
     void reload() {
-        version (AtelierEditor) {
+        version (AtelierEtabli) {
             try {
                 _compile();
             }

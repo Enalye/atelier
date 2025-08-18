@@ -7,6 +7,8 @@
     "license": "Zlib",
     "name": "atelier",
     "targetName": "atelier",
+    "targetPath": "bin",
+    "targetType": "library",
     "workingDirectory": ".",
     "dependencies": {
         "grimoire": {
@@ -51,57 +53,29 @@
     ],
     "configurations": [
         {
-            "name": "debug",
-            "targetType": "library",
+            "name": "atelier_debug",
             "targetName": "atelier_debug",
-            "targetPath": "bin",
-            "dflags": [
-                "-gf"
-            ],
             "versions": [
                 "AtelierDebug"
             ]
         },
         {
+            "name": "atelier",
+            "targetName": "atelier"
+        },
+        {
             "name": "etabli_debug",
-            "targetType": "library",
-            "targetName": "atelier_etabli_debug",
-            "targetPath": "bin",
+            "targetName": "etabli_debug",
             "versions": [
-                "AtelierEditor",
+                "AtelierEtabli",
                 "AtelierDebug"
             ]
         },
         {
             "name": "etabli",
-            "targetType": "library",
-            "targetName": "atelier_etabli",
-            "targetPath": "bin",
+            "targetName": "etabli",
             "versions": [
-                "AtelierEditor"
-            ]
-        },
-        {
-            "name": "export",
-            "targetType": "library",
-            "targetName": "atelier",
-            "targetPath": "export",
-            "lflags": [
-                "-subsystem:windows",
-                "-entry:mainCRTStartup"
-            ]
-        },
-        {
-            "name": "etabli_export",
-            "targetType": "library",
-            "targetName": "atelier",
-            "targetPath": "export",
-            "lflags": [
-                "-subsystem:windows",
-                "-entry:mainCRTStartup"
-            ],
-            "versions": [
-                "AtelierEditor"
+                "AtelierEtabli"
             ]
         }
     ],

@@ -13,29 +13,29 @@
             "path": "../../"
         }
     },
-	"subConfigurations": {
-        "atelier:game": "game_lib"
-	},
     "configurations": [
         {
             "name": "example_editor_debug",
-            "targetPath": "../../bin",
             "targetType": "executable",
+            "targetPath": "../bin",
             "dflags": [
                 "-gf"
-            ]
+            ],
+            "subConfigurations": {
+                "atelier:game": "game_editor_debug"
+            }
         },
         {
             "name": "example_editor_export",
             "targetType": "executable",
-            "versions": [
-                "AtelierEditor"
-            ],
+            "targetPath": "../export",
             "lflags": [
                 "-subsystem:windows",
                 "-entry:mainCRTStartup"
             ],
-            "targetPath": "../../export"
+            "subConfigurations": {
+                "atelier:game": "game_editor"
+            }
         }
     ]
 }

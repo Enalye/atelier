@@ -23,7 +23,7 @@ final class NewFile : Modal {
 
     this() {
         setAlign(UIAlignX.center, UIAlignY.center);
-        setSize(Vec2f(500f, 500f));
+        setSize(Vec2f(500f, 300f));
 
         {
             Label title = new Label("Nouveau Fichier", Atelier.theme.font);
@@ -86,7 +86,7 @@ final class NewFile : Modal {
 
             mediaBox.addUI(new Label("Média:", Atelier.theme.font));
 
-            _mediaSelector = new SelectButton(medias, "");
+            _mediaSelector = new SelectButton(medias, Atelier.etabli.currentMedia);
             _mediaSelector.addEventListener("value", &_onMediaChange);
             mediaBox.addUI(_mediaSelector);
         }

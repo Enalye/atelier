@@ -23,6 +23,12 @@ final class FileExplorer : Surface {
         TextField _searchField;
     }
 
+    @property {
+        string currentMedia() const {
+            return _currentMedia;
+        }
+    }
+
     this() {
         setAlign(UIAlignX.left, UIAlignY.bottom);
         setSize(Vec2f(250f, Atelier.window.height - 35f));

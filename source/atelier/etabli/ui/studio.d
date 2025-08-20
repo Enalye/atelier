@@ -84,6 +84,12 @@ final class EtabliUI : UIElement {
         enum RightPanelSize = 317f;
     }
 
+    @property {
+        string currentMedia() const {
+            return _mediaExplorer.currentMedia;
+        }
+    }
+
     this() {
         setSize(Vec2f(Atelier.renderer.size.x, Atelier.renderer.size.y - 35f));
         setAlign(UIAlignX.center, UIAlignY.bottom);

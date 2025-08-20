@@ -48,6 +48,10 @@ final class Etabli {
         MenuBar bar() {
             return _bar;
         }
+
+        string currentMedia() const {
+            return _ui.currentMedia;
+        }
     }
 
     this() {

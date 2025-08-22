@@ -23,7 +23,7 @@ enum Atelier_Window_Width = 640;
 
 enum Atelier_Window_Height = 360;
 
-enum Atelier_Window_Title = "Projet Numé";
+enum Atelier_Window_Title = "Atelier";
 
 enum Atelier_Window_Icon = "icon.png";
 

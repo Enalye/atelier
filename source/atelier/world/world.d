@@ -115,8 +115,6 @@ final class World {
         setTransition(&_createDefaultTransition);
         setTeleporterBehavior(&_createDefaultTeleporterBehavior);
         setPlayerBehavior(&_createDefaultMoveBehavior);
-
-        _tempConfig();
     }
 
     void setTransition(Transition function(string, string, Actor, bool) transitionFunc = &_createDefaultTransition) {
@@ -133,128 +131,6 @@ final class World {
 
     void setPause(bool value) {
         _isPaused = value;
-    }
-
-    private void _tempConfig() {
-        Atelier.input.addAction("left");
-        Atelier.input.addAction("right");
-        Atelier.input.addAction("up");
-        Atelier.input.addAction("down");
-        Atelier.input.addAction("focus");
-        Atelier.input.addAction("hover");
-        Atelier.input.addAction("validate");
-        Atelier.input.addAction("cancel");
-
-        for (int i = 1; i <= 4; ++i) {
-            Atelier.input.addAction("skill" ~ to!string(i) ~ "_down");
-            Atelier.input.addAction("skill" ~ to!string(i) ~ "_pressed");
-        }
-
-        // Manette
-        Atelier.input.addActionEvent("left", InputEvent.controllerButton(
-                InputEvent.ControllerButton.Button.left, InputState(KeyState.pressed)));
-        Atelier.input.addActionEvent("right", InputEvent.controllerButton(
-                InputEvent.ControllerButton.Button.right, InputState(KeyState.pressed)));
-        Atelier.input.addActionEvent("up", InputEvent.controllerButton(
-                InputEvent.ControllerButton.Button.up, InputState(KeyState.pressed)));
-        Atelier.input.addActionEvent("down", InputEvent.controllerButton(
-                InputEvent.ControllerButton.Button.down, InputState(KeyState.pressed)));
-        Atelier.input.addActionEvent("focus", InputEvent.controllerButton(
-                InputEvent.ControllerButton.Button.leftShoulder, InputState(KeyState.pressed)));
-        Atelier.input.addActionEvent("hover",
-            InputEvent.controllerButton(
-                InputEvent.ControllerButton.Button.leftStick, InputState(KeyState.down)));
-        Atelier.input.addActionEvent("validate",
-            InputEvent.controllerButton(
-                InputEvent.ControllerButton.Button.a, InputState(KeyState.down)));
-        Atelier.input.addActionEvent("cancel",
-            InputEvent.controllerButton(
-                InputEvent.ControllerButton.Button.b, InputState(KeyState.down)));
-
-        Atelier.input.addActionEvent("left",
-            InputEvent.controllerAxis(InputEvent.ControllerAxis.Axis.leftX, -1.0));
-        Atelier.input.addActionEvent("right",
-            InputEvent.controllerAxis(InputEvent.ControllerAxis.Axis.leftX, 1.0));
-        Atelier.input.addActionEvent("up",
-            InputEvent.controllerAxis(InputEvent.ControllerAxis.Axis.leftY, -1.0));
-        Atelier.input.addActionEvent("down",
-            InputEvent.controllerAxis(InputEvent.ControllerAxis.Axis.leftY, 1.0));
-
-        Atelier.input.addActionEvent("skill1_down",
-            InputEvent.controllerButton(
-                InputEvent.ControllerButton.Button.a, InputState(KeyState.down)));
-        Atelier.input.addActionEvent("skill1_pressed",
-            InputEvent.controllerButton(
-                InputEvent.ControllerButton.Button.a, InputState(KeyState.pressed)));
-
-        Atelier.input.addActionEvent("skill2_down",
-            InputEvent.controllerButton(
-                InputEvent.ControllerButton.Button.b, InputState(KeyState.down)));
-        Atelier.input.addActionEvent("skill2_pressed",
-            InputEvent.controllerButton(
-                InputEvent.ControllerButton.Button.b, InputState(KeyState.pressed)));
-
-        Atelier.input.addActionEvent("skill3_down",
-            InputEvent.controllerButton(
-                InputEvent.ControllerButton.Button.x, InputState(KeyState.down)));
-        Atelier.input.addActionEvent("skill3_pressed",
-            InputEvent.controllerButton(
-                InputEvent.ControllerButton.Button.x, InputState(KeyState.pressed)));
-
-        Atelier.input.addActionEvent("skill4_down",
-            InputEvent.controllerButton(
-                InputEvent.ControllerButton.Button.y, InputState(KeyState.down)));
-        Atelier.input.addActionEvent("skill4_pressed",
-            InputEvent.controllerButton(
-                InputEvent.ControllerButton.Button.y, InputState(KeyState.pressed)));
-
-        // Clavier
-        Atelier.input.addActionEvent("left",
-            InputEvent.keyButton(InputEvent.KeyButton.Button.left, InputState(KeyState.pressed)));
-        Atelier.input.addActionEvent("right",
-            InputEvent.keyButton(InputEvent.KeyButton.Button.right, InputState(KeyState.pressed)));
-        Atelier.input.addActionEvent("up",
-            InputEvent.keyButton(InputEvent.KeyButton.Button.up, InputState(KeyState.pressed)));
-        Atelier.input.addActionEvent("down",
-            InputEvent.keyButton(InputEvent.KeyButton.Button.down, InputState(KeyState.pressed)));
-        Atelier.input.addActionEvent("focus",
-            InputEvent.keyButton(
-                InputEvent.KeyButton.Button.leftShift, InputState(KeyState.pressed)));
-        Atelier.input.addActionEvent("validate",
-            InputEvent.keyButton(
-                InputEvent.KeyButton.Button.z, InputState(KeyState.down)));
-        Atelier.input.addActionEvent("cancel",
-            InputEvent.keyButton(
-                InputEvent.KeyButton.Button.x, InputState(KeyState.down)));
-
-        Atelier.input.addActionEvent("skill1_down",
-            InputEvent.keyButton(
-                InputEvent.KeyButton.Button.z, InputState(KeyState.down)));
-        Atelier.input.addActionEvent("skill1_pressed",
-            InputEvent.keyButton(
-                InputEvent.KeyButton.Button.z, InputState(KeyState.pressed)));
-
-        Atelier.input.addActionEvent("skill2_down",
-            InputEvent.keyButton(
-                InputEvent.KeyButton.Button.x, InputState(KeyState.down)));
-        Atelier.input.addActionEvent("skill2_pressed",
-            InputEvent.keyButton(
-                InputEvent.KeyButton.Button.x, InputState(KeyState.pressed)));
-
-        Atelier.input.addActionEvent("skill3_down",
-            InputEvent.keyButton(
-                InputEvent.KeyButton.Button.c, InputState(KeyState.down)));
-        Atelier.input.addActionEvent("skill3_pressed",
-            InputEvent.keyButton(
-                InputEvent.KeyButton.Button.c, InputState(KeyState.pressed)));
-
-        Atelier.input.addActionEvent("skill4_down",
-            InputEvent.keyButton(
-                InputEvent.KeyButton.Button.a, InputState(KeyState.down)));
-        Atelier.input.addActionEvent("skill4_pressed",
-            InputEvent.keyButton(
-                InputEvent.KeyButton.Button.a, InputState(KeyState.pressed)));
-
     }
 
     /// Ajoute un élément d’interface

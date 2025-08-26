@@ -34,6 +34,9 @@ enum Atelier_Media_Dir = "media";
 /// Fichier de configuration
 enum Atelier_Configuration_Extension = ".acf";
 
+/// Fichier de configuration
+enum Atelier_Configuration = "atelier.ffd";
+
 /// Fichier d’application
 enum Atelier_Application_Extension = ".atl";
 

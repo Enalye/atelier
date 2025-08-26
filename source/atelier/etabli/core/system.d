@@ -649,7 +649,7 @@ final class Etabli {
     void loadConfig() {
         _mediaFolders.clear();
 
-        string path = buildNormalizedPath(getDir(), "config.ffd");
+        string path = buildNormalizedPath(getDir(), Atelier_Configuration);
         if (!exists(path))
             return;
 
@@ -665,7 +665,7 @@ final class Etabli {
             configFfd.addNode("media").add(folder).add(isArchived);
         }
 
-        configFfd.save(buildNormalizedPath(getDir(), "config.ffd"));
+        configFfd.save(buildNormalizedPath(getDir(), Atelier_Configuration));
     }
 
     void editFile(string path) {

@@ -414,7 +414,7 @@ final class Atelier {
 
     void loadArchives() {
         version (AtelierDebug) {
-            string configPath = buildNormalizedPath(getcwd(), "config.ffd");
+            string configPath = buildNormalizedPath(getcwd(), Atelier_Configuration);
             if (!exists(configPath))
                 return;
 

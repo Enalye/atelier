@@ -22,6 +22,7 @@ final class Window {
         SDL_Surface* _icon;
         string _title;
         int _width, _height;
+        Display _display = Display.windowed;
     }
 
     @property {
@@ -85,6 +86,16 @@ final class Window {
         SDL_SetWindowIcon(_sdlWindow, _icon);
     }
 
+    void setSize(int width_, int height_) {
+        if (_width == width_ && _height == height_)
+            return;
+
+        _width = width_;
+        _height = height_;
+        SDL_SetWindowSize(_sdlWindow, _width, _height);
+        Atelier.renderer.setWindowSize(Vec2i(_width, _height));
+    }
+
     void onSize(int width_, int height_) {
         if (_width == width_ && _height == height_)
             return;
@@ -92,5 +103,30 @@ final class Window {
         _width = width_;
         _height = height_;
         Atelier.renderer.setWindowSize(Vec2i(_width, _height));
+    }
+
+    /// Change le rendu de la fenêtre en mode fenêtré ou plein-écran.
+    void setDisplay(Display display) {
+        _display = display;
+        SDL_WindowFlags mode;
+
+        final switch (display) with (Display) {
+        case fullscreen:
+            mode = SDL_WINDOW_FULLSCREEN;
+            break;
+        case desktop:
+            mode = SDL_WINDOW_FULLSCREEN_DESKTOP;
+            break;
+        case windowed:
+            mode = cast(SDL_WindowFlags) 0;
+            break;
+        }
+
+        SDL_SetWindowFullscreen(_sdlWindow, mode);
+    }
+
+    /// Mode de rendu de la fenêtre
+    Display getDisplay() {
+        return _display;
     }
 }

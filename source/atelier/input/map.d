@@ -2,6 +2,8 @@ module atelier.input.map;
 
 import std.algorithm.mutation : remove;
 
+import farfadet;
+
 import atelier.input.event;
 
 /// Gère l’association de certaines entrés avec leurs actions correspondantes
@@ -33,6 +35,27 @@ final class InputMap {
 
     private {
         Action[string] _actions;
+    }
+
+    void load(Farfadet ffd) {
+        _actions.clear();
+
+        if (!ffd.hasNode("input"))
+            return;
+
+        foreach (node; ffd.getNode("input").getNodes()) {
+            Action action = new Action(node.name);
+            action.events ~= InputEvent.fromFarfadet(node);
+        }
+    }
+
+    void save(Farfadet ffd) {
+        Farfadet node = ffd.addNode("input");
+        foreach (key, action; _actions) {
+            foreach (event; action.events) {
+                node.addNode(key).addNode(event.toFarfadet());
+            }
+        }
     }
 
     /// Ajoute une nouvelle action

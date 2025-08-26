@@ -8,6 +8,7 @@ import std.string : fromStringz;
 import std.typecons;
 
 import bindbc.sdl;
+import atelier;
 
 import atelier.common;
 
@@ -363,6 +364,13 @@ final class InputEvent {
         bool echo;
 
         /// Init
+        this(Farfadet ffd) {
+            button = ffd.getNode("button").get!Button(0);
+            state = ffd.getNode("state").get!InputState(0);
+            echo = ffd.getNode("echo").get!bool(0);
+        }
+
+        /// Init
         this(Button button_, InputState state_, bool echo_) {
             button = button_;
             state = state_;
@@ -374,6 +382,12 @@ final class InputEvent {
             button = event.button;
             state = event.state;
             echo = event.echo;
+        }
+
+        void save(Farfadet ffd) {
+            ffd.addNode("button").add(button);
+            ffd.addNode("state").add(state);
+            ffd.addNode("echo").add(echo);
         }
     }
 
@@ -404,6 +418,15 @@ final class InputEvent {
         Vec2f deltaPosition;
 
         /// Init
+        this(Farfadet ffd) {
+            button = ffd.getNode("button").get!Button(0);
+            state = ffd.getNode("state").get!InputState(0);
+            clicks = ffd.getNode("clicks").get!uint(0);
+            position = ffd.getNode("position").get!Vec2f(0);
+            deltaPosition = ffd.getNode("deltaPosition").get!Vec2f(0);
+        }
+
+        /// Init
         this(Button button_, InputState state_, uint clicks_, Vec2f position_, Vec2f deltaPosition_) {
             button = button_;
             state = state_;
@@ -420,6 +443,14 @@ final class InputEvent {
             position = event.position;
             deltaPosition = event.deltaPosition;
         }
+
+        void save(Farfadet ffd) {
+            ffd.addNode("button").add(button);
+            ffd.addNode("state").add(state);
+            ffd.addNode("clicks").add(clicks);
+            ffd.addNode("position").add(position);
+            ffd.addNode("deltaPosition").add(deltaPosition);
+        }
     }
 
     /// Déplacement de la souris
@@ -429,6 +460,12 @@ final class InputEvent {
 
         /// Position par rapport à la dernière position
         Vec2f deltaPosition;
+
+        /// Init
+        this(Farfadet ffd) {
+            position = ffd.getNode("position").get!Vec2f(0);
+            deltaPosition = ffd.getNode("deltaPosition").get!Vec2f(0);
+        }
 
         /// Init
         this(Vec2f position_, Vec2f deltaPosition_) {
@@ -441,12 +478,22 @@ final class InputEvent {
             position = event.position;
             deltaPosition = event.deltaPosition;
         }
+
+        void save(Farfadet ffd) {
+            ffd.addNode("position").add(position);
+            ffd.addNode("deltaPosition").add(deltaPosition);
+        }
     }
 
     /// Molette de la souris
     final class MouseWheel {
         /// Molette
         Vec2i wheel;
+
+        /// Init
+        this(Farfadet ffd) {
+            wheel = ffd.getNode("wheel").get!Vec2i(0);
+        }
 
         /// Init
         this(Vec2i wheel_) {
@@ -456,6 +503,10 @@ final class InputEvent {
         /// Copie
         this(const MouseWheel event) {
             wheel = event.wheel;
+        }
+
+        void save(Farfadet ffd) {
+            ffd.addNode("wheel").add(wheel);
         }
     }
 
@@ -488,6 +539,12 @@ final class InputEvent {
         InputState state;
 
         /// Init
+        this(Farfadet ffd) {
+            button = ffd.getNode("button").get!Button(0);
+            state = ffd.getNode("state").get!InputState(0);
+        }
+
+        /// Init
         this(Button button_, InputState state_) {
             button = button_;
             state = state_;
@@ -497,6 +554,11 @@ final class InputEvent {
         this(const ControllerButton event) {
             button = event.button;
             state = event.state;
+        }
+
+        void save(Farfadet ffd) {
+            ffd.addNode("button").add(button);
+            ffd.addNode("state").add(state);
         }
     }
 
@@ -523,6 +585,13 @@ final class InputEvent {
         double deadzone;
 
         /// Init
+        this(Farfadet ffd) {
+            axis = ffd.getNode("axis").get!Axis(0);
+            value = ffd.getNode("value").get!double(0);
+            deadzone = ffd.getNode("deadzone").get!double(0);
+        }
+
+        /// Init
         this(Axis axis_, double value_, double deadzone_ = 0.2) {
             axis = axis_;
             value = value_;
@@ -535,12 +604,23 @@ final class InputEvent {
             value = event.value;
             deadzone = event.deadzone;
         }
+
+        void save(Farfadet ffd) {
+            ffd.addNode("axis").add(axis);
+            ffd.addNode("value").add(value);
+            ffd.addNode("deadzone").add(deadzone);
+        }
     }
 
     /// Texte entré par l’utilisateur
     final class TextInput {
         /// Texte
         string text;
+
+        /// Init
+        this(Farfadet ffd) {
+            text = ffd.getNode("text").get!string(0);
+        }
 
         /// Init
         this(string text_) {
@@ -551,12 +631,21 @@ final class InputEvent {
         this(const TextInput event) {
             text = event.text;
         }
+
+        void save(Farfadet ffd) {
+            ffd.addNode("text").add(text);
+        }
     }
 
     /// Fichier glissé/déposé dans la fenêtre de l’application
     final class DropFile {
         /// Chemin du fichier
         string path;
+
+        /// Init
+        this(Farfadet ffd) {
+            path = ffd.getNode("path").get!string(0);
+        }
 
         /// Init
         this(string path_) {
@@ -566,6 +655,10 @@ final class InputEvent {
         /// Copie
         this(const DropFile event) {
             path = event.path;
+        }
+
+        void save(Farfadet ffd) {
+            ffd.addNode("path").add(path);
         }
     }
 
@@ -774,6 +867,90 @@ final class InputEvent {
         final isAccepted() const {
             return _isAccepted;
         }
+    }
+
+    static {
+        InputEvent fromFarfadet(Farfadet ffd) {
+            InputEvent event = new InputEvent;
+
+            if (ffd.hasNode("type"))
+                event._type = ffd.getNode("type").get!Type(0);
+            else
+                event._type = Type.none;
+
+            if (ffd.hasNode("isAccepted"))
+                event._isAccepted = ffd.getNode("type").get!bool(0);
+            else
+                event._isAccepted = false;
+
+            final switch (event._type) with (Type) {
+            case none:
+                break;
+            case keyButton:
+                event._keyButton = event.new KeyButton(ffd);
+                break;
+            case mouseButton:
+                event._mouseButton = event.new MouseButton(ffd);
+                break;
+            case mouseMotion:
+                event._mouseMotion = event.new MouseMotion(ffd);
+                break;
+            case mouseWheel:
+                event._mouseWheel = event.new MouseWheel(ffd);
+                break;
+            case controllerButton:
+                event._controllerButton = event.new ControllerButton(ffd);
+                break;
+            case controllerAxis:
+                event._controllerAxis = event.new ControllerAxis(ffd);
+                break;
+            case textInput:
+                event._textInput = event.new TextInput(ffd);
+                break;
+            case dropFile:
+                event._dropFile = event.new DropFile(ffd);
+                break;
+            }
+
+            return event;
+        }
+    }
+
+    Farfadet toFarfadet() {
+        Farfadet ffd;
+        ffd.addNode("type").add(_type);
+        ffd.addNode("type").add(_isAccepted);
+
+        final switch (_type) with (Type) {
+        case none:
+            break;
+        case keyButton:
+            _keyButton.save(ffd);
+            break;
+        case mouseButton:
+            _mouseButton.save(ffd);
+            break;
+        case mouseMotion:
+            _mouseMotion.save(ffd);
+            break;
+        case mouseWheel:
+            _mouseWheel.save(ffd);
+            break;
+        case controllerButton:
+            _controllerButton.save(ffd);
+            break;
+        case controllerAxis:
+            _controllerAxis.save(ffd);
+            break;
+        case textInput:
+            _textInput.save(ffd);
+            break;
+        case dropFile:
+            _dropFile.save(ffd);
+            break;
+        }
+
+        return ffd;
     }
 
     private this() {

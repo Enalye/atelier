@@ -1,8 +1,6 @@
 module atelier.locale;
 
-final class Locale {
-    // @TODO
-    string get(string text) {
-        return text;
-    }
+public {
+    import atelier.locale.language;
+    import atelier.locale.system;
 }

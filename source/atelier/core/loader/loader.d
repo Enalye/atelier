@@ -7,7 +7,7 @@ import atelier.core.data;
 import atelier.core.loader.actor;
 import atelier.core.loader.animation;
 import atelier.core.loader.bitmapfont;
-import atelier.core.loader.scene;
+import atelier.core.loader.locale;
 import atelier.core.loader.multidiranimation;
 import atelier.core.loader.music;
 import atelier.core.loader.ninepatch;
@@ -16,8 +16,9 @@ import atelier.core.loader.pixelfont;
 import atelier.core.loader.pixelfontset;
 import atelier.core.loader.prop;
 import atelier.core.loader.proxy;
-import atelier.core.loader.sound;
+import atelier.core.loader.scene;
 import atelier.core.loader.shot;
+import atelier.core.loader.sound;
 import atelier.core.loader.sprite;
 import atelier.core.loader.terrain;
 import atelier.core.loader.texture;
@@ -50,5 +51,6 @@ void setupDefaultResourceLoaders(ResourceManager res) {
     res.setLoader("actor", &compileActor, &loadActor);
     res.setLoader("shot", &compileShot, &loadShot);
     res.setLoader("proxy", &compileProxy, &loadProxy);
+    res.setLoader("locale", &compileLocale, &loadLocale);
     res.setLoaderIgnored("instrument");
 }

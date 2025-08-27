@@ -10,13 +10,13 @@ import grimoire;
 import atelier.audio;
 import atelier.common;
 import atelier.input;
+import atelier.locale;
 import atelier.physics;
 import atelier.render;
 import atelier.script;
 import atelier.ui;
 import atelier.world;
 import atelier.console;
-import atelier.locale;
 import atelier.etabli;
 
 import atelier.core.loader;

@@ -274,8 +274,6 @@ final class InputManager {
                 events ~= InputEvent.controllerButton(button, state);
                 break;
             case SDL_WINDOWEVENT:
-                import std.stdio;
-
                 switch (sdlEvent.window.event) {
                 case SDL_WINDOWEVENT_RESIZED:
                 case SDL_WINDOWEVENT_SIZE_CHANGED:

@@ -8,8 +8,14 @@ final class Language {
         string[string] _values;
     }
 
-    this(string id) {
-        _id = id;
+    @property {
+        string id() const {
+            return _id;
+        }
+    }
+
+    this(string id_) {
+        _id = id_;
     }
 
     void store(string key, string value) {

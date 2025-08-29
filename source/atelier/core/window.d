@@ -22,7 +22,9 @@ final class Window {
         SDL_Surface* _icon;
         string _title;
         int _width, _height;
+        int _windowedWidth, _windowedHeight;
         Display _display = Display.windowed;
+        bool _isFullscreen;
     }
 
     @property {
@@ -53,6 +55,8 @@ final class Window {
     this(int width_, int height_) {
         _width = width_;
         _height = height_;
+        _windowedWidth = _width;
+        _windowedHeight = _height;
 
         enforce(SDL_Init(SDL_INIT_EVERYTHING) == 0,
             "SDL initialisation failure: " ~ fromStringz(SDL_GetError()));
@@ -92,6 +96,12 @@ final class Window {
 
         _width = width_;
         _height = height_;
+
+        if (!_isFullscreen) {
+            _windowedWidth = _width;
+            _windowedHeight = _height;
+        }
+
         SDL_SetWindowSize(_sdlWindow, _width, _height);
         Atelier.renderer.setWindowSize(Vec2i(_width, _height));
     }
@@ -102,6 +112,12 @@ final class Window {
 
         _width = width_;
         _height = height_;
+
+        if (!_isFullscreen) {
+            _windowedWidth = _width;
+            _windowedHeight = _height;
+        }
+
         Atelier.renderer.setWindowSize(Vec2i(_width, _height));
     }
 
@@ -109,20 +125,41 @@ final class Window {
     void setDisplay(Display display) {
         _display = display;
         SDL_WindowFlags mode;
+        SDL_DisplayMode displayMode;
 
         final switch (display) with (Display) {
         case fullscreen:
+            SDL_GetDesktopDisplayMode(SDL_GetWindowDisplayIndex(_sdlWindow), &displayMode);
+            _width = displayMode.w;
+            _height = displayMode.h;
             mode = SDL_WINDOW_FULLSCREEN;
+            _isFullscreen = true;
+
+            SDL_SetWindowSize(_sdlWindow, _width, _height);
+            Atelier.renderer.setWindowSize(Vec2i(_width, _height));
+            SDL_SetWindowFullscreen(_sdlWindow, mode);
             break;
         case desktop:
+            _width = _windowedWidth;
+            _height = _windowedHeight;
             mode = SDL_WINDOW_FULLSCREEN_DESKTOP;
+            _isFullscreen = true;
+
+            SDL_SetWindowFullscreen(_sdlWindow, mode);
+            SDL_SetWindowSize(_sdlWindow, _width, _height);
+            Atelier.renderer.setWindowSize(Vec2i(_width, _height));
             break;
         case windowed:
+            _width = _windowedWidth;
+            _height = _windowedHeight;
             mode = cast(SDL_WindowFlags) 0;
+            _isFullscreen = false;
+
+            SDL_SetWindowFullscreen(_sdlWindow, mode);
+            SDL_SetWindowSize(_sdlWindow, _width, _height);
+            Atelier.renderer.setWindowSize(Vec2i(_width, _height));
             break;
         }
-
-        SDL_SetWindowFullscreen(_sdlWindow, mode);
     }
 
     /// Mode de rendu de la fenêtre

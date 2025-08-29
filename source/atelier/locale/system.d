@@ -31,6 +31,10 @@ final class Locale {
         return *p;
     }
 
+    string getID() const {
+        return _current.id;
+    }
+
     string[] getLanguageIDs() {
         return _languages.keys;
     }

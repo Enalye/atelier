@@ -173,11 +173,16 @@ final class Renderer {
     }
 
     void startRenderPass() {
-        pushCanvas(_kernelCanvas);
         SDL_Color sdlColor = Atelier.theme.background.toSDL();
-        SDL_SetRenderDrawBlendMode(_sdlRenderer, getSDLBlend(Blend.none));
         SDL_SetRenderDrawColor(_sdlRenderer, sdlColor.r, sdlColor.g, sdlColor.b, 255);
+        SDL_SetRenderDrawBlendMode(_sdlRenderer, getSDLBlend(Blend.none));
+        const SDL_Rect rectScreen = {0, 0, _windowSize.x, _windowSize.y};
+        SDL_RenderFillRect(_sdlRenderer, &rectScreen);
+
+        pushCanvas(_kernelCanvas);
         const SDL_Rect rect = {0, 0, _kernelCanvas.width, _kernelCanvas.height};
+        SDL_SetRenderDrawColor(_sdlRenderer, sdlColor.r, sdlColor.g, sdlColor.b, 255);
+        SDL_SetRenderDrawBlendMode(_sdlRenderer, getSDLBlend(Blend.none));
         SDL_RenderFillRect(_sdlRenderer, &rect);
     }
 

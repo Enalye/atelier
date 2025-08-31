@@ -730,12 +730,13 @@ abstract class Entity {
         if (!_shadow)
             return;
 
-        float t = easeInOutSine(clamp(_position.z - _baseZ, 0, 16) / 16f);
+        int alt = getAltitude();
+        float t = easeInOutSine(clamp(alt, 0, 16) / 16f);
         shadowSprite.alpha = lerp(0.6f, 0.2f,
             t) * Atelier.world.lighting.getBrightnessAt(
             _position.xy) * alpha;
         shadowSprite.size = Vec2f.one * lerp(15f, 10f, t);
-        shadowSprite.draw(offset + Vec2f(_position.x, _position.y - _baseZ));
+        shadowSprite.draw(offset + Vec2f(0f, alt));
     }
 
     final void renderGraphic(Vec2f offset, float alpha = 1f) {

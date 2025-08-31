@@ -1,5 +1,7 @@
 module atelier.common.timer;
 
+import std.algorithm : min;
+
 /**
 	Simple updatable timer. \
 	Start with start() and update with update(Deltatime). \
@@ -34,9 +36,20 @@ struct Timer {
             return cast(float) _time / cast(float) _duration;
         }
 
+        /// Ditto
+        float value01(float value_) {
+            _time = cast(int)(value_ * _duration);
+            return cast(float) _time / cast(float) _duration;
+        }
+
         /// Time elapsed between 0 and the max duration.
         int value() const {
             return _time;
+        }
+
+        // Ditto
+        int value(int value_) {
+            return _time = value_;
         }
 
         /// Duration in seconds from witch the timer goes from 0 to 1 (framerate dependent). \
@@ -73,18 +86,20 @@ struct Timer {
 
     /// Immediatly starts the timer with the specified running time. \
     /// Note that loop and bounce behaviours will never stop until you tell him to.
-    void start(int duration_) {
+    void start(int duration_, int startTime = 0) {
         _isRunning = true;
         _duration = duration_;
         reset();
+        _time = min(startTime, _duration);
     }
 
     /// Ditto
-    void start(int duration_, Mode mode_) {
+    void start(int duration_, Mode mode_, int startTime = 0) {
         _isRunning = true;
         _duration = duration_;
         _mode = mode_;
         reset();
+        _time = min(startTime, _duration);
     }
 
     /// Immediatly stops the timer and resets it.

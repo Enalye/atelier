@@ -4,7 +4,6 @@ import std.math;
 import atelier.common;
 import atelier.core;
 import atelier.physics;
-import atelier.world.behavior;
 import atelier.world.entity.base;
 import atelier.world.entity.effect;
 
@@ -14,7 +13,6 @@ final class Actor : Entity, Resource!Actor {
         float _hoverHeight, _currentHoverHeight;
         float _gravity = 0.8f;
         float _frictionBrake = 1f;
-        Behavior _behavior;
         bool _isPlayer;
     }
 
@@ -83,13 +81,6 @@ final class Actor : Entity, Resource!Actor {
         return cast(ActorCollider) _collider;
     }
 
-    void setBehavior(Behavior behavior) {
-        if (_behavior) {
-            _behavior.unregister();
-        }
-        _behavior = behavior;
-    }
-
     override void onCollide(Physics.CollisionHit hit) {
         final switch (hit.type) with (Physics.CollisionHit.Type) {
         case none:
@@ -112,22 +103,13 @@ final class Actor : Entity, Resource!Actor {
             }
             break;
         case squish:
+            if (getBehavior()) {
+                getBehavior().onSquish(hit.normal);
+            }
             break;
         case impact:
-            _velocity = Vec3f(hit.normal.xy * 2.5f, _velocity.z);
-            setEffect(new FlashEffect(Color.white, 1f, 0, 30, Spline.sineInOut));
-
-            if (_isPlayer) {
-                Atelier.slowDown(0.2f, 5, 30, Spline.sineInOut, Spline.sineInOut);
-                Atelier.world.camera.shake(1f);
-                Atelier.world.camera.zoom(1.1f, 0, Spline.linear);
-                Atelier.world.camera.zoom(1f, 30, Spline.sineInOut);
-                Atelier.world.camera.blur(2f, 0, Spline.sineInOut);
-                Atelier.world.camera.blur(0f, 30, Spline.sineInOut);
-            }
-
-            if (_behavior) {
-                _behavior.onImpact();
+            if (getBehavior()) {
+                getBehavior().onImpact(hit.normal);
             }
             break;
         }

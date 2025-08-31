@@ -12,8 +12,8 @@ final class DefaultMoveBehavior : Behavior {
     }
 
     this(Actor actor_) {
+        super(actor_);
         _actor = actor_;
-        _actor.setBehavior(this);
     }
 
     override void update() {
@@ -30,8 +30,5 @@ final class DefaultMoveBehavior : Behavior {
     }
 
     override void onUnregister() {
-    }
-
-    override void onImpact() {
     }
 }

@@ -13,6 +13,7 @@ final class DefaultTeleporterBehavior : Behavior {
     }
 
     this(Actor actor_, uint direction_, bool isExit) {
+        super(actor_);
         _actor = actor_;
         _direction = direction_ % 8;
         _isExit = isExit;

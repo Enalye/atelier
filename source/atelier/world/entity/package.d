@@ -1,8 +1,10 @@
 module atelier.world.entity;
 
 public {
-    import atelier.world.entity.base;
     import atelier.world.entity.actor;
+    import atelier.world.entity.base;
+    import atelier.world.entity.component;
+    import atelier.world.entity.effect;
     import atelier.world.entity.particle;
     import atelier.world.entity.prop;
     import atelier.world.entity.proxy;

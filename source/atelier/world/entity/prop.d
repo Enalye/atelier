@@ -40,9 +40,14 @@ final class Prop : Entity, Resource!Prop {
         final switch (hit.type) with (Physics.CollisionHit.Type) {
         case none:
         case squish:
+            if (getBehavior()) {
+                getBehavior().onSquish(hit.normal);
+            }
             break;
         case impact:
-            setEffect(new FlashEffect(Color.white, 1f, 0, 30, Spline.sineInOut));
+            if (getBehavior()) {
+                getBehavior().onImpact(hit.normal);
+            }
             break;
         }
     }

@@ -7,6 +7,7 @@ import atelier.common;
 import atelier.core;
 import atelier.physics;
 import atelier.render;
+import atelier.world.behavior;
 import atelier.world.lighting;
 import atelier.world.world;
 import atelier.world.entity.effect;
@@ -34,6 +35,7 @@ abstract class Entity {
         string _name;
         string[] _tags;
         Layer _layer = Layer.scene;
+        Behavior _behavior;
     }
 
     protected {
@@ -183,6 +185,7 @@ abstract class Entity {
         return cast(T) _components.require(T.stringof, {
             T component = new T;
             component.entity = this;
+            component.setup();
             return component;
         }());
     }
@@ -192,6 +195,7 @@ abstract class Entity {
             return;
         T component = new T;
         component.entity = this;
+        component.setup();
         _components[T.stringof] = component;
     }
 
@@ -201,6 +205,17 @@ abstract class Entity {
 
     final Collider getBaseCollider() {
         return _collider;
+    }
+
+    final void setBehavior(Behavior behavior) {
+        if (_behavior) {
+            _behavior.unregister();
+        }
+        _behavior = behavior;
+    }
+
+    final Behavior getBehavior() {
+        return _behavior;
     }
 
     final void unregister() {
@@ -428,6 +443,10 @@ abstract class Entity {
     }
 
     final void updateEntity() {
+        foreach (component; _components) {
+            component.update();
+        }
+
         if (_effect) {
             _effect.update(this);
             if (!_effect.isRunning) {

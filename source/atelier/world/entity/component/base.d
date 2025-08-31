@@ -12,7 +12,7 @@ abstract class EntityComponent {
             return _entity;
         }
 
-        package Entity entity(Entity entity_) {
+        package(atelier.world.entity) Entity entity(Entity entity_) {
             return _entity = entity_;
         }
     }

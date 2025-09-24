@@ -34,7 +34,7 @@ abstract class Behavior {
     void onSquish(Vec3f normal) {
     }
 
-    void onImpact(Vec3f normal) {
+    void onImpact(Entity target, Vec3f normal) {
     }
 
     final void unregister() {

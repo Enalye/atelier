@@ -54,6 +54,9 @@ final class Physics {
         /// Boite de collision touchée
         SolidCollider solid;
 
+        /// Élément touché
+        Entity entity;
+
         /// Normale de la surface
         Vec3f normal;
 
@@ -222,8 +225,10 @@ final class Physics {
                     CollisionHit hit;
                     hit.type = CollisionHit.Type.impact;
                     hit.normal = hurtboxHit.normal;
+                    hit.entity = impact.entity;
                     target.entity.onCollide(hit);
                     hit.normal = -hurtboxHit.normal;
+                    hit.entity = target.entity;
                     impact.entity.onCollide(hit);
                     _enemyImpactHurtboxes.mark(i);
                     continue __enemyImpactHurboxesLoop;
@@ -236,8 +241,10 @@ final class Physics {
                     CollisionHit hit;
                     hit.type = CollisionHit.Type.impact;
                     hit.normal = hurtboxHit.normal;
+                    hit.entity = impact.entity;
                     target.entity.onCollide(hit);
                     hit.normal = -hurtboxHit.normal;
+                    hit.entity = target.entity;
                     impact.entity.onCollide(hit);
                     _enemyImpactHurtboxes.mark(i);
                     continue __enemyImpactHurboxesLoop;
@@ -258,8 +265,10 @@ final class Physics {
                     CollisionHit hit;
                     hit.type = CollisionHit.Type.impact;
                     hit.normal = hurtboxHit.normal;
+                    hit.entity = impact.entity;
                     target.entity.onCollide(hit);
                     hit.normal = -hurtboxHit.normal;
+                    hit.entity = target.entity;
                     impact.entity.onCollide(hit);
                     _enemyImpactHurtboxes.mark(i);
                     continue __playerImpactHurboxesLoop;
@@ -272,8 +281,10 @@ final class Physics {
                     CollisionHit hit;
                     hit.type = CollisionHit.Type.impact;
                     hit.normal = hurtboxHit.normal;
+                    hit.entity = impact.entity;
                     target.entity.onCollide(hit);
                     hit.normal = -hurtboxHit.normal;
+                    hit.entity = target.entity;
                     impact.entity.onCollide(hit);
                     _playerImpactHurtboxes.mark(i);
                     continue __playerImpactHurboxesLoop;
@@ -288,19 +299,21 @@ final class Physics {
                 continue __globalImpactHurboxesLoop;
             }
 
-            foreach (y, target; _globalTargetHurtboxes) {
+            /*foreach (y, target; _globalTargetHurtboxes) {
                 HurtboxHit hurtboxHit = impact.collidesWith(target);
                 if (hurtboxHit.isColliding) {
                     CollisionHit hit;
                     hit.type = CollisionHit.Type.impact;
                     hit.normal = hurtboxHit.normal;
+                    hit.entity = impact.entity;
                     target.entity.onCollide(hit);
                     hit.normal = -hurtboxHit.normal;
+                    hit.entity = target.entity;
                     impact.entity.onCollide(hit);
                     _enemyImpactHurtboxes.mark(i);
                     continue __globalImpactHurboxesLoop;
                 }
-            }
+            }*/
 
             foreach (y, target; _enemyTargetHurtboxes) {
                 HurtboxHit hurtboxHit = impact.collidesWith(target);
@@ -308,8 +321,10 @@ final class Physics {
                     CollisionHit hit;
                     hit.type = CollisionHit.Type.impact;
                     hit.normal = hurtboxHit.normal;
+                    hit.entity = impact.entity;
                     target.entity.onCollide(hit);
                     hit.normal = -hurtboxHit.normal;
+                    hit.entity = target.entity;
                     impact.entity.onCollide(hit);
                     _globalImpactHurtboxes.mark(i);
                     continue __globalImpactHurboxesLoop;
@@ -322,8 +337,10 @@ final class Physics {
                     CollisionHit hit;
                     hit.type = CollisionHit.Type.impact;
                     hit.normal = hurtboxHit.normal;
+                    hit.entity = impact.entity;
                     target.entity.onCollide(hit);
                     hit.normal = -hurtboxHit.normal;
+                    hit.entity = target.entity;
                     impact.entity.onCollide(hit);
                     _globalImpactHurtboxes.mark(i);
                     continue __globalImpactHurboxesLoop;
@@ -366,36 +383,42 @@ final class Physics {
     }
 
     void addHurtbox(Hurtbox hurtbox) {
-        final switch (hurtbox.type) with (Hurtbox.Type) {
-        case playerTarget:
-            _playerTargetHurtboxes ~= hurtbox;
-            hurtbox.isRegistered = true;
-            hurtbox.isDisplayed = _showPlayerTargetHurtboxes;
+        final switch (hurtbox.faction) with (Hurtbox.Faction) {
+        case allied:
+            if (hurtbox.type == Hurtbox.Type.target || hurtbox.type == Hurtbox.Type.both) {
+                _playerTargetHurtboxes ~= hurtbox;
+                hurtbox.isRegistered = true;
+                hurtbox.isDisplayed = _showPlayerTargetHurtboxes;
+            }
+            if (hurtbox.type == Hurtbox.Type.projectile || hurtbox.type == Hurtbox.Type.both) {
+                _playerImpactHurtboxes ~= hurtbox;
+                hurtbox.isRegistered = true;
+                hurtbox.isDisplayed = _showPlayerImpactHurtboxes;
+            }
             break;
-        case enemyTarget:
-            _enemyTargetHurtboxes ~= hurtbox;
-            hurtbox.isRegistered = true;
-            hurtbox.isDisplayed = _showEnemyTargetHurtboxes;
+        case enemy:
+            if (hurtbox.type == Hurtbox.Type.target || hurtbox.type == Hurtbox.Type.both) {
+                _enemyTargetHurtboxes ~= hurtbox;
+                hurtbox.isRegistered = true;
+                hurtbox.isDisplayed = _showEnemyTargetHurtboxes;
+            }
+            if (hurtbox.type == Hurtbox.Type.projectile || hurtbox.type == Hurtbox.Type.both) {
+                _enemyImpactHurtboxes ~= hurtbox;
+                hurtbox.isRegistered = true;
+                hurtbox.isDisplayed = _showEnemyImpactHurtboxes;
+            }
             break;
-        case globalTarget:
-            _globalTargetHurtboxes ~= hurtbox;
-            hurtbox.isRegistered = true;
-            hurtbox.isDisplayed = _showGlobalTargetHurtboxes;
-            break;
-        case playerImpact:
-            _playerImpactHurtboxes ~= hurtbox;
-            hurtbox.isRegistered = true;
-            hurtbox.isDisplayed = _showPlayerImpactHurtboxes;
-            break;
-        case enemyImpact:
-            _enemyImpactHurtboxes ~= hurtbox;
-            hurtbox.isRegistered = true;
-            hurtbox.isDisplayed = _showEnemyImpactHurtboxes;
-            break;
-        case globalImpact:
-            _globalImpactHurtboxes ~= hurtbox;
-            hurtbox.isRegistered = true;
-            hurtbox.isDisplayed = _showGlobalImpactHurtboxes;
+        case neutral:
+            if (hurtbox.type == Hurtbox.Type.target || hurtbox.type == Hurtbox.Type.both) {
+                _globalTargetHurtboxes ~= hurtbox;
+                hurtbox.isRegistered = true;
+                hurtbox.isDisplayed = _showGlobalTargetHurtboxes;
+            }
+            if (hurtbox.type == Hurtbox.Type.projectile || hurtbox.type == Hurtbox.Type.both) {
+                _globalImpactHurtboxes ~= hurtbox;
+                hurtbox.isRegistered = true;
+                hurtbox.isDisplayed = _showGlobalImpactHurtboxes;
+            }
             break;
         }
     }

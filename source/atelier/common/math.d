@@ -119,3 +119,7 @@ T dbToVol(T)(T db) {
 T volToDb(T)(T vol) {
     return 20.0 * log10(vol);
 }
+
+T volToNonLinear(T)(T vol) {
+    return vol * vol * vol;
+}

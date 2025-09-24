@@ -23,6 +23,10 @@ Il est recommandé de reserver cette classe pour des fichiers peu volumineux.");
     mod.setParameters(["sound"]);
     mod.addFunction(&_play, "play", [soundType]);
 
+    mod.setDescription(GrLocale.fr_FR, "Lance la lecture sur le bus `master`.");
+    mod.setParameters(["sound", "speed"]);
+    mod.addFunction(&_play2, "play", [soundType, grFloat]);
+
     //mod.addProperty(&_volume!"get", &_volume!"set", "volume", soundType, grFloat);
 }
 
@@ -34,6 +38,12 @@ private void _ctor(GrCall call) {
 private void _play(GrCall call) {
     Sound sound = call.getNative!Sound(0);
     Atelier.audio.play(new SoundPlayer(sound));
+}
+
+private void _play2(GrCall call) {
+    Sound sound = call.getNative!Sound(0);
+    GrFloat speed = call.getFloat(1);
+    Atelier.audio.play(new SoundPlayer(sound, speed));
 }
 /*
 private void _volume(string op)(GrCall call) {

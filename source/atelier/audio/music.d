@@ -17,11 +17,16 @@ final class Music : Resource!Music {
         ulong _samples;
         int _sampleRate;
         float _volume = 1f;
+        float _gain = 1f;
         float _intro = -1f;
         float _outro = -1f;
     }
 
     @property {
+        float gain() const {
+            return _gain;
+        }
+
         /// Volume entre 0 et 1
         float volume() const {
             return _volume;
@@ -29,7 +34,9 @@ final class Music : Resource!Music {
 
         /// Ditto
         float volume(float volume_) {
-            return _volume = clamp(volume_, 0f, 1f);
+            _volume = clamp(volume_, 0f, 1f);
+            _gain = volToNonLinear(_volume);
+            return _volume;
         }
 
         /// Début de la boucle
@@ -101,6 +108,7 @@ final class Music : Resource!Music {
         _samples = music._samples;
         _sampleRate = music._sampleRate;
         _volume = music._volume;
+        _gain = music._gain;
         _intro = music._intro;
         _outro = music._outro;
     }

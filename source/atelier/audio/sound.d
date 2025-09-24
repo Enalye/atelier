@@ -15,9 +15,15 @@ final class Sound : Resource!Sound {
         ulong _samples;
         int _sampleRate;
         float _volume = 1f;
+        float _gain = 1f;
     }
 
     @property {
+        /// Gain entre 0 et 1
+        float gain() const {
+            return _gain;
+        }
+
         /// Volume entre 0 et 1
         float volume() const {
             return _volume;
@@ -25,7 +31,9 @@ final class Sound : Resource!Sound {
 
         /// Ditto
         float volume(float volume_) {
-            return _volume = clamp(volume_, 0f, 1f);
+            _volume = clamp(volume_, 0f, 1f);
+            _gain = volToNonLinear(_volume);
+            return _volume;
         }
 
         const(float[]) buffer() const {
@@ -52,7 +60,7 @@ final class Sound : Resource!Sound {
     static Sound fromFile(string filePath) {
         return new Sound(cast(const(ubyte)[]) std.file.read(filePath));
     }
-    
+
     static Sound fromResource(string filePath) {
         return new Sound(Atelier.res.read(filePath));
     }
@@ -82,6 +90,7 @@ final class Sound : Resource!Sound {
         _samples = sound._samples;
         _sampleRate = sound._sampleRate;
         _volume = sound._volume;
+        _gain = sound._gain;
     }
 
     /// Accès à la ressource

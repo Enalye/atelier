@@ -46,7 +46,7 @@ final class Prop : Entity, Resource!Prop {
             break;
         case impact:
             if (getBehavior()) {
-                getBehavior().onImpact(hit.normal);
+                getBehavior().onImpact(hit.entity, hit.normal);
             }
             break;
         }

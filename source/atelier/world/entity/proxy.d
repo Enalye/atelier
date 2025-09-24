@@ -1,6 +1,7 @@
 module atelier.world.entity.proxy;
 
 import atelier.common;
+import atelier.physics;
 import atelier.world.entity.base;
 
 /// Entité positionnée relativement à une autre entité.
@@ -52,4 +53,18 @@ final class Proxy : Entity, Resource!Proxy {
         pos += Vec3f(Vec2f.angled(degToRad(_relativeAngle - 90f)) * _relativeDistance, 0f).round();
         setPosition(pos);
     }
+
+    override void onCollide(Physics.CollisionHit hit) {
+        final switch (hit.type) with (Physics.CollisionHit.Type) {
+        case none:
+        case squish:
+            break;
+        case impact:
+            if (getBehavior()) {
+                getBehavior().onImpact(hit.entity, hit.normal);
+            }
+            break;
+        }
+    }
+
 }

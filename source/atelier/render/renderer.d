@@ -297,6 +297,9 @@ final class Renderer {
             context.canvas.alpha = alpha;
             context.canvas.blend = Blend.alpha;
         }
+        else {
+            context.canvas.alpha = 1f;
+        }
         context.canvas.draw(position, size, context.clip, angle, pivot);
     }
 

@@ -9,6 +9,7 @@ import atelier.world.entity;
 import atelier.physics.system;
 
 struct HurtboxData {
+    string faction = "none";
     string type = "none";
     uint minRadius, maxRadius;
     uint height;
@@ -16,6 +17,13 @@ struct HurtboxData {
     int offsetDist, offsetAngle;
 
     void load(Farfadet ffd) {
+        if (ffd.hasNode("faction")) {
+            faction = ffd.getNode("faction").get!string(0);
+        }
+        else {
+            faction = "none";
+        }
+
         if (ffd.hasNode("type")) {
             type = ffd.getNode("type").get!string(0);
         }
@@ -54,7 +62,7 @@ struct HurtboxData {
 
     void save(Farfadet ffd) {
         Farfadet node = ffd.addNode("hurtbox");
-        if (type != "none") {
+        if (faction != "none" && type != "none") {
             node.addNode("type").add(type);
             node.addNode("minRadius").add(minRadius);
             node.addNode("maxRadius").add(maxRadius);
@@ -67,9 +75,10 @@ struct HurtboxData {
     }
 
     void serialize(OutStream stream) {
-        bool hasValue = type != "none";
+        bool hasValue = faction != "none" && type != "none";
         stream.write!bool(hasValue);
         if (hasValue) {
+            stream.write!string(faction);
             stream.write!string(type);
             stream.write!uint(minRadius);
             stream.write!uint(maxRadius);
@@ -83,6 +92,7 @@ struct HurtboxData {
 
     void deserialize(InStream stream) {
         if (stream.read!bool()) {
+            faction = stream.read!string();
             type = stream.read!string();
             minRadius = stream.read!uint();
             maxRadius = stream.read!uint();
@@ -96,13 +106,16 @@ struct HurtboxData {
 }
 
 final class Hurtbox {
+    enum Faction {
+        neutral,
+        allied,
+        enemy
+    }
+
     enum Type {
-        playerTarget,
-        enemyTarget,
-        globalTarget,
-        playerImpact,
-        enemyImpact,
-        globalImpact
+        target,
+        projectile,
+        both
     }
 
     private {
@@ -112,6 +125,7 @@ final class Hurtbox {
         uint _height;
         int _angle, _angleDelta;
         int _offsetDist, _offsetAngle;
+        Faction _faction;
         Type _type;
         bool _isDisplayed;
         bool _isCollidable = true;
@@ -132,6 +146,10 @@ final class Hurtbox {
 
         uint radius() const {
             return _maxRadius;
+        }
+
+        Faction faction() const {
+            return _faction;
         }
 
         Type type() const {
@@ -166,6 +184,13 @@ final class Hurtbox {
         _offsetAngle = data.offsetAngle;
 
         try {
+            _faction = to!Faction(data.faction);
+        }
+        catch (Exception e) {
+            Atelier.log(data.type, " n’est pas un type de hurtbox valide");
+        }
+
+        try {
             _type = to!Type(data.type);
         }
         catch (Exception e) {
@@ -175,6 +200,7 @@ final class Hurtbox {
 
     this(Hurtbox other) {
         _entity = other._entity;
+        _faction = other._faction;
         _type = other._type;
         _minRadius = other._minRadius;
         _maxRadius = other._maxRadius;

@@ -194,7 +194,7 @@ final class MusicPlayer : AudioPlayer {
         if (framesRead >= 0) {
             framesRead >>= 2;
 
-            const float totalVolume = _music.volume * _volume;
+            const float totalVolume = volToNonLinear(_music.volume * _volume);
             for (int i = _delayStartFrame * Atelier_Audio_Channels; i < (
                     (_delayStartFrame + framesToRead) * Atelier_Audio_Channels); i += 2) {
                 buffer[i] *= totalVolume;

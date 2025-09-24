@@ -109,7 +109,7 @@ final class Actor : Entity, Resource!Actor {
             break;
         case impact:
             if (getBehavior()) {
-                getBehavior().onImpact(hit.normal);
+                getBehavior().onImpact(hit.entity, hit.normal);
             }
             break;
         }
@@ -135,7 +135,7 @@ final class Actor : Entity, Resource!Actor {
             if (_isHovering) {
                 accelFriction = 2f;
                 maxSpeed = 1f;
-                accelSpeed = 1f;
+                accelSpeed = 0.4f;
             }
             else {
                 _velocity.z -= _gravity;

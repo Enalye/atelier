@@ -151,6 +151,10 @@ final class Camera {
         _zoomer.zoom(zoomLevel, frames, spline);
     }
 
+    void blurShake(float trauma) {
+        _shaker.blurShake(trauma);
+    }
+
     void shake(float trauma) {
         _shaker.shake(trauma);
     }
@@ -205,14 +209,26 @@ final class Camera {
     }
 
     void draw() {
-        Vec2f position = _shaker.offset();
+        Vec2f position = _shaker.getOffset();
         Vec2f size = _zoomer.size();
 
+        _sprite.blend = Blend.alpha;
         _sprite.size = size;
-        _sprite.angle = _shaker.angle();
+        _sprite.angle = _shaker.getAngle();
         _sprite.alpha = 1f;
+        _sprite.color = Color.white;
         _sprite.draw(position);
 
+        if (_shaker.isBlurred()) {
+            for (uint i; i < 5; ++i) {
+                _sprite.blend = Blend.additive;
+                _sprite.alpha = 1f * _shaker.getBlurFactor();
+                _sprite.color = Color.black;
+                _sprite.color.r = _shaker.getBlurColor(i).r;
+                _sprite.angle = _shaker.getBlurAngle(i);
+                _sprite.draw(_shaker.getBlurOffset(i));
+            }
+        }
         if (_blurFactor > 0f) {
             _sprite.alpha = .5f * _blurFactor;
             _sprite.size = size * lerp(1f, 1.2f, _blurFactor);

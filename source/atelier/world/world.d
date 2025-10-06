@@ -152,6 +152,37 @@ final class World {
         return null;
     }
 
+    /// Récupère l’entité par tag
+    Entity[] findByTag(string tag) {
+        Entity[] result;
+        foreach (entity; _entities) {
+            if (entity.hasTag(tag))
+                result ~= entity;
+        }
+        return result;
+    }
+
+    /// Récupère l’entité par tags
+    Entity[] findByTags(string[] tags) {
+        if (!tags.length)
+            return _entities.array;
+
+        Entity[] result;
+        __findByTag_entityLoop: foreach (entity; _entities) {
+            foreach (tag; tags) {
+                if (!entity.hasTag(tag))
+                    continue __findByTag_entityLoop;
+            }
+            result ~= entity;
+        }
+        return result;
+    }
+
+    /// Récupère toutes les entités
+    Array!Entity getEntities() {
+        return _entities;
+    }
+
     void setCombat(bool value) { //TODO: Migrer hors du moteur
         /*if (!_player || _isInCombat == value)
             return;
@@ -449,11 +480,7 @@ final class World {
                 _renderedEntities.mark(i);
                 continue;
             }
-            graphic.update();
-
-            EntityGraphic auxGraphic = entity.getAuxGraphic();
-            if (auxGraphic)
-                auxGraphic.update();
+            entity.updateEntityGraphics();
         }
         _renderedEntities.sweep();
 

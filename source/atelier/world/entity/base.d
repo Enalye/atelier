@@ -41,8 +41,16 @@ abstract class Entity {
     protected {
         EntityComponent[string] _components;
         EntityGraphic[string] _graphics;
-        string _graphicId, _auxGraphicId;
-        EntityGraphic _graphic, _auxGraphic;
+        string _graphicId;
+        EntityGraphic _graphic;
+
+        struct AuxGraphic {
+            string id;
+            EntityGraphic graphic;
+        }
+
+        AuxGraphic[] _auxGraphics;
+
         EntityGraphicEffectWrapper _effect;
         Collider _collider;
         Hurtbox _hurtbox;
@@ -110,9 +118,14 @@ abstract class Entity {
             if (_graphic) {
                 _graphic.setAngle(_angle);
             }
-            if (_auxGraphic) {
-                _auxGraphic.setAngle(_angle);
+
+            foreach (ref auxGraphic; _auxGraphics) {
+                if (!auxGraphic.graphic)
+                    continue;
+
+                auxGraphic.graphic.setAngle(_angle);
             }
+
             return _angle;
         }
 
@@ -370,41 +383,51 @@ abstract class Entity {
         }
     }
 
-    final void setAuxGraphic(string id) {
+    final void setAuxGraphic(uint index, string id) {
+        if (index >= _auxGraphics.length) {
+            if (!id.length)
+                return;
+
+            _auxGraphics.length = index + 1;
+        }
+
         if (!id.length) {
-            _auxGraphicId.length = 0;
-            _auxGraphic = null;
+            _auxGraphics[index].id.length = 0;
+            _auxGraphics[index].graphic = null;
             return;
         }
-        else if (_auxGraphicId == id) {
+        else if (_auxGraphics[index].id == id) {
             return;
         }
 
-        _auxGraphicId = id;
+        _auxGraphics[index].id = id;
 
-        if (_auxGraphicId !in _graphics) {
-            if (_auxGraphicId.length) {
-                Atelier.log("Pas d’état `", _auxGraphicId, "` trouvé");
+        if (id !in _graphics) {
+            if (id.length) {
+                Atelier.log("Pas d’état `", id, "` trouvé");
             }
-            _auxGraphic = null;
+            _auxGraphics[index].graphic = null;
             return;
         }
 
-        if (_auxGraphic) {
-            _auxGraphic.stop();
+        if (_auxGraphics[index].graphic) {
+            _auxGraphics[index].graphic.stop();
         }
 
-        _auxGraphic = _graphics[_auxGraphicId];
-        _auxGraphic.start();
-        _auxGraphic.setAngle(_angle);
+        _auxGraphics[index].graphic = _graphics[id];
+        _auxGraphics[index].graphic.start();
+        _auxGraphics[index].graphic.setAngle(_angle);
     }
 
     final EntityGraphic getGraphic() {
         return _graphic;
     }
 
-    final EntityGraphic getAuxGraphic() {
-        return _auxGraphic;
+    final EntityGraphic getAuxGraphic(uint index) {
+        if (index >= _auxGraphics.length)
+            return null;
+
+        return _auxGraphics[index].graphic;
     }
 
     final void setEffect(EntityGraphicEffect effect) {
@@ -440,6 +463,19 @@ abstract class Entity {
     }
 
     void update() {
+    }
+
+    final void updateEntityGraphics() {
+        if (_graphic) {
+            _graphic.update();
+        }
+
+        foreach (ref auxGraphic; _auxGraphics) {
+            if (!auxGraphic.graphic)
+                continue;
+
+            auxGraphic.graphic.update();
+        }
     }
 
     final void updateEntity() {
@@ -630,6 +666,12 @@ abstract class Entity {
         return _name;
     }
 
+    final void addTag(string tag_) {
+        if (hasTag(tag_))
+            return;
+        _tags ~= tag_;
+    }
+
     final bool hasTag(string tag_) const {
         foreach (tag; _tags) {
             if (tag == tag_)
@@ -740,14 +782,19 @@ abstract class Entity {
     }
 
     final void renderGraphic(Vec2f offset, float alpha = 1f) {
-        if (_auxGraphic) {
-            if (_auxGraphic.isBehind()) {
-                _auxGraphic.draw(offset, alpha);
-                _graphic.draw(offset, alpha);
+        if (_auxGraphics.length) {
+            for (size_t i; i < _auxGraphics.length; ++i) {
+                if (_auxGraphics[i].graphic && _auxGraphics[i].graphic.isBehind()) {
+                    _auxGraphics[i].graphic.draw(offset, alpha);
+                }
             }
-            else {
-                _graphic.draw(offset, alpha);
-                _auxGraphic.draw(offset, alpha);
+
+            _graphic.draw(offset, alpha);
+
+            for (size_t i; i < _auxGraphics.length; ++i) {
+                if (_auxGraphics[i].graphic && !_auxGraphics[i].graphic.isBehind()) {
+                    _auxGraphics[i].graphic.draw(offset, alpha);
+                }
             }
         }
         else {

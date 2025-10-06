@@ -44,7 +44,7 @@ package final class ParameterWindow : UIElement {
 
         // Hurtbox
         HurtboxData _hurtbox;
-        SelectButton _hurtTypeBtn;
+        SelectButton _hurtTypeBtn, _hurtFactionBtn;
         IntegerField _hurtMinRadiusField, _hurtMaxRadiusField, _hurtHeightField;
         IntegerField _hurtAngleField, _hurtAngleDeltaField;
         IntegerField _hurtOffsetDistanceField, _hurtOffsetAngleField;
@@ -196,6 +196,24 @@ package final class ParameterWindow : UIElement {
             sep.setSpacing(8f);
             sep.setLineWidth(1f);
             vlist.addList(sep);
+        }
+
+        {
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(284f, 0f));
+            vlist.addList(hlayout);
+
+            hlayout.addUI(new Label("Faction:", Atelier.theme.font));
+
+            string[] hurtFactions = "none" ~ [
+                __traits(allMembers, Hurtbox.Faction)
+            ];
+            _hurtFactionBtn = new SelectButton(hurtFactions, _hurtbox.faction);
+            _hurtFactionBtn.addEventListener("value", {
+                _hurtbox.faction = _hurtFactionBtn.value;
+                dispatchEvent("property_hurtbox", false);
+            });
+            hlayout.addUI(_hurtFactionBtn);
         }
 
         {

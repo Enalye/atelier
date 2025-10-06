@@ -22,6 +22,18 @@ package void loadLibWorld_entity(GrModule mod) {
     mod.setParameters(["entity"]);
     mod.addFunction(&_unregister, "unregister", [entityType]);
 
+    mod.setDescription(GrLocale.fr_FR, "Ajoute un tag à l’entité");
+    mod.setParameters(["entity", "tag"]);
+    mod.addFunction(&_addTag, "addTag", [
+            entityType, grString
+        ]);
+
+    mod.setDescription(GrLocale.fr_FR, "Vérifie la présence d’un tag chez l’entité");
+    mod.setParameters(["entity", "tag"]);
+    mod.addFunction(&_hasTag, "hasTag", [
+            entityType, grString
+        ], [grBool]);
+
     mod.setDescription(GrLocale.fr_FR, "Change le rendu de l’entité");
     mod.setParameters(["entity", "id"]);
     mod.addFunction(&_setGraphic, "setGraphic", [
@@ -102,6 +114,16 @@ package void loadLibWorld_entity(GrModule mod) {
 private void _unregister(GrCall call) {
     Entity entity = call.getNative!Entity(0);
     entity.unregister();
+}
+
+private void _addTag(GrCall call) {
+    Entity entity = call.getNative!Entity(0);
+    entity.addTag(call.getString(1));
+}
+
+private void _hasTag(GrCall call) {
+    Entity entity = call.getNative!Entity(0);
+    call.setBool(entity.hasTag(call.getString(1)));
 }
 
 private void _setGraphic(GrCall call) {

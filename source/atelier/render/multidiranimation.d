@@ -139,32 +139,30 @@ final class MultiDirAnimation : Image, Resource!MultiDirAnimation {
 
     /// Avance l’animation
     override void update() {
-        if (!_isRunning) {
-            return;
-        }
+        if (_isRunning) {
+            _currentTick++;
+            if (_currentTick >= frameTime) {
+                _currentTick = 0;
 
-        _currentTick++;
-        if (_currentTick >= frameTime) {
-            _currentTick = 0;
-
-            if (!frames.length) {
-                _frame = -1;
-            }
-            else {
-                _frame++;
-                if (_frame >= frames.length) {
-                    if (repeat) {
-                        _frame = 0;
-                    }
-                    else {
-                        _frame = (cast(int) frames.length) - 1;
-                        _isRunning = false;
+                if (!frames.length) {
+                    _frame = -1;
+                }
+                else {
+                    _frame++;
+                    if (_frame >= frames.length) {
+                        if (repeat) {
+                            _frame = 0;
+                        }
+                        else {
+                            _frame = (cast(int) frames.length) - 1;
+                            _isRunning = false;
+                        }
                     }
                 }
             }
         }
 
-        if(dirIndexes.length) {
+        if (dirIndexes.length) {
             float angleStep = 360f / dirIndexes.length;
             float angleDelta = angleBetweenDeg(dirStartAngle - angleStep / 2f, dirAngle);
             if (angleDelta < 0f)

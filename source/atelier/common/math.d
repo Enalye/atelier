@@ -34,17 +34,24 @@ float clampRad(float angle) {
 
 /// L’angle minimal (en degrés) entre deux angles.
 float angleBetweenDeg(float a, float b) {
-    /*const float delta = (b - a) % 360f;
-    return ((delta + 540f) % 360f) - 180f;*/
-    return clampDeg(b - a);
+    for (;;) {
+        float delta = b - a;
+        if (abs(delta) <= 180f)
+            return delta;
+
+        b += (b < a) ? 360f : -360f;
+    }
 }
 
 /// L’angle minimal (en radians) entre deux angles.
 float angleBetweenRad(float a, float b) {
-    /*enum pi2 = PI + PI;
-    const float delta = (b - a) % pi2;
-    return ((delta + (pi2 + PI)) % pi2) - PI;*/
-    return clampRad(b - a);
+    for (;;) {
+        float delta = b - a;
+        if (abs(delta) <= PI_2)
+            return delta;
+
+        b += (b < a) ? PI : -PI;
+    }
 }
 
 /// Interpolation entre un angle a et b. \

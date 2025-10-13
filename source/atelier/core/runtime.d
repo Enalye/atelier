@@ -11,6 +11,7 @@ import atelier.audio;
 import atelier.common;
 import atelier.input;
 import atelier.locale;
+import atelier.nav;
 import atelier.physics;
 import atelier.render;
 import atelier.script;
@@ -69,6 +70,7 @@ final class Atelier {
         ResourceManager _resourceManager;
         AudioMixer _audioMixer;
         World _world;
+        NavMesh _navMesh;
         Console _console;
         Script _script;
         RNG _rng;
@@ -124,6 +126,11 @@ final class Atelier {
         /// Le gestionnaire du monde
         World world() {
             return _world;
+        }
+
+        /// Le navigation
+        NavMesh nav() {
+            return _navMesh;
         }
 
         /// Le terminal de commande
@@ -262,6 +269,7 @@ final class Atelier {
         _audioMixer = new AudioMixer();
         _resourceManager = new ResourceManager();
         _world = new World();
+        _navMesh = new NavMesh();
         _physics = new Physics();
         _rng = new RNG();
         _theme = new Theme();
@@ -389,6 +397,7 @@ final class Atelier {
         _audioMixer.clear();
         _uiManager.clearUI();
         _world.clear();
+        _navMesh.clear();
         _physics.clear();
         _theme.setDefault();
         _console.clear();

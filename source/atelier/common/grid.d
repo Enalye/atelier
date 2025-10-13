@@ -122,4 +122,10 @@ final class Grid(T) : Resource!Grid {
 
         return values;
     }
+
+    void clear() {
+        foreach (ref T value; _values) {
+            value = defaultValue;
+        }
+    }
 }

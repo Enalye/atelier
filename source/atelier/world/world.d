@@ -245,6 +245,8 @@ final class World {
         _scene = Atelier.res.get!Scene(_sceneRid);
         _shadowSprite = Atelier.res.get!Sprite("atelier:shadow");
 
+        Atelier.nav.generate();
+
         Vec2f rendererSize = cast(Vec2f) Atelier.renderer.size;
         Vec2f halfRendererSize = rendererSize / 2f;
         Vec2f mapSize = Vec2f(_scene.columns, _scene.lines) * 16f;
@@ -856,6 +858,8 @@ final class World {
         }
 
         _displayBorders(entityOffset);
+
+        Atelier.nav.draw(entityOffset);
 
         _lighting.draw(entityOffset);
         _weather.draw(entityOffset);

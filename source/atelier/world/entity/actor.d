@@ -5,9 +5,12 @@ import atelier.common;
 import atelier.core;
 import atelier.physics;
 import atelier.world.entity.base;
+import atelier.world.entity.controller;
 import atelier.world.entity.effect;
 
 final class Actor : Entity, Resource!Actor {
+    mixin EntityController;
+
     private {
         bool _isHovering;
         float _hoverHeight, _currentHoverHeight;
@@ -103,14 +106,10 @@ final class Actor : Entity, Resource!Actor {
             }
             break;
         case squish:
-            if (getBehavior()) {
-                getBehavior().onSquish(hit.normal);
-            }
+            onSquish(hit.normal);
             break;
         case impact:
-            if (getBehavior()) {
-                getBehavior().onImpact(hit.entity, hit.normal);
-            }
+            onImpact(hit.entity, hit.normal);
             break;
         }
     }

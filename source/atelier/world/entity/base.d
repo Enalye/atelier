@@ -7,11 +7,11 @@ import atelier.common;
 import atelier.core;
 import atelier.physics;
 import atelier.render;
-import atelier.world.behavior;
 import atelier.world.lighting;
 import atelier.world.world;
 import atelier.world.entity.effect;
 import atelier.world.entity.component;
+import atelier.world.entity.controller;
 import atelier.world.entity.renderer;
 
 struct EntityData {
@@ -21,6 +21,55 @@ struct EntityData {
     Vec3i position;
 
     mixin Serializer;
+}
+
+mixin template EntityController() {
+    private {
+        alias T = typeof(this);
+
+        static assert(__traits(isAbstractClass, T) == false,
+            "EntityController ne doit pas être intégré dans une classe abstraite");
+
+        Controller!T _controller;
+    }
+
+    void setController(Controller!T controller) {
+        _controller = controller;
+    }
+
+    Controller!T getController() {
+        return _controller;
+    }
+
+    override void setController(string id) {
+        import atelier.core : Atelier;
+
+        if (_controller) {
+            _controller.unregister();
+            _controller.onClose();
+        }
+
+        _controller = Atelier.world.fetchController!T(id);
+
+        if (_controller) {
+            _controller.setup(this);
+            _controller.onStart();
+        }
+    }
+
+    final private void onSquish(Vec3f normal) {
+        if (!_controller)
+            return;
+
+        _controller.onSquish(normal);
+    }
+
+    final private void onImpact(Entity target, Vec3f normal) {
+        if (!_controller)
+            return;
+
+        _controller.onImpact(target, normal);
+    }
 }
 
 abstract class Entity {
@@ -35,7 +84,6 @@ abstract class Entity {
         string _name;
         string[] _tags;
         Layer _layer = Layer.scene;
-        Behavior _behavior;
     }
 
     protected {
@@ -218,17 +266,6 @@ abstract class Entity {
 
     final Collider getBaseCollider() {
         return _collider;
-    }
-
-    final void setBehavior(Behavior behavior) {
-        if (_behavior) {
-            _behavior.unregister();
-        }
-        _behavior = behavior;
-    }
-
-    final Behavior getBehavior() {
-        return _behavior;
     }
 
     final void unregister() {
@@ -678,6 +715,9 @@ abstract class Entity {
                 return true;
         }
         return false;
+    }
+
+    void setController(string id) {
     }
 
     void updateMovement() {

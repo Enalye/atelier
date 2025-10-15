@@ -3,10 +3,13 @@ module atelier.world.entity.proxy;
 import atelier.common;
 import atelier.physics;
 import atelier.world.entity.base;
+import atelier.world.entity.controller;
 
 /// Entité positionnée relativement à une autre entité.
 /// N’utilise pas de collision
 final class Proxy : Entity, Resource!Proxy {
+    mixin EntityController;
+
     private {
         Entity _base;
         Vec3f _relativePosition = Vec3f.zero;
@@ -60,11 +63,8 @@ final class Proxy : Entity, Resource!Proxy {
         case squish:
             break;
         case impact:
-            if (getBehavior()) {
-                getBehavior().onImpact(hit.entity, hit.normal);
-            }
+            onImpact(hit.entity, hit.normal);
             break;
         }
     }
-
 }

@@ -5,8 +5,11 @@ import atelier.core;
 import atelier.physics;
 import atelier.render;
 import atelier.world.entity.base;
+import atelier.world.entity.controller;
 
 final class Shot : Entity, Resource!Shot {
+    mixin EntityController;
+
     private {
         bool _hasTtl;
         uint _ttl, _time;
@@ -178,6 +181,5 @@ final class Shot : Entity, Resource!Shot {
             move(_velocity);
             break;
         }
-
     }
 }

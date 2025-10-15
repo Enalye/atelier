@@ -4,9 +4,12 @@ import atelier.common;
 import atelier.core;
 import atelier.physics;
 import atelier.world.entity.base;
+import atelier.world.entity.controller;
 import atelier.world.entity.effect;
 
 final class Prop : Entity, Resource!Prop {
+    mixin EntityController;
+
     private {
     }
 
@@ -40,14 +43,10 @@ final class Prop : Entity, Resource!Prop {
         final switch (hit.type) with (Physics.CollisionHit.Type) {
         case none:
         case squish:
-            if (getBehavior()) {
-                getBehavior().onSquish(hit.normal);
-            }
+            onSquish(hit.normal);
             break;
         case impact:
-            if (getBehavior()) {
-                getBehavior().onImpact(hit.entity, hit.normal);
-            }
+            onImpact(hit.entity, hit.normal);
             break;
         }
     }

@@ -2,7 +2,6 @@ module atelier.world;
 
 public {
     import atelier.world.audio;
-    import atelier.world.behavior;
     import atelier.world.camera;
     import atelier.world.dialog;
     import atelier.world.entity;

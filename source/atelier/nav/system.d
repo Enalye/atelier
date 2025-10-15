@@ -6,7 +6,8 @@ import atelier.world;
 
 private struct NavEdge {
     Vec2i start, end;
-    uint id;
+    Vec2i center;
+    uint sectorId, edgeId;
     Dir dir;
 
     enum Dir {
@@ -24,9 +25,24 @@ final class NavSector {
         NavEdge[] _edges;
     }
 
-    void addEdge(uint id, uint start, uint end, NavEdge.Dir dir) {
+    float distanceFromSquared(Vec3i position) {
+        Vec3i start = Vec3i(_start * 16 - 8, _level * 16);
+        Vec3i end = Vec3i((_end + 1) * 16 - 8, (_level + 1) * 16);
+
+        if (position.isBetween(start, end))
+            return 0f;
+
+        Vec3i nearestPoint;
+        nearestPoint.x = (position.x - end.x) < (position.x - start.x) ? end.x : start.x;
+        nearestPoint.y = (position.y - end.y) < (position.y - start.y) ? end.y : start.y;
+        nearestPoint.z = (position.z - end.z) < (position.z - start.z) ? end.z : start.z;
+
+        return nearestPoint.distanceSquared(position);
+    }
+
+    void addEdge(uint sectorId, uint edgeId, uint start, uint end, NavEdge.Dir dir) {
         NavEdge edge;
-        edge.id = id;
+        edge.sectorId = sectorId;
         edge.dir = dir;
         final switch (dir) with (NavEdge.Dir) {
         case up:
@@ -46,6 +62,7 @@ final class NavSector {
             edge.end = Vec2i(_end.x, end);
             break;
         }
+        edge.center = (edge.start - edge.end) / 2;
         _edges ~= edge;
     }
 
@@ -110,6 +127,109 @@ final class NavMesh {
         _connectSectors();
     }
 
+    struct NavPath {
+
+    }
+
+    /// Calcule le chemin le plus court du départ à l’arrivé.
+    NavPath getPath(Vec3i from, Vec3i to) {
+        NavPath path;
+
+        if (!_sectors.length)
+            return path;
+
+        // On détermine dans quel secteur les points se situent
+        uint srcId, dstId;
+        float nearestSrc = _sectors[0].distanceFromSquared(from);
+        float nearestDst = _sectors[0].distanceFromSquared(to);
+
+        for (uint id = 1; id < _sectors.length; ++id) {
+            float dist = _sectors[id].distanceFromSquared(from);
+            if (dist < nearestSrc) {
+                nearestSrc = dist;
+                srcId = id;
+            }
+            dist = _sectors[id].distanceFromSquared(to);
+            if (dist < nearestDst) {
+                nearestDst = dist;
+                dstId = id;
+            }
+        }
+
+        final class NavNode {
+            Vec2i position;
+            uint sectorId;
+            uint edgeId;
+            float priority;
+
+            int opCmp(ref const NavNode rhs) const {
+                if (priority == rhs.priority)
+                    return 0;
+                return priority > rhs.priority ? 1 : -1;
+            }
+
+            this(Vec2i position_, uint sectorId_, uint edgeId_, float priority_) {
+                position = position_;
+                sectorId = sectorId_;
+                edgeId = edgeId_;
+                priority = priority_;
+            }
+        }
+
+        import std.container.binaryheap;
+
+        auto frontiers = heapify!"a > b"([
+            new NavNode(from.xy, srcId, uint.max, 0)
+        ]);
+        Vec2i[Vec2i] cameFrom;
+        float[Vec2i] costSoFar;
+        cameFrom[from.xy] = from.xy;
+        costSoFar[from.xy] = 0f;
+
+        while (!frontiers.empty) {
+            NavNode node = frontiers.front;
+            frontiers.removeFront();
+
+            if (node.sectorId == dstId) {
+                break;
+            }
+
+            NavSector currentSector = _sectors[node.sectorId];
+
+            for (uint i; i < currentSector._edges.length; ++i) {
+                if (i == node.edgeId)
+                    continue;
+
+                Vec2i position = currentSector._edges[i].center;
+
+                float newCost = costSoFar[node.position] + position.distanceSquared(
+                    node.position);
+
+                auto p = currentSector._edges[i].center in costSoFar;
+
+                if (!p || newCost < *p) {
+                    costSoFar[position] = newCost;
+                    float priority = newCost + position.distanceSquared(to.xy);
+                    frontiers.insert(new NavNode(
+                            currentSector._edges[i].center,
+                            currentSector._edges[i].sectorId,
+                            currentSector._edges[i].edgeId,
+                            priority));
+                    cameFrom[position] = node.position;
+                }
+
+                /*for (uint y = i + 1; y < currentSector._edges.length; ++y) {
+                    float dist = currentSector._edges[i].center.distanceSquared(
+                        currentSector._edges[y].center);
+
+                    currentSector._edges[i].
+                    }*/
+            }
+        }
+
+        return path;
+    }
+
     private void _generateSectors() {
         clear();
 
@@ -135,7 +255,7 @@ final class NavMesh {
     }
 
     private void _connectSectors() {
-        for (uint sectorId; sectorId < _sectors.length; ++sectorId) {
+        for (uint sectorId; (sectorId + 1) < _sectors.length; ++sectorId) {
             NavSector currentSector = _sectors[sectorId];
 
             for (uint neightborId = sectorId + 1; neightborId < _sectors.length; ++neightborId) {
@@ -149,8 +269,10 @@ final class NavMesh {
                     uint endX = min(currentSector._end.x, neighborSector._end.x);
 
                     if (endX >= startX) {
-                        currentSector.addEdge(neightborId, startX, endX, NavEdge.Dir.up);
-                        neighborSector.addEdge(sectorId, startX, endX, NavEdge.Dir.down);
+                        uint edgeId1 = cast(uint) currentSector._edges.length;
+                        uint edgeId2 = cast(uint) neighborSector._edges.length;
+                        currentSector.addEdge(neightborId, edgeId2, startX, endX, NavEdge.Dir.up);
+                        neighborSector.addEdge(sectorId, edgeId1, startX, endX, NavEdge.Dir.down);
                     }
                 }
                 else if (neighborSector._start.y == currentSector._end.y + 1) {
@@ -158,8 +280,10 @@ final class NavMesh {
                     uint endX = min(currentSector._end.x, neighborSector._end.x);
 
                     if (endX >= startX) {
-                        currentSector.addEdge(neightborId, startX, endX, NavEdge.Dir.down);
-                        neighborSector.addEdge(sectorId, startX, endX, NavEdge.Dir.up);
+                        uint edgeId1 = cast(uint) currentSector._edges.length;
+                        uint edgeId2 = cast(uint) neighborSector._edges.length;
+                        currentSector.addEdge(neightborId, edgeId2, startX, endX, NavEdge.Dir.down);
+                        neighborSector.addEdge(sectorId, edgeId1, startX, endX, NavEdge.Dir.up);
                     }
                 }
 
@@ -168,8 +292,10 @@ final class NavMesh {
                     uint endY = min(currentSector._end.y, neighborSector._end.y);
 
                     if (endY >= startY) {
-                        currentSector.addEdge(neightborId, startY, endY, NavEdge.Dir.left);
-                        neighborSector.addEdge(sectorId, startY, endY, NavEdge.Dir.right);
+                        uint edgeId1 = cast(uint) currentSector._edges.length;
+                        uint edgeId2 = cast(uint) neighborSector._edges.length;
+                        currentSector.addEdge(neightborId, edgeId2, startY, endY, NavEdge.Dir.left);
+                        neighborSector.addEdge(sectorId, edgeId1, startY, endY, NavEdge.Dir.right);
                     }
                 }
                 else if (neighborSector._start.x == currentSector._end.x + 1) {
@@ -177,8 +303,10 @@ final class NavMesh {
                     uint endY = min(currentSector._end.y, neighborSector._end.y);
 
                     if (endY >= startY) {
-                        currentSector.addEdge(neightborId, startY, endY, NavEdge.Dir.right);
-                        neighborSector.addEdge(sectorId, startY, endY, NavEdge.Dir.left);
+                        uint edgeId1 = cast(uint) currentSector._edges.length;
+                        uint edgeId2 = cast(uint) neighborSector._edges.length;
+                        currentSector.addEdge(neightborId, edgeId2, startY, endY, NavEdge.Dir.right);
+                        neighborSector.addEdge(sectorId, edgeId1, startY, endY, NavEdge.Dir.left);
                     }
                 }
             }
@@ -190,7 +318,6 @@ final class NavMesh {
         sector._start = Vec2i(x, y);
         sector._end = sector._start;
         sector._level = Atelier.world.scene.getLevel(sector._start.x, sector._start.y);
-        ;
 
         _extendSectorDiagonally(sector);
 
@@ -237,7 +364,8 @@ final class NavMesh {
                 return;
             }
 
-            if (_markedTiles.getValue(x, y) || Atelier.world.scene.getLevel(x, y) != sector._level) {
+            if (_markedTiles.getValue(x, y) || Atelier.world.scene.getLevel(x, y) != sector
+                ._level) {
                 // Au pif ?
                 _extendSectorHorizontally(sector);
                 _extendSectorVertically(sector);
@@ -284,7 +412,8 @@ final class NavMesh {
 
             // Opti: on s’arrête si la zone s’agrandit
             if ((Atelier.world.scene.getLevel(x, sector._start.y - 1) == sector._level && !_markedTiles.getValue(
-                    x, sector._start.y - 1) && Atelier.world.scene.getLevel(x, sector._start.y - 2) == sector._level && !_markedTiles
+                    x, sector._start.y - 1) && Atelier.world.scene.getLevel(x, sector._start.y - 2) == sector
+                    ._level && !_markedTiles
                     .getValue(x, sector._start.y - 2)) ||
                 (Atelier.world.scene.getLevel(x, sector._end.y + 1) == sector._level && !_markedTiles.getValue(
                     x, sector._end.y + 1) && Atelier.world.scene.getLevel(x, sector._end.y + 2) == sector._level && !_markedTiles

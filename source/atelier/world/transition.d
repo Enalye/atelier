@@ -5,7 +5,6 @@ import atelier.core;
 import atelier.render;
 import atelier.world.scene;
 import atelier.world.entity;
-import atelier.world.behavior;
 
 abstract class Transition {
     @property {

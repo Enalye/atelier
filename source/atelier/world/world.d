@@ -10,7 +10,6 @@ import atelier.physics;
 import atelier.render;
 import atelier.ui;
 import atelier.world.audio;
-import atelier.world.behavior;
 import atelier.world.camera;
 import atelier.world.dialog;
 import atelier.world.entity;
@@ -26,14 +25,6 @@ private Transition _createDefaultTransition(string sceneRid, string tpName, Acto
     return new DefaultTransition(sceneRid, tpName, actor, skip);
 }
 
-private Behavior _createDefaultTeleporterBehavior(Actor actor, uint direction, bool isExit) {
-    return new DefaultTeleporterBehavior(actor, direction, isExit);
-}
-
-private Behavior _createDefaultMoveBehavior(Actor actor) {
-    return new DefaultMoveBehavior(actor);
-}
-
 /// Gère les différentes scènes
 final class World {
     private {
@@ -46,8 +37,7 @@ final class World {
         Array!ParticleSource _particleSources;
         Array!Entity _entities, _enemies;
         Array!Entity _renderedEntities;
-        Array!Behavior _behaviors;
-        Behavior _currentBehaviorTurn;
+        Array!ControllerWrapper _controllers;
         int _frame;
         Vec2f _mousePosition = Vec2f.zero;
 
@@ -67,8 +57,9 @@ final class World {
 
         bool _isPaused;
 
-        Behavior function(Actor, uint, bool) _teleporterBehavior;
-        Behavior function(Actor) _moveBehavior;
+        Factory _factory;
+        string _playerControllerId;
+        Controller!Actor _playerController;
         Transition function(string, string, Actor, bool) _transitionFunc;
     }
 
@@ -106,27 +97,24 @@ final class World {
         _lighting = new Lighting;
         _entities = new Array!Entity;
         _renderedEntities = new Array!Entity;
-        _behaviors = new Array!Behavior;
+        _controllers = new Array!ControllerWrapper;
         _weather = new Weather;
         _enemies = new Array!Entity;
         _particleSources = new Array!ParticleSource;
         _glow = new Glow;
+        _factory = new Factory;
 
         setTransition(&_createDefaultTransition);
-        setTeleporterBehavior(&_createDefaultTeleporterBehavior);
-        setPlayerBehavior(&_createDefaultMoveBehavior);
+        addController!Actor("player", { return new DefaultPlayerController(); });
+        setPlayerControllerID("player");
     }
 
     void setTransition(Transition function(string, string, Actor, bool) transitionFunc = &_createDefaultTransition) {
         _transitionFunc = transitionFunc;
     }
 
-    void setTeleporterBehavior(Behavior function(Actor, uint, bool) behaviorLoader = &_createDefaultTeleporterBehavior) {
-        _teleporterBehavior = behaviorLoader;
-    }
-
-    void setPlayerBehavior(Behavior function(Actor) behaviorLoader = &_createDefaultMoveBehavior) {
-        _moveBehavior = behaviorLoader;
+    void setPlayerControllerID(string id) {
+        _playerControllerId = id;
     }
 
     void setPause(bool value) {
@@ -222,8 +210,9 @@ final class World {
             _transition = _transitionFunc(rid, tpName, _player, skip);
         }
 
-        if (_teleporterBehavior) {
-            addBehavior(_teleporterBehavior(_player, direction, false));
+        _setupPlayerController();
+        if (_playerController) {
+            _playerController.onTeleport(direction, false);
         }
 
         _weather.run("", 0f, 60);
@@ -231,6 +220,16 @@ final class World {
         Atelier.physics.setBounds(false);
         Atelier.script.killTasks();
         _transition.update();
+    }
+
+    private void _setupPlayerController() {
+        if (!_playerController) {
+            _playerController = fetchController!Actor(_playerControllerId);
+            if (_playerController) {
+                _playerController.setup(_player);
+                _controllers ~= _playerController;
+            }
+        }
     }
 
     void load(string sceneRid, string tpName = "") {
@@ -254,6 +253,10 @@ final class World {
         bool hasXBounds = rendererSize.x <= mapSize.x;
         bool hasYBounds = rendererSize.y <= mapSize.y;
 
+        if (_playerController) {
+            _controllers ~= _playerController;
+        }
+
         if (_player) {
             addEntity(_player);
             addRenderedEntity(_player);
@@ -270,8 +273,10 @@ final class World {
             _player.setShadow(true);
             _camera.setPosition(_player.cameraPosition() - oldCameraDeltaPosition);
             _camera.follow(_player, Vec2f.one * 1f, Vec2f.zero);
-            if (_moveBehavior) {
-                addBehavior(_moveBehavior(_player));
+
+            _setupPlayerController();
+            if (_playerController) {
+                _playerController.onStart();
             }
             _player.isPlayer = true;
         }
@@ -312,14 +317,18 @@ final class World {
                 if (_player && teleporter.getName() == _tpName) {
                     if (_transition) {
                         _player.setPosition(teleporter.getExitPosition(_player));
-                        if (_teleporterBehavior) {
-                            addBehavior(_teleporterBehavior(_player, teleporter.direction + 4, true));
+
+                        _setupPlayerController();
+                        if (_playerController) {
+                            _playerController.onTeleport(teleporter.direction + 4, true);
                         }
                     }
                     else { // Position par défaut
                         _player.setPosition(teleporter.getPosition());
-                        if (_moveBehavior) {
-                            addBehavior(_moveBehavior(_player));
+
+                        _setupPlayerController();
+                        if (_playerController) {
+                            _playerController.onStart();
                         }
                         _player.angle = entityBuilder.teleporter.direction * -45f;
                     }
@@ -374,8 +383,9 @@ final class World {
             _transition.onCameraMoved();
         }
         if (_player) {
-            if (_moveBehavior) {
-                addBehavior(_moveBehavior(_player));
+            _setupPlayerController();
+            if (_playerController) {
+                _playerController.onStart();
             }
             Atelier.script.callEvent("scene_" ~ _sceneRid);
             Atelier.physics.setTriggersActive(true);
@@ -401,13 +411,17 @@ final class World {
         source.isRegistered = true;
     }
 
-    void addBehavior(Behavior behavior) {
-        _behaviors ~= behavior;
+    void addController(T)(string id, Controller!T delegate() func) {
+        _factory.store(id, func);
+    }
+
+    package Controller!T fetchController(T)(string id) {
+        return _factory.build!(Controller!T)(id);
     }
 
     void clear() {
         _uiManager.clearUI();
-        _behaviors.clear();
+        _controllers.clear();
         _entities.clear();
         _renderedEntities.clear();
         _particleSources.clear();
@@ -445,13 +459,13 @@ final class World {
             return;
 
         if (!_dialog.isRunning) {
-            foreach (i, behavior; _behaviors) {
-                behavior.update();
-                if (!behavior.isRunning) {
-                    _behaviors.mark(i);
+            foreach (i, controller; _controllers) {
+                controller.update();
+                if (!controller.isRunning) {
+                    _controllers.mark(i);
                 }
             }
-            _behaviors.sweep();
+            _controllers.sweep();
         }
 
         _dialog.update();

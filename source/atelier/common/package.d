@@ -7,6 +7,7 @@ public {
     import atelier.common.color;
     import atelier.common.constants;
     import atelier.common.conv;
+    import atelier.common.factory;
     import atelier.common.interpolator;
     import atelier.common.grid;
     import atelier.common.hslcolor;

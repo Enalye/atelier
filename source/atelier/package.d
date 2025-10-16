@@ -7,6 +7,7 @@ public {
     import atelier.doc;
     import atelier.etabli;
     import atelier.input;
+    import atelier.nav;
     import atelier.physics;
     import atelier.render;
     import atelier.world;

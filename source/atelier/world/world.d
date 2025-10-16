@@ -419,6 +419,10 @@ final class World {
         return _factory.build!(Controller!T)(id);
     }
 
+    package void registerController(T)(Controller!T controller) {
+        _controllers ~= controller;
+    }
+
     void clear() {
         _uiManager.clearUI();
         _controllers.clear();

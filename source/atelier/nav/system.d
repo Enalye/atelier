@@ -6,7 +6,7 @@ import atelier.world;
 
 private struct NavEdge {
     Vec2i start, end;
-    Vec2i center;
+    Vec3i center;
     uint sectorId, edgeId;
     Dir dir;
 
@@ -43,6 +43,7 @@ final class NavSector {
     void addEdge(uint sectorId, uint edgeId, uint start, uint end, NavEdge.Dir dir) {
         NavEdge edge;
         edge.sectorId = sectorId;
+        edge.edgeId = edgeId;
         edge.dir = dir;
         final switch (dir) with (NavEdge.Dir) {
         case up:
@@ -62,13 +63,13 @@ final class NavSector {
             edge.end = Vec2i(_end.x, end);
             break;
         }
-        edge.center = (edge.start - edge.end) / 2;
+        edge.center = Vec3i((edge.start + edge.end) * 8 - 4, _level * 16);
         _edges ~= edge;
     }
 
     void draw(Vec2f offset, Color color) {
-        //if (_level != 0)
-        //    return;
+        if (_level != 0)
+            return;
 
         Vec2f src = (16 * cast(Vec2f) _start) + Vec2f(-8f, -(8f + _level * 16f));
         Vec2f size = 16 * cast(Vec2f)(1 + (_end - _start));
@@ -107,10 +108,17 @@ final class NavSector {
     }
 }
 
+struct NavPath {
+    uint srcSectorID, dstSectorID;
+    Vec3i[] path;
+    bool isValid;
+}
+
 final class NavMesh {
     private {
         Grid!bool _markedTiles;
         NavSector[] _sectors;
+        Vec3i[] _debugPath;
     }
 
     this() {
@@ -127,16 +135,27 @@ final class NavMesh {
         _connectSectors();
     }
 
-    struct NavPath {
+    // Retourne le secteur dans lequel le point se situe
+    uint getSectorID(Vec3i position) {
+        uint sectorID;
+        float nearest = _sectors[0].distanceFromSquared(position);
 
+        for (uint id = 1; id < _sectors.length; ++id) {
+            float dist = _sectors[id].distanceFromSquared(position);
+            if (dist < nearest) {
+                nearest = dist;
+                sectorID = id;
+            }
+        }
+        return sectorID;
     }
 
     /// Calcule le chemin le plus court du départ à l’arrivé.
     NavPath getPath(Vec3i from, Vec3i to) {
-        NavPath path;
+        NavPath result;
 
         if (!_sectors.length)
-            return path;
+            return result;
 
         // On détermine dans quel secteur les points se situent
         uint srcId, dstId;
@@ -156,8 +175,11 @@ final class NavMesh {
             }
         }
 
+        result.srcSectorID = srcId;
+        result.dstSectorID = dstId;
+
         final class NavNode {
-            Vec2i position;
+            Vec3i position;
             uint sectorId;
             uint edgeId;
             float priority;
@@ -168,7 +190,7 @@ final class NavMesh {
                 return priority > rhs.priority ? 1 : -1;
             }
 
-            this(Vec2i position_, uint sectorId_, uint edgeId_, float priority_) {
+            this(Vec3i position_, uint sectorId_, uint edgeId_, float priority_) {
                 position = position_;
                 sectorId = sectorId_;
                 edgeId = edgeId_;
@@ -179,18 +201,21 @@ final class NavMesh {
         import std.container.binaryheap;
 
         auto frontiers = heapify!"a > b"([
-            new NavNode(from.xy, srcId, uint.max, 0)
-        ]);
-        Vec2i[Vec2i] cameFrom;
-        float[Vec2i] costSoFar;
-        cameFrom[from.xy] = from.xy;
-        costSoFar[from.xy] = 0f;
+                new NavNode(from, srcId, uint.max, 0)
+            ]);
+        Vec3i[Vec3i] cameFrom;
+        float[Vec3i] costSoFar;
+        cameFrom[from] = from;
+        costSoFar[from] = 0f;
 
         while (!frontiers.empty) {
             NavNode node = frontiers.front;
             frontiers.removeFront();
 
             if (node.sectorId == dstId) {
+                cameFrom[to] = node.position;
+                Atelier.log("Got there ", to, " after ", node.position);
+                result.isValid = true;
                 break;
             }
 
@@ -200,7 +225,7 @@ final class NavMesh {
                 if (i == node.edgeId)
                     continue;
 
-                Vec2i position = currentSector._edges[i].center;
+                Vec3i position = currentSector._edges[i].center;
 
                 float newCost = costSoFar[node.position] + position.distanceSquared(
                     node.position);
@@ -209,7 +234,7 @@ final class NavMesh {
 
                 if (!p || newCost < *p) {
                     costSoFar[position] = newCost;
-                    float priority = newCost + position.distanceSquared(to.xy);
+                    float priority = newCost + position.distanceSquared(to);
                     frontiers.insert(new NavNode(
                             currentSector._edges[i].center,
                             currentSector._edges[i].sectorId,
@@ -227,7 +252,18 @@ final class NavMesh {
             }
         }
 
-        return path;
+        if (result.isValid) {
+            Vec3i[] path;
+            Vec3i current = to;
+            while (current != from) {
+                path ~= current;
+                current = cameFrom[current];
+            }
+            result.path = path;
+            _debugPath = result.path ~ from;
+        }
+
+        return result;
     }
 
     private void _generateSectors() {
@@ -445,6 +481,20 @@ final class NavMesh {
             i++;
             if (i >= colors.length)
                 i = 0;
+        }
+
+        if (_debugPath.length >= 2) {
+            Vec2f startPos = offset + cast(Vec2f) _debugPath[0].xy;
+            startPos.y -= _debugPath[0].z;
+            i = 1;
+
+            while (i < _debugPath.length) {
+                Vec2f endPos = offset + cast(Vec2f) _debugPath[i].xy;
+                endPos.y -= _debugPath[i].z;
+                Atelier.renderer.drawLine(startPos, endPos, Color.white, 1f);
+                startPos = endPos;
+                i++;
+            }
         }
     }
 }

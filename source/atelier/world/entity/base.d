@@ -53,6 +53,7 @@ mixin template EntityController() {
 
         if (_controller) {
             _controller.setup(this);
+            Atelier.world.registerController(_controller);
             _controller.onStart();
         }
     }

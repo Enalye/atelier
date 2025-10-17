@@ -13,7 +13,7 @@ final class WarningModal : Modal {
             Atelier.log("[editor] ", title, " - ", msg);
         }
 
-        void ask(string title, string msg, string action, bool isDanger = false, void delegate() onValidate) {
+        void ask(string title, string msg, string action, bool isDanger, void delegate() onValidate) {
             Atelier.ui.pushModalUI(new WarningModal(title, msg, true, action, isDanger, onValidate, "", false, {
                 }));
             Atelier.log("[editor] ", title, " - ", msg);

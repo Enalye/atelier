@@ -1,6 +1,7 @@
 module atelier.etabli.ui;
 
 public {
+    import atelier.etabli.ui.fileexplorer;
     import atelier.etabli.ui.knob;
     import atelier.etabli.ui.studio;
     import atelier.etabli.ui.newfile;

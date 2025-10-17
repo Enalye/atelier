@@ -52,6 +52,15 @@ final class Grid(T) : Resource!Grid {
         return new Grid(this);
     }
 
+    void setup(uint columns_, uint lines_, T value = defaultValue) {
+        _lines = lines_;
+        _columns = columns_;
+        _values.length = _columns * _lines;
+        for (size_t i; i < _values.length; ++i) {
+            _values[i] = value;
+        }
+    }
+
     void setDimensions(uint columns_, uint lines_) {
         T[][] values_ = getValues();
         _lines = lines_;
@@ -123,9 +132,9 @@ final class Grid(T) : Resource!Grid {
         return values;
     }
 
-    void clear() {
+    void clear(T clearValue = defaultValue) {
         foreach (ref T value; _values) {
-            value = defaultValue;
+            value = clearValue;
         }
     }
 }

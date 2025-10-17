@@ -1,5 +1,6 @@
 module atelier.nav.system;
 
+import std.datetime, std.conv;
 import atelier.common;
 import atelier.core;
 import atelier.world;
@@ -26,8 +27,8 @@ final class NavSector {
     }
 
     float distanceFromSquared(Vec3i position) {
-        Vec3i start = Vec3i(_start * 16 - 8, _level * 16);
-        Vec3i end = Vec3i((_end + 1) * 16 - 8, (_level + 1) * 16);
+        Vec3i start = Vec3i(_start * 8, _level * 16);
+        Vec3i end = Vec3i((_end + 1) * 8, (_level + 1) * 16);
 
         if (position.isBetween(start, end))
             return 0f;
@@ -63,44 +64,43 @@ final class NavSector {
             edge.end = Vec2i(_end.x, end);
             break;
         }
-        edge.center = Vec3i((edge.start + edge.end) * 8 - 4, _level * 16);
+        edge.center = Vec3i((edge.start + edge.end) * 4, _level * 16);
         _edges ~= edge;
     }
 
     void draw(Vec2f offset, Color color) {
-        if (_level != 0)
-            return;
-
-        Vec2f src = (16 * cast(Vec2f) _start) + Vec2f(-8f, -(8f + _level * 16f));
-        Vec2f size = 16 * cast(Vec2f)(1 + (_end - _start));
+        Vec2f src = (8 * cast(Vec2f) _start) + Vec2f(0f, _level * -16f);
+        Vec2f size = 8 * cast(Vec2f)(1 + (_end - _start));
         Atelier.renderer.drawRect(offset + src, size, color, 1f, false);
 
         for (uint i; i < _edges.length; ++i) {
             final switch (_edges[i].dir) with (NavEdge.Dir) {
             case up:
-                src = (16 * cast(Vec2f) _edges[i].start) + Vec2f(-8f, 2f - (8f + _level * 16f));
-                size = (16 * cast(Vec2f)(_edges[i].end + Vec2i(1, 0))) + Vec2f(-8f, 2f - (
-                        8f + _level * 16f));
+                src = (8 * cast(Vec2f) _edges[i].start) +
+                    Vec2f(0f, 2f - _level * 16f);
+                size = (8 * cast(Vec2f)(_edges[i].end + Vec2i(1, 0))) +
+                    Vec2f(0f, 2f - _level * 16f);
                 Atelier.renderer.drawLine(offset + src, offset + size, color, 1f);
                 break;
             case down:
-                src = (16 * cast(Vec2f)(_edges[i].start + Vec2i(0, 1))) + Vec2f(-8f, -(
-                        12f + _level * 16f));
-                size = (16 * cast(Vec2f)(_edges[i].end + Vec2i(1, 1))) + Vec2f(-8f, -(
-                        12f + _level * 16f));
+                src = (8 * cast(Vec2f)(_edges[i].start + Vec2i(0, 1))) +
+                    Vec2f(0f, -(4f + _level * 16f));
+                size = (8 * cast(Vec2f)(_edges[i].end + Vec2i(1, 1))) +
+                    Vec2f(0f, -(4f + _level * 16f));
                 Atelier.renderer.drawLine(offset + src, offset + size, color, 1f);
                 break;
             case left:
-                src = (16 * cast(Vec2f) _edges[i].start) + Vec2f(-6f, -(8f + _level * 16f));
-                size = (16 * cast(Vec2f)(_edges[i].end + Vec2i(0, 1))) + Vec2f(-6f, -(
-                        8f + _level * 16f));
+                src = (8 * cast(Vec2f) _edges[i].start) +
+                    Vec2f(2f, _level * -16f);
+                size = (8 * cast(Vec2f)(_edges[i].end + Vec2i(0, 1))) +
+                    Vec2f(2f, _level * -16f);
                 Atelier.renderer.drawLine(offset + src, offset + size, color, 1f);
                 break;
             case right:
-                src = (16 * cast(Vec2f)(_edges[i].start + Vec2i(1, 0))) + Vec2f(-12f, 2f - (
-                        8f + _level * 16f));
-                size = (16 * cast(Vec2f)(_edges[i].end + Vec2i(1, 1))) + Vec2f(-12f, 2f - (
-                        8f + _level * 16f));
+                src = (8 * cast(Vec2f)(_edges[i].start + Vec2i(1, 0))) +
+                    Vec2f(-4f, 2f - (_level * 16f));
+                size = (8 * cast(Vec2f)(_edges[i].end + Vec2i(1, 1))) +
+                    Vec2f(-4f, 2f - (_level * 16f));
                 Atelier.renderer.drawLine(offset + src, offset + size, color, 1f);
                 break;
             }
@@ -116,21 +116,28 @@ struct NavPath {
 
 final class NavMesh {
     private {
-        Grid!bool _markedTiles;
+        Grid!bool _tiles;
         NavSector[] _sectors;
         Vec3i[] _debugPath;
     }
 
+    int levelToDraw = -1;
+    bool isDebug;
+
     this() {
-        _markedTiles = new Grid!bool;
+        _tiles = new Grid!bool;
+        _tiles.defaultValue = true;
     }
 
     void clear() {
         _sectors.length = 0;
-        _markedTiles.clear();
+        _debugPath.length = 0;
+        _tiles.clear(false);
     }
 
     void generate() {
+        clear();
+
         _generateSectors();
         _connectSectors();
     }
@@ -213,8 +220,9 @@ final class NavMesh {
             frontiers.removeFront();
 
             if (node.sectorId == dstId) {
-                cameFrom[to] = node.position;
-                Atelier.log("Got there ", to, " after ", node.position);
+                if (to != node.position) {
+                    cameFrom[to] = node.position;
+                }
                 result.isValid = true;
                 break;
             }
@@ -267,27 +275,35 @@ final class NavMesh {
     }
 
     private void _generateSectors() {
-        clear();
+        long startTime = Clock.currStdTime();
 
-        _markedTiles.setDimensions(Atelier.world.scene.columns, Atelier.world.scene.lines);
+        _tiles.setup(Atelier.world.scene.columns << 1, Atelier.world.scene.lines << 1, false);
 
-        for (uint y; y < Atelier.world.scene.lines; ++y) {
-            for (uint x; x < Atelier.world.scene.columns; ++x) {
-                if (!_markedTiles.getValue(x, y)) {
-                    NavSector sector = _createSector(x, y);
-                    x = sector._end.x;
+        for (uint z; z < Atelier.world.scene.levels; ++z) {
+            _tiles.clear(false);
 
-                    for (uint y2 = sector._start.y; y2 <= sector._end.y; ++y2) {
-                        for (uint x2 = sector._start.x; x2 <= sector._end.x; ++x2) {
-                            _markedTiles.setValue(x2, y2, true);
+            for (uint y; y < Atelier.world.scene.lines << 1; ++y) {
+                for (uint x; x < Atelier.world.scene.columns << 1; ++x) {
+                    if (!_tiles.getValue(x, y) && _canWalk(x, y, z)) {
+                        NavSector sector = _createSector(x, y, z);
+                        x = sector._end.x;
+
+                        for (uint y2 = sector._start.y; y2 <= sector._end.y; ++y2) {
+                            for (uint x2 = sector._start.x; x2 <= sector._end.x; ++x2) {
+                                _tiles.setValue(x2, y2, true);
+                            }
                         }
-                    }
 
-                    _sectors ~= sector;
+                        _sectors ~= sector;
+                    }
+                    //if (_sectors.length > 100)
+                    //    break;
                 }
             }
         }
-        Atelier.log("Généré ", _sectors.length, " secteurs");
+        double loadDuration = (cast(double)(Clock.currStdTime() - startTime) / 10_000_000.0);
+        Atelier.log("Généré ", _sectors.length, " secteurs, effectué en ",
+            to!string(loadDuration), "sec");
     }
 
     private void _connectSectors() {
@@ -349,11 +365,156 @@ final class NavMesh {
         }
     }
 
-    private NavSector _createSector(uint x, uint y) {
+    private bool _canWalk(uint x, uint y, int level) {
+        int groundLevel = Atelier.world.scene.getLevel((x + 1) >> 1, (y + 1) >> 1);
+
+        if (level < groundLevel)
+            return false;
+
+        bool hasLevel = false;
+        Vec2i subCoords = Vec2i(x, y) & 0x1;
+        foreach_reverse (layer; Atelier.world.scene.collisionLayers) {
+            if (layer.level + 1 == level) {
+                int id = layer.getId(x >> 1, y >> 1);
+                switch (id) {
+                case 0b1111: // Zone pleine
+                    hasLevel = true;
+                    break;
+                case 0b0110: // Coin gauche
+                    if (subCoords.x == 0)
+                        hasLevel = true;
+                    break;
+                case 0b1001: // Coin droite
+                    if (subCoords.x == 1)
+                        hasLevel = true;
+                    break;
+                case 0b1100: // Coin haut
+                    if (subCoords.y == 0)
+                        hasLevel = true;
+                    break;
+                case 0b0011: // Coin bas
+                    if (subCoords.y == 1)
+                        hasLevel = true;
+                    break;
+                case 0b1110: // Coin 3/4 haut-gauche
+                    if (subCoords.x == 0 || subCoords.y == 0)
+                        hasLevel = true;
+                    break;
+                case 0b1011: // Coin 3/4 bas-droite
+                    if (subCoords.x == 1 || subCoords.y == 1)
+                        hasLevel = true;
+                    break;
+                case 0b1101: // Coin 3/4 haut-droite
+                    if (subCoords.x == 1 || subCoords.y == 0)
+                        hasLevel = true;
+                    break;
+                case 0b0111: // Coin 3/4 bas-gauche
+                    if (subCoords.x == 0 || subCoords.y == 1)
+                        hasLevel = true;
+                    break;
+                case 0b0100: // Coin 1/4 haut-gauche
+                    if (subCoords.x == 0 && subCoords.y == 0)
+                        hasLevel = true;
+                    break;
+                case 0b0001: // Coin 1/4 bas-droite
+                    if (subCoords.x == 1 && subCoords.y == 1)
+                        hasLevel = true;
+                    break;
+                case 0b1000: // Coin 1/4 haut-droite
+                    if (subCoords.x == 1 && subCoords.y == 0)
+                        hasLevel = true;
+                    break;
+                case 0b0010: // Coin 1/4 bas-gauche
+                    if (subCoords.x == 0 && subCoords.y == 1)
+                        hasLevel = true;
+                    break;
+                case 0b0101: // Diagonale haut-gauche / bas-droite
+                    if ((subCoords.x == 0 && subCoords.y == 0) || (subCoords.x == 1 && subCoords.y == 1))
+                        hasLevel = true;
+                    break;
+                case 0b1010: // Diagonale haut-droite / bas-gauche
+                    if ((subCoords.x == 1 && subCoords.y == 0) || (subCoords.x == 0 && subCoords.y == 1))
+                        hasLevel = true;
+                    break;
+                default:
+                    break;
+                }
+            }
+            else if (layer.level == level) {
+                int id = layer.getId(x >> 1, y >> 1);
+                switch (id) {
+                case 0b1111: // Zone pleine
+                    return false;
+                case 0b0110: // Coin gauche
+                    if (subCoords.x == 0)
+                        return false;
+                    break;
+                case 0b1001: // Coin droite
+                    if (subCoords.x == 1)
+                        return false;
+                    break;
+                case 0b1100: // Coin haut
+                    if (subCoords.y == 0)
+                        return false;
+                    break;
+                case 0b0011: // Coin bas
+                    if (subCoords.y == 1)
+                        return false;
+                    break;
+                case 0b1110: // Coin 3/4 haut-gauche
+                    if (subCoords.x == 0 || subCoords.y == 0)
+                        return false;
+                    break;
+                case 0b1011: // Coin 3/4 bas-droite
+                    if (subCoords.x == 1 || subCoords.y == 1)
+                        return false;
+                    break;
+                case 0b1101: // Coin 3/4 haut-droite
+                    if (subCoords.x == 1 || subCoords.y == 0)
+                        return false;
+                    break;
+                case 0b0111: // Coin 3/4 bas-gauche
+                    if (subCoords.x == 0 || subCoords.y == 1)
+                        return false;
+                    break;
+                case 0b0100: // Coin 1/4 haut-gauche
+                    if (subCoords.x == 0 && subCoords.y == 0)
+                        return false;
+                    break;
+                case 0b0001: // Coin 1/4 bas-droite
+                    if (subCoords.x == 1 && subCoords.y == 1)
+                        return false;
+                    break;
+                case 0b1000: // Coin 1/4 haut-droite
+                    if (subCoords.x == 1 && subCoords.y == 0)
+                        return false;
+                    break;
+                case 0b0010: // Coin 1/4 bas-gauche
+                    if (subCoords.x == 0 && subCoords.y == 1)
+                        return false;
+                    break;
+                case 0b0101: // Diagonale haut-gauche / bas-droite
+                    if ((subCoords.x == 0 && subCoords.y == 0) || (subCoords.x == 1 && subCoords.y == 1))
+                        return false;
+                    break;
+                case 0b1010: // Diagonale haut-droite / bas-gauche
+                    if ((subCoords.x == 1 && subCoords.y == 0) || (subCoords.x == 0 && subCoords.y == 1))
+                        return false;
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+
+        return (level == groundLevel || hasLevel);
+    }
+
+    private NavSector _createSector(uint x, uint y, uint z) {
         NavSector sector = new NavSector;
         sector._start = Vec2i(x, y);
         sector._end = sector._start;
-        sector._level = Atelier.world.scene.getLevel(sector._start.x, sector._start.y);
+        sector._level = z;
 
         _extendSectorDiagonally(sector);
 
@@ -372,16 +533,14 @@ final class NavMesh {
             bool isRightAvailable = true;
 
             for (uint x2 = sector._start.x; x2 < x; ++x2) {
-                if (_markedTiles.getValue(x2, y) || Atelier.world.scene.getLevel(x2, y) != sector
-                    ._level) {
+                if (_tiles.getValue(x2, y) || !_canWalk(x2, y, sector._level)) {
                     isDownAvailable = false;
                     break;
                 }
             }
 
             for (uint y2 = sector._start.y; y2 < y; ++y2) {
-                if (_markedTiles.getValue(x, y2) || Atelier.world.scene.getLevel(x, y2) != sector
-                    ._level) {
+                if (_tiles.getValue(x, y2) || !_canWalk(x, y2, sector._level)) {
                     isRightAvailable = false;
                     break;
                 }
@@ -400,8 +559,7 @@ final class NavMesh {
                 return;
             }
 
-            if (_markedTiles.getValue(x, y) || Atelier.world.scene.getLevel(x, y) != sector
-                ._level) {
+            if (_tiles.getValue(x, y) || !_canWalk(x, y, sector._level)) {
                 // Au pif ?
                 _extendSectorHorizontally(sector);
                 _extendSectorVertically(sector);
@@ -420,18 +578,19 @@ final class NavMesh {
             y++;
 
             // Opti: on s’arrête si la zone s’agrandit
-            if ((Atelier.world.scene.getLevel(sector._start.x - 1, y) == sector._level && !_markedTiles.getValue(
-                    sector._start.x - 1, y) && Atelier.world.scene.getLevel(
-                    sector._start.x - 2, y) == sector._level && !_markedTiles.getValue(sector._start.x - 2, y)) ||
-                (Atelier.world.scene.getLevel(sector._end.x + 1, y) == sector._level && !_markedTiles.getValue(
-                    sector._end.x + 1, y) && Atelier.world.scene.getLevel(
-                    sector._end.x + 2, y) == sector._level) && !_markedTiles.getValue(sector._end.x + 2, y)) {
+            if ((_canWalk(sector._start.x - 1, y, sector._level) &&
+                    !_tiles.getValue(sector._start.x - 1, y) &&
+                    _canWalk(sector._start.x - 2, y, sector._level) &&
+                    !_tiles.getValue(sector._start.x - 2, y)) ||
+                (_canWalk(sector._end.x + 1, y, sector._level) &&
+                    !_tiles.getValue(sector._end.x + 1, y) &&
+                    _canWalk(sector._end.x + 2, y, sector._level) &&
+                    !_tiles.getValue(sector._end.x + 2, y))) {
                 return;
             }
 
             for (uint x = sector._start.x; x <= sector._end.x; ++x) {
-                if (_markedTiles.getValue(x, y) || Atelier.world.scene.getLevel(x, y) != sector
-                    ._level) {
+                if (_tiles.getValue(x, y) || !_canWalk(x, y, sector._level)) {
                     return;
                 }
             }
@@ -447,19 +606,19 @@ final class NavMesh {
             x++;
 
             // Opti: on s’arrête si la zone s’agrandit
-            if ((Atelier.world.scene.getLevel(x, sector._start.y - 1) == sector._level && !_markedTiles.getValue(
-                    x, sector._start.y - 1) && Atelier.world.scene.getLevel(x, sector._start.y - 2) == sector
-                    ._level && !_markedTiles
-                    .getValue(x, sector._start.y - 2)) ||
-                (Atelier.world.scene.getLevel(x, sector._end.y + 1) == sector._level && !_markedTiles.getValue(
-                    x, sector._end.y + 1) && Atelier.world.scene.getLevel(x, sector._end.y + 2) == sector._level && !_markedTiles
-                    .getValue(x, sector._end.y + 2))) {
+            if ((_canWalk(x, sector._start.y - 1, sector._level) &&
+                    !_tiles.getValue(x, sector._start.y - 1) &&
+                    _canWalk(x, sector._start.y - 2, sector._level) &&
+                    !_tiles.getValue(x, sector._start.y - 2)) ||
+                (_canWalk(x, sector._end.y + 1, sector._level) &&
+                    !_tiles.getValue(x, sector._end.y + 1) &&
+                    _canWalk(x, sector._end.y + 2, sector._level) &&
+                    !_tiles.getValue(x, sector._end.y + 2))) {
                 return;
             }
 
             for (uint y = sector._start.y; y <= sector._end.y; ++y) {
-                if (_markedTiles.getValue(x, y) || Atelier.world.scene.getLevel(x, y) != sector
-                    ._level) {
+                if (_tiles.getValue(x, y) || !_canWalk(x, y, sector._level)) {
                     return;
                 }
             }
@@ -469,6 +628,9 @@ final class NavMesh {
     }
 
     void draw(Vec2f offset) {
+        if (!isDebug)
+            return;
+
         Color[] colors = [
             Color.blue, Color.green, Color.red, Color.cyan, Color.lime,
             Color.magenta, Color.olive, Color.orange, Color.navy, Color.gray
@@ -477,6 +639,9 @@ final class NavMesh {
         uint i;
 
         foreach (sector; _sectors) {
+            if (levelToDraw >= 0 && sector._level != levelToDraw)
+                continue;
+
             sector.draw(offset, colors[i]);
             i++;
             if (i >= colors.length)

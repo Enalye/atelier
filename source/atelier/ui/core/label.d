@@ -57,13 +57,18 @@ final class Label : UIElement {
     }
 
     /// Constructor
-    this(string text_ = "", Font font_) {
-        _text = to!dstring(text_);
+    this(Font font_) {
         _font = font_;
         _reload();
         isEnabled = false;
 
         addEventListener("draw", &_onDraw);
+    }
+
+    /// Ditto
+    this(string text_, Font font_) {
+        _text = to!dstring(text_);
+        this(font_);
     }
 
     private void _onDraw() {
@@ -136,13 +141,18 @@ final class ColoredLabel : UIElement {
     }
 
     /// Constructor
-    this(string text_ = "", Font font_) {
-        _text = to!dstring(text_);
+    this(Font font_) {
         _font = font_;
         _reload();
         isEnabled = false;
 
         addEventListener("draw", &_onDraw);
+    }
+
+    /// Ditto
+    this(string text_, Font font_) {
+        _text = to!dstring(text_);
+        this(font_);
     }
 
     private void _onDraw() {

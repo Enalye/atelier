@@ -79,16 +79,21 @@ final class DialogText : UIElement {
     }
 
     /// Build text with default font
-    this(string text_ = "", Font font_) {
+    this(Font font_) {
         isEnabled = false;
         _font = font_;
-        _text = to!dstring(text_);
         _tokenize();
         _effectTimer.mode = Timer.Mode.loop;
         _effectTimer.start(60);
 
         addEventListener("update", &_onUpdate);
         addEventListener("draw", &_onDraw);
+    }
+
+    /// Ditto
+    this(string text_, Font font_) {
+        _text = to!dstring(text_);
+        this(font_);
     }
 
     /// Restart the reading from the beginning

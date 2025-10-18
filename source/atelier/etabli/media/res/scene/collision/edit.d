@@ -89,7 +89,7 @@ final class EditCollisionElement : Modal {
         return _nameField.value;
     }
 
-    uint getLevel() const {
+    int getLevel() const {
         return _levelField.value();
     }
 }

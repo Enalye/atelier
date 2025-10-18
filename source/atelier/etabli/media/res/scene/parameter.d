@@ -76,7 +76,6 @@ package final class ParameterWindow : UIElement {
             _tabs.addTab("", "terrain", "editor:scene-terrain");
             _tabs.addTab("", "parallax", "editor:scene-parallax");
             _tabs.addTab("", "collision", "editor:scene-collision");
-            _tabs.addTab("", "navigation", "editor:scene-navigation");
             _tabs.addTab("", "lighting", "editor:scene-lighting");
             vlist.addList(_tabs);
 

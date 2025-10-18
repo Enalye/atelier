@@ -90,6 +90,8 @@ package(atelier.etabli.media.res.scene) final class CollisionList : UIElement {
         }
         _currentLayer.openToolbox();
         _currentLayer.toolbox.addEventListener("tool", &_onTool);
+        _currentLayer.toolbox.addEventListener("mode", &_onMode);
+        _currentLayer.tilemap.color = Color.fromHex(_currentLayer.mode ? 0x5a36ff : 0xff2929);
     }
 
     void closeToolbox() {
@@ -98,6 +100,7 @@ package(atelier.etabli.media.res.scene) final class CollisionList : UIElement {
         }
         _currentLayer.closeToolbox();
         _currentLayer.toolbox.removeEventListener("tool", &_onTool);
+        _currentLayer.toolbox.removeEventListener("mode", &_onMode);
     }
 
     private void _onKey() {
@@ -132,6 +135,19 @@ package(atelier.etabli.media.res.scene) final class CollisionList : UIElement {
         }
 
         updateSelectionPreview();
+    }
+
+    private void _onMode() {
+        if (!_currentLayer) {
+            return;
+        }
+
+        _currentLayer.mode = _currentLayer.toolbox.getMode();
+        _currentLayer.tilemap.color = Color.fromHex(_currentLayer.mode ? 0x5a36ff : 0xff2929);
+
+        if (_previewSelectionTM) {
+            _previewSelectionTM.color = Color.fromHex(_currentLayer.mode ? 0x5a36ff : 0xff2929);
+        }
     }
 
     bool hasControlModifier() const {
@@ -169,7 +185,7 @@ package(atelier.etabli.media.res.scene) final class CollisionList : UIElement {
         Vec2i dimensions = Vec2i(_definition.getWidth(), _definition.getHeight());
         _mapSize = (cast(Vec2f) dimensions * tileSize) * _zoom;
         Vec2f offset = _centerPosition + _mapPosition + Vec2f(0f,
-            -_definition.getLevel(_currentLayer.level) * _zoom);
+            -_definition.getLevel(_currentLayer.level + _currentLayer.mode) * _zoom);
         _mapMousePosition = (mousePos - (offset - _mapSize / 2f)) / _zoom;
         Vec2i tilePos = (cast(Vec2i) _mapMousePosition) / tileSize;
         _startTile = tilePos;
@@ -223,7 +239,7 @@ package(atelier.etabli.media.res.scene) final class CollisionList : UIElement {
         Vec2i dimensions = Vec2i(_definition.getWidth(), _definition.getHeight());
         _mapSize = (cast(Vec2f) dimensions * tileSize) * _zoom;
         Vec2f offset = _centerPosition + _mapPosition + Vec2f(0f,
-            -_definition.getLevel(_currentLayer.level) * _zoom);
+            -_definition.getLevel(_currentLayer.level + _currentLayer.mode) * _zoom);
         _mapMousePosition = (mousePos - (offset - _mapSize / 2f)) / _zoom;
         Vec2i tilePos = (cast(Vec2i) _mapMousePosition) / tileSize;
         _endTile = tilePos;
@@ -244,7 +260,7 @@ package(atelier.etabli.media.res.scene) final class CollisionList : UIElement {
         Vec2i dimensions = Vec2i(_definition.getWidth(), _definition.getHeight());
         _mapSize = (cast(Vec2f) dimensions * tileSize) * _zoom;
         Vec2f offset = _centerPosition + _mapPosition + Vec2f(0f,
-            -_definition.getLevel(_currentLayer.level) * _zoom);
+            -_definition.getLevel(_currentLayer.level + _currentLayer.mode) * _zoom);
         _mapMousePosition = (mousePos - (offset - _mapSize / 2f)) / _zoom;
         Vec2i tilePos = (cast(Vec2i) _mapMousePosition) / tileSize;
         _endTile = tilePos;
@@ -295,6 +311,7 @@ package(atelier.etabli.media.res.scene) final class CollisionList : UIElement {
             _selection.width, _selection.height);
         _previewSelectionTM.setTiles(0, 0, _selection.tiles);
         _previewSelectionTM.anchor = Vec2f.zero;
+        _previewSelectionTM.color = Color.fromHex(_currentLayer.mode ? 0x5a36ff : 0xff2929);
     }
 
     private void _onPasteSelectionTool() {
@@ -490,7 +507,7 @@ package(atelier.etabli.media.res.scene) final class CollisionList : UIElement {
         Vec2i dimensions = Vec2i(_definition.getWidth(), _definition.getHeight());
         Vec2f mapSize = (cast(Vec2f) dimensions * 16f) * _zoom;
         Vec2f offset = _centerPosition + _mapPosition + Vec2f(0f,
-            -_definition.getLevel(_currentLayer.level) * _zoom);
+            -_definition.getLevel(_currentLayer.level + _currentLayer.mode) * _zoom);
         Vec2f origin = offset - mapSize / 2f;
         return Vec4f(origin, mapSize);
     }
@@ -500,7 +517,7 @@ package(atelier.etabli.media.res.scene) final class CollisionList : UIElement {
             return;
 
         Vec2f offset = _centerPosition + _mapPosition + Vec2f(0f,
-            -_definition.getLevel(_currentLayer.level) * _zoom);
+            -_definition.getLevel(_currentLayer.level + _currentLayer.mode) * _zoom);
         Vec2f origin = offset - _mapSize / 2f;
 
         switch (_tool) {
@@ -521,6 +538,8 @@ package(atelier.etabli.media.res.scene) final class CollisionList : UIElement {
                     if (_previewSelectionTM) {
                         _previewSelectionTM.size = Vec2f(_selection.width,
                             _selection.height) * 16f * _zoom;
+                        _previewSelectionTM.color = Color.fromHex(_currentLayer.mode ? 0x5a36ff
+                                : 0xff2929);
                         _previewSelectionTM.draw(origin + (cast(Vec2f) _endTile) * 16f * _zoom);
                     }
 

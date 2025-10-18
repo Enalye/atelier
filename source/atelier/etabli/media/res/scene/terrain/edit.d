@@ -57,7 +57,6 @@ final class EditTerrainElement : Modal {
             hbox.addUI(new Label("Niveau:", Atelier.theme.font));
 
             _levelField = new IntegerField;
-            _levelField.setMinValue(0);
             _levelField.value = _layer.level;
             hbox.addUI(_levelField);
         }
@@ -109,7 +108,7 @@ final class EditTerrainElement : Modal {
         return _terrainSelect.getName();
     }
 
-    uint getLevel() const {
+    int getLevel() const {
         return _levelField.value();
     }
 }

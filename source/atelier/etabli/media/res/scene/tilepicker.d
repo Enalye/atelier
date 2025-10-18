@@ -24,12 +24,13 @@ package(atelier.etabli.media.res.scene) final class TilePicker : UIElement {
         Vec2f _position = Vec2f.zero;
         float _zoom = 1f;
         bool _isRect;
+        Color _colorMod = Color.white;
     }
 
     TilesSelection selection;
 
-    this() {
-        setSize(Vec2f(256f, 384f));
+    this(float height_ = 384f) {
+        setSize(Vec2f(256f, height_));
 
         {
             Rectangle rect = Rectangle.outline(getSize(), 1f);
@@ -47,6 +48,7 @@ package(atelier.etabli.media.res.scene) final class TilePicker : UIElement {
             _tilemap.remove();
         _tilemap = new Tilemap(tileset, tileset.columns, tileset.lines);
         _tilemap.anchor = Vec2f.zero;
+        _tilemap.color = _colorMod;
         addImage(_tilemap);
 
         int id;
@@ -177,6 +179,13 @@ package(atelier.etabli.media.res.scene) final class TilePicker : UIElement {
 
     void setRectMode(bool isRect) {
         _isRect = isRect;
+    }
+
+    void setColorMod(Color color_) {
+        _colorMod = color_;
+        if (_tilemap) {
+            _tilemap.color = _colorMod;
+        }
     }
 
     private void _onRectSelection() {

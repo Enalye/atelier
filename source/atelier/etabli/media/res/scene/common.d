@@ -22,7 +22,7 @@ package final class SceneDefinition {
     final class TerrainLayer {
         string name;
         bool isVisible = true;
-        uint level;
+        int level;
         Tilemap tilemap;
         TerrainToolbox toolbox;
 
@@ -127,7 +127,7 @@ package final class SceneDefinition {
             name = ffd.get!string(0);
 
             if (ffd.hasNode("level")) {
-                level = ffd.getNode("level").get!uint(0);
+                level = ffd.getNode("level").get!int(0);
             }
 
             if (ffd.hasNode("isVisible")) {
@@ -292,6 +292,7 @@ package final class SceneDefinition {
     final class CollisionLayer {
         string name;
         int level;
+        int mode;
         bool isVisible;
         Tilemap tilemap;
         CollisionToolbox toolbox;
@@ -310,7 +311,7 @@ package final class SceneDefinition {
             isVisible = true;
 
             if (!toolbox) {
-                toolbox = new CollisionToolbox;
+                toolbox = new CollisionToolbox(mode);
             }
 
             Atelier.ui.addUI(toolbox);
@@ -2163,7 +2164,7 @@ package final class SceneDefinition {
         return _levels;
     }
 
-    int getLevel(uint level) const {
+    int getLevel(int level) const {
         if (level >= _levels)
             return 0;
         return level * 16;

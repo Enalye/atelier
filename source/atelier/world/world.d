@@ -655,6 +655,15 @@ final class World {
                 }
             }
 
+            if (_transition.showTiles()) {
+                foreach_reverse (layer; _scene.terrainLayers) {
+                    if (layer.level >= 0)
+                        continue;
+
+                    layer.draw(offset - Vec2f(0f, layer.level * 16f));
+                }
+            }
+
             // Entités en haut
             for (; renderEntityIndex < _renderListRoots.length; ++renderEntityIndex) {
                 Entity entity = _renderListRoots[renderEntityIndex];
@@ -772,6 +781,13 @@ final class World {
             // Parallax
             foreach_reverse (layer; _scene.parallaxLayers) {
                 layer.draw(offset - 16 + cameraPosition / layer.distance);
+            }
+
+            foreach_reverse (layer; _scene.terrainLayers) {
+                if (layer.level >= 0)
+                    continue;
+
+                layer.draw(offset - Vec2f(0f, layer.level * 16f));
             }
 
             // Entités en haut

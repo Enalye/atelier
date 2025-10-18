@@ -15,7 +15,7 @@ final class Scene : Resource!Scene {
     final class TerrainLayer {
         private {
             string _name;
-            uint _level;
+            int _level;
             TerrainMap _terrainMap;
             Tileset _tileset;
             Tilemap _tilemap;
@@ -23,7 +23,7 @@ final class Scene : Resource!Scene {
         }
 
         @property {
-            uint level() const {
+            int level() const {
                 return _level;
             }
         }
@@ -50,7 +50,7 @@ final class Scene : Resource!Scene {
             _name = ffd.get!string(0);
 
             if (ffd.hasNode("level")) {
-                _level = ffd.getNode("level").get!uint(0);
+                _level = ffd.getNode("level").get!int(0);
             }
 
             if (ffd.hasNode("terrain")) {
@@ -64,20 +64,24 @@ final class Scene : Resource!Scene {
 
         void serialize(OutStream stream) {
             stream.write!string(_name);
-            stream.write!uint(_level);
+            stream.write!int(_level);
             stream.write!string(_terrainRID);
             stream.write!(int[][])(_tilemap.getTiles());
         }
 
         void deserialize(InStream stream) {
             _name = stream.read!string();
-            _level = stream.read!uint();
+            _level = stream.read!int();
             _terrainRID = stream.read!string();
             _tilemap.setTiles(0, 0, stream.read!(int[][])());
         }
 
         void drawLine(int y, Vec2f offset) {
             _tilemap.drawLine(y, offset);
+        }
+
+        void draw(Vec2f offset) {
+            _tilemap.draw(offset);
         }
     }
 

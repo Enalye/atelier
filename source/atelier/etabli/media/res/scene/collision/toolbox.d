@@ -22,14 +22,18 @@ package(atelier.etabli.media.res.scene) class CollisionToolbox : Modal {
     private {
         ToolGroup _toolGroup;
         int _tool;
+        ToolGroup _modeGroup;
+        int _mode;
         TilePicker _tilePicker;
         HBox _brushSizeBox;
         Label _brushSizeLabel;
         IntegerField _brushSizeField;
     }
 
-    this() {
-        setSize(Vec2f(256f, 512f));
+    this(int mode) {
+        _mode = mode;
+
+        setSize(Vec2f(256f, 312f));
         setAlign(UIAlignX.left, UIAlignY.top);
         setPosition(Vec2f(258f, 75f));
 
@@ -47,6 +51,23 @@ package(atelier.etabli.media.res.scene) class CollisionToolbox : Modal {
             hbox.setSpacing(4f);
             addUI(hbox);
 
+            _modeGroup = new ToolGroup;
+            foreach (key; ["collision", "navigation"]) {
+                ToolButton btn = new ToolButton(_modeGroup,
+                    "editor:" ~ key ~ "-button", key == "selection");
+                btn.setSize(Vec2f(32f, 32f));
+                hbox.addUI(btn);
+            }
+            _modeGroup.value = _mode;
+        }
+
+        {
+            HBox hbox = new HBox;
+            hbox.setAlign(UIAlignX.center, UIAlignY.top);
+            hbox.setPosition(Vec2f(0f, 76f));
+            hbox.setSpacing(4f);
+            addUI(hbox);
+
             _toolGroup = new ToolGroup;
             foreach (key; ["selection", "pen", "eraser", "bucket"]) {
                 ToolButton btn = new ToolButton(_toolGroup,
@@ -61,19 +82,24 @@ package(atelier.etabli.media.res.scene) class CollisionToolbox : Modal {
                 _tool = _toolGroup.value;
                 _onToolChange();
             }
+            if (_modeGroup.value != _mode) {
+                _mode = _modeGroup.value;
+                _onModeChange();
+            }
         });
 
         addEventListener("globalkey", &_onKey);
 
-        _tilePicker = new TilePicker;
+        _tilePicker = new TilePicker(128f);
         _tilePicker.setAlign(UIAlignX.center, UIAlignY.bottom);
         _tilePicker.setPosition(Vec2f(0f, 8f));
         _tilePicker.addEventListener("value", { dispatchEvent("tool", false); });
         _tilePicker.setTileset("editor:collision");
+        _tilePicker.setColorMod(Color.fromHex(_mode ? 0x5a36ff : 0xff2929));
 
         _brushSizeBox = new HBox;
         _brushSizeBox.setAlign(UIAlignX.center, UIAlignY.top);
-        _brushSizeBox.setPosition(Vec2f(0f, 76f));
+        _brushSizeBox.setPosition(Vec2f(0f, 120f));
 
         _brushSizeLabel = new Label("Taille: ", Atelier.theme.font);
         _brushSizeBox.addUI(_brushSizeLabel);
@@ -140,8 +166,17 @@ package(atelier.etabli.media.res.scene) class CollisionToolbox : Modal {
         dispatchEvent("tool", false);
     }
 
+    private void _onModeChange() {
+        _tilePicker.setColorMod(Color.fromHex(_mode ? 0x5a36ff : 0xff2929));
+        dispatchEvent("mode", false);
+    }
+
     int getTool() const {
         return _toolGroup.value();
+    }
+
+    int getMode() const {
+        return _modeGroup.value();
     }
 
     TilesSelection getSelection() {

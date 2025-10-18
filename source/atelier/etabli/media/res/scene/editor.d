@@ -106,7 +106,7 @@ final class SceneResourceEditor : ResourceBaseEditor {
 
         foreach (layer; _definition.getCollisionLayers()) {
             layer.tilemap.position = getCenter() + _mapPosition + Vec2f(0f,
-                -_definition.getLevel(layer.level) * _zoom);
+                -_definition.getLevel(layer.level + layer.mode) * _zoom);
             layer.tilemap.size = _mapSize;
         }
 
@@ -218,12 +218,20 @@ final class SceneResourceEditor : ResourceBaseEditor {
             levelToShow = 3;
         }
 
+        foreach_reverse (layer; _definition.getTerrainLayers()) {
+            if (layer.level >= 0 || !layer.isVisible)
+                continue;
+
+            layer.tilemap.draw();
+        }
+
         foreach (entity; _definition.getEntities()) {
             if (entity.yOrder >= -16f)
                 continue;
 
             entity.draw();
         }
+
         for (int y = 0; y < _definition.getHeight() + _definition.getLevels(); ++y) {
             int levels = _definition.levels;
             Tilemap[] lowerTopographicLayers = _definition.topologicMap.lowerTilemaps;

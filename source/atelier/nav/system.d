@@ -7,7 +7,7 @@ import atelier.world;
 
 private struct NavEdge {
     Vec2i start, end;
-    Vec3i center;
+    Vec3i center, borderA, borderB;
     uint sectorId, edgeId;
     Dir dir;
 
@@ -64,7 +64,9 @@ final class NavSector {
             edge.end = Vec2i(_end.x, end);
             break;
         }
-        edge.center = Vec3i((edge.start + edge.end) * 4, _level * 16);
+        edge.borderA = Vec3i(edge.start * 8, _level * 16);
+        edge.borderB = Vec3i(edge.end * 8, _level * 16);
+        edge.center = (edge.borderA + edge.borderB) / 2;
         _edges ~= edge;
     }
 
@@ -109,8 +111,24 @@ final class NavSector {
 }
 
 struct NavPath {
+    struct Node {
+        Vec3i center, start, end;
+
+        this(Vec3i center_) {
+            center = center_;
+            start = center;
+            end = center;
+        }
+
+        this(Vec3i center_, Vec3i start_, Vec3i end_) {
+            center = center_;
+            start = start_;
+            end = end_;
+        }
+    }
+
     uint srcSectorID, dstSectorID;
-    Vec3i[] path;
+    Node[] path;
     bool isValid;
 }
 
@@ -118,7 +136,7 @@ final class NavMesh {
     private {
         Grid!bool _tiles;
         NavSector[] _sectors;
-        Vec3i[] _debugPath;
+        NavPath.Node[] _debugPath;
     }
 
     int levelToDraw = -1;
@@ -186,7 +204,7 @@ final class NavMesh {
         result.dstSectorID = dstId;
 
         final class NavNode {
-            Vec3i position;
+            Vec3i position, start, end;
             uint sectorId;
             uint edgeId;
             float priority;
@@ -197,8 +215,10 @@ final class NavMesh {
                 return priority > rhs.priority ? 1 : -1;
             }
 
-            this(Vec3i position_, uint sectorId_, uint edgeId_, float priority_) {
+            this(Vec3i position_, Vec3i start_, Vec3i end_, uint sectorId_, uint edgeId_, float priority_) {
                 position = position_;
+                start = start_;
+                end = end_;
                 sectorId = sectorId_;
                 edgeId = edgeId_;
                 priority = priority_;
@@ -208,11 +228,11 @@ final class NavMesh {
         import std.container.binaryheap;
 
         auto frontiers = heapify!"a > b"([
-                new NavNode(from, srcId, uint.max, 0)
-            ]);
-        Vec3i[Vec3i] cameFrom;
+            new NavNode(from, from, from, srcId, uint.max, 0)
+        ]);
+        NavPath.Node[Vec3i] cameFrom;
         float[Vec3i] costSoFar;
-        cameFrom[from] = from;
+        cameFrom[from] = NavPath.Node(from);
         costSoFar[from] = 0f;
 
         while (!frontiers.empty) {
@@ -221,7 +241,7 @@ final class NavMesh {
 
             if (node.sectorId == dstId) {
                 if (to != node.position) {
-                    cameFrom[to] = node.position;
+                    cameFrom[to] = NavPath.Node(node.position, node.start, node.end);
                 }
                 result.isValid = true;
                 break;
@@ -245,10 +265,12 @@ final class NavMesh {
                     float priority = newCost + position.distanceSquared(to);
                     frontiers.insert(new NavNode(
                             currentSector._edges[i].center,
+                            currentSector._edges[i].borderA,
+                            currentSector._edges[i].borderB,
                             currentSector._edges[i].sectorId,
                             currentSector._edges[i].edgeId,
                             priority));
-                    cameFrom[position] = node.position;
+                    cameFrom[position] = NavPath.Node(node.position, node.start, node.end);
                 }
 
                 /*for (uint y = i + 1; y < currentSector._edges.length; ++y) {
@@ -261,14 +283,13 @@ final class NavMesh {
         }
 
         if (result.isValid) {
-            Vec3i[] path;
-            Vec3i current = to;
-            while (current != from) {
+            NavPath.Node[] path;
+            NavPath.Node current = NavPath.Node(to);
+            while (current.center != from) {
                 path ~= current;
-                current = cameFrom[current];
+                current = cameFrom[current.center];
             }
             result.path = path;
-            _debugPath = result.path ~ from;
         }
 
         return result;
@@ -627,6 +648,10 @@ final class NavMesh {
         }
     }
 
+    void setDebugPath(NavPath path) {
+        _debugPath = path.path;
+    }
+
     void draw(Vec2f offset) {
         if (!isDebug)
             return;
@@ -649,13 +674,13 @@ final class NavMesh {
         }
 
         if (_debugPath.length >= 2) {
-            Vec2f startPos = offset + cast(Vec2f) _debugPath[0].xy;
-            startPos.y -= _debugPath[0].z;
+            Vec2f startPos = offset + cast(Vec2f) _debugPath[0].center.xy;
+            startPos.y -= _debugPath[0].center.z;
             i = 1;
 
             while (i < _debugPath.length) {
-                Vec2f endPos = offset + cast(Vec2f) _debugPath[i].xy;
-                endPos.y -= _debugPath[i].z;
+                Vec2f endPos = offset + cast(Vec2f) _debugPath[i].center.xy;
+                endPos.y -= _debugPath[i].center.z;
                 Atelier.renderer.drawLine(startPos, endPos, Color.white, 1f);
                 startPos = endPos;
                 i++;

@@ -181,6 +181,7 @@ final class Actor : Entity, Resource!Actor {
         }
         acceleration2d = acceleration2d * (accelFriction * accelSpeed * 10f / 60f);
         velocity2d = velocity2d + acceleration2d;
+        velocity2d += _avoidCliffs(acceleration2d);
 
         float m = max(velLen, maxSpeed);
         float nm = _velocity.length();
@@ -212,6 +213,57 @@ final class Actor : Entity, Resource!Actor {
     }
 
     override void update() {
+    }
+
+    private Vec2f _avoidCliffs(Vec2f dir) {
+        Vec2f force = Vec2f.zero;
+
+        Collider collider = getCollider();
+        if (!collider)
+            return force;
+
+        int baseZ = -16;
+        Vec2i position = getPosition().xy;
+
+        {
+            Physics.TerrainHit result = Atelier.physics.hitTerrain(getPosition(), Vec3i.zero);
+            baseZ = result.height;
+        }
+
+        Vec3i[4] corners = [
+            Vec3i(_collider.left, _collider.up, _collider.bottom),
+            Vec3i(_collider.right, _collider.up, _collider.bottom),
+            Vec3i(_collider.left, _collider.down, _collider.bottom),
+            Vec3i(_collider.right, _collider.down, _collider.bottom)
+        ];
+
+        int[4] heights;
+        int maxHeight = baseZ;
+
+        for (uint i; i < 4; ++i) {
+            Physics.TerrainHit result = Atelier.physics.hitTerrain(corners[i], Vec3i.zero);
+            heights[i] = result.height;
+            if (result.height > maxHeight)
+                maxHeight = result.height;
+        }
+
+        if (maxHeight != baseZ) {
+            for (uint i; i < 4; ++i) {
+                if (heights[i] == maxHeight) {
+                    force += (cast(Vec2f)(corners[i].xy - position));
+                }
+            }
+        }
+
+        force.normalize();
+        dir.normalize();
+
+        float dot = dir.dot(force);
+        if (dot <= 0f) {
+            force -= dir * dot;
+        }
+
+        return force * 0.2f;
     }
 
     override void onRegisterEntity() {

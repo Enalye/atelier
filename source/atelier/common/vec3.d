@@ -363,6 +363,11 @@ struct Vec3(T) {
     }
 
     /// Ditto
+    Vec3!T opBinary(string op)(const Vec2!T v) const {
+        return mixin("Vec3!T(x ", op, " v.x, y ", op, " v.y, z)");
+    }
+
+    /// Ditto
     Vec3!T opBinary(string op)(T s) const {
         return mixin("Vec3!T(x ", op, " s, y ", op, " s, z ", op, " s)");
     }
@@ -375,6 +380,12 @@ struct Vec3(T) {
     /// Ditto
     Vec3!T opOpAssign(string op)(Vec3!T v) {
         mixin("x = x", op, "v.x;y = y", op, "v.y;z = z", op, "v.z;");
+        return this;
+    }
+
+    /// Ditto
+    Vec3!T opOpAssign(string op)(Vec2!T v) {
+        mixin("x = x", op, "v.x;y = y", op, "v.y;");
         return this;
     }
 

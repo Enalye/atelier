@@ -63,6 +63,7 @@ struct HurtboxData {
     void save(Farfadet ffd) {
         Farfadet node = ffd.addNode("hurtbox");
         if (faction != "none" && type != "none") {
+            node.addNode("faction").add(faction);
             node.addNode("type").add(type);
             node.addNode("minRadius").add(minRadius);
             node.addNode("maxRadius").add(maxRadius);
@@ -307,7 +308,7 @@ final class Hurtbox {
             float d1sq = v1.lengthSquared();
             if (d1sq >= (minRadius * minRadius) && d1sq <= (maxRadius * maxRadius)) {
                 float v1a = v1.angle();
-                if (angleBetweenDeg(angle, v1a) <= angleDelta) {
+                if (abs(angleBetweenDeg(angle, v1a)) <= angleDelta) {
                     return true;
                 }
             }
@@ -319,7 +320,7 @@ final class Hurtbox {
             float d2sq = v2.lengthSquared();
             if (d2sq >= (minRadius * minRadius) && d2sq <= (maxRadius * maxRadius)) {
                 float v2a = v2.angle();
-                if (angleBetweenDeg(angle, v2a) <= angleDelta) {
+                if (abs(angleBetweenDeg(angle, v2a)) <= angleDelta) {
                     return true;
                 }
             }
@@ -377,7 +378,7 @@ final class Hurtbox {
         // Il suffit que l’axe AB soit dans la section du cercle
         if (hasAnglesA && !hasAnglesB) {
             float angle = radToDeg((posB - posA).angle());
-            if (angleBetweenDeg(angleA, angle) <= _angleDelta) {
+            if (abs(angleBetweenDeg(angleA, angle)) <= _angleDelta) {
                 hit.isColliding = true;
             }
             else {
@@ -427,7 +428,7 @@ final class Hurtbox {
         }
         else if (!hasAnglesA && hasAnglesB) {
             float angle = radToDeg((posA - posB).angle());
-            if (angleBetweenDeg(angleB, angle) <= other._angleDelta) {
+            if (abs(angleBetweenDeg(angleB, angle)) <= other._angleDelta) {
                 hit.isColliding = true;
             }
             else {
@@ -481,8 +482,8 @@ final class Hurtbox {
             float angleAB = radToDeg((posB - posA).angle());
             float angleBA = radToDeg((posA - posB).angle());
 
-            if ((angleBetweenDeg(angleA, angleAB) <= _angleDelta) &&
-                (angleBetweenDeg(angleB, angleBA) <= other._angleDelta)) {
+            if ((abs(angleBetweenDeg(angleA, angleAB)) <= _angleDelta) &&
+                (abs(angleBetweenDeg(angleB, angleBA)) <= other._angleDelta)) {
                 hit.isColliding = true;
                 return hit;
             }

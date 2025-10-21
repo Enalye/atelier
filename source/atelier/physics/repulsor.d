@@ -169,10 +169,10 @@ final class Repulsor {
         int distSq = getPosition().distanceSquared(other.getPosition());
         int delta = (_radius * other._radius) - distSq;
 
-        if (delta > 0) {
+        if (delta > 0 && distSq > 0) {
             Vec2f dir = (cast(Vec2f)(posB.xy - posA.xy)).normalized();
             Vec2f force = dir * delta;
-            force += (other._entity.velocity.xy - _entity.velocity.xy).lengthSquared();
+            force += (other._entity.velocity.xy - _entity.velocity.xy).length();
 
             if (_type == other._type) {
                 _forces -= force * 0.02f;
@@ -188,7 +188,7 @@ final class Repulsor {
     }
 
     void apply() {
-        _entity.addVelocity(Vec3f(_forces, 0f));
+        _entity.addVelocity(Vec3f(_forces.clamp(-Vec2f.one * 2f, Vec2f.one * 2f), 0f));
         _forces.set(0f, 0f);
     }
 

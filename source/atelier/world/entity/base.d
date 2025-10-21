@@ -862,7 +862,7 @@ abstract class Entity {
             _hurtbox.unregister();
         }
 
-        onRegisterEntity();
+        onUnregisterEntity();
     }
 
     void onRegisterEntity() {

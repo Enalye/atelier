@@ -217,6 +217,13 @@ final class Physics {
             }
             _globalTargetHurtboxes.sweep();
 
+            foreach (i, impact; _globalImpactHurtboxes) {
+                if (!impact.isRegistered) {
+                    _globalImpactHurtboxes.mark(i);
+                }
+            }
+            _globalImpactHurtboxes.sweep();
+
             foreach (i, target; _enemyTargetHurtboxes) {
                 if (!target.isRegistered) {
                     _enemyTargetHurtboxes.mark(i);
@@ -224,12 +231,26 @@ final class Physics {
             }
             _enemyTargetHurtboxes.sweep();
 
+            foreach (i, impact; _enemyImpactHurtboxes) {
+                if (!impact.isRegistered) {
+                    _enemyImpactHurtboxes.mark(i);
+                }
+            }
+            _enemyImpactHurtboxes.sweep();
+
             foreach (i, target; _playerTargetHurtboxes) {
                 if (!target.isRegistered) {
                     _playerTargetHurtboxes.mark(i);
                 }
             }
             _playerTargetHurtboxes.sweep();
+
+            foreach (i, impact; _playerImpactHurtboxes) {
+                if (!impact.isRegistered) {
+                    _playerImpactHurtboxes.mark(i);
+                }
+            }
+            _playerImpactHurtboxes.sweep();
         }
 
         __enemyImpactHurboxesLoop: foreach (i, impact; _enemyImpactHurtboxes) {
@@ -411,16 +432,16 @@ final class Physics {
         }
     }
 
-    void addRepulsor(Repulsor collider) {
-        _repulsors ~= collider;
-        collider.isRegistered = true;
-        collider.isDisplayed = _showRepulsors;
+    void addRepulsor(Repulsor repulsor) {
+        _repulsors ~= repulsor;
+        repulsor.isRegistered = true;
+        repulsor.isDisplayed = _showRepulsors;
     }
 
-    void removeRepulsor(Repulsor collider) {
-        if (collider.isRegistered) {
+    void removeRepulsor(Repulsor repulsor) {
+        if (repulsor.isRegistered) {
             _hasRepulsorToRemove = true;
-            collider.isRegistered = false;
+            repulsor.isRegistered = false;
         }
     }
 

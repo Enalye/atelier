@@ -40,6 +40,11 @@ package final class ParameterWindow : UIElement {
         IntegerField _collXField, _collYField, _collZField;
         SelectButton _shapeBtn;
 
+        // Repulsor
+        RepulsorData _repulsor;
+        SelectButton _repulsorTypeBtn;
+        IntegerField _repulsorRadiusField, _repulsorHeightField;
+
         // Hurtbox
         HurtboxData _hurtbox;
         SelectButton _hurtTypeBtn, _hurtFactionBtn;
@@ -50,7 +55,7 @@ package final class ParameterWindow : UIElement {
         TextField _tagsField;
     }
 
-    this(EntityRenderData[] renders, HitboxData hitbox, HurtboxData hurtbox) {
+    this(EntityRenderData[] renders, HitboxData hitbox, RepulsorData repulsor, HurtboxData hurtbox) {
         VList vlist = new VList;
         vlist.setPosition(Vec2f(8f, 8f));
         vlist.setSize(Vec2f.zero.max(getSize() - Vec2f(8f, 8f)));
@@ -185,12 +190,66 @@ package final class ParameterWindow : UIElement {
         }
 
         {
+            LabelSeparator sep = new LabelSeparator("Répulsion Acteur/Acteur", Atelier.theme.font);
+            sep.setColor(Atelier.theme.neutral);
+            sep.setPadding(Vec2f(284f, 0f));
+            sep.setSpacing(8f);
+            sep.setLineWidth(1f);
+            vlist.addList(sep);
+        }
+
+        {
             HLayout hlayout = new HLayout;
             hlayout.setPadding(Vec2f(284f, 0f));
             vlist.addList(hlayout);
 
-            hlayout.addUI(new Label("Répulsion Acteur/Acteur", Atelier.theme.font));
-            hlayout.addUI(new Checkbox());
+            hlayout.addUI(new Label("Type", Atelier.theme.font));
+
+            string[] repulsorTypes = "none" ~ [
+                __traits(allMembers, Repulsor.Type)
+            ];
+            _repulsorTypeBtn = new SelectButton(repulsorTypes, _repulsor.type);
+            _repulsorTypeBtn.addEventListener("value", {
+                _repulsor.type = _repulsorTypeBtn.value;
+                dispatchEvent("property_repulsor", false);
+            });
+            hlayout.addUI(_repulsorTypeBtn);
+        }
+
+        {
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(284f, 0f));
+            vlist.addList(hlayout);
+
+            hlayout.addUI(new Label("Rayon:", Atelier.theme.font));
+
+            _repulsorRadiusField = new IntegerField;
+            _repulsorRadiusField.value = _repulsor.radius;
+            _repulsorRadiusField.isEnabled = (_repulsor.type != "none");
+            _repulsorRadiusField.setMinValue(0);
+            _repulsorRadiusField.addEventListener("value", {
+                _repulsor.radius = _repulsorRadiusField.value;
+                dispatchEvent("property_repulsor");
+            });
+            hlayout.addUI(_repulsorRadiusField);
+        }
+
+        {
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(284f, 0f));
+            vlist.addList(hlayout);
+
+            hlayout.addUI(new Label("Hauteur:", Atelier.theme.font));
+
+            _repulsorHeightField = new IntegerField;
+            _repulsorHeightField.value = _repulsor.height;
+            _repulsorHeightField.isEnabled = (_repulsor.type != "none");
+            _repulsorHeightField.setMinValue(0);
+            _repulsorHeightField.addEventListener("value", {
+                _repulsor.height = _repulsorHeightField.value;
+                dispatchEvent("property_repulsor");
+            });
+            hlayout.addUI(_repulsorHeightField);
         }
 
         {
@@ -389,6 +448,12 @@ package final class ParameterWindow : UIElement {
             Atelier.renderer.drawRect(Vec2f.zero, getSize(), Atelier.theme.surface, 1f, true);
         });
 
+        addEventListener("property_repulsor", {
+            bool isRepulsorEnabled = (_repulsor.type != "none");
+            _repulsorRadiusField.isEnabled = isRepulsorEnabled;
+            _repulsorHeightField.isEnabled = isRepulsorEnabled;
+        });
+
         addEventListener("property_hurtbox", {
             bool isHurtboxEnabled = (_hurtbox.type != "none");
             _hurtMinRadiusField.isEnabled = isHurtboxEnabled;
@@ -412,6 +477,10 @@ package final class ParameterWindow : UIElement {
 
     HitboxData getHitbox() {
         return _hitbox;
+    }
+
+    RepulsorData getRepulsor() {
+        return _repulsor;
     }
 
     HurtboxData getHurtbox() {

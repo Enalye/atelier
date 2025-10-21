@@ -17,6 +17,7 @@ final class Actor : Entity, Resource!Actor {
         float _gravity = 0.8f;
         float _frictionBrake = 1f;
         bool _isPlayer;
+        Repulsor _repulsor;
     }
 
     @property {
@@ -55,6 +56,11 @@ final class Actor : Entity, Resource!Actor {
 
     this(Actor other) {
         super(other);
+
+        if (other._repulsor) {
+            _repulsor = new Repulsor(other._repulsor);
+            _repulsor.setEntity(this);
+        }
     }
 
     Actor fetch() {
@@ -82,6 +88,22 @@ final class Actor : Entity, Resource!Actor {
 
     ActorCollider getCollider() {
         return cast(ActorCollider) _collider;
+    }
+
+    void setupRepulsor(RepulsorData data) {
+        if (_repulsor) {
+            _repulsor.unregister();
+            _repulsor = null;
+        }
+
+        if (data.type == "none")
+            return;
+
+        _repulsor = new Repulsor(this, data);
+    }
+
+    Repulsor getRepulsor() {
+        return _repulsor;
     }
 
     override void onCollide(Physics.CollisionHit hit) {
@@ -190,5 +212,17 @@ final class Actor : Entity, Resource!Actor {
     }
 
     override void update() {
+    }
+
+    override void onRegisterEntity() {
+        if (_repulsor) {
+            _repulsor.register();
+        }
+    }
+
+    override void onUnregisterEntity() {
+        if (_repulsor) {
+            _repulsor.unregister();
+        }
     }
 }

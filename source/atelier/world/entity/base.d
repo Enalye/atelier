@@ -850,6 +850,8 @@ abstract class Entity {
         if (_hurtbox) {
             _hurtbox.register();
         }
+
+        onRegisterEntity();
     }
 
     final void onUnregister() {
@@ -859,6 +861,14 @@ abstract class Entity {
         if (_hurtbox) {
             _hurtbox.unregister();
         }
+
+        onRegisterEntity();
+    }
+
+    void onRegisterEntity() {
+    }
+
+    void onUnregisterEntity() {
     }
 
     void onCollide(Physics.CollisionHit hit) {

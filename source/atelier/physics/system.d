@@ -3,12 +3,13 @@ module atelier.physics.system;
 import atelier.common;
 import atelier.core;
 import atelier.world;
-import atelier.physics.collider;
 import atelier.physics.actor;
+import atelier.physics.collider;
+import atelier.physics.hurt;
+import atelier.physics.repulsor;
 import atelier.physics.solid;
 import atelier.physics.shot;
 import atelier.physics.trigger;
-import atelier.physics.hurt;
 
 final class Physics {
     private {
@@ -19,8 +20,10 @@ final class Physics {
         Array!Hurtbox _playerImpactHurtboxes, _playerTargetHurtboxes;
         Array!Hurtbox _enemyImpactHurtboxes, _enemyTargetHurtboxes;
         Array!Hurtbox _globalImpactHurtboxes, _globalTargetHurtboxes;
+        Array!Repulsor _repulsors;
         bool _hasColliderToRemove;
         bool _hasHurtboxToRemove;
+        bool _hasRepulsorToRemove;
         bool _areTriggersActive;
         bool _isBounded;
         Vec4i _combatBounds;
@@ -37,6 +40,7 @@ final class Physics {
         bool _showEnemyTargetHurtboxes;
         bool _showGlobalImpactHurtboxes;
         bool _showGlobalTargetHurtboxes;
+        bool _showRepulsors;
     }
 
     @property {
@@ -103,6 +107,7 @@ final class Physics {
         _enemyTargetHurtboxes = new Array!Hurtbox;
         _globalImpactHurtboxes = new Array!Hurtbox;
         _globalTargetHurtboxes = new Array!Hurtbox;
+        _repulsors = new Array!Repulsor;
     }
 
     void clear() {
@@ -110,6 +115,7 @@ final class Physics {
         _solids.clear();
         _shots.clear();
         _triggers.clear();
+        _repulsors.clear();
         _playerImpactHurtboxes.clear();
         _playerTargetHurtboxes.clear();
         _enemyImpactHurtboxes.clear();
@@ -139,7 +145,7 @@ final class Physics {
         if (_hasColliderToRemove) {
             _hasColliderToRemove = false;
 
-            // À faire: la boucle ne sert qu’à vérifier l’existance des hurtbox.
+            // À faire: la boucle ne sert qu’à vérifier l’existance des hitbox.
             // -> Trouver un autre endroit où le faire
             foreach (i, solid; _solids) {
                 if (!solid.isRegistered) {
@@ -154,14 +160,14 @@ final class Physics {
                 }
             }
             _shots.sweep();
-        }
 
-        foreach (i, actor; _actors) {
-            if (!actor.isRegistered) {
-                _actors.mark(i);
+            foreach (i, actor; _actors) {
+                if (!actor.isRegistered) {
+                    _actors.mark(i);
+                }
             }
+            _actors.sweep();
         }
-        _actors.sweep();
 
         if (Atelier.world.player) {
             ActorCollider player = Atelier.world.player.getCollider();
@@ -184,6 +190,19 @@ final class Physics {
                 }
                 _triggers.sweep();
             }
+        }
+
+        if (_hasRepulsorToRemove) {
+            _hasRepulsorToRemove = false;
+
+            // À faire: la boucle ne sert qu’à vérifier l’existance des hitbox.
+            // -> Trouver un autre endroit où le faire
+            foreach (i, collider; _repulsors) {
+                if (!collider.isRegistered) {
+                    _repulsors.mark(i);
+                }
+            }
+            _repulsors.sweep();
         }
 
         if (_hasHurtboxToRemove) {
@@ -348,6 +367,16 @@ final class Physics {
             }
         }
         _globalImpactHurtboxes.sweep();
+
+        for (uint i; i < _repulsors.length; ++i) {
+            for (uint y = i + 1; y < _repulsors.length; ++y) {
+                _repulsors[i].update(_repulsors[y]);
+            }
+        }
+
+        for (uint i; i < _repulsors.length; ++i) {
+            _repulsors[i].apply();
+        }
     }
 
     void addCollider(Collider collider) {
@@ -378,6 +407,19 @@ final class Physics {
     void removeCollider(Collider collider) {
         if (collider.isRegistered) {
             _hasColliderToRemove = true;
+            collider.isRegistered = false;
+        }
+    }
+
+    void addRepulsor(Repulsor collider) {
+        _repulsors ~= collider;
+        collider.isRegistered = true;
+        collider.isDisplayed = _showRepulsors;
+    }
+
+    void removeRepulsor(Repulsor collider) {
+        if (collider.isRegistered) {
+            _hasRepulsorToRemove = true;
             collider.isRegistered = false;
         }
     }

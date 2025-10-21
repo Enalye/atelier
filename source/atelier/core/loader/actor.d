@@ -55,6 +55,12 @@ package void compileActor(string path, const Farfadet ffd, OutStream stream) {
     }
     hitbox.serialize(stream);
 
+    RepulsorData repulsor;
+    if (ffd.hasNode("repulsor")) {
+        repulsor.load(ffd.getNode("repulsor"));
+    }
+    repulsor.serialize(stream);
+
     HurtboxData hurtbox;
     if (ffd.hasNode("hurtbox")) {
         hurtbox.load(ffd.getNode("hurtbox"));
@@ -70,6 +76,9 @@ package void loadActor(InStream stream) {
 
     HitboxData hitbox;
     hitbox.deserialize(stream);
+
+    RepulsorData repulsor;
+    repulsor.deserialize(stream);
 
     HurtboxData hurtbox;
     hurtbox.deserialize(stream);
@@ -88,6 +97,7 @@ package void loadActor(InStream stream) {
         if (hitbox.hasHitbox) {
             actor.setupCollider(hitbox.size);
         }
+        actor.setupRepulsor(repulsor);
         actor.setupHurtbox(hurtbox);
         actor.setName(name);
         return actor;

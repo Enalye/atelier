@@ -397,29 +397,6 @@ struct Vec2(T) {
 
             Result result;
 
-            /*
-(float a1.x, float a1.y, float b1.x, float b1.y, 
-    float a2.x, float a2.y, float b2.x, float b2.y, float *i_x, float *i_y)
-
-        float s1_x, s1_y, s2_x, s2_y;
-        s1_x = b1.x - a1.x;     s1_y = b1.y - a1.y;
-        s2_x = b2.x - a2.x;     s2_y = b2.y - a2.y;
-
-        float s, t;
-        s = (-s1_y * (a1.x - a2.x) + s1_x * (a1.y - a2.y)) / (-s2_x * s1_y + s1_x * s2_y);
-        t = ( s2_x * (a1.y - a2.y) - s2_y * (a1.x - a2.x)) / (-s2_x * s1_y + s1_x * s2_y);
-
-         if (s >= 0 && s <= 1 && t >= 0 && t <= 1)
-    {
-        // Collision detected
-        if (i_x != NULL)
-            *i_x = a1.x + (t * s1_x);
-        if (i_y != NULL)
-            *i_y = a1.y + (t * s1_y);
-        return 1;
-    }
-     */
-
             Vec2!T s1 = Vec2!T(b1.x - a1.x, b1.y - a1.y);
             Vec2!T s2 = Vec2!T(b2.x - a2.x, b2.y - a2.y);
             T d = -s2.x * s1.y + s1.x * s2.y;

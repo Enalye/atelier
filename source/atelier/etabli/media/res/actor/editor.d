@@ -27,6 +27,7 @@ final class ActorResourceEditor : ResourceBaseEditor {
 
         EntityRenderData[] _renders;
         HitboxData _hitbox;
+        RepulsorData _repulsor;
         HurtboxData _hurtbox;
 
         Vec2f _originPosition = Vec2f.zero;
@@ -43,6 +44,10 @@ final class ActorResourceEditor : ResourceBaseEditor {
             _hitbox.load(ffd.getNode("hitbox"));
         }
 
+        if (ffd.hasNode("repulsor")) {
+            _repulsor.load(ffd.getNode("repulsor"));
+        }
+
         if (ffd.hasNode("hurtbox")) {
             _hurtbox.load(ffd.getNode("hurtbox"));
         }
@@ -53,13 +58,18 @@ final class ActorResourceEditor : ResourceBaseEditor {
             _renders ~= render;
         }
 
-        _parameterWindow = new ParameterWindow(_renders, _hitbox, _hurtbox);
+        _parameterWindow = new ParameterWindow(_renders, _hitbox, _repulsor, _hurtbox);
 
         _toolbox = new Toolbox();
         _toolbox.setRenders(_renders);
 
         _parameterWindow.addEventListener("property_hitbox", {
             _hitbox = _parameterWindow.getHitbox();
+            setDirty();
+        });
+
+        _parameterWindow.addEventListener("property_repulsor", {
+            _repulsor = _parameterWindow.getRepulsor();
             setDirty();
         });
 
@@ -123,6 +133,7 @@ final class ActorResourceEditor : ResourceBaseEditor {
         if (_hitbox.hasHitbox) {
             _hitbox.save(node);
         }
+        _repulsor.save(node);
         _hurtbox.save(node);
         return node;
     }

@@ -292,6 +292,18 @@ final class Scene : Resource!Scene {
             string terrainRID() {
                 return _terrainRID;
             }
+
+            string terrainRID(string id) {
+                return _terrainRID = id;
+            }
+
+            Grid!int levelGrid() {
+                return _levelGrid;
+            }
+
+            Grid!int brushGrid() {
+                return _brushGrid;
+            }
         }
 
         this() {
@@ -323,12 +335,6 @@ final class Scene : Resource!Scene {
             }
 
             updateTiles();
-        }
-
-        void setupWireframe(TopologicMap baseMap) {
-            _terrainRID = "wireframe";
-            _levelGrid.setValues(0, 0, baseMap._levelGrid.getValues());
-            _brushGrid.setValues(0, 0, baseMap._brushGrid.getValues());
         }
 
         void setDimensions(uint columns, uint lines) {
@@ -652,7 +658,7 @@ final class Scene : Resource!Scene {
         TerrainLayer[] _terrainlayers;
         ParallaxLayer[] _parallaxLayers;
         CollisionLayer[] _collisionLayers;
-        TopologicMap _topologicMap, _topologicWireframeMap;
+        TopologicMap _topologicMap;
         string _name;
         uint _columns, _lines;
         int _levels;
@@ -691,10 +697,6 @@ final class Scene : Resource!Scene {
             return _topologicMap;
         }
 
-        TopologicMap topologicWireframeMap() {
-            return _topologicWireframeMap;
-        }
-
         TerrainLayer[] terrainLayers() {
             return _terrainlayers;
         }
@@ -718,7 +720,6 @@ final class Scene : Resource!Scene {
 
     this() {
         _topologicMap = new TopologicMap;
-        _topologicWireframeMap = new TopologicMap;
     }
 
     Scene fetch() {
@@ -727,7 +728,6 @@ final class Scene : Resource!Scene {
 
     void setup() {
         _topologicMap.setup();
-        _topologicWireframeMap.setup();
 
         foreach (layer; _terrainlayers) {
             layer.setup();
@@ -746,7 +746,6 @@ final class Scene : Resource!Scene {
             _columns = node.get!uint(0);
             _lines = node.get!uint(1);
             _topologicMap.setDimensions(_columns, _lines);
-            _topologicWireframeMap.setDimensions(_columns, _lines);
         }
 
         if (ffd.hasNode("levels")) {
@@ -768,8 +767,6 @@ final class Scene : Resource!Scene {
         }
 
         _topologicMap.load(ffd);
-        _topologicWireframeMap.load(ffd);
-        _topologicWireframeMap.setupWireframe(_topologicMap);
 
         foreach (layerNode; ffd.getNodes("terrainLayer")) {
             TerrainLayer layer = new TerrainLayer(_columns, _lines);
@@ -853,8 +850,6 @@ final class Scene : Resource!Scene {
 
         _topologicMap.setDimensions(_columns, _lines);
         _topologicMap.deserialize(stream);
-        _topologicWireframeMap.setDimensions(_columns, _lines);
-        _topologicWireframeMap.setupWireframe(_topologicMap);
 
         const uint terrainCount = stream.read!uint();
         for (uint i; i < terrainCount; ++i) {

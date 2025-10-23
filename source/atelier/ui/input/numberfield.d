@@ -77,6 +77,8 @@ final class NumberField : UIElement {
 
     this() {
         setSize(Vec2f(100f, 32f));
+        focusable = true;
+        inputable = true;
 
         _textField = new TextField();
         _textField.value = "0";

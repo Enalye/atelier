@@ -103,8 +103,17 @@ final class UIManager {
         case keyButton:
             if (_focusedElement && _focusedElement.getManager()) {
                 _focusedElement.dispatchEvent("key");
+
+                dispatchEvent("overridekey");
+
+                if (!_focusedElement.inputable) {
+                    dispatchEvent("globalkey");
+                }
             }
-            dispatchEvent("globalkey");
+            else {
+                dispatchEvent("overridekey");
+                dispatchEvent("globalkey");
+            }
             break;
         case mouseButton:
             auto mouseButtonEvent = event.asMouseButton();

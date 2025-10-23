@@ -199,7 +199,7 @@ class UIElement {
         }
     }
 
-    bool focusable, movable;
+    bool focusable, movable, inputable;
 
     this() {
         _children = new Array!UIElement;

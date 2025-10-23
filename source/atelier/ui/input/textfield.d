@@ -81,6 +81,7 @@ final class TextField : UIElement {
         setSize(Vec2f(150f, 32f));
         setSizeLock(false, true);
         focusable = true;
+        inputable = true;
         _timer.mode = Timer.Mode.bounce;
 
         _background = RoundedRectangle.fill(getSize(), Atelier.theme.corner);

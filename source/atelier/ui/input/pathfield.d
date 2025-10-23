@@ -38,6 +38,8 @@ final class PathField : UIElement {
 
     this(string path) {
         setSize(Vec2f(400f, 32f));
+        focusable = true;
+        inputable = true;
 
         _background = RoundedRectangle.fill(getSize(), Atelier.theme.corner);
         _background.anchor = Vec2f.zero;

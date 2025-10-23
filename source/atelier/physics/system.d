@@ -26,8 +26,8 @@ final class Physics {
         bool _hasRepulsorToRemove;
         bool _areTriggersActive;
         bool _isBounded;
-        Vec4i _combatBounds;
-        bool _hasCombatBounds;
+        Vec4i _customBounds;
+        bool _hasCustomBounds;
 
         // Affichage des collisions
         bool _showActors;
@@ -44,12 +44,12 @@ final class Physics {
     }
 
     @property {
-        bool hasCombatBounds() const {
-            return _hasCombatBounds;
+        bool hasCustomBounds() const {
+            return _hasCustomBounds;
         }
 
-        Vec4i combatBounds() const {
-            return _combatBounds;
+        Vec4i customBounds() const {
+            return _customBounds;
         }
     }
 
@@ -132,13 +132,13 @@ final class Physics {
         _isBounded = value;
     }
 
-    void setCombatBounds(Vec4i bounds) {
-        _combatBounds = bounds;
-        _hasCombatBounds = true;
+    void setCustomBounds(Vec4i bounds) {
+        _customBounds = bounds;
+        _hasCustomBounds = true;
     }
 
-    void unsetCombatBounds() {
-        _hasCombatBounds = false;
+    void unsetCustomBounds() {
+        _hasCustomBounds = false;
     }
 
     void update() {
@@ -1068,28 +1068,28 @@ final class Physics {
                 endResult.isColliding = true;
                 endResult.normal = Vec3f(0f, -1f, 0f);
             }
-            else if (_hasCombatBounds) {
-                if (coll.x < _combatBounds.x && coll.y < _combatBounds.y) {
+            else if (_hasCustomBounds) {
+                if (coll.x < _customBounds.x && coll.y < _customBounds.y) {
                     endResult.isColliding = true;
                     endResult.normal = Vec3f(1f, 1f, 0f);
                 }
-                else if (coll.x < _combatBounds.x) {
+                else if (coll.x < _customBounds.x) {
                     endResult.isColliding = true;
                     endResult.normal = Vec3f(1f, 0f, 0f);
                 }
-                else if (coll.y < _combatBounds.y) {
+                else if (coll.y < _customBounds.y) {
                     endResult.isColliding = true;
                     endResult.normal = Vec3f(0f, 1f, 0f);
                 }
-                else if (coll.z > _combatBounds.z && coll.w > _combatBounds.w) {
+                else if (coll.z > _customBounds.z && coll.w > _customBounds.w) {
                     endResult.isColliding = true;
                     endResult.normal = Vec3f(-1f, -1f, 0f);
                 }
-                else if (coll.z > _combatBounds.z) {
+                else if (coll.z > _customBounds.z) {
                     endResult.isColliding = true;
                     endResult.normal = Vec3f(-1f, 0f, 0f);
                 }
-                else if (coll.w > _combatBounds.w) {
+                else if (coll.w > _customBounds.w) {
                     endResult.isColliding = true;
                     endResult.normal = Vec3f(0f, -1f, 0f);
                 }

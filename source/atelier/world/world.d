@@ -58,7 +58,7 @@ final class World {
         bool _isPaused;
 
         Factory _factory;
-        string _playerControllerId;
+        string _playerControllerId, _playerActorId;
         Controller!Actor _playerController;
         Transition function(string, string, Actor, bool) _transitionFunc;
     }
@@ -117,6 +117,10 @@ final class World {
         _playerControllerId = id;
     }
 
+    void setPlayerActorID(string id) {
+        _playerActorId = id;
+    }
+
     void setPause(bool value) {
         _isPaused = value;
     }
@@ -169,38 +173,6 @@ final class World {
     /// Récupère toutes les entités
     Array!Entity getEntities() {
         return _entities;
-    }
-
-    void setCombat(bool value) { //TODO: Migrer hors du moteur
-        /*if (!_player || _isInCombat == value)
-            return;
-
-        _isInCombat = value;
-
-        if (_isInCombat) {
-            _camera.stop(false);
-            _lastPlayerPosition = _player.getPosition();
-            _camera.focus(_player, _lastPlayerPosition, Vec2f.one, Vec2f.zero);
-            //_player.isHovering = true;
-
-            Vec4i bounds;
-            bounds.xy = _player.getPosition().xy;
-            bounds.zw = _player.getPosition().xy;
-            Vec2i halfSize = Atelier.renderer.size >> 1;
-            bounds.x -= halfSize.x;
-            bounds.z += halfSize.x;
-            bounds.y -= halfSize.y;
-            bounds.w += halfSize.y;
-            Atelier.physics.setCombatBounds(bounds);
-            addBehavior(new PlayerCombatBehavior(_player));
-        }
-        else {
-            _camera.follow(_player, Vec2f.one * 1f, Vec2f.zero);
-            //_player.isHovering = false;
-            _player.setPosition(_lastPlayerPosition + Vec3i(0, 0, 8));
-            Atelier.physics.unsetCombatBounds();
-            addBehavior(new PlayerWalkBehavior(_player));
-        }*/
     }
 
     void transitionScene(string rid, string tpName, uint direction) {
@@ -262,8 +234,8 @@ final class World {
             addRenderedEntity(_player);
             _player.setName("player");
         }
-        else {
-            _player = Atelier.res.get!Actor("nume");
+        else if (_playerActorId.length) {
+            _player = Atelier.res.get!Actor(_playerActorId);
             _player.setPosition(Vec3i(0, 0, 0));
             _player.setName("player");
             _player.setGraphic("idle");
@@ -891,8 +863,6 @@ final class World {
             _glow.draw(_postRenderListGlow, entityOffset, _shadowSprite);
         }
 
-        _displayBorders(entityOffset);
-
         Atelier.nav.draw(entityOffset);
 
         _lighting.draw(entityOffset);
@@ -900,107 +870,5 @@ final class World {
         _uiManager.draw();
         Atelier.renderer.popCanvas();
         _camera.draw();
-    }
-
-    private void _displayBorders(Vec2f entityOffset) {
-        if (!_player || !Atelier.physics.hasCombatBounds)
-            return;
-
-        const Vec4i bounds = Atelier.physics.combatBounds;
-        ActorCollider collider = _player.getCollider();
-        const Vec4i corners = Vec4i(
-            collider.left,
-            collider.up,
-            collider.right,
-            collider.down
-        );
-        Vec4i delta = Vec4i(
-            corners.x - bounds.x,
-            corners.y - bounds.y,
-            corners.z - bounds.z,
-            corners.w - bounds.w
-        ).abs().min(Vec4i.one * 50);
-        Vec4f alpha = (50f - (cast(Vec4f) delta)) / 50f;
-
-        Vec4i borders = Vec4i(
-            max(corners.x - 50, bounds.x),
-            max(corners.y - 50, bounds.y),
-            min(corners.z + 50, bounds.z),
-            min(corners.w + 50, bounds.w)
-        );
-
-        float alphaMax = alpha.max();
-        entityOffset.y -= _player.getPosition().z;
-
-        float t1 = easeOutSine((_frame % 32) / 32f);
-        int p1 = cast(int) lerp(0f, 16f, t1 * alphaMax);
-
-        float t2 = easeOutSine(((_frame + 16) % 32) / 32f);
-        int p2 = cast(int) lerp(0f, 16f, t2 * alphaMax);
-
-        if (alpha.x > 0f) {
-            Atelier.renderer.drawLine(
-                entityOffset + Vec2f(bounds.x, borders.y),
-                entityOffset + Vec2f(bounds.x, borders.w),
-                Color.white, alpha.x);
-
-            Atelier.renderer.drawLine(
-                entityOffset + Vec2f(bounds.x - p1, borders.y - p1),
-                entityOffset + Vec2f(bounds.x - p1, borders.w + p1),
-                Color.white, (1f - t1) * alpha.x);
-
-            Atelier.renderer.drawLine(
-                entityOffset + Vec2f(bounds.x - p2, borders.y - p2),
-                entityOffset + Vec2f(bounds.x - p2, borders.w + p2),
-                Color.white, (1f - t2) * alpha.x);
-        }
-        if (alpha.y > 0f) {
-            Atelier.renderer.drawLine(
-                entityOffset + Vec2f(borders.x, bounds.y),
-                entityOffset + Vec2f(borders.z, bounds.y),
-                Color.white, alpha.y);
-
-            Atelier.renderer.drawLine(
-                entityOffset + Vec2f(borders.x - p1, bounds.y - p1),
-                entityOffset + Vec2f(borders.z + p1, bounds.y - p1),
-                Color.white, (1f - t1) * alpha.y);
-
-            Atelier.renderer.drawLine(
-                entityOffset + Vec2f(borders.x - p2, bounds.y - p2),
-                entityOffset + Vec2f(borders.z + p2, bounds.y - p2),
-                Color.white, (1f - t2) * alpha.y);
-        }
-        if (alpha.z > 0f) {
-            Atelier.renderer.drawLine(
-                entityOffset + Vec2f(bounds.z, borders.y),
-                entityOffset + Vec2f(bounds.z, borders.w),
-                Color.white, alpha.z);
-
-            Atelier.renderer.drawLine(
-                entityOffset + Vec2f(bounds.z + p1, borders.y - p1),
-                entityOffset + Vec2f(bounds.z + p1, borders.w + p1),
-                Color.white, (1f - t1) * alpha.z);
-
-            Atelier.renderer.drawLine(
-                entityOffset + Vec2f(bounds.z + p2, borders.y - p2),
-                entityOffset + Vec2f(bounds.z + p2, borders.w + p2),
-                Color.white, (1f - t2) * alpha.z);
-        }
-        if (alpha.w > 0f) {
-            Atelier.renderer.drawLine(
-                entityOffset + Vec2f(borders.x, bounds.w),
-                entityOffset + Vec2f(borders.z, bounds.w),
-                Color.white, alpha.w);
-
-            Atelier.renderer.drawLine(
-                entityOffset + Vec2f(borders.x - p1, bounds.w + p1),
-                entityOffset + Vec2f(borders.z + p1, bounds.w + p1),
-                Color.white, (1f - t1) * alpha.w);
-
-            Atelier.renderer.drawLine(
-                entityOffset + Vec2f(borders.x - p2, bounds.w + p2),
-                entityOffset + Vec2f(borders.z + p2, bounds.w + p2),
-                Color.white, (1f - t2) * alpha.w);
-        }
     }
 }

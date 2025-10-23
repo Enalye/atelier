@@ -17,10 +17,6 @@ package void loadLibWorld_world(GrModule mod) {
     GrType entityType = grGetNativeType("Entity");
     GrType actorType = grGetNativeType("Actor");
 
-    mod.setDescription(GrLocale.fr_FR, "Lance/Arrête le mode de combat");
-    mod.setParameters(["isInCombat"]);
-    mod.addStatic(&_setCombat, worldType, "setCombat", [grBool]);
-
     mod.setDescription(GrLocale.fr_FR, "Ajoute l’entité à la scène");
     mod.setParameters(["entity"]);
     mod.addStatic(&_addEntity, worldType, "addEntity", [entityType]);
@@ -112,10 +108,6 @@ package void loadLibWorld_world(GrModule mod) {
     
 +/
 
-}
-
-private void _setCombat(GrCall call) {
-    Atelier.world.setCombat(call.getBool(0));
 }
 
 private void _addEntity(GrCall call) {

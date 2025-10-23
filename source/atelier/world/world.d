@@ -5,6 +5,7 @@ import std.conv : to;
 
 import atelier.common;
 import atelier.core;
+import atelier.env;
 import atelier.input;
 import atelier.physics;
 import atelier.render;
@@ -58,7 +59,6 @@ final class World {
         bool _isPaused;
 
         Factory _factory;
-        string _playerControllerId, _playerActorId;
         Controller!Actor _playerController;
         Transition function(string, string, Actor, bool) _transitionFunc;
     }
@@ -106,19 +106,10 @@ final class World {
 
         setTransition(&_createDefaultTransition);
         addController!Actor("player", { return new DefaultPlayerController(); });
-        setPlayerControllerID("player");
     }
 
     void setTransition(Transition function(string, string, Actor, bool) transitionFunc = &_createDefaultTransition) {
         _transitionFunc = transitionFunc;
-    }
-
-    void setPlayerControllerID(string id) {
-        _playerControllerId = id;
-    }
-
-    void setPlayerActorID(string id) {
-        _playerActorId = id;
     }
 
     void setPause(bool value) {
@@ -196,7 +187,7 @@ final class World {
 
     private void _setupPlayerController() {
         if (!_playerController) {
-            _playerController = fetchController!Actor(_playerControllerId);
+            _playerController = fetchController!Actor(Atelier.env.getPlayerController());
             if (_playerController) {
                 _playerController.setup(_player);
                 _controllers ~= _playerController;
@@ -205,6 +196,8 @@ final class World {
     }
 
     void load(string sceneRid, string tpName = "") {
+        Atelier.env.setScene(sceneRid, tpName);
+
         _sceneRid = sceneRid;
         _tpName = tpName;
         _frame = 0;
@@ -234,8 +227,8 @@ final class World {
             addRenderedEntity(_player);
             _player.setName("player");
         }
-        else if (_playerActorId.length) {
-            _player = Atelier.res.get!Actor(_playerActorId);
+        else if (Atelier.env.getPlayerActor().length) {
+            _player = Atelier.res.get!Actor(Atelier.env.getPlayerActor());
             _player.setPosition(Vec3i(0, 0, 0));
             _player.setName("player");
             _player.setGraphic("idle");

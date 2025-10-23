@@ -9,6 +9,7 @@ import grimoire;
 
 import atelier.audio;
 import atelier.common;
+import atelier.env;
 import atelier.input;
 import atelier.locale;
 import atelier.nav;
@@ -71,6 +72,7 @@ final class Atelier {
         AudioMixer _audioMixer;
         World _world;
         NavMesh _navMesh;
+        Env _env;
         Console _console;
         Script _script;
         RNG _rng;
@@ -131,6 +133,11 @@ final class Atelier {
         /// Le navigation
         NavMesh nav() {
             return _navMesh;
+        }
+
+        /// Environnement
+        Env env() {
+            return _env;
         }
 
         /// Le terminal de commande
@@ -270,6 +277,7 @@ final class Atelier {
         _resourceManager = new ResourceManager();
         _world = new World();
         _navMesh = new NavMesh();
+        _env = new Env();
         _physics = new Physics();
         _rng = new RNG();
         _theme = new Theme();

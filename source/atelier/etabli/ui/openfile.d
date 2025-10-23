@@ -69,7 +69,6 @@ final class OpenFile : Modal {
         _onSearch();
 
         addEventListener("overridekey", &_onKey);
-        Atelier.log("YO");
     }
 
     private void _onKey() {

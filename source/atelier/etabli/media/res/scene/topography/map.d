@@ -85,6 +85,10 @@ package(atelier.etabli.media.res.scene) final class TopographicMap : UIElement {
                 }
                 _brushLevel = _toolbox.getBrushLevel();
             });
+            _toolbox.addEventListener("debug", {
+                _definition.topologicMap.debugMode = _toolbox.getDebugMode();
+                _definition.topologicMap.debugLevel = _toolbox.getDebugLevel();
+            });
         }
 
         Atelier.ui.addUI(_toolbox);
@@ -95,6 +99,8 @@ package(atelier.etabli.media.res.scene) final class TopographicMap : UIElement {
         if (_toolbox) {
             _toolbox.removeUI();
         }
+        _definition.topologicMap.debugMode = 0;
+        _definition.topologicMap.debugLevel = 0;
         _toolbox.removeEventListener("tool", &_onTool);
     }
 
@@ -215,19 +221,8 @@ package(atelier.etabli.media.res.scene) final class TopographicMap : UIElement {
             color = Atelier.theme.danger;
         }
 
-        { //Debug
-            if (Atelier.input.isPressed(InputEvent.KeyButton.Button.f1)) {
-                renderDebug(0);
-            }
-            else if (Atelier.input.isPressed(InputEvent.KeyButton.Button.f2)) {
-                renderDebug(1);
-            }
-            else if (Atelier.input.isPressed(InputEvent.KeyButton.Button.f3)) {
-                renderDebug(2);
-            }
-            else if (Atelier.input.isPressed(InputEvent.KeyButton.Button.f4)) {
-                renderDebug(3);
-            }
+        if (_definition.topologicMap.debugMode == 2 || _definition.topologicMap.debugMode == 3) {
+            renderDebug(_definition.topologicMap.debugLevel);
         }
 
         Atelier.renderer.drawRect(origin + (cast(Vec2f) _endTile) * 16f * _zoom,

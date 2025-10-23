@@ -79,6 +79,8 @@ package final class ParameterWindow : UIElement {
             _tabs.addTab("", "lighting", "editor:scene-lighting");
             vlist.addList(_tabs);
 
+            _tabs.selectTab("entity");
+
             _tabs.addEventListener("value", &_onTabChange);
         }
 

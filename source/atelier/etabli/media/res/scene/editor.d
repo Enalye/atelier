@@ -198,25 +198,9 @@ final class SceneResourceEditor : ResourceBaseEditor {
             layer.tilemap.draw();
         }
 
-        int levelToShow;
-        bool limitLevel;
-
-        if (Atelier.input.isPressed(InputEvent.KeyButton.Button.f1)) {
-            limitLevel = true;
-            levelToShow = 0;
-        }
-        else if (Atelier.input.isPressed(InputEvent.KeyButton.Button.f2)) {
-            limitLevel = true;
-            levelToShow = 1;
-        }
-        else if (Atelier.input.isPressed(InputEvent.KeyButton.Button.f3)) {
-            limitLevel = true;
-            levelToShow = 2;
-        }
-        else if (Atelier.input.isPressed(InputEvent.KeyButton.Button.f4)) {
-            limitLevel = true;
-            levelToShow = 3;
-        }
+        bool limitLevel = _definition.topologicMap.debugMode == 1 ||
+            _definition.topologicMap.debugMode == 3;
+        int levelToShow = _definition.topologicMap.debugLevel;
 
         foreach_reverse (layer; _definition.getTerrainLayers()) {
             if (layer.level >= 0 || !layer.isVisible)

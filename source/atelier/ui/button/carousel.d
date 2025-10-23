@@ -17,6 +17,10 @@ final class CarouselButton : UIElement {
     }
 
     @property {
+        uint ivalue() const {
+            return cast(uint) _index;
+        }
+
         string value() const {
             return _value;
         }

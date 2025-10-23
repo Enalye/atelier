@@ -386,6 +386,9 @@ package final class SceneDefinition {
             bool _isDirty = true;
         }
 
+        int debugMode;
+        int debugLevel;
+
         @property {
             Tilemap[] lowerTilemaps() {
                 return _lowerTilemaps;

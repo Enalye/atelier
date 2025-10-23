@@ -46,9 +46,9 @@ package(atelier.etabli.media.res.scene) class EntityToolbox : Modal {
             addUI(hbox);
 
             _toolGroup = new ToolGroup;
-            foreach (key; ["selection", "move", "pen"]) {
+            foreach (key; ["selectmove", "selection", "move", "pen"]) {
                 ToolButton btn = new ToolButton(_toolGroup,
-                    "editor:" ~ key ~ "-button", key == "selection");
+                    "editor:" ~ key ~ "-button", key == "selectmove");
                 btn.setSize(Vec2f(32f, 32f));
                 hbox.addUI(btn);
             }
@@ -123,6 +123,9 @@ package(atelier.etabli.media.res.scene) class EntityToolbox : Modal {
                 break;
             case alpha3:
                 _toolGroup.value = 2;
+                break;
+            case alpha4:
+                _toolGroup.value = 3;
                 break;
             default:
                 break;

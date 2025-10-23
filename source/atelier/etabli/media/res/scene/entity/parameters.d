@@ -30,6 +30,8 @@ package(atelier.etabli.media.res.scene) final class EntityParameters : UIElement
         float _zoom = 1f;
         bool _isApplyingTool;
         void delegate() _updateToolFunc;
+
+        bool _isTool0Selecting;
     }
 
     this(SceneDefinition definition) {
@@ -121,19 +123,38 @@ package(atelier.etabli.media.res.scene) final class EntityParameters : UIElement
 
         switch (_toolbox.getTool()) {
         case 0:
+            _isTool0Selecting = true;
+            foreach (entity; _definition.getEntities()) {
+                if (entity.isInside(_startMousePosition, _startMousePosition)) {
+                    _isTool0Selecting = false;
+                    break;
+                }
+            }
+
+            if (_isTool0Selecting) {
+                goto case 1;
+            }
+            else {
+                if (_selectedEntities.length > 0) {
+                    _captureSelection(true);
+                }
+                goto case 2;
+            }
+            break;
+        case 1:
             if (!hasControlModifier()) {
                 _unselectEntities();
             }
 
             _captureSelection(false);
             break;
-        case 1:
+        case 2:
             if (_selectedEntities.length == 0) {
                 _captureSelection(true);
             }
             _moveZ = hasControlModifier();
             break;
-        case 2:
+        case 3:
             _createEntity();
             break;
         default:
@@ -153,9 +174,17 @@ package(atelier.etabli.media.res.scene) final class EntityParameters : UIElement
         if (_isApplyingTool) {
             switch (_toolbox.getTool()) {
             case 0:
-                _captureSelection(false);
+                if (_isTool0Selecting) {
+                    goto case 1;
+                }
+                else {
+                    goto case 2;
+                }
                 break;
             case 1:
+                _captureSelection(false);
+                break;
+            case 2:
                 _moveSelection(false);
                 break;
             default:
@@ -201,9 +230,17 @@ package(atelier.etabli.media.res.scene) final class EntityParameters : UIElement
 
         switch (_toolbox.getTool()) {
         case 0:
-            _captureSelection(true);
+            if (_isTool0Selecting) {
+                goto case 1;
+            }
+            else {
+                goto case 2;
+            }
             break;
         case 1:
+            _captureSelection(true);
+            break;
+        case 2:
             _moveSelection(true);
             break;
         default:
@@ -336,6 +373,11 @@ package(atelier.etabli.media.res.scene) final class EntityParameters : UIElement
         if (_isApplyingTool) {
             switch (_toolbox.getTool()) {
             case 0:
+                if (_isTool0Selecting) {
+                    goto case 1;
+                }
+                break;
+            case 1:
                 Vec2f startPos = origin + _startMousePosition * _zoom;
                 Vec2f endPos = origin + _endMousePosition * _zoom;
                 Atelier.renderer.drawRect(startPos, endPos - startPos,

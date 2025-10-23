@@ -286,8 +286,8 @@ final class Etabli {
 
     string[] getResourceList(string type) {
         auto p = type in _farfadets;
-        enforce(p, "le type de ressource `" ~ type ~ "` n’existe pas");
-        return p.resources.keys;
+        //enforce(p, "le type de ressource `" ~ type ~ "` n’existe pas");
+        return p ? p.resources.keys : [];
     }
 
     string[] getScripts() {

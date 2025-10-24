@@ -801,11 +801,15 @@ abstract class Entity {
 
         if (_collider && _collider.isDisplayed) {
             _collider.drawBack(drawPos);
-            render(drawPos);
+            if(_isEnabled) {
+                render(drawPos);
+            }
             _collider.drawFront(drawPos);
         }
         else {
-            render(drawPos);
+            if(_isEnabled) {
+                render(drawPos);
+            }
         }
 
         if (_hurtbox && _hurtbox.isDisplayed) {

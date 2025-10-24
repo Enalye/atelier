@@ -11,6 +11,7 @@ import atelier.core;
 import atelier.input;
 import atelier.physics;
 import atelier.ui;
+import atelier.world.entity : BaseEntityData;
 import atelier.etabli.ui;
 import atelier.etabli.media.res.base;
 import atelier.etabli.media.res.editor;
@@ -28,8 +29,7 @@ final class PropResourceEditor : ResourceBaseEditor {
         EntityRenderData[] _renders;
         HitboxData _hitbox;
         HurtboxData _hurtbox;
-        string _controller;
-        int _zOrderOffset;
+        BaseEntityData _baseEntityData;
         int _material;
 
         Vec2f _originPosition = Vec2f.zero;
@@ -50,13 +50,7 @@ final class PropResourceEditor : ResourceBaseEditor {
             _hurtbox.load(ffd.getNode("hurtbox"));
         }
 
-        if (ffd.hasNode("controller")) {
-            _controller = ffd.getNode("controller").get!string(0);
-        }
-
-        if (ffd.hasNode("zOrderOffset")) {
-            _zOrderOffset = ffd.getNode("zOrderOffset").get!int(0);
-        }
+        _baseEntityData.load(ffd);
 
         if (ffd.hasNode("material")) {
             _material = ffd.getNode("material").get!int(0);
@@ -68,7 +62,7 @@ final class PropResourceEditor : ResourceBaseEditor {
             _renders ~= render;
         }
 
-        _parameterWindow = new ParameterWindow(_renders, _hitbox, _hurtbox, _controller, _zOrderOffset, _material);
+        _parameterWindow = new ParameterWindow(_renders, _hitbox, _hurtbox, _baseEntityData, _material);
 
         _toolbox = new Toolbox();
         _toolbox.setRenders(_renders);
@@ -94,13 +88,8 @@ final class PropResourceEditor : ResourceBaseEditor {
             setDirty();
         });
 
-        _parameterWindow.addEventListener("property_controller", {
-            _controller = _parameterWindow.getController();
-            setDirty();
-        });
-
-        _parameterWindow.addEventListener("property_zorderoffset", {
-            _zOrderOffset = _parameterWindow.getZOrderOffset();
+        _parameterWindow.addEventListener("property_base", {
+            _baseEntityData = _parameterWindow.getBaseEntityData();
             setDirty();
         });
 
@@ -154,10 +143,7 @@ final class PropResourceEditor : ResourceBaseEditor {
             _hitbox.save(node);
         }
         _hurtbox.save(node);
-        if (_controller.length) {
-            node.addNode("controller").add(_controller);
-        }
-        node.addNode("zOrderOffset").add(_zOrderOffset);
+        _baseEntityData.save(node);
         node.addNode("material").add(_material);
         return node;
     }

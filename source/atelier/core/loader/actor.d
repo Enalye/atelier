@@ -67,6 +67,10 @@ package void compileActor(string path, const Farfadet ffd, OutStream stream) {
     }
     hurtbox.serialize(stream);
 
+    BaseEntityData baseEntityData;
+    baseEntityData.load(ffd);
+    baseEntityData.serialize(stream);
+
     serializeEntityGraphicData(ffd, stream);
 }
 
@@ -82,6 +86,9 @@ package void loadActor(InStream stream) {
 
     HurtboxData hurtbox;
     hurtbox.deserialize(stream);
+
+    BaseEntityData baseEntityData;
+    baseEntityData.deserialize(stream);
 
     EntityGraphicData[] graphicDataList = unserializeEntityGraphicData(stream);
 
@@ -100,6 +107,7 @@ package void loadActor(InStream stream) {
         actor.setupRepulsor(repulsor);
         actor.setupHurtbox(hurtbox);
         actor.setName(name);
+        actor.setBaseEntityData(baseEntityData);
         return actor;
     });
 }

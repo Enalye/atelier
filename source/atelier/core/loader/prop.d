@@ -73,17 +73,9 @@ package void compileProp(string path, const Farfadet ffd, OutStream stream) {
     }
     hurtbox.serialize(stream);
 
-    string controller;
-    if (ffd.hasNode("controller")) {
-        controller = ffd.getNode("controller").get!string(0);
-    }
-    stream.write!string(controller);
-
-    int zOrderOffset;
-    if (ffd.hasNode("zOrderOffset")) {
-        zOrderOffset = ffd.getNode("zOrderOffset").get!int(0);
-    }
-    stream.write!int(zOrderOffset);
+    BaseEntityData baseEntityData;
+    baseEntityData.load(ffd);
+    baseEntityData.serialize(stream);
 
     int material;
     if (ffd.hasNode("material")) {
@@ -104,8 +96,8 @@ package void loadProp(InStream stream) {
     HurtboxData hurtbox;
     hurtbox.deserialize(stream);
 
-    string controller = stream.read!string();
-    int zOrderOffset = stream.read!int();
+    BaseEntityData baseEntityData;
+    baseEntityData.deserialize(stream);
 
     int material = stream.read!int();
     EntityGraphicData[] graphicDataList = unserializeEntityGraphicData(stream);
@@ -124,8 +116,7 @@ package void loadProp(InStream stream) {
         prop.setupHurtbox(hurtbox);
         prop.setMaterial(material);
         prop.setName(name);
-        prop.setBaseControllerId(controller);
-        prop.setZOrderOffset(zOrderOffset);
+        prop.setBaseEntityData(baseEntityData);
         return prop;
     });
 }

@@ -7,6 +7,7 @@ import atelier.core;
 import atelier.physics;
 import atelier.ui;
 import atelier.render;
+import atelier.world.entity : BaseEntityData;
 import atelier.etabli.ui;
 import atelier.etabli.media.res.entity_render;
 
@@ -52,10 +53,14 @@ package final class ParameterWindow : UIElement {
         IntegerField _hurtAngleField, _hurtAngleDeltaField;
         IntegerField _hurtOffsetDistanceField, _hurtOffsetAngleField;
 
+        // Base
+        BaseEntityData _baseEntityData;
+        TextField _controllerField;
+        IntegerField _zOrderOffsetField;
         TextField _tagsField;
     }
 
-    this(EntityRenderData[] renders, HitboxData hitbox, RepulsorData repulsor, HurtboxData hurtbox) {
+    this(EntityRenderData[] renders, HitboxData hitbox, RepulsorData repulsor, HurtboxData hurtbox, BaseEntityData baseEntityData) {
         VList vlist = new VList;
         vlist.setPosition(Vec2f(8f, 8f));
         vlist.setSize(Vec2f.zero.max(getSize() - Vec2f(8f, 8f)));
@@ -67,6 +72,7 @@ package final class ParameterWindow : UIElement {
 
         _hitbox = hitbox;
         _hurtbox = hurtbox;
+        _baseEntityData = baseEntityData;
 
         {
             LabelSeparator sep = new LabelSeparator("Rendu", Atelier.theme.font);
@@ -433,6 +439,38 @@ package final class ParameterWindow : UIElement {
             hlayout.setPadding(Vec2f(284f, 0f));
             vlist.addList(hlayout);
 
+            hlayout.addUI(new Label("Contrôleur:", Atelier.theme.font));
+
+            _controllerField = new TextField;
+            _controllerField.value = _baseEntityData.controller;
+            _controllerField.addEventListener("value", {
+                _baseEntityData.controller = _controllerField.value;
+                dispatchEvent("property_base");
+            });
+            hlayout.addUI(_controllerField);
+        }
+
+        {
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(284f, 0f));
+            vlist.addList(hlayout);
+
+            hlayout.addUI(new Label("Ordre Z:", Atelier.theme.font));
+
+            _zOrderOffsetField = new IntegerField;
+            _zOrderOffsetField.value = _baseEntityData.zOrderOffset;
+            _zOrderOffsetField.addEventListener("value", {
+                _baseEntityData.zOrderOffset = _zOrderOffsetField.value;
+                dispatchEvent("property_base");
+            });
+            hlayout.addUI(_zOrderOffsetField);
+        }
+
+        {
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(284f, 0f));
+            vlist.addList(hlayout);
+
             hlayout.addUI(new Label("Tags:", Atelier.theme.font));
             hlayout.addUI(new TextField());
 
@@ -485,6 +523,10 @@ package final class ParameterWindow : UIElement {
 
     HurtboxData getHurtbox() {
         return _hurtbox;
+    }
+
+    BaseEntityData getBaseEntityData() {
+        return _baseEntityData;
     }
 
     private void moveUp(RenderElement item_) {

@@ -1,8 +1,8 @@
 module atelier.common.serializer;
 
-import farfadet;
-
 mixin template Serializer() {
+    import farfadet;
+
     void load(const(Farfadet) ffd) {
         static foreach (member; __traits(allMembers, typeof(this))) {
             static if (isFarfadetCompatible!(typeof(__traits(getMember, typeof(this), member)))) {
@@ -21,9 +21,6 @@ mixin template Serializer() {
                 mixin("ffd.addNode(\"", member, "\").add!(",
                     typeof(__traits(getMember, typeof(this), member)),
                     ")(", member, ");");
-                //static if (member == "repeat") {
-                //    static assert(typeof(__traits(getMember, typeof(this), member)).stringof == "const(bool)");
-                //}
             }
         }
     }

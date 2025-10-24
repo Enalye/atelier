@@ -11,6 +11,7 @@ import atelier.core;
 import atelier.physics;
 import atelier.input;
 import atelier.ui;
+import atelier.world.entity : BaseEntityData;
 import atelier.etabli.ui;
 import atelier.etabli.media.res.base;
 import atelier.etabli.media.res.editor;
@@ -29,6 +30,7 @@ final class ActorResourceEditor : ResourceBaseEditor {
         HitboxData _hitbox;
         RepulsorData _repulsor;
         HurtboxData _hurtbox;
+        BaseEntityData _baseEntityData;
 
         Vec2f _originPosition = Vec2f.zero;
         float _zoom = 1f;
@@ -52,13 +54,15 @@ final class ActorResourceEditor : ResourceBaseEditor {
             _hurtbox.load(ffd.getNode("hurtbox"));
         }
 
+        _baseEntityData.load(ffd);
+
         foreach (size_t i, Farfadet renderNode; ffd.getNodes("render")) {
             EntityRenderData render = new EntityRenderData(renderNode);
             render.isVisible = (i == 0);
             _renders ~= render;
         }
 
-        _parameterWindow = new ParameterWindow(_renders, _hitbox, _repulsor, _hurtbox);
+        _parameterWindow = new ParameterWindow(_renders, _hitbox, _repulsor, _hurtbox, _baseEntityData);
 
         _toolbox = new Toolbox();
         _toolbox.setRenders(_renders);
@@ -75,6 +79,11 @@ final class ActorResourceEditor : ResourceBaseEditor {
 
         _parameterWindow.addEventListener("property_hurtbox", {
             _hurtbox = _parameterWindow.getHurtbox();
+            setDirty();
+        });
+
+        _parameterWindow.addEventListener("property_base", {
+            _baseEntityData = _parameterWindow.getBaseEntityData();
             setDirty();
         });
 
@@ -135,6 +144,7 @@ final class ActorResourceEditor : ResourceBaseEditor {
         }
         _repulsor.save(node);
         _hurtbox.save(node);
+        _baseEntityData.save(node);
         return node;
     }
 

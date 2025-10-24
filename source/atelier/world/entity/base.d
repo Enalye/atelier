@@ -14,6 +14,15 @@ import atelier.world.entity.component;
 import atelier.world.entity.controller;
 import atelier.world.entity.renderer;
 
+// Propriétés de base l’entité
+struct BaseEntityData {
+    string controller;
+    int zOrderOffset;
+
+    mixin Serializer;
+}
+
+// Propriétés de l’entité dans la scène
 struct EntityData {
     string name;
     string[] tags;
@@ -246,8 +255,9 @@ abstract class Entity {
         }
     }
 
-    final void setBaseControllerId(string id) {
-        _baseControllerId = id;
+    final void setBaseEntityData(const(BaseEntityData) data) {
+        _baseControllerId = data.controller;
+        _zOrderOffset = data.zOrderOffset;
     }
 
     final Layer getLayer() const {

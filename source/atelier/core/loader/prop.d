@@ -124,11 +124,7 @@ package void loadProp(InStream stream) {
         prop.setupHurtbox(hurtbox);
         prop.setMaterial(material);
         prop.setName(name);
-
-        Atelier.log(rid, " CONTROLLER: ", controller);
-        if (controller.length) {
-            prop.setController(controller);
-        }
+        prop.setBaseControllerId(controller);
         prop.setZOrderOffset(zOrderOffset);
         return prop;
     });

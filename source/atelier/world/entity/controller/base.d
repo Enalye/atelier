@@ -37,7 +37,6 @@ abstract class Controller(T : Entity) : ControllerWrapper {
     final void setup(T entity_) {
         _isRunning = true;
         _entity = entity_;
-        _entity.setController(this);
     }
 
     void onUpdate() {

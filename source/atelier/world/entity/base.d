@@ -86,6 +86,7 @@ abstract class Entity {
         string _name;
         string[] _tags;
         Layer _layer = Layer.scene;
+        string _baseControllerId;
     }
 
     protected {
@@ -195,6 +196,7 @@ abstract class Entity {
         _angle = other._angle;
         _material = other._material;
         _baseZ = other._baseZ;
+        _baseControllerId = other._baseControllerId;
         _zOrderOffset = other._zOrderOffset;
         _baseMaterial = other._baseMaterial;
         _shadowBaseZ = other._shadowBaseZ;
@@ -235,8 +237,17 @@ abstract class Entity {
         _tags = data.tags.dup;
         _layer = asEnum!Layer(data.layer);
         setPosition(data.position);
-        if (data.controller)
+
+        if (data.controller.length) {
             setController(data.controller);
+        }
+        else if (_baseControllerId.length) {
+            setController(_baseControllerId);
+        }
+    }
+
+    final void setBaseControllerId(string id) {
+        _baseControllerId = id;
     }
 
     final Layer getLayer() const {

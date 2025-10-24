@@ -469,6 +469,7 @@ package final class ParameterWindow : UIElement {
                 materialList[i] = to!string(i) ~ " - " ~ materialList[i];
             }
             _materialBtn = new SelectButton(materialList, "");
+            _materialBtn.setListAlign(UIAlignX.right, UIAlignY.bottom);
             _materialBtn.ivalue = material;
             _materialBtn.addEventListener("value", {
                 dispatchEvent("property_material", false);

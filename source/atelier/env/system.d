@@ -62,6 +62,14 @@ final class Env {
         return _current.getTeleporter();
     }
 
+    void setTeleporterDirection(int dir) {
+        _current.setTeleporterDirection(dir);
+    }
+
+    int getTeleporterDirection() {
+        return _current.getTeleporterDirection();
+    }
+
     T get(T)(string id) if (isEnvType!T) {
         return _current.get!T(id);
     }

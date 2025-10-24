@@ -20,6 +20,7 @@ final class EnvData {
         string _playerController;
         string _playerActor;
         string _scene, _teleporter;
+        int _teleporterDirection;
 
         bool[string] _bools;
         int[string] _ints;
@@ -49,12 +50,20 @@ final class EnvData {
         _teleporter = teleporter;
     }
 
+    void setTeleporterDirection(int dir) {
+        _teleporterDirection = dir;
+    }
+
     string getScene() {
         return _scene;
     }
 
     string getTeleporter() {
         return _teleporter;
+    }
+
+    int getTeleporterDirection() {
+        return _teleporterDirection;
     }
 
     T get(T)(string id) if (isEnvType!T) {
@@ -135,6 +144,7 @@ final class EnvData {
                 playerNode.addNode("scene").add(_scene);
             if (_teleporter.length)
                 playerNode.addNode("teleporter").add(_teleporter);
+            playerNode.addNode("teleporterDirection").add(_teleporterDirection);
         }
 
         Farfadet node;
@@ -166,6 +176,8 @@ final class EnvData {
                 _scene = playerNode.getNode("scene").get!string(0);
             if (playerNode.hasNode("teleporter"))
                 _teleporter = playerNode.getNode("teleporter").get!string(0);
+            if (playerNode.hasNode("teleporterDirection"))
+                _teleporterDirection = playerNode.getNode("teleporterDirection").get!int(0);
         }
 
         static foreach (stack; [

@@ -287,6 +287,8 @@ final class World {
                         if (_playerController) {
                             _playerController.onTeleport(teleporter.direction + 4, true);
                         }
+
+                        Atelier.env.setTeleporterDirection(teleporter.direction + 4);
                     }
                     else { // Position par défaut
                         _player.setPosition(teleporter.getPosition());

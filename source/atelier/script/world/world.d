@@ -106,7 +106,7 @@ package void loadLibWorld_world(GrModule mod) {
     mod.setDescription(GrLocale.fr_FR, "Récupère les entités possédants le tag indiqué");
     mod.setParameters(["tags"]);
     mod.addStatic(&_findByTag, worldType, "findEntitiesByTag",
-        [grString]);
+        [grString], [grList(entityType)]);
 
 }
 

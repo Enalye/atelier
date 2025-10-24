@@ -129,6 +129,7 @@ abstract class Entity {
         Vec3i _targetPosition = Vec3i.zero;
         int _zOrderOffset;
 
+        bool _isEnabled = true;
         bool _isRendered;
         int _isInRenderList;
         Entity[] _renderEntitiesAbove;
@@ -210,6 +211,7 @@ abstract class Entity {
         _baseMaterial = other._baseMaterial;
         _shadowBaseZ = other._shadowBaseZ;
         _shadow = other._shadow;
+        _isEnabled = other._isEnabled;
 
         foreach (id, renderer; other._graphics) {
             _graphics[id] = renderer.fetch();
@@ -542,26 +544,28 @@ abstract class Entity {
     }
 
     final void updateEntity() {
-        foreach (component; _components) {
-            component.update();
-        }
-
-        if (_effect) {
-            _effect.update(this);
-            if (!_effect.isRunning) {
-                _effect = null;
+        if(_isEnabled) {
+            foreach (component; _components) {
+                component.update();
             }
-        }
 
-        _shadowBaseZ = approach(_shadowBaseZ, _baseZ, 1);
+            if (_effect) {
+                _effect.update(this);
+                if (!_effect.isRunning) {
+                    _effect = null;
+                }
+            }
 
-        if (_isMoving) {
-            _position.x = approach(_position.x, _targetPosition.x, 1);
-            _position.y = approach(_position.y, _targetPosition.y, 1);
-            _position.z = approach(_position.z, _targetPosition.z, 1);
+            _shadowBaseZ = approach(_shadowBaseZ, _baseZ, 1);
 
-            if (_position == _targetPosition) {
-                _isMoving = false;
+            if (_isMoving) {
+                _position.x = approach(_position.x, _targetPosition.x, 1);
+                _position.y = approach(_position.y, _targetPosition.y, 1);
+                _position.z = approach(_position.z, _targetPosition.z, 1);
+
+                if (_position == _targetPosition) {
+                    _isMoving = false;
+                }
             }
         }
     }
@@ -786,12 +790,14 @@ abstract class Entity {
 
     final void draw(Vec2f offset, Sprite shadowSprite) {
         Vec2f drawPos = offset + cameraPosition();
+        if(_isEnabled) {
 
-        foreach (child; _renderEntitiesBehind) {
-            child.draw(offset, shadowSprite);
+            foreach (child; _renderEntitiesBehind) {
+                child.draw(offset, shadowSprite);
+            }
+
+            renderShadow(drawPos, shadowSprite);
         }
-
-        renderShadow(drawPos, shadowSprite);
 
         if (_collider && _collider.isDisplayed) {
             _collider.drawBack(drawPos);
@@ -806,22 +812,26 @@ abstract class Entity {
             _hurtbox.draw(drawPos);
         }
 
-        foreach (child; _renderEntitiesAbove) {
-            child.draw(offset, shadowSprite);
+        if(_isEnabled) {
+            foreach (child; _renderEntitiesAbove) {
+                child.draw(offset, shadowSprite);
+            }
         }
     }
 
     final void drawTransition(Vec2f offset, Sprite shadowSprite, float tTransition, bool drawGraphics) {
-        Vec2f drawPos = offset + cameraPosition();
+        if(_isEnabled) {
+            Vec2f drawPos = offset + cameraPosition();
 
-        foreach (child; _renderEntitiesBehind) {
-            child.drawTransition(offset, shadowSprite, tTransition, drawGraphics);
-        }
+            foreach (child; _renderEntitiesBehind) {
+                child.drawTransition(offset, shadowSprite, tTransition, drawGraphics);
+            }
 
-        Atelier.world.renderEntityTransition(this, drawPos, shadowSprite, tTransition, drawGraphics);
+            Atelier.world.renderEntityTransition(this, drawPos, shadowSprite, tTransition, drawGraphics);
 
-        foreach (child; _renderEntitiesAbove) {
-            child.drawTransition(offset, shadowSprite, tTransition, drawGraphics);
+            foreach (child; _renderEntitiesAbove) {
+                child.drawTransition(offset, shadowSprite, tTransition, drawGraphics);
+            }
         }
     }
 
@@ -865,6 +875,18 @@ abstract class Entity {
         }
         else {
             _graphic.draw(offset, alpha);
+        }
+    }
+
+    final void setEnabled(bool enabled) {
+        if(enabled) {
+            _isEnabled = true;
+            if(_collider) _collider.register();
+            if(_hurtbox) _hurtbox.register();
+        } else {
+            _isEnabled = false;
+            if(_collider) _collider.unregister();
+            if(_hurtbox) _hurtbox.unregister();
         }
     }
 

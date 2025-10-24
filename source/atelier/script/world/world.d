@@ -65,11 +65,7 @@ package void loadLibWorld_world(GrModule mod) {
     mod.setParameters(["name"]);
     mod.addStatic(&_findByName!Entity, worldType, "findEntityByName",
         [grString], [grOptional(entityType)]);
-    
-    mod.setDescription(GrLocale.fr_FR, "Récupère les entités possédants le tag indiqué");
-    mod.setParameters(["tags"]);
-    mod.addStatic(&_findByTag!Entity, worldType, "findEntitiesByTag",
-        [grList(grString)], [grList(entityType)]);*/
+    */
     /*
     mod.setDescription(GrLocale.fr_FR,
         "Récupère la source correspondant au nom donné parmi toutes les scènes");
@@ -107,6 +103,10 @@ package void loadLibWorld_world(GrModule mod) {
         [grList(grString)], [grList(solidType)]);*/
     
 +/
+    mod.setDescription(GrLocale.fr_FR, "Récupère les entités possédants le tag indiqué");
+    mod.setParameters(["tags"]);
+    mod.addStatic(&_findByTag, worldType, "findEntitiesByTag",
+        [grString]);
 
 }
 
@@ -167,11 +167,11 @@ private void _findByName(T)(GrCall call) {
     }
     call.setNull();
 }
-
-private void _findByTag(T)(GrCall call) {
-    GrList result = new GrList;
-    result.setNatives(Atelier.world.findByTag!T(call.getList(0).getStrings!string()));
-    call.setList(result);
-}
 */
 +/
+
+private void _findByTag(GrCall call) {
+    GrList result = new GrList;
+    result.setNatives(Atelier.world.findByTag(call.getString(0)));
+    call.setList(result);
+}

@@ -62,6 +62,12 @@ package void loadLibWorld_entity(GrModule mod) {
             entityType, grInt, grInt, grInt
         ]);
 
+    mod.setDescription(GrLocale.fr_FR, "Active/Désactive l’entité");
+    mod.setParameters(["entity", "state"]);
+    mod.addFunction(&_setEnabled, "setEnabled", [
+            entityType, grBool
+        ]);
+
     mod.setDescription(GrLocale.fr_FR, "Récupère la position de l’entité");
     mod.setParameters(["entity"]);
     mod.addFunction(&_getPosition, "getPosition", [entityType], [
@@ -156,6 +162,11 @@ private void _setPosition(GrCall call) {
 private void _addPosition(GrCall call) {
     Entity entity = call.getNative!Entity(0);
     entity.addPosition(Vec3i(call.getInt(1), call.getInt(2), call.getInt(3)));
+}
+
+private void _setEnabled(GrCall call) {
+    Entity entity = call.getNative!Entity(0);
+    entity.setEnabled(call.getBool(1));
 }
 
 private void _getPosition(GrCall call) {

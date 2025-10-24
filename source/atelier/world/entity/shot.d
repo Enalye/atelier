@@ -132,8 +132,11 @@ final class Shot : Entity, Resource!Shot {
             }
             else {
                 _state = State.normal;
-                _graphic.setAlpha(1f);
-                _graphic.setScale(Vec2f.one);
+
+                if (_graphic) {
+                    _graphic.setAlpha(1f);
+                    _graphic.setScale(Vec2f.one);
+                }
 
                 if (_hasTtl) {
                     _stateTimer.start(_ttl);
@@ -161,7 +164,10 @@ final class Shot : Entity, Resource!Shot {
             }
             else {
                 float alpha = lerp(1f, 0f, easeInOutSine(_stateTimer.value01));
-                _graphic.setAlpha(alpha);
+
+                if (_graphic) {
+                    _graphic.setAlpha(alpha);
+                }
             }
             _velocity += _acceleration;
             move(_velocity);
@@ -173,9 +179,12 @@ final class Shot : Entity, Resource!Shot {
             else {
                 float alpha = lerp(1f, 0f, easeInOutSine(_stateTimer.value01));
                 Vec2f scale = Vec2f.one * lerp(1f, 2f, easeInOutSine(_stateTimer.value01));
-                _graphic.setAlpha(alpha);
-                _graphic.setScale(scale);
-                _graphic.setBlend(Blend.additive);
+
+                if (_graphic) {
+                    _graphic.setAlpha(alpha);
+                    _graphic.setScale(scale);
+                    _graphic.setBlend(Blend.additive);
+                }
             }
             _velocity += _acceleration;
             move(_velocity);

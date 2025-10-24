@@ -194,6 +194,7 @@ abstract class Entity {
         _angle = other._angle;
         _material = other._material;
         _baseZ = other._baseZ;
+        _zOrderOffset = other._zOrderOffset;
         _baseMaterial = other._baseMaterial;
         _shadowBaseZ = other._shadowBaseZ;
         _shadow = other._shadow;

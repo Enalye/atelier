@@ -28,6 +28,7 @@ final class PropResourceEditor : ResourceBaseEditor {
         EntityRenderData[] _renders;
         HitboxData _hitbox;
         HurtboxData _hurtbox;
+        int _zOrderOffset;
         int _material;
 
         Vec2f _originPosition = Vec2f.zero;
@@ -48,6 +49,10 @@ final class PropResourceEditor : ResourceBaseEditor {
             _hurtbox.load(ffd.getNode("hurtbox"));
         }
 
+        if (ffd.hasNode("zOrderOffset")) {
+            _zOrderOffset = ffd.getNode("zOrderOffset").get!int(0);
+        }
+
         if (ffd.hasNode("material")) {
             _material = ffd.getNode("material").get!int(0);
         }
@@ -58,7 +63,7 @@ final class PropResourceEditor : ResourceBaseEditor {
             _renders ~= render;
         }
 
-        _parameterWindow = new ParameterWindow(_renders, _hitbox, _hurtbox, _material);
+        _parameterWindow = new ParameterWindow(_renders, _hitbox, _hurtbox, _zOrderOffset, _material);
 
         _toolbox = new Toolbox();
         _toolbox.setRenders(_renders);
@@ -81,6 +86,11 @@ final class PropResourceEditor : ResourceBaseEditor {
                 _renders ~= render;
             }
             _toolbox.setRenders(_renders);
+            setDirty();
+        });
+
+        _parameterWindow.addEventListener("property_zorderoffset", {
+            _zOrderOffset = _parameterWindow.getZOrderOffset();
             setDirty();
         });
 
@@ -134,6 +144,7 @@ final class PropResourceEditor : ResourceBaseEditor {
             _hitbox.save(node);
         }
         _hurtbox.save(node);
+        node.addNode("zOrderOffset").add(_zOrderOffset);
         node.addNode("material").add(_material);
         return node;
     }

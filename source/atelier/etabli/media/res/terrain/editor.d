@@ -384,12 +384,18 @@ final class TerrainResourceEditor : ResourceBaseEditor {
     }
 
     private Vec2i getTilePos() {
+        if (_tileset.tileSize.x == 0 || _tileset.tileSize.y == 0)
+            return Vec2i.zero;
+
         Vec2f mousePos = (getMousePosition() - (_tilemap.position - _tilemap.size / 2f)) / _zoom;
         Vec2i tilePos = (cast(Vec2i) mousePos) / cast(Vec2i) _tileset.tileSize;
         return tilePos;
     }
 
     private Vec2i getSubTilePos() {
+        if (_tileset.tileSize.x == 0 || _tileset.tileSize.y == 0)
+            return Vec2i.zero;
+
         Vec2f mousePos = (getMousePosition() - (_tilemap.position - _tilemap.size / 2f)) / _zoom;
         Vec2i tilePos = (2 * cast(Vec2i) mousePos) / cast(Vec2i) _tileset.tileSize;
         return tilePos;

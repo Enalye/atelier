@@ -69,12 +69,13 @@ package final class ParameterWindow : UIElement {
         IntegerField _hurtAngleField, _hurtAngleDeltaField;
         IntegerField _hurtOffsetDistanceField, _hurtOffsetAngleField;
 
+        TextField _controllerField;
         IntegerField _zOrderOffsetField;
         SelectButton _materialBtn;
         TextField _tagsField;
     }
 
-    this(EntityRenderData[] renders, HitboxData hitbox, HurtboxData hurtbox, int zOrderOffset, int material) {
+    this(EntityRenderData[] renders, HitboxData hitbox, HurtboxData hurtbox, string controller, int zOrderOffset, int material) {
         VList vlist = new VList;
         vlist.setPosition(Vec2f(8f, 8f));
         vlist.setSize(Vec2f.zero.max(getSize() - Vec2f(8f, 8f)));
@@ -444,6 +445,21 @@ package final class ParameterWindow : UIElement {
             hlayout.setPadding(Vec2f(284f, 0f));
             vlist.addList(hlayout);
 
+            hlayout.addUI(new Label("Contrôleur:", Atelier.theme.font));
+
+            _controllerField = new TextField;
+            _controllerField.value = controller;
+            _controllerField.addEventListener("value", {
+                dispatchEvent("property_controller");
+            });
+            hlayout.addUI(_controllerField);
+        }
+
+        {
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(284f, 0f));
+            vlist.addList(hlayout);
+
             hlayout.addUI(new Label("Ordre Z:", Atelier.theme.font));
 
             _zOrderOffsetField = new IntegerField;
@@ -521,6 +537,10 @@ package final class ParameterWindow : UIElement {
 
     HurtboxData getHurtbox() {
         return _hurtbox;
+    }
+
+    string getController() const {
+        return _controllerField.value();
     }
 
     int getZOrderOffset() const {

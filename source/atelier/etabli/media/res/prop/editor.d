@@ -28,6 +28,7 @@ final class PropResourceEditor : ResourceBaseEditor {
         EntityRenderData[] _renders;
         HitboxData _hitbox;
         HurtboxData _hurtbox;
+        string _controller;
         int _zOrderOffset;
         int _material;
 
@@ -49,6 +50,10 @@ final class PropResourceEditor : ResourceBaseEditor {
             _hurtbox.load(ffd.getNode("hurtbox"));
         }
 
+        if (ffd.hasNode("controller")) {
+            _controller = ffd.getNode("controller").get!string(0);
+        }
+
         if (ffd.hasNode("zOrderOffset")) {
             _zOrderOffset = ffd.getNode("zOrderOffset").get!int(0);
         }
@@ -63,7 +68,7 @@ final class PropResourceEditor : ResourceBaseEditor {
             _renders ~= render;
         }
 
-        _parameterWindow = new ParameterWindow(_renders, _hitbox, _hurtbox, _zOrderOffset, _material);
+        _parameterWindow = new ParameterWindow(_renders, _hitbox, _hurtbox, _controller, _zOrderOffset, _material);
 
         _toolbox = new Toolbox();
         _toolbox.setRenders(_renders);
@@ -86,6 +91,11 @@ final class PropResourceEditor : ResourceBaseEditor {
                 _renders ~= render;
             }
             _toolbox.setRenders(_renders);
+            setDirty();
+        });
+
+        _parameterWindow.addEventListener("property_controller", {
+            _controller = _parameterWindow.getController();
             setDirty();
         });
 
@@ -144,6 +154,9 @@ final class PropResourceEditor : ResourceBaseEditor {
             _hitbox.save(node);
         }
         _hurtbox.save(node);
+        if (_controller.length) {
+            node.addNode("controller").add(_controller);
+        }
         node.addNode("zOrderOffset").add(_zOrderOffset);
         node.addNode("material").add(_material);
         return node;

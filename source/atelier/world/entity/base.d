@@ -19,6 +19,7 @@ struct EntityData {
     string[] tags;
     string layer = Entity.Layer.scene.stringof;
     Vec3i position;
+    string controller;
 
     mixin Serializer;
 }
@@ -234,6 +235,8 @@ abstract class Entity {
         _tags = data.tags.dup;
         _layer = asEnum!Layer(data.layer);
         setPosition(data.position);
+        if (data.controller)
+            setController(data.controller);
     }
 
     final Layer getLayer() const {

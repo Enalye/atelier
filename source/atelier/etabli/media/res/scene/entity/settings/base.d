@@ -18,6 +18,7 @@ package(atelier.etabli.media.res.scene) abstract class BaseEntitySettings : UIEl
         SelectButton _graphicBtn;
         TextField _nameField;
         TextField _tagsField;
+        TextField _controllerField;
         IntegerField _posXField, _posYField, _posZField;
         SelectButton _layerBtn;
     }
@@ -77,6 +78,21 @@ package(atelier.etabli.media.res.scene) abstract class BaseEntitySettings : UIEl
                 setDirty();
             });
             hlayout.addUI(_tagsField);
+        }
+
+        {
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(284f, 0f));
+            addProperty(hlayout);
+
+            hlayout.addUI(new Label("Contrôleur:", Atelier.theme.font));
+
+            _controllerField = new TextField;
+            _controllerField.addEventListener("value", {
+                _entity.entityData.controller = _controllerField.value;
+                setDirty();
+            });
+            hlayout.addUI(_controllerField);
         }
 
         {

@@ -272,13 +272,6 @@ final class NavMesh {
                             priority));
                     cameFrom[position] = NavPath.Node(node.position, node.start, node.end);
                 }
-
-                /*for (uint y = i + 1; y < currentSector._edges.length; ++y) {
-                    float dist = currentSector._edges[i].center.distanceSquared(
-                        currentSector._edges[y].center);
-
-                    currentSector._edges[i].
-                    }*/
             }
         }
 
@@ -296,8 +289,6 @@ final class NavMesh {
     }
 
     private void _generateSectors() {
-        long startTime = Clock.currStdTime();
-
         _tiles.setup(Atelier.world.scene.columns << 1, Atelier.world.scene.lines << 1, false);
 
         for (uint z; z < Atelier.world.scene.levels; ++z) {
@@ -317,14 +308,9 @@ final class NavMesh {
 
                         _sectors ~= sector;
                     }
-                    //if (_sectors.length > 100)
-                    //    break;
                 }
             }
         }
-        double loadDuration = (cast(double)(Clock.currStdTime() - startTime) / 10_000_000.0);
-        Atelier.log("Généré ", _sectors.length, " secteurs, effectué en ",
-            to!string(loadDuration), "sec");
     }
 
     private void _connectSectors() {

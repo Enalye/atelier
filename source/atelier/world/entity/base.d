@@ -51,6 +51,10 @@ mixin template EntityController() {
         return _controller;
     }
 
+    override bool hasController() {
+        return _controller !is null;
+    }
+
     override void setController(string id) {
         import atelier.core : Atelier;
 
@@ -251,9 +255,6 @@ abstract class Entity {
 
         if (data.controller.length) {
             setController(data.controller);
-        }
-        else if (_baseControllerId.length) {
-            setController(_baseControllerId);
         }
     }
 
@@ -544,7 +545,7 @@ abstract class Entity {
     }
 
     final void updateEntity() {
-        if(_isEnabled) {
+        if (_isEnabled) {
             foreach (component; _components) {
                 component.update();
             }
@@ -747,6 +748,10 @@ abstract class Entity {
         return false;
     }
 
+    bool hasController() {
+        return false;
+    }
+
     void setController(string id) {
     }
 
@@ -790,7 +795,7 @@ abstract class Entity {
 
     final void draw(Vec2f offset, Sprite shadowSprite) {
         Vec2f drawPos = offset + cameraPosition();
-        if(_isEnabled) {
+        if (_isEnabled) {
 
             foreach (child; _renderEntitiesBehind) {
                 child.draw(offset, shadowSprite);
@@ -801,13 +806,13 @@ abstract class Entity {
 
         if (_collider && _collider.isDisplayed) {
             _collider.drawBack(drawPos);
-            if(_isEnabled) {
+            if (_isEnabled) {
                 render(drawPos);
             }
             _collider.drawFront(drawPos);
         }
         else {
-            if(_isEnabled) {
+            if (_isEnabled) {
                 render(drawPos);
             }
         }
@@ -816,7 +821,7 @@ abstract class Entity {
             _hurtbox.draw(drawPos);
         }
 
-        if(_isEnabled) {
+        if (_isEnabled) {
             foreach (child; _renderEntitiesAbove) {
                 child.draw(offset, shadowSprite);
             }
@@ -824,7 +829,7 @@ abstract class Entity {
     }
 
     final void drawTransition(Vec2f offset, Sprite shadowSprite, float tTransition, bool drawGraphics) {
-        if(_isEnabled) {
+        if (_isEnabled) {
             Vec2f drawPos = offset + cameraPosition();
 
             foreach (child; _renderEntitiesBehind) {
@@ -883,14 +888,19 @@ abstract class Entity {
     }
 
     final void setEnabled(bool enabled) {
-        if(enabled) {
+        if (enabled) {
             _isEnabled = true;
-            if(_collider) _collider.register();
-            if(_hurtbox) _hurtbox.register();
-        } else {
+            if (_collider)
+                _collider.register();
+            if (_hurtbox)
+                _hurtbox.register();
+        }
+        else {
             _isEnabled = false;
-            if(_collider) _collider.unregister();
-            if(_hurtbox) _hurtbox.unregister();
+            if (_collider)
+                _collider.unregister();
+            if (_hurtbox)
+                _hurtbox.unregister();
         }
     }
 
@@ -900,6 +910,11 @@ abstract class Entity {
         }
         if (_hurtbox) {
             _hurtbox.register();
+        }
+        if (!hasController()) {
+            if (_baseControllerId.length) {
+                setController(_baseControllerId);
+            }
         }
 
         onRegisterEntity();

@@ -165,7 +165,7 @@ final class TerrainMap : Resource!TerrainMap {
             _columns = sizeNode.get!uint(0);
             _lines = sizeNode.get!uint(1);
             _collision.setDimensions(_columns, _lines);
-            _material.setDimensions(_columns, _lines);
+            _material.setDimensions(_columns << 1, _lines << 1);
         }
 
         if (ffd.hasNode("tileset")) {
@@ -232,7 +232,7 @@ final class TerrainMap : Resource!TerrainMap {
         _lines = stream.read!uint();
 
         _collision.setDimensions(_columns, _lines);
-        _material.setDimensions(_columns, _lines);
+        _material.setDimensions(_columns << 1, _lines << 1);
         _collision.setValues(0, 0, stream.read!(int[][])());
         _material.setValues(0, 0, stream.read!(int[][])());
 
@@ -293,7 +293,7 @@ final class TerrainMap : Resource!TerrainMap {
 
     int getMaterial(int tileId, Vec2i subCoords) {
         tileId <<= 1;
-        Vec2i coords = Vec2i(tileId % _material.lines, tileId / _material.lines);
+        Vec2i coords = Vec2i(tileId % _material.columns, tileId / _material.columns);
         coords.y <<= 1;
         coords += subCoords;
         return _material.getValue(coords.x, coords.y);

@@ -801,52 +801,46 @@ abstract class Entity {
 
     final void draw(Vec2f offset, Sprite shadowSprite) {
         Vec2f drawPos = offset + cameraPosition();
+
+        foreach (child; _renderEntitiesBehind) {
+            child.draw(offset, shadowSprite);
+        }
+
         if (_isEnabled) {
-
-            foreach (child; _renderEntitiesBehind) {
-                child.draw(offset, shadowSprite);
-            }
-
             renderShadow(drawPos, shadowSprite);
-        }
 
-        if (_collider && _collider.isDisplayed) {
-            _collider.drawBack(drawPos);
-            if (_isEnabled) {
+            if (_collider && _collider.isDisplayed) {
+                _collider.drawBack(drawPos);
+                render(drawPos);
+                _collider.drawFront(drawPos);
+            }
+            else {
                 render(drawPos);
             }
-            _collider.drawFront(drawPos);
-        }
-        else {
-            if (_isEnabled) {
-                render(drawPos);
+
+            if (_hurtbox && _hurtbox.isDisplayed) {
+                _hurtbox.draw(drawPos);
             }
         }
 
-        if (_hurtbox && _hurtbox.isDisplayed) {
-            _hurtbox.draw(drawPos);
-        }
-
-        if (_isEnabled) {
-            foreach (child; _renderEntitiesAbove) {
-                child.draw(offset, shadowSprite);
-            }
+        foreach (child; _renderEntitiesAbove) {
+            child.draw(offset, shadowSprite);
         }
     }
 
     final void drawTransition(Vec2f offset, Sprite shadowSprite, float tTransition, bool drawGraphics) {
+        Vec2f drawPos = offset + cameraPosition();
+
+        foreach (child; _renderEntitiesBehind) {
+            child.drawTransition(offset, shadowSprite, tTransition, drawGraphics);
+        }
+
         if (_isEnabled) {
-            Vec2f drawPos = offset + cameraPosition();
-
-            foreach (child; _renderEntitiesBehind) {
-                child.drawTransition(offset, shadowSprite, tTransition, drawGraphics);
-            }
-
             Atelier.world.renderEntityTransition(this, drawPos, shadowSprite, tTransition, drawGraphics);
+        }
 
-            foreach (child; _renderEntitiesAbove) {
-                child.drawTransition(offset, shadowSprite, tTransition, drawGraphics);
-            }
+        foreach (child; _renderEntitiesAbove) {
+            child.drawTransition(offset, shadowSprite, tTransition, drawGraphics);
         }
     }
 

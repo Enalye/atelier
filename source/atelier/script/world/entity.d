@@ -108,6 +108,12 @@ package void loadLibWorld_entity(GrModule mod) {
     mod.setParameters(["entity"]);
     mod.addFunction(&_getAngle, "getAngle", [entityType], [grFloat]);
 
+    mod.setDescription(GrLocale.fr_FR, "Change l'accélération de l'entité");
+    mod.setParameters(["entity", "x", "y", "z"]);
+    mod.addFunction(&_accelerate, "accelerate", [
+            entityType, grFloat, grFloat, grFloat
+        ]);
+
     mod.setDescription(GrLocale.fr_FR, "S’oriente vers une cible");
     mod.setParameters(["entity", "x", "y"]);
     mod.addFunction(&_lookAt_xy, "lookAt", [entityType, grInt, grInt]);
@@ -115,6 +121,9 @@ package void loadLibWorld_entity(GrModule mod) {
     mod.setDescription(GrLocale.fr_FR, "S’oriente vers une cible");
     mod.setParameters(["entity", "target"]);
     mod.addFunction(&_lookAt_entity, "lookAt", [entityType, entityType]);
+
+    mod.addFunction(&_isOnGround, "isOnGround", [entityType], [grBool]);
+    mod.addFunction(&_getBaseMaterial, "getBaseMaterial", [entityType], [grInt]);
 }
 
 private void _unregister(GrCall call) {
@@ -207,6 +216,11 @@ private void _getAngle(GrCall call) {
     call.setFloat(entity.angle);
 }
 
+private void _accelerate(GrCall call) {
+    Entity entity = call.getNative!Entity(0);
+    entity.accelerate(Vec3f(call.getFloat(1), call.getFloat(2), call.getFloat(3)));
+}
+
 private void _lookAt_xy(GrCall call) {
     Entity entity = call.getNative!Entity(0);
     Vec2i target = Vec2i(call.getInt(1), call.getInt(2));
@@ -217,4 +231,14 @@ private void _lookAt_entity(GrCall call) {
     Entity entity = call.getNative!Entity(0);
     Entity target = call.getNative!Entity(1);
     entity.lookAt(target);
+}
+
+private void _isOnGround(GrCall call) {
+    Entity entity = call.getNative!Entity(0);
+    call.setBool(entity.isOnGround);
+}
+
+private void _getBaseMaterial(GrCall call) {
+    Entity entity = call.getNative!Entity(0);
+    call.setInt(entity.getBaseMaterial);
 }

@@ -35,16 +35,26 @@ final class ShotCollider : Collider {
             .CollisionHit.Type.none) {
     }
 
-    override void move(Vec3f moveDir,
+    override bool move(Vec3f moveDir,
         Physics.CollisionHit.Type hitType = Physics.CollisionHit.Type.none) {
         Vec3f subMove = entity.getSubPosition();
+
+        if (moveDir.x >= 10 || moveDir.x <= -10 ||
+            moveDir.y >= 10 || moveDir.y <= -10 ||
+            moveDir.z >= 10 || moveDir.z <= -10 ||
+            isNaN(moveDir.x) || isNaN(moveDir.y) || isNaN(moveDir.z) ||
+            isInfinity(moveDir.x) || isInfinity(moveDir.y) || isInfinity(moveDir.z)) {
+            Atelier.log("[Atelier] Entité en survitesse: ", moveDir);
+            return false;
+        }
+
         subMove += moveDir;
         Vec3i gridMovement = cast(Vec3i) subMove.round();
         subMove -= cast(Vec3f) gridMovement;
         entity.setSubPosition(subMove);
 
         if (gridMovement == Vec3i.zero)
-            return;
+            return true;
 
         Vec3i stepDir = gridMovement.sign();
 
@@ -196,6 +206,8 @@ final class ShotCollider : Collider {
                 }
             }
         }
+
+        return true;
     }
 
     private void _moveRaw(Entity entity, Vec3i dir, int baseZ) {

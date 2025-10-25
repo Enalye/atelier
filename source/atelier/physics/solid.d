@@ -68,8 +68,18 @@ final class SolidCollider : Collider {
             .CollisionHit.Type.none) {
     }
 
-    override void move(Vec3f moveDir, Physics.CollisionHit.Type type = Physics
+    override bool move(Vec3f moveDir, Physics.CollisionHit.Type type = Physics
             .CollisionHit.Type.none) {
+
+        if (moveDir.x >= 10 || moveDir.x <= -10 ||
+            moveDir.y >= 10 || moveDir.y <= -10 ||
+            moveDir.z >= 10 || moveDir.z <= -10 ||
+            isNaN(moveDir.x) || isNaN(moveDir.y) || isNaN(moveDir.z) ||
+            isInfinity(moveDir.x) || isInfinity(moveDir.y) || isInfinity(moveDir.z)) {
+            Atelier.log("[Atelier] Entité en survitesse: ", moveDir);
+            return false;
+        }
+
         Vec3f _moveRemaining = entity.getSubPosition() + moveDir;
         Vec3i _position = entity.getPosition();
 
@@ -177,6 +187,8 @@ final class SolidCollider : Collider {
 
             _isTempCollidable = true;
         }
+
+        return true;
     }
 
     ActorCollider[] getAllRidingActors() {

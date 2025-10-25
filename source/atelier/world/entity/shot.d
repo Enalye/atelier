@@ -12,7 +12,7 @@ final class Shot : Entity, Resource!Shot {
 
     private {
         bool _hasTtl;
-        uint _ttl, _time;
+        uint _ttl, _time, _delay;
         bool _hasBounces;
         uint _bounces, _currentBounce;
 
@@ -49,7 +49,7 @@ final class Shot : Entity, Resource!Shot {
         _bounces = other._bounces;
         _shadow = true;
 
-        _stateTimer.start(30);
+        _stateTimer.start(_delay);
         _state = State.spawn;
     }
 
@@ -78,6 +78,13 @@ final class Shot : Entity, Resource!Shot {
     void setBounces(bool hasBounces_, uint bounces_) {
         _hasBounces = hasBounces_;
         _bounces = bounces_;
+    }
+
+    void setDelay(uint delay_) {
+        _delay = delay_;
+
+        // evil hack :)
+        _stateTimer.start(_delay);
     }
 
     override void onCollide(Physics.CollisionHit hit) {

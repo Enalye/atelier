@@ -42,6 +42,9 @@ abstract class Behavior(T : Entity) {
     void onClose() {
     }
 
+    void onHit(Vec3f normal) {
+    }
+
     void onSquish(Vec3f normal) {
     }
 

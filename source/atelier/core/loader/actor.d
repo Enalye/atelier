@@ -11,6 +11,7 @@ import atelier.core.loader.util;
 struct HitboxData {
     bool hasHitbox = false;
     Vec3u size;
+    float bounciness = 0f;
 
     void load(const Farfadet ffd) {
         if (ffd.hasNode("hitbox")) {
@@ -18,6 +19,9 @@ struct HitboxData {
             Farfadet hitboxNode = ffd.getNode("hitbox");
             if (hitboxNode.hasNode("size")) {
                 size = hitboxNode.getNode("size").get!Vec3u(0);
+            }
+            if (hitboxNode.hasNode("bounciness")) {
+                bounciness = hitboxNode.getNode("bounciness").get!float(0);
             }
         }
     }
@@ -27,6 +31,7 @@ struct HitboxData {
 
         if (hasHitbox) {
             stream.write!Vec3u(size);
+            stream.write!float(bounciness);
         }
     }
 
@@ -35,6 +40,7 @@ struct HitboxData {
 
         if (hasHitbox) {
             size = stream.read!Vec3u();
+            bounciness = stream.read!float();
         }
     }
 }
@@ -102,7 +108,7 @@ package void loadActor(InStream stream) {
             actor.addGraphic(graphicDataList[i].name, graphic);
         }
         if (hitbox.hasHitbox) {
-            actor.setupCollider(hitbox.size);
+            actor.setupCollider(hitbox.size, hitbox.bounciness);
         }
         actor.setupRepulsor(repulsor);
         actor.setupHurtbox(hurtbox);

@@ -151,7 +151,7 @@ abstract class Collider {
 
     abstract void moveTile(Vec3i dir, Physics.CollisionHit.Type type = Physics
             .CollisionHit.Type.none);
-    abstract void move(Vec3f dir, Physics.CollisionHit.Type type = Physics.CollisionHit.Type.none);
+    abstract bool move(Vec3f dir, Physics.CollisionHit.Type type = Physics.CollisionHit.Type.none);
 
     final void drawBox(Vec2f origin, float alpha) {
         Vec2f offset = cast(Vec2f)(_hitbox.xy - (_hitbox.xy >> 1));

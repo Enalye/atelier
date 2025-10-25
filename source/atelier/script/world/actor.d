@@ -17,9 +17,18 @@ package void loadLibWorld_actor(GrModule mod) {
     mod.setDescription(GrLocale.fr_FR, "Crée un acteur");
     mod.setParameters(["rid"]);
     mod.addConstructor(&_ctor, actorType, [grString]);
+
+    mod.addFunction(&_setGravity, "setGravity", [
+            actorType, grFloat
+        ]);
 }
 
 private void _ctor(GrCall call) {
     Actor actor = Atelier.res.get!Actor(call.getString(0));
     call.setNative(actor);
+}
+
+private void _setGravity(GrCall call) {
+    Actor actor = call.getNative!Actor(0);
+    actor.setGravity(call.getFloat(1));
 }

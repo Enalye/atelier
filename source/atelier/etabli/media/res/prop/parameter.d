@@ -240,22 +240,6 @@ package final class ParameterWindow : UIElement {
             hlayout.setPadding(Vec2f(284f, 0f));
             vlist.addList(hlayout);
 
-            hlayout.addUI(new Label("Bouge ?", Atelier.theme.font));
-            Checkbox a = new Checkbox();
-            a.isEnabled = false;
-            hlayout.addUI(a);
-
-            hlayout.addUI(new Label("Facteur:", Atelier.theme.font));
-            a = new Checkbox();
-            a.isEnabled = false;
-            hlayout.addUI(a);
-        }
-
-        {
-            HLayout hlayout = new HLayout;
-            hlayout.setPadding(Vec2f(284f, 0f));
-            vlist.addList(hlayout);
-
             hlayout.addUI(new Label("Rebond:", Atelier.theme.font));
 
             _bouncinessField = new NumberField;
@@ -267,6 +251,22 @@ package final class ParameterWindow : UIElement {
                 dispatchEvent("property_hitbox");
             });
             hlayout.addUI(_bouncinessField);
+        }
+
+        {
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(284f, 0f));
+            vlist.addList(hlayout);
+
+            hlayout.addUI(new Label("Bouge ?", Atelier.theme.font));
+            Checkbox a = new Checkbox();
+            a.isEnabled = false;
+            hlayout.addUI(a);
+
+            hlayout.addUI(new Label("Facteur:", Atelier.theme.font));
+            a = new Checkbox();
+            a.isEnabled = false;
+            hlayout.addUI(a);
         }
 
         {

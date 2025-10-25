@@ -324,11 +324,11 @@ final class Particle : Entity {
         _relativeDistance = other._relativeDistance;
     }
 
-    void setupCollider(Vec3u size_) {
+    void setupCollider(Vec3u size_, float bounciness) {
         if (_collider) {
             _collider.setEntity(null);
         }
-        _collider = new ActorCollider(size_);
+        _collider = new ActorCollider(size_, bounciness);
 
         if (_collider) {
             _collider.setEntity(this);

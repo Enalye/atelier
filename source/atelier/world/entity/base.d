@@ -43,12 +43,12 @@ mixin template EntityController() {
         Controller!T _controller;
     }
 
-    void setController(Controller!T controller) {
-        _controller = controller;
-    }
-
     Controller!T getController() {
         return _controller;
+    }
+
+    override bool hasController() {
+        return _controller !is null;
     }
 
     override void setController(string id) {
@@ -66,6 +66,13 @@ mixin template EntityController() {
             Atelier.world.registerController(_controller);
             _controller.onStart();
         }
+    }
+
+    final private void onHit(Vec3f normal) {
+        if (!_controller)
+            return;
+
+        _controller.onHit(normal);
     }
 
     final private void onSquish(Vec3f normal) {
@@ -251,9 +258,6 @@ abstract class Entity {
 
         if (data.controller.length) {
             setController(data.controller);
-        }
-        else if (_baseControllerId.length) {
-            setController(_baseControllerId);
         }
     }
 
@@ -544,7 +548,7 @@ abstract class Entity {
     }
 
     final void updateEntity() {
-        if(_isEnabled) {
+        if (_isEnabled) {
             foreach (component; _components) {
                 component.update();
             }
@@ -686,7 +690,10 @@ abstract class Entity {
         }
         else {
             if (_collider) {
-                _collider.move(dir);
+                if (!_collider.move(dir)) {
+                    _velocity.set(0f, 0f, 0f);
+                    _acceleration.set(0f, 0f, 0f);
+                }
             }
             else {
                 moveRaw(dir);
@@ -747,6 +754,10 @@ abstract class Entity {
         return false;
     }
 
+    bool hasController() {
+        return false;
+    }
+
     void setController(string id) {
     }
 
@@ -790,7 +801,7 @@ abstract class Entity {
 
     final void draw(Vec2f offset, Sprite shadowSprite) {
         Vec2f drawPos = offset + cameraPosition();
-        if(_isEnabled) {
+        if (_isEnabled) {
 
             foreach (child; _renderEntitiesBehind) {
                 child.draw(offset, shadowSprite);
@@ -801,13 +812,13 @@ abstract class Entity {
 
         if (_collider && _collider.isDisplayed) {
             _collider.drawBack(drawPos);
-            if(_isEnabled) {
+            if (_isEnabled) {
                 render(drawPos);
             }
             _collider.drawFront(drawPos);
         }
         else {
-            if(_isEnabled) {
+            if (_isEnabled) {
                 render(drawPos);
             }
         }
@@ -816,7 +827,7 @@ abstract class Entity {
             _hurtbox.draw(drawPos);
         }
 
-        if(_isEnabled) {
+        if (_isEnabled) {
             foreach (child; _renderEntitiesAbove) {
                 child.draw(offset, shadowSprite);
             }
@@ -824,7 +835,7 @@ abstract class Entity {
     }
 
     final void drawTransition(Vec2f offset, Sprite shadowSprite, float tTransition, bool drawGraphics) {
-        if(_isEnabled) {
+        if (_isEnabled) {
             Vec2f drawPos = offset + cameraPosition();
 
             foreach (child; _renderEntitiesBehind) {
@@ -883,14 +894,19 @@ abstract class Entity {
     }
 
     final void setEnabled(bool enabled) {
-        if(enabled) {
+        if (enabled) {
             _isEnabled = true;
-            if(_collider) _collider.register();
-            if(_hurtbox) _hurtbox.register();
-        } else {
+            if (_collider)
+                _collider.register();
+            if (_hurtbox)
+                _hurtbox.register();
+        }
+        else {
             _isEnabled = false;
-            if(_collider) _collider.unregister();
-            if(_hurtbox) _hurtbox.unregister();
+            if (_collider)
+                _collider.unregister();
+            if (_hurtbox)
+                _hurtbox.unregister();
         }
     }
 
@@ -900,6 +916,11 @@ abstract class Entity {
         }
         if (_hurtbox) {
             _hurtbox.register();
+        }
+        if (!hasController()) {
+            if (_baseControllerId.length) {
+                setController(_baseControllerId);
+            }
         }
 
         onRegisterEntity();

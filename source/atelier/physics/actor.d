@@ -12,15 +12,28 @@ import atelier.world;
 final class ActorCollider : Collider {
     private {
         SolidCollider _riding;
+        float _bounciness = 0f;
     }
 
-    this(Vec3u size_) {
+    @property {
+        float bounciness() const {
+            return _bounciness;
+        }
+
+        float bounciness(float bounciness_) {
+            return _bounciness = bounciness_;
+        }
+    }
+
+    this(Vec3u size_, float bounciness_) {
         super(size_);
         _type = Type.actor;
+        _bounciness = bounciness_;
     }
 
     this(ActorCollider other) {
         super(other);
+        _bounciness = other._bounciness;
     }
 
     override Collider fetch() {
@@ -163,16 +176,26 @@ final class ActorCollider : Collider {
         }
     }
 
-    override void move(Vec3f moveDir,
+    override bool move(Vec3f moveDir,
         Physics.CollisionHit.Type hitType = Physics.CollisionHit.Type.none) {
         Vec3f subMove = entity.getSubPosition();
+
+        if (moveDir.x >= 10 || moveDir.x <= -10 ||
+            moveDir.y >= 10 || moveDir.y <= -10 ||
+            moveDir.z >= 10 || moveDir.z <= -10 ||
+            isNaN(moveDir.x) || isNaN(moveDir.y) || isNaN(moveDir.z) ||
+            isInfinity(moveDir.x) || isInfinity(moveDir.y) || isInfinity(moveDir.z)) {
+            Atelier.log("[Atelier] Entité en survitesse: ", moveDir);
+            return false;
+        }
+
         subMove += moveDir;
         Vec3i gridMovement = cast(Vec3i) subMove.round();
         subMove -= cast(Vec3f) gridMovement;
         entity.setSubPosition(subMove);
 
         if (gridMovement == Vec3i.zero)
-            return;
+            return true;
 
         Vec3i stepDir = gridMovement.sign();
 
@@ -377,6 +400,8 @@ final class ActorCollider : Collider {
                 }
             }
         }
+
+        return true;
     }
 
     private void _moveTileRaw(Entity entity, Vec3i dir, int baseZ) {

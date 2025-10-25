@@ -51,6 +51,13 @@ abstract class Controller(T : Entity) : ControllerWrapper {
     void onTeleport(uint direction, bool isExit) {
     }
 
+    final void onHit(Vec3f normal) {
+        if (!_behavior)
+            return;
+
+        _behavior.onHit(normal);
+    }
+
     final void onSquish(Vec3f normal) {
         if (!_behavior)
             return;

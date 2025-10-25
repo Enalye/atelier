@@ -72,6 +72,13 @@ mixin template EntityController() {
         }
     }
 
+    final private void onHit(Vec3f normal) {
+        if (!_controller)
+            return;
+
+        _controller.onHit(normal);
+    }
+
     final private void onSquish(Vec3f normal) {
         if (!_controller)
             return;
@@ -687,7 +694,10 @@ abstract class Entity {
         }
         else {
             if (_collider) {
-                _collider.move(dir);
+                if (!_collider.move(dir)) {
+                    _velocity.set(0f, 0f, 0f);
+                    _acceleration.set(0f, 0f, 0f);
+                }
             }
             else {
                 moveRaw(dir);

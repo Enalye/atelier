@@ -75,11 +75,11 @@ final class Actor : Entity, Resource!Actor {
         _frictionBrake = value;
     }
 
-    void setupCollider(Vec3u size_) {
+    void setupCollider(Vec3u size_, float bounciness) {
         if (_collider) {
             _collider.setEntity(null);
         }
-        _collider = new ActorCollider(size_);
+        _collider = new ActorCollider(size_, bounciness);
 
         if (_collider) {
             _collider.setEntity(this);
@@ -113,6 +113,7 @@ final class Actor : Entity, Resource!Actor {
             if (normal.lengthSquared() > 0f) {
                 Vec3f bounceVec = _velocity.dot(normal) * normal;
                 float bounciness = hit.solid ? hit.solid.bounciness : 0f;
+                bounciness += _collider ? (cast(ActorCollider) _collider).bounciness : 0f;
                 _velocity += -(1f + bounciness) * bounceVec;
             }
             if (normal.z > 0f) {
@@ -126,6 +127,7 @@ final class Actor : Entity, Resource!Actor {
                     _baseMaterial = Atelier.world.scene.getMaterial(_position);
                 }
             }
+            onHit(hit.normal);
             break;
         case squish:
             onSquish(hit.normal);

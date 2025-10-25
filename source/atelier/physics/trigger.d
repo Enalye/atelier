@@ -52,8 +52,9 @@ final class TriggerCollider : Collider {
             .CollisionHit.Type.none) {
     }
 
-    override void move(Vec3f moveDir,
+    override bool move(Vec3f moveDir,
         Physics.CollisionHit.Type hitType = Physics.CollisionHit.Type.none) {
         entity.moveRaw(moveDir);
+        return true;
     }
 }

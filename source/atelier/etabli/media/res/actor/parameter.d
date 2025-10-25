@@ -14,6 +14,7 @@ import atelier.etabli.media.res.entity_render;
 package struct HitboxData {
     bool hasHitbox = false;
     Vec3u size = Vec3u.zero;
+    float bounciness = 0f;
 
     void load(Farfadet ffd) {
         hasHitbox = true;
@@ -23,11 +24,19 @@ package struct HitboxData {
         else {
             size = Vec3u.zero;
         }
+
+        if (ffd.hasNode("bounciness")) {
+            bounciness = ffd.getNode("bounciness").get!float(0);
+        }
+        else {
+            bounciness = 0f;
+        }
     }
 
     void save(Farfadet ffd) {
         Farfadet node = ffd.addNode("hitbox");
         node.addNode("size").add(size);
+        node.addNode("bounciness").add(bounciness);
     }
 }
 
@@ -39,7 +48,7 @@ package final class ParameterWindow : UIElement {
         HitboxData _hitbox;
         Checkbox _hasHitboxCheck;
         IntegerField _collXField, _collYField, _collZField;
-        SelectButton _shapeBtn;
+        NumberField _bouncinessField;
 
         // Repulsor
         RepulsorData _repulsor;
@@ -142,6 +151,7 @@ package final class ParameterWindow : UIElement {
                 _collXField.isEnabled = _hitbox.hasHitbox;
                 _collYField.isEnabled = _hitbox.hasHitbox;
                 _collZField.isEnabled = _hitbox.hasHitbox;
+                _bouncinessField.isEnabled = _hitbox.hasHitbox;
                 dispatchEvent("property_hitbox");
             });
             hlayout.addUI(_hasHitboxCheck);
@@ -193,6 +203,24 @@ package final class ParameterWindow : UIElement {
                 dispatchEvent("property_hitbox");
             });
             hlayout.addUI(_collZField);
+        }
+
+        {
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(284f, 0f));
+            vlist.addList(hlayout);
+
+            hlayout.addUI(new Label("Rebond:", Atelier.theme.font));
+
+            _bouncinessField = new NumberField;
+            _bouncinessField.setMinValue(0f);
+            _bouncinessField.value = _hitbox.bounciness;
+            _bouncinessField.isEnabled = _hitbox.hasHitbox;
+            _bouncinessField.addEventListener("value", {
+                _hitbox.bounciness = _bouncinessField.value;
+                dispatchEvent("property_hitbox");
+            });
+            hlayout.addUI(_bouncinessField);
         }
 
         {

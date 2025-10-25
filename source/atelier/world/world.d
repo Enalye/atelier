@@ -187,11 +187,7 @@ final class World {
 
     private void _setupPlayerController() {
         if (!_playerController) {
-            _playerController = fetchController!Actor(Atelier.env.getPlayerController());
-            if (_playerController) {
-                _playerController.setup(_player);
-                _controllers ~= _playerController;
-            }
+            _player.setController(Atelier.env.getPlayerController());
         }
     }
 

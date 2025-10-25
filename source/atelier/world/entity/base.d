@@ -43,10 +43,6 @@ mixin template EntityController() {
         Controller!T _controller;
     }
 
-    void setController(Controller!T controller) {
-        _controller = controller;
-    }
-
     Controller!T getController() {
         return _controller;
     }

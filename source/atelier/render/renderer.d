@@ -86,6 +86,10 @@ final class Renderer {
         SDL_ShowCursor(_cursor is null);
     }
 
+    Image getCursor() {
+        return _cursor;
+    }
+
     Vec2f getLogicalPosition(Vec2f position) const {
         Vec2f windowSize = Vec2f(Atelier.window.width, Atelier.window.height);
         Vec2f ratio = (cast(Vec2f) _kernelSize) / windowSize;

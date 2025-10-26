@@ -51,7 +51,7 @@ final class Actor : Entity, Resource!Actor {
     }
 
     this() {
-
+        super(Entity.Type.actor);
     }
 
     this(Actor other) {
@@ -76,9 +76,7 @@ final class Actor : Entity, Resource!Actor {
     }
 
     void setupCollider(Vec3u size_, float bounciness) {
-        if (_collider) {
-            _collider.setEntity(null);
-        }
+        removeCollider();
         _collider = new ActorCollider(size_, bounciness);
 
         if (_collider) {

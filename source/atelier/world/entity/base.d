@@ -105,7 +105,18 @@ abstract class Entity {
         glow
     }
 
+    enum Type {
+        actor,
+        prop,
+        particle,
+        proxy,
+        shot,
+        teleporter,
+        trigger
+    }
+
     private {
+        Type _type;
         bool _isRegistered = false;
         string _name;
         string[] _tags;
@@ -153,6 +164,10 @@ abstract class Entity {
     }
 
     @property {
+        final Type type() const {
+            return _type;
+        }
+
         final Vec2f cameraPosition() const {
             return Vec2f(_position.x, _position.y - _position.z);
         }
@@ -215,10 +230,12 @@ abstract class Entity {
         }
     }
 
-    this() {
+    this(Type type_) {
+        _type = type_;
     }
 
     this(Entity other) {
+        _type = other._type;
         _name = other._name;
         _tags = other._tags;
         _layer = other._layer;
@@ -309,6 +326,14 @@ abstract class Entity {
 
     void removeComponent(T : EntityComponent)() {
         _components.remove(T.stringof);
+    }
+
+    final void removeCollider() {
+        if (_collider) {
+            _collider.setEntity(null);
+            _collider.unregister();
+            _collider = null;
+        }
     }
 
     final Collider getBaseCollider() {

@@ -305,6 +305,7 @@ final class Particle : Entity {
     }
 
     this(EntityGraphic[string] graphics, uint generation, uint count, GrEvent event) {
+        super(Entity.Type.particle);
         _generation = generation;
         _count = count;
 

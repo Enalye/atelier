@@ -39,6 +39,7 @@ final class Shot : Entity, Resource!Shot {
     }
 
     this() {
+        super(Entity.Type.shot);
     }
 
     this(Shot other) {

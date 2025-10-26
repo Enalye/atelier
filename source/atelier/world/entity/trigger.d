@@ -31,6 +31,7 @@ final class Trigger : Entity {
     }
 
     this() {
+        super(Entity.Type.trigger);
     }
 
     this(Trigger other) {

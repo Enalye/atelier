@@ -68,6 +68,13 @@ mixin template EntityController() {
         }
     }
 
+    override string sendEvent(string event) {
+        if (!_controller)
+            return "";
+
+        return _controller.onEvent(event);
+    }
+
     final private void onHit(Vec3f normal) {
         if (!_controller)
             return;
@@ -103,6 +110,7 @@ abstract class Entity {
         string[] _tags;
         Layer _layer = Layer.scene;
         string _baseControllerId;
+        bool _hasCulling = true;
     }
 
     protected {
@@ -223,6 +231,7 @@ abstract class Entity {
         _shadowBaseZ = other._shadowBaseZ;
         _shadow = other._shadow;
         _isEnabled = other._isEnabled;
+        _hasCulling = other._hasCulling;
 
         foreach (id, renderer; other._graphics) {
             _graphics[id] = renderer.fetch();
@@ -644,9 +653,15 @@ abstract class Entity {
         return false;
     }
 
+    final void setCulling(bool culling) {
+        _hasCulling = culling;
+    }
+
     final bool isCulled(Vec4f bounds) const {
         if (!_graphic)
             return true;
+        if (!_hasCulling)
+            return false;
         return (_graphic.getRight(_position.x) < bounds.x) ||
             (_graphic.getLeft(_position.x) > bounds.z) ||
             (_graphic.getDown(_position.y) < bounds.y) ||
@@ -767,6 +782,10 @@ abstract class Entity {
     }
 
     void setController(string id) {
+    }
+
+    string sendEvent(string event) {
+        return "";
     }
 
     void updateMovement() {

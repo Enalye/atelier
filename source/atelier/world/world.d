@@ -405,16 +405,20 @@ final class World {
         switch (event.type) with (InputEvent.Type) {
         case mouseButton:
             Vec2f pos = event.asMouseButton().position;
-            _mousePosition = pos - _camera.getPosition();
+            _mousePosition = (pos + _camera.getPosition()) - (cast(Vec2f) Atelier.renderer.size) / 2f;
             break;
         case mouseMotion:
             Vec2f pos = event.asMouseMotion().position;
-            _mousePosition = pos - _camera.getPosition();
+            _mousePosition = (pos + _camera.getPosition()) - (cast(Vec2f) Atelier.renderer.size) / 2f;
             break;
         default:
             break;
         }
         _uiManager.dispatch(event);
+    }
+
+    Vec2f getMousePosition() const {
+        return _mousePosition;
     }
 
     void update(InputEvent[] inputEvents) {

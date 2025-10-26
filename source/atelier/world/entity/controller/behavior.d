@@ -36,6 +36,10 @@ abstract class Behavior(T : Entity) {
 
     void update();
 
+    string onEvent(string event) {
+        return "";
+    }
+
     void onStart() {
     }
 

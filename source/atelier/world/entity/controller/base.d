@@ -39,6 +39,17 @@ abstract class Controller(T : Entity) : ControllerWrapper {
         _entity = entity_;
     }
 
+    final string sendEvent(string event) {
+        if (!_behavior)
+            return "";
+
+        return _behavior.onEvent(event);
+    }
+
+    string onEvent(string event) {
+        return "";
+    }
+
     void onUpdate() {
     }
 

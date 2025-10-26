@@ -126,6 +126,10 @@ final class InputManager {
         _isLocked = isLocked;
     }
 
+    Vec2f getMousePosition() const {
+        return _mousePosition;
+    }
+
     /// Récupère les événements (clavier/souris/manette/etc)
     /// et les événements de la fenêtre (redimmensionnement/glisser-déposer/etc)
     /// et les redistribue sous forme d’InputEvent

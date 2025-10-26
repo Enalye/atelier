@@ -177,6 +177,10 @@ abstract class Entity {
             return _isMoving;
         }
 
+        bool isEnabled() const {
+            return _isEnabled;
+        }
+
         float angle() const {
             return _angle;
         }
@@ -752,6 +756,10 @@ abstract class Entity {
                 return true;
         }
         return false;
+    }
+
+    final bool hasGraphic(string graphic_) const {
+        return _graphic == _graphics[graphic_];
     }
 
     bool hasController() {

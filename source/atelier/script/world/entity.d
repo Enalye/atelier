@@ -122,7 +122,9 @@ package void loadLibWorld_entity(GrModule mod) {
     mod.setParameters(["entity", "target"]);
     mod.addFunction(&_lookAt_entity, "lookAt", [entityType, entityType]);
 
+    mod.addFunction(&_isEnabled, "isEnabled", [entityType], [grBool]);
     mod.addFunction(&_isOnGround, "isOnGround", [entityType], [grBool]);
+    mod.addFunction(&_hasGraphic, "hasGraphic", [entityType, grString], [grBool]);
     mod.addFunction(&_getBaseMaterial, "getBaseMaterial", [entityType], [grInt]);
 }
 
@@ -216,6 +218,11 @@ private void _getAngle(GrCall call) {
     call.setFloat(entity.angle);
 }
 
+private void _isEnabled(GrCall call) {
+    Entity entity = call.getNative!Entity(0);
+    call.setBool(entity.isEnabled());
+}
+
 private void _accelerate(GrCall call) {
     Entity entity = call.getNative!Entity(0);
     entity.accelerate(Vec3f(call.getFloat(1), call.getFloat(2), call.getFloat(3)));
@@ -236,6 +243,11 @@ private void _lookAt_entity(GrCall call) {
 private void _isOnGround(GrCall call) {
     Entity entity = call.getNative!Entity(0);
     call.setBool(entity.isOnGround);
+}
+
+private void _hasGraphic(GrCall call) {
+    Entity entity = call.getNative!Entity(0);
+    call.setBool(entity.hasGraphic(call.getString(1)));
 }
 
 private void _getBaseMaterial(GrCall call) {

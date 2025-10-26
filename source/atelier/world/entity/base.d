@@ -177,6 +177,10 @@ abstract class Entity {
             return _isMoving;
         }
 
+        bool isEnabled() const {
+            return _isEnabled;
+        }
+
         float angle() const {
             return _angle;
         }

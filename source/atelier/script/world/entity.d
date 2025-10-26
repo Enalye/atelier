@@ -122,6 +122,7 @@ package void loadLibWorld_entity(GrModule mod) {
     mod.setParameters(["entity", "target"]);
     mod.addFunction(&_lookAt_entity, "lookAt", [entityType, entityType]);
 
+    mod.addFunction(&_isEnabled, "isEnabled", [entityType], [grBool]);
     mod.addFunction(&_isOnGround, "isOnGround", [entityType], [grBool]);
     mod.addFunction(&_getBaseMaterial, "getBaseMaterial", [entityType], [grInt]);
 }
@@ -214,6 +215,11 @@ private void _setAngle(GrCall call) {
 private void _getAngle(GrCall call) {
     Entity entity = call.getNative!Entity(0);
     call.setFloat(entity.angle);
+}
+
+private void _isEnabled(GrCall call) {
+    Entity entity = call.getNative!Entity(0);
+    call.setBool(entity.isEnabled());
 }
 
 private void _accelerate(GrCall call) {

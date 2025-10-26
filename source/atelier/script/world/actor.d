@@ -21,11 +21,27 @@ package void loadLibWorld_actor(GrModule mod) {
     mod.addFunction(&_setGravity, "setGravity", [
             actorType, grFloat
         ]);
+    mod.addFunction(&_setHovering, "setHovering", [
+            actorType, grBool
+        ]);
+    mod.addFunction(&_setFrictionBrake, "setFrictionBrake", [
+            actorType, grFloat
+        ]);
 }
 
 private void _ctor(GrCall call) {
     Actor actor = Atelier.res.get!Actor(call.getString(0));
     call.setNative(actor);
+}
+
+private void _setHovering(GrCall call) {
+    Actor actor = call.getNative!Actor(0);
+    actor.setGravity(call.getBool(1));
+}
+
+private void _setFrictionBrake(GrCall call) {
+    Actor actor = call.getNative!Actor(0);
+    actor.setFrictionBrake(call.getFloat(1));
 }
 
 private void _setGravity(GrCall call) {

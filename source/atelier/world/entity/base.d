@@ -773,6 +773,7 @@ abstract class Entity {
         return false;
     }
 
+    /// À changer plus tard
     final bool hasGraphic(string graphic_) const {
         return _graphic == _graphics[graphic_];
     }

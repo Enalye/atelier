@@ -16,6 +16,7 @@ import atelier.world.entity.renderer;
 
 // Propriétés de base l’entité
 struct BaseEntityData {
+    string[] tags;
     string controller;
     int zOrderOffset;
 
@@ -75,11 +76,11 @@ mixin template EntityController() {
         return _controller.onEvent(event);
     }
 
-    final private void onHit(Vec3f normal) {
+    final private void onHit(Entity target, Vec3f normal) {
         if (!_controller)
             return;
 
-        _controller.onHit(normal);
+        _controller.onHit(target, normal);
     }
 
     final private void onSquish(Vec3f normal) {
@@ -265,7 +266,7 @@ abstract class Entity {
 
     final void setData(const(EntityData) data) {
         _name = data.name;
-        _tags = data.tags.dup;
+        _tags ~= data.tags.dup;
         _layer = asEnum!Layer(data.layer);
         setPosition(data.position);
 
@@ -275,6 +276,7 @@ abstract class Entity {
     }
 
     final void setBaseEntityData(const(BaseEntityData) data) {
+        _tags ~= data.tags.dup;
         _baseControllerId = data.controller;
         _zOrderOffset = data.zOrderOffset;
     }

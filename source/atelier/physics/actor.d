@@ -303,6 +303,7 @@ final class ActorCollider : Collider {
                                     0, deltaZ), hitbox);
                             if (solidHitUp.isColliding) {
                                 data.solid = solidHit.solid;
+                                data.entity = solidHit.solid.entity;
                                 data.normal = Vec3f(0, 0, deltaZ > 0 ? -1 : 1);
                                 data.type = hitType;
                                 entity.onCollide(data);
@@ -314,6 +315,7 @@ final class ActorCollider : Collider {
                             break;
                         default:
                             data.solid = solidHit.solid;
+                            data.entity = solidHit.solid.entity;
                             data.normal = Vec3f(-stepDir.x, 0, 0);
                             data.type = hitType;
                             entity.onCollide(data);
@@ -352,6 +354,7 @@ final class ActorCollider : Collider {
                                     0, deltaZ), hitbox);
                             if (solidHitUp.isColliding) {
                                 data.solid = solidHit.solid;
+                                data.entity = solidHit.solid.entity;
                                 data.normal = Vec3f(0, 0, deltaZ > 0 ? -1 : 1);
                                 data.type = hitType;
                                 entity.onCollide(data);
@@ -363,6 +366,7 @@ final class ActorCollider : Collider {
                             break;
                         default:
                             data.solid = solidHit.solid;
+                            data.entity = solidHit.solid.entity;
                             data.normal = Vec3f(0, -stepDir.y, 0);
                             data.type = hitType;
                             entity.onCollide(data);
@@ -389,6 +393,7 @@ final class ActorCollider : Collider {
                     if (solidHit.isColliding) {
                         Physics.CollisionHit data;
                         data.solid = solidHit.solid;
+                        data.entity = solidHit.solid.entity;
                         data.normal = Vec3f(0, 0, -stepDir.z);
                         data.type = hitType;
                         entity.onCollide(data);

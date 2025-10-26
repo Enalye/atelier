@@ -130,7 +130,7 @@ final class Actor : Entity, Resource!Actor {
                     _baseMaterial = Atelier.world.scene.getMaterial(_position);
                 }
             }
-            onHit(hit.normal);
+            onHit(hit.entity, hit.normal);
             break;
         case squish:
             onSquish(hit.normal);

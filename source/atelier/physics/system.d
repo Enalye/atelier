@@ -270,7 +270,9 @@ final class Physics {
                     hit.normal = -hurtboxHit.normal;
                     hit.entity = target.entity;
                     impact.entity.onCollide(hit);
-                    _enemyImpactHurtboxes.mark(i);
+                    if (!impact.isInvincible()) {
+                        _enemyImpactHurtboxes.mark(i);
+                    }
                     continue __enemyImpactHurboxesLoop;
                 }
             }
@@ -286,7 +288,9 @@ final class Physics {
                     hit.normal = -hurtboxHit.normal;
                     hit.entity = target.entity;
                     impact.entity.onCollide(hit);
-                    _enemyImpactHurtboxes.mark(i);
+                    if (!impact.isInvincible()) {
+                        _enemyImpactHurtboxes.mark(i);
+                    }
                     continue __enemyImpactHurboxesLoop;
                 }
             }
@@ -310,7 +314,9 @@ final class Physics {
                     hit.normal = -hurtboxHit.normal;
                     hit.entity = target.entity;
                     impact.entity.onCollide(hit);
-                    _enemyImpactHurtboxes.mark(i);
+                    if (!impact.isInvincible()) {
+                        _enemyImpactHurtboxes.mark(i);
+                    }
                     continue __playerImpactHurboxesLoop;
                 }
             }
@@ -326,7 +332,9 @@ final class Physics {
                     hit.normal = -hurtboxHit.normal;
                     hit.entity = target.entity;
                     impact.entity.onCollide(hit);
-                    _playerImpactHurtboxes.mark(i);
+                    if (!impact.isInvincible()) {
+                        _playerImpactHurtboxes.mark(i);
+                    }
                     continue __playerImpactHurboxesLoop;
                 }
             }
@@ -366,7 +374,9 @@ final class Physics {
                     hit.normal = -hurtboxHit.normal;
                     hit.entity = target.entity;
                     impact.entity.onCollide(hit);
-                    _globalImpactHurtboxes.mark(i);
+                    if (!impact.isInvincible()) {
+                        _globalImpactHurtboxes.mark(i);
+                    }
                     continue __globalImpactHurboxesLoop;
                 }
             }
@@ -382,7 +392,9 @@ final class Physics {
                     hit.normal = -hurtboxHit.normal;
                     hit.entity = target.entity;
                     impact.entity.onCollide(hit);
-                    _globalImpactHurtboxes.mark(i);
+                    if (!impact.isInvincible()) {
+                        _globalImpactHurtboxes.mark(i);
+                    }
                     continue __globalImpactHurboxesLoop;
                 }
             }

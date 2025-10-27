@@ -130,6 +130,7 @@ final class Hurtbox {
         Type _type;
         bool _isDisplayed;
         bool _isCollidable = true;
+        bool _isInvincible;
     }
 
     @property {
@@ -171,6 +172,14 @@ final class Hurtbox {
 
         bool isCollidable(bool isCollidable_) {
             return _isCollidable = isCollidable_;
+        }
+
+        bool isInvincible() const {
+            return _isInvincible;
+        }
+
+        bool isInvincible(bool isInvincible_) {
+            return _isInvincible = isInvincible_;
         }
     }
 

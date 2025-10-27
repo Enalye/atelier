@@ -15,6 +15,12 @@ final class Console {
         Cli _cli;
     }
 
+    @property {
+        Cli cli() {
+            return _cli;
+        }
+    }
+
     this() {
         _cli = new Cli();
         console_registerCommands(_cli);

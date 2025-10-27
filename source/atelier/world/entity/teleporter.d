@@ -20,6 +20,7 @@ final class Teleporter : Entity {
     }
 
     this() {
+        super(Entity.Type.teleporter);
     }
 
     this(Teleporter other) {

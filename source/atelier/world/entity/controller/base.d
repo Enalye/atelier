@@ -39,6 +39,17 @@ abstract class Controller(T : Entity) : ControllerWrapper {
         _entity = entity_;
     }
 
+    final string sendEvent(string event) {
+        if (!_behavior)
+            return "";
+
+        return _behavior.onEvent(event);
+    }
+
+    string onEvent(string event) {
+        return "";
+    }
+
     void onUpdate() {
     }
 
@@ -51,11 +62,11 @@ abstract class Controller(T : Entity) : ControllerWrapper {
     void onTeleport(uint direction, bool isExit) {
     }
 
-    final void onHit(Vec3f normal) {
+    final void onHit(Entity target, Vec3f normal) {
         if (!_behavior)
             return;
 
-        _behavior.onHit(normal);
+        _behavior.onHit(target, normal);
     }
 
     final void onSquish(Vec3f normal) {

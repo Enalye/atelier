@@ -16,6 +16,7 @@ import atelier.world.entity.renderer;
 
 // Propriétés de base l’entité
 struct BaseEntityData {
+    string[] tags;
     string controller;
     int zOrderOffset;
 
@@ -68,11 +69,18 @@ mixin template EntityController() {
         }
     }
 
-    final private void onHit(Vec3f normal) {
+    override string sendEvent(string event) {
+        if (!_controller)
+            return "";
+
+        return _controller.onEvent(event);
+    }
+
+    final private void onHit(Entity target, Vec3f normal) {
         if (!_controller)
             return;
 
-        _controller.onHit(normal);
+        _controller.onHit(target, normal);
     }
 
     final private void onSquish(Vec3f normal) {
@@ -97,12 +105,24 @@ abstract class Entity {
         glow
     }
 
+    enum Type {
+        actor,
+        prop,
+        particle,
+        proxy,
+        shot,
+        teleporter,
+        trigger
+    }
+
     private {
+        Type _type;
         bool _isRegistered = false;
         string _name;
         string[] _tags;
         Layer _layer = Layer.scene;
         string _baseControllerId;
+        bool _hasCulling = true;
     }
 
     protected {
@@ -144,6 +164,10 @@ abstract class Entity {
     }
 
     @property {
+        final Type type() const {
+            return _type;
+        }
+
         final Vec2f cameraPosition() const {
             return Vec2f(_position.x, _position.y - _position.z);
         }
@@ -206,10 +230,12 @@ abstract class Entity {
         }
     }
 
-    this() {
+    this(Type type_) {
+        _type = type_;
     }
 
     this(Entity other) {
+        _type = other._type;
         _name = other._name;
         _tags = other._tags;
         _layer = other._layer;
@@ -223,6 +249,7 @@ abstract class Entity {
         _shadowBaseZ = other._shadowBaseZ;
         _shadow = other._shadow;
         _isEnabled = other._isEnabled;
+        _hasCulling = other._hasCulling;
 
         foreach (id, renderer; other._graphics) {
             _graphics[id] = renderer.fetch();
@@ -256,7 +283,7 @@ abstract class Entity {
 
     final void setData(const(EntityData) data) {
         _name = data.name;
-        _tags = data.tags.dup;
+        _tags ~= data.tags.dup;
         _layer = asEnum!Layer(data.layer);
         setPosition(data.position);
 
@@ -266,6 +293,7 @@ abstract class Entity {
     }
 
     final void setBaseEntityData(const(BaseEntityData) data) {
+        _tags ~= data.tags.dup;
         _baseControllerId = data.controller;
         _zOrderOffset = data.zOrderOffset;
     }
@@ -298,6 +326,14 @@ abstract class Entity {
 
     void removeComponent(T : EntityComponent)() {
         _components.remove(T.stringof);
+    }
+
+    final void removeCollider() {
+        if (_collider) {
+            _collider.setEntity(null);
+            _collider.unregister();
+            _collider = null;
+        }
     }
 
     final Collider getBaseCollider() {
@@ -644,9 +680,15 @@ abstract class Entity {
         return false;
     }
 
+    final void setCulling(bool culling) {
+        _hasCulling = culling;
+    }
+
     final bool isCulled(Vec4f bounds) const {
         if (!_graphic)
             return true;
+        if (!_hasCulling)
+            return false;
         return (_graphic.getRight(_position.x) < bounds.x) ||
             (_graphic.getLeft(_position.x) > bounds.z) ||
             (_graphic.getDown(_position.y) < bounds.y) ||
@@ -758,11 +800,20 @@ abstract class Entity {
         return false;
     }
 
+    /// À changer plus tard
+    final bool hasGraphic(string graphic_) const {
+        return _graphic == _graphics[graphic_];
+    }
+
     bool hasController() {
         return false;
     }
 
     void setController(string id) {
+    }
+
+    string sendEvent(string event) {
+        return "";
     }
 
     void updateMovement() {

@@ -124,7 +124,9 @@ package void loadLibWorld_entity(GrModule mod) {
 
     mod.addFunction(&_isEnabled, "isEnabled", [entityType], [grBool]);
     mod.addFunction(&_isOnGround, "isOnGround", [entityType], [grBool]);
+    mod.addFunction(&_hasGraphic, "hasGraphic", [entityType, grString], [grBool]);
     mod.addFunction(&_getBaseMaterial, "getBaseMaterial", [entityType], [grInt]);
+    mod.addFunction(&_setShadow, "setShadow", [entityType, grBool]);
 }
 
 private void _unregister(GrCall call) {
@@ -244,7 +246,17 @@ private void _isOnGround(GrCall call) {
     call.setBool(entity.isOnGround);
 }
 
+private void _hasGraphic(GrCall call) {
+    Entity entity = call.getNative!Entity(0);
+    call.setBool(entity.hasGraphic(call.getString(1)));
+}
+
 private void _getBaseMaterial(GrCall call) {
     Entity entity = call.getNative!Entity(0);
     call.setInt(entity.getBaseMaterial);
+}
+
+private void _setShadow(GrCall call) {
+    Entity entity = call.getNative!Entity(0);
+    entity.setShadow(call.getBool(1));
 }

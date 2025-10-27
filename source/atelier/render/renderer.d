@@ -9,6 +9,7 @@ import atelier.common, atelier.core;
 import atelier.render.canvas;
 import atelier.render.sprite;
 import atelier.render.util;
+import atelier.render.image;
 
 final class Renderer {
     private {
@@ -34,6 +35,8 @@ final class Renderer {
         Scaling _scaling = Scaling.stretch;
         Vec2f _scaledSizeStart = Vec2f.zero, _scaledSizeEnd = Vec2f.zero;
         Timer _scaleTimer;
+
+        Image _cursor;
     }
 
     enum Scaling {
@@ -76,6 +79,15 @@ final class Renderer {
 
     void close() {
         SDL_DestroyRenderer(_sdlRenderer);
+    }
+
+    void setCursor(Image cursor) {
+        _cursor = cursor;
+        SDL_ShowCursor(_cursor is null);
+    }
+
+    Image getCursor() {
+        return _cursor;
     }
 
     Vec2f getLogicalPosition(Vec2f position) const {
@@ -187,6 +199,9 @@ final class Renderer {
     }
 
     void endRenderPass() {
+        if (_cursor) {
+            _cursor.draw(Atelier.input.getMousePosition());
+        }
         popCanvas();
 
         pushCanvas(_scaledCanvas);

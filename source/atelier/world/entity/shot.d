@@ -39,6 +39,7 @@ final class Shot : Entity, Resource!Shot {
     }
 
     this() {
+        super(Entity.Type.shot);
     }
 
     this(Shot other) {
@@ -47,7 +48,7 @@ final class Shot : Entity, Resource!Shot {
         _ttl = other._ttl;
         _hasBounces = other._hasBounces;
         _bounces = other._bounces;
-        _shadow = true;
+        _shadow = false;
 
         _stateTimer.start(_delay);
         _state = State.spawn;

@@ -43,7 +43,6 @@ final class World {
         Vec2f _mousePosition = Vec2f.zero;
 
         Sprite _shadowSprite;
-        bool _isInCombat;
         Vec3i _lastPlayerPosition;
 
         int[] _renderReferenceCounters;
@@ -56,7 +55,7 @@ final class World {
         string _sceneRid, _tpName;
         Actor _player;
 
-        bool _isPaused;
+        bool _isPaused, _isRunning;
 
         Factory _factory;
         Controller!Actor _playerController;
@@ -191,7 +190,15 @@ final class World {
         }
     }
 
+    void close() {
+        if (_isRunning) {
+            _isRunning = false;
+            clear();
+        }
+    }
+
     void load(string sceneRid, string tpName = "") {
+        _isRunning = true;
         Atelier.env.setScene(sceneRid, tpName);
 
         _sceneRid = sceneRid;
@@ -398,18 +405,17 @@ final class World {
         _renderUpdateIndex = 0;
         _renderListRoots.length = 0;
         _postRenderListAbove.length = 0;
-        _isInCombat = false;
     }
 
     private void _dispatch(InputEvent event) {
         switch (event.type) with (InputEvent.Type) {
         case mouseButton:
             Vec2f pos = event.asMouseButton().position;
-            _mousePosition = pos - _camera.getPosition();
+            _mousePosition = (pos + _camera.getPosition()) - (cast(Vec2f) Atelier.renderer.size) / 2f;
             break;
         case mouseMotion:
             Vec2f pos = event.asMouseMotion().position;
-            _mousePosition = pos - _camera.getPosition();
+            _mousePosition = (pos + _camera.getPosition()) - (cast(Vec2f) Atelier.renderer.size) / 2f;
             break;
         default:
             break;
@@ -417,7 +423,16 @@ final class World {
         _uiManager.dispatch(event);
     }
 
+    Vec2f getMousePosition() const {
+        return _mousePosition;
+    }
+
     void update(InputEvent[] inputEvents) {
+        if (!_isRunning) {
+            _scene = null;
+            return;
+        }
+
         foreach (InputEvent event; inputEvents) {
             _dispatch(event);
         }

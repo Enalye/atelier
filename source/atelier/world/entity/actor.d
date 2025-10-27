@@ -51,7 +51,7 @@ final class Actor : Entity, Resource!Actor {
     }
 
     this() {
-
+        super(Entity.Type.actor);
     }
 
     this(Actor other) {
@@ -76,9 +76,7 @@ final class Actor : Entity, Resource!Actor {
     }
 
     void setupCollider(Vec3u size_, float bounciness) {
-        if (_collider) {
-            _collider.setEntity(null);
-        }
+        removeCollider();
         _collider = new ActorCollider(size_, bounciness);
 
         if (_collider) {
@@ -107,7 +105,9 @@ final class Actor : Entity, Resource!Actor {
     }
 
     override void onCollide(Physics.CollisionHit hit) {
-        if(!_isEnabled) return;
+        if (!_isEnabled)
+            return;
+
         final switch (hit.type) with (Physics.CollisionHit.Type) {
         case none:
             Vec3f normal = hit.normal;
@@ -128,7 +128,7 @@ final class Actor : Entity, Resource!Actor {
                     _baseMaterial = Atelier.world.scene.getMaterial(_position);
                 }
             }
-            onHit(hit.normal);
+            onHit(hit.entity, hit.normal);
             break;
         case squish:
             onSquish(hit.normal);
@@ -140,7 +140,9 @@ final class Actor : Entity, Resource!Actor {
     }
 
     override void updateMovement() {
-        if(!_isEnabled) return;
+        if (!_isEnabled)
+            return;
+
         float maxSpeed = 2.5f;
         float accelSpeed = 1f;
         float friction = 1f;

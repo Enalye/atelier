@@ -36,13 +36,17 @@ abstract class Behavior(T : Entity) {
 
     void update();
 
+    string onEvent(string event) {
+        return "";
+    }
+
     void onStart() {
     }
 
     void onClose() {
     }
 
-    void onHit(Vec3f normal) {
+    void onHit(Entity target, Vec3f normal) {
     }
 
     void onSquish(Vec3f normal) {

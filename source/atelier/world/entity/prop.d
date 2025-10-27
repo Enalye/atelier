@@ -17,6 +17,7 @@ final class Prop : Entity, Resource!Prop {
     }
 
     this() {
+        super(Entity.Type.prop);
     }
 
     this(Prop other) {

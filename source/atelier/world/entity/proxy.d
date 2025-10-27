@@ -18,7 +18,7 @@ final class Proxy : Entity, Resource!Proxy {
     }
 
     this() {
-
+        super(Entity.Type.proxy);
     }
 
     this(Proxy other) {

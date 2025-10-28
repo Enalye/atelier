@@ -697,8 +697,8 @@ abstract class Entity {
             return false;
         return (_graphic.getRight(_position.x) < bounds.x) ||
             (_graphic.getLeft(_position.x) > bounds.z) ||
-            (_graphic.getDown(_position.y) < bounds.y) ||
-            (_graphic.getUp(_position.y) > bounds.w);
+            (_graphic.getDown(_position.y - _position.z) < bounds.y) ||
+            (_graphic.getUp(_position.y - _position.z) > bounds.w);
     }
 
     final void moveRaw(Vec3f dir) {

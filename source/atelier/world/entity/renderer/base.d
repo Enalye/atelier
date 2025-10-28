@@ -45,6 +45,7 @@ abstract class EntityGraphic {
     void setAlpha(float alpha);
     void setColor(Color color);
     void setScale(Vec2f scale);
+    void setEffectMargin(Vec2i margin);
     void start();
     void stop();
     void pause();
@@ -58,5 +59,7 @@ abstract class EntityGraphic {
     float getDown(float y) const;
     uint getWidth() const;
     uint getHeight() const;
+    uint getEffectWidth() const;
+    uint getEffectHeight() const;
     bool isBehind() const;
 }

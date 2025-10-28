@@ -1,5 +1,7 @@
 module atelier.world.entity.renderer.sprite;
 
+import std.math;
+
 import atelier.common;
 import atelier.render;
 import atelier.world.entity.renderer.base;
@@ -11,6 +13,7 @@ final class EntitySpriteRenderer : EntityGraphic {
         float _alpha = 1f;
         float _angle = 0f;
         float _angleOffset = 0f;
+        Vec2i _effectMargin;
     }
 
     this(Sprite sprite) {
@@ -24,6 +27,7 @@ final class EntitySpriteRenderer : EntityGraphic {
         _alpha = other._alpha;
         _angle = other._angle;
         _angleOffset = other._angleOffset;
+        _effectMargin = other._effectMargin;
     }
 
     override EntityGraphic fetch() {
@@ -76,6 +80,10 @@ final class EntitySpriteRenderer : EntityGraphic {
         _sprite.size = (cast(Vec2f) _sprite.clip.zw) * scale;
     }
 
+    override void setEffectMargin(Vec2i margin) {
+        _effectMargin = margin;
+    }
+
     override void start() {
     }
 
@@ -122,6 +130,14 @@ final class EntitySpriteRenderer : EntityGraphic {
 
     override uint getHeight() const {
         return _sprite.height;
+    }
+
+    override uint getEffectWidth() const {
+        return _sprite.width + _effectMargin.x;
+    }
+
+    override uint getEffectHeight() const {
+        return _sprite.height + _effectMargin.y;
     }
 
     override bool isBehind() const {

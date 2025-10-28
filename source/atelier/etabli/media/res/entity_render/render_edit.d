@@ -22,7 +22,7 @@ final class EntityEditRenderData : Modal {
 
     this(EntityRenderData data = null) {
         setAlign(UIAlignX.center, UIAlignY.center);
-        setSize(Vec2f(500f, 480f));
+        setSize(Vec2f(500f, 520f));
 
         bool isNew = false;
         if (data) {
@@ -275,6 +275,42 @@ final class EntityEditRenderData : Modal {
                 offsetXField.value(_data.offset.x);
                 _data.offset.y = 0;
                 offsetYField.value(_data.offset.y);
+                _isDirty = true;
+            });
+            hlayout.addUI(defaultBtn);
+        }
+
+        {
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(400f, 0f));
+            vbox.addUI(hlayout);
+
+            hlayout.addUI(new Label("Marge VFX - x:", Atelier.theme.font));
+
+            IntegerField offsetXField = new IntegerField;
+            offsetXField.value = _data.effectMargin.x;
+            offsetXField.addEventListener("value", {
+                _data.effectMargin.x = offsetXField.value();
+                _isDirty = true;
+            });
+            hlayout.addUI(offsetXField);
+
+            hlayout.addUI(new Label("y:", Atelier.theme.font));
+
+            IntegerField offsetYField = new IntegerField;
+            offsetYField.value = _data.effectMargin.y;
+            offsetYField.addEventListener("value", {
+                _data.effectMargin.y = offsetYField.value();
+                _isDirty = true;
+            });
+            hlayout.addUI(offsetYField);
+
+            IconButton defaultBtn = new IconButton("editor:revert");
+            defaultBtn.addEventListener("click", {
+                _data.effectMargin.x = 0;
+                offsetXField.value(_data.effectMargin.x);
+                _data.effectMargin.y = 0;
+                offsetYField.value(_data.effectMargin.y);
                 _isDirty = true;
             });
             hlayout.addUI(defaultBtn);

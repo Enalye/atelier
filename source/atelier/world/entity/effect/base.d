@@ -49,8 +49,8 @@ final class EntityGraphicEffectWrapper {
         if (!_graphic)
             return;
 
-        const uint width = _graphic.getWidth();
-        const uint height = _graphic.getHeight();
+        const uint width = _graphic.getEffectWidth();
+        const uint height = _graphic.getEffectHeight();
 
         if (_canvas && _canvas.width == width && _canvas.height == height)
             return;

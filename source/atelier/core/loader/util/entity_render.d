@@ -15,6 +15,7 @@ package(atelier.core.loader) struct EntityGraphicData {
     Vec2f offset = Vec2f.zero;
     bool isRotating;
     int angleOffset;
+    Vec2i effectMargin;
     Blend blend = Blend.alpha;
     int[] isBehind;
     bool isDefault;
@@ -28,6 +29,7 @@ package(atelier.core.loader) struct EntityGraphicData {
         stream.write!Vec2f(offset);
         stream.write!bool(isRotating);
         stream.write!int(angleOffset);
+        stream.write!Vec2i(effectMargin);
         stream.write!Blend(blend);
         stream.write!(int[])(isBehind);
         stream.write!bool(isDefault);
@@ -42,6 +44,7 @@ package(atelier.core.loader) struct EntityGraphicData {
         offset = stream.read!Vec2f();
         isRotating = stream.read!bool();
         angleOffset = stream.read!int();
+        effectMargin = stream.read!Vec2i();
         blend = stream.read!Blend();
         isBehind = stream.read!(int[])();
         isDefault = stream.read!bool();
@@ -85,6 +88,10 @@ package(atelier.core.loader) void serializeEntityGraphicData(const Farfadet ffd,
 
         if (renderNode.hasNode("angleOffset")) {
             renderData.angleOffset = renderNode.getNode("angleOffset").get!int(0);
+        }
+
+        if (renderNode.hasNode("effectMargin")) {
+            renderData.effectMargin = renderNode.getNode("effectMargin").get!Vec2i(0);
         }
 
         if (renderNode.hasNode("isBehind")) {
@@ -131,6 +138,7 @@ package(atelier.core.loader) EntityGraphic createEntityGraphicData(EntityGraphic
     graphic.setOffset(data.offset);
     graphic.setRotating(data.isRotating);
     graphic.setAngleOffset(data.angleOffset);
+    graphic.setEffectMargin(data.effectMargin);
     graphic.setBlend(data.blend);
     graphic.setIsBehind(data.isBehind);
     graphic.setDefault(data.isDefault);

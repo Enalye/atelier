@@ -28,6 +28,7 @@ final class EntityRenderData {
     Vec2f pivot = Vec2f(.5f, .5f);
     Vec2i offset = Vec2i.zero;
     int angleOffset = 0;
+    Vec2i effectMargin;
     int[] isBehind;
     bool isVisible = true;
 
@@ -97,6 +98,10 @@ final class EntityRenderData {
             angleOffset = ffd.getNode("angleOffset").get!int(0);
         }
 
+        if (ffd.hasNode("effectMargin")) {
+            effectMargin = ffd.getNode("effectMargin").get!Vec2i(0);
+        }
+
         if (ffd.hasNode("blend")) {
             blend = ffd.getNode("blend").get!Blend(0);
         }
@@ -119,6 +124,7 @@ final class EntityRenderData {
         offset = other.offset;
         isRotating = other.isRotating;
         angleOffset = other.angleOffset;
+        effectMargin = other.effectMargin;
         blend = other.blend;
         isDefault = other.isDefault;
         isBehind = other.isBehind;
@@ -134,6 +140,7 @@ final class EntityRenderData {
         node.addNode("offset").add(offset);
         node.addNode("isRotating").add(isRotating);
         node.addNode("angleOffset").add(angleOffset);
+        node.addNode("effectMargin").add(effectMargin);
         node.addNode("blend").add(blend);
         node.addNode("isDefault").add(isDefault);
         node.addNode("isBehind").add(isBehind);
@@ -271,6 +278,7 @@ final class EntityRenderData {
         graphic.setOffset(cast(Vec2f) offset);
         graphic.setRotating(isRotating);
         graphic.setAngleOffset(angleOffset);
+        graphic.setEffectMargin(effectMargin);
         graphic.setBlend(blend);
         graphic.setDefault(isDefault);
         graphic.setIsBehind(isBehind);

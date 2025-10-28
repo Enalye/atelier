@@ -11,6 +11,7 @@ final class EntityAnimRenderer : EntityGraphic {
         float _alpha = 1f;
         float _angle = 0f;
         float _angleOffset = 0f;
+        Vec2i _effectMargin;
     }
 
     this(Animation anim) {
@@ -24,6 +25,7 @@ final class EntityAnimRenderer : EntityGraphic {
         _alpha = other._alpha;
         _angle = other._angle;
         _angleOffset = other._angleOffset;
+        _effectMargin = other._effectMargin;
     }
 
     override EntityGraphic fetch() {
@@ -74,6 +76,10 @@ final class EntityAnimRenderer : EntityGraphic {
 
     override void setScale(Vec2f scale) {
         _anim.size = (cast(Vec2f) _anim.clip.zw) * scale;
+    }
+
+    override void setEffectMargin(Vec2i margin) {
+        _effectMargin = margin;
     }
 
     override void start() {
@@ -127,6 +133,14 @@ final class EntityAnimRenderer : EntityGraphic {
 
     override uint getHeight() const {
         return _anim.height;
+    }
+
+    override uint getEffectWidth() const {
+        return _anim.width + _effectMargin.x;
+    }
+
+    override uint getEffectHeight() const {
+        return _anim.height + _effectMargin.y;
     }
 
     override bool isBehind() const {

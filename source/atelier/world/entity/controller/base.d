@@ -84,12 +84,18 @@ abstract class Controller(T : Entity) : ControllerWrapper {
     }
 
     package(atelier.world) final void unregister() {
+        if (_behavior) {
+            _behavior.onClose();
+        }
+        onClose();
+
         _isRunning = false;
     }
 
     final void setBehavior(Behavior!T behavior) {
         if (_behavior) {
             _behavior.onClose();
+            _behavior = null;
         }
 
         _behavior = behavior;

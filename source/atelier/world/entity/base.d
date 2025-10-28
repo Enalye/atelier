@@ -52,12 +52,18 @@ mixin template EntityController() {
         return _controller !is null;
     }
 
+    override void removeController() {
+        if (_controller) {
+            _controller.unregister();
+            _controller = null;
+        }
+    }
+
     override void setController(string id) {
         import atelier.core : Atelier;
 
         if (_controller) {
             _controller.unregister();
-            _controller.onClose();
         }
 
         _controller = Atelier.world.fetchController!T(id);
@@ -809,6 +815,9 @@ abstract class Entity {
         return false;
     }
 
+    void removeController() {
+    }
+
     void setController(string id) {
     }
 
@@ -982,6 +991,7 @@ abstract class Entity {
         if (_hurtbox) {
             _hurtbox.unregister();
         }
+        removeController();
 
         onUnregisterEntity();
     }

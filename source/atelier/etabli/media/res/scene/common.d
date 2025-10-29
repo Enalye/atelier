@@ -1896,7 +1896,8 @@ package final class SceneDefinition {
             Vec2f a = Vec2f(entityData.position.x - _hitbox.x / 2f,
                 entityData.position.y - (entityData.position.z + _hitbox.y / 2f + _hitbox.z));
 
-            Vec2f b = Vec2f(entityData.position.x + _hitbox.x / 2f, entityData.position.y + _hitbox.y / 2f);
+            Vec2f b = Vec2f(entityData.position.x + _hitbox.x / 2f,
+                entityData.position.y + _hitbox.y / 2f - entityData.position.z);
 
             return minPos.x < b.x && maxPos.x > a.x && minPos.y < b.y && maxPos.y > a.y;
         }
@@ -1904,7 +1905,8 @@ package final class SceneDefinition {
         bool checkHover(Vec2f pos) {
             return pos.isBetween(Vec2f(entityData.position.x - _hitbox.x / 2f,
                     entityData.position.y - (entityData.position.z + _hitbox.y / 2f + _hitbox.z)),
-                Vec2f(entityData.position.x + _hitbox.x / 2f, entityData.position.y + _hitbox.y / 2f));
+                Vec2f(entityData.position.x + _hitbox.x / 2f,
+                    entityData.position.y + _hitbox.y / 2f - entityData.position.z));
         }
 
         void setHover(bool hover) {

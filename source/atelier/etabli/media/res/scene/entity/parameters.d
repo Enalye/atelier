@@ -135,10 +135,8 @@ package(atelier.etabli.media.res.scene) final class EntityParameters : UIElement
                 goto case 1;
             }
             else {
-                if (_selectedEntities.length > 0) {
-                    _captureSelection(true);
-                }
-                goto case 2;
+                _captureSelection(true);
+                _moveZ = hasControlModifier();
             }
             break;
         case 1:
@@ -234,7 +232,15 @@ package(atelier.etabli.media.res.scene) final class EntityParameters : UIElement
                 goto case 1;
             }
             else {
-                goto case 2;
+                if (_startMousePosition == _endMousePosition) {
+                    if (!hasControlModifier()) {
+                        _unselectEntities();
+                    }
+                    _captureSelection(true);
+                }
+                else {
+                    goto case 2;
+                }
             }
             break;
         case 1:

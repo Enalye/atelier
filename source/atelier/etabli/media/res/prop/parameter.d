@@ -1,5 +1,6 @@
 module atelier.etabli.media.res.prop.parameter;
 
+import std.array : split, join;
 import std.conv : to;
 
 import farfadet;
@@ -140,6 +141,89 @@ package final class ParameterWindow : UIElement {
         }
 
         {
+            LabelSeparator sep = new LabelSeparator("Propriétés", Atelier.theme.font);
+            sep.setColor(Atelier.theme.neutral);
+            sep.setPadding(Vec2f(284f, 0f));
+            sep.setSpacing(8f);
+            sep.setLineWidth(1f);
+            vlist.addList(sep);
+        }
+
+        {
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(284f, 0f));
+            vlist.addList(hlayout);
+
+            hlayout.addUI(new Label("Contrôleur:", Atelier.theme.font));
+
+            _controllerField = new TextField;
+            _controllerField.value = _baseEntityData.controller;
+            _controllerField.addEventListener("value", {
+                _baseEntityData.controller = _controllerField.value;
+                dispatchEvent("property_base");
+            });
+            hlayout.addUI(_controllerField);
+        }
+
+        {
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(284f, 0f));
+            vlist.addList(hlayout);
+
+            hlayout.addUI(new Label("Ordre Z:", Atelier.theme.font));
+
+            _zOrderOffsetField = new IntegerField;
+            _zOrderOffsetField.value = _baseEntityData.zOrderOffset;
+            _zOrderOffsetField.addEventListener("value", {
+                _baseEntityData.zOrderOffset = _zOrderOffsetField.value;
+                dispatchEvent("property_base");
+            });
+            hlayout.addUI(_zOrderOffsetField);
+        }
+
+        {
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(284f, 0f));
+            vlist.addList(hlayout);
+
+            hlayout.addUI(new Label("Tags:", Atelier.theme.font));
+
+            _tagsField = new TextField;
+            _tagsField.value = _baseEntityData.tags.join(' ');
+            _tagsField.addEventListener("value", {
+                _baseEntityData.tags.length = 0;
+                foreach (element; _tagsField.value.split(' ')) {
+                    _baseEntityData.tags ~= element;
+                }
+                dispatchEvent("property_base");
+            });
+            hlayout.addUI(_tagsField);
+        }
+
+        {
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(284f, 0f));
+            vlist.addList(hlayout);
+
+            hlayout.addUI(new Label("Matériau:", Atelier.theme.font));
+
+            string[] materialList = [
+                "Vide", "Béton", "Métal", "Terre", "Herbe", "Bois", "Sable",
+                "Neige", "Eau"
+            ];
+            for (uint i; i < materialList.length; ++i) {
+                materialList[i] = to!string(i) ~ " - " ~ materialList[i];
+            }
+            _materialBtn = new SelectButton(materialList, "");
+            _materialBtn.setListAlign(UIAlignX.right, UIAlignY.top);
+            _materialBtn.ivalue = material;
+            _materialBtn.addEventListener("value", {
+                dispatchEvent("property_material", false);
+            });
+            hlayout.addUI(_materialBtn);
+        }
+
+        {
             LabelSeparator sep = new LabelSeparator("Collision", Atelier.theme.font);
             sep.setColor(Atelier.theme.neutral);
             sep.setPadding(Vec2f(284f, 0f));
@@ -217,11 +301,11 @@ package final class ParameterWindow : UIElement {
         }
 
         {
-            HBox hbox = new HBox;
-            hbox.setSpacing(8f);
-            vlist.addList(hbox);
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(284f, 0f));
+            vlist.addList(hlayout);
 
-            hbox.addUI(new Label("Forme:", Atelier.theme.font));
+            hlayout.addUI(new Label("Forme:", Atelier.theme.font));
 
             _shapeBtn = new SelectButton([
                 __traits(allMembers, SolidCollider.Shape)
@@ -232,7 +316,7 @@ package final class ParameterWindow : UIElement {
                 _hitbox.shape = _shapeBtn.value;
                 dispatchEvent("property_hitbox");
             });
-            hbox.addUI(_shapeBtn);
+            hlayout.addUI(_shapeBtn);
         }
 
         {
@@ -434,79 +518,6 @@ package final class ParameterWindow : UIElement {
                 dispatchEvent("property_hurtbox");
             });
             hlayout.addUI(_hurtOffsetAngleField);
-        }
-
-        {
-            LabelSeparator sep = new LabelSeparator("Propriétés", Atelier.theme.font);
-            sep.setColor(Atelier.theme.neutral);
-            sep.setPadding(Vec2f(284f, 0f));
-            sep.setSpacing(8f);
-            sep.setLineWidth(1f);
-            vlist.addList(sep);
-        }
-
-        {
-            HLayout hlayout = new HLayout;
-            hlayout.setPadding(Vec2f(284f, 0f));
-            vlist.addList(hlayout);
-
-            hlayout.addUI(new Label("Contrôleur:", Atelier.theme.font));
-
-            _controllerField = new TextField;
-            _controllerField.value = _baseEntityData.controller;
-            _controllerField.addEventListener("value", {
-                _baseEntityData.controller = _controllerField.value;
-                dispatchEvent("property_base");
-            });
-            hlayout.addUI(_controllerField);
-        }
-
-        {
-            HLayout hlayout = new HLayout;
-            hlayout.setPadding(Vec2f(284f, 0f));
-            vlist.addList(hlayout);
-
-            hlayout.addUI(new Label("Ordre Z:", Atelier.theme.font));
-
-            _zOrderOffsetField = new IntegerField;
-            _zOrderOffsetField.value = _baseEntityData.zOrderOffset;
-            _zOrderOffsetField.addEventListener("value", {
-                _baseEntityData.zOrderOffset = _zOrderOffsetField.value;
-                dispatchEvent("property_base");
-            });
-            hlayout.addUI(_zOrderOffsetField);
-        }
-
-        {
-            HLayout hlayout = new HLayout;
-            hlayout.setPadding(Vec2f(284f, 0f));
-            vlist.addList(hlayout);
-
-            hlayout.addUI(new Label("Tags:", Atelier.theme.font));
-            hlayout.addUI(new TextField());
-        }
-
-        {
-            HLayout hlayout = new HLayout;
-            hlayout.setPadding(Vec2f(284f, 0f));
-            vlist.addList(hlayout);
-
-            hlayout.addUI(new Label("Matériau:", Atelier.theme.font));
-
-            string[] materialList = [
-                "Vide", "Béton", "Métal", "Terre", "Herbe", "Bois", "Sable",
-                "Neige", "Eau"
-            ];
-            for (uint i; i < materialList.length; ++i) {
-                materialList[i] = to!string(i) ~ " - " ~ materialList[i];
-            }
-            _materialBtn = new SelectButton(materialList, "");
-            _materialBtn.setListAlign(UIAlignX.right, UIAlignY.bottom);
-            _materialBtn.ivalue = material;
-            _materialBtn.addEventListener("value", {
-                dispatchEvent("property_material", false);
-            });
-            hlayout.addUI(_materialBtn);
         }
 
         addEventListener("size", {

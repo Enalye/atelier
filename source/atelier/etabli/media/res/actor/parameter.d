@@ -1,5 +1,7 @@
 module atelier.etabli.media.res.actor.parameter;
 
+import std.array : split, join;
+
 import farfadet;
 
 import atelier.common;
@@ -127,6 +129,66 @@ package final class ParameterWindow : UIElement {
                 });
                 _renderList.addList(elt);
             }
+        }
+
+        {
+            LabelSeparator sep = new LabelSeparator("Propriétés", Atelier.theme.font);
+            sep.setColor(Atelier.theme.neutral);
+            sep.setPadding(Vec2f(284f, 0f));
+            sep.setSpacing(8f);
+            sep.setLineWidth(1f);
+            vlist.addList(sep);
+        }
+
+        {
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(284f, 0f));
+            vlist.addList(hlayout);
+
+            hlayout.addUI(new Label("Contrôleur:", Atelier.theme.font));
+
+            _controllerField = new TextField;
+            _controllerField.value = _baseEntityData.controller;
+            _controllerField.addEventListener("value", {
+                _baseEntityData.controller = _controllerField.value;
+                dispatchEvent("property_base");
+            });
+            hlayout.addUI(_controllerField);
+        }
+
+        {
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(284f, 0f));
+            vlist.addList(hlayout);
+
+            hlayout.addUI(new Label("Ordre Z:", Atelier.theme.font));
+
+            _zOrderOffsetField = new IntegerField;
+            _zOrderOffsetField.value = _baseEntityData.zOrderOffset;
+            _zOrderOffsetField.addEventListener("value", {
+                _baseEntityData.zOrderOffset = _zOrderOffsetField.value;
+                dispatchEvent("property_base");
+            });
+            hlayout.addUI(_zOrderOffsetField);
+        }
+
+        {
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(284f, 0f));
+            vlist.addList(hlayout);
+
+            hlayout.addUI(new Label("Tags:", Atelier.theme.font));
+
+            _tagsField = new TextField;
+            _tagsField.value = _baseEntityData.tags.join(' ');
+            _tagsField.addEventListener("value", {
+                _baseEntityData.tags.length = 0;
+                foreach (element; _tagsField.value.split(' ')) {
+                    _baseEntityData.tags ~= element;
+                }
+                dispatchEvent("property_base");
+            });
+            hlayout.addUI(_tagsField);
         }
 
         {
@@ -451,59 +513,6 @@ package final class ParameterWindow : UIElement {
                 dispatchEvent("property_hurtbox");
             });
             hlayout.addUI(_hurtOffsetAngleField);
-        }
-
-        {
-            LabelSeparator sep = new LabelSeparator("Propriétés", Atelier.theme.font);
-            sep.setColor(Atelier.theme.neutral);
-            sep.setPadding(Vec2f(284f, 0f));
-            sep.setSpacing(8f);
-            sep.setLineWidth(1f);
-            vlist.addList(sep);
-        }
-
-        {
-            HLayout hlayout = new HLayout;
-            hlayout.setPadding(Vec2f(284f, 0f));
-            vlist.addList(hlayout);
-
-            hlayout.addUI(new Label("Contrôleur:", Atelier.theme.font));
-
-            _controllerField = new TextField;
-            _controllerField.value = _baseEntityData.controller;
-            _controllerField.addEventListener("value", {
-                _baseEntityData.controller = _controllerField.value;
-                dispatchEvent("property_base");
-            });
-            hlayout.addUI(_controllerField);
-        }
-
-        {
-            HLayout hlayout = new HLayout;
-            hlayout.setPadding(Vec2f(284f, 0f));
-            vlist.addList(hlayout);
-
-            hlayout.addUI(new Label("Ordre Z:", Atelier.theme.font));
-
-            _zOrderOffsetField = new IntegerField;
-            _zOrderOffsetField.value = _baseEntityData.zOrderOffset;
-            _zOrderOffsetField.addEventListener("value", {
-                _baseEntityData.zOrderOffset = _zOrderOffsetField.value;
-                dispatchEvent("property_base");
-            });
-            hlayout.addUI(_zOrderOffsetField);
-        }
-
-        {
-            HLayout hlayout = new HLayout;
-            hlayout.setPadding(Vec2f(284f, 0f));
-            vlist.addList(hlayout);
-
-            hlayout.addUI(new Label("Tags:", Atelier.theme.font));
-            hlayout.addUI(new TextField());
-
-            hlayout.addUI(new Label("Bouge ?", Atelier.theme.font));
-            hlayout.addUI(new Checkbox());
         }
 
         addEventListener("size", {

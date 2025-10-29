@@ -23,6 +23,11 @@ package void compileProxy(string path, const Farfadet ffd, OutStream stream) {
         hurtbox.load(ffd.getNode("hurtbox"));
     }
     hurtbox.serialize(stream);
+
+    BaseEntityData baseEntityData;
+    baseEntityData.load(ffd);
+    baseEntityData.serialize(stream);
+
     serializeEntityGraphicData(ffd, stream);
 }
 
@@ -31,6 +36,10 @@ package void loadProxy(InStream stream) {
     const string name = stream.read!string();
     HurtboxData hurtbox;
     hurtbox.deserialize(stream);
+
+    BaseEntityData baseEntityData;
+    baseEntityData.deserialize(stream);
+
     EntityGraphicData[] graphicDataList = unserializeEntityGraphicData(stream);
 
     Atelier.res.store(rid, {

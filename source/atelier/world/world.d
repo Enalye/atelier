@@ -395,12 +395,17 @@ final class World {
 
     void clear() {
         _uiManager.clearUI();
-        _controllers.clear();
+
+        foreach (entity; _entities) {
+            entity.onUnregister();
+        }
         _entities.clear();
+        _controllers.clear();
         _renderedEntities.clear();
         _particleSources.clear();
         _lighting.clear();
         Atelier.physics.clear();
+        Atelier.nav.clear();
         _renderReferenceCounters.length = 0;
         _renderUpdateIndex = 0;
         _renderListRoots.length = 0;
@@ -430,6 +435,10 @@ final class World {
     void update(InputEvent[] inputEvents) {
         if (!_isRunning) {
             _scene = null;
+            _player = null;
+            _playerController = null;
+            _sceneRid.length = 0;
+            _tpName.length = 0;
             return;
         }
 

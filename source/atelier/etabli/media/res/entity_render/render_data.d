@@ -21,16 +21,24 @@ final class EntityRenderData {
         Image _image;
     }
 
-    bool isDefault;
     bool isRotating;
     Blend blend = Blend.alpha;
     Vec2f anchor = Vec2f(.5f, .5f);
     Vec2f pivot = Vec2f(.5f, .5f);
     Vec2i offset = Vec2i.zero;
     int angleOffset = 0;
-    Vec2i effectMargin;
-    int[] isBehind;
     bool isVisible = true;
+    bool isAuxGraphic;
+
+    // Principal
+    bool isDefault;
+    Vec2i effectMargin;
+    string[] auxGraphics;
+
+    // Aux
+    int[] isBehind;
+    int order;
+    uint slot;
 
     @property {
         string name() const {
@@ -63,11 +71,12 @@ final class EntityRenderData {
         }
     }
 
-    this() {
-
+    this(bool isAuxGraphic_) {
+        isAuxGraphic = isAuxGraphic_;
     }
 
     this(Farfadet ffd) {
+        isAuxGraphic = ffd.name == "auxGraphic";
         name = ffd.get!string(0);
 
         if (ffd.hasNode("type")) {
@@ -98,24 +107,40 @@ final class EntityRenderData {
             angleOffset = ffd.getNode("angleOffset").get!int(0);
         }
 
-        if (ffd.hasNode("effectMargin")) {
-            effectMargin = ffd.getNode("effectMargin").get!Vec2i(0);
-        }
-
         if (ffd.hasNode("blend")) {
             blend = ffd.getNode("blend").get!Blend(0);
         }
 
-        if (ffd.hasNode("isDefault")) {
-            isDefault = ffd.getNode("isDefault").get!bool(0);
-        }
+        if (isAuxGraphic) {
+            if (ffd.hasNode("isBehind")) {
+                isBehind = ffd.getNode("isBehind").get!(int[])(0);
+            }
 
-        if (ffd.hasNode("isBehind")) {
-            isBehind = ffd.getNode("isBehind").get!(int[])(0);
+            if (ffd.hasNode("order")) {
+                order = ffd.getNode("order").get!(int)(0);
+            }
+
+            if (ffd.hasNode("slot")) {
+                slot = ffd.getNode("slot").get!(uint)(0);
+            }
+        }
+        else {
+            if (ffd.hasNode("isDefault")) {
+                isDefault = ffd.getNode("isDefault").get!bool(0);
+            }
+
+            if (ffd.hasNode("effectMargin")) {
+                effectMargin = ffd.getNode("effectMargin").get!Vec2i(0);
+            }
+
+            if (ffd.hasNode("auxGraphics")) {
+                auxGraphics = ffd.getNode("auxGraphics").get!(string[])(0);
+            }
         }
     }
 
     this(EntityRenderData other) {
+        isAuxGraphic = other.isAuxGraphic;
         name = other.name;
         type = other.type;
         rid = other.rid;
@@ -124,15 +149,23 @@ final class EntityRenderData {
         offset = other.offset;
         isRotating = other.isRotating;
         angleOffset = other.angleOffset;
-        effectMargin = other.effectMargin;
         blend = other.blend;
-        isDefault = other.isDefault;
-        isBehind = other.isBehind;
         isVisible = other.isVisible;
+
+        if (isAuxGraphic) {
+            isBehind = other.isBehind;
+            order = other.order;
+            slot = other.slot;
+        }
+        else {
+            isDefault = other.isDefault;
+            effectMargin = other.effectMargin;
+            auxGraphics = other.auxGraphics;
+        }
     }
 
     Farfadet save(Farfadet ffd) {
-        Farfadet node = ffd.addNode("render").add(name);
+        Farfadet node = ffd.addNode(isAuxGraphic ? "auxGraphic" : "graphic").add(name);
         node.addNode("type").add(type);
         node.addNode("rid").add(rid);
         node.addNode("anchor").add(anchor);
@@ -140,11 +173,39 @@ final class EntityRenderData {
         node.addNode("offset").add(offset);
         node.addNode("isRotating").add(isRotating);
         node.addNode("angleOffset").add(angleOffset);
-        node.addNode("effectMargin").add(effectMargin);
         node.addNode("blend").add(blend);
-        node.addNode("isDefault").add(isDefault);
-        node.addNode("isBehind").add(isBehind);
+
+        if (isAuxGraphic) {
+            node.addNode("isBehind").add(isBehind);
+            node.addNode("order").add(order);
+            node.addNode("slot").add(slot);
+        }
+        else {
+            node.addNode("isDefault").add(isDefault);
+            node.addNode("effectMargin").add(effectMargin);
+            node.addNode("auxGraphics").add(auxGraphics);
+
+        }
         return node;
+    }
+
+    bool hasAuxGraphic(string graphic) const {
+        foreach (render; auxGraphics) {
+            if (render == graphic) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool getIsBehind() const {
+        if (_mdiranim) {
+            if (_mdiranim.currentDir < isBehind.length)
+                return isBehind[_mdiranim.currentDir] != 0;
+        }
+        else if (isBehind.length > 0)
+            return isBehind[0] != 0;
+        return false;
     }
 
     void play() {

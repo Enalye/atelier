@@ -15,10 +15,18 @@ package(atelier.core.loader) struct EntityGraphicData {
     Vec2f offset = Vec2f.zero;
     bool isRotating;
     int angleOffset;
-    Vec2i effectMargin;
     Blend blend = Blend.alpha;
-    int[] isBehind;
+    bool isAuxGraphic;
+
+    // Principal
     bool isDefault;
+    Vec2i effectMargin;
+    string[] auxGraphics;
+
+    // Auxiliaire
+    int[] isBehind;
+    int order;
+    uint slot;
 
     void serialize(OutStream stream) {
         stream.write!string(name);
@@ -29,10 +37,19 @@ package(atelier.core.loader) struct EntityGraphicData {
         stream.write!Vec2f(offset);
         stream.write!bool(isRotating);
         stream.write!int(angleOffset);
-        stream.write!Vec2i(effectMargin);
         stream.write!Blend(blend);
         stream.write!(int[])(isBehind);
+        stream.write!bool(isAuxGraphic);
+
+        // Principal
         stream.write!bool(isDefault);
+        stream.write!Vec2i(effectMargin);
+        stream.write!(string[])(auxGraphics);
+
+        // Auxiliaire
+        stream.write!(int[])(isBehind);
+        stream.write!int(order);
+        stream.write!uint(slot);
     }
 
     void deserialize(InStream stream) {
@@ -44,65 +61,94 @@ package(atelier.core.loader) struct EntityGraphicData {
         offset = stream.read!Vec2f();
         isRotating = stream.read!bool();
         angleOffset = stream.read!int();
-        effectMargin = stream.read!Vec2i();
         blend = stream.read!Blend();
         isBehind = stream.read!(int[])();
+        isAuxGraphic = stream.read!bool();
+
+        // Principal
         isDefault = stream.read!bool();
+        effectMargin = stream.read!Vec2i();
+        auxGraphics = stream.read!(string[])();
+
+        // Auxiliaire
+        isBehind = stream.read!(int[])();
+        order = stream.read!int();
+        slot = stream.read!uint();
     }
 }
 
 package(atelier.core.loader) void serializeEntityGraphicData(const Farfadet ffd, OutStream stream) {
-    stream.write!uint(cast(uint) ffd.getNodeCount("render"));
-    foreach (renderNode; ffd.getNodes("render")) {
-        EntityGraphicData renderData;
+    uint count = cast(uint)(ffd.getNodeCount("graphic") + ffd.getNodeCount("auxGraphic"));
+    stream.write!uint(count);
 
-        renderData.name = renderNode.get!string(0);
+    foreach (string key; ["graphic", "auxGraphic"]) {
+        foreach (graphicNode; ffd.getNodes(key)) {
+            EntityGraphicData graphicData;
 
-        if (renderNode.hasNode("type")) {
-            renderData.type = renderNode.getNode("type").get!string(0);
+            graphicData.name = graphicNode.get!string(0);
+            graphicData.isAuxGraphic = key == "auxGraphic";
+
+            if (graphicNode.hasNode("type")) {
+                graphicData.type = graphicNode.getNode("type").get!string(0);
+            }
+
+            if (graphicNode.hasNode("rid")) {
+                graphicData.rid = graphicNode.getNode("rid").get!string(0);
+            }
+
+            if (graphicNode.hasNode("anchor")) {
+                graphicData.anchor = graphicNode.getNode("anchor").get!Vec2f(0);
+            }
+
+            if (graphicNode.hasNode("pivot")) {
+                graphicData.pivot = graphicNode.getNode("pivot").get!Vec2f(0);
+            }
+
+            if (graphicNode.hasNode("offset")) {
+                graphicData.offset = graphicNode.getNode("offset").get!Vec2f(0);
+            }
+
+            if (graphicNode.hasNode("isRotating")) {
+                graphicData.isRotating = graphicNode.getNode("isRotating").get!bool(0);
+            }
+
+            if (graphicNode.hasNode("blend")) {
+                graphicData.blend = graphicNode.getNode("blend").get!Blend(0);
+            }
+
+            if (graphicNode.hasNode("angleOffset")) {
+                graphicData.angleOffset = graphicNode.getNode("angleOffset").get!int(0);
+            }
+
+            if (graphicData.isAuxGraphic) {
+                if (graphicNode.hasNode("isBehind")) {
+                    graphicData.isBehind = graphicNode.getNode("isBehind").get!(int[])(0);
+                }
+
+                if (graphicNode.hasNode("order")) {
+                    graphicData.order = graphicNode.getNode("order").get!(int)(0);
+                }
+
+                if (graphicNode.hasNode("slot")) {
+                    graphicData.slot = graphicNode.getNode("slot").get!(uint)(0);
+                }
+            }
+            else {
+                if (graphicNode.hasNode("isDefault")) {
+                    graphicData.isDefault = graphicNode.getNode("isDefault").get!bool(0);
+                }
+
+                if (graphicNode.hasNode("effectMargin")) {
+                    graphicData.effectMargin = graphicNode.getNode("effectMargin").get!Vec2i(0);
+                }
+
+                if (graphicNode.hasNode("auxGraphics")) {
+                    graphicData.auxGraphics = graphicNode.getNode("auxGraphics").get!(string[])(0);
+                }
+            }
+
+            graphicData.serialize(stream);
         }
-
-        if (renderNode.hasNode("rid")) {
-            renderData.rid = renderNode.getNode("rid").get!string(0);
-        }
-
-        if (renderNode.hasNode("anchor")) {
-            renderData.anchor = renderNode.getNode("anchor").get!Vec2f(0);
-        }
-
-        if (renderNode.hasNode("pivot")) {
-            renderData.pivot = renderNode.getNode("pivot").get!Vec2f(0);
-        }
-
-        if (renderNode.hasNode("offset")) {
-            renderData.offset = renderNode.getNode("offset").get!Vec2f(0);
-        }
-
-        if (renderNode.hasNode("isRotating")) {
-            renderData.isRotating = renderNode.getNode("isRotating").get!bool(0);
-        }
-
-        if (renderNode.hasNode("blend")) {
-            renderData.blend = renderNode.getNode("blend").get!Blend(0);
-        }
-
-        if (renderNode.hasNode("angleOffset")) {
-            renderData.angleOffset = renderNode.getNode("angleOffset").get!int(0);
-        }
-
-        if (renderNode.hasNode("effectMargin")) {
-            renderData.effectMargin = renderNode.getNode("effectMargin").get!Vec2i(0);
-        }
-
-        if (renderNode.hasNode("isBehind")) {
-            renderData.isBehind = renderNode.getNode("isBehind").get!(int[])(0);
-        }
-
-        if (renderNode.hasNode("isDefault")) {
-            renderData.isDefault = renderNode.getNode("isDefault").get!bool(0);
-        }
-
-        renderData.serialize(stream);
     }
 }
 
@@ -138,9 +184,31 @@ package(atelier.core.loader) EntityGraphic createEntityGraphicData(EntityGraphic
     graphic.setOffset(data.offset);
     graphic.setRotating(data.isRotating);
     graphic.setAngleOffset(data.angleOffset);
-    graphic.setEffectMargin(data.effectMargin);
     graphic.setBlend(data.blend);
-    graphic.setIsBehind(data.isBehind);
-    graphic.setDefault(data.isDefault);
+
+    if (data.isAuxGraphic) {
+        graphic.setIsBehind(data.isBehind);
+        graphic.setOrder(data.order);
+        graphic.setSlot(data.slot);
+    }
+    else {
+        graphic.setDefault(data.isDefault);
+        graphic.setEffectMargin(data.effectMargin);
+        graphic.setAuxGraphics(data.auxGraphics);
+    }
+
     return graphic;
+}
+
+package(atelier.core.loader) void buildEntityGraphics(Entity entity, EntityGraphicData[] graphicDataList) {
+    for (uint i; i < graphicDataList.length; ++i) {
+        EntityGraphic graphic = createEntityGraphicData(graphicDataList[i]);
+        if (!graphic)
+            continue;
+
+        if (graphicDataList[i].isAuxGraphic)
+            entity.addAuxGraphic(graphicDataList[i].name, graphic);
+        else
+            entity.addGraphic(graphicDataList[i].name, graphic);
+    }
 }

@@ -52,6 +52,7 @@ class UIElement {
         bool _isAlive;
         bool _widthLock, _heightLock;
         bool _isVisible = true;
+        uint _propagationStopCount;
     }
 
     /// Ordenancement
@@ -501,9 +502,15 @@ class UIElement {
         });
     }
 
+    final void stopPropagation() {
+        _propagationStopCount++;
+    }
+
     final void dispatchEvent(string type, bool bubbleUp = true) {
         if (_manager && _manager.blockEvents)
             return;
+
+        uint propagationStopCount = _propagationStopCount;
 
         { // Natifs
             auto p = type in _nativeEventListeners;
@@ -523,6 +530,11 @@ class UIElement {
                     Atelier.script.callEvent(listener);
                 }
             }
+        }
+
+        if (_propagationStopCount > propagationStopCount) {
+            _propagationStopCount = propagationStopCount;
+            return;
         }
 
         if (bubbleUp && _parent) {

@@ -132,6 +132,7 @@ final class HList : List {
     }
 
     private void _onWheel() {
+        stopPropagation();
         _scrollbar.removeEventListener("handlePosition", &_onHandlePosition);
 
         UIManager manager = getManager();
@@ -218,6 +219,7 @@ final class VList : List {
     }
 
     private void _onWheel() {
+        stopPropagation();
         _scrollbar.removeEventListener("handlePosition", &_onHandlePosition);
 
         UIManager manager = getManager();

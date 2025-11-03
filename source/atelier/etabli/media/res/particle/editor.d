@@ -25,7 +25,7 @@ final class ParticleResourceEditor : ResourceBaseEditor {
         ParameterWindow _parameterWindow;
         MediaPlayer _player;
 
-        EntityRenderData[] _renders;
+        EntityRenderData[] _graphics;
         HitboxData _hitbox;
         ParticleData _particle;
 
@@ -44,18 +44,18 @@ final class ParticleResourceEditor : ResourceBaseEditor {
         _hitbox.load(ffd);
         _particle.load(ffd);
 
-        foreach (size_t i, Farfadet renderNode; ffd.getNodes("render")) {
+        foreach (size_t i, Farfadet renderNode; ffd.getNodes("graphic")) {
             EntityRenderData render = new EntityRenderData(renderNode);
             render.isVisible = (i == 0);
-            _renders ~= render;
+            _graphics ~= render;
         }
 
         _source = new EditorParticleSource(this);
 
-        _parameterWindow = new ParameterWindow(_renders, _hitbox, _particle);
+        _parameterWindow = new ParameterWindow(_graphics, _hitbox, _particle);
 
         _player = new MediaPlayer();
-        _player.setRenders(_renders);
+        _player.setRenders(_graphics);
         addUI(_player);
 
         _parameterWindow.addEventListener("property_hitbox", {
@@ -70,22 +70,22 @@ final class ParticleResourceEditor : ResourceBaseEditor {
         });
 
         _parameterWindow.addEventListener("property_render", {
-            _renders.length = 0;
+            _graphics.length = 0;
             foreach (size_t i, EntityRenderData renderData; _parameterWindow.getRenders()) {
                 EntityRenderData render = new EntityRenderData(renderData);
                 render.isVisible = (i == _player.getRender());
-                _renders ~= render;
+                _graphics ~= render;
             }
-            _player.setRenders(_renders);
-            _source.setGraphics(_renders);
+            _player.setRenders(_graphics);
+            _source.setGraphics(_graphics);
             setDirty();
         });
 
         _player.addEventListener("particle_graphic", {
-            //foreach (size_t i, EntityRenderData render; _renders) {
+            //foreach (size_t i, EntityRenderData render; _graphics) {
             //    render.isVisible = (i == _player.getRender());
             //}
-            //_source.setGraphics(_renders);
+            //_source.setGraphics(_graphics);
         });
 
         _player.addEventListener("particle_start", { _source.start(); });
@@ -103,14 +103,14 @@ final class ParticleResourceEditor : ResourceBaseEditor {
         });
         addEventListener("size", { _player.setWidth(getWidth()); });
 
-        _source.setGraphics(_renders);
+        _source.setGraphics(_graphics);
         _source.setData(_particle);
 
     }
 
     override Farfadet save(Farfadet ffd) {
         Farfadet node = ffd.addNode("particle").add(_name);
-        foreach (EntityRenderData render; _renders) {
+        foreach (EntityRenderData render; _graphics) {
             render.save(node);
         }
         _hitbox.save(node);

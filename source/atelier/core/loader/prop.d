@@ -104,12 +104,7 @@ package void loadProp(InStream stream) {
 
     Atelier.res.store(rid, {
         Prop prop = new Prop;
-        for (uint i; i < graphicDataList.length; ++i) {
-            EntityGraphic graphic = createEntityGraphicData(graphicDataList[i]);
-            if (!graphic)
-                continue;
-            prop.addGraphic(graphicDataList[i].name, graphic);
-        }
+        buildEntityGraphics(prop, graphicDataList);
         if (hitbox.hasHitbox) {
             prop.setupCollider(hitbox.size, hitbox.shape, hitbox.bounciness);
         }

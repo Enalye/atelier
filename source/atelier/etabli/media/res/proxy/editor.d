@@ -1,5 +1,6 @@
 module atelier.etabli.media.res.proxy.editor;
 
+import std.algorithm.sorting : sort;
 import std.file;
 import std.path;
 import std.math : abs;
@@ -25,7 +26,7 @@ final class ProxyResourceEditor : ResourceBaseEditor {
         ParameterWindow _parameterWindow;
         Toolbox _toolbox;
 
-        EntityRenderData[] _renders;
+        EntityRenderData[] _graphics, _auxGraphics, _auxGraphicsStack;
         HurtboxData _hurtbox;
 
         Vec2f _originPosition = Vec2f.zero;
@@ -42,16 +43,21 @@ final class ProxyResourceEditor : ResourceBaseEditor {
             _hurtbox.load(ffd.getNode("hurtbox"));
         }
 
-        foreach (size_t i, Farfadet renderNode; ffd.getNodes("render")) {
+        foreach (size_t i, Farfadet renderNode; ffd.getNodes("graphic")) {
             EntityRenderData render = new EntityRenderData(renderNode);
             render.isVisible = (i == 0);
-            _renders ~= render;
+            _graphics ~= render;
         }
 
-        _parameterWindow = new ParameterWindow(_renders, _hurtbox);
+        foreach (size_t i, Farfadet renderNode; ffd.getNodes("auxGraphic")) {
+            EntityRenderData render = new EntityRenderData(renderNode);
+            _auxGraphics ~= render;
+        }
+
+        _parameterWindow = new ParameterWindow(_graphics, _auxGraphics, _hurtbox);
 
         _toolbox = new Toolbox();
-        _toolbox.setRenders(_renders);
+        _toolbox.setRenders(_graphics);
 
         _parameterWindow.addEventListener("property_hurtbox", {
             _hurtbox = _parameterWindow.getHurtbox();
@@ -59,36 +65,49 @@ final class ProxyResourceEditor : ResourceBaseEditor {
         });
 
         _parameterWindow.addEventListener("property_render", {
-            _renders.length = 0;
+            _graphics.length = 0;
             foreach (size_t i, EntityRenderData renderData; _parameterWindow.getRenders()) {
-                EntityRenderData render = new EntityRenderData(renderData);
-                render.isVisible = (i == _toolbox.getRender());
-                _renders ~= render;
+                _graphics ~= new EntityRenderData(renderData);
             }
-            _toolbox.setRenders(_renders);
+            _toolbox.setRenders(_graphics);
+            _onToolbox();
             setDirty();
         });
 
-        _toolbox.addEventListener("toolbox", {
-            foreach (size_t i, EntityRenderData render; _renders) {
-                render.isVisible = (i == _toolbox.getRender());
+        _parameterWindow.addEventListener("property_auxGraphic", {
+            _auxGraphics.length = 0;
+            foreach (size_t i, EntityRenderData renderData; _parameterWindow.getAuxRenders()) {
+                _auxGraphics ~= new EntityRenderData(renderData);
             }
+            _onToolbox();
+            setDirty();
         });
 
+        _toolbox.addEventListener("toolbox", &_onToolbox);
+
         _toolbox.addEventListener("toolbox_play", {
-            foreach (EntityRenderData render; _renders) {
+            foreach (EntityRenderData render; _graphics) {
+                render.play();
+            }
+            foreach (EntityRenderData render; _auxGraphics) {
                 render.play();
             }
         });
 
         _toolbox.addEventListener("toolbox_pause", {
-            foreach (EntityRenderData render; _renders) {
+            foreach (EntityRenderData render; _graphics) {
+                render.pause();
+            }
+            foreach (EntityRenderData render; _auxGraphics) {
                 render.pause();
             }
         });
 
         _toolbox.addEventListener("toolbox_stop", {
-            foreach (EntityRenderData render; _renders) {
+            foreach (EntityRenderData render; _graphics) {
+                render.stop();
+            }
+            foreach (EntityRenderData render; _auxGraphics) {
                 render.stop();
             }
         });
@@ -103,11 +122,16 @@ final class ProxyResourceEditor : ResourceBaseEditor {
         });
         addEventListener("register", { Atelier.ui.addUI(_toolbox); });
         addEventListener("unregister", { _toolbox.removeUI(); });
+
+        _onToolbox();
     }
 
     override Farfadet save(Farfadet ffd) {
         Farfadet node = ffd.addNode("proxy").add(_name);
-        foreach (EntityRenderData render; _renders) {
+        foreach (EntityRenderData render; _graphics) {
+            render.save(node);
+        }
+        foreach (EntityRenderData render; _auxGraphics) {
             render.save(node);
         }
         _hurtbox.save(node);
@@ -116,6 +140,30 @@ final class ProxyResourceEditor : ResourceBaseEditor {
 
     override UIElement getPanel() {
         return _parameterWindow;
+    }
+
+    private void _onToolbox() {
+        EntityRenderData mainRenderData;
+        foreach (size_t i, EntityRenderData render; _graphics) {
+            render.isVisible = (i == _toolbox.getRender());
+            if (render.isVisible) {
+                mainRenderData = render;
+            }
+        }
+
+        _auxGraphicsStack.length = 0;
+        foreach (size_t i, EntityRenderData render; _auxGraphics) {
+            if (mainRenderData) {
+                render.isVisible = mainRenderData && mainRenderData.hasAuxGraphic(render.name);
+                if (render.isVisible) {
+                    _auxGraphicsStack ~= render;
+                }
+            }
+            else {
+                render.isVisible = false;
+            }
+        }
+        _auxGraphicsStack.sort!((a, b) => a.order < b.order)();
     }
 
     private void _onMouseDown() {
@@ -160,15 +208,43 @@ final class ProxyResourceEditor : ResourceBaseEditor {
     }
 
     private void _onUpdate() {
-        foreach (EntityRenderData render; _renders) {
+        foreach (EntityRenderData render; _graphics) {
+            render.update(_zoom);
+        }
+        foreach (EntityRenderData render; _auxGraphics) {
             render.update(_zoom);
         }
     }
 
-    private void _onDraw() {
-        foreach (EntityRenderData render; _renders) {
-            render.draw(_originPosition + getCenter(), _toolbox.getDir());
+    private void _render() {
+        Vec2f graphicOffset = _originPosition + getCenter();
+
+        if (_auxGraphicsStack.length) {
+            foreach (EntityRenderData render; _auxGraphicsStack) {
+                if (render.getIsBehind()) {
+                    render.draw(graphicOffset, _toolbox.getDir());
+                }
+            }
+
+            foreach (EntityRenderData render; _graphics) {
+                render.draw(graphicOffset, _toolbox.getDir());
+            }
+
+            foreach (EntityRenderData render; _auxGraphicsStack) {
+                if (!render.getIsBehind()) {
+                    render.draw(graphicOffset, _toolbox.getDir());
+                }
+            }
         }
+        else {
+            foreach (EntityRenderData render; _graphics) {
+                render.draw(graphicOffset, _toolbox.getDir());
+            }
+        }
+    }
+
+    private void _onDraw() {
+        _render();
 
         if (_hurtbox.type != "none") {
             Vec2f hurtOrigin = _originPosition + getCenter() + Vec2f.angled(

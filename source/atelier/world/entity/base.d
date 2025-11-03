@@ -1,5 +1,6 @@
 module atelier.world.entity.base;
 
+import std.algorithm.sorting : sort;
 import std.math;
 
 import farfadet;
@@ -133,16 +134,18 @@ abstract class Entity {
 
     protected {
         EntityComponent[string] _components;
-        EntityGraphic[string] _graphics;
+        EntityGraphic[string] _graphics, _auxGraphics;
         string _graphicId;
         EntityGraphic _graphic;
 
-        struct AuxGraphic {
+        struct AuxGraphicSlot {
             string id;
+            bool isUpdated;
             EntityGraphic graphic;
         }
 
-        AuxGraphic[] _auxGraphics;
+        AuxGraphicSlot[] _auxGraphicSlots;
+        EntityGraphic[] _auxGraphicStack;
 
         EntityGraphicEffectWrapper _effect;
         Collider _collider;
@@ -221,7 +224,7 @@ abstract class Entity {
                 _graphic.setAngle(_angle);
             }
 
-            foreach (ref auxGraphic; _auxGraphics) {
+            foreach (ref auxGraphic; _auxGraphicSlots) {
                 if (!auxGraphic.graphic)
                     continue;
 
@@ -261,6 +264,10 @@ abstract class Entity {
             _graphics[id] = renderer.fetch();
         }
 
+        foreach (id, renderer; other._auxGraphics) {
+            _auxGraphics[id] = renderer.fetch();
+        }
+
         if (other._collider) {
             _collider = other._collider.fetch();
             _collider.setEntity(this);
@@ -285,6 +292,7 @@ abstract class Entity {
                 break;
             }
         }
+        _updateAuxGraphics();
     }
 
     final void setData(const(EntityData) data) {
@@ -425,8 +433,12 @@ abstract class Entity {
         reloadTerrainInfo();
     }
 
-    final void addGraphic(string name, EntityGraphic renderer) {
-        _graphics[name] = renderer;
+    final void addGraphic(string name, EntityGraphic graphic) {
+        _graphics[name] = graphic;
+    }
+
+    final void addAuxGraphic(string name, EntityGraphic graphic) {
+        _auxGraphics[name] = graphic;
     }
 
     final void setDefaultGraphic() {
@@ -445,6 +457,7 @@ abstract class Entity {
                 _graphic = graphic;
                 _graphic.start();
                 _graphic.setAngle(_angle);
+                _updateAuxGraphics();
 
                 if (!wasRendered) {
                     version (AtelierEtabli) {
@@ -471,6 +484,10 @@ abstract class Entity {
             return;
         }
 
+        if (_graphic) {
+            _graphic.stop();
+        }
+
         _graphicId = id;
 
         if (_graphicId !in _graphics) {
@@ -478,11 +495,8 @@ abstract class Entity {
                 Atelier.log("Pas d’état `", _graphicId, "` trouvé");
             }
             _graphic = null;
+            _updateAuxGraphics();
             return;
-        }
-
-        if (_graphic) {
-            _graphic.stop();
         }
 
         bool wasRendered = _graphic !is null;
@@ -496,42 +510,101 @@ abstract class Entity {
                 Atelier.world.addRenderedEntity(this);
             }
         }
+        _updateAuxGraphics();
     }
 
-    final void setAuxGraphic(uint index, string id) {
-        if (index >= _auxGraphics.length) {
+    private void _updateAuxGraphics() {
+        if (!_graphic)
+            return;
+
+        foreach (id; _graphic.getAuxGraphics()) {
+            _setAuxGraphic(id);
+        }
+
+        for (uint i; i < _auxGraphicSlots.length; ++i) {
+            if (!_auxGraphicSlots[i].isUpdated) {
+                setAuxGraphic(i, "");
+            }
+            _auxGraphicSlots[i].isUpdated = false;
+        }
+
+        _auxGraphicStack.length = 0;
+        for (uint i; i < _auxGraphicSlots.length; ++i) {
+            if (!_auxGraphicSlots[i].graphic)
+                continue;
+
+            _auxGraphicStack ~= _auxGraphicSlots[i].graphic;
+        }
+        _auxGraphicStack.sort!((a, b) => a.getOrder() < b.getOrder())();
+    }
+
+    private void _setAuxGraphic(string id) {
+        auto p = id in _auxGraphics;
+        if (!p) {
+            if (id.length) {
+                Atelier.log("Pas d’état auxiliaire `", id, "` trouvé");
+            }
+            return;
+        }
+        EntityGraphic graphic = *p;
+        uint slot = graphic.getSlot();
+
+        if (getAuxGraphic(slot) == graphic) {
+            _auxGraphicSlots[slot].isUpdated = true;
+            return;
+        }
+
+        if (slot >= _auxGraphicSlots.length) {
             if (!id.length)
                 return;
 
-            _auxGraphics.length = index + 1;
+            _auxGraphicSlots.length = slot + 1;
+        }
+
+        if (_auxGraphicSlots[slot].graphic) {
+            _auxGraphicSlots[slot].graphic.stop();
+        }
+
+        _auxGraphicSlots[slot].isUpdated = true;
+        _auxGraphicSlots[slot].graphic = graphic;
+        _auxGraphicSlots[slot].graphic.start();
+        _auxGraphicSlots[slot].graphic.setAngle(_angle);
+    }
+
+    private void setAuxGraphic(uint index, string id) {
+        if (index >= _auxGraphicSlots.length) {
+            if (!id.length)
+                return;
+
+            _auxGraphicSlots.length = index + 1;
         }
 
         if (!id.length) {
-            _auxGraphics[index].id.length = 0;
-            _auxGraphics[index].graphic = null;
+            _auxGraphicSlots[index].id.length = 0;
+            _auxGraphicSlots[index].graphic = null;
             return;
         }
-        else if (_auxGraphics[index].id == id) {
+        else if (_auxGraphicSlots[index].id == id) {
             return;
         }
 
-        _auxGraphics[index].id = id;
+        _auxGraphicSlots[index].id = id;
 
-        if (id !in _graphics) {
+        if (id !in _auxGraphics) {
             if (id.length) {
-                Atelier.log("Pas d’état `", id, "` trouvé");
+                Atelier.log("Pas d’état auxiliaire `", id, "` trouvé");
             }
-            _auxGraphics[index].graphic = null;
+            _auxGraphicSlots[index].graphic = null;
             return;
         }
 
-        if (_auxGraphics[index].graphic) {
-            _auxGraphics[index].graphic.stop();
+        if (_auxGraphicSlots[index].graphic) {
+            _auxGraphicSlots[index].graphic.stop();
         }
 
-        _auxGraphics[index].graphic = _graphics[id];
-        _auxGraphics[index].graphic.start();
-        _auxGraphics[index].graphic.setAngle(_angle);
+        _auxGraphicSlots[index].graphic = _graphics[id];
+        _auxGraphicSlots[index].graphic.start();
+        _auxGraphicSlots[index].graphic.setAngle(_angle);
     }
 
     final EntityGraphic getGraphic() {
@@ -539,10 +612,10 @@ abstract class Entity {
     }
 
     final EntityGraphic getAuxGraphic(uint index) {
-        if (index >= _auxGraphics.length)
+        if (index >= _auxGraphicSlots.length)
             return null;
 
-        return _auxGraphics[index].graphic;
+        return _auxGraphicSlots[index].graphic;
     }
 
     final void setEffect(EntityGraphicEffect effect) {
@@ -585,7 +658,7 @@ abstract class Entity {
             _graphic.update();
         }
 
-        foreach (ref auxGraphic; _auxGraphics) {
+        foreach (ref auxGraphic; _auxGraphicSlots) {
             if (!auxGraphic.graphic)
                 continue;
 
@@ -931,18 +1004,18 @@ abstract class Entity {
     }
 
     final void renderGraphic(Vec2f offset, float alpha = 1f) {
-        if (_auxGraphics.length) {
-            for (size_t i; i < _auxGraphics.length; ++i) {
-                if (_auxGraphics[i].graphic && _auxGraphics[i].graphic.isBehind()) {
-                    _auxGraphics[i].graphic.draw(offset, alpha);
+        if (_auxGraphicStack.length) {
+            for (size_t i; i < _auxGraphicStack.length; ++i) {
+                if (_auxGraphicStack[i].isBehind()) {
+                    _auxGraphicStack[i].draw(offset, alpha);
                 }
             }
 
             _graphic.draw(offset, alpha);
 
-            for (size_t i; i < _auxGraphics.length; ++i) {
-                if (_auxGraphics[i].graphic && !_auxGraphics[i].graphic.isBehind()) {
-                    _auxGraphics[i].graphic.draw(offset, alpha);
+            for (size_t i; i < _auxGraphicStack.length; ++i) {
+                if (!_auxGraphicStack[i].isBehind()) {
+                    _auxGraphicStack[i].draw(offset, alpha);
                 }
             }
         }

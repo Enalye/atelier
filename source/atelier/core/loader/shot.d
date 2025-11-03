@@ -108,12 +108,7 @@ package void loadShot(InStream stream) {
 
     Atelier.res.store(rid, {
         Shot shot = new Shot;
-        for (uint i; i < graphicDataList.length; ++i) {
-            EntityGraphic graphic = createEntityGraphicData(graphicDataList[i]);
-            if (!graphic)
-                continue;
-            shot.addGraphic(graphicDataList[i].name, graphic);
-        }
+        buildEntityGraphics(shot, graphicDataList);
         if (hitbox.hasHitbox) {
             shot.setupCollider(hitbox.size);
         }

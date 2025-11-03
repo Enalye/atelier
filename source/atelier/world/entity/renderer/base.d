@@ -7,6 +7,9 @@ abstract class EntityGraphic {
     private {
         bool _isDefault;
         int[] _isBehind;
+        uint _slot;
+        int _order;
+        string[] _auxGraphics;
     }
 
     this() {
@@ -16,6 +19,9 @@ abstract class EntityGraphic {
     this(EntityGraphic other) {
         _isDefault = other._isDefault;
         _isBehind = other._isBehind;
+        _slot = other._slot;
+        _order = other._order;
+        _auxGraphics = other._auxGraphics;
     }
 
     final void setDefault(bool isDefault) {
@@ -32,6 +38,30 @@ abstract class EntityGraphic {
 
     final const(int[]) getIsBehind() const {
         return _isBehind;
+    }
+
+    final void setSlot(uint slot_) {
+        _slot = slot_;
+    }
+
+    final uint getSlot() const {
+        return _slot;
+    }
+
+    final void setOrder(int order_) {
+        _order = order_;
+    }
+
+    final int getOrder() const {
+        return _order;
+    }
+
+    final void setAuxGraphics(string[] graphics) {
+        _auxGraphics = graphics;
+    }
+
+    final const(string[]) getAuxGraphics() const {
+        return _auxGraphics;
     }
 
     EntityGraphic fetch();

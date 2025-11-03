@@ -100,13 +100,7 @@ package void loadActor(InStream stream) {
 
     Atelier.res.store(rid, {
         Actor actor = new Actor;
-        for (uint i; i < graphicDataList.length; ++i) {
-            EntityGraphic graphic = createEntityGraphicData(graphicDataList[i]);
-            if (!graphic)
-                continue;
-
-            actor.addGraphic(graphicDataList[i].name, graphic);
-        }
+        buildEntityGraphics(actor, graphicDataList);
         if (hitbox.hasHitbox) {
             actor.setupCollider(hitbox.size, hitbox.bounciness);
         }

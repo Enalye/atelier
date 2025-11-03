@@ -44,12 +44,7 @@ package void loadProxy(InStream stream) {
 
     Atelier.res.store(rid, {
         Proxy proxy = new Proxy;
-        for (uint i; i < graphicDataList.length; ++i) {
-            EntityGraphic graphic = createEntityGraphicData(graphicDataList[i]);
-            if (!graphic)
-                continue;
-            proxy.addGraphic(graphicDataList[i].name, graphic);
-        }
+        buildEntityGraphics(proxy, graphicDataList);
         proxy.setupHurtbox(hurtbox);
         proxy.setName(name);
         return proxy;

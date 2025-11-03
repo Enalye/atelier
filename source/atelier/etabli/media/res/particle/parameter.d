@@ -93,11 +93,11 @@ package final class ParameterWindow : UIElement {
 
             AccentButton addBtn = new AccentButton("Ajouter");
             addBtn.addEventListener("click", {
-                EntityEditRenderData modal = new EntityEditRenderData();
+                EntityEditRenderData modal = new EntityEditRenderData(null, false);
                 modal.addEventListener("render.new", {
                     auto elt = new RenderElement(this, modal.getData());
                     _renderList.addList(elt);
-                    elt.addEventListener("render", {
+                    elt.addEventListener("graphic", {
                         dispatchEvent("property_render", false);
                     });
                     dispatchEvent("property_render", false);
@@ -111,7 +111,7 @@ package final class ParameterWindow : UIElement {
 
             foreach (render; renders) {
                 auto elt = new RenderElement(this, render);
-                elt.addEventListener("render", {
+                elt.addEventListener("graphic", {
                     dispatchEvent("property_render", false);
                 });
                 _renderList.addList(elt);
@@ -663,17 +663,17 @@ private final class RenderElement : UIElement {
     }
 
     private void _onClick() {
-        EntityEditRenderData modal = new EntityEditRenderData(_data);
+        EntityEditRenderData modal = new EntityEditRenderData(_data, _data.isAuxGraphic);
         modal.addEventListener("render.apply", {
             _data = modal.getData();
             if (modal.isDirty()) {
-                dispatchEvent("render", false);
+                dispatchEvent("graphic", false);
             }
             _updateDisplay();
             Atelier.ui.popModalUI();
         });
         modal.addEventListener("render.remove", {
-            dispatchEvent("render", false);
+            dispatchEvent("graphic", false);
             Atelier.ui.popModalUI();
             removeUI();
         });

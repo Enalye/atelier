@@ -44,7 +44,7 @@ package struct HitboxData {
 
 package final class ParameterWindow : UIElement {
     private {
-        VList _renderList;
+        VList _renderList, _auxGraphicList;
 
         // Hitbox
         HitboxData _hitbox;
@@ -71,7 +71,7 @@ package final class ParameterWindow : UIElement {
         TextField _tagsField;
     }
 
-    this(EntityRenderData[] renders, HitboxData hitbox, RepulsorData repulsor, HurtboxData hurtbox, BaseEntityData baseEntityData) {
+    this(EntityRenderData[] renders, EntityRenderData[] auxGraphics, HitboxData hitbox, RepulsorData repulsor, HurtboxData hurtbox, BaseEntityData baseEntityData) {
         VList vlist = new VList;
         vlist.setPosition(Vec2f(8f, 8f));
         vlist.setSize(Vec2f.zero.max(getSize() - Vec2f(8f, 8f)));
@@ -99,18 +99,18 @@ package final class ParameterWindow : UIElement {
             hlayout.setPadding(Vec2f(284f, 0f));
             vlist.addList(hlayout);
 
-            hlayout.addUI(new Label("Rendus:", Atelier.theme.font));
+            hlayout.addUI(new Label("Rendus Principaux:", Atelier.theme.font));
 
             _renderList = new VList;
             _renderList.setSize(Vec2f(300f, 200f));
 
             AccentButton addBtn = new AccentButton("Ajouter");
             addBtn.addEventListener("click", {
-                EntityEditRenderData modal = new EntityEditRenderData();
+                EntityEditRenderData modal = new EntityEditRenderData(null, false);
                 modal.addEventListener("render.new", {
                     auto elt = new RenderElement(this, modal.getData());
                     _renderList.addList(elt);
-                    elt.addEventListener("render", {
+                    elt.addEventListener("graphic", {
                         dispatchEvent("property_render", false);
                     });
                     dispatchEvent("property_render", false);
@@ -124,10 +124,47 @@ package final class ParameterWindow : UIElement {
 
             foreach (render; renders) {
                 auto elt = new RenderElement(this, render);
-                elt.addEventListener("render", {
+                elt.addEventListener("graphic", {
                     dispatchEvent("property_render", false);
                 });
                 _renderList.addList(elt);
+            }
+        }
+
+        {
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(284f, 0f));
+            vlist.addList(hlayout);
+
+            hlayout.addUI(new Label("Rendus Auxiliaires:", Atelier.theme.font));
+
+            _auxGraphicList = new VList;
+            _auxGraphicList.setSize(Vec2f(300f, 200f));
+
+            AccentButton addBtn = new AccentButton("Ajouter");
+            addBtn.addEventListener("click", {
+                EntityEditRenderData modal = new EntityEditRenderData(null, true);
+                modal.addEventListener("render.new", {
+                    auto elt = new RenderElement(this, modal.getData());
+                    _auxGraphicList.addList(elt);
+                    elt.addEventListener("graphic", {
+                        dispatchEvent("property_auxGraphic", false);
+                    });
+                    dispatchEvent("property_auxGraphic", false);
+                    Atelier.ui.popModalUI();
+                });
+                Atelier.ui.pushModalUI(modal);
+            });
+            hlayout.addUI(addBtn);
+
+            vlist.addList(_auxGraphicList);
+
+            foreach (render; auxGraphics) {
+                auto elt = new RenderElement(this, render);
+                elt.addEventListener("graphic", {
+                    dispatchEvent("property_auxGraphic", false);
+                });
+                _auxGraphicList.addList(elt);
             }
         }
 
@@ -550,6 +587,15 @@ package final class ParameterWindow : UIElement {
         return renders;
     }
 
+    EntityRenderData[] getAuxRenders() {
+        RenderElement[] elements = cast(RenderElement[]) _auxGraphicList.getList();
+        EntityRenderData[] renders;
+        foreach (RenderElement elt; elements) {
+            renders ~= elt.getData();
+        }
+        return renders;
+    }
+
     HitboxData getHitbox() {
         return _hitbox;
     }
@@ -567,8 +613,17 @@ package final class ParameterWindow : UIElement {
     }
 
     private void moveUp(RenderElement item_) {
-        RenderElement[] elements = cast(RenderElement[]) _renderList.getList();
-        _renderList.clearList();
+        bool isAuxGraphic = item_._data.isAuxGraphic;
+        RenderElement[] elements;
+
+        if (isAuxGraphic) {
+            elements = cast(RenderElement[]) _auxGraphicList.getList();
+            _auxGraphicList.clearList();
+        }
+        else {
+            elements = cast(RenderElement[]) _renderList.getList();
+            _renderList.clearList();
+        }
 
         for (size_t i = 1; i < elements.length; ++i) {
             if (elements[i] == item_) {
@@ -578,14 +633,30 @@ package final class ParameterWindow : UIElement {
             }
         }
 
-        foreach (RenderElement element; elements) {
-            _renderList.addList(element);
+        if (isAuxGraphic) {
+            foreach (RenderElement element; elements) {
+                _auxGraphicList.addList(element);
+            }
+        }
+        else {
+            foreach (RenderElement element; elements) {
+                _renderList.addList(element);
+            }
         }
     }
 
     private void moveDown(RenderElement item_) {
-        RenderElement[] elements = cast(RenderElement[]) _renderList.getList();
-        _renderList.clearList();
+        bool isAuxGraphic = item_._data.isAuxGraphic;
+        RenderElement[] elements;
+
+        if (isAuxGraphic) {
+            elements = cast(RenderElement[]) _auxGraphicList.getList();
+            _auxGraphicList.clearList();
+        }
+        else {
+            elements = cast(RenderElement[]) _renderList.getList();
+            _renderList.clearList();
+        }
 
         for (size_t i = 0; (i + 1) < elements.length; ++i) {
             if (elements[i] == item_) {
@@ -595,8 +666,15 @@ package final class ParameterWindow : UIElement {
             }
         }
 
-        foreach (RenderElement element; elements) {
-            _renderList.addList(element);
+        if (isAuxGraphic) {
+            foreach (RenderElement element; elements) {
+                _auxGraphicList.addList(element);
+            }
+        }
+        else {
+            foreach (RenderElement element; elements) {
+                _renderList.addList(element);
+            }
         }
     }
 }
@@ -693,17 +771,17 @@ private final class RenderElement : UIElement {
     }
 
     private void _onClick() {
-        EntityEditRenderData modal = new EntityEditRenderData(_data);
+        EntityEditRenderData modal = new EntityEditRenderData(_data, _data.isAuxGraphic);
         modal.addEventListener("render.apply", {
             _data = modal.getData();
             if (modal.isDirty()) {
-                dispatchEvent("render", false);
+                dispatchEvent("graphic", false);
             }
             _updateDisplay();
             Atelier.ui.popModalUI();
         });
         modal.addEventListener("render.remove", {
-            dispatchEvent("render", false);
+            dispatchEvent("graphic", false);
             Atelier.ui.popModalUI();
             removeUI();
         });

@@ -1,6 +1,6 @@
 module atelier.etabli.media.res.entity_render.render_edit;
 
-import std.array : split;
+import std.array : split, join;
 import std.conv : to, ConvException;
 
 import atelier.common;
@@ -20,7 +20,7 @@ final class EntityEditRenderData : Modal {
         bool _isDirty = false;
     }
 
-    this(EntityRenderData data = null) {
+    this(EntityRenderData data, bool isAuxGraphic) {
         setAlign(UIAlignX.center, UIAlignY.center);
         setSize(Vec2f(500f, 520f));
 
@@ -29,7 +29,7 @@ final class EntityEditRenderData : Modal {
             _data = data;
         }
         else {
-            _data = new EntityRenderData;
+            _data = new EntityRenderData(isAuxGraphic);
             isNew = true;
         }
 
@@ -112,21 +112,6 @@ final class EntityEditRenderData : Modal {
                 _isDirty = true;
             });
             hlayout.addUI(_nameField);
-        }
-
-        {
-            HLayout hlayout = new HLayout;
-            hlayout.setPadding(Vec2f(400f, 0f));
-            vbox.addUI(hlayout);
-
-            hlayout.addUI(new Label("Valeur par défaut:", Atelier.theme.font));
-
-            _defaultBtn = new Checkbox(_data.isDefault);
-            _defaultBtn.addEventListener("value", {
-                _data.isDefault = _defaultBtn.value();
-                _isDirty = true;
-            });
-            hlayout.addUI(_defaultBtn);
         }
 
         {
@@ -285,49 +270,14 @@ final class EntityEditRenderData : Modal {
             hlayout.setPadding(Vec2f(400f, 0f));
             vbox.addUI(hlayout);
 
-            hlayout.addUI(new Label("Marge VFX - x:", Atelier.theme.font));
-
-            IntegerField offsetXField = new IntegerField;
-            offsetXField.value = _data.effectMargin.x;
-            offsetXField.addEventListener("value", {
-                _data.effectMargin.x = offsetXField.value();
-                _isDirty = true;
-            });
-            hlayout.addUI(offsetXField);
-
-            hlayout.addUI(new Label("y:", Atelier.theme.font));
-
-            IntegerField offsetYField = new IntegerField;
-            offsetYField.value = _data.effectMargin.y;
-            offsetYField.addEventListener("value", {
-                _data.effectMargin.y = offsetYField.value();
-                _isDirty = true;
-            });
-            hlayout.addUI(offsetYField);
-
-            IconButton defaultBtn = new IconButton("editor:revert");
-            defaultBtn.addEventListener("click", {
-                _data.effectMargin.x = 0;
-                offsetXField.value(_data.effectMargin.x);
-                _data.effectMargin.y = 0;
-                offsetYField.value(_data.effectMargin.y);
-                _isDirty = true;
-            });
-            hlayout.addUI(defaultBtn);
-        }
-
-        {
-            HLayout hlayout = new HLayout;
-            hlayout.setPadding(Vec2f(400f, 0f));
-            vbox.addUI(hlayout);
-
             hlayout.addUI(new Label("Tourne avec l'angle:", Atelier.theme.font));
 
             Checkbox isRotatingCheck = new Checkbox(_data.isRotating);
             isRotatingCheck.addEventListener("value", {
                 _data.isRotating = isRotatingCheck.value;
                 _isDirty = true;
-            });
+            }
+            );
             hlayout.addUI(isRotatingCheck);
         }
 
@@ -375,34 +325,139 @@ final class EntityEditRenderData : Modal {
             hlayout.addUI(blendBtn);
         }
 
-        {
-            HLayout hlayout = new HLayout;
-            hlayout.setPadding(Vec2f(400f, 0f));
-            vbox.addUI(hlayout);
+        if (_data.isAuxGraphic) {
+            {
+                HLayout hlayout = new HLayout;
+                hlayout.setPadding(Vec2f(400f, 0f));
+                vbox.addUI(hlayout);
 
-            hlayout.addUI(new Label("Derrière Aux.:", Atelier.theme.font));
+                hlayout.addUI(new Label("Derrière Auxiliaire:", Atelier.theme.font));
 
-            TextField isBehindField = new TextField();
-            isBehindField.setAllowedCharacters(" 01");
-            isBehindField.addEventListener("value", {
-                _data.isBehind.length = 0;
-                foreach (element; isBehindField.value.split(' ')) {
-                    try {
-                        _data.isBehind ~= to!uint(element);
+                TextField isBehindField = new TextField();
+                isBehindField.setAllowedCharacters(" 01");
+                isBehindField.addEventListener("value", {
+                    _data.isBehind.length = 0;
+                    foreach (element; isBehindField.value.split(
+                        ' ')) {
+                        try {
+                            _data.isBehind ~= to!uint(element);
+                        }
+                        catch (ConvException e) {
+                        }
                     }
-                    catch (ConvException e) {
-                    }
+
+                    _isDirty = true;
+                });
+                hlayout.addUI(isBehindField);
+
+                string value;
+                foreach (i; _data.isBehind) {
+                    value ~= to!string(i) ~ " ";
                 }
-
-                _isDirty = true;
-            });
-            hlayout.addUI(isBehindField);
-
-            string value;
-            foreach (i; _data.isBehind) {
-                value ~= to!string(i) ~ " ";
+                isBehindField.value = value;
             }
-            isBehindField.value = value;
+
+            {
+                HLayout hlayout = new HLayout;
+                hlayout.setPadding(Vec2f(400f, 0f));
+                vbox.addUI(hlayout);
+
+                hlayout.addUI(new Label("Ordre:", Atelier.theme.font));
+
+                IntegerField orderField = new IntegerField;
+                orderField.value = _data.order;
+                orderField.addEventListener("value", {
+                    _data.order = orderField.value();
+                    _isDirty = true;
+                });
+                hlayout.addUI(orderField);
+            }
+
+            {
+                HLayout hlayout = new HLayout;
+                hlayout.setPadding(Vec2f(400f, 0f));
+                vbox.addUI(hlayout);
+
+                hlayout.addUI(new Label("Emplacement:", Atelier.theme.font));
+
+                IntegerField slotField = new IntegerField;
+                slotField.setMinValue(0);
+                slotField.value = _data.slot;
+                slotField.addEventListener("value", {
+                    _data.slot = slotField.value();
+                    _isDirty = true;
+                });
+                hlayout.addUI(slotField);
+            }
+        }
+        else {
+            {
+                HLayout hlayout = new HLayout;
+                hlayout.setPadding(Vec2f(400f, 0f));
+                vbox.addUI(hlayout);
+
+                hlayout.addUI(new Label("Valeur par défaut:", Atelier.theme.font));
+
+                _defaultBtn = new Checkbox(_data.isDefault);
+                _defaultBtn.addEventListener("value", {
+                    _data.isDefault = _defaultBtn.value();
+                    _isDirty = true;
+                });
+                hlayout.addUI(_defaultBtn);
+            }
+            {
+                HLayout hlayout = new HLayout;
+                hlayout.setPadding(Vec2f(400f, 0f));
+                vbox.addUI(hlayout);
+
+                hlayout.addUI(new Label("Marge VFX - x:", Atelier.theme.font));
+
+                IntegerField offsetXField = new IntegerField;
+                offsetXField.value = _data.effectMargin.x;
+                offsetXField.addEventListener("value", {
+                    _data.effectMargin.x = offsetXField.value();
+                    _isDirty = true;
+                });
+                hlayout.addUI(offsetXField);
+
+                hlayout.addUI(new Label("y:", Atelier.theme.font));
+
+                IntegerField offsetYField = new IntegerField;
+                offsetYField.value = _data.effectMargin.y;
+                offsetYField.addEventListener("value", {
+                    _data.effectMargin.y = offsetYField.value();
+                    _isDirty = true;
+                });
+                hlayout.addUI(offsetYField);
+
+                IconButton defaultBtn = new IconButton("editor:revert");
+                defaultBtn.addEventListener("click", {
+                    _data.effectMargin.x = 0;
+                    offsetXField.value(_data.effectMargin.x);
+                    _data.effectMargin.y = 0;
+                    offsetYField.value(_data.effectMargin.y);
+                    _isDirty = true;
+                });
+                hlayout.addUI(defaultBtn);
+            }
+            {
+                HLayout hlayout = new HLayout;
+                hlayout.setPadding(Vec2f(400f, 0f));
+                vbox.addUI(hlayout);
+
+                hlayout.addUI(new Label("Rendus Auxiliaires:", Atelier.theme.font));
+
+                TextField auxGraphicsField = new TextField;
+                auxGraphicsField.value = _data.auxGraphics.join(' ');
+                auxGraphicsField.addEventListener("value", {
+                    _data.auxGraphics.length = 0;
+                    foreach (element; auxGraphicsField.value.split(' ')) {
+                        _data.auxGraphics ~= element;
+                    }
+                    _isDirty = true;
+                });
+                hlayout.addUI(auxGraphicsField);
+            }
         }
     }
 

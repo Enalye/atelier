@@ -12,6 +12,7 @@ final class Knob : UIElement {
         Circle _circle;
         float _value = 0f;
         float _minValue = 0f, _maxValue = 1f;
+        float _angleOffset = 0f;
     }
 
     @property {
@@ -48,24 +49,28 @@ final class Knob : UIElement {
 
     private void _onMouseDown() {
         Vec2f delta = getMousePosition() - getCenter();
-        _value = delta.rotated(-PI_2).angle();
+        _value = delta.rotated(-_angleOffset).angle();
         addEventListener("mousemove", &_onMouseMove);
         dispatchEvent("value", false);
     }
 
     private void _onMouseMove() {
         Vec2f delta = getMousePosition() - getCenter();
-        _value = delta.rotated(-PI_2).angle();
+        _value = delta.rotated(-_angleOffset).angle();
         dispatchEvent("value", false);
     }
 
     private void _onDraw() {
-        Vec2f endLine = getCenter() + Vec2f.angled(_value + PI_2) * (getWidth() / 2f);
+        Vec2f endLine = getCenter() + Vec2f.angled(_value + _angleOffset) * (getWidth() / 2f);
         Atelier.renderer.drawLine(getCenter(), endLine, Atelier.theme.accent, 1f);
     }
 
     void setRange(float minValue_, float maxValue_) {
         _minValue = minValue_;
         _maxValue = maxValue_;
+    }
+
+    void setAngleOffset(float angleOffset_) {
+        _angleOffset = degToRad(angleOffset_);
     }
 }

@@ -1200,7 +1200,7 @@ package final class SceneDefinition {
                 _image = null;
                 _imageOffset = Vec2f.zero;
 
-                foreach (renderNode; ffd.getNodes("render")) {
+                foreach (renderNode; ffd.getNodes("graphic")) {
                     _graphics ~= renderNode.get!string(0);
 
                     if (_graphic == renderNode.get!string(0) || _graphic.length == 0) {
@@ -1410,7 +1410,7 @@ package final class SceneDefinition {
                 _image = null;
                 _imageOffset = Vec2f.zero;
 
-                foreach (renderNode; ffd.getNodes("render")) {
+                foreach (renderNode; ffd.getNodes("graphic")) {
                     _graphics ~= renderNode.get!string(0);
 
                     if (_graphic == renderNode.get!string(0) || _graphic.length == 0) {

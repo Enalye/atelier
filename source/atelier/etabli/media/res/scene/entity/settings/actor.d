@@ -56,6 +56,7 @@ package(atelier.etabli.media.res.scene) class ActorSettings : BaseEntitySettings
             Knob dirKnob = new Knob;
             dirKnob.setSize(Vec2f(128f, 128f));
             dirKnob.setRange(0f, 360f);
+            dirKnob.setAngleOffset(180f);
             dirKnob.value = _entity.actor.angle;
             dirKnob.addEventListener("value", {
                 _entity.actor.angle = dirKnob.value;

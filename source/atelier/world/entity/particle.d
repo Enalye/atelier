@@ -413,7 +413,7 @@ final class Particle : Entity {
             pos = cast(Vec3f) _origin;
         }
         pos += _relativePosition;
-        pos += Vec3f(Vec2f.angled(degToRad(_relativeAngle - 90f)) * _relativeDistance, 0f).round();
+        pos += Vec3f(Vec2f.angled(degToRad(_relativeAngle)) * _relativeDistance, 0f).round();
 
         setPosition(pos);
     }
@@ -437,7 +437,7 @@ final class Particle : Entity {
         }
         _relativePosition += _velocity;
         pos += _relativePosition;
-        pos += Vec3f(Vec2f.angled(degToRad(_relativeAngle - 90f)) * _relativeDistance, 0f).round();
+        pos += Vec3f(Vec2f.angled(degToRad(_relativeAngle)) * _relativeDistance, 0f).round();
 
         Vec3f dir = pos - (getSubPosition() + cast(Vec3f) getPosition());
         move(dir);

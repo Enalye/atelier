@@ -29,7 +29,7 @@ final class MultiDirAnimationResourceEditor : ResourceBaseEditor {
         bool _repeat, _hasMaxCount;
         uint _frameTime;
 
-        float _dirStartAngle = 90f;
+        float _dirStartAngle = 0f;
         Vec2i _dirOffset;
         int[] _dirIndexes, _dirFlipXs;
 
@@ -588,6 +588,7 @@ private class Toolbox : Modal {
             _dirKnob.setAlign(UIAlignX.center, UIAlignY.top);
             _dirKnob.setPosition(Vec2f(0f, 70f));
             _dirKnob.setRange(0f, 360f);
+            _dirKnob.setAngleOffset(180f);
             _dirKnob.value = 0f;
             _dirKnob.addEventListener("value", {
                 _animation.dirAngle = _dirKnob.value;

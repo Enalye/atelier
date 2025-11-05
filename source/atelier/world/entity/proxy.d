@@ -53,7 +53,7 @@ final class Proxy : Entity, Resource!Proxy {
         Vec3f pos = cast(Vec3f) _base.getPosition();
         _relativePosition += _velocity;
         pos += _relativePosition;
-        pos += Vec3f(Vec2f.angled(degToRad(_relativeAngle - 90f)) * _relativeDistance, 0f).round();
+        pos += Vec3f(Vec2f.angled(degToRad(_relativeAngle)) * _relativeDistance, 0f).round();
         setPosition(pos);
     }
 

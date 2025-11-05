@@ -40,7 +40,7 @@ final class MultiDirAnimation : Image, Resource!MultiDirAnimation {
     int[] dirIndexes, dirFlipXs;
 
     float dirAngle = 0f;
-    float dirStartAngle = 90f;
+    float dirStartAngle = 0f;
 
     @property {
         pragma(inline) uint width() const {

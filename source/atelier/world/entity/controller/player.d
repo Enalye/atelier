@@ -23,7 +23,7 @@ final class DefaultMoveBehavior : Behavior!Actor {
 
         if (movedir != Vec2f.zero) {
             movedir.normalize();
-            entity.angle = radToDeg(movedir.angle()) + 90f;
+            entity.angle = radToDeg(movedir.angle());
             acceldir += movedir * 1f;
         }
 
@@ -43,8 +43,8 @@ final class DefaultTeleporterBehavior : Behavior!Actor {
     }
 
     override void update() {
-        Vec2f acceldir = Vec2f.angled(degToRad((_direction * -45f) - 90f)) * (_isExit ? 0.3f : 0.65f);
-        entity.angle = radToDeg(acceldir.angle()) + 90f;
+        Vec2f acceldir = Vec2f.angled(degToRad((_direction * -45f))) * (_isExit ? 0.3f : 0.65f);
+        entity.angle = radToDeg(acceldir.angle());
         entity.accelerate(Vec3f(acceldir, 0f));
     }
 }

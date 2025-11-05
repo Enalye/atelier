@@ -60,6 +60,7 @@ package class Toolbox : Modal {
             _dirKnob = new Knob;
             _dirKnob.setSize(Vec2f(128f, 128f));
             _dirKnob.setRange(0f, 360f);
+            _dirKnob.setAngleOffset(180f);
             _dirKnob.value = 0f;
             vbox.addUI(_dirKnob);
         }

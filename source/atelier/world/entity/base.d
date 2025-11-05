@@ -929,7 +929,7 @@ abstract class Entity {
 
         const float angle_ = (cast(Vec2f)(target - origin)).angle();
 
-        angle(clampDeg(radToDeg(angle_) + 90f));
+        angle(clampDeg(radToDeg(angle_)));
     }
 
     final void lookAt(Entity target) {

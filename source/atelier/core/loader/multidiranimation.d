@@ -51,7 +51,7 @@ package void compileMultiDirAnimation(string path, const Farfadet ffd, OutStream
         margin = ffd.getNode("margin", 2).get!Vec2i(0);
     }
 
-    float dirStartAngle = 90f;
+    float dirStartAngle = 0f;
     if (ffd.hasNode("dirStartAngle")) {
         dirStartAngle = ffd.getNode("dirStartAngle", 1).get!float(0);
     }

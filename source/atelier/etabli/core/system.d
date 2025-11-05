@@ -495,7 +495,7 @@ final class Etabli {
                 repeat = info.farfadet.getNode("repeat").get!bool(0);
             }
 
-            float dirStartAngle = 90f;
+            float dirStartAngle = 0f;
             if (info.farfadet.hasNode("dirStartAngle")) {
                 dirStartAngle = info.farfadet.getNode("dirStartAngle").get!float(0);
             }

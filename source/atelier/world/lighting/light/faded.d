@@ -3,6 +3,7 @@ module atelier.world.lighting.light.faded;
 import atelier.common;
 import atelier.world.lighting.light.base;
 
+/*
 final class FadedLight : Light {
     private {
         float _maxBrightness;
@@ -60,3 +61,4 @@ final class FadedLight : Light {
         }
     }
 }
+*/

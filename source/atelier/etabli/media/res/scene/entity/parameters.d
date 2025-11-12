@@ -310,6 +310,9 @@ package(atelier.etabli.media.res.scene) final class EntityParameters : UIElement
     }
 
     private void _createEntity() {
+        if (!_toolbox.getType().length)
+            return;
+
         SceneDefinition.Entity entity = _definition.createEntity(_toolbox.getType());
         entity.entityData.position = Vec3i(cast(Vec2i) _endMousePosition, 0);
 

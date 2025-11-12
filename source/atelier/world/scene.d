@@ -10,6 +10,7 @@ import atelier.core;
 import atelier.render;
 import atelier.world.weather;
 import atelier.world.entity;
+import atelier.world.lighting;
 
 final class Scene : Resource!Scene {
     final class TerrainLayer {
@@ -939,92 +940,34 @@ final class Scene : Resource!Scene {
 }
 
 final class LightBuilder {
-    enum Type {
-        pointLight
-    }
-
     private {
-        Type _type;
-        string _name;
-        Vec2i _position;
-        float _radius = 0f;
-        Color _color = Color.white;
-        float _brightness = 1f;
+        string _rid;
+        LightData _data;
     }
 
     @property {
-        Type type() const {
-            return _type;
+        string rid() const {
+            return _rid;
         }
 
-        string name() const {
-            return _name;
-        }
-
-        Vec2i position() const {
-            return _position;
-        }
-
-        float radius() const {
-            return _radius;
-        }
-
-        Color color() const {
-            return _color;
-        }
-
-        float brightness() const {
-            return _brightness;
+        const(LightData) data() const {
+            return _data;
         }
     }
 
     this(Farfadet ffd) {
-        try {
-            _type = to!Type(ffd.get!string(0));
-        }
-        catch (Exception e) {
-            _type = Type.pointLight;
-        }
-
-        if (ffd.hasNode("name")) {
-            _name = ffd.getNode("name").get!string(0);
-        }
-
-        if (ffd.hasNode("position")) {
-            _position = ffd.getNode("position").get!Vec2i(0);
-        }
-
-        if (ffd.hasNode("radius")) {
-            _radius = ffd.getNode("radius").get!float(0);
-        }
-
-        if (ffd.hasNode("color")) {
-            Farfadet colorNode = ffd.getNode("color");
-            _color = Color(colorNode.get!float(0), colorNode.get!float(1),
-                colorNode.get!float(2));
-        }
-
-        if (ffd.hasNode("brightness")) {
-            _brightness = ffd.getNode("brightness").get!float(0);
-        }
+        _rid = ffd.get!string(0);
+        _data.load(ffd);
     }
 
     this(InStream stream) {
-        _type = stream.read!Type();
-        _name = stream.read!string();
-        _position = stream.read!Vec2i();
-        _radius = stream.read!float();
-        _color = stream.read!Color();
-        _brightness = stream.read!float();
+        _rid = stream.read!string();
+        _data.deserialize(stream);
     }
 
     void serialize(OutStream stream) {
-        stream.write!Type(_type);
-        stream.write!string(_name);
-        stream.write!Vec2i(_position);
-        stream.write!float(_radius);
-        stream.write!Color(_color);
-        stream.write!float(_brightness);
+        stream.write!string(_rid);
+        _data.serialize(stream);
     }
 }
 

@@ -323,14 +323,8 @@ final class World {
         }
 
         foreach (lightBuilder; _scene.lights) {
-            final switch (lightBuilder.type) with (LightBuilder.Type) {
-            case pointLight:
-                PointLight light = new PointLight(lightBuilder.position, lightBuilder.radius);
-                light.color = lightBuilder.color;
-                light.brightness = lightBuilder.brightness;
-                _lighting.addLight(light);
-                break;
-            }
+            Light light = new Light(lightBuilder.rid, lightBuilder.data);
+            _lighting.addLight(light);
         }
 
         _weather.run(_scene.weatherType, _scene.weatherValue, 30);

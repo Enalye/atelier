@@ -151,10 +151,7 @@ final class Lighting {
         _rectSprite.draw(Vec2f.zero);
 
         foreach (id, light; _lights) {
-            _lightSprite.size = Vec2f(light.radius, light.radius);
-            _lightSprite.color = light.color;
-            _lightSprite.alpha = light.brightness;
-            _lightSprite.draw(offset + cast(Vec2f) light.position);
+            light.draw(offset);
         }
 
         Atelier.renderer.popCanvas();

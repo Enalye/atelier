@@ -229,6 +229,11 @@ final class Etabli {
 
             return new ShadowResourceEditor(editor, path, ffd, size);
         });
+        ResourceEditor.add("light", (ResourceEditor editor, string path, Farfadet ffd, Vec2f size) {
+            import atelier.etabli.media.res.light : LightResourceEditor;
+
+            return new LightResourceEditor(editor, path, ffd, size);
+        });
         /*ResourceEditor.add("grid", (ResourceEditor editor, string path, Farfadet ffd, Vec2f size) {
             import atelier.etabli.media.res.grid : GridResourceEditor;
 

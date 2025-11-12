@@ -929,19 +929,13 @@ package final class SceneDefinition {
     }
 
     final class Light {
-        enum Type {
-            pointLight,
-        }
-
         bool isAlive = true;
-        string name;
-        Vec2i position;
-        float brightness = 1f;
-        float radius = 0f;
-        Color color = Color.white;
+        LightData data;
+        float radius = 64f;
 
         private {
-            Type _type;
+            string _rid;
+            BaseLight _base;
             Vec2f _offset = Vec2f.zero;
             Vec2f _tempMove = Vec2f.zero;
             float _zoom = 1f;
@@ -952,48 +946,29 @@ package final class SceneDefinition {
 
         @property {
             Vec2i tempPosition() const {
-                return position + (cast(Vec2i) _tempMove.round());
+                return data.position + (cast(Vec2i) _tempMove.round());
             }
         }
 
         this(Farfadet ffd) {
-            try {
-                _type = to!Type(ffd.get!string(0));
-            }
-            catch (Exception e) {
-                _type = Type.pointLight;
-            }
+            _rid = ffd.get!string(0);
+            _base = Atelier.res.get!BaseLight(_rid);
+            data.load(ffd);
 
-            if (ffd.hasNode("name")) {
-                name = ffd.getNode("name").get!string(0);
-            }
-
-            if (ffd.hasNode("position")) {
-                position = ffd.getNode("position").get!Vec2i(0);
-            }
-
-            if (ffd.hasNode("radius")) {
-                radius = ffd.getNode("radius").get!float(0);
-            }
-
-            if (ffd.hasNode("color")) {
-                color = ffd.getNode("color").get!Color(0);
-            }
-
-            if (ffd.hasNode("brightness")) {
-                brightness = ffd.getNode("brightness").get!float(0);
-            }
             _setup();
         }
 
-        this(Type type_) {
-            _type = type_;
+        this(string rid_) {
+            _rid = rid_;
+            _base = Atelier.res.get!BaseLight(_rid);
+
             _setup();
         }
 
         private void _setup() {
             _circle = Circle.outline(radius, 1f);
-            _icon = Atelier.res.get!Sprite("editor:scene-lighting");
+            _icon = Atelier.res.get!Sprite(_base.icon);
+            Atelier.log(_base.icon);
         }
 
         void setTempMove(Vec2f move) {
@@ -1001,7 +976,7 @@ package final class SceneDefinition {
         }
 
         void applyMove() {
-            position += cast(Vec2i) _tempMove.round();
+            data.position += cast(Vec2i) _tempMove.round();
             _tempMove = Vec2f.zero;
         }
 
@@ -1022,14 +997,14 @@ package final class SceneDefinition {
         }
 
         bool isInside(Vec2f minPos, Vec2f maxPos) {
-            Vec2f a = (cast(Vec2f) position) - radius / 2f;
-            Vec2f b = (cast(Vec2f) position) + radius / 2f;
+            Vec2f a = (cast(Vec2f) data.position) - radius / 2f;
+            Vec2f b = (cast(Vec2f) data.position) + radius / 2f;
 
             return minPos.x < b.x && maxPos.x > a.x && minPos.y < b.y && maxPos.y > a.y;
         }
 
         bool checkHover(Vec2f point) {
-            return point.distance(cast(Vec2f) position) < radius / 2f;
+            return point.distance(cast(Vec2f) data.position) < radius / 2f;
         }
 
         void setHover(bool hover) {
@@ -1040,10 +1015,10 @@ package final class SceneDefinition {
             _offset = offset;
             _zoom = zoom;
             _circle.radius = clamp(radius * _zoom, 0f, 1024f);
-            _circle.position = offset + (_tempMove + cast(Vec2f) position) * _zoom;
+            _circle.position = offset + (_tempMove + cast(Vec2f) data.position) * _zoom;
             _icon.position = _circle.position;
             _icon.size = (cast(Vec2f) _icon.clip.zw) * _zoom;
-            _circle.color = color;
+            _circle.color = data.color;
         }
 
         void draw() {
@@ -1061,12 +1036,8 @@ package final class SceneDefinition {
         }
 
         void save(Farfadet ffd) {
-            Farfadet node = ffd.addNode("light").add(to!string(_type));
-            node.addNode("name").add(name);
-            node.addNode("position").add(position);
-            node.addNode("radius").add(radius);
-            node.addNode("color").add(color);
-            node.addNode("brightness").add(brightness);
+            Farfadet node = ffd.addNode("light").add(_rid);
+            data.save(node);
         }
 
         UIElement createSettingsWindow() {
@@ -2135,15 +2106,8 @@ package final class SceneDefinition {
         return _lights;
     }
 
-    Light createLight(string type) {
-        Light.Type type_;
-        try {
-            type_ = to!(Light.Type)(type);
-        }
-        catch (Exception e) {
-            Atelier.log(e.msg);
-        }
-        Light light = new Light(type_);
+    Light createLight(string rid) {
+        Light light = new Light(rid);
         _lights ~= light;
         return light;
     }

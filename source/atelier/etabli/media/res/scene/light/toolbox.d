@@ -66,7 +66,7 @@ package(atelier.etabli.media.res.scene) class LightToolbox : Modal {
 
             hlayout.addUI(new Label("Type:", Atelier.theme.font));
 
-            _typeBtn = new SelectButton(["pointLight"], "pointLight");
+            _typeBtn = new SelectButton(Atelier.etabli.getResourceList("light"), "");
             hlayout.addUI(_typeBtn);
         }
 

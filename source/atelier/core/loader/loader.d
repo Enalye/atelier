@@ -7,6 +7,7 @@ import atelier.core.data;
 import atelier.core.loader.actor;
 import atelier.core.loader.animation;
 import atelier.core.loader.bitmapfont;
+import atelier.core.loader.light;
 import atelier.core.loader.locale;
 import atelier.core.loader.multidiranimation;
 import atelier.core.loader.music;
@@ -47,6 +48,7 @@ void setupDefaultResourceLoaders(ResourceManager res) {
     res.setLoader("pixelfontstandard", &compilePixelFont, &loadPixelFont!PixelFontStandard);
     res.setLoader("pixelfontset", &compilePixelFontSet, &loadPixelFontSet);
     res.setLoader("shadow", &compileShadow, &loadShadow);
+    res.setLoader("light", &compileLight, &loadLight);
     res.setLoader("scene", &compileScene, &loadScene);
     res.setLoader("terrain", &compileTerrain, &loadTerrain);
     res.setLoader("prop", &compileProp, &loadProp);

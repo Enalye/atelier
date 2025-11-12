@@ -49,9 +49,9 @@ package(atelier.etabli.media.res.scene) class LightSettings : UIElement {
             hlayout.addUI(new Label("Nom:", Atelier.theme.font));
 
             _nameField = new TextField;
-            _nameField.value = _light.name;
+            _nameField.value = _light.data.name;
             _nameField.addEventListener("value", {
-                _light.name = _nameField.value;
+                _light.data.name = _nameField.value;
                 setDirty();
             });
             hlayout.addUI(_nameField);
@@ -65,9 +65,9 @@ package(atelier.etabli.media.res.scene) class LightSettings : UIElement {
             hlayout.addUI(new Label("x:", Atelier.theme.font));
 
             _posXField = new IntegerField;
-            _posXField.value = _light.position.x;
+            _posXField.value = _light.data.position.x;
             _posXField.addEventListener("value", {
-                _light.position = Vec2i(_posXField.value, _light.position.y);
+                _light.data.position = Vec2i(_posXField.value, _light.data.position.y);
                 setDirty();
             });
             hlayout.addUI(_posXField);
@@ -75,15 +75,15 @@ package(atelier.etabli.media.res.scene) class LightSettings : UIElement {
             hlayout.addUI(new Label("y:", Atelier.theme.font));
 
             _posYField = new IntegerField;
-            _posYField.value = _light.position.y;
+            _posYField.value = _light.data.position.y;
             _posYField.addEventListener("value", {
-                _light.position = Vec2i(_light.position.x, _posYField.value);
+                _light.data.position = Vec2i(_light.data.position.x, _posYField.value);
                 setDirty();
             });
             hlayout.addUI(_posYField);
         }
 
-        {
+        /* {
             HLayout hlayout = new HLayout;
             hlayout.setPadding(Vec2f(284f, 0f));
             vbox.addUI(hlayout);
@@ -98,7 +98,7 @@ package(atelier.etabli.media.res.scene) class LightSettings : UIElement {
                 setDirty();
             });
             hlayout.addUI(_radiusField);
-        }
+        }*/
 
         {
             HLayout hlayout = new HLayout;
@@ -108,9 +108,9 @@ package(atelier.etabli.media.res.scene) class LightSettings : UIElement {
             hlayout.addUI(new Label("Couleur:", Atelier.theme.font));
 
             ColorButton colorBtn = new ColorButton();
-            colorBtn.value = _light.color;
+            colorBtn.value = _light.data.color;
             colorBtn.addEventListener("value", {
-                _light.color = colorBtn.value();
+                _light.data.color = colorBtn.value();
                 setDirty();
             });
             hlayout.addUI(colorBtn);
@@ -127,9 +127,9 @@ package(atelier.etabli.media.res.scene) class LightSettings : UIElement {
             _brightnessSlider.minValue = 0f;
             _brightnessSlider.maxValue = 1f;
             _brightnessSlider.steps = 100;
-            _brightnessSlider.fvalue = _light.brightness;
+            _brightnessSlider.fvalue = _light.data.brightness;
             _brightnessSlider.addEventListener("value", {
-                _light.brightness = _brightnessSlider.fvalue;
+                _light.data.brightness = _brightnessSlider.fvalue;
                 _brightnessField.value = _brightnessSlider.fvalue;
                 setDirty();
             });
@@ -138,9 +138,9 @@ package(atelier.etabli.media.res.scene) class LightSettings : UIElement {
             _brightnessField = new NumberField;
             _brightnessField.setRange(0f, 1f);
             _brightnessField.setStep(.1f);
-            _brightnessField.value = _light.brightness;
+            _brightnessField.value = _light.data.brightness;
             _brightnessField.addEventListener("value", {
-                _light.brightness = _brightnessField.value;
+                _light.data.brightness = _brightnessField.value;
                 _brightnessSlider.fvalue = _brightnessField.value;
                 setDirty();
             });

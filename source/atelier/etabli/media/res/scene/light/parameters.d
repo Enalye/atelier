@@ -150,7 +150,7 @@ package(atelier.etabli.media.res.scene) final class LightParameters : UIElement 
                 if (!hoveredLight) {
                     hoveredLight = light;
                 }
-                else if (hoveredLight.position.y < light.position.y) {
+                else if (hoveredLight.data.position.y < light.data.position.y) {
                     hoveredLight = light;
                 }
             }
@@ -234,8 +234,11 @@ package(atelier.etabli.media.res.scene) final class LightParameters : UIElement 
     }
 
     private void _createLight() {
+        if (!_toolbox.getType().length)
+            return;
+
         SceneDefinition.Light light = _definition.createLight(_toolbox.getType());
-        light.position = cast(Vec2i) _endMousePosition;
+        light.data.position = cast(Vec2i) _endMousePosition;
 
         if (!hasControlModifier()) {
             _unselectLights();

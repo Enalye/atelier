@@ -1,4 +1,4 @@
-module atelier.etabli.ui.ressource_selector;
+module atelier.etabli.ui.resource_selector;
 
 import std.algorithm.searching;
 import std.algorithm.mutation;
@@ -17,25 +17,31 @@ import atelier.render;
 
 import atelier.etabli.ui.studio;
 
-final class RessourceButton : Button!RoundedRectangle {
+final class ResourceButton : Button!RoundedRectangle {
     private {
         RoundedRectangle _background;
         string[] _types;
         string _name, _type;
+        bool _allowEmpty;
         Icon _icon;
         Label _label;
     }
 
-    this(string name_, string type_, string[] types_) {
+    this(string name_, string type_, string[] types_, bool allowEmpty = false) {
         _name = name_;
         _type = type_;
         _types = types_;
+        _allowEmpty = allowEmpty;
 
-        if (!Atelier.etabli.hasResource(_type, _name)) {
-            _name.length = 0;
-            string[] list = Atelier.etabli.getResourceList(_type);
-            if (list.length > 0) {
-                _name = list[0];
+        if (!_allowEmpty || (_allowEmpty && _name.length > 0)) {
+            if (!Atelier.etabli.hasResource(_type, _name)) {
+                _name.length = 0;
+                if (!_allowEmpty) {
+                    string[] list = Atelier.etabli.getResourceList(_type);
+                    if (list.length > 0) {
+                        _name = list[0];
+                    }
+                }
             }
         }
 
@@ -48,8 +54,12 @@ final class RessourceButton : Button!RoundedRectangle {
         hbox.isEnabled = false;
         addUI(hbox);
 
-        _icon = new Icon("editor:ffd-" ~ _type);
+        _icon = new Icon;
         hbox.addUI(_icon);
+
+        if (!_allowEmpty || (_allowEmpty && _name.length > 0)) {
+            _icon.setIcon("editor:ffd-" ~ _type);
+        }
 
         _label = new Label(_name, Atelier.theme.font);
         hbox.addUI(_label);
@@ -96,12 +106,19 @@ final class RessourceButton : Button!RoundedRectangle {
     }
 
     private void _onClick() {
-        RessourceSelectorModal modal = new RessourceSelectorModal(_name, _type, _types);
-        modal.addEventListener("ressourceSelector", {
+        ResourceSelectorModal modal = new ResourceSelectorModal(_name, _type, _types, _allowEmpty);
+        modal.addEventListener("resourceSelector", {
             _name = modal.getName();
             _type = modal.getType();
             _label.text = _name;
-            _icon.setIcon("editor:ffd-" ~ _type);
+
+            if (!_allowEmpty || (_allowEmpty && _name.length > 0)) {
+                _icon.setIcon("editor:ffd-" ~ _type);
+            }
+            else {
+                _icon.removeIcon();
+            }
+
             dispatchEvent("value", false);
             Atelier.ui.popModalUI();
         });
@@ -124,11 +141,15 @@ final class RessourceButton : Button!RoundedRectangle {
         _type = type_;
         _name = name_;
 
-        if (!Atelier.etabli.hasResource(_type, _name)) {
-            _name.length = 0;
-            string[] list = Atelier.etabli.getResourceList(_type);
-            if (list.length > 0) {
-                _name = list[0];
+        if (!_allowEmpty || (_allowEmpty && _name.length > 0)) {
+            if (!Atelier.etabli.hasResource(_type, _name)) {
+                _name.length = 0;
+                if (!_allowEmpty) {
+                    string[] list = Atelier.etabli.getResourceList(_type);
+                    if (list.length > 0) {
+                        _name = list[0];
+                    }
+                }
             }
         }
 
@@ -137,23 +158,25 @@ final class RessourceButton : Button!RoundedRectangle {
     }
 }
 
-private final class RessourceSelectorModal : Modal {
+private final class ResourceSelectorModal : Modal {
     private {
         TextField _searchField;
         VList _fileList;
-        RessourceItem[] _ressourceItems;
+        ResourceItem[] _resourceItems;
         size_t _selectedItemIndex;
         string[] _types;
         string _type, _name;
         string _oldType, _oldName;
+        bool _allowEmpty;
     }
 
-    this(string name_, string type_, string[] types_) {
+    this(string name_, string type_, string[] types_, bool allowEmpty) {
         setAlign(UIAlignX.center, UIAlignY.center);
         setSize(Vec2f(500f, 500f));
         _types = types_;
         _oldType = type_;
         _oldName = name_;
+        _allowEmpty = allowEmpty;
 
         VBox vbox = new VBox;
         vbox.setAlign(UIAlignX.center, UIAlignY.center);
@@ -162,7 +185,7 @@ private final class RessourceSelectorModal : Modal {
         addUI(vbox);
 
         {
-            Label title = new Label("Sélectionner une ressource", Atelier.theme.font);
+            Label title = new Label("Sélectionner une resource", Atelier.theme.font);
             title.setAlign(UIAlignX.center, UIAlignY.top);
             vbox.addUI(title);
         }
@@ -206,9 +229,9 @@ private final class RessourceSelectorModal : Modal {
         case enter:
         case enter2:
         case numEnter:
-            if (_selectedItemIndex < _ressourceItems.length) {
-                validate(_ressourceItems[_selectedItemIndex].getName(),
-                    _ressourceItems[_selectedItemIndex].getType());
+            if (_selectedItemIndex < _resourceItems.length) {
+                validate(_resourceItems[_selectedItemIndex].getName(),
+                    _resourceItems[_selectedItemIndex].getType());
             }
             break;
         case escape:
@@ -216,8 +239,8 @@ private final class RessourceSelectorModal : Modal {
             break;
         case up:
             if (_selectedItemIndex == 0) {
-                _selectedItemIndex = _ressourceItems.length > 0 ?
-                    (cast(ptrdiff_t) _ressourceItems.length - 1) : 0;
+                _selectedItemIndex = _resourceItems.length > 0 ?
+                    (cast(ptrdiff_t) _resourceItems.length - 1) : 0;
             }
             else {
                 _selectedItemIndex--;
@@ -226,7 +249,7 @@ private final class RessourceSelectorModal : Modal {
             break;
         case down:
             _selectedItemIndex++;
-            if (_selectedItemIndex >= _ressourceItems.length) {
+            if (_selectedItemIndex >= _resourceItems.length) {
                 _selectedItemIndex = 0;
             }
             _updateSelectedItem();
@@ -237,21 +260,33 @@ private final class RessourceSelectorModal : Modal {
     }
 
     private void _updateSelectedItem() {
-        if (_selectedItemIndex < _ressourceItems.length) {
-            _fileList.moveToElement(_ressourceItems[_selectedItemIndex].elementIndex);
+        if (_selectedItemIndex < _resourceItems.length) {
+            _fileList.moveToElement(_resourceItems[_selectedItemIndex].elementIndex);
         }
-        for (size_t i; i < _ressourceItems.length; ++i) {
-            _ressourceItems[i].setSelected(i == _selectedItemIndex);
+        for (size_t i; i < _resourceItems.length; ++i) {
+            _resourceItems[i].setSelected(i == _selectedItemIndex);
         }
     }
 
     private void _onSearch() {
         _fileList.clearList();
-        _ressourceItems.length = 0;
+        _resourceItems.length = 0;
         _selectedItemIndex = 0;
 
         string search = _searchField.value;
         size_t elementIndex;
+
+        if (_allowEmpty) {
+            _fileList.addList(new TypeItem("Aucun"));
+            elementIndex++;
+
+            bool isOldValue = _oldName.length == 0;
+            ResourceItem item = new ResourceItem(this, isOldValue, "", "", "");
+            item.elementIndex = elementIndex;
+            _resourceItems ~= item;
+            _fileList.addList(item);
+            elementIndex++;
+        }
 
         foreach (type; _types) {
             bool isInit = true;
@@ -266,9 +301,9 @@ private final class RessourceSelectorModal : Modal {
                 }
 
                 bool isOldValue = (res == _oldName && type == _oldType);
-                RessourceItem item = new RessourceItem(this, isOldValue, res, type, search);
+                ResourceItem item = new ResourceItem(this, isOldValue, res, type, search);
                 item.elementIndex = elementIndex;
-                _ressourceItems ~= item;
+                _resourceItems ~= item;
                 _fileList.addList(item);
                 elementIndex++;
             }
@@ -288,7 +323,7 @@ private final class RessourceSelectorModal : Modal {
     void validate(string name_, string type_) {
         _type = type_;
         _name = name_;
-        dispatchEvent("ressourceSelector", false);
+        dispatchEvent("resourceSelector", false);
     }
 }
 
@@ -311,9 +346,9 @@ private final class TypeItem : UIElement {
     }
 }
 
-private final class RessourceItem : UIElement {
+private final class ResourceItem : UIElement {
     private {
-        RessourceSelectorModal _ressourceSelector;
+        ResourceSelectorModal _resourceSelector;
         Rectangle _rect;
         string _name, _type;
         bool _isSelected;
@@ -321,9 +356,9 @@ private final class RessourceItem : UIElement {
 
     protected size_t elementIndex;
 
-    this(RessourceSelectorModal ressourceSelector, bool isOldValue, string name_,
+    this(ResourceSelectorModal resourceSelector, bool isOldValue, string name_,
         string type_, string search) {
-        _ressourceSelector = ressourceSelector;
+        _resourceSelector = resourceSelector;
         _type = type_;
         _name = name_;
 
@@ -343,7 +378,7 @@ private final class RessourceItem : UIElement {
             addUI(icon);
         }
 
-        {
+        if (_type.length) {
             Icon icon = new Icon("editor:ffd-" ~ _type);
             icon.setAlign(UIAlignX.left, UIAlignY.center);
             icon.setPosition(Vec2f(32f, 0f));
@@ -421,6 +456,6 @@ private final class RessourceItem : UIElement {
     }
 
     private void _onClick() {
-        _ressourceSelector.validate(_name, _type);
+        _resourceSelector.validate(_name, _type);
     }
 }

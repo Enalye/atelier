@@ -13,11 +13,12 @@ import atelier.input;
 import atelier.physics;
 import atelier.ui;
 import atelier.render;
+import atelier.world;
 
 import atelier.etabli.ui;
 import atelier.etabli.media.res.base;
 import atelier.etabli.media.res.editor;
-import atelier.etabli.media.res.entity_render;
+import atelier.etabli.media.res.entity_base;
 import atelier.etabli.media.res.shot.parameter;
 import atelier.etabli.media.res.shot.toolbox;
 
@@ -31,6 +32,7 @@ final class ShotResourceEditor : ResourceBaseEditor {
         EntityRenderData[] _graphics, _auxGraphics, _auxGraphicsStack;
         HitboxData _hitbox;
         HurtboxData _hurtbox;
+        BaseEntityData _baseEntityData;
         int _material;
         uint _bounces, _ttl;
         bool _hasBounces, _hasTtl;
@@ -52,6 +54,8 @@ final class ShotResourceEditor : ResourceBaseEditor {
         if (ffd.hasNode("hurtbox")) {
             _hurtbox.load(ffd.getNode("hurtbox"));
         }
+
+        _baseEntityData.load(ffd);
 
         if (ffd.hasNode("material")) {
             _material = ffd.getNode("material").get!int(0);
@@ -78,7 +82,7 @@ final class ShotResourceEditor : ResourceBaseEditor {
             _auxGraphics ~= render;
         }
 
-        _parameterWindow = new ParameterWindow(_graphics, _auxGraphicsStack, _hitbox, _hurtbox, _bounces, _hasBounces, _ttl, _hasTtl, _material);
+        _parameterWindow = new ParameterWindow(_graphics, _auxGraphicsStack, _baseEntityData, _hitbox, _hurtbox, _bounces, _hasBounces, _ttl, _hasTtl, _material);
 
         _toolbox = new Toolbox();
         _toolbox.setRenders(_graphics);
@@ -90,6 +94,11 @@ final class ShotResourceEditor : ResourceBaseEditor {
 
         _parameterWindow.addEventListener("property_hurtbox", {
             _hurtbox = _parameterWindow.getHurtbox();
+            setDirty();
+        });
+
+        _parameterWindow.addEventListener("property_base", {
+            _baseEntityData = _parameterWindow.getBaseEntityData();
             setDirty();
         });
 
@@ -184,6 +193,7 @@ final class ShotResourceEditor : ResourceBaseEditor {
             _hitbox.save(node);
         }
         _hurtbox.save(node);
+        _baseEntityData.save(node);
 
         if (_hasBounces)
             node.addNode("bounces").add(_bounces);

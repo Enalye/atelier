@@ -31,7 +31,7 @@ package(atelier.etabli.media.res.scene) class PropSettings : BaseEntitySettings 
 
             hlayout.addUI(new Label("Prop:", Atelier.theme.font));
 
-            RessourceButton btn = new RessourceButton(_entity.prop.rid, "prop", [
+            ResourceButton btn = new ResourceButton(_entity.prop.rid, "prop", [
                     "prop"
                 ]);
             btn.addEventListener("value", {

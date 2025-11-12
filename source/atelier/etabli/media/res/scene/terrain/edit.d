@@ -12,7 +12,7 @@ final class EditTerrainElement : Modal {
     private {
         TextField _nameField;
         IntegerField _levelField;
-        RessourceButton _terrainSelect;
+        ResourceButton _terrainSelect;
 
         AccentButton _applyBtn;
         SceneDefinition.TerrainLayer _layer;
@@ -68,7 +68,7 @@ final class EditTerrainElement : Modal {
 
             hbox.addUI(new Label("Terrain:", Atelier.theme.font));
 
-            _terrainSelect = new RessourceButton(_layer.terrainRID, "terrain", [
+            _terrainSelect = new ResourceButton(_layer.terrainRID, "terrain", [
                     "terrain"
                 ]);
             hbox.addUI(_terrainSelect);

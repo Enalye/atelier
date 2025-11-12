@@ -415,7 +415,7 @@ private final class MediaPlayer : UIElement {
 
 private final class ParameterWindow : UIElement {
     private {
-        RessourceButton _spriteSelect;
+        ResourceButton _spriteSelect;
         SelectButton _blendSelect;
         Checkbox _isRelativePositionCB;
         Checkbox _isRelativeSpriteAngleCB;
@@ -462,7 +462,7 @@ private final class ParameterWindow : UIElement {
 
             hlayout.addUI(new Label("Texture:", Atelier.theme.font));
 
-            _spriteSelect = new RessourceButton(spriteRID, "sprite", ["sprite"]);
+            _spriteSelect = new ResourceButton(spriteRID, "sprite", ["sprite"]);
             _spriteSelect.addEventListener("value", {
                 dispatchEvent("property_spriteRID", false);
             });

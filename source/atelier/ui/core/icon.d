@@ -10,15 +10,23 @@ final class Icon : UIElement {
         Sprite _icon;
     }
 
+    this() {
+
+    }
+
     this(string icon) {
         isEnabled = false;
         setIcon(icon);
     }
 
-    void setIcon(string icon) {
+    void removeIcon() {
         if (_icon) {
             _icon.remove();
         }
+    }
+
+    void setIcon(string icon) {
+        removeIcon();
 
         _icon = Atelier.res.get!Sprite(icon);
         _icon.anchor = Vec2f.zero;

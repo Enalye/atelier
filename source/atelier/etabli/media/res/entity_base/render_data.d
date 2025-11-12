@@ -1,4 +1,4 @@
-module atelier.etabli.media.res.entity_render.render_data;
+module atelier.etabli.media.res.entity_base.render_data;
 
 import farfadet;
 
@@ -14,7 +14,7 @@ final class EntityRenderData {
         string _type;
         string _rid;
         string _layer;
-        bool _isRenderDirty = true;
+        bool _isGraphicDirty = true;
         Sprite _sprite;
         Animation _anim;
         MultiDirAnimation _mdiranim;
@@ -56,7 +56,7 @@ final class EntityRenderData {
 
         string type(string type_) {
             _type = type_;
-            _isRenderDirty = true;
+            _isGraphicDirty = true;
             return _type;
         }
 
@@ -66,7 +66,7 @@ final class EntityRenderData {
 
         string rid(string rid_) {
             _rid = rid_;
-            _isRenderDirty = true;
+            _isGraphicDirty = true;
             return _rid;
         }
     }
@@ -267,8 +267,8 @@ final class EntityRenderData {
         if (!isVisible)
             return;
 
-        if (_isRenderDirty) {
-            _isRenderDirty = false;
+        if (_isGraphicDirty) {
+            _isGraphicDirty = false;
 
             _sprite = null;
             _anim = null;
@@ -316,7 +316,7 @@ final class EntityRenderData {
         }
     }
 
-    EntityGraphic createEntityGraphicData() {
+    EntityGraphic createEntityRenderData() {
         EntityGraphic graphic;
 
         switch (_type) {

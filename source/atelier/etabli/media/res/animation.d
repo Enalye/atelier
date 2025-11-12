@@ -595,7 +595,7 @@ private class Toolbox : Modal {
 
 private final class ParameterWindow : UIElement {
     private {
-        RessourceButton _textureSelect;
+        ResourceButton _textureSelect;
         IntegerField[] _clipFields, _marginFields, _countFields;
         TextField _framesField;
         IntegerField _frameTimeField;
@@ -629,7 +629,7 @@ private final class ParameterWindow : UIElement {
 
             hlayout.addUI(new Label("Texture:", Atelier.theme.font));
 
-            _textureSelect = new RessourceButton(textureRID, "texture", [
+            _textureSelect = new ResourceButton(textureRID, "texture", [
                     "texture"
                 ]);
             _textureSelect.addEventListener("value", {

@@ -14,7 +14,7 @@ package(atelier.etabli.media.res.scene) final class TopographicMap : UIElement {
     private {
         SceneDefinition _definition;
         TopographyToolbox _toolbox;
-        RessourceButton _terrainSelect;
+        ResourceButton _terrainSelect;
 
         TerrainMap _terrainMap;
         TerrainMap.Brush _brush;
@@ -47,7 +47,7 @@ package(atelier.etabli.media.res.scene) final class TopographicMap : UIElement {
 
             hlayout.addUI(new Label("Terrain:", Atelier.theme.font));
 
-            _terrainSelect = new RessourceButton(_definition.topologicMap.terrainRID,
+            _terrainSelect = new ResourceButton(_definition.topologicMap.terrainRID,
                 "terrain", ["terrain"]);
             _terrainSelect.addEventListener("value", {
                 _definition.topologicMap.terrainRID = _terrainSelect.getName();

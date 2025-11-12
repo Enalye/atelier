@@ -9,9 +9,10 @@ import atelier.core;
 import atelier.physics;
 import atelier.ui;
 import atelier.render;
+import atelier.world;
 
 import atelier.etabli.ui;
-import atelier.etabli.media.res.entity_render;
+import atelier.etabli.media.res.entity_base;
 
 package struct HitboxData {
     bool hasHitbox = false;
@@ -35,8 +36,6 @@ package struct HitboxData {
 
 package final class ParameterWindow : UIElement {
     private {
-        VList _renderList, _auxGraphicList;
-
         // Hitbox
         HitboxData _hitbox;
         Checkbox _hasHitboxCheck;
@@ -55,7 +54,10 @@ package final class ParameterWindow : UIElement {
         SelectButton _materialBtn;
     }
 
-    this(EntityRenderData[] renders, EntityRenderData[] auxGraphics, HitboxData hitbox, HurtboxData hurtbox, uint bounces, bool hasBounces_, uint ttl, bool hasTtl_, int material) {
+    mixin GraphicDataEntityParameter;
+    mixin BaseDataEntityParameter;
+
+    this(EntityRenderData[] graphics, EntityRenderData[] auxGraphics, BaseEntityData baseEntityData, HitboxData hitbox, HurtboxData hurtbox, uint bounces, bool hasBounces_, uint ttl, bool hasTtl_, int material) {
         VList vlist = new VList;
         vlist.setPosition(Vec2f(8f, 8f));
         vlist.setSize(Vec2f.zero.max(getSize() - Vec2f(8f, 8f)));
@@ -68,88 +70,8 @@ package final class ParameterWindow : UIElement {
         _hitbox = hitbox;
         _hurtbox = hurtbox;
 
-        {
-            LabelSeparator sep = new LabelSeparator("Rendu", Atelier.theme.font);
-            sep.setColor(Atelier.theme.neutral);
-            sep.setPadding(Vec2f(284f, 0f));
-            sep.setSpacing(8f);
-            sep.setLineWidth(1f);
-            vlist.addList(sep);
-        }
-
-        {
-            HLayout hlayout = new HLayout;
-            hlayout.setPadding(Vec2f(284f, 0f));
-            vlist.addList(hlayout);
-
-            hlayout.addUI(new Label("Rendus Principaux:", Atelier.theme.font));
-
-            _renderList = new VList;
-            _renderList.setSize(Vec2f(300f, 200f));
-
-            AccentButton addBtn = new AccentButton("Ajouter");
-            addBtn.addEventListener("click", {
-                EntityEditRenderData modal = new EntityEditRenderData(null, false);
-                modal.addEventListener("render.new", {
-                    auto elt = new RenderElement(this, modal.getData());
-                    _renderList.addList(elt);
-                    elt.addEventListener("graphic", {
-                        dispatchEvent("property_render", false);
-                    });
-                    dispatchEvent("property_render", false);
-                    Atelier.ui.popModalUI();
-                });
-                Atelier.ui.pushModalUI(modal);
-            });
-            hlayout.addUI(addBtn);
-
-            vlist.addList(_renderList);
-
-            foreach (render; renders) {
-                auto elt = new RenderElement(this, render);
-                elt.addEventListener("graphic", {
-                    dispatchEvent("property_render", false);
-                });
-                _renderList.addList(elt);
-            }
-        }
-
-        {
-            HLayout hlayout = new HLayout;
-            hlayout.setPadding(Vec2f(284f, 0f));
-            vlist.addList(hlayout);
-
-            hlayout.addUI(new Label("Rendus Auxiliaires:", Atelier.theme.font));
-
-            _auxGraphicList = new VList;
-            _auxGraphicList.setSize(Vec2f(300f, 200f));
-
-            AccentButton addBtn = new AccentButton("Ajouter");
-            addBtn.addEventListener("click", {
-                EntityEditRenderData modal = new EntityEditRenderData(null, true);
-                modal.addEventListener("render.new", {
-                    auto elt = new RenderElement(this, modal.getData());
-                    _auxGraphicList.addList(elt);
-                    elt.addEventListener("graphic", {
-                        dispatchEvent("property_auxGraphic", false);
-                    });
-                    dispatchEvent("property_auxGraphic", false);
-                    Atelier.ui.popModalUI();
-                });
-                Atelier.ui.pushModalUI(modal);
-            });
-            hlayout.addUI(addBtn);
-
-            vlist.addList(_auxGraphicList);
-
-            foreach (render; auxGraphics) {
-                auto elt = new RenderElement(this, render);
-                elt.addEventListener("graphic", {
-                    dispatchEvent("property_auxGraphic", false);
-                });
-                _auxGraphicList.addList(elt);
-            }
-        }
+        setupEntityGraphicsParameters(vlist, graphics, auxGraphics);
+        setupEntityBaseParameters(vlist, baseEntityData);
 
         {
             LabelSeparator sep = new LabelSeparator("Collision", Atelier.theme.font);
@@ -493,24 +415,6 @@ package final class ParameterWindow : UIElement {
         });
     }
 
-    EntityRenderData[] getRenders() {
-        RenderElement[] elements = cast(RenderElement[]) _renderList.getList();
-        EntityRenderData[] renders;
-        foreach (RenderElement elt; elements) {
-            renders ~= elt.getData();
-        }
-        return renders;
-    }
-
-    EntityRenderData[] getAuxRenders() {
-        RenderElement[] elements = cast(RenderElement[]) _auxGraphicList.getList();
-        EntityRenderData[] renders;
-        foreach (RenderElement elt; elements) {
-            renders ~= elt.getData();
-        }
-        return renders;
-    }
-
     HitboxData getHitbox() {
         return _hitbox;
     }
@@ -537,185 +441,5 @@ package final class ParameterWindow : UIElement {
 
     bool hasTtl() const {
         return _ttlCheck.value();
-    }
-
-    private void moveUp(RenderElement item_) {
-        bool isAuxGraphic = item_._data.isAuxGraphic;
-        RenderElement[] elements;
-
-        if (isAuxGraphic) {
-            elements = cast(RenderElement[]) _auxGraphicList.getList();
-            _auxGraphicList.clearList();
-        }
-        else {
-            elements = cast(RenderElement[]) _renderList.getList();
-            _renderList.clearList();
-        }
-
-        for (size_t i = 1; i < elements.length; ++i) {
-            if (elements[i] == item_) {
-                elements[i] = elements[i - 1];
-                elements[i - 1] = item_;
-                break;
-            }
-        }
-
-        if (isAuxGraphic) {
-            foreach (RenderElement element; elements) {
-                _auxGraphicList.addList(element);
-            }
-        }
-        else {
-            foreach (RenderElement element; elements) {
-                _renderList.addList(element);
-            }
-        }
-    }
-
-    private void moveDown(RenderElement item_) {
-        bool isAuxGraphic = item_._data.isAuxGraphic;
-        RenderElement[] elements;
-
-        if (isAuxGraphic) {
-            elements = cast(RenderElement[]) _auxGraphicList.getList();
-            _auxGraphicList.clearList();
-        }
-        else {
-            elements = cast(RenderElement[]) _renderList.getList();
-            _renderList.clearList();
-        }
-
-        for (size_t i = 0; (i + 1) < elements.length; ++i) {
-            if (elements[i] == item_) {
-                elements[i] = elements[i + 1];
-                elements[i + 1] = item_;
-                break;
-            }
-        }
-
-        if (isAuxGraphic) {
-            foreach (RenderElement element; elements) {
-                _auxGraphicList.addList(element);
-            }
-        }
-        else {
-            foreach (RenderElement element; elements) {
-                _renderList.addList(element);
-            }
-        }
-    }
-}
-
-private final class RenderElement : UIElement {
-    private {
-        ParameterWindow _param;
-        EntityRenderData _data;
-        Label _nameLabel, _typeLabel;
-        Rectangle _rect;
-        HBox _hbox;
-        IconButton _upBtn, _downBtn;
-        Icon _icon, _checkmark;
-    }
-
-    this(ParameterWindow param, EntityRenderData data) {
-        _param = param;
-        _data = new EntityRenderData(data);
-        setSize(Vec2f(300f, 48f));
-
-        _rect = Rectangle.fill(getSize());
-        _rect.anchor = Vec2f.zero;
-        _rect.color = Atelier.theme.foreground;
-        _rect.isVisible = false;
-        addImage(_rect);
-
-        _nameLabel = new Label("", Atelier.theme.font);
-        _nameLabel.setAlign(UIAlignX.left, UIAlignY.top);
-        _nameLabel.setPosition(Vec2f(64f, 4f));
-        _nameLabel.textColor = Atelier.theme.onNeutral;
-        addUI(_nameLabel);
-
-        _typeLabel = new Label("", Atelier.theme.font);
-        _typeLabel.setAlign(UIAlignX.left, UIAlignY.bottom);
-        _typeLabel.setPosition(Vec2f(64f, 4f));
-        _typeLabel.textColor = Atelier.theme.neutral;
-        addUI(_typeLabel);
-
-        _icon = new Icon("editor:ffd-" ~ _data.type);
-        _icon.setAlign(UIAlignX.left, UIAlignY.center);
-        _icon.setPosition(Vec2f(16f, 0f));
-        addUI(_icon);
-
-        _checkmark = new Icon("editor:checkmark");
-        _checkmark.setAlign(UIAlignX.left, UIAlignY.center);
-        _checkmark.setPosition(Vec2f(40f, 0f));
-        _checkmark.color = Atelier.theme.accent;
-        _checkmark.isVisible = _data.isDefault;
-        addUI(_checkmark);
-
-        {
-            _hbox = new HBox;
-            _hbox.setAlign(UIAlignX.right, UIAlignY.center);
-            _hbox.setPosition(Vec2f(12f, 0f));
-            _hbox.setSpacing(2f);
-            addUI(_hbox);
-
-            _upBtn = new IconButton("editor:arrow-small-up");
-            _upBtn.addEventListener("click", { _param.moveUp(this); });
-            _hbox.addUI(_upBtn);
-
-            _downBtn = new IconButton("editor:arrow-small-down");
-            _downBtn.addEventListener("click", { _param.moveDown(this); });
-            _hbox.addUI(_downBtn);
-
-            _hbox.isVisible = false;
-            _hbox.isEnabled = false;
-        }
-
-        _updateDisplay();
-
-        addEventListener("mouseenter", &_onMouseEnter);
-        addEventListener("mouseleave", &_onMouseLeave);
-        addEventListener("click", &_onClick);
-    }
-
-    private void _onMouseEnter() {
-        _rect.isVisible = true;
-        _hbox.isVisible = true;
-        _hbox.isEnabled = true;
-    }
-
-    private void _onMouseLeave() {
-        _rect.isVisible = false;
-        _hbox.isVisible = false;
-        _hbox.isEnabled = false;
-    }
-
-    private void _updateDisplay() {
-        _nameLabel.text = _data.name;
-        _typeLabel.text = _data.type ~ ": " ~ _data.rid;
-        _icon.setIcon("editor:ffd-" ~ _data.type);
-        _checkmark.isVisible = _data.isDefault;
-    }
-
-    private void _onClick() {
-        EntityEditRenderData modal = new EntityEditRenderData(_data, _data.isAuxGraphic);
-        modal.addEventListener("render.apply", {
-            _data = modal.getData();
-            if (modal.isDirty()) {
-                dispatchEvent("graphic", false);
-            }
-            _updateDisplay();
-            Atelier.ui.popModalUI();
-        });
-        modal.addEventListener("render.remove", {
-            dispatchEvent("graphic", false);
-            Atelier.ui.popModalUI();
-            removeUI();
-        });
-        Atelier.ui.pushModalUI(modal);
-    }
-
-    EntityRenderData getData() {
-        return _data;
     }
 }

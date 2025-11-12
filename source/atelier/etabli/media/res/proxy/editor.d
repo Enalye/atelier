@@ -12,10 +12,11 @@ import atelier.core;
 import atelier.input;
 import atelier.physics;
 import atelier.ui;
+import atelier.world.entity : BaseEntityData;
 import atelier.etabli.ui;
 import atelier.etabli.media.res.base;
 import atelier.etabli.media.res.editor;
-import atelier.etabli.media.res.entity_render;
+import atelier.etabli.media.res.entity_base;
 import atelier.etabli.media.res.proxy.parameter;
 import atelier.etabli.media.res.proxy.toolbox;
 
@@ -28,6 +29,7 @@ final class ProxyResourceEditor : ResourceBaseEditor {
 
         EntityRenderData[] _graphics, _auxGraphics, _auxGraphicsStack;
         HurtboxData _hurtbox;
+        BaseEntityData _baseEntityData;
 
         Vec2f _originPosition = Vec2f.zero;
         float _zoom = 1f;
@@ -43,6 +45,8 @@ final class ProxyResourceEditor : ResourceBaseEditor {
             _hurtbox.load(ffd.getNode("hurtbox"));
         }
 
+        _baseEntityData.load(ffd);
+
         foreach (size_t i, Farfadet renderNode; ffd.getNodes("graphic")) {
             EntityRenderData render = new EntityRenderData(renderNode);
             render.isVisible = (i == 0);
@@ -54,7 +58,7 @@ final class ProxyResourceEditor : ResourceBaseEditor {
             _auxGraphics ~= render;
         }
 
-        _parameterWindow = new ParameterWindow(_graphics, _auxGraphics, _hurtbox);
+        _parameterWindow = new ParameterWindow(_graphics, _auxGraphics, _baseEntityData, _hurtbox);
 
         _toolbox = new Toolbox();
         _toolbox.setRenders(_graphics);
@@ -80,6 +84,11 @@ final class ProxyResourceEditor : ResourceBaseEditor {
                 _auxGraphics ~= new EntityRenderData(renderData);
             }
             _onToolbox();
+            setDirty();
+        });
+
+        _parameterWindow.addEventListener("property_base", {
+            _baseEntityData = _parameterWindow.getBaseEntityData();
             setDirty();
         });
 

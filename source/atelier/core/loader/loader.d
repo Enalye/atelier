@@ -16,6 +16,7 @@ import atelier.core.loader.pixelfont;
 import atelier.core.loader.pixelfontset;
 import atelier.core.loader.prop;
 import atelier.core.loader.proxy;
+import atelier.core.loader.shadow;
 import atelier.core.loader.scene;
 import atelier.core.loader.shot;
 import atelier.core.loader.sound;
@@ -45,6 +46,7 @@ void setupDefaultResourceLoaders(ResourceManager res) {
     res.setLoader("pixelfontshadowed", &compilePixelFont, &loadPixelFont!PixelFontShadowed);
     res.setLoader("pixelfontstandard", &compilePixelFont, &loadPixelFont!PixelFontStandard);
     res.setLoader("pixelfontset", &compilePixelFontSet, &loadPixelFontSet);
+    res.setLoader("shadow", &compileShadow, &loadShadow);
     res.setLoader("scene", &compileScene, &loadScene);
     res.setLoader("terrain", &compileTerrain, &loadTerrain);
     res.setLoader("prop", &compileProp, &loadProp);

@@ -29,6 +29,9 @@ package(atelier.etabli.media.res.scene) abstract class BaseEntitySettings : UIEl
         setAlign(UIAlignX.left, UIAlignY.top);
 
         _vbox = new VBox;
+        _vbox.addEventListener("size", {
+            setSize(Vec2f(284f, _vbox.getHeight()));
+        });
         _vbox.setAlign(UIAlignX.left, UIAlignY.top);
         _vbox.setSpacing(8f);
         _vbox.setChildAlign(UIAlignX.center);

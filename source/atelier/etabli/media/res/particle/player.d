@@ -6,7 +6,7 @@ import atelier.input;
 import atelier.ui;
 import atelier.etabli.ui;
 import atelier.etabli.media.res.particle.editor;
-import atelier.etabli.media.res.entity_render;
+import atelier.etabli.media.res.entity_base;
 
 package final class MediaPlayer : UIElement {
     private {

@@ -16,7 +16,7 @@ import atelier.world.entity : BaseEntityData;
 import atelier.etabli.ui;
 import atelier.etabli.media.res.base;
 import atelier.etabli.media.res.editor;
-import atelier.etabli.media.res.entity_render;
+import atelier.etabli.media.res.entity_base;
 import atelier.etabli.media.res.actor.parameter;
 import atelier.etabli.media.res.actor.toolbox;
 

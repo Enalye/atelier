@@ -19,7 +19,7 @@ import atelier.etabli.ui;
 package final class ParameterWindow : UIElement {
     private {
         VBox _vbox;
-        RessourceButton _tilesetSelect;
+        ResourceButton _tilesetSelect;
         BrushList _brushList;
     }
 
@@ -49,7 +49,7 @@ package final class ParameterWindow : UIElement {
 
             hlayout.addUI(new Label("Tileset:", Atelier.theme.font));
 
-            _tilesetSelect = new RessourceButton(tilesetRID, "tileset", [
+            _tilesetSelect = new ResourceButton(tilesetRID, "tileset", [
                     "tileset"
                 ]);
             _tilesetSelect.addEventListener("value", {

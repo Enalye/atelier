@@ -19,14 +19,14 @@ final class Glow {
         _sprite.anchor = Vec2f.zero;
     }
 
-    void draw(Entity[] entities, Vec2f offset, Sprite shadowSprite) {
+    void draw(Entity[] entities, Vec2f offset) {
         _canvas.color = Color.black;
         Atelier.renderer.pushCanvas(_canvas);
 
         foreach (Entity entity; entities) {
             if (!entity.isRendered) {
                 entity.isRendered = true;
-                entity.draw(offset, shadowSprite);
+                entity.draw(offset);
             }
         }
 
@@ -34,14 +34,14 @@ final class Glow {
         _sprite.draw(Vec2f.zero);
     }
 
-    void drawTransition(Transition transition, Entity[] entities, Vec2f offset, Sprite shadowSprite) {
+    void drawTransition(Transition transition, Entity[] entities, Vec2f offset) {
         _canvas.color = Color.black;
         Atelier.renderer.pushCanvas(_canvas);
 
         foreach (Entity entity; entities) {
             if (!entity.isRendered) {
                 entity.isRendered = true;
-                transition.drawEntity(entity, offset, shadowSprite);
+                transition.drawEntity(entity, offset);
             }
         }
 

@@ -23,7 +23,7 @@ package(atelier.etabli.media.res.scene) class EntityToolbox : Modal {
         ToolGroup _toolGroup;
         int _tool;
         SelectButton _typeBtn;
-        RessourceButton _ridBtn;
+        ResourceButton _ridBtn;
     }
 
     this() {
@@ -82,7 +82,7 @@ package(atelier.etabli.media.res.scene) class EntityToolbox : Modal {
 
             hlayout.addUI(new Label("RID:", Atelier.theme.font));
 
-            _ridBtn = new RessourceButton("", _typeBtn.value, [_typeBtn.value]);
+            _ridBtn = new ResourceButton("", _typeBtn.value, [_typeBtn.value]);
             hlayout.addUI(_ridBtn);
         }
 

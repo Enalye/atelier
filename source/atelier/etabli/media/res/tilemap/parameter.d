@@ -16,7 +16,7 @@ import atelier.etabli.ui;
 
 package final class ParameterWindow : UIElement {
     private {
-        RessourceButton _tilesetSelect;
+        ResourceButton _tilesetSelect;
         IntegerField[] _sizeFields;
     }
 
@@ -46,7 +46,7 @@ package final class ParameterWindow : UIElement {
 
             hlayout.addUI(new Label("Tileset:", Atelier.theme.font));
 
-            _tilesetSelect = new RessourceButton(tilesetRID, "tileset", [
+            _tilesetSelect = new ResourceButton(tilesetRID, "tileset", [
                     "tileset"
                 ]);
             _tilesetSelect.addEventListener("value", {

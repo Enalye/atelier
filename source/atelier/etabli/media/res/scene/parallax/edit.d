@@ -13,7 +13,7 @@ final class EditParallaxElement : Modal {
         TextField _nameField;
         IntegerField _widthField, _heightField;
         NumberField _distanceField;
-        RessourceButton _tilesetSelect;
+        ResourceButton _tilesetSelect;
 
         AccentButton _applyBtn;
         SceneDefinition.ParallaxLayer _layer;
@@ -90,7 +90,7 @@ final class EditParallaxElement : Modal {
 
             hbox.addUI(new Label("Tileset:", Atelier.theme.font));
 
-            _tilesetSelect = new RessourceButton(_layer.tilesetRID, "tileset", [
+            _tilesetSelect = new ResourceButton(_layer.tilesetRID, "tileset", [
                     "tileset"
                 ]);
             hbox.addUI(_tilesetSelect);

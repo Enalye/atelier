@@ -29,10 +29,10 @@ abstract class Transition {
     void drawLine(Vec2f offset, int y, size_t level) {
     }
 
-    void drawEntity(Entity entity, Vec2f entityOffset, Sprite shadowSprite) {
+    void drawEntity(Entity entity, Vec2f entityOffset) {
     }
 
-    void renderEntity(Entity entity, Vec2f offset, Sprite shadowSprite, float tTransition, bool drawGraphics) {
+    void renderEntity(Entity entity, Vec2f offset, float tTransition, bool drawGraphics) {
     }
 
     void drawAbove() {
@@ -120,11 +120,11 @@ final class DefaultTransition : Transition {
     override void drawLine(Vec2f offset, int y, size_t level) {
     }
 
-    override void drawEntity(Entity entity, Vec2f entityOffset, Sprite shadowSprite) {
-        entity.draw(entityOffset, shadowSprite);
+    override void drawEntity(Entity entity, Vec2f entityOffset) {
+        entity.draw(entityOffset);
     }
 
-    override void renderEntity(Entity entity, Vec2f offset, Sprite shadowSprite, float tTransition, bool drawGraphics) {
+    override void renderEntity(Entity entity, Vec2f offset, float tTransition, bool drawGraphics) {
     }
 
     override void drawAbove() {

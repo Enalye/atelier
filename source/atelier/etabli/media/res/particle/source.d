@@ -8,7 +8,7 @@ import atelier.common;
 import atelier.core;
 import atelier.ui;
 import atelier.world;
-import atelier.etabli.media.res.entity_render;
+import atelier.etabli.media.res.entity_base;
 import atelier.etabli.media.res.particle.editor;
 
 package final class EditorParticleSource {
@@ -36,9 +36,9 @@ package final class EditorParticleSource {
 
     void setGraphics(EntityRenderData[] renders) {
         _graphics.clear();
-        foreach (render; renders) {
-            _graphics[render.name()] = render.createEntityGraphicData();
-        }
+        //foreach (render; renders) {
+        //    _graphics[render.name()] = render.createEntityGraphicData();
+        //}
     }
 
     void setData(ParticleData data) {
@@ -86,7 +86,7 @@ package final class EditorParticleSource {
 
     void draw(Vec2f offset) {
         foreach (particle; _particles) {
-            particle.draw(offset, null);
+            particle.draw(offset);
         }
     }
 

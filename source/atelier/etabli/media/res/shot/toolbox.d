@@ -14,7 +14,7 @@ import atelier.render;
 
 import atelier.etabli.ui;
 import atelier.etabli.media.res.base;
-import atelier.etabli.media.res.entity_render;
+import atelier.etabli.media.res.entity_base;
 
 package class Toolbox : Modal {
     private {

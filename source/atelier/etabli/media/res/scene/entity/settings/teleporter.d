@@ -25,7 +25,7 @@ package(atelier.etabli.media.res.scene) class TeleporterSettings : BaseEntitySet
 
             hlayout.addUI(new Label("Scène:", Atelier.theme.font));
 
-            RessourceButton btn = new RessourceButton(_entity.teleporter.scene, "scene", [
+            ResourceButton btn = new ResourceButton(_entity.teleporter.scene, "scene", [
                     "scene"
                 ]);
             btn.addEventListener("value", {

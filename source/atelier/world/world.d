@@ -42,7 +42,6 @@ final class World {
         int _frame;
         Vec2f _mousePosition = Vec2f.zero;
 
-        Sprite _shadowSprite;
         Vec3i _lastPlayerPosition;
 
         int[] _renderReferenceCounters;
@@ -210,7 +209,6 @@ final class World {
         clear();
         _lighting.setup();
         _scene = Atelier.res.get!Scene(_sceneRid);
-        _shadowSprite = Atelier.res.get!Sprite("atelier:shadow");
 
         Atelier.nav.generate();
 
@@ -238,7 +236,6 @@ final class World {
             _player.angle = 0f;
             addEntity(_player);
 
-            _player.setShadow(true);
             _camera.setPosition(_player.cameraPosition() - oldCameraDeltaPosition);
             _camera.follow(_player, Vec2f.one * 1f, Vec2f.zero);
 
@@ -598,11 +595,11 @@ final class World {
             _renderListRoots);
     }
 
-    void renderEntityTransition(Entity entity, Vec2f offset, Sprite shadowSprite, float tTransition, bool drawGraphics) {
+    void renderEntityTransition(Entity entity, Vec2f offset, float tTransition, bool drawGraphics) {
         if (!_transition)
             return;
 
-        _transition.renderEntity(entity, offset, shadowSprite, tTransition, drawGraphics);
+        _transition.renderEntity(entity, offset, tTransition, drawGraphics);
     }
 
     void draw(Vec2f origin) {
@@ -660,7 +657,7 @@ final class World {
 
                 if (!entity.isRendered) {
                     entity.isRendered = true;
-                    _transition.drawEntity(entity, entityOffset, _shadowSprite);
+                    _transition.drawEntity(entity, entityOffset);
                 }
             }
 
@@ -674,7 +671,7 @@ final class World {
                     _renderReferenceCounters[i]++;
                     if (_renderReferenceCounters[i] >= entity.isInRenderList) {
                         entity.isRendered = true;
-                        _transition.drawEntity(entity, entityOffset, _shadowSprite);
+                        _transition.drawEntity(entity, entityOffset);
                     }
                 }
             }
@@ -726,7 +723,7 @@ final class World {
 
                         if (!entity.isRendered) {
                             entity.isRendered = true;
-                            _transition.drawEntity(entity, entityOffset, _shadowSprite);
+                            _transition.drawEntity(entity, entityOffset);
                         }
                     }
                 }
@@ -747,7 +744,7 @@ final class World {
 
                 if (!entity.isRendered) {
                     entity.isRendered = true;
-                    _transition.drawEntity(entity, entityOffset, _shadowSprite);
+                    _transition.drawEntity(entity, entityOffset);
                 }
             }
 
@@ -755,12 +752,12 @@ final class World {
             foreach (Entity entity; _postRenderListAbove) {
                 if (!entity.isRendered) {
                     entity.isRendered = true;
-                    _transition.drawEntity(entity, entityOffset, _shadowSprite);
+                    _transition.drawEntity(entity, entityOffset);
                 }
             }
 
             // Entités en post-rendu additif
-            _glow.drawTransition(_transition, _postRenderListGlow, entityOffset, _shadowSprite);
+            _glow.drawTransition(_transition, _postRenderListGlow, entityOffset);
 
             _transition.drawAbove();
         }
@@ -786,7 +783,7 @@ final class World {
 
                 if (!entity.isRendered) {
                     entity.isRendered = true;
-                    entity.draw(entityOffset, _shadowSprite);
+                    entity.draw(entityOffset);
                 }
             }
 
@@ -800,7 +797,7 @@ final class World {
                     _renderReferenceCounters[i]++;
                     if (_renderReferenceCounters[i] >= entity.isInRenderList) {
                         entity.isRendered = true;
-                        entity.draw(entityOffset, _shadowSprite);
+                        entity.draw(entityOffset);
                     }
                 }
             }
@@ -843,7 +840,7 @@ final class World {
 
                         if (!entity.isRendered) {
                             entity.isRendered = true;
-                            entity.draw(entityOffset, _shadowSprite);
+                            entity.draw(entityOffset);
                         }
                     }
                 }
@@ -862,7 +859,7 @@ final class World {
 
                 if (!entity.isRendered) {
                     entity.isRendered = true;
-                    entity.draw(entityOffset, _shadowSprite);
+                    entity.draw(entityOffset);
                 }
             }
 
@@ -870,12 +867,12 @@ final class World {
             foreach (Entity entity; _postRenderListAbove) {
                 if (!entity.isRendered) {
                     entity.isRendered = true;
-                    entity.draw(entityOffset, _shadowSprite);
+                    entity.draw(entityOffset);
                 }
             }
 
             // Entités en post-rendu additif
-            _glow.draw(_postRenderListGlow, entityOffset, _shadowSprite);
+            _glow.draw(_postRenderListGlow, entityOffset);
         }
 
         Atelier.nav.draw(entityOffset);

@@ -1,8 +1,11 @@
 module atelier.etabli.media.res.item.add;
 
+import std.algorithm : sort;
+
 import atelier.common;
 import atelier.core;
 import atelier.ui;
+import atelier.etabli.media.res.editor;
 
 final class AddResourceItem : Modal {
     private {
@@ -35,14 +38,9 @@ final class AddResourceItem : Modal {
 
             hbox.addUI(new Label("Type:", Atelier.theme.font));
 
-            _typeSelector = new SelectButton([
-                "texture", "sprite", "ninepatch", "animation",
-                "multidiranimation", "tileset", "tilemap", "sound", "music",
-                "truetype", "bitmapfont", "particle", "terrain", "scene", "prop",
-                "actor", "shot", "proxy", "skill", "grid (bool)", "grid (int)",
-                "grid (uint)",
-                "grid (float)"
-            ], "texture", false);
+            string[] resourceTypes = ResourceEditor.getResourceTypes();
+            sort!((a, b) => (a < b))(resourceTypes);
+            _typeSelector = new SelectButton(resourceTypes, "", false);
             hbox.addUI(_typeSelector);
         }
 

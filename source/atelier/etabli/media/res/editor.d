@@ -25,6 +25,7 @@ import atelier.etabli.media.res.prop;
 import atelier.etabli.media.res.proxy;
 import atelier.etabli.media.res.scene;
 import atelier.etabli.media.res.shot;
+import atelier.etabli.media.res.shadow;
 import atelier.etabli.media.res.sound;
 import atelier.etabli.media.res.sprite;
 import atelier.etabli.media.res.terrain;
@@ -56,6 +57,10 @@ final class ResourceEditor : ContentEditor {
         }
 
         return new InvalidResourceEditor(editor, path_, ffd, size);
+    }
+
+    static string[] getResourceTypes() {
+        return _createResourceEditorFuncs.keys;
     }
 
     this(string path_, Vec2f windowSize) {

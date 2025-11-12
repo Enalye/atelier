@@ -10,15 +10,17 @@ import atelier.physics;
 import atelier.render;
 import atelier.world.lighting;
 import atelier.world.world;
-import atelier.world.entity.effect;
 import atelier.world.entity.component;
 import atelier.world.entity.controller;
+import atelier.world.entity.effect;
 import atelier.world.entity.renderer;
+import atelier.world.entity.shadow;
 
 // Propriétés de base l’entité
 struct BaseEntityData {
     string[] tags;
     string controller;
+    string shadow;
     int zOrderOffset;
 
     mixin Serializer;
@@ -159,7 +161,7 @@ abstract class Entity {
         Vec3f _subPosition = Vec3f.zero;
         Vec3f _velocity = Vec3f.zero;
         Vec3f _acceleration = Vec3f.zero;
-        bool _shadow;
+        Shadow _shadow;
         int _shadowBaseZ = 0;
         bool _isMoving;
         Vec3i _targetPosition = Vec3i.zero;
@@ -310,6 +312,7 @@ abstract class Entity {
         _tags ~= data.tags.dup;
         _baseControllerId = data.controller;
         _zOrderOffset = data.zOrderOffset;
+        setShadow(data.shadow);
     }
 
     final Layer getLayer() const {
@@ -622,8 +625,9 @@ abstract class Entity {
         _effect = effect.setup(this);
     }
 
-    final void setShadow(bool shadow_) {
-        _shadow = shadow_;
+    final void setShadow(string shadow) {
+        _shadow = shadow.length ?
+            Atelier.res.get!Shadow(shadow) : null;
     }
 
     final void setMaterial(int mat) {
@@ -936,15 +940,15 @@ abstract class Entity {
         lookAt(target.getPosition().xy);
     }
 
-    final void draw(Vec2f offset, Sprite shadowSprite) {
+    final void draw(Vec2f offset) {
         Vec2f drawPos = offset + cameraPosition();
 
         foreach (child; _renderEntitiesBehind) {
-            child.draw(offset, shadowSprite);
+            child.draw(offset);
         }
 
         if (_isEnabled) {
-            renderShadow(drawPos, shadowSprite);
+            renderShadow(drawPos);
 
             if (_collider && _collider.isDisplayed) {
                 _collider.drawBack(drawPos);
@@ -961,23 +965,23 @@ abstract class Entity {
         }
 
         foreach (child; _renderEntitiesAbove) {
-            child.draw(offset, shadowSprite);
+            child.draw(offset);
         }
     }
 
-    final void drawTransition(Vec2f offset, Sprite shadowSprite, float tTransition, bool drawGraphics) {
+    final void drawTransition(Vec2f offset, float tTransition, bool drawGraphics) {
         Vec2f drawPos = offset + cameraPosition();
 
         foreach (child; _renderEntitiesBehind) {
-            child.drawTransition(offset, shadowSprite, tTransition, drawGraphics);
+            child.drawTransition(offset, tTransition, drawGraphics);
         }
 
         if (_isEnabled) {
-            Atelier.world.renderEntityTransition(this, drawPos, shadowSprite, tTransition, drawGraphics);
+            Atelier.world.renderEntityTransition(this, drawPos, tTransition, drawGraphics);
         }
 
         foreach (child; _renderEntitiesAbove) {
-            child.drawTransition(offset, shadowSprite, tTransition, drawGraphics);
+            child.drawTransition(offset, tTransition, drawGraphics);
         }
     }
 
@@ -990,17 +994,18 @@ abstract class Entity {
         }
     }
 
-    final void renderShadow(Vec2f offset, Sprite shadowSprite, float alpha = 1f) {
+    final void renderShadow(Vec2f offset, float alpha = 1f) {
         if (!_shadow)
             return;
 
-        int alt = getAltitude();
+        /*int alt = getAltitude();
         float t = easeInOutSine(clamp(alt, 0, 16) / 16f);
         shadowSprite.alpha = lerp(0.6f, 0.2f,
             t) * Atelier.world.lighting.getBrightnessAt(
             _position.xy) * alpha;
         shadowSprite.size = Vec2f.one * lerp(15f, 10f, t);
-        shadowSprite.draw(offset + Vec2f(0f, alt));
+        shadowSprite.draw(offset + Vec2f(0f, alt));*/
+        _shadow.draw(offset, _position.xy, getAltitude(), _angle, alpha);
     }
 
     final void renderGraphic(Vec2f offset, float alpha = 1f) {

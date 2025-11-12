@@ -13,7 +13,7 @@ import atelier.world;
 import atelier.etabli.ui;
 import atelier.etabli.media.res.base;
 import atelier.etabli.media.res.editor;
-import atelier.etabli.media.res.entity_render;
+import atelier.etabli.media.res.entity_base;
 import atelier.etabli.media.res.particle.parameter;
 import atelier.etabli.media.res.particle.player;
 import atelier.etabli.media.res.particle.source;
@@ -25,9 +25,10 @@ final class ParticleResourceEditor : ResourceBaseEditor {
         ParameterWindow _parameterWindow;
         MediaPlayer _player;
 
-        EntityRenderData[] _graphics;
+        EntityRenderData[] _graphics, _auxGraphics, _auxGraphicsStack;
         HitboxData _hitbox;
         ParticleData _particle;
+        BaseEntityData _baseEntityData;
 
         Vec2f _originPosition = Vec2f.zero;
         float _zoom = 1f;
@@ -43,6 +44,7 @@ final class ParticleResourceEditor : ResourceBaseEditor {
 
         _hitbox.load(ffd);
         _particle.load(ffd);
+        _baseEntityData.load(ffd);
 
         foreach (size_t i, Farfadet renderNode; ffd.getNodes("graphic")) {
             EntityRenderData render = new EntityRenderData(renderNode);
@@ -50,9 +52,14 @@ final class ParticleResourceEditor : ResourceBaseEditor {
             _graphics ~= render;
         }
 
+        foreach (size_t i, Farfadet renderNode; ffd.getNodes("auxGraphic")) {
+            EntityRenderData render = new EntityRenderData(renderNode);
+            _auxGraphics ~= render;
+        }
+
         _source = new EditorParticleSource(this);
 
-        _parameterWindow = new ParameterWindow(_graphics, _hitbox, _particle);
+        _parameterWindow = new ParameterWindow(_graphics, _auxGraphics, _baseEntityData, _hitbox, _particle);
 
         _player = new MediaPlayer();
         _player.setRenders(_graphics);
@@ -66,6 +73,11 @@ final class ParticleResourceEditor : ResourceBaseEditor {
         _parameterWindow.addEventListener("property_particle", {
             _particle = _parameterWindow.getParticle();
             _source.setData(_particle);
+            setDirty();
+        });
+
+        _parameterWindow.addEventListener("property_base", {
+            _baseEntityData = _parameterWindow.getBaseEntityData();
             setDirty();
         });
 
@@ -113,8 +125,12 @@ final class ParticleResourceEditor : ResourceBaseEditor {
         foreach (EntityRenderData render; _graphics) {
             render.save(node);
         }
+        foreach (EntityRenderData render; _auxGraphics) {
+            render.save(node);
+        }
         _hitbox.save(node);
         _particle.save(node);
+        _baseEntityData.save(node);
         return node;
     }
 

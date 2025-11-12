@@ -78,6 +78,10 @@ final class Tileset : Resource!Tileset {
         return p ? *p : previousTile;
     }
 
+    uint getCount() const {
+        return maxCount > 0 ? maxCount : columns * lines;
+    }
+
     /// Récupère une image correspondant à la tuile
     Sprite getImage(int id) {
         columns = max(columns, 1);

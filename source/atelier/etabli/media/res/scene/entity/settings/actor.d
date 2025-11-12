@@ -26,7 +26,7 @@ package(atelier.etabli.media.res.scene) class ActorSettings : BaseEntitySettings
 
             hlayout.addUI(new Label("Acteur:", Atelier.theme.font));
 
-            RessourceButton btn = new RessourceButton(_entity.actor.rid, "actor", [
+            ResourceButton btn = new ResourceButton(_entity.actor.rid, "actor", [
                     "actor"
                 ]);
             btn.addEventListener("value", {

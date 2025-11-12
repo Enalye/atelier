@@ -10,6 +10,7 @@ public {
     import atelier.world.entity.prop;
     import atelier.world.entity.proxy;
     import atelier.world.entity.renderer;
+    import atelier.world.entity.shadow;
     import atelier.world.entity.shot;
     import atelier.world.entity.teleporter;
     import atelier.world.entity.trigger;

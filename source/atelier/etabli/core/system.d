@@ -224,7 +224,12 @@ final class Etabli {
 
             return new ProxyResourceEditor(editor, path, ffd, size);
         });
-        ResourceEditor.add("grid", (ResourceEditor editor, string path, Farfadet ffd, Vec2f size) {
+        ResourceEditor.add("shadow", (ResourceEditor editor, string path, Farfadet ffd, Vec2f size) {
+            import atelier.etabli.media.res.shadow : ShadowResourceEditor;
+
+            return new ShadowResourceEditor(editor, path, ffd, size);
+        });
+        /*ResourceEditor.add("grid", (ResourceEditor editor, string path, Farfadet ffd, Vec2f size) {
             import atelier.etabli.media.res.grid : GridResourceEditor;
 
             switch (ffd.getNode("type").get!string(0)) {
@@ -239,7 +244,7 @@ final class Etabli {
             default:
                 return cast(ResourceBaseEditor) new InvalidResourceEditor(editor, path, ffd, size);
             }
-        });
+        });*/
         ResourceEditor.add("instrument", (ResourceEditor editor, string path, Farfadet ffd, Vec2f size) {
             import atelier.etabli.media.res.instrument : InstrumentResourceEditor;
 

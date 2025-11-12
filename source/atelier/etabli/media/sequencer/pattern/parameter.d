@@ -10,7 +10,7 @@ import atelier.etabli.ui;
 
 package final class PatternSequencerParameterWindow : UIElement {
     private {
-        RessourceButton _instrumentSelect;
+        ResourceButton _instrumentSelect;
         IntegerField _stepsField, _barsField, _bpmField, _blocksField;
         IntegerField[] _initializationFields;
         SelectButton _scaleSelect, _tonicSelect;
@@ -124,7 +124,7 @@ package final class PatternSequencerParameterWindow : UIElement {
 
             hlayout.addUI(new Label("Instrument:", Atelier.theme.font));
 
-            _instrumentSelect = new RessourceButton(instrument, "instrument", [
+            _instrumentSelect = new ResourceButton(instrument, "instrument", [
                     "instrument"
                 ]);
             _instrumentSelect.addEventListener("value", {

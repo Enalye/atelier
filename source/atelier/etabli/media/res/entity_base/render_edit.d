@@ -1,4 +1,4 @@
-module atelier.etabli.media.res.entity_render.render_edit;
+module atelier.etabli.media.res.entity_base.render_edit;
 
 import std.array : split, join;
 import std.conv : to, ConvException;
@@ -8,14 +8,14 @@ import atelier.core;
 import atelier.ui;
 import atelier.render;
 import atelier.etabli.ui;
-import atelier.etabli.media.res.entity_render.render_data;
+import atelier.etabli.media.res.entity_base.render_data;
 
-final class EntityEditRenderData : Modal {
+final class EntityEditGraphicData : Modal {
     private {
         EntityRenderData _data;
         TextField _nameField;
         SelectButton _typeBtn, _layerBtn;
-        RessourceButton _ridBtn;
+        ResourceButton _ridBtn;
         Checkbox _defaultBtn;
         bool _isDirty = false;
     }
@@ -140,7 +140,7 @@ final class EntityEditRenderData : Modal {
 
             hlayout.addUI(new Label("RID:", Atelier.theme.font));
 
-            _ridBtn = new RessourceButton(_data.rid, _data.type, [_data.type]);
+            _ridBtn = new ResourceButton(_data.rid, _data.type, [_data.type]);
             _data.rid = _ridBtn.getName();
             _ridBtn.addEventListener("value", {
                 _data.rid = _ridBtn.getName();

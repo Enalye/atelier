@@ -43,6 +43,8 @@ final class World {
         int _frame;
         Vec2f _mousePosition = Vec2f.zero;
 
+        Material[] _materials;
+
         Vec3i _lastPlayerPosition;
 
         int[] _renderReferenceCounters;
@@ -105,6 +107,23 @@ final class World {
 
         setTransition(&_createDefaultTransition);
         addController!Actor("player", { return new DefaultPlayerController(); });
+    }
+
+    void setMaterial(uint id, Material material) {
+        if (id >= _materials.length)
+            _materials.length = id + 1;
+        _materials[id] = material;
+    }
+
+    Material getMaterial(int id) {
+        if (id < 0 || id >= _materials.length) {
+            return Material("", 0f);
+        }
+        return _materials[id];
+    }
+
+    Material[] getMaterials() {
+        return _materials;
     }
 
     void setTransition(Transition function(string, string, Actor, bool) transitionFunc = &_createDefaultTransition) {

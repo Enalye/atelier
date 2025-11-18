@@ -2,6 +2,7 @@ module atelier.common.serializer;
 
 mixin template Serializer() {
     import farfadet;
+    import atelier.common.stream : InStream, OutStream;
 
     void load(const(Farfadet) ffd) {
         static foreach (member; __traits(allMembers, typeof(this))) {

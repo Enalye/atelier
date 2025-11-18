@@ -145,7 +145,8 @@ final class Actor : Entity, Resource!Actor {
 
         float maxSpeed = 2.5f;
         float accelSpeed = 1f;
-        float friction = 1f;
+
+        float friction = Atelier.world.getMaterial(_baseMaterial).friction;
         Vec2f velocity2d = _velocity.xy;
         Vec2f acceleration2d = _acceleration.xy;
         float accelFriction = friction;
@@ -187,7 +188,7 @@ final class Actor : Entity, Resource!Actor {
         }
         acceleration2d = acceleration2d * (accelFriction * accelSpeed * 10f / 60f);
         velocity2d = velocity2d + acceleration2d;
-        velocity2d += _avoidCliffs(acceleration2d);
+        velocity2d += _avoidCliffs(acceleration2d) * friction;
 
         float m = max(velLen, maxSpeed);
         float nm = _velocity.length();

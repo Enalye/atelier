@@ -9,6 +9,7 @@ import atelier.core.loader.animation;
 import atelier.core.loader.bitmapfont;
 import atelier.core.loader.light;
 import atelier.core.loader.locale;
+import atelier.core.loader.material;
 import atelier.core.loader.multidiranimation;
 import atelier.core.loader.music;
 import atelier.core.loader.ninepatch;
@@ -32,6 +33,7 @@ import atelier.core.loader.truetype;
 /// Initialise les ressources
 void setupDefaultResourceLoaders(ResourceManager res) {
     loadInternalData(res);
+    res.setLoader("material", &compileMaterial, &loadMaterial);
     res.setLoader("texture", &compileTexture, &loadTexture);
     res.setLoader("shadedtexture", &compileShadedTexture, &loadShadedTexture);
     res.setLoader("sprite", &compileSprite, &loadSprite);

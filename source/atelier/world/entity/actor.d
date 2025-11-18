@@ -232,8 +232,10 @@ final class Actor : Entity, Resource!Actor {
         Vec2i position = getPosition().xy;
 
         {
-            Physics.TerrainHit result = Atelier.physics.hitTerrain(getPosition(), Vec3i.zero);
-            baseZ = result.height;
+            Physics.TerrainHit terrainHit = Atelier.physics.hitTerrain(getPosition(), Vec3i.zero);
+            Physics.SolidUnderHit solidUnderHit = Atelier.physics.getSolidUnder(getPosition());
+            //solidUnderHit.solid.entity.getMaterial() <- Récupérer le coéf de friction
+            baseZ = max(terrainHit.height, solidUnderHit.baseZ);
         }
 
         Vec3i[4] corners = [
@@ -247,10 +249,12 @@ final class Actor : Entity, Resource!Actor {
         int maxHeight = baseZ;
 
         for (uint i; i < 4; ++i) {
-            Physics.TerrainHit result = Atelier.physics.hitTerrain(corners[i], Vec3i.zero);
-            heights[i] = result.height;
-            if (result.height > maxHeight)
-                maxHeight = result.height;
+            Physics.TerrainHit terrainHit = Atelier.physics.hitTerrain(corners[i], Vec3i.zero);
+            Physics.SolidUnderHit solidUnderHit = Atelier.physics.getSolidUnder(corners[i]);
+
+            heights[i] = max(terrainHit.height, solidUnderHit.baseZ);
+            if (heights[i] > maxHeight)
+                maxHeight = heights[i];
         }
 
         if (maxHeight != baseZ) {

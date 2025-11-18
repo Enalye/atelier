@@ -1278,4 +1278,22 @@ final class Physics {
         }
         return hit;
     }
+
+    SolidUnderHit getSolidUnder(Vec3i position) {
+        SolidUnderHit hit;
+
+        foreach (solid; _solids) {
+            int baseZ = solid.getBaseZ(position);
+            if (!hit.isUnder) {
+                hit.isUnder = true;
+                hit.baseZ = baseZ;
+                hit.solid = solid;
+            }
+            else if (baseZ > hit.baseZ) {
+                hit.baseZ = baseZ;
+                hit.solid = solid;
+            }
+        }
+        return hit;
+    }
 }

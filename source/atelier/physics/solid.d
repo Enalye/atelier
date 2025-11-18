@@ -310,4 +310,31 @@ final class SolidCollider : Collider {
             return cast(int) round(lerp(cast(float) top, cast(float) bottom, t));
         }
     }
+
+    int getBaseZ(Vec3i position) {
+        if (!_isCollidable) {
+            return -16;
+        }
+
+        if (!((left < position.x) && (up < position.y) && (bottom < position.z) &&
+                (right > position.x) && (down > position.y)))
+            return -16;
+
+        final switch (_shape) with (Shape) {
+        case box:
+            return top;
+        case slopeUp:
+            float t = clamp((position.y - up) / cast(float) hitbox.y, 0f, 1f);
+            return cast(int) round(lerp(cast(float) top, cast(float) bottom, t));
+        case slopeDown:
+            float t = clamp((down - position.y) / cast(float) hitbox.y, 0f, 1f);
+            return cast(int) round(lerp(cast(float) top, cast(float) bottom, t));
+        case slopeLeft:
+            float t = clamp((position.x - left) / cast(float) hitbox.x, 0f, 1f);
+            return cast(int) round(lerp(cast(float) top, cast(float) bottom, t));
+        case slopeRight:
+            float t = clamp((right - position.x) / cast(float) hitbox.x, 0f, 1f);
+            return cast(int) round(lerp(cast(float) top, cast(float) bottom, t));
+        }
+    }
 }

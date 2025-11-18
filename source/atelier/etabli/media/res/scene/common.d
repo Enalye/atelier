@@ -931,7 +931,6 @@ package final class SceneDefinition {
     final class Light {
         bool isAlive = true;
         LightData data;
-        float radius = 64f;
 
         private {
             string _rid;
@@ -966,7 +965,7 @@ package final class SceneDefinition {
         }
 
         private void _setup() {
-            _circle = Circle.outline(radius, 1f);
+            _circle = Circle.outline(data.radius, 1f);
             _icon = Atelier.res.get!Sprite(_base.icon);
             Atelier.log(_base.icon);
         }
@@ -997,14 +996,14 @@ package final class SceneDefinition {
         }
 
         bool isInside(Vec2f minPos, Vec2f maxPos) {
-            Vec2f a = (cast(Vec2f) data.position) - radius / 2f;
-            Vec2f b = (cast(Vec2f) data.position) + radius / 2f;
+            Vec2f a = (cast(Vec2f) data.position) - data.radius / 2f;
+            Vec2f b = (cast(Vec2f) data.position) + data.radius / 2f;
 
             return minPos.x < b.x && maxPos.x > a.x && minPos.y < b.y && maxPos.y > a.y;
         }
 
         bool checkHover(Vec2f point) {
-            return point.distance(cast(Vec2f) data.position) < radius / 2f;
+            return point.distance(cast(Vec2f) data.position) < data.radius / 2f;
         }
 
         void setHover(bool hover) {
@@ -1014,7 +1013,7 @@ package final class SceneDefinition {
         void update(Vec2f offset, float zoom) {
             _offset = offset;
             _zoom = zoom;
-            _circle.radius = clamp(radius * _zoom, 0f, 1024f);
+            _circle.radius = clamp(data.radius * _zoom, 0f, 1024f);
             _circle.position = offset + (_tempMove + cast(Vec2f) data.position) * _zoom;
             _icon.position = _circle.position;
             _icon.size = (cast(Vec2f) _icon.clip.zw) * _zoom;

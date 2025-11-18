@@ -144,6 +144,11 @@ final class Etabli {
 
             return new TextureResourceEditor(editor, path, ffd, size);
         });
+        ResourceEditor.add("shadedtexture", (ResourceEditor editor, string path, Farfadet ffd, Vec2f size) {
+            import atelier.etabli.media.res.shadedtexture : ShadedTextureResourceEditor;
+
+            return new ShadedTextureResourceEditor(editor, path, ffd, size);
+        });
         ResourceEditor.add("sprite", (ResourceEditor editor, string path, Farfadet ffd, Vec2f size) {
             import atelier.etabli.media.res.sprite : SpriteResourceEditor;
 

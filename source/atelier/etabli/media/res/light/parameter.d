@@ -16,10 +16,8 @@ package final class ParameterWindow : UIElement {
     private {
         // Base
         BaseLightData _data;
-        IntegerField _maxAltitudeField;
-        NumberField _groundAlphaField, _highAlphaField;
-        NumberField _groundScaleField, _highScaleField;
-        Checkbox _isTurningCheck;
+        IntegerField[] _clipFields;
+        NumberField[] _anchorFields;
     }
 
     this(BaseLightData data) {
@@ -33,6 +31,83 @@ package final class ParameterWindow : UIElement {
         addUI(vlist);
 
         _data = data;
+
+        {
+            LabelSeparator sep = new LabelSeparator("Rendu", Atelier.theme.font);
+            sep.setColor(Atelier.theme.neutral);
+            sep.setPadding(Vec2f(284f, 0f));
+            sep.setSpacing(8f);
+            sep.setLineWidth(1f);
+            vlist.addList(sep);
+        }
+
+        {
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(284f, 0f));
+            vlist.addList(hlayout);
+
+            hlayout.addUI(new Label("Texture:", Atelier.theme.font));
+
+            ResourceButton texSelect = new ResourceButton(_data.shadedtexture, "shadedtexture", [
+                    "shadedtexture"
+                ]);
+            texSelect.addEventListener("value", {
+                _data.shadedtexture = texSelect.getName();
+                dispatchEvent("property_tex", false);
+            });
+            hlayout.addUI(texSelect);
+        }
+
+        {
+            foreach (field; ["Position X", "Position Y", "Largeur", "Hauteur"]) {
+                IntegerField numField = new IntegerField();
+                numField.setMinValue(0);
+                numField.addEventListener("value", {
+                    _data.clip.x = _clipFields[0].value;
+                    _data.clip.y = _clipFields[1].value;
+                    _data.clip.z = _clipFields[2].value;
+                    _data.clip.w = _clipFields[3].value;
+                    dispatchEvent("property_data", false);
+                });
+                _clipFields ~= numField;
+
+                HLayout hlayout = new HLayout;
+                hlayout.setPadding(Vec2f(284f, 0f));
+                vlist.addList(hlayout);
+
+                hlayout.addUI(new Label(field ~ ":", Atelier.theme.font));
+                hlayout.addUI(numField);
+            }
+
+            _clipFields[0].value = data.clip.x;
+            _clipFields[1].value = data.clip.y;
+            _clipFields[2].value = data.clip.z;
+            _clipFields[3].value = data.clip.w;
+        }
+
+        {
+            foreach (field; ["Ancre X", "Ancre Y"]) {
+                NumberField numField = new NumberField();
+                numField.setRange(0f, 1f);
+                numField.setStep(0.25f);
+                numField.addEventListener("value", {
+                    _data.anchor.x = _anchorFields[0].value;
+                    _data.anchor.y = _anchorFields[1].value;
+                    dispatchEvent("property_data", false);
+                });
+                _anchorFields ~= numField;
+
+                HLayout hlayout = new HLayout;
+                hlayout.setPadding(Vec2f(284f, 0f));
+                vlist.addList(hlayout);
+
+                hlayout.addUI(new Label(field ~ ":", Atelier.theme.font));
+                hlayout.addUI(numField);
+            }
+
+            _anchorFields[0].value = data.anchor.x;
+            _anchorFields[1].value = data.anchor.y;
+        }
 
         {
             LabelSeparator sep = new LabelSeparator("Propriétés", Atelier.theme.font);
@@ -58,23 +133,6 @@ package final class ParameterWindow : UIElement {
                 dispatchEvent("property_data", false);
             });
             hlayout.addUI(iconSelect);
-        }
-
-        {
-            HLayout hlayout = new HLayout;
-            hlayout.setPadding(Vec2f(284f, 0f));
-            vlist.addList(hlayout);
-
-            hlayout.addUI(new Label("Animation:", Atelier.theme.font));
-
-            ResourceButton animSelect = new ResourceButton(_data.anim, "animation", [
-                    "animation"
-                ]);
-            animSelect.addEventListener("value", {
-                _data.anim = animSelect.getName();
-                dispatchEvent("property_anim", false);
-            });
-            hlayout.addUI(animSelect);
         }
 
         {
@@ -123,5 +181,19 @@ package final class ParameterWindow : UIElement {
 
     BaseLightData getData() {
         return _data;
+    }
+
+    void setClip(Vec4u clip) {
+        _data.clip = clip;
+        _clipFields[0].value = _data.clip.x;
+        _clipFields[1].value = _data.clip.y;
+        _clipFields[2].value = _data.clip.z;
+        _clipFields[3].value = _data.clip.w;
+    }
+
+    void setAnchor(Vec2f anchor) {
+        _data.anchor = anchor;
+        _anchorFields[0].value = _data.anchor.x;
+        _anchorFields[1].value = _data.anchor.y;
     }
 }

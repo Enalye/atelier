@@ -2,22 +2,9 @@ module atelier.world.entity.controller.base;
 
 import atelier.common;
 import atelier.core;
+import atelier.world.controller;
 import atelier.world.entity.base;
 import atelier.world.entity.controller.behavior;
-
-abstract class ControllerWrapper {
-    private {
-        bool _isRunning;
-    }
-
-    @property {
-        bool isRunning() const {
-            return _isRunning;
-        }
-    }
-
-    void update();
-}
 
 abstract class Controller(T : Entity) : ControllerWrapper {
     static assert(__traits(isAbstractClass, T) == false,

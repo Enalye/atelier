@@ -7,7 +7,9 @@ import atelier.core;
 import atelier.render;
 
 struct ShadowData {
-    string sprite;
+    string shadedtexture;
+    Vec4u clip;
+    Vec2f anchor = Vec2f.zero;
     int maxAltitude = 16;
     float groundAlpha = 0.6f;
     float highAlpha = 0.2f;
@@ -30,8 +32,11 @@ final class Shadow : Resource!Shadow {
     }
 
     this(ShadowData data) {
-        _sprite = Atelier.res.get!Sprite(data.sprite);
-        _sprite.anchor = Vec2f.half;
+        ShadedTexture texture = Atelier.res.get!ShadedTexture(data.shadedtexture);
+        _sprite = new Sprite(texture.data, data.clip);
+        _sprite.anchor = data.anchor;
+        _sprite.pivot = data.anchor;
+
         _maxAltitude = data.maxAltitude;
         _groundAlpha = data.groundAlpha;
         _highAlpha = data.highAlpha;

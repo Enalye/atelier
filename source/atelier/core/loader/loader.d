@@ -19,6 +19,7 @@ import atelier.core.loader.prop;
 import atelier.core.loader.proxy;
 import atelier.core.loader.shadow;
 import atelier.core.loader.scene;
+import atelier.core.loader.shadedtexture;
 import atelier.core.loader.shot;
 import atelier.core.loader.sound;
 import atelier.core.loader.sprite;
@@ -32,6 +33,7 @@ import atelier.core.loader.truetype;
 void setupDefaultResourceLoaders(ResourceManager res) {
     loadInternalData(res);
     res.setLoader("texture", &compileTexture, &loadTexture);
+    res.setLoader("shadedtexture", &compileShadedTexture, &loadShadedTexture);
     res.setLoader("sprite", &compileSprite, &loadSprite);
     res.setLoader("animation", &compileAnimation, &loadAnimation);
     res.setLoader("multidiranimation", &compileMultiDirAnimation, &loadMultiDirAnimation);

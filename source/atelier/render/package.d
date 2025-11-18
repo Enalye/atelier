@@ -13,6 +13,7 @@ public {
     import atelier.render.rectangle;
     import atelier.render.renderer;
     import atelier.render.roundedrectangle;
+    import atelier.render.shadedtexture;
     import atelier.render.sprite;
     import atelier.render.texture;
     import atelier.render.tileset;

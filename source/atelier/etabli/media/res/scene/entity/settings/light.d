@@ -1,5 +1,7 @@
 module atelier.etabli.media.res.scene.entity.settings.light;
 
+import std.array : split, join;
+
 import atelier.common;
 import atelier.core;
 import atelier.ui;
@@ -62,6 +64,41 @@ package(atelier.etabli.media.res.scene) class LightSettings : UIElement {
             hlayout.setPadding(Vec2f(284f, 0f));
             vbox.addUI(hlayout);
 
+            hlayout.addUI(new Label("Tags:", Atelier.theme.font));
+
+            TextField tagsField = new TextField;
+            tagsField.value = light.data.tags.join(' ');
+            tagsField.addEventListener("value", {
+                light.data.tags.length = 0;
+                foreach (element; tagsField.value.split(' ')) {
+                    light.data.tags ~= element;
+                }
+                dispatchEvent("property_data", false);
+            });
+            hlayout.addUI(tagsField);
+        }
+
+        {
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(284f, 0f));
+            vbox.addUI(hlayout);
+
+            hlayout.addUI(new Label("Contrôleur:", Atelier.theme.font));
+
+            TextField controllerField = new TextField;
+            controllerField.value = light.data.controller;
+            controllerField.addEventListener("value", {
+                light.data.controller = controllerField.value;
+                dispatchEvent("property_data", false);
+            });
+            hlayout.addUI(controllerField);
+        }
+
+        {
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(284f, 0f));
+            vbox.addUI(hlayout);
+
             hlayout.addUI(new Label("x:", Atelier.theme.font));
 
             _posXField = new IntegerField;
@@ -82,23 +119,6 @@ package(atelier.etabli.media.res.scene) class LightSettings : UIElement {
             });
             hlayout.addUI(_posYField);
         }
-
-        /* {
-            HLayout hlayout = new HLayout;
-            hlayout.setPadding(Vec2f(284f, 0f));
-            vbox.addUI(hlayout);
-
-            hlayout.addUI(new Label("Rayon:", Atelier.theme.font));
-
-            _radiusField = new NumberField;
-            _radiusField.setMinValue(0f);
-            _radiusField.value = _light.radius;
-            _radiusField.addEventListener("value", {
-                _light.radius = _radiusField.value;
-                setDirty();
-            });
-            hlayout.addUI(_radiusField);
-        }*/
 
         {
             HLayout hlayout = new HLayout;

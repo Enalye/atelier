@@ -93,6 +93,13 @@ final class Grid(T) : Resource!Grid {
         _values[x + y * _columns] = value;
     }
 
+    void setValues(const(T[]) values) {
+        _values = values.dup;
+        if (_values.length > _columns * _lines) {
+            _values.length = _columns * _lines;
+        }
+    }
+
     void setValues(const(T[][]) values) {
         enforce(values.length == _lines, "taille des tuiles invalides: " ~ to!string(
                 values.length) ~ " lignes au lieu de " ~ to!string(_lines));

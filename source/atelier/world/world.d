@@ -21,6 +21,7 @@ import atelier.world.particle;
 import atelier.world.scene;
 import atelier.world.transition;
 import atelier.world.weather;
+import atelier.world.controller;
 
 private Transition _createDefaultTransition(string sceneRid, string tpName, Actor actor, bool skip) {
     return new DefaultTransition(sceneRid, tpName, actor, skip);
@@ -381,6 +382,18 @@ final class World {
     }
 
     package void registerController(T)(Controller!T controller) {
+        _controllers ~= controller;
+    }
+
+    void addLightController(T)(string id, LightController delegate() func) {
+        _factory.store(id, func);
+    }
+
+    package LightController fetchController(T : Light)(string id) {
+        return _factory.build!(LightController)(id);
+    }
+
+    package void registerController(LightController controller) {
         _controllers ~= controller;
     }
 

@@ -2,9 +2,14 @@ module atelier.common.material;
 
 import atelier.common.serializer;
 
-struct Material {
-    string name;
+struct MaterialData {
+    uint slot;
     float friction = 1f;
 
     mixin Serializer;
+}
+
+struct Material {
+    string name;
+    float friction = 1f;
 }

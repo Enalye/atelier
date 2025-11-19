@@ -260,6 +260,11 @@ final class Etabli {
 
             return new InstrumentResourceEditor(editor, path, ffd, size);
         });
+        ResourceEditor.add("material", (ResourceEditor editor, string path, Farfadet ffd, Vec2f size) {
+            import atelier.etabli.media.res.material : MaterialResourceEditor;
+
+            return new MaterialResourceEditor(editor, path, ffd, size);
+        });
     }
 
     bool hasResource(string type, string rid) {

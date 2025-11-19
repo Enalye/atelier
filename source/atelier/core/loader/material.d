@@ -9,20 +9,20 @@ import atelier.core.runtime;
 import atelier.core.loader.util;
 
 package void compileMaterial(string path, const Farfadet ffd, OutStream stream) {
-    const uint id = ffd.get!uint(0);
-    stream.write!uint(id);
+    const string rid = ffd.get!string(0);
+    stream.write!string(rid);
 
-    Material material;
+    MaterialData material;
     material.load(ffd);
 
     material.serialize(stream);
 }
 
 package void loadMaterial(InStream stream) {
-    const uint id = stream.read!uint();
+    const string rid = stream.read!string();
 
-    Material material;
+    MaterialData material;
     material.deserialize(stream);
 
-    Atelier.world.setMaterial(id, material);
+    Atelier.world.addMaterial(rid, material);
 }

@@ -109,15 +109,19 @@ final class World {
         addController!Actor("player", { return new DefaultPlayerController(); });
     }
 
-    void setMaterial(uint id, Material material) {
-        if (id >= _materials.length)
-            _materials.length = id + 1;
-        _materials[id] = material;
+    void addMaterial(string name, MaterialData data) {
+        if (data.slot >= _materials.length)
+            _materials.length = data.slot + 1;
+
+        Material material;
+        material.name = name;
+        material.friction = data.friction;
+        _materials[data.slot] = material;
     }
 
     Material getMaterial(int id) {
         if (id < 0 || id >= _materials.length) {
-            return Material("", 0f);
+            return Material();
         }
         return _materials[id];
     }

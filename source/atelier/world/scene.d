@@ -268,13 +268,19 @@ final class Scene : Resource!Scene {
 
     final class TopologicMap {
         private {
+            struct ShadowTile {
+                int level;
+                bool isShadowed;
+            }
+
             string _terrainRID;
             TerrainMap _terrainMap;
             Tileset _tileset;
-            Tilemap[] _lowerTilemaps, _upperTilemaps;
+            Tilemap[] _lowerTilemaps, _upperTilemaps, _shadowTilemaps;
             Grid!int _levelGrid;
             Grid!int _brushGrid;
             Grid!bool _cliffGrid;
+            Grid!ShadowTile _shadowGrid;
         }
 
         @property {
@@ -284,6 +290,10 @@ final class Scene : Resource!Scene {
 
             Tilemap[] upperTilemaps() {
                 return _upperTilemaps;
+            }
+
+            Tilemap[] shadowTilemaps() {
+                return _shadowTilemaps;
             }
 
             Tileset tileset() {
@@ -311,10 +321,12 @@ final class Scene : Resource!Scene {
             _levelGrid = new Grid!int(_columns + 1, _lines + _levels);
             _brushGrid = new Grid!int(_columns + 1, _lines + _levels);
             _cliffGrid = new Grid!bool(_columns + 1, _lines + _levels);
+            _shadowGrid = new Grid!ShadowTile((_columns + 1) << 1, (_lines + _levels) << 1);
 
             _levelGrid.defaultValue = -1;
             _brushGrid.defaultValue = 0;
             _cliffGrid.defaultValue = false;
+            _shadowGrid.defaultValue = ShadowTile(-1, false);
         }
 
         void setup() {
@@ -334,6 +346,16 @@ final class Scene : Resource!Scene {
                 tilemap.anchor = Vec2f.zero;
                 tilemap.position = Vec2f(columns, lines) * -8f - Vec2f(0f, i << 4);
             }
+            auto shadowTileset = Atelier.res.get!Tileset("shadowmap");
+            foreach (i, tilemap; _shadowTilemaps) {
+                tilemap.setTileset(shadowTileset);
+                tilemap.size = tilemap.mapSize();
+                tilemap.anchor = Vec2f.zero;
+                tilemap.position = Vec2f(columns, lines) * -8f - Vec2f(0f, i << 4);
+                tilemap.color = Color.blue.mix(Color.purple).mix(Color.black);
+                tilemap.blend = Blend.alpha;
+                tilemap.alpha = 0.2f;
+            }
 
             updateTiles();
         }
@@ -342,6 +364,7 @@ final class Scene : Resource!Scene {
             _levelGrid.setDimensions(columns + 1, lines + _levels);
             _brushGrid.setDimensions(columns + 1, lines + _levels);
             _cliffGrid.setDimensions(columns + 1, lines + _levels);
+            _shadowGrid.setDimensions(columns + 1, lines + _levels);
 
             foreach (i, tilemap; _lowerTilemaps) {
                 tilemap.setDimensions(columns, lines + cast(uint) i);
@@ -350,6 +373,12 @@ final class Scene : Resource!Scene {
                 tilemap.position = Vec2f(columns, lines) * -8f - Vec2f(0f, i << 4);
             }
             foreach (i, tilemap; _upperTilemaps) {
+                tilemap.setDimensions(columns, lines + cast(uint) i);
+                tilemap.size = tilemap.mapSize();
+                tilemap.anchor = Vec2f.zero;
+                tilemap.position = Vec2f(columns, lines) * -8f - Vec2f(0f, i << 4);
+            }
+            foreach (i, tilemap; _shadowTilemaps) {
                 tilemap.setDimensions(columns, lines + cast(uint) i);
                 tilemap.size = tilemap.mapSize();
                 tilemap.anchor = Vec2f.zero;
@@ -408,6 +437,92 @@ final class Scene : Resource!Scene {
                 for (size_t i = _upperTilemaps.length; i < _levels; ++i) {
                     _upperTilemaps ~= new Tilemap(_columns, _lines + cast(uint) i);
                 }
+            }
+
+            if (_shadowTilemaps.length > _levels) {
+                _shadowTilemaps.length = _levels;
+            }
+            else if (_shadowTilemaps.length < _levels) {
+                for (size_t i = _shadowTilemaps.length; i < _levels; ++i) {
+                    _shadowTilemaps ~= new Tilemap(_columns, _lines + cast(uint) i);
+                }
+            }
+        }
+
+        void processShadow(int x, int y, Vec2i[4] neighborsOffset) {
+            bool[] levels;
+            levels.length = _levels;
+            int[4] neighborLevels;
+            ShadowTile[4] neighborShadows;
+
+            foreach (int i, Vec2i neighborOffset; neighborsOffset) {
+                Vec2i neighbor = Vec2i(x, y) + neighborOffset;
+                neighborLevels[i] = _levelGrid.getValue(neighbor.x, neighbor.y);
+                neighborShadows[i] = _shadowGrid.getValue(neighbor.x, neighbor.y);
+            }
+
+            for (int i; i < 4; ++i) {
+                int level = neighborLevels[i];
+                if (level < 0 || level >= _levels || levels[level])
+                    continue;
+
+                levels[level] = true;
+
+                int tileValue = 0;
+                int levelValue = 0;
+
+                for (int i2; i2 < 4; ++i2) {
+                    ShadowTile neighborShadow = neighborShadows[i2];
+
+                    if (neighborLevels[i2] < level) {
+                        levelValue |= 0x1 << i2;
+                    }
+                    if (neighborLevels[i2] > level) {
+                        levelValue |= 0x1 << (i2 + 4);
+                    }
+
+                    if (neighborShadow.isShadowed && neighborLevels[i2] == level) {
+                        tileValue |= 1 << i2;
+                    }
+                }
+
+                tileValue--;
+
+                if (tileValue == 0 && (levelValue == 0b0110_0000 || levelValue == 0b0110_1000)) {
+                    tileValue = 16;
+                }
+                else if (tileValue == 1 && (levelValue == 0b1001_0000 || levelValue == 0b1000_0101)) {
+                    tileValue = 17;
+                }
+                else if (tileValue == 3 && (levelValue == 0b0010_0000 || levelValue == 0b0010_1001 || levelValue == 0b0010_1000)) {
+                    tileValue = 18;
+                }
+                else if (tileValue == 7 && (levelValue == 0b0001_0000 || levelValue == 0b0001_0110)) {
+                    tileValue = 19;
+                }
+                else if (tileValue == 0 && levelValue == 0b0010_1100) {
+                    tileValue = 24;
+                }
+                else if (tileValue == 1 && levelValue == 0b0001_1100) {
+                    tileValue = 25;
+                }
+                else if (tileValue == 3 && (levelValue == 0b0011_1000 || levelValue == 0b0000_0011)) {
+                    tileValue = 26;
+                }
+                else if (tileValue == 7 && levelValue == 0b0011_0100) {
+                    tileValue = 27;
+                }
+                else if (tileValue == 7 && (levelValue == 0b0001_0010 || levelValue == 0b0100_0011)) {
+                    tileValue = 23;
+                }
+                else if (tileValue == 4 && levelValue == 0b1010_0000) {
+                    tileValue = 28;
+                }
+                else if (tileValue == 9 && levelValue == 0b0101_0000) {
+                    tileValue = 29;
+                }
+
+                _shadowTilemaps[level].setTile(x, y, tileValue);
             }
         }
 
@@ -609,6 +724,28 @@ final class Scene : Resource!Scene {
                 }
             }
 
+            // Cache de l’ombragement
+            for (uint y; y < _lines + _levels; ++y) {
+                for (uint x; x < _columns + 1; ++x) {
+                    Vec2i baseCoords = Vec2i(x, y);
+                    int level = _levelGrid.getValue(baseCoords.x, baseCoords.y);
+
+                    ShadowTile tile;
+                    tile.level = level;
+
+                    int maxDelta = -1;
+                    for (int iy = 1; iy < y; ++iy) {
+                        ShadowTile other = _shadowGrid.getValue(x, (cast(int) y) - iy);
+                        int delta = (other.level - level) - iy;
+                        if (delta >= 0) {
+                            tile.isShadowed = true;
+                            break;
+                        }
+                    }
+                    _shadowGrid.setValue(x, y, tile);
+                }
+            }
+
             uint maxY = _lines + max(0, (cast(int) _levels) - 1);
 
             // Terrain
@@ -648,6 +785,26 @@ final class Scene : Resource!Scene {
 
                 for (uint x = 1; x < _columns; ++x) {
                     processCliff(x, y, innerOffsets);
+                }
+            }
+
+            // Ombres
+            processShadow(0, 0, innerOffsets);
+            processShadow(_columns, 0, innerOffsets);
+            processShadow(_columns, maxY, innerOffsets);
+            processShadow(0, maxY, innerOffsets);
+
+            for (uint x = 1; x < _columns; ++x) {
+                processShadow(x, 0, innerOffsets);
+                processShadow(x, maxY, innerOffsets);
+            }
+
+            for (uint y = 1; y < maxY; ++y) {
+                processShadow(0, y, innerOffsets);
+                processShadow(_columns, y, innerOffsets);
+
+                for (uint x = 1; x < _columns; ++x) {
+                    processShadow(x, y, innerOffsets);
                 }
             }
         }
@@ -920,7 +1077,9 @@ final class Scene : Resource!Scene {
                 subCoords.x = (pos.x / 8) & 0x1;
                 subCoords.y = (pos.y / 8) & 0x1;
 
-                return _topologicMap._terrainMap.getMaterial(tileId, subCoords);
+                int material = layer._terrainMap.getMaterial(tileId, subCoords);
+                if (material >= 0)
+                    return material;
             }
         }
 

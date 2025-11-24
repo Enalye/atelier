@@ -86,12 +86,9 @@ package(atelier.etabli.media.res.terrain) class Toolbox : Modal {
 
             _materialBox.addUI(new Label("Matériau:", Atelier.theme.font));
 
-            string[] materialList = [
-                "Vide", "Béton", "Métal", "Terre", "Herbe", "Bois", "Sable",
-                "Neige", "Eau"
-            ];
-            for (uint i; i < materialList.length; ++i) {
-                materialList[i] = to!string(i) ~ " - " ~ materialList[i];
+            string[] materialList;
+            foreach (i, mat; Atelier.world.getMaterials()) {
+                materialList ~= to!string(i) ~ " - " ~ mat.name;
             }
             _materialSelect = new SelectButton(materialList, "");
             _materialSelect.addEventListener("value", {
@@ -153,7 +150,7 @@ package(atelier.etabli.media.res.terrain) class Toolbox : Modal {
         return _collTilePicker.getTileId();
     }
 
-    uint getMaterial() const {
+    int getMaterial() const {
         return _materialSelect.ivalue();
     }
 

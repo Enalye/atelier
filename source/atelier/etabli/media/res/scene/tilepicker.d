@@ -25,12 +25,32 @@ package(atelier.etabli.media.res.scene) final class TilePicker : UIElement {
         float _zoom = 1f;
         bool _isRect;
         Color _colorMod = Color.white;
+        Rectangle _background;
     }
 
     TilesSelection selection;
 
     this(float height_ = 384f) {
         setSize(Vec2f(256f, height_));
+
+        {
+            _background = Rectangle.fill(getSize());
+            _background.color = Atelier.theme.background;
+            _background.anchor = Vec2f.zero;
+            _background.position = Vec2f.zero;
+            addImage(_background);
+        }
+
+        {
+            SwitchButton bgModeBtn = new SwitchButton(false);
+            bgModeBtn.setAlign(UIAlignX.right, UIAlignY.top);
+            bgModeBtn.setPosition(Vec2f(4f, 4f));
+            bgModeBtn.addEventListener("value", {
+                _background.color = bgModeBtn.value ? Atelier.theme.neutral
+                    : Atelier.theme.background;
+            });
+            addUI(bgModeBtn);
+        }
 
         {
             Rectangle rect = Rectangle.outline(getSize(), 1f);

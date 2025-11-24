@@ -74,6 +74,65 @@ package final class ParameterWindow : UIElement {
         setupEntityBaseParameters(vlist, baseEntityData);
 
         {
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(284f, 0f));
+            vlist.addList(hlayout);
+
+            hlayout.addUI(new Label("Nb.Rebond:", Atelier.theme.font));
+
+            _bouncesField = new IntegerField;
+            _bouncesField.setMinValue(0);
+            _bouncesField.value = bounces;
+            _bouncesField.addEventListener("value", {
+                dispatchEvent("property_bounces");
+            });
+            hlayout.addUI(_bouncesField);
+
+            _bouncesCheck = new Checkbox(hasBounces_);
+            _bouncesCheck.addEventListener("value", {
+                dispatchEvent("property_bounces");
+            });
+            hlayout.addUI(_bouncesCheck);
+        }
+
+        {
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(284f, 0f));
+            vlist.addList(hlayout);
+
+            hlayout.addUI(new Label("Durée:", Atelier.theme.font));
+
+            _ttlField = new IntegerField;
+            _ttlField.setMinValue(0);
+            _ttlField.value = ttl;
+            _ttlField.addEventListener("value", { dispatchEvent("property_ttl"); });
+            hlayout.addUI(_ttlField);
+
+            _ttlCheck = new Checkbox(hasTtl_);
+            _ttlCheck.addEventListener("value", { dispatchEvent("property_ttl"); });
+            hlayout.addUI(_ttlCheck);
+        }
+
+        {
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(284f, 0f));
+            vlist.addList(hlayout);
+
+            hlayout.addUI(new Label("Matériau:", Atelier.theme.font));
+
+            string[] materialList;
+            foreach (i, mat; Atelier.world.getMaterials()) {
+                materialList ~= to!string(i) ~ " - " ~ mat.name;
+            }
+            _materialBtn = new SelectButton(materialList, "");
+            _materialBtn.ivalue = material;
+            _materialBtn.addEventListener("value", {
+                dispatchEvent("property_material", false);
+            });
+            hlayout.addUI(_materialBtn);
+        }
+
+        {
             LabelSeparator sep = new LabelSeparator("Collision", Atelier.theme.font);
             sep.setColor(Atelier.theme.neutral);
             sep.setPadding(Vec2f(284f, 0f));
@@ -313,86 +372,6 @@ package final class ParameterWindow : UIElement {
                 dispatchEvent("property_hurtbox");
             });
             hlayout.addUI(_hurtOffsetAngleField);
-        }
-
-        {
-            LabelSeparator sep = new LabelSeparator("Propriétés", Atelier.theme.font);
-            sep.setColor(Atelier.theme.neutral);
-            sep.setPadding(Vec2f(284f, 0f));
-            sep.setSpacing(8f);
-            sep.setLineWidth(1f);
-            vlist.addList(sep);
-        }
-
-        {
-            HLayout hlayout = new HLayout;
-            hlayout.setPadding(Vec2f(284f, 0f));
-            vlist.addList(hlayout);
-
-            hlayout.addUI(new Label("Nb.Rebond:", Atelier.theme.font));
-
-            _bouncesField = new IntegerField;
-            _bouncesField.setMinValue(0);
-            _bouncesField.value = bounces;
-            _bouncesField.addEventListener("value", {
-                dispatchEvent("property_bounces");
-            });
-            hlayout.addUI(_bouncesField);
-
-            _bouncesCheck = new Checkbox(hasBounces_);
-            _bouncesCheck.addEventListener("value", {
-                dispatchEvent("property_bounces");
-            });
-            hlayout.addUI(_bouncesCheck);
-        }
-
-        {
-            HLayout hlayout = new HLayout;
-            hlayout.setPadding(Vec2f(284f, 0f));
-            vlist.addList(hlayout);
-
-            hlayout.addUI(new Label("Durée:", Atelier.theme.font));
-
-            _ttlField = new IntegerField;
-            _ttlField.setMinValue(0);
-            _ttlField.value = ttl;
-            _ttlField.addEventListener("value", { dispatchEvent("property_ttl"); });
-            hlayout.addUI(_ttlField);
-
-            _ttlCheck = new Checkbox(hasTtl_);
-            _ttlCheck.addEventListener("value", { dispatchEvent("property_ttl"); });
-            hlayout.addUI(_ttlCheck);
-        }
-
-        {
-            HLayout hlayout = new HLayout;
-            hlayout.setPadding(Vec2f(284f, 0f));
-            vlist.addList(hlayout);
-
-            hlayout.addUI(new Label("Matériau:", Atelier.theme.font));
-
-            string[] materialList = [
-                "Vide", "Béton", "Métal", "Terre", "Herbe", "Bois", "Sable",
-                "Neige", "Eau"
-            ];
-            for (uint i; i < materialList.length; ++i) {
-                materialList[i] = to!string(i) ~ " - " ~ materialList[i];
-            }
-            _materialBtn = new SelectButton(materialList, "");
-            _materialBtn.ivalue = material;
-            _materialBtn.addEventListener("value", {
-                dispatchEvent("property_material", false);
-            });
-            hlayout.addUI(_materialBtn);
-        }
-
-        {
-            HLayout hlayout = new HLayout;
-            hlayout.setPadding(Vec2f(284f, 0f));
-            vlist.addList(hlayout);
-
-            hlayout.addUI(new Label("Tags:", Atelier.theme.font));
-            hlayout.addUI(new TextField());
         }
 
         addEventListener("size", {

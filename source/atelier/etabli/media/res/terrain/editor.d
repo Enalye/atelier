@@ -31,7 +31,7 @@ final class TerrainResourceEditor : ResourceBaseEditor {
         ParameterWindow _parameterWindow;
         Toolbox _toolbox;
         int _colliderTileId, _brushTileId;
-        uint _material;
+        int _material = -1;
         bool _isApplyingTool;
 
         string _name;
@@ -51,7 +51,7 @@ final class TerrainResourceEditor : ResourceBaseEditor {
         _matTilemap = new Tilemap(0, 0);
 
         _collTilemap.defaultTile = -1;
-        _matTilemap.defaultTile = 0;
+        _matTilemap.defaultTile = -1;
 
         _collTilemap.alpha = .5f;
         _matTilemap.alpha = .5f;
@@ -408,7 +408,7 @@ final class TerrainResourceEditor : ResourceBaseEditor {
 
     private void _onPasteMaterialTool() {
         Vec2i tilePos = getSubTilePos();
-        _matTilemap.setTile(tilePos.x, tilePos.y, _material);
+        _matTilemap.setTile(tilePos.x, tilePos.y, hasAltModifier() ? -1 : _material);
         setDirty();
     }
 

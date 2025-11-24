@@ -99,14 +99,9 @@ package final class ParameterWindow : UIElement {
             hlayout.addUI(new Label("Matériau:", Atelier
                     .theme.font));
 
-            string[] materialList = [
-                "Vide", "Béton", "Métal",
-                "Terre", "Herbe", "Bois",
-                "Sable",
-                "Neige", "Eau"
-            ];
-            for (uint i; i < materialList.length; ++i) {
-                materialList[i] = to!string(i) ~ " - " ~ materialList[i];
+            string[] materialList;
+            foreach (i, mat; Atelier.world.getMaterials()) {
+                materialList ~= to!string(i) ~ " - " ~ mat.name;
             }
             _materialBtn = new SelectButton(materialList, "");
             _materialBtn.setListAlign(UIAlignX.right, UIAlignY

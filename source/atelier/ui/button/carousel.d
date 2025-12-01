@@ -21,6 +21,17 @@ final class CarouselButton : UIElement {
             return cast(uint) _index;
         }
 
+        uint ivalue(uint ivalue_) {
+            if (_index == ivalue_ || ivalue_ > _items.length)
+                return cast(uint) _index;
+
+            _index = ivalue_;
+            _value = _items[_index];
+            _label.text = _value;
+
+            return cast(uint) _index;
+        }
+
         string value() const {
             return _value;
         }
@@ -43,7 +54,7 @@ final class CarouselButton : UIElement {
     }
 
     this(string[] items, string defaultItem, bool isAccent = false) {
-        _items = items;
+        _items = items.dup;
 
         _label = new Label("", Atelier.theme.font);
         _label.setAlign(UIAlignX.center, UIAlignY.center);

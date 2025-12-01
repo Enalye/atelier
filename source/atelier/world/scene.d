@@ -488,16 +488,16 @@ final class Scene : Resource!Scene {
 
                 tileValue--;
 
-                if (tileValue == 0 && (levelValue == 0b0110_0000 || levelValue == 0b0110_1000)) {
+                if (tileValue == 0 && (levelValue == 0b0110_0000 || levelValue == 0b0110_1000 || levelValue == 0b0100_1010)) {
                     tileValue = 16;
                 }
-                else if (tileValue == 1 && (levelValue == 0b1001_0000 || levelValue == 0b1000_0101)) {
+                else if (tileValue == 1 && (levelValue == 0b1001_0000 || levelValue == 0b1001_0100 || levelValue == 0b1000_0101)) {
                     tileValue = 17;
                 }
                 else if (tileValue == 3 && (levelValue == 0b0010_0000 || levelValue == 0b0010_1001 || levelValue == 0b0010_1000)) {
                     tileValue = 18;
                 }
-                else if (tileValue == 7 && (levelValue == 0b0001_0000 || levelValue == 0b0001_0110)) {
+                else if (tileValue == 7 && (levelValue == 0b0001_0000 || levelValue == 0b0001_0110 || levelValue == 0b0001_0100)) {
                     tileValue = 19;
                 }
                 else if (tileValue == 0 && levelValue == 0b0010_1100) {
@@ -509,8 +509,11 @@ final class Scene : Resource!Scene {
                 else if (tileValue == 3 && (levelValue == 0b0011_1000 || levelValue == 0b0000_0011)) {
                     tileValue = 26;
                 }
-                else if (tileValue == 7 && levelValue == 0b0011_0100) {
+                else if (tileValue == 7 && (levelValue == 0b0011_0100 || levelValue == 0b0000_0011)) {
                     tileValue = 27;
+                }
+                else if (tileValue == 3 && (levelValue == 0b0010_0001 || levelValue == 0b0100_0011)) {
+                    tileValue = 22;
                 }
                 else if (tileValue == 7 && (levelValue == 0b0001_0010 || levelValue == 0b0100_0011)) {
                     tileValue = 23;
@@ -520,6 +523,12 @@ final class Scene : Resource!Scene {
                 }
                 else if (tileValue == 9 && levelValue == 0b0101_0000) {
                     tileValue = 29;
+                }
+                else if (tileValue == 8 && levelValue == 0b0010_0100) {
+                    tileValue = 31;
+                }
+                else if (tileValue == 5 && levelValue == 0b0001_1000) {
+                    tileValue = 30;
                 }
 
                 _shadowTilemaps[level].setTile(x, y, tileValue);

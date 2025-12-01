@@ -37,6 +37,8 @@ final class Archive : IArchive {
             string _path, _name;
         }
 
+        bool isIgnored;
+
         @property {
             string path() const {
                 return _path.length ? (_path ~ Separator ~ _name) : _name;
@@ -81,10 +83,16 @@ final class Archive : IArchive {
                 mkdir(path_);
 
             foreach (file; _files) {
+                if (file.isIgnored)
+                    continue;
+
                 file.unpack(buildNormalizedPath(path_, file.name));
             }
 
             foreach (dir; _dirs) {
+                if (dir.isIgnored)
+                    continue;
+
                 dir.unpack(buildNormalizedPath(path_, dir.name));
             }
         }
@@ -111,12 +119,18 @@ final class Archive : IArchive {
         void save(OutStream stream) {
             stream.write!uint(cast(uint) _files.length);
             foreach (file; _files) {
+                if (file.isIgnored)
+                    continue;
+
                 stream.write!string(file.name);
                 file.save(stream);
             }
 
             stream.write!uint(cast(uint) _dirs.length);
             foreach (dir; _dirs) {
+                if (dir.isIgnored)
+                    continue;
+
                 stream.write!string(dir.name);
                 dir.save(stream);
             }
@@ -171,6 +185,8 @@ final class Archive : IArchive {
             string _path, _name;
             ubyte[] _data;
         }
+
+        bool isIgnored;
 
         @property {
             /// Chemin du fichier

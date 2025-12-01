@@ -19,59 +19,6 @@ import atelier.etabli.ui.openfile;
 import atelier.etabli.ui.resourcemanager;
 import atelier.etabli.ui.warning;
 
-/*
-private final class ExplorerToggleButton : TextButton!Rectangle {
-    private {
-        Rectangle _background;
-    }
-
-    this(string text_) {
-        super(text_);
-
-        setFxColor(Atelier.theme.neutral);
-        setTextColor(Atelier.theme.onNeutral);
-        setSize(Vec2f(Atelier.etabli.LeftPanelSize / 2f, 35f));
-
-        _background = Rectangle.fill(getSize());
-        _background.color = Atelier.theme.background;
-        _background.anchor = Vec2f.zero;
-        addImage(_background);
-
-        addEventListener("mouseenter", &_onMouseEnter);
-        addEventListener("mouseleave", &_onMouseLeave);
-
-        addEventListener("enable", &_onEnable);
-        addEventListener("disable", &_onDisable);
-    }
-
-    private void _onEnable() {
-        _background.alpha = Atelier.theme.activeOpacity;
-        setTextColor(Atelier.theme.onNeutral);
-
-        addEventListener("mouseenter", &_onMouseEnter);
-        addEventListener("mouseleave", &_onMouseLeave);
-    }
-
-    private void _onDisable() {
-        _background.alpha = Atelier.theme.inactiveOpacity;
-        setTextColor(Atelier.theme.neutral);
-
-        removeEventListener("mouseenter", &_onMouseEnter);
-        removeEventListener("mouseleave", &_onMouseLeave);
-    }
-
-    private void _onMouseEnter() {
-        Color rgb = Atelier.theme.neutral;
-        HSLColor hsl = HSLColor.fromColor(rgb);
-        hsl.l = hsl.l * .8f;
-        _background.color = hsl.toColor();
-    }
-
-    private void _onMouseLeave() {
-        _background.color = Atelier.theme.accent;
-    }
-}
-*/
 final class EtabliUI : UIElement {
     private static {
         TabBar _tabBar;
@@ -169,9 +116,6 @@ final class EtabliUI : UIElement {
                 break;
             case f5:
                 Atelier.etabli.runProject();
-                break;
-            case f6:
-                Atelier.etabli.buildProject();
                 break;
             default:
                 break;

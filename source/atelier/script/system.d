@@ -119,36 +119,43 @@ final class Script {
 
         long startTime = Clock.currStdTime();
 
-        version (AtelierEtabli) {
-            Atelier.log("[ATELIER] Compilation des scripts personnalisés...");
-        }
-        else {
-            Atelier.log("[ATELIER] Compilation des scripts...");
-        }
+        version (AtelierDebug) {
+            version (AtelierEtabli) {
+                Atelier.log("[ATELIER] Compilation des scripts personnalisés...");
+            }
+            else {
+                Atelier.log("[ATELIER] Compilation des scripts...");
+            }
 
-        GrCompiler compiler = new GrCompiler(Atelier_Version_ID);
-        foreach (library; _libraries) {
-            compiler.addLibrary(library);
-        }
+            GrCompiler compiler = new GrCompiler(Atelier_Version_ID);
+            foreach (library; _libraries) {
+                compiler.addLibrary(library);
+            }
 
-        version (AtelierEtabli) {
-            foreach (sourceFile; _customFiles) {
-                if (exists(sourceFile)) {
-                    compiler.addFile(sourceFile);
+            version (AtelierEtabli) {
+                foreach (sourceFile; _customFiles) {
+                    if (exists(sourceFile)) {
+                        compiler.addFile(sourceFile);
+                    }
                 }
             }
+            else {
+                foreach (file; _files) {
+                    compiler.addSource(cast(string) file.data, file.path, 1);
+                }
+            }
+
+            _bytecode = compiler.compile(
+                GrOption.safe | GrOption.profile | GrOption.symbols,
+                GrLocale.fr_FR);
+
+            enforce!GrCompilerException(_bytecode, compiler.getError().prettify(GrLocale.fr_FR));
         }
         else {
-            foreach (file; _files) {
-                compiler.addSource(cast(string) file.data, file.path, 1);
-            }
+            Atelier.log("[ATELIER] Chargement du bytecode...");
+            _bytecode = new GrBytecode;
+            _bytecode.load(Atelier_Bytecode_Compiled);
         }
-
-        _bytecode = compiler.compile(
-            GrOption.safe | GrOption.profile | GrOption.symbols,
-            GrLocale.fr_FR);
-
-        enforce!GrCompilerException(_bytecode, compiler.getError().prettify(GrLocale.fr_FR));
 
         double loadDuration = (cast(double)(Clock.currStdTime() - startTime) / 10_000_000.0);
         Atelier.log("  > Effectué en " ~ to!string(loadDuration) ~ "sec");

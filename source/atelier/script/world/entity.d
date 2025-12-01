@@ -22,6 +22,10 @@ package void loadLibWorld_entity(GrModule mod) {
     mod.setParameters(["entity"]);
     mod.addFunction(&_unregister, "unregister", [entityType]);
 
+    mod.setDescription(GrLocale.fr_FR, "L’entité est-il présent dans la scène ?");
+    mod.setParameters(["entity"]);
+    mod.addFunction(&_isRegistered, "isRegistered", [entityType], [grBool]);
+
     mod.setDescription(GrLocale.fr_FR, "Ajoute un tag à l’entité");
     mod.setParameters(["entity", "tag"]);
     mod.addFunction(&_addTag, "addTag", [
@@ -132,6 +136,11 @@ package void loadLibWorld_entity(GrModule mod) {
 private void _unregister(GrCall call) {
     Entity entity = call.getNative!Entity(0);
     entity.unregister();
+}
+
+private void _isRegistered(GrCall call) {
+    Entity entity = call.getNative!Entity(0);
+    call.setBool(entity.isRegistered());
 }
 
 private void _addTag(GrCall call) {

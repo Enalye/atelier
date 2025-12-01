@@ -156,5 +156,9 @@ final class Lighting {
 
         Atelier.renderer.popCanvas();
         _sprite.draw(Vec2f.zero);
+
+        foreach (id, light; _lights) {
+            //  light.draw(offset);
+        }
     }
 }

@@ -9,26 +9,18 @@ import atelier.world.entity;
 import atelier.physics.system;
 
 struct HurtboxData {
-    string faction = "none";
-    string type = "none";
+    bool hasHurtbox;
+    uint layer;
     uint minRadius, maxRadius;
     uint height;
     int angle, angleDelta;
     int offsetDist, offsetAngle;
 
     void load(Farfadet ffd) {
-        if (ffd.hasNode("faction")) {
-            faction = ffd.getNode("faction").get!string(0);
-        }
-        else {
-            faction = "none";
-        }
+        hasHurtbox = true;
 
-        if (ffd.hasNode("type")) {
-            type = ffd.getNode("type").get!string(0);
-        }
-        else {
-            type = "none";
+        if (ffd.hasNode("layer")) {
+            layer = ffd.getNode("layer").get!uint(0);
         }
 
         if (ffd.hasNode("minRadius")) {
@@ -61,26 +53,24 @@ struct HurtboxData {
     }
 
     void save(Farfadet ffd) {
+        if (!hasHurtbox)
+            return;
+
         Farfadet node = ffd.addNode("hurtbox");
-        if (faction != "none" && type != "none") {
-            node.addNode("faction").add(faction);
-            node.addNode("type").add(type);
-            node.addNode("minRadius").add(minRadius);
-            node.addNode("maxRadius").add(maxRadius);
-            node.addNode("height").add(height);
-            node.addNode("angle").add(angle);
-            node.addNode("angleDelta").add(angleDelta);
-            node.addNode("offsetDist").add(offsetDist);
-            node.addNode("offsetAngle").add(offsetAngle);
-        }
+        node.addNode("layer").add(layer);
+        node.addNode("minRadius").add(minRadius);
+        node.addNode("maxRadius").add(maxRadius);
+        node.addNode("height").add(height);
+        node.addNode("angle").add(angle);
+        node.addNode("angleDelta").add(angleDelta);
+        node.addNode("offsetDist").add(offsetDist);
+        node.addNode("offsetAngle").add(offsetAngle);
     }
 
     void serialize(OutStream stream) {
-        bool hasValue = faction != "none" && type != "none";
-        stream.write!bool(hasValue);
-        if (hasValue) {
-            stream.write!string(faction);
-            stream.write!string(type);
+        stream.write!bool(hasHurtbox);
+        if (hasHurtbox) {
+            stream.write!uint(layer);
             stream.write!uint(minRadius);
             stream.write!uint(maxRadius);
             stream.write!uint(height);
@@ -92,9 +82,9 @@ struct HurtboxData {
     }
 
     void deserialize(InStream stream) {
-        if (stream.read!bool()) {
-            faction = stream.read!string();
-            type = stream.read!string();
+        hasHurtbox = stream.read!bool();
+        if (hasHurtbox) {
+            layer = stream.read!uint();
             minRadius = stream.read!uint();
             maxRadius = stream.read!uint();
             height = stream.read!uint();
@@ -107,18 +97,6 @@ struct HurtboxData {
 }
 
 final class Hurtbox {
-    enum Faction {
-        neutral,
-        allied,
-        enemy
-    }
-
-    enum Type {
-        target,
-        projectile,
-        both
-    }
-
     private {
         bool _isRegistered = true;
         Entity _entity;
@@ -126,11 +104,11 @@ final class Hurtbox {
         uint _height;
         int _angle, _angleDelta;
         int _offsetDist, _offsetAngle;
-        Faction _faction;
-        Type _type;
+        uint _layer;
         bool _isDisplayed;
         bool _isCollidable = true;
-        bool _isInvincible;
+        Hurtbox[size_t] _exclusionList;
+        uint _iframes;
     }
 
     @property {
@@ -150,12 +128,8 @@ final class Hurtbox {
             return _maxRadius;
         }
 
-        Faction faction() const {
-            return _faction;
-        }
-
-        Type type() const {
-            return _type;
+        uint layer() const {
+            return _layer;
         }
 
         bool isDisplayed() const {
@@ -167,19 +141,11 @@ final class Hurtbox {
         }
 
         bool isCollidable() const {
-            return _isCollidable;
+            return _iframes == 0 || _isCollidable || !_isRegistered;
         }
 
         bool isCollidable(bool isCollidable_) {
             return _isCollidable = isCollidable_;
-        }
-
-        bool isInvincible() const {
-            return _isInvincible;
-        }
-
-        bool isInvincible(bool isInvincible_) {
-            return _isInvincible = isInvincible_;
         }
     }
 
@@ -192,26 +158,12 @@ final class Hurtbox {
         _angleDelta = data.angleDelta;
         _offsetDist = data.offsetDist;
         _offsetAngle = data.offsetAngle;
-
-        try {
-            _faction = to!Faction(data.faction);
-        }
-        catch (Exception e) {
-            Atelier.log(data.type, " n’est pas un type de hurtbox valide");
-        }
-
-        try {
-            _type = to!Type(data.type);
-        }
-        catch (Exception e) {
-            Atelier.log(data.type, " n’est pas un type de hurtbox valide");
-        }
+        _layer = data.layer;
     }
 
     this(Hurtbox other) {
         _entity = other._entity;
-        _faction = other._faction;
-        _type = other._type;
+        _layer = other.layer;
         _minRadius = other._minRadius;
         _maxRadius = other._maxRadius;
         _height = other._height;
@@ -252,6 +204,34 @@ final class Hurtbox {
             basePosition.y += offset.y;
         }
         return Vec3i(basePosition.x, basePosition.y, basePosition.z);
+    }
+
+    void update() {
+        if (_iframes > 0)
+            _iframes--;
+    }
+
+    void setIFrames(uint iframes_) {
+        _iframes = iframes_;
+    }
+
+    void exclude(Hurtbox other) {
+        _exclusionList[cast(size_t) cast(void*) other] = other;
+    }
+
+    bool isExcluded(Hurtbox other) {
+        return ((cast(size_t) cast(void*) other) in _exclusionList) !is null;
+    }
+
+    void clear() {
+        foreach (key, value; _exclusionList) {
+            value.removeExcluded(this);
+        }
+        _exclusionList.clear();
+    }
+
+    void removeExcluded(Hurtbox other) {
+        _exclusionList.remove(cast(size_t) cast(void*) other);
     }
 
     private bool _checkSegment(Vec2f center, float maxRadius, Vec2f startPoint, Vec2f endPoint) const {

@@ -3,6 +3,7 @@ module atelier.core.runtime;
 import core.thread;
 import std.path, std.file, std.exception;
 import std.datetime, std.conv;
+import std.zlib;
 
 import farfadet;
 import grimoire;
@@ -21,6 +22,7 @@ import atelier.world;
 import atelier.console;
 import atelier.etabli;
 
+import atelier.core.build;
 import atelier.core.loader;
 import atelier.core.logger;
 import atelier.core.theme;
@@ -39,7 +41,12 @@ final class Atelier {
         GrEvent _inputEvent, _lateInputEvent;
 
         // Ressources
-        string[] _archives;
+        struct ArchiveData {
+            string path;
+            bool isArchived;
+        }
+
+        ArchiveData[] _archives;
         Archive.File[] _resourceFiles, _compiledResourceFiles;
 
         alias ResourceLoaderFunc = void function(ResourceManager);
@@ -298,24 +305,24 @@ final class Atelier {
         }
     }
 
-    void addArchive(string path) {
-        _archives ~= path;
+    void addArchive(string path, bool isArchived) {
+        _archives ~= ArchiveData(path, isArchived);
     }
 
     private void _loadArchives() {
-        foreach (path; _archives) {
-            log("[ATELIER] Chargement de l’archive `" ~ path ~ "`...");
+        foreach (archiveData; _archives) {
+            log("[ATELIER] Chargement de l’archive `" ~ archiveData.path ~ "`...");
             long startTime = Clock.currStdTime();
 
             Archive archive = new Archive;
 
-            if (isDir(path)) {
-                enforce(exists(path), "le dossier `" ~ path ~ "` n’existe pas");
-                archive.pack(path);
+            if (isDir(archiveData.path)) {
+                enforce(exists(archiveData.path), "le dossier `" ~ archiveData.path ~ "` n’existe pas");
+                archive.pack(archiveData.path);
             }
-            else if (extension(path) == Atelier_Archive_Extension) {
-                enforce(exists(path), "l’archive `" ~ path ~ "` n’existe pas");
-                archive.load(path);
+            else if (extension(archiveData.path) == Atelier_Archive_Extension) {
+                enforce(exists(archiveData.path), "l’archive `" ~ archiveData.path ~ "` n’existe pas");
+                archive.load(archiveData.path);
             }
 
             foreach (file; archive) {
@@ -341,33 +348,42 @@ final class Atelier {
         }
     }
 
+    static void build() {
+        ProjectBuilder modal = new ProjectBuilder();
+        Atelier.ui.pushModalUI(modal);
+    }
+
+    static void compileResource(Archive.File file) {
+        OutStream stream = new OutStream;
+        stream.write!string(Atelier_Resource_Compiled_MagicWord);
+
+        try {
+            Farfadet ffd = Farfadet.fromBytes(file.data);
+
+            stream.write!uint(cast(uint) ffd.getNodes().length);
+            foreach (resNode; ffd.getNodes()) {
+                stream.write!string(resNode.name);
+
+                ResourceManager.Loader loader = res.getLoader(resNode.name);
+                loader.compile(dirName(file.path) ~ Archive.Separator, resNode, stream);
+            }
+        }
+        catch (FarfadetSyntaxException e) {
+            string msg = file.path ~ "(" ~ to!string(
+                e.tokenLine) ~ "," ~ to!string(e.tokenColumn) ~ "): ";
+            e.msg = msg ~ e.msg;
+            throw e;
+        }
+
+        file.data = cast(ubyte[]) stream.data;
+    }
+
     private void _compileResources() {
         log("[ATELIER] Compilation des ressources...");
         long startTime = Clock.currStdTime();
 
         foreach (Archive.File file; _resourceFiles) {
-            OutStream stream = new OutStream;
-            stream.write!string(Atelier_Resource_Compiled_MagicWord);
-
-            try {
-                Farfadet ffd = Farfadet.fromBytes(file.data);
-
-                stream.write!uint(cast(uint) ffd.getNodes().length);
-                foreach (resNode; ffd.getNodes()) {
-                    stream.write!string(resNode.name);
-
-                    ResourceManager.Loader loader = res.getLoader(resNode.name);
-                    loader.compile(dirName(file.path) ~ Archive.Separator, resNode, stream);
-                }
-            }
-            catch (FarfadetSyntaxException e) {
-                string msg = file.path ~ "(" ~ to!string(
-                    e.tokenLine) ~ "," ~ to!string(e.tokenColumn) ~ "): ";
-                e.msg = msg ~ e.msg;
-                throw e;
-            }
-
-            file.data = cast(ubyte[]) stream.data;
+            compileResource(file);
             _compiledResourceFiles ~= file;
         }
         _resourceFiles.length = 0;
@@ -429,7 +445,7 @@ final class Atelier {
         _script.start();
     }
 
-    void loadArchives() {
+    void loadConfig() {
         version (AtelierDebug) {
             string configPath = buildNormalizedPath(getcwd(), Atelier_Configuration);
             if (!exists(configPath))
@@ -446,17 +462,23 @@ final class Atelier {
                     Atelier.log("Aucune archive `", folder, "` trouvé");
                     continue;
                 }
-                addArchive(path);
+                addArchive(path, isArchived);
             }
+            _physics.load(configFfd);
         }
         else {
-            auto entries = dirEntries("media", SpanMode.shallow);
-            foreach (entry; entries) {
-                if (!entry.isDir)
-                    continue;
+            string configPath = buildNormalizedPath(getcwd(), Atelier_Configuration_Compiled);
+            InStream stream = new InStream;
+            stream.data = cast(ubyte[]) uncompress(std.file.read(configPath));
+            if (stream.read!string() != Atelier_Environment_MagicWord)
+                return;
 
-                addArchive(entry);
+            _archives.length = stream.read!uint();
+            for (uint i; i < _archives.length; ++i) {
+                _archives[i].path = stream.read!string();
+                _archives[i].isArchived = stream.read!bool();
             }
+            _physics.deserialize(stream);
         }
     }
 

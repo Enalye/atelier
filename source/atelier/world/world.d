@@ -711,10 +711,12 @@ final class World {
             int levels = _scene.levels;
             Tilemap[] lowerTopographicLayers;
             Tilemap[] upperTopographicLayers;
+            Tilemap[] shadowTopographicLayers;
 
             if (_transition.showTiles()) {
                 lowerTopographicLayers = _scene.topologicMap.lowerTilemaps;
                 upperTopographicLayers = _scene.topologicMap.upperTilemaps;
+                shadowTopographicLayers = _scene.topologicMap.shadowTilemaps;
             }
 
             for (int y = 0; y < _scene.lines; ++y) {
@@ -729,6 +731,10 @@ final class World {
 
                     if (level < upperTopographicLayers.length) {
                         upperTopographicLayers[level].drawLine(y, offset);
+                    }
+
+                    if (level < shadowTopographicLayers.length) {
+                        shadowTopographicLayers[level].drawLine(y, offset);
                     }
 
                     if (y > 0 && _transition.showTiles()) {

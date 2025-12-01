@@ -63,7 +63,7 @@ final class SelectButton : Button!RoundedRectangle {
     }
 
     this(string[] items, string defaultItem, bool isAccent = false) {
-        _items = items;
+        _items = items.dup;
         _buttonColor = isAccent ? Atelier.theme.accent : Atelier.theme.neutral;
 
         _label = new Label("", Atelier.theme.font);
@@ -118,7 +118,7 @@ final class SelectButton : Button!RoundedRectangle {
             _list.removeUI();
         }
 
-        _items = items;
+        _items = items.dup;
 
         Vec2f size = getSize();
         _list = new SelectList(this);

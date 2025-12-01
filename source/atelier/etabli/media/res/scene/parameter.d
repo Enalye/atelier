@@ -50,8 +50,12 @@ package final class ParameterWindow : UIElement {
         addUI(vlist);
 
         {
-            NeutralButton btn = new NeutralButton("Paramètres");
-            btn.addEventListener("click", {
+            HBox hbox = new HBox;
+            hbox.setSpacing(8f);
+            vlist.addList(hbox);
+
+            NeutralButton paramBtn = new NeutralButton("Paramètres");
+            paramBtn.addEventListener("click", {
                 SceneSettings modal = new SceneSettings(_definition);
                 modal.addEventListener("apply", {
                     _definition.setSize(modal.getGridWidth(), modal.getGridHeight());
@@ -65,7 +69,13 @@ package final class ParameterWindow : UIElement {
                 });
                 Atelier.ui.pushModalUI(modal);
             });
-            vlist.addList(btn);
+            hbox.addUI(paramBtn);
+
+            NeutralButton testBtn = new NeutralButton("Tester");
+            testBtn.addEventListener("click", {
+                Atelier.etabli.runScene(_definition.name);
+            });
+            hbox.addUI(testBtn);
         }
 
         {

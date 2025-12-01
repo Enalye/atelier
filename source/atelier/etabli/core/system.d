@@ -68,7 +68,7 @@ final class Etabli {
         _ui = new EtabliUI;
 
         _bar.add("Projet", "Lancer (F5)").addEventListener("click", &(runProject));
-        _bar.add("Projet", "Exporter (F6)").addEventListener("click", &(buildProject));
+        _bar.add("Projet", "Exporter").addEventListener("click", &(buildProject));
         _bar.addSeparator("Projet");
         _bar.add("Projet", "Quitter").addEventListener("click", {
             Atelier.close();
@@ -81,6 +81,9 @@ final class Etabli {
         _bar.add("Fichier", "Gérer les Dossiers").addEventListener("click",
             &(_onManageFolders));
         _bar.add("Fichier", "Fermer");
+
+        _bar.add("Physique", "Calques des Hurtbox").addEventListener("click", &(
+                _onManageHurtboxLayers));
 
         Atelier.ui.addUI(_bar);
         Atelier.ui.addUI(_ui);
@@ -601,14 +604,21 @@ final class Etabli {
     }
 
     void buildProject() {
-        //if (Project.isOpen()) {
-        //    Project.build();
-        //}
+        Atelier.build();
     }
 
     void runProject() {
         try {
-            spawnProcess(["dub", "run", "--", "test"]);
+            spawnProcess(["dub", "run"]);
+        }
+        catch (Exception e) {
+            Atelier.log("[Atelier] Impossible de lancer le processus");
+        }
+    }
+
+    void runScene(string rid) {
+        try {
+            spawnProcess(["dub", "run", "--", "scene", rid]);
         }
         catch (Exception e) {
             Atelier.log("[Atelier] Impossible de lancer le processus");
@@ -645,6 +655,12 @@ final class Etabli {
         _ui.saveFile();
     }
 
+    private void _onManageHurtboxLayers() {
+        auto modal = new HurtboxLayersManager;
+        modal.addEventListener("apply", { saveConfig(); });
+        Atelier.ui.pushModalUI(modal);
+    }
+
     private void _onManageFolders() {
         auto modal = new ResourceFolderManager;
         modal.addEventListener("updateRessourceFolders", {
@@ -677,6 +693,8 @@ final class Etabli {
         foreach (mediaNode; configFfd.getNodes("media")) {
             _mediaFolders[mediaNode.get!string(0)] = mediaNode.get!bool(1);
         }
+
+        Atelier.physics.load(configFfd);
     }
 
     void saveConfig() {
@@ -684,6 +702,8 @@ final class Etabli {
         foreach (folder, isArchived; _mediaFolders) {
             configFfd.addNode("media").add(folder).add(isArchived);
         }
+
+        Atelier.physics.save(configFfd);
 
         configFfd.save(buildNormalizedPath(getDir(), Atelier_Configuration));
     }

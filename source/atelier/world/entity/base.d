@@ -648,7 +648,7 @@ abstract class Entity {
             _hurtbox = null;
         }
 
-        if (data.type == "none")
+        if (!data.hasHurtbox)
             return;
 
         _hurtbox = new Hurtbox(this, data);

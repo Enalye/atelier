@@ -255,7 +255,7 @@ final class ProxyResourceEditor : ResourceBaseEditor {
     private void _onDraw() {
         _render();
 
-        if (_hurtbox.type != "none") {
+        if (_hurtbox.hasHurtbox) {
             Vec2f hurtOrigin = _originPosition + getCenter() + Vec2f.angled(
                 degToRad(cast(float) _hurtbox.offsetAngle)) * _hurtbox.offsetDist * _zoom;
 

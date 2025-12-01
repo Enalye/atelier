@@ -66,6 +66,7 @@ final class Light {
         _sprite = new Sprite(texture.data, base.clip);
         _radius = (_sprite.clip.z + _sprite.clip.w) / 4f;
 
+        _sprite.blend = Blend.additive;
         _sprite.position = cast(Vec2f) data.position;
         _sprite.color = data.color;
         _sprite.alpha = data.brightness;

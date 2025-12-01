@@ -31,17 +31,16 @@ enum Atelier_Window_Enabled_Default = true;
 
 enum Atelier_Media_Dir = "media";
 
+enum Atelier_Export_Folder = "export";
+
 /// Fichier de configuration
-enum Atelier_Configuration_Extension = ".acf";
+enum Atelier_Configuration_Compiled = "atelier.bin";
 
 /// Fichier de configuration
 enum Atelier_Configuration = "atelier.ffd";
 
-/// Fichier d’application
-enum Atelier_Application_Extension = ".atl";
-
 /// Fichier de données
-enum Atelier_Archive_Extension = ".pqt";
+enum Atelier_Archive_Extension = ".pak";
 
 /// Fichier de ressource farfadet
 enum Atelier_Resource_Extension = ".ffd";
@@ -53,7 +52,7 @@ enum Atelier_Resource_Compiled_Extension = ".ffdt";
 enum Atelier_Script_Extension = ".gr";
 
 /// Fichier de bytecode grimoire
-enum Atelier_Bytecode_Extension = ".grb";
+enum Atelier_Bytecode_Compiled = "script.bin";
 
 enum Atelier_Environment_MagicWord = "atelier";
 

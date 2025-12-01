@@ -1,5 +1,10 @@
 module atelier.physics.system;
 
+import std.conv : to;
+import std.exception : enforce;
+
+import farfadet;
+
 import atelier.common;
 import atelier.core;
 import atelier.world;
@@ -12,14 +17,86 @@ import atelier.physics.shot;
 import atelier.physics.trigger;
 
 final class Physics {
+    private struct HurtboxLayerInternal {
+        ubyte[] collisionList;
+        Array!Hurtbox hurtboxes;
+    }
+
+    struct HurtboxLayer {
+        string name;
+        uint collisionMask;
+        uint repeatMask;
+        uint removeMask;
+        uint iframes;
+
+        mixin Serializer;
+
+        bool getCollision(uint layer) {
+            if (layer >= 32)
+                return false;
+
+            return (collisionMask & (1 << layer)) > 0;
+        }
+
+        void setCollision(uint layer, bool value) {
+            if (layer >= 32)
+                return;
+
+            uint mask = 1 << layer;
+            if (value) {
+                collisionMask |= mask;
+            }
+            else {
+                collisionMask &= ~mask;
+            }
+        }
+
+        bool getRepeat(uint layer) {
+            if (layer >= 32)
+                return false;
+
+            return (repeatMask & (1 << layer)) > 0;
+        }
+
+        void setRepeat(uint layer, bool value) {
+            if (layer >= 32)
+                return;
+
+            uint mask = 1 << layer;
+            if (value) {
+                repeatMask |= mask;
+            }
+            else {
+                repeatMask &= ~mask;
+            }
+        }
+
+        bool getRemove(uint layer) {
+            if (layer >= 32)
+                return false;
+
+            return (removeMask & (1 << layer)) > 0;
+        }
+
+        void setRemove(uint layer, bool value) {
+            if (layer >= 32)
+                return;
+
+            uint mask = 1 << layer;
+            if (value) {
+                removeMask |= mask;
+            }
+            else {
+                removeMask &= ~mask;
+            }
+        }
+    }
+
     private {
         Array!ActorCollider _actors;
         Array!SolidCollider _solids;
         Array!ShotCollider _shots;
         Array!TriggerCollider _triggers;
-        Array!Hurtbox _playerImpactHurtboxes, _playerTargetHurtboxes;
-        Array!Hurtbox _enemyImpactHurtboxes, _enemyTargetHurtboxes;
-        Array!Hurtbox _globalImpactHurtboxes, _globalTargetHurtboxes;
         Array!Repulsor _repulsors;
         bool _hasColliderToRemove;
         bool _hasHurtboxToRemove;
@@ -34,13 +111,67 @@ final class Physics {
         bool _showSolids;
         bool _showShots;
         bool _showTriggers;
-        bool _showPlayerImpactHurtboxes;
-        bool _showPlayerTargetHurtboxes;
-        bool _showEnemyImpactHurtboxes;
-        bool _showEnemyTargetHurtboxes;
-        bool _showGlobalImpactHurtboxes;
-        bool _showGlobalTargetHurtboxes;
+        bool _showHurtboxes;
         bool _showRepulsors;
+
+        HurtboxLayer[32] _hurtboxLayers;
+        HurtboxLayerInternal[32] _hurtboxLayersInternal;
+    }
+
+    void load(Farfadet ffd) {
+        if (!ffd.hasNode("physics"))
+            return;
+
+        Farfadet node = ffd.getNode("physics");
+        foreach (hurtboxLayerNode; node.getNodes("hurtboxLayer")) {
+            HurtboxLayer data;
+            data.load(hurtboxLayerNode);
+            setHurtboxLayer(hurtboxLayerNode.get!uint(0), data);
+        }
+    }
+
+    void save(Farfadet ffd) {
+        Farfadet node = ffd.addNode("physics");
+
+        foreach (i, data; _hurtboxLayers) {
+            Farfadet hurtboxLayerNode = node.addNode("hurtboxLayer").add!uint(cast(uint) i);
+            data.save(hurtboxLayerNode);
+        }
+    }
+
+    void deserialize(InStream stream) {
+        for (uint i; i < 32; ++i) {
+            HurtboxLayer data;
+            data.deserialize(stream);
+            setHurtboxLayer(i, data);
+        }
+    }
+
+    void serialize(OutStream stream) {
+        for (uint i; i < 32; ++i) {
+            _hurtboxLayers[i].serialize(stream);
+        }
+    }
+
+    void setHurtboxLayer(uint layer, HurtboxLayer data) {
+        enforce(layer < _hurtboxLayers.length, "Le calque de collision " ~ to!string(
+                layer) ~ " dépasse la limite");
+
+        uint collisionMask = data.collisionMask;
+
+        _hurtboxLayers[layer] = data;
+        _hurtboxLayersInternal[layer].collisionList.length = 0;
+        for (ubyte maskId; maskId < 32; ++maskId) {
+            if (collisionMask & (1 << maskId)) {
+                _hurtboxLayersInternal[layer].collisionList ~= maskId;
+            }
+        }
+    }
+
+    HurtboxLayer getHurtboxLayer(uint layer) {
+        enforce(layer < _hurtboxLayers.length, "Le calque de collision " ~ to!string(
+                layer) ~ " dépasse la limite");
+        return _hurtboxLayers[layer];
     }
 
     @property {
@@ -101,13 +232,11 @@ final class Physics {
         _solids = new Array!SolidCollider;
         _shots = new Array!ShotCollider;
         _triggers = new Array!TriggerCollider;
-        _playerImpactHurtboxes = new Array!Hurtbox;
-        _playerTargetHurtboxes = new Array!Hurtbox;
-        _enemyImpactHurtboxes = new Array!Hurtbox;
-        _enemyTargetHurtboxes = new Array!Hurtbox;
-        _globalImpactHurtboxes = new Array!Hurtbox;
-        _globalTargetHurtboxes = new Array!Hurtbox;
         _repulsors = new Array!Repulsor;
+
+        for (uint i; i < 32; ++i) {
+            _hurtboxLayersInternal[i].hurtboxes = new Array!Hurtbox;
+        }
     }
 
     void clear() {
@@ -116,12 +245,10 @@ final class Physics {
         _shots.clear();
         _triggers.clear();
         _repulsors.clear();
-        _playerImpactHurtboxes.clear();
-        _playerTargetHurtboxes.clear();
-        _enemyImpactHurtboxes.clear();
-        _enemyTargetHurtboxes.clear();
-        _globalImpactHurtboxes.clear();
-        _globalTargetHurtboxes.clear();
+
+        for (uint i; i < 32; ++i) {
+            _hurtboxLayersInternal[i].hurtboxes.clear();
+        }
     }
 
     void setTriggersActive(bool value) {
@@ -192,6 +319,7 @@ final class Physics {
             }
         }
 
+        // Repulsor
         if (_hasRepulsorToRemove) {
             _hasRepulsorToRemove = false;
 
@@ -205,202 +333,6 @@ final class Physics {
             _repulsors.sweep();
         }
 
-        if (_hasHurtboxToRemove) {
-            // À faire: la boucle ne sert qu’à vérifier l’existance des hurtbox.
-            // -> Trouver un autre endroit où le faire
-            _hasHurtboxToRemove = false;
-
-            foreach (i, target; _globalTargetHurtboxes) {
-                if (!target.isRegistered) {
-                    _globalTargetHurtboxes.mark(i);
-                }
-            }
-            _globalTargetHurtboxes.sweep();
-
-            foreach (i, impact; _globalImpactHurtboxes) {
-                if (!impact.isRegistered) {
-                    _globalImpactHurtboxes.mark(i);
-                }
-            }
-            _globalImpactHurtboxes.sweep();
-
-            foreach (i, target; _enemyTargetHurtboxes) {
-                if (!target.isRegistered) {
-                    _enemyTargetHurtboxes.mark(i);
-                }
-            }
-            _enemyTargetHurtboxes.sweep();
-
-            foreach (i, impact; _enemyImpactHurtboxes) {
-                if (!impact.isRegistered) {
-                    _enemyImpactHurtboxes.mark(i);
-                }
-            }
-            _enemyImpactHurtboxes.sweep();
-
-            foreach (i, target; _playerTargetHurtboxes) {
-                if (!target.isRegistered) {
-                    _playerTargetHurtboxes.mark(i);
-                }
-            }
-            _playerTargetHurtboxes.sweep();
-
-            foreach (i, impact; _playerImpactHurtboxes) {
-                if (!impact.isRegistered) {
-                    _playerImpactHurtboxes.mark(i);
-                }
-            }
-            _playerImpactHurtboxes.sweep();
-        }
-
-        __enemyImpactHurboxesLoop: foreach (i, impact; _enemyImpactHurtboxes) {
-            if (!impact.isRegistered) {
-                _enemyImpactHurtboxes.mark(i);
-                continue __enemyImpactHurboxesLoop;
-            }
-
-            foreach (y, target; _globalTargetHurtboxes) {
-                HurtboxHit hurtboxHit = impact.collidesWith(target);
-                if (hurtboxHit.isColliding) {
-                    CollisionHit hit;
-                    hit.type = CollisionHit.Type.impact;
-                    hit.normal = hurtboxHit.normal;
-                    hit.entity = impact.entity;
-                    target.entity.onCollide(hit);
-                    hit.normal = -hurtboxHit.normal;
-                    hit.entity = target.entity;
-                    impact.entity.onCollide(hit);
-                    if (!impact.isInvincible()) {
-                        _enemyImpactHurtboxes.mark(i);
-                    }
-                    continue __enemyImpactHurboxesLoop;
-                }
-            }
-
-            foreach (y, target; _playerTargetHurtboxes) {
-                HurtboxHit hurtboxHit = impact.collidesWith(target);
-                if (hurtboxHit.isColliding) {
-                    CollisionHit hit;
-                    hit.type = CollisionHit.Type.impact;
-                    hit.normal = hurtboxHit.normal;
-                    hit.entity = impact.entity;
-                    target.entity.onCollide(hit);
-                    hit.normal = -hurtboxHit.normal;
-                    hit.entity = target.entity;
-                    impact.entity.onCollide(hit);
-                    if (!impact.isInvincible()) {
-                        _enemyImpactHurtboxes.mark(i);
-                    }
-                    continue __enemyImpactHurboxesLoop;
-                }
-            }
-        }
-        _enemyImpactHurtboxes.sweep();
-
-        __playerImpactHurboxesLoop: foreach (i, impact; _playerImpactHurtboxes) {
-            foreach (y, target; _globalTargetHurtboxes) {
-                if (!impact.isRegistered) {
-                    _playerImpactHurtboxes.mark(i);
-                    continue __playerImpactHurboxesLoop;
-                }
-
-                HurtboxHit hurtboxHit = impact.collidesWith(target);
-                if (hurtboxHit.isColliding) {
-                    CollisionHit hit;
-                    hit.type = CollisionHit.Type.impact;
-                    hit.normal = hurtboxHit.normal;
-                    hit.entity = impact.entity;
-                    target.entity.onCollide(hit);
-                    hit.normal = -hurtboxHit.normal;
-                    hit.entity = target.entity;
-                    impact.entity.onCollide(hit);
-                    if (!impact.isInvincible()) {
-                        _enemyImpactHurtboxes.mark(i);
-                    }
-                    continue __playerImpactHurboxesLoop;
-                }
-            }
-
-            foreach (y, target; _enemyTargetHurtboxes) {
-                HurtboxHit hurtboxHit = impact.collidesWith(target);
-                if (hurtboxHit.isColliding) {
-                    CollisionHit hit;
-                    hit.type = CollisionHit.Type.impact;
-                    hit.normal = hurtboxHit.normal;
-                    hit.entity = impact.entity;
-                    target.entity.onCollide(hit);
-                    hit.normal = -hurtboxHit.normal;
-                    hit.entity = target.entity;
-                    impact.entity.onCollide(hit);
-                    if (!impact.isInvincible()) {
-                        _playerImpactHurtboxes.mark(i);
-                    }
-                    continue __playerImpactHurboxesLoop;
-                }
-            }
-        }
-        _playerImpactHurtboxes.sweep();
-
-        __globalImpactHurboxesLoop: foreach (i, impact; _globalImpactHurtboxes) {
-            if (!impact.isRegistered) {
-                _enemyImpactHurtboxes.mark(i);
-                continue __globalImpactHurboxesLoop;
-            }
-
-            /*foreach (y, target; _globalTargetHurtboxes) {
-                HurtboxHit hurtboxHit = impact.collidesWith(target);
-                if (hurtboxHit.isColliding) {
-                    CollisionHit hit;
-                    hit.type = CollisionHit.Type.impact;
-                    hit.normal = hurtboxHit.normal;
-                    hit.entity = impact.entity;
-                    target.entity.onCollide(hit);
-                    hit.normal = -hurtboxHit.normal;
-                    hit.entity = target.entity;
-                    impact.entity.onCollide(hit);
-                    _enemyImpactHurtboxes.mark(i);
-                    continue __globalImpactHurboxesLoop;
-                }
-            }*/
-
-            foreach (y, target; _enemyTargetHurtboxes) {
-                HurtboxHit hurtboxHit = impact.collidesWith(target);
-                if (hurtboxHit.isColliding) {
-                    CollisionHit hit;
-                    hit.type = CollisionHit.Type.impact;
-                    hit.normal = hurtboxHit.normal;
-                    hit.entity = impact.entity;
-                    target.entity.onCollide(hit);
-                    hit.normal = -hurtboxHit.normal;
-                    hit.entity = target.entity;
-                    impact.entity.onCollide(hit);
-                    if (!impact.isInvincible()) {
-                        _globalImpactHurtboxes.mark(i);
-                    }
-                    continue __globalImpactHurboxesLoop;
-                }
-            }
-
-            foreach (y, target; _playerTargetHurtboxes) {
-                HurtboxHit hurtboxHit = impact.collidesWith(target);
-                if (hurtboxHit.isColliding) {
-                    CollisionHit hit;
-                    hit.type = CollisionHit.Type.impact;
-                    hit.normal = hurtboxHit.normal;
-                    hit.entity = impact.entity;
-                    target.entity.onCollide(hit);
-                    hit.normal = -hurtboxHit.normal;
-                    hit.entity = target.entity;
-                    impact.entity.onCollide(hit);
-                    if (!impact.isInvincible()) {
-                        _globalImpactHurtboxes.mark(i);
-                    }
-                    continue __globalImpactHurboxesLoop;
-                }
-            }
-        }
-        _globalImpactHurtboxes.sweep();
-
         for (uint i; i < _repulsors.length; ++i) {
             for (uint y = i + 1; y < _repulsors.length; ++y) {
                 _repulsors[i].update(_repulsors[y]);
@@ -409,6 +341,64 @@ final class Physics {
 
         for (uint i; i < _repulsors.length; ++i) {
             _repulsors[i].apply();
+        }
+
+        // Hurtbox
+        for (uint layer; layer < 32; ++layer) {
+            foreach (hurtboxID, hurtbox; _hurtboxLayersInternal[layer].hurtboxes) {
+                hurtbox.update();
+                if (!hurtbox.isRegistered) {
+                    hurtbox.clear();
+                    _hurtboxLayersInternal[layer].hurtboxes.mark(hurtboxID);
+                    continue;
+                }
+            }
+            _hurtboxLayersInternal[layer].hurtboxes.sweep();
+        }
+
+        for (uint layerA; layerA < 32; ++layerA) {
+            foreach (layerB; _hurtboxLayersInternal[layerA].collisionList) {
+                foreach (hurtboxAID, hurtboxA; _hurtboxLayersInternal[layerA].hurtboxes) {
+                    if (!hurtboxA.isCollidable())
+                        continue;
+
+                    foreach (hurtboxBID, hurtboxB; _hurtboxLayersInternal[layerB].hurtboxes) {
+                        if (hurtboxA == hurtboxB ||
+                            !hurtboxB.isCollidable() ||
+                            hurtboxA.isExcluded(hurtboxB) ||
+                            hurtboxB.isExcluded(hurtboxA))
+                            continue;
+
+                        HurtboxHit hurtboxHit = hurtboxA.collidesWith(hurtboxB);
+                        if (hurtboxHit.isColliding) {
+                            CollisionHit hit;
+                            hit.type = CollisionHit.Type.impact;
+                            hit.normal = hurtboxHit.normal;
+                            hit.entity = hurtboxA.entity;
+                            hurtboxB.entity.onCollide(hit);
+                            hit.normal = -hurtboxHit.normal;
+                            hit.entity = hurtboxB.entity;
+                            hurtboxA.entity.onCollide(hit);
+
+                            if (!_hurtboxLayers[layerA].getRepeat(layerB))
+                                hurtboxA.exclude(hurtboxB);
+
+                            if (!_hurtboxLayers[layerB].getRepeat(layerA))
+                                hurtboxB.exclude(hurtboxA);
+
+                            if (_hurtboxLayers[layerA].getRemove(layerB))
+                                _hurtboxLayersInternal[layerA].hurtboxes.mark(hurtboxAID);
+                            else
+                                hurtboxA.setIFrames(_hurtboxLayers[layerA].iframes);
+
+                            if (_hurtboxLayers[layerB].getRemove(layerA))
+                                _hurtboxLayersInternal[layerB].hurtboxes.mark(hurtboxBID);
+                            else
+                                hurtboxB.setIFrames(_hurtboxLayers[layerB].iframes);
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -458,44 +448,12 @@ final class Physics {
     }
 
     void addHurtbox(Hurtbox hurtbox) {
-        final switch (hurtbox.faction) with (Hurtbox.Faction) {
-        case allied:
-            if (hurtbox.type == Hurtbox.Type.target || hurtbox.type == Hurtbox.Type.both) {
-                _playerTargetHurtboxes ~= hurtbox;
-                hurtbox.isRegistered = true;
-                hurtbox.isDisplayed = _showPlayerTargetHurtboxes;
-            }
-            if (hurtbox.type == Hurtbox.Type.projectile || hurtbox.type == Hurtbox.Type.both) {
-                _playerImpactHurtboxes ~= hurtbox;
-                hurtbox.isRegistered = true;
-                hurtbox.isDisplayed = _showPlayerImpactHurtboxes;
-            }
-            break;
-        case enemy:
-            if (hurtbox.type == Hurtbox.Type.target || hurtbox.type == Hurtbox.Type.both) {
-                _enemyTargetHurtboxes ~= hurtbox;
-                hurtbox.isRegistered = true;
-                hurtbox.isDisplayed = _showEnemyTargetHurtboxes;
-            }
-            if (hurtbox.type == Hurtbox.Type.projectile || hurtbox.type == Hurtbox.Type.both) {
-                _enemyImpactHurtboxes ~= hurtbox;
-                hurtbox.isRegistered = true;
-                hurtbox.isDisplayed = _showEnemyImpactHurtboxes;
-            }
-            break;
-        case neutral:
-            if (hurtbox.type == Hurtbox.Type.target || hurtbox.type == Hurtbox.Type.both) {
-                _globalTargetHurtboxes ~= hurtbox;
-                hurtbox.isRegistered = true;
-                hurtbox.isDisplayed = _showGlobalTargetHurtboxes;
-            }
-            if (hurtbox.type == Hurtbox.Type.projectile || hurtbox.type == Hurtbox.Type.both) {
-                _globalImpactHurtboxes ~= hurtbox;
-                hurtbox.isRegistered = true;
-                hurtbox.isDisplayed = _showGlobalImpactHurtboxes;
-            }
-            break;
-        }
+        enforce(hurtbox.layer < _hurtboxLayers.length, "Le calque de collision " ~ to!string(
+                hurtbox.layer) ~ " dépasse la limite");
+
+        hurtbox.isRegistered = true;
+        _hurtboxLayersInternal[hurtbox.layer].hurtboxes ~= hurtbox;
+        hurtbox.isDisplayed = _showHurtboxes;
     }
 
     void removeHurtbox(Hurtbox hurtbox) {
@@ -1131,28 +1089,11 @@ final class Physics {
         return _triggers;
     }
 
-    Array!Hurtbox getAllPlayerImpactHurtboxes() {
-        return _playerImpactHurtboxes;
-    }
+    Array!Hurtbox getAllHurtboxes(uint layer) {
+        enforce(layer < _hurtboxLayers.length, "Le calque de collision " ~ to!string(
+                layer) ~ " dépasse la limite");
 
-    Array!Hurtbox getAllPlayerTargetHurtboxes() {
-        return _playerTargetHurtboxes;
-    }
-
-    Array!Hurtbox getAllEnemyImpactHurtboxes() {
-        return _enemyImpactHurtboxes;
-    }
-
-    Array!Hurtbox getAllEnemyTargetHurtboxes() {
-        return _enemyTargetHurtboxes;
-    }
-
-    Array!Hurtbox getAllGlobalImpactHurtboxes() {
-        return _globalImpactHurtboxes;
-    }
-
-    Array!Hurtbox getAllGlobalTargetHurtboxes() {
-        return _globalTargetHurtboxes;
+        return _hurtboxLayersInternal[layer].hurtboxes;
     }
 
     void showActors(bool show) {
@@ -1195,63 +1136,15 @@ final class Physics {
         }
     }
 
-    void showPlayerImpactHurtboxes(bool show) {
-        if (show == _showPlayerImpactHurtboxes)
+    void showHurtboxes(bool show) {
+        if (show == _showHurtboxes)
             return;
 
-        _showPlayerImpactHurtboxes = show;
-        foreach (impact; _playerImpactHurtboxes) {
-            impact.isDisplayed = _showPlayerImpactHurtboxes;
-        }
-    }
-
-    void showPlayerTargetHurtboxes(bool show) {
-        if (show == _showPlayerTargetHurtboxes)
-            return;
-
-        _showPlayerTargetHurtboxes = show;
-        foreach (target; _playerTargetHurtboxes) {
-            target.isDisplayed = _showPlayerTargetHurtboxes;
-        }
-    }
-
-    void showEnemyImpactHurtboxes(bool show) {
-        if (show == _showEnemyImpactHurtboxes)
-            return;
-
-        _showEnemyImpactHurtboxes = show;
-        foreach (impact; _enemyImpactHurtboxes) {
-            impact.isDisplayed = _showEnemyImpactHurtboxes;
-        }
-    }
-
-    void showEnemyTargetHurtboxes(bool show) {
-        if (show == _showEnemyTargetHurtboxes)
-            return;
-
-        _showEnemyTargetHurtboxes = show;
-        foreach (target; _enemyTargetHurtboxes) {
-            target.isDisplayed = _showEnemyTargetHurtboxes;
-        }
-    }
-
-    void showGlobalImpactHurtboxes(bool show) {
-        if (show == _showGlobalImpactHurtboxes)
-            return;
-
-        _showGlobalImpactHurtboxes = show;
-        foreach (impact; _globalImpactHurtboxes) {
-            impact.isDisplayed = _showGlobalImpactHurtboxes;
-        }
-    }
-
-    void showGlobalTargetHurtboxes(bool show) {
-        if (show == _showGlobalTargetHurtboxes)
-            return;
-
-        _showGlobalTargetHurtboxes = show;
-        foreach (target; _globalTargetHurtboxes) {
-            target.isDisplayed = _showGlobalTargetHurtboxes;
+        _showHurtboxes = show;
+        for (uint i; i < 32; ++i) {
+            foreach (hurtbox; _hurtboxLayersInternal[i].hurtboxes) {
+                hurtbox.isDisplayed = _showHurtboxes;
+            }
         }
     }
 

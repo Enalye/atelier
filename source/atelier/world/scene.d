@@ -273,9 +273,9 @@ final class Scene : Resource!Scene {
                 bool isShadowed;
             }
 
-            string _terrainRID;
+            string _terrainRID, _shadowTilesetRID;
             TerrainMap _terrainMap;
-            Tileset _tileset;
+            Tileset _tileset, _shadowTileset;
             Tilemap[] _lowerTilemaps, _upperTilemaps, _shadowTilemaps;
             Grid!int _levelGrid;
             Grid!int _brushGrid;
@@ -332,6 +332,9 @@ final class Scene : Resource!Scene {
         void setup() {
             _terrainMap = Atelier.res.get!TerrainMap(_terrainRID);
             _tileset = Atelier.res.get!Tileset(_terrainMap.tileset);
+            if (_shadowTilesetRID.length) {
+                _shadowTileset = Atelier.res.get!Tileset(_shadowTilesetRID);
+            }
             updateLevels();
 
             foreach (i, tilemap; _lowerTilemaps) {
@@ -346,9 +349,10 @@ final class Scene : Resource!Scene {
                 tilemap.anchor = Vec2f.zero;
                 tilemap.position = Vec2f(columns, lines) * -8f - Vec2f(0f, i << 4);
             }
-            auto shadowTileset = Atelier.res.get!Tileset("shadowmap");
             foreach (i, tilemap; _shadowTilemaps) {
-                tilemap.setTileset(shadowTileset);
+                if (_shadowTileset) {
+                    tilemap.setTileset(_shadowTileset);
+                }
                 tilemap.size = tilemap.mapSize();
                 tilemap.anchor = Vec2f.zero;
                 tilemap.position = Vec2f(columns, lines) * -8f - Vec2f(0f, i << 4);

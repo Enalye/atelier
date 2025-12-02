@@ -60,6 +60,10 @@ abstract class EntityGraphic {
         _auxGraphics = graphics;
     }
 
+    final void addAuxGraphic(string graphic) {
+        _auxGraphics ~= graphic;
+    }
+
     final const(string[]) getAuxGraphics() const {
         return _auxGraphics;
     }

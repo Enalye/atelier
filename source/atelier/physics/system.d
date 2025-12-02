@@ -387,12 +387,12 @@ final class Physics {
                                 hurtboxB.exclude(hurtboxA);
 
                             if (_hurtboxLayers[layerA].getRemove(layerB))
-                                _hurtboxLayersInternal[layerA].hurtboxes.mark(hurtboxAID);
+                                hurtboxA.isRegistered = false;
                             else
                                 hurtboxA.setIFrames(_hurtboxLayers[layerA].iframes);
 
                             if (_hurtboxLayers[layerB].getRemove(layerA))
-                                _hurtboxLayersInternal[layerB].hurtboxes.mark(hurtboxBID);
+                                hurtboxB.isRegistered = false;
                             else
                                 hurtboxB.setIFrames(_hurtboxLayers[layerB].iframes);
                         }

@@ -478,12 +478,12 @@ abstract class Entity {
         }
     }
 
-    final void setGraphic(string id) {
+    final void setGraphic(string id, bool forceUpdate = false) {
         if (!id.length) {
             setDefaultGraphic();
             return;
         }
-        else if (_graphicId == id) {
+        else if (_graphicId == id && !forceUpdate) {
             return;
         }
 
@@ -521,12 +521,12 @@ abstract class Entity {
             return;
 
         foreach (id; _graphic.getAuxGraphics()) {
-            _setAuxGraphic(id);
+            setAuxGraphic(id);
         }
 
         for (uint i; i < _auxGraphicSlots.length; ++i) {
             if (!_auxGraphicSlots[i].isUpdated) {
-                setAuxGraphic(i, "");
+                _setAuxGraphic(i, "");
             }
             _auxGraphicSlots[i].isUpdated = false;
         }
@@ -541,11 +541,12 @@ abstract class Entity {
         _auxGraphicStack.sort!((a, b) => a.getOrder() < b.getOrder())();
     }
 
-    private void _setAuxGraphic(string id) {
+    void setAuxGraphic(string id) {
         auto p = id in _auxGraphics;
         if (!p) {
             if (id.length) {
                 Atelier.log("Pas d’état auxiliaire `", id, "` trouvé");
+                assert(false);
             }
             return;
         }
@@ -574,7 +575,7 @@ abstract class Entity {
         _auxGraphicSlots[slot].graphic.setAngle(_angle);
     }
 
-    private void setAuxGraphic(uint index, string id) {
+    private void _setAuxGraphic(uint index, string id) {
         if (index >= _auxGraphicSlots.length) {
             if (!id.length)
                 return;
@@ -596,6 +597,7 @@ abstract class Entity {
         if (id !in _auxGraphics) {
             if (id.length) {
                 Atelier.log("Pas d’état auxiliaire `", id, "` trouvé");
+                assert(false);
             }
             _auxGraphicSlots[index].graphic = null;
             return;
@@ -610,8 +612,22 @@ abstract class Entity {
         _auxGraphicSlots[index].graphic.setAngle(_angle);
     }
 
+    final EntityGraphic getGraphic(string id) {
+        auto p = id in _graphics;
+        return p ? *p : null;
+    }
+
     final EntityGraphic getGraphic() {
         return _graphic;
+    }
+
+    final EntityGraphic[string] getGraphics() {
+        return _graphics;
+    }
+
+    final EntityGraphic getAuxGraphic(string id) {
+        auto p = id in _auxGraphics;
+        return p ? *p : null;
     }
 
     final EntityGraphic getAuxGraphic(uint index) {
@@ -619,6 +635,10 @@ abstract class Entity {
             return null;
 
         return _auxGraphicSlots[index].graphic;
+    }
+
+    final EntityGraphic[string] getAuxGraphics() {
+        return _auxGraphics;
     }
 
     final void setEffect(EntityGraphicEffect effect) {

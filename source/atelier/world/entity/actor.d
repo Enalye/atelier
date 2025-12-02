@@ -188,7 +188,7 @@ final class Actor : Entity, Resource!Actor {
         }
         acceleration2d = acceleration2d * (accelFriction * accelSpeed * 10f / 60f);
         velocity2d = velocity2d + acceleration2d;
-        velocity2d += _avoidCliffs(acceleration2d) * friction;
+        velocity2d += _avoidCliffs(acceleration2d) * friction * _frictionBrake;
 
         float m = max(velLen, maxSpeed);
         float nm = _velocity.length();
@@ -235,7 +235,6 @@ final class Actor : Entity, Resource!Actor {
         {
             Physics.TerrainHit terrainHit = Atelier.physics.hitTerrain(getPosition(), Vec3i.zero);
             Physics.SolidUnderHit solidUnderHit = Atelier.physics.getSolidUnder(getPosition());
-            //solidUnderHit.solid.entity.getMaterial() <- Récupérer le coéf de friction
             baseZ = max(terrainHit.height, solidUnderHit.baseZ);
         }
 

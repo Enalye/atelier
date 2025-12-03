@@ -767,10 +767,9 @@ final class Scene : Resource!Scene {
                     ShadowTile tile;
                     tile.level = level;
 
-                    int maxDelta = -1;
-                    for (int iy = 1; iy < y; ++iy) {
-                        ShadowTile other = _shadowGrid.getValue(x, (cast(int) y) - iy);
-                        int delta = (other.level - level) - iy;
+                    for (int iy = 1; iy <= y; ++iy) {
+                        int otherLevel = _levelGrid.getValue(x, (cast(int) y) - iy);
+                        int delta = (otherLevel - level) - iy;
                         if (delta >= 0) {
                             tile.isShadowed = true;
                             break;

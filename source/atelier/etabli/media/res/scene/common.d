@@ -377,6 +377,7 @@ package final class SceneDefinition {
     final class TopologicMap {
         private {
             string _terrainRID;
+            string _shadowRID;
             Tileset _tileset;
             TerrainMap _terrainMap;
             Tilemap[] _lowerTilemaps, _upperTilemaps;
@@ -423,6 +424,14 @@ package final class SceneDefinition {
                 }
                 return _terrainRID;
             }
+
+            string shadowRID() {
+                return _shadowRID;
+            }
+
+            string shadowRID(string rid) {
+                return _shadowRID = rid;
+            }
         }
 
         this() {
@@ -459,6 +468,9 @@ package final class SceneDefinition {
             if (_terrainRID.length) {
                 node.addNode("terrain").add(_terrainRID);
             }
+            if (_shadowRID.length) {
+                node.addNode("shadow").add(_shadowRID);
+            }
             node.addNode("levels").add(_levelGrid.getValues());
             node.addNode("brushes").add(_brushGrid.getValues());
         }
@@ -471,6 +483,10 @@ package final class SceneDefinition {
 
             if (node.hasNode("terrain")) {
                 terrainRID(node.getNode("terrain").get!string(0));
+            }
+
+            if (node.hasNode("shadow")) {
+                _shadowRID = node.getNode("shadow").get!string(0);
             }
 
             if (node.hasNode("levels")) {
@@ -967,7 +983,6 @@ package final class SceneDefinition {
         private void _setup() {
             _circle = Circle.outline(data.radius, 1f);
             _icon = Atelier.res.get!Sprite(_base.icon);
-            Atelier.log(_base.icon);
         }
 
         void setTempMove(Vec2f move) {

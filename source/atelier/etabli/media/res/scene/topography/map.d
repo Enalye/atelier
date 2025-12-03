@@ -14,7 +14,7 @@ package(atelier.etabli.media.res.scene) final class TopographicMap : UIElement {
     private {
         SceneDefinition _definition;
         TopographyToolbox _toolbox;
-        ResourceButton _terrainSelect;
+        ResourceButton _terrainSelect, _shadowSelect;
 
         TerrainMap _terrainMap;
         TerrainMap.Brush _brush;
@@ -36,6 +36,7 @@ package(atelier.etabli.media.res.scene) final class TopographicMap : UIElement {
         _definition = definition;
 
         VBox vbox = new VBox;
+        vbox.setSpacing(4f);
         addUI(vbox);
 
         vbox.addEventListener("size", { setSize(vbox.getSize()); });
@@ -64,6 +65,22 @@ package(atelier.etabli.media.res.scene) final class TopographicMap : UIElement {
                 setDirty();
             });
             hlayout.addUI(_terrainSelect);
+        }
+
+        {
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(284f, 0f));
+            vbox.addUI(hlayout);
+
+            hlayout.addUI(new Label("Ombre:", Atelier.theme.font));
+
+            _shadowSelect = new ResourceButton(_definition.topologicMap.shadowRID,
+                "tileset", ["tileset"]);
+            _shadowSelect.addEventListener("value", {
+                _definition.topologicMap.shadowRID = _shadowSelect.getName();
+                setDirty();
+            });
+            hlayout.addUI(_shadowSelect);
         }
 
         _terrainMap = Atelier.etabli.getTerrain(_definition.topologicMap.terrainRID);

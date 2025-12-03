@@ -27,6 +27,14 @@ final class Scene : Resource!Scene {
             int level() const {
                 return _level;
             }
+
+            Color color() const {
+                return _tilemap.color;
+            }
+
+            Color color(Color color_) {
+                return _tilemap.color = color_;
+            }
         }
 
         this(uint width, uint height) {
@@ -273,7 +281,7 @@ final class Scene : Resource!Scene {
                 bool isShadowed;
             }
 
-            string _terrainRID, _shadowTilesetRID;
+            string _terrainRID, _shadowRID;
             TerrainMap _terrainMap;
             Tileset _tileset, _shadowTileset;
             Tilemap[] _lowerTilemaps, _upperTilemaps, _shadowTilemaps;
@@ -308,6 +316,14 @@ final class Scene : Resource!Scene {
                 return _terrainRID = id;
             }
 
+            string shadowRID() {
+                return _shadowRID;
+            }
+
+            string shadowRID(string id) {
+                return _shadowRID = id;
+            }
+
             Grid!int levelGrid() {
                 return _levelGrid;
             }
@@ -332,8 +348,8 @@ final class Scene : Resource!Scene {
         void setup() {
             _terrainMap = Atelier.res.get!TerrainMap(_terrainRID);
             _tileset = Atelier.res.get!Tileset(_terrainMap.tileset);
-            if (_shadowTilesetRID.length) {
-                _shadowTileset = Atelier.res.get!Tileset(_shadowTilesetRID);
+            if (_shadowRID.length) {
+                _shadowTileset = Atelier.res.get!Tileset(_shadowRID);
             }
             updateLevels();
 
@@ -403,6 +419,9 @@ final class Scene : Resource!Scene {
             if (node.hasNode("terrain")) {
                 _terrainRID = node.getNode("terrain").get!string(0);
             }
+            if (node.hasNode("shadow")) {
+                _shadowRID = node.getNode("shadow").get!string(0);
+            }
 
             if (node.hasNode("levels")) {
                 _levelGrid.setValues(0, 0, node.getNode("levels").get!(int[][])(0));
@@ -414,12 +433,14 @@ final class Scene : Resource!Scene {
 
         void serialize(OutStream stream) {
             stream.write!string(_terrainRID);
+            stream.write!string(_shadowRID);
             stream.write!(int[][])(_levelGrid.getValues());
             stream.write!(int[][])(_brushGrid.getValues());
         }
 
         void deserialize(InStream stream) {
             _terrainRID = stream.read!string();
+            _shadowRID = stream.read!string();
             _levelGrid.setValues(0, 0, stream.read!(int[][])());
             _brushGrid.setValues(0, 0, stream.read!(int[][])());
         }

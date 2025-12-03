@@ -1029,22 +1029,28 @@ abstract class Entity {
     }
 
     final void renderGraphic(Vec2f offset, float alpha = 1f) {
+        Color color = Atelier.world.getDepthColor(_position.z);
+
         if (_auxGraphicStack.length) {
             for (size_t i; i < _auxGraphicStack.length; ++i) {
                 if (_auxGraphicStack[i].isBehind()) {
+                    _auxGraphicStack[i].setColor(color);
                     _auxGraphicStack[i].draw(offset, alpha);
                 }
             }
 
+            _graphic.setColor(color);
             _graphic.draw(offset, alpha);
 
             for (size_t i; i < _auxGraphicStack.length; ++i) {
                 if (!_auxGraphicStack[i].isBehind()) {
+                    _auxGraphicStack[i].setColor(color);
                     _auxGraphicStack[i].draw(offset, alpha);
                 }
             }
         }
         else {
+            _graphic.setColor(color);
             _graphic.draw(offset, alpha);
         }
     }

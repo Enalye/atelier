@@ -632,6 +632,27 @@ final class World {
         _transition.renderEntity(entity, offset, tTransition, drawGraphics);
     }
 
+    Color getDepthColor(int zPos) {
+        if (!_player)
+            return Color.white;
+
+        int baseLevel = _player.getPosition().z;
+
+        float deltaLevel = zPos - cast(float) baseLevel;
+
+        Color color = Color.white;
+        if (deltaLevel > 0) {
+            float diff = min(deltaLevel / (4f * 16f), 1f);
+            color = color.lerp(Color.blue, easeInOutSine(diff) * 0.3f);
+        }
+        else if (deltaLevel < 0f) {
+            float diff = min(-deltaLevel / (4f * 16f), 1f);
+            color = color.lerp(Color.blue, easeInOutSine(diff) * 0.3f);
+        }
+
+        return color;
+    }
+
     void draw(Vec2f origin) {
         if (!_scene)
             return;
@@ -674,6 +695,7 @@ final class World {
                     if (layer.level >= 0)
                         continue;
 
+                    layer.color = getDepthColor(layer.level << 4);
                     layer.draw(offset - Vec2f(0f, layer.level * 16f));
                 }
             }
@@ -720,16 +742,20 @@ final class World {
             }
 
             for (int y = 0; y < _scene.lines; ++y) {
-                for (size_t level; level < levels; ++level) {
+                for (int level; level < levels; ++level) {
+                    Color color = getDepthColor(cast(int)(level << 4));
+
                     const float yLine = (y - cast(int) level) << 4;
                     if ((yLine + 16) < cameraBounds.y || (yLine > cameraBounds.w))
                         continue;
 
                     if (level < lowerTopographicLayers.length) {
+                        lowerTopographicLayers[level].color = color;
                         lowerTopographicLayers[level].drawLine(y, offset);
                     }
 
                     if (level < upperTopographicLayers.length) {
+                        upperTopographicLayers[level].color = color;
                         upperTopographicLayers[level].drawLine(y, offset);
                     }
 
@@ -742,6 +768,7 @@ final class World {
                             if (layer.level != level)
                                 continue;
 
+                            layer.color = color;
                             layer.drawLine(y, offset - Vec2f(0f, level << 4));
                         }
                     }
@@ -769,6 +796,7 @@ final class World {
                         if (layer.level <= levels)
                             continue;
 
+                        layer.color = getDepthColor(layer.level << 4);
                         layer.drawLine(y, offset - Vec2f(0f, layer.level * 16f));
                     }
                 }
@@ -807,6 +835,7 @@ final class World {
                 if (layer.level >= 0)
                     continue;
 
+                layer.color = getDepthColor(layer.level << 4);
                 layer.draw(offset - Vec2f(0f, layer.level * 16f));
             }
 
@@ -844,16 +873,20 @@ final class World {
             Tilemap[] shadowTopographicLayers = _scene.topologicMap.shadowTilemaps;
 
             for (int y = 0; y < (_scene.lines + levels); ++y) {
-                for (size_t level; level < levels; ++level) {
+                for (int level; level < levels; ++level) {
+                    Color color = getDepthColor(cast(int)(level << 4));
+
                     const float yLine = (y - cast(int) level) << 4;
                     if ((yLine + 16) < cameraBounds.y || (yLine > cameraBounds.w))
                         continue;
 
                     if (level < lowerTopographicLayers.length) {
+                        lowerTopographicLayers[level].color = color;
                         lowerTopographicLayers[level].drawLine(y, offset);
                     }
 
                     if (level < upperTopographicLayers.length) {
+                        upperTopographicLayers[level].color = color;
                         upperTopographicLayers[level].drawLine(y, offset);
                     }
 
@@ -866,6 +899,7 @@ final class World {
                             if (layer.level != level)
                                 continue;
 
+                            layer.color = color;
                             layer.drawLine(y, offset - Vec2f(0f, level << 4));
                         }
                     }
@@ -890,6 +924,7 @@ final class World {
                     if (layer.level <= levels)
                         continue;
 
+                    layer.color = getDepthColor(layer.level << 4);
                     layer.drawLine(y, offset - Vec2f(0f, layer.level * 16f));
                 }
             }

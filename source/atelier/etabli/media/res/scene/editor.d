@@ -60,6 +60,7 @@ final class SceneResourceEditor : ResourceBaseEditor {
             _mapSize = _nominalMapSize;
             _mapPosition = Vec2f.zero;
             _parameterWindow.updateView(getCenter(), _mapPosition, _zoom);
+            setDirty();
         });
         _parameterWindow.addEventListener("property_layer", {});
         _parameterWindow.addEventListener("property_dirty", &setDirty);

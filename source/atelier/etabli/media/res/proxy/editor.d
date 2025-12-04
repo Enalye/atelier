@@ -218,10 +218,12 @@ final class ProxyResourceEditor : ResourceBaseEditor {
 
     private void _onUpdate() {
         foreach (EntityRenderData render; _graphics) {
-            render.update(_zoom);
+            render.setZoom(_zoom);
+            render.update();
         }
         foreach (EntityRenderData render; _auxGraphics) {
-            render.update(_zoom);
+            render.setZoom(_zoom);
+            render.update();
         }
     }
 

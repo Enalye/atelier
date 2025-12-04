@@ -8,12 +8,14 @@ import atelier.render;
 
 import atelier.etabli.ui;
 import atelier.etabli.media.res.scene.common;
+import atelier.etabli.media.res.scene.entity.list;
 import atelier.etabli.media.res.scene.entity.toolbox;
 
 package(atelier.etabli.media.res.scene) final class EntityParameters : UIElement {
     private {
         SceneDefinition _definition;
         EntityToolbox _toolbox;
+        SceneEntityList _entityList;
         VBox _vbox;
 
         Vec2f _centerPosition = Vec2f.zero;
@@ -38,6 +40,7 @@ package(atelier.etabli.media.res.scene) final class EntityParameters : UIElement
         _definition = definition;
 
         _vbox = new VBox;
+        _vbox.addUI(new Label("Saucisse", Atelier.theme.font));
         addUI(_vbox);
 
         _vbox.addEventListener("size", { setSize(_vbox.getSize()); });
@@ -74,6 +77,7 @@ package(atelier.etabli.media.res.scene) final class EntityParameters : UIElement
 
         Atelier.ui.addUI(_toolbox);
         _toolbox.addEventListener("tool", &_onTool);
+        _openSettings();
     }
 
     void closeToolbox() {
@@ -364,6 +368,19 @@ package(atelier.etabli.media.res.scene) final class EntityParameters : UIElement
                 setDirty();
             });
             _vbox.addUI(_settingsWindow);
+        }
+        else {
+            if (_entityList) {
+                _entityList.removeUI();
+            }
+
+            if (_selectedEntities.length > 0) {
+                _entityList = new SceneEntityList(_selectedEntities);
+            }
+            else {
+                _entityList = new SceneEntityList(_definition.getEntities().array);
+            }
+            _vbox.addUI(_entityList);
         }
     }
 

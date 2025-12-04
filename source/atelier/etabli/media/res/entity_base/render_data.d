@@ -244,7 +244,7 @@ final class EntityRenderData {
         }
     }
 
-    void update(float zoom) {
+    void setZoom(float zoom) {
         if (_sprite) {
             _sprite.size = (cast(Vec2f) _sprite.clip.zw) * zoom;
         }
@@ -257,6 +257,11 @@ final class EntityRenderData {
 
         if (_image) {
             _image.position = (cast(Vec2f) offset) * zoom;
+        }
+    }
+
+    void update() {
+        if (_image) {
             _image.anchor = anchor;
             _image.pivot = pivot;
             _image.update();

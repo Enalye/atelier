@@ -1,5 +1,6 @@
 module atelier.etabli.media.res.scene.common;
 
+import std.algorithm.sorting : sort;
 import std.conv : to;
 import std.math : round;
 import std.exception;
@@ -13,6 +14,7 @@ import atelier.render;
 import atelier.world;
 
 import atelier.etabli.ui;
+import atelier.etabli.media.res.entity_base;
 import atelier.etabli.media.res.scene.terrain;
 import atelier.etabli.media.res.scene.parallax;
 import atelier.etabli.media.res.scene.collision;
@@ -1071,23 +1073,27 @@ package final class SceneDefinition {
         bool isAlive = true;
         EntityData entityData;
 
+        @property {
+            Type type() const {
+                return _type;
+            }
+        }
+
         abstract class BuilderData {
             void save(Farfadet ffd);
             void update(float zoom);
             void draw(Vec2f offset, Vec3f hbSize, Vec2f hbOffset);
+            void drawSnapshot(Vec2f offset);
             UIElement createSettingsWindow();
         }
 
         final class PropBuilderData : BuilderData {
             private {
-                string[] _graphics;
+                EntityRenderData[] _graphics, _auxGraphics, _auxGraphicsStack;
                 string _graphic;
                 float _angle = 180f;
                 string _rid;
-                Sprite _sprite;
-                Animation _anim;
-                MultiDirAnimation _mdiranim;
-                Image _image;
+                float _zoom = 1f;
                 Vec2f _imageOffset = Vec2f.zero;
             }
 
@@ -1122,11 +1128,7 @@ package final class SceneDefinition {
                 }
 
                 float angle(float angle_) {
-                    _angle = angle_;
-                    if (_mdiranim) {
-                        _mdiranim.dirAngle = _angle;
-                    }
-                    return _angle;
+                    return _angle = angle_;
                 }
             }
 
@@ -1150,7 +1152,11 @@ package final class SceneDefinition {
             }
 
             string[] getGraphicList() {
-                return _graphics;
+                string[] names;
+                foreach (graphic; _graphics) {
+                    names ~= graphic.name;
+                }
+                return names;
             }
 
             override void save(Farfadet ffd) {
@@ -1179,79 +1185,90 @@ package final class SceneDefinition {
                     }
                 }
 
-                _sprite = null;
-                _anim = null;
-                _mdiranim = null;
-                _image = null;
-                _imageOffset = Vec2f.zero;
+                _graphics.length = 0;
+                foreach (size_t i, Farfadet renderNode; ffd.getNodes("graphic")) {
+                    EntityRenderData render = new EntityRenderData(renderNode);
+                    render.isVisible = false;
+                    _graphics ~= render;
+                }
 
-                foreach (renderNode; ffd.getNodes("graphic")) {
-                    _graphics ~= renderNode.get!string(0);
+                _auxGraphics.length = 0;
+                foreach (size_t i, Farfadet renderNode; ffd.getNodes("auxGraphic")) {
+                    EntityRenderData render = new EntityRenderData(renderNode);
+                    render.isVisible = false;
+                    _auxGraphics ~= render;
+                }
 
-                    if (_graphic == renderNode.get!string(0) || _graphic.length == 0) {
-                        _graphic = renderNode.get!string(0);
-                        string renderRid, renderType;
+                EntityRenderData mainRenderData;
+                foreach (size_t i, EntityRenderData render; _graphics) {
+                    render.isVisible = false;
+                    if ((_graphic.length && render.name == _graphic) ||
+                        (!_graphic.length && render.isDefault)) {
+                        mainRenderData = render;
+                        mainRenderData.isVisible = true;
+                        break;
+                    }
+                }
 
-                        if (renderNode.hasNode("type")) {
-                            renderType = renderNode.getNode("type").get!string(0);
-                        }
-                        if (renderNode.hasNode("rid")) {
-                            renderRid = renderNode.getNode("rid").get!string(0);
-                        }
+                if (!mainRenderData && _graphics.length > 0) {
+                    mainRenderData = _graphics[0];
+                    mainRenderData.isVisible = true;
+                }
 
-                        switch (renderType) {
-                        case "sprite":
-                            _sprite = Atelier.etabli.getSprite(renderRid);
-                            _image = _sprite;
-                            break;
-                        case "animation":
-                            _anim = Atelier.etabli.getAnimation(renderRid);
-                            _image = _anim;
-                            break;
-                        case "multidiranimation":
-                            _mdiranim = Atelier.etabli.getMultiDirAnimation(renderRid);
-                            _image = _mdiranim;
-                            break;
-                        default:
-                            break;
-                        }
-
-                        if (_mdiranim) {
-                            _mdiranim.dirAngle = _angle;
-                        }
-
-                        if (_image) {
-                            if (renderNode.hasNode("offset")) {
-                                _imageOffset = cast(Vec2f) renderNode.getNode("offset")
-                                    .get!Vec2i(0);
+                _auxGraphicsStack.length = 0;
+                if (mainRenderData) {
+                    foreach (size_t i, EntityRenderData render; _auxGraphics) {
+                        if (mainRenderData) {
+                            render.isVisible = mainRenderData && mainRenderData.hasAuxGraphic(
+                                render.name);
+                            if (render.isVisible) {
+                                _auxGraphicsStack ~= render;
                             }
-
-                            if (renderNode.hasNode("anchor")) {
-                                _image.anchor = renderNode.getNode("anchor").get!Vec2f(0);
-                            }
-
-                            if (renderNode.hasNode("pivot")) {
-                                _image.pivot = renderNode.getNode("pivot").get!Vec2f(0);
-                            }
+                        }
+                        else {
+                            render.isVisible = false;
                         }
                     }
+                    _auxGraphicsStack.sort!((a, b) => a.order < b.order)();
                 }
             }
 
             override void update(float zoom) {
-                if (_sprite) {
-                    _sprite.size = (cast(Vec2f) _sprite.clip.zw) * zoom;
+                _zoom = zoom;
+                foreach (EntityRenderData render; _graphics) {
+                    render.update();
                 }
-                if (_anim) {
-                    _anim.size = (cast(Vec2f) _anim.clip.zw) * zoom;
+                foreach (EntityRenderData render; _auxGraphics) {
+                    render.update();
                 }
-                if (_mdiranim) {
-                    _mdiranim.size = (cast(Vec2f) _mdiranim.clip.zw) * zoom;
-                }
+            }
 
-                if (_image) {
-                    _image.position = _imageOffset * zoom;
-                    _image.update();
+            private void _render(Vec2f graphicOffset, float zoom) {
+                if (_auxGraphicsStack.length) {
+                    foreach (EntityRenderData render; _auxGraphicsStack) {
+                        if (render.getIsBehind()) {
+                            render.setZoom(zoom);
+                            render.draw(graphicOffset, _angle);
+                        }
+                    }
+
+                    foreach (EntityRenderData render; _graphics) {
+                        render.setZoom(zoom);
+                        render.draw(graphicOffset, _angle);
+                    }
+
+                    foreach (EntityRenderData render; _auxGraphicsStack) {
+                        if (!render.getIsBehind()) {
+                            render.setZoom(zoom);
+                            render.draw(graphicOffset, _angle);
+                        }
+                    }
+                }
+                else {
+                    foreach (EntityRenderData render; _graphics) {
+                        render.setZoom(zoom);
+                        render.draw(graphicOffset, _angle);
+                    }
                 }
             }
 
@@ -1266,9 +1283,7 @@ package final class SceneDefinition {
                         hitboxColor, 0.2f * hitboxAlpha, false);
                 }
 
-                if (_image) {
-                    _image.draw(origin);
-                }
+                _render(origin, _zoom);
 
                 if (showHitbox) {
                     Atelier.renderer.drawRect(origin - (offset + Vec2f(0f,
@@ -1286,18 +1301,19 @@ package final class SceneDefinition {
                         hitboxColor, hitboxAlpha, false);
                 }
             }
+
+            override void drawSnapshot(Vec2f origin) {
+                _render(origin, 1f);
+            }
         }
 
         final class ActorBuilderData : BuilderData {
             private {
-                string[] _graphics;
+                EntityRenderData[] _graphics, _auxGraphics, _auxGraphicsStack;
                 string _graphic;
                 float _angle = 180f;
                 string _rid;
-                Sprite _sprite;
-                Animation _anim;
-                MultiDirAnimation _mdiranim;
-                Image _image;
+                float _zoom = 1f;
                 Vec2f _imageOffset = Vec2f.zero;
             }
 
@@ -1332,11 +1348,7 @@ package final class SceneDefinition {
                 }
 
                 float angle(float angle_) {
-                    _angle = angle_;
-                    if (_mdiranim) {
-                        _mdiranim.dirAngle = _angle;
-                    }
-                    return _angle;
+                    return _angle = angle_;
                 }
             }
 
@@ -1360,7 +1372,11 @@ package final class SceneDefinition {
             }
 
             string[] getGraphicList() {
-                return _graphics;
+                string[] names;
+                foreach (graphic; _graphics) {
+                    names ~= graphic.name;
+                }
+                return names;
             }
 
             override void save(Farfadet ffd) {
@@ -1389,79 +1405,90 @@ package final class SceneDefinition {
                     }
                 }
 
-                _sprite = null;
-                _anim = null;
-                _mdiranim = null;
-                _image = null;
-                _imageOffset = Vec2f.zero;
+                _graphics.length = 0;
+                foreach (size_t i, Farfadet renderNode; ffd.getNodes("graphic")) {
+                    EntityRenderData render = new EntityRenderData(renderNode);
+                    render.isVisible = false;
+                    _graphics ~= render;
+                }
 
-                foreach (renderNode; ffd.getNodes("graphic")) {
-                    _graphics ~= renderNode.get!string(0);
+                _auxGraphics.length = 0;
+                foreach (size_t i, Farfadet renderNode; ffd.getNodes("auxGraphic")) {
+                    EntityRenderData render = new EntityRenderData(renderNode);
+                    render.isVisible = false;
+                    _auxGraphics ~= render;
+                }
 
-                    if (_graphic == renderNode.get!string(0) || _graphic.length == 0) {
-                        _graphic = renderNode.get!string(0);
-                        string renderRid, renderType;
+                EntityRenderData mainRenderData;
+                foreach (size_t i, EntityRenderData render; _graphics) {
+                    render.isVisible = false;
+                    if ((_graphic.length && render.name == _graphic) ||
+                        (!_graphic.length && render.isDefault)) {
+                        mainRenderData = render;
+                        mainRenderData.isVisible = true;
+                        break;
+                    }
+                }
 
-                        if (renderNode.hasNode("type")) {
-                            renderType = renderNode.getNode("type").get!string(0);
-                        }
-                        if (renderNode.hasNode("rid")) {
-                            renderRid = renderNode.getNode("rid").get!string(0);
-                        }
+                if (!mainRenderData && _graphics.length > 0) {
+                    mainRenderData = _graphics[0];
+                    mainRenderData.isVisible = true;
+                }
 
-                        switch (renderType) {
-                        case "sprite":
-                            _sprite = Atelier.etabli.getSprite(renderRid);
-                            _image = _sprite;
-                            break;
-                        case "animation":
-                            _anim = Atelier.etabli.getAnimation(renderRid);
-                            _image = _anim;
-                            break;
-                        case "multidiranimation":
-                            _mdiranim = Atelier.etabli.getMultiDirAnimation(renderRid);
-                            _image = _mdiranim;
-                            break;
-                        default:
-                            break;
-                        }
-
-                        if (_mdiranim) {
-                            _mdiranim.dirAngle = _angle;
-                        }
-
-                        if (_image) {
-                            if (renderNode.hasNode("offset")) {
-                                _imageOffset = cast(Vec2f) renderNode.getNode("offset")
-                                    .get!Vec2i(0);
+                _auxGraphicsStack.length = 0;
+                if (mainRenderData) {
+                    foreach (size_t i, EntityRenderData render; _auxGraphics) {
+                        if (mainRenderData) {
+                            render.isVisible = mainRenderData && mainRenderData.hasAuxGraphic(
+                                render.name);
+                            if (render.isVisible) {
+                                _auxGraphicsStack ~= render;
                             }
-
-                            if (renderNode.hasNode("anchor")) {
-                                _image.anchor = renderNode.getNode("anchor").get!Vec2f(0);
-                            }
-
-                            if (renderNode.hasNode("pivot")) {
-                                _image.pivot = renderNode.getNode("pivot").get!Vec2f(0);
-                            }
+                        }
+                        else {
+                            render.isVisible = false;
                         }
                     }
+                    _auxGraphicsStack.sort!((a, b) => a.order < b.order)();
                 }
             }
 
             override void update(float zoom) {
-                if (_sprite) {
-                    _sprite.size = (cast(Vec2f) _sprite.clip.zw) * zoom;
+                _zoom = zoom;
+                foreach (EntityRenderData render; _graphics) {
+                    render.update();
                 }
-                if (_anim) {
-                    _anim.size = (cast(Vec2f) _anim.clip.zw) * zoom;
+                foreach (EntityRenderData render; _auxGraphics) {
+                    render.update();
                 }
-                if (_mdiranim) {
-                    _mdiranim.size = (cast(Vec2f) _mdiranim.clip.zw) * zoom;
-                }
+            }
 
-                if (_image) {
-                    _image.position = _imageOffset * zoom;
-                    _image.update();
+            private void _render(Vec2f graphicOffset, float zoom) {
+                if (_auxGraphicsStack.length) {
+                    foreach (EntityRenderData render; _auxGraphicsStack) {
+                        if (render.getIsBehind()) {
+                            render.setZoom(zoom);
+                            render.draw(graphicOffset, _angle);
+                        }
+                    }
+
+                    foreach (EntityRenderData render; _graphics) {
+                        render.setZoom(zoom);
+                        render.draw(graphicOffset, _angle);
+                    }
+
+                    foreach (EntityRenderData render; _auxGraphicsStack) {
+                        if (!render.getIsBehind()) {
+                            render.setZoom(zoom);
+                            render.draw(graphicOffset, _angle);
+                        }
+                    }
+                }
+                else {
+                    foreach (EntityRenderData render; _graphics) {
+                        render.setZoom(zoom);
+                        render.draw(graphicOffset, _angle);
+                    }
                 }
             }
 
@@ -1476,9 +1503,7 @@ package final class SceneDefinition {
                         hitboxColor, 0.2f * hitboxAlpha, false);
                 }
 
-                if (_image) {
-                    _image.draw(origin);
-                }
+                _render(origin, _zoom);
 
                 if (showHitbox) {
                     Atelier.renderer.drawRect(origin - (offset + Vec2f(0f,
@@ -1495,6 +1520,10 @@ package final class SceneDefinition {
                             hitboxSize.z)), hitboxSize.xy + Vec2f(0f, hitboxSize.z),
                         hitboxColor, hitboxAlpha, false);
                 }
+            }
+
+            override void drawSnapshot(Vec2f origin) {
+                _render(origin, 1f);
             }
         }
 
@@ -1569,6 +1598,10 @@ package final class SceneDefinition {
                 Atelier.renderer.drawRect(origin - (offset + Vec2f(0f,
                         hitboxSize.z)), hitboxSize.xy + Vec2f(0f, hitboxSize.z),
                     hitboxColor, hitboxAlpha, false);
+            }
+
+            override void drawSnapshot(Vec2f origin) {
+
             }
         }
 
@@ -1671,6 +1704,10 @@ package final class SceneDefinition {
                         hitboxSize.z)), hitboxSize.xy + Vec2f(0f, hitboxSize.z),
                     hitboxColor, hitboxAlpha, false);
             }
+
+            override void drawSnapshot(Vec2f origin) {
+
+            }
         }
 
         final class NoteBuilderData : BuilderData {
@@ -1719,6 +1756,10 @@ package final class SceneDefinition {
 
                 drawText((origin - offset) + Vec2f(1f, hitboxSize.y - 1f), to!dstring(name),
                     Atelier.theme.font, Atelier.theme.onNeutral);
+            }
+
+            override void drawSnapshot(Vec2f origin) {
+
             }
         }
 
@@ -1912,6 +1953,10 @@ package final class SceneDefinition {
                 entityData.position.y + _tempMove.y - (entityData.position.z + _tempMove.z)) * _zoom;
 
             _data.draw(origin, hitboxSize, offset);
+        }
+
+        void drawSnapshot(Vec2f origin) {
+            _data.drawSnapshot(origin);
         }
     }
 

@@ -1956,7 +1956,8 @@ package final class SceneDefinition {
         }
 
         void drawSnapshot(Vec2f origin) {
-            _data.drawSnapshot(origin);
+            Vec2f offset = (cast(Vec2f)(_hitbox.xy - (_hitbox.xy >> 1)));
+            _data.drawSnapshot(origin + offset);
         }
     }
 

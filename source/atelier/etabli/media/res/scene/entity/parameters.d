@@ -18,6 +18,7 @@ package(atelier.etabli.media.res.scene) final class EntityParameters : UIElement
         SceneEntityList _entityList;
         VBox _vbox;
 
+        Vec2f _viewDestination = Vec2f.zero;
         Vec2f _centerPosition = Vec2f.zero;
         Vec2f _mapPosition = Vec2f.zero;
         Vec2f _mapSize = Vec2f.zero;
@@ -380,8 +381,33 @@ package(atelier.etabli.media.res.scene) final class EntityParameters : UIElement
             else {
                 _entityList = new SceneEntityList(_definition.getEntities().array);
             }
+
+            _entityList.addEventListener("entity_list_center", {
+                SceneDefinition.Entity entity = _entityList.getSelectedEntity();
+                _viewDestination = (cast(Vec3f) entity.tempPosition()).proj2D();
+                dispatchEvent("property_centerView", false);
+            });
+
+            _entityList.addEventListener("entity_list_select", {
+                SceneDefinition.Entity entity = _entityList.getSelectedEntity();
+                _viewDestination = (cast(Vec3f) entity.tempPosition()).proj2D();
+
+                foreach (other; _selectedEntities) {
+                    other.setSelected(false);
+                }
+                entity.setSelected(true);
+                _selectedEntities = [entity];
+
+                _openSettings();
+                dispatchEvent("property_centerView", false);
+            });
+
             _vbox.addUI(_entityList);
         }
+    }
+
+    Vec2f getViewDestination() const {
+        return _viewDestination;
     }
 
     Vec4f getCurrentLayerClip() const {

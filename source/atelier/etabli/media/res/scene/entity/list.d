@@ -14,6 +14,7 @@ final class SceneEntityList : UIElement {
         TextField _searchField;
         VList _list;
         EntityElement[] _items;
+        SceneDefinition.Entity _selectedEntity;
     }
 
     this(SceneDefinition.Entity[] entities) {
@@ -22,7 +23,6 @@ final class SceneEntityList : UIElement {
         }
 
         VBox vbox = new VBox;
-        vbox.setPosition(Vec2f(4f, 8f));
         vbox.setAlign(UIAlignX.right, UIAlignY.top);
         vbox.setChildAlign(UIAlignX.right);
         vbox.setSpacing(8f);
@@ -31,7 +31,7 @@ final class SceneEntityList : UIElement {
         {
             LabelSeparator sep = new LabelSeparator("Entités", Atelier.theme.font);
             sep.setColor(Atelier.theme.neutral);
-            sep.setPadding(Vec2f(284f, 0f));
+            sep.setPadding(Vec2f(300f, 0f));
             sep.setSpacing(8f);
             sep.setLineWidth(1f);
             vbox.addUI(sep);
@@ -44,14 +44,37 @@ final class SceneEntityList : UIElement {
             vbox.addUI(hbox);
 
             hbox.addUI(new Icon("editor:magnify"));
+
             _searchField = new TextField;
-            _searchField.setWidth(200f);
+            _searchField.setWidth(250f);
             _searchField.addEventListener("value", &_rebuildList);
             hbox.addUI(_searchField);
         }
 
+        {
+            string[] types = "*" ~ [
+                __traits(allMembers, SceneDefinition.Entity.Type)
+            ];
+
+            TabGroup _tabs = new TabGroup;
+            _tabs.setWidth(300f);
+            foreach (string type; types) {
+                if (type == "*") {
+                    _tabs.addTab("*", type, "");
+                }
+                else {
+                    _tabs.addTab("", type, "editor:ffd-" ~ type);
+                }
+            }
+            vbox.addUI(_tabs);
+
+            _tabs.selectTab("*");
+
+            //_tabs.addEventListener("value", &_rebuildList);
+        }
+
         _list = new VList;
-        _list.setSize(Vec2f(284f, 800f));
+        _list.setSize(Vec2f(300f, 840f));
         vbox.addUI(_list);
 
         vbox.addEventListener("size", { setSize(vbox.getSize()); });
@@ -69,6 +92,20 @@ final class SceneEntityList : UIElement {
         }
     }
 
+    private void _centerEntity(SceneDefinition.Entity entity) {
+        _selectedEntity = entity;
+        dispatchEvent("entity_list_center", false);
+    }
+
+    private void _selectEntity(SceneDefinition.Entity entity) {
+        _selectedEntity = entity;
+        dispatchEvent("entity_list_select", false);
+    }
+
+    SceneDefinition.Entity getSelectedEntity() {
+        return _selectedEntity;
+    }
+
     private final class EntityElement : UIElement {
         private {
             SceneDefinition.Entity _entity;
@@ -76,12 +113,11 @@ final class SceneEntityList : UIElement {
             Rectangle _rect;
             HBox _hbox;
             IconButton _viewBtn;
-            Icon _icon;
         }
 
         this(SceneDefinition.Entity entity) {
             _entity = entity;
-            setSize(Vec2f(300f, 48f));
+            setSize(Vec2f(284f, 48f));
 
             _rect = Rectangle.fill(getSize());
             _rect.anchor = Vec2f.zero;
@@ -101,10 +137,21 @@ final class SceneEntityList : UIElement {
             _typeLabel.textColor = Atelier.theme.neutral;
             addUI(_typeLabel);
 
-            //_icon = new Icon("editor:ffd-" ~ _data.type);
-            //_icon.setAlign(UIAlignX.left, UIAlignY.center);
-            //_icon.setPosition(Vec2f(16f, 0f));
-            //addUI(_icon);
+            final switch (_entity.type) with (SceneDefinition.Entity.Type) {
+            case actor:
+            case prop:
+                addEventListener("draw", &_onDraw);
+                break;
+            case trigger:
+                _addIcon("editor:entity-trigger");
+                break;
+            case teleporter:
+                _addIcon("editor:entity-teleporter");
+                break;
+            case note:
+                _addIcon("editor:entity-note");
+                break;
+            }
 
             {
                 _hbox = new HBox;
@@ -113,9 +160,9 @@ final class SceneEntityList : UIElement {
                 _hbox.setSpacing(2f);
                 addUI(_hbox);
 
-                _viewBtn = new IconButton("editor:shown");
+                _viewBtn = new IconButton("editor:center-button");
                 _viewBtn.addEventListener("click", {
-                    //TODO: Centrer la vue
+                    this.outer._centerEntity(_entity);
                 });
                 _hbox.addUI(_viewBtn);
 
@@ -127,11 +174,14 @@ final class SceneEntityList : UIElement {
 
             addEventListener("mouseenter", &_onMouseEnter);
             addEventListener("mouseleave", &_onMouseLeave);
-            addEventListener("click", {
-                //TODO: Sélectionner l’entité
-            });
+            addEventListener("click", { this.outer._selectEntity(_entity); });
+        }
 
-            addEventListener("draw", &_onDraw);
+        private void _addIcon(string rid) {
+            Icon icon = new Icon(rid);
+            icon.setAlign(UIAlignX.left, UIAlignY.center);
+            icon.setPosition(Vec2f(16f, 0f));
+            addUI(icon);
         }
 
         string getName() {
@@ -158,26 +208,6 @@ final class SceneEntityList : UIElement {
             _nameLabel.text = _entity.entityData.name;
             string typeName = to!string(_entity.type);
             _typeLabel.text = typeName; // ~ ": " ~ _entity.entityData.rid;
-            //_icon.setIcon("editor:ffd-" ~ typeName);
-            //_checkmark.isVisible = _data.isDefault;
         }
-        /*
-        private void _onClick() {
-            EntityEditGraphicData modal = new EntityEditGraphicData(_data, _data.isAuxGraphic);
-            modal.addEventListener("render.apply", {
-                _data = modal.getData();
-                if (modal.isDirty()) {
-                    dispatchEvent("graphic", false);
-                }
-                _updateDisplay();
-                Atelier.ui.popModalUI();
-            });
-            modal.addEventListener("render.remove", {
-                dispatchEvent("graphic", false);
-                Atelier.ui.popModalUI();
-                removeUI();
-            });
-            Atelier.ui.pushModalUI(modal);
-        }*/
     }
 }

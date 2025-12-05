@@ -62,6 +62,13 @@ final class SceneResourceEditor : ResourceBaseEditor {
             _parameterWindow.updateView(getCenter(), _mapPosition, _zoom);
             setDirty();
         });
+
+        _parameterWindow.addEventListener("property_centerView", {
+            Vec2f viewDest = _parameterWindow.getViewDestination();
+
+            _mapPosition = (_mapSize / 2f) - (viewDest * _zoom);
+        });
+
         _parameterWindow.addEventListener("property_layer", {});
         _parameterWindow.addEventListener("property_dirty", &setDirty);
 

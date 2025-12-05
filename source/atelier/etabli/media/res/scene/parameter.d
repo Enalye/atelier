@@ -29,6 +29,7 @@ package final class ParameterWindow : UIElement {
         SceneDefinition _definition;
         TabGroup _tabs;
         VBox _vbox;
+        Vec2f _viewDestination = Vec2f.zero;
         EntityParameters _entityParameters;
         LightParameters _lightParameters;
         TopographicMap _topographicMap;
@@ -110,6 +111,10 @@ package final class ParameterWindow : UIElement {
         _onTabChange();
     }
 
+    Vec2f getViewDestination() {
+        return _viewDestination;
+    }
+
     private void _onTabChange() {
         _vbox.clearUI();
         closeToolbox();
@@ -126,6 +131,10 @@ package final class ParameterWindow : UIElement {
             _entityParameters = new EntityParameters(_definition);
             _entityParameters.addEventListener("property_dirty", {
                 dispatchEvent("property_dirty", false);
+            });
+            _entityParameters.addEventListener("property_centerView", {
+                _viewDestination = _entityParameters.getViewDestination();
+                dispatchEvent("property_centerView", false);
             });
             _vbox.addUI(_entityParameters);
             break;

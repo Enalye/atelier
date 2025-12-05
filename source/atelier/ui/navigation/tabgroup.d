@@ -15,11 +15,16 @@ import atelier.ui.navigation.list;
 final class TabGroup : UIElement {
     private {
         string _value;
+        int _index = -1;
     }
 
     @property {
         string value() const {
             return _value;
+        }
+
+        uint ivalue() const {
+            return _index;
         }
     }
 
@@ -69,9 +74,10 @@ final class TabGroup : UIElement {
         Tab[] tabs = cast(Tab[]) getChildren().array;
 
         bool hasValue;
-        foreach (Tab tab; tabs) {
+        foreach (i, Tab tab; tabs) {
             if (tab._id == id) {
                 hasValue = true;
+                _index = cast(int) i;
             }
             tab.updateValue(tab._id == id);
         }
@@ -79,6 +85,7 @@ final class TabGroup : UIElement {
         if (!tabs.length) {
             if (_value != "") {
                 _value = "";
+                _index = -1;
                 if (dispatch) {
                     dispatchEvent("value", false);
                 }
@@ -89,6 +96,7 @@ final class TabGroup : UIElement {
         if (!hasValue) {
             tabs[0].updateValue(true);
             _value = tabs[0]._id;
+            _index = 0;
         }
 
         if (_value != id) {
@@ -102,7 +110,11 @@ final class TabGroup : UIElement {
     private void _selectTab(Tab tab_, bool dispatch) {
         Tab[] tabs = cast(Tab[]) getChildren().array;
 
-        foreach (Tab tab; tabs) {
+        _index = -1;
+        foreach (i, Tab tab; tabs) {
+            if (tab_ == tab) {
+                _index = cast(int) i;
+            }
             tab.updateValue(tab_ == tab);
         }
 
@@ -122,17 +134,21 @@ final class TabGroup : UIElement {
                 if (i > 0) {
                     tabs[i - 1].updateValue(true);
                     _value = tabs[i - 1]._id;
+                    _index = i - 1;
                 }
                 else if (i + 1 < tabs.length) {
                     tabs[i + 1].updateValue(true);
                     _value = tabs[i + 1]._id;
+                    _index = i + 1;
                 }
                 break;
             }
         }
 
-        if (tabs.length <= 1)
+        if (tabs.length <= 1) {
             _value = "";
+            _index = -1;
+        }
 
         dispatchEvent("value", false);
     }

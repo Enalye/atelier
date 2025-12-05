@@ -125,6 +125,23 @@ package(atelier.etabli.media.res.scene) class LightSettings : UIElement {
             hlayout.setPadding(Vec2f(284f, 0f));
             vbox.addUI(hlayout);
 
+            hlayout.addUI(new Label("Lumière:", Atelier.theme.font));
+
+            ResourceButton btn = new ResourceButton(_light.rid, "light", [
+                    "light"
+                ]);
+            btn.addEventListener("value", {
+                _light.rid = btn.getName();
+                setDirty();
+            });
+            hlayout.addUI(btn);
+        }
+
+        {
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(284f, 0f));
+            vbox.addUI(hlayout);
+
             hlayout.addUI(new Label("Couleur:", Atelier.theme.font));
 
             ColorButton colorBtn = new ColorButton();

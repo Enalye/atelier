@@ -1,4 +1,4 @@
-module atelier.etabli.media.res.scene.entity.list;
+module atelier.etabli.media.res.scene.light.list;
 
 import std.conv : to;
 import std.string;
@@ -9,18 +9,17 @@ import atelier.render;
 import atelier.ui;
 import atelier.etabli.media.res.scene.common;
 
-final class SceneEntityList : UIElement {
+final class SceneLightList : UIElement {
     private {
         TextField _searchField;
-        TabGroup _tabs;
         VList _list;
-        EntityElement[] _items;
-        SceneDefinition.Entity _selectedEntity;
+        LightElement[] _items;
+        SceneDefinition.Light _selectedLight;
     }
 
-    this(SceneDefinition.Entity[] entities) {
-        foreach (SceneDefinition.Entity entity; entities) {
-            _items ~= new EntityElement(entity);
+    this(SceneDefinition.Light[] entities) {
+        foreach (SceneDefinition.Light light; entities) {
+            _items ~= new LightElement(light);
         }
 
         VBox vbox = new VBox;
@@ -52,29 +51,8 @@ final class SceneEntityList : UIElement {
             hbox.addUI(_searchField);
         }
 
-        {
-            string[] types = "*" ~ [
-                __traits(allMembers, SceneDefinition.Entity.Type)
-            ];
-
-            _tabs = new TabGroup;
-            _tabs.setWidth(300f);
-            foreach (string type; types) {
-                if (type == "*") {
-                    _tabs.addTab("*", type, "");
-                }
-                else {
-                    _tabs.addTab("", type, "editor:ffd-" ~ type);
-                }
-            }
-            vbox.addUI(_tabs);
-
-            _tabs.selectTab("*");
-            _tabs.addEventListener("value", &_rebuildList);
-        }
-
         _list = new VList;
-        _list.setSize(Vec2f(300f, 855f));
+        _list.setSize(Vec2f(300f, 895f));
         vbox.addUI(_list);
 
         vbox.addEventListener("size", { setSize(vbox.getSize()); });
@@ -86,39 +64,38 @@ final class SceneEntityList : UIElement {
         _list.clearList();
         string search = _searchField ? _searchField.value.toLower : "";
         foreach (item; _items) {
-            bool catSearch = (_tabs.ivalue() == 0) || ((_tabs.ivalue() - 1) == item._entity.type());
             bool nameSearch = (search.length == 0) || item.getName().toLower.indexOf(search) != -1;
-            if (catSearch && nameSearch) {
+            if (nameSearch) {
                 _list.addList(item);
             }
         }
     }
 
-    private void _centerEntity(SceneDefinition.Entity entity) {
-        _selectedEntity = entity;
-        dispatchEvent("entity_list_center", false);
+    private void _centerLight(SceneDefinition.Light light) {
+        _selectedLight = light;
+        dispatchEvent("light_list_center", false);
     }
 
-    private void _selectEntity(SceneDefinition.Entity entity) {
-        _selectedEntity = entity;
-        dispatchEvent("entity_list_select", false);
+    private void _selectLight(SceneDefinition.Light light) {
+        _selectedLight = light;
+        dispatchEvent("light_list_select", false);
     }
 
-    SceneDefinition.Entity getSelectedEntity() {
-        return _selectedEntity;
+    SceneDefinition.Light getSelectedLight() {
+        return _selectedLight;
     }
 
-    private final class EntityElement : UIElement {
+    private final class LightElement : UIElement {
         private {
-            SceneDefinition.Entity _entity;
+            SceneDefinition.Light _light;
             Label _nameLabel, _typeLabel;
             Rectangle _rect;
             HBox _hbox;
             IconButton _viewBtn;
         }
 
-        this(SceneDefinition.Entity entity) {
-            _entity = entity;
+        this(SceneDefinition.Light light) {
+            _light = light;
             setSize(Vec2f(284f, 48f));
 
             _rect = Rectangle.fill(getSize());
@@ -139,20 +116,12 @@ final class SceneEntityList : UIElement {
             _typeLabel.textColor = Atelier.theme.neutral;
             addUI(_typeLabel);
 
-            final switch (_entity.type) with (SceneDefinition.Entity.Type) {
-            case actor:
-            case prop:
-                addEventListener("draw", &_onDraw);
-                break;
-            case trigger:
-                _addIcon("editor:entity-trigger");
-                break;
-            case teleporter:
-                _addIcon("editor:entity-teleporter");
-                break;
-            case note:
-                _addIcon("editor:entity-note");
-                break;
+            string rid = _light.icon();
+            if (rid.length) {
+                Sprite icon = Atelier.etabli.getSprite(rid);
+                icon.anchor = Vec2f.half;
+                icon.position = Vec2f.one * getHeight() / 2f;
+                addImage(icon);
             }
 
             {
@@ -164,7 +133,7 @@ final class SceneEntityList : UIElement {
 
                 _viewBtn = new IconButton("editor:center-button");
                 _viewBtn.addEventListener("click", {
-                    this.outer._centerEntity(_entity);
+                    this.outer._centerLight(_light);
                 });
                 _hbox.addUI(_viewBtn);
 
@@ -176,18 +145,11 @@ final class SceneEntityList : UIElement {
 
             addEventListener("mouseenter", &_onMouseEnter);
             addEventListener("mouseleave", &_onMouseLeave);
-            addEventListener("click", { this.outer._selectEntity(_entity); });
-        }
-
-        private void _addIcon(string rid) {
-            Icon icon = new Icon(rid);
-            icon.setAlign(UIAlignX.left, UIAlignY.center);
-            icon.setPosition(Vec2f(16f, 0f));
-            addUI(icon);
+            addEventListener("click", { this.outer._selectLight(_light); });
         }
 
         string getName() {
-            return _entity.entityData.name;
+            return _light.data.name;
         }
 
         private void _onMouseEnter() {
@@ -202,13 +164,9 @@ final class SceneEntityList : UIElement {
             _hbox.isEnabled = false;
         }
 
-        private void _onDraw() {
-            _entity.drawSnapshot(Vec2f.one * getHeight() / 2f);
-        }
-
         private void _updateDisplay() {
-            _nameLabel.text = _entity.entityData.name;
-            _typeLabel.text = _entity.getTypeInfo();
+            _nameLabel.text = _light.data.name;
+            _typeLabel.text = _light.getTypeInfo();
         }
     }
 }

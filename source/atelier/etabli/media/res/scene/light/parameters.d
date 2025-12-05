@@ -8,14 +8,17 @@ import atelier.render;
 
 import atelier.etabli.ui;
 import atelier.etabli.media.res.scene.common;
+import atelier.etabli.media.res.scene.light.list;
 import atelier.etabli.media.res.scene.light.toolbox;
 
 package(atelier.etabli.media.res.scene) final class LightParameters : UIElement {
     private {
         SceneDefinition _definition;
         LightToolbox _toolbox;
+        SceneLightList _lightList;
         VBox _vbox;
 
+        Vec2f _viewDestination = Vec2f.zero;
         Vec2f _centerPosition = Vec2f.zero;
         Vec2f _mapPosition = Vec2f.zero;
         Vec2f _mapSize = Vec2f.zero;
@@ -50,6 +53,7 @@ package(atelier.etabli.media.res.scene) final class LightParameters : UIElement 
 
         Atelier.ui.addUI(_toolbox);
         _toolbox.addEventListener("tool", &_onTool);
+        _openSettings();
     }
 
     void closeToolbox() {
@@ -320,6 +324,44 @@ package(atelier.etabli.media.res.scene) final class LightParameters : UIElement 
             });
             _vbox.addUI(_settingsWindow);
         }
+        else {
+            if (_lightList) {
+                _lightList.removeUI();
+            }
+
+            if (_selectedLights.length > 0) {
+                _lightList = new SceneLightList(_selectedLights);
+            }
+            else {
+                _lightList = new SceneLightList(_definition.getLights().array);
+            }
+
+            _lightList.addEventListener("light_list_center", {
+                SceneDefinition.Light light = _lightList.getSelectedLight();
+                _viewDestination = cast(Vec2f) light.tempPosition();
+                dispatchEvent("property_centerView", false);
+            });
+
+            _lightList.addEventListener("light_list_select", {
+                SceneDefinition.Light light = _lightList.getSelectedLight();
+                _viewDestination = cast(Vec2f) light.tempPosition();
+
+                foreach (other; _selectedLights) {
+                    other.setSelected(false);
+                }
+                light.setSelected(true);
+                _selectedLights = [light];
+
+                _openSettings();
+                dispatchEvent("property_centerView", false);
+            });
+
+            _vbox.addUI(_lightList);
+        }
+    }
+
+    Vec2f getViewDestination() const {
+        return _viewDestination;
     }
 
     Vec4f getCurrentLayerClip() const {

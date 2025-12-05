@@ -171,6 +171,10 @@ package final class ParameterWindow : UIElement {
             _lightParameters.addEventListener("property_dirty", {
                 dispatchEvent("property_dirty", false);
             });
+            _lightParameters.addEventListener("property_centerView", {
+                _viewDestination = _lightParameters.getViewDestination();
+                dispatchEvent("property_centerView", false);
+            });
             _vbox.addUI(_lightParameters);
             break;
         default:

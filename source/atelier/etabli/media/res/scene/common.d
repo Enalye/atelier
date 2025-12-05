@@ -2,6 +2,7 @@ module atelier.etabli.media.res.scene.common;
 
 import std.algorithm.sorting : sort;
 import std.conv : to;
+import std.format;
 import std.math : round;
 import std.exception;
 
@@ -952,7 +953,7 @@ package final class SceneDefinition {
 
         private {
             string _rid;
-            BaseLight _base;
+            BaseLightData _base;
             Vec2f _offset = Vec2f.zero;
             Vec2f _tempMove = Vec2f.zero;
             float _zoom = 1f;
@@ -965,11 +966,28 @@ package final class SceneDefinition {
             Vec2i tempPosition() const {
                 return data.position + (cast(Vec2i) _tempMove.round());
             }
+
+            string icon() const {
+                return _base.icon;
+            }
+
+            string rid() const {
+                return _rid;
+            }
+
+            string rid(string rid_) {
+                if (_rid != rid_) {
+                    _rid = rid_;
+                    _base.load(Atelier.etabli.getResource("light", _rid).farfadet);
+                    _setup();
+                }
+                return _rid;
+            }
         }
 
         this(Farfadet ffd) {
             _rid = ffd.get!string(0);
-            _base = Atelier.res.get!BaseLight(_rid);
+            _base.load(Atelier.etabli.getResource("light", _rid).farfadet);
             data.load(ffd);
 
             _setup();
@@ -977,14 +995,14 @@ package final class SceneDefinition {
 
         this(string rid_) {
             _rid = rid_;
-            _base = Atelier.res.get!BaseLight(_rid);
+            _base.load(Atelier.etabli.getResource("light", _rid).farfadet);
 
             _setup();
         }
 
         private void _setup() {
             _circle = Circle.outline(data.radius, 1f);
-            _icon = Atelier.res.get!Sprite(_base.icon);
+            _icon = Atelier.etabli.getSprite(_base.icon);
         }
 
         void setTempMove(Vec2f move) {
@@ -1059,6 +1077,11 @@ package final class SceneDefinition {
         UIElement createSettingsWindow() {
             return new LightSettings(this);
         }
+
+        string getTypeInfo() const {
+            return format("(%s) {%d, %d}", _rid,
+                data.position.x, data.position.y);
+        }
     }
 
     final class Entity {
@@ -1085,6 +1108,7 @@ package final class SceneDefinition {
             void draw(Vec2f offset, Vec3f hbSize, Vec2f hbOffset);
             void drawSnapshot(Vec2f offset);
             UIElement createSettingsWindow();
+            string getTypeInfo() const;
         }
 
         final class PropBuilderData : BuilderData {
@@ -1304,6 +1328,11 @@ package final class SceneDefinition {
 
             override void drawSnapshot(Vec2f origin) {
                 _render(origin, 1f);
+            }
+
+            override string getTypeInfo() const {
+                return format("(%s) {%d, %d, %d}", _rid,
+                    entityData.position.x, entityData.position.y, entityData.position.z);
             }
         }
 
@@ -1525,6 +1554,11 @@ package final class SceneDefinition {
             override void drawSnapshot(Vec2f origin) {
                 _render(origin, 1f);
             }
+
+            override string getTypeInfo() const {
+                return format("(%s) {%d, %d, %d}", _rid,
+                    entityData.position.x, entityData.position.y, entityData.position.z);
+            }
         }
 
         final class TriggerBuilderData : BuilderData {
@@ -1602,6 +1636,11 @@ package final class SceneDefinition {
 
             override void drawSnapshot(Vec2f origin) {
 
+            }
+
+            override string getTypeInfo() const {
+                return format("{%d, %d, %d}",
+                    entityData.position.x, entityData.position.y, entityData.position.z);
             }
         }
 
@@ -1708,6 +1747,11 @@ package final class SceneDefinition {
             override void drawSnapshot(Vec2f origin) {
 
             }
+
+            override string getTypeInfo() const {
+                return format("{%d, %d, %d}",
+                    entityData.position.x, entityData.position.y, entityData.position.z);
+            }
         }
 
         final class NoteBuilderData : BuilderData {
@@ -1760,6 +1804,11 @@ package final class SceneDefinition {
 
             override void drawSnapshot(Vec2f origin) {
 
+            }
+
+            override string getTypeInfo() const {
+                return format("{%d, %d, %d}",
+                    entityData.position.x, entityData.position.y, entityData.position.z);
             }
         }
 
@@ -1937,6 +1986,10 @@ package final class SceneDefinition {
 
         void setHover(bool hover) {
             _isHovered = hover;
+        }
+
+        string getTypeInfo() const {
+            return _data.getTypeInfo();
         }
 
         void update(Vec2f offset, float zoom) {

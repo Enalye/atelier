@@ -305,11 +305,11 @@ final class Atelier {
         }
     }
 
-    void addArchive(string path, bool isArchived) {
+    static void addArchive(string path, bool isArchived = true) {
         _archives ~= ArchiveData(path, isArchived);
     }
 
-    private void _loadArchives() {
+    private static void _loadArchives() {
         foreach (archiveData; _archives) {
             log("[ATELIER] Chargement de l’archive `" ~ archiveData.path ~ "`...");
             long startTime = Clock.currStdTime();
@@ -378,7 +378,7 @@ final class Atelier {
         file.data = cast(ubyte[]) stream.data;
     }
 
-    private void _compileResources() {
+    private static void _compileResources() {
         log("[ATELIER] Compilation des ressources...");
         long startTime = Clock.currStdTime();
 
@@ -392,7 +392,7 @@ final class Atelier {
         log("  > Effectué en " ~ to!string(loadDuration) ~ "sec");
     }
 
-    private void _loadResources() {
+    private static void _loadResources() {
         log("[ATELIER] Chargement des ressources...");
         long startTime = Clock.currStdTime();
 
@@ -415,7 +415,7 @@ final class Atelier {
         log("  > Effectué en " ~ to!string(loadDuration) ~ "sec");
     }
 
-    void _reload() {
+    private static void _reload() {
         _mustReload = false;
 
         _audioMixer.clear();
@@ -445,7 +445,7 @@ final class Atelier {
         _script.start();
     }
 
-    void loadConfig() {
+    static void loadConfig() {
         version (AtelierDebug) {
             string configPath = buildNormalizedPath(getcwd(), Atelier_Configuration);
             if (!exists(configPath))
@@ -482,13 +482,13 @@ final class Atelier {
         }
     }
 
-    void loadResources() {
+    static void loadResources() {
         _loadArchives();
         _compileResources();
         _loadResources();
     }
 
-    void run() {
+    static void run() {
         _script.reload();
         _script.start();
 
@@ -599,6 +599,8 @@ final class Atelier {
         close();
     }
 
-    double _minDur = 1000.0;
-    double _maxDur = 0.0;
+    private static {
+        double _minDur = 1000.0;
+        double _maxDur = 0.0;
+    }
 }

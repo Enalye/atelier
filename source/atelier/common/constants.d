@@ -18,6 +18,8 @@ enum Atelier_Version_ID = Atelier_Version_Major * 1000 + Atelier_Version_Minor;
 
 enum Atelier_Project_File = "atelier.ffd";
 
+enum Atelier_Installation_Dir = "atelier";
+
 // Initialisation fenêtre
 enum Atelier_Window_Width = 640;
 

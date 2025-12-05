@@ -37,6 +37,7 @@ final class Etabli {
         ResourceManager _resourceManager;
         FarfadetCache[string] _farfadets;
         bool[string] _mediaFolders;
+        string[] _editorMediaFolders;
         string[] _scriptFiles;
     }
 
@@ -55,9 +56,21 @@ final class Etabli {
     }
 
     this() {
+        _editorMediaFolders ~= Atelier_Media_Dir;
     }
 
     void open() {
+        Atelier.loadConfig();
+        Atelier.renderer.scalingTime = 0;
+        Atelier.window.setIcon(buildNormalizedPath("atelier", Atelier_Window_Icon));
+        //atelier.renderer.setScaling(Renderer.Scaling.desktop);
+
+        foreach (string dir; _editorMediaFolders) {
+            Atelier.addArchive(buildNormalizedPath("atelier", dir));
+        }
+
+        Atelier.loadResources();
+
         Atelier.res.store("editor:small-font", {
             import atelier.core.data.vera : veraFontData;
 
@@ -721,6 +734,10 @@ final class Etabli {
         return buildNormalizedPath(getcwd(), Atelier_Media_Dir);
     }
 
+    string getAtelierDir() {
+        return buildNormalizedPath(getcwd(), Atelier_Installation_Dir);
+    }
+
     bool[string] getMediaFolders() {
         return _mediaFolders;
     }
@@ -729,50 +746,50 @@ final class Etabli {
         _mediaFolders = folders;
     }
 
-    void reloadResources() {
-        _resourceManager = new ResourceManager;
+    private Archive.File[] _loadResourceFolder(string path) {
+        Archive archive = new Archive;
         Archive.File[] resourceFiles;
-        _scriptFiles.length = 0;
-        foreach (entry; dirEntries(getMediaDir(), SpanMode.shallow)) {
-            if (stripExtension(baseName(entry)) !in _mediaFolders)
-                continue;
 
-            Archive archive = new Archive;
-
-            string path = buildNormalizedPath(getMediaDir(), entry);
-
-            if (isDir(path)) {
-                if (!exists(path)) {
-                    Atelier.log("le dossier `" ~ path ~ "` n’existe pas");
-                    continue;
-                }
-                archive.pack(path);
+        if (isDir(path)) {
+            if (!exists(path)) {
+                Atelier.log("le dossier `" ~ path ~ "` n’existe pas");
+                return resourceFiles;
             }
-            else if (extension(path) == Atelier_Archive_Extension) {
-                if (!exists(path)) {
-                    Atelier.log("l’archive `" ~ path ~ "` n’existe pas");
-                    continue;
-                }
-                archive.load(path);
+            archive.pack(path);
+        }
+        else if (extension(path) == Atelier_Archive_Extension) {
+            if (!exists(path)) {
+                Atelier.log("l’archive `" ~ path ~ "` n’existe pas");
+                return resourceFiles;
             }
-
-            foreach (file; archive) {
-                const string ext = extension(file.name);
-                switch (ext) {
-                case Atelier_Resource_Extension:
-                    resourceFiles ~= file;
-                    break;
-                case Atelier_Script_Extension:
-                    _scriptFiles ~= buildNormalizedPath(getMediaDir(), file.path);
-                    break;
-                default:
-                    //_resourceManager.write(file.path, file.data);
-                    break;
-                }
-            }
+            archive.load(path);
         }
 
-        _farfadets.clear();
+        foreach (file; archive) {
+            const string ext = extension(file.name);
+            switch (ext) {
+            case Atelier_Resource_Extension:
+                resourceFiles ~= file;
+                break;
+            case Atelier_Script_Extension:
+                _scriptFiles ~= buildNormalizedPath(getMediaDir(), file.path);
+                break;
+            default:
+                //_resourceManager.write(file.path, file.data);
+                break;
+            }
+        }
+        return resourceFiles;
+    }
+
+    private void _loadResourceFolders(string basePath, string[] folders) {
+        Archive.File[] resourceFiles;
+
+        foreach (folder; folders) {
+            string path = buildNormalizedPath(basePath, folder);
+            resourceFiles ~= _loadResourceFolder(path);
+        }
+
         foreach (Archive.File file; resourceFiles) {
             Farfadet ffd;
             try {
@@ -801,10 +818,19 @@ final class Etabli {
 
                 ResourceInfo info;
                 info.farfadet = resNode;
-                info.path = buildNormalizedPath(getMediaDir(), dirName(file.path));
+                info.path = buildNormalizedPath(basePath, dirName(file.path));
 
                 cache.resources[resNode.get!string(0)] = info;
             }
         }
+    }
+
+    void reloadResources() {
+        _resourceManager = new ResourceManager;
+        _scriptFiles.length = 0;
+        _farfadets.clear();
+
+        _loadResourceFolders(getAtelierDir(), _editorMediaFolders);
+        _loadResourceFolders(getMediaDir(), _mediaFolders.keys);
     }
 }

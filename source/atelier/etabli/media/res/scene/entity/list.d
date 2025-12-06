@@ -2,6 +2,7 @@ module atelier.etabli.media.res.scene.entity.list;
 
 import std.conv : to;
 import std.string;
+import std.typecons : No;
 
 import atelier.common;
 import atelier.core;
@@ -87,8 +88,10 @@ final class SceneEntityList : UIElement {
         string search = _searchField ? _searchField.value.toLower : "";
         foreach (item; _items) {
             bool catSearch = (_tabs.ivalue() == 0) || ((_tabs.ivalue() - 1) == item._entity.type());
-            bool nameSearch = (search.length == 0) || item.getName().toLower.indexOf(search) != -1;
+            bool nameSearch = (search.length == 0) ||
+                indexOf(item.getName(), search, No.caseSentitive) != -1;
             if (catSearch && nameSearch) {
+                item.updateDisplay(search);
                 _list.addList(item);
             }
         }
@@ -111,7 +114,8 @@ final class SceneEntityList : UIElement {
     private final class EntityElement : UIElement {
         private {
             SceneDefinition.Entity _entity;
-            Label _nameLabel, _typeLabel;
+            ColoredLabel _nameLabel;
+            Label _typeLabel;
             Rectangle _rect;
             HBox _hbox;
             IconButton _viewBtn;
@@ -127,10 +131,9 @@ final class SceneEntityList : UIElement {
             _rect.isVisible = false;
             addImage(_rect);
 
-            _nameLabel = new Label("", Atelier.theme.font);
+            _nameLabel = new ColoredLabel("", Atelier.theme.font);
             _nameLabel.setAlign(UIAlignX.left, UIAlignY.top);
             _nameLabel.setPosition(Vec2f(64f, 4f));
-            _nameLabel.textColor = Atelier.theme.onNeutral;
             addUI(_nameLabel);
 
             _typeLabel = new Label("", Atelier.theme.font);
@@ -172,8 +175,6 @@ final class SceneEntityList : UIElement {
                 _hbox.isEnabled = false;
             }
 
-            _updateDisplay();
-
             addEventListener("mouseenter", &_onMouseEnter);
             addEventListener("mouseleave", &_onMouseLeave);
             addEventListener("click", { this.outer._selectEntity(_entity); });
@@ -206,8 +207,40 @@ final class SceneEntityList : UIElement {
             _entity.drawSnapshot(Vec2f.one * getHeight() / 2f);
         }
 
-        private void _updateDisplay() {
+        void updateDisplay(string search) {
             _nameLabel.text = _entity.entityData.name;
+
+            ptrdiff_t index = -1;
+            size_t startSearch = 0;
+            _nameLabel.tokens.length = 0;
+            if (search.length > 0) {
+                for (;;) {
+                    index = indexOf(_entity.entityData.name[startSearch .. $],
+                        search, No.caseSentitive);
+                    if (index < 0)
+                        break;
+
+                    index += startSearch;
+
+                    ColoredLabel.Token token1, token2;
+                    token1.index = index;
+                    token1.textColor = Atelier.theme.accent;
+                    _nameLabel.tokens ~= token1;
+
+                    token2.index = index + search.length;
+                    token2.textColor = Atelier.theme.onNeutral;
+                    _nameLabel.tokens ~= token2;
+
+                    startSearch = index + search.length;
+                }
+            }
+            else {
+                ColoredLabel.Token token;
+                token.index = 0;
+                token.textColor = Atelier.theme.onNeutral;
+                _nameLabel.tokens ~= token;
+            }
+
             _typeLabel.text = _entity.getTypeInfo();
         }
     }

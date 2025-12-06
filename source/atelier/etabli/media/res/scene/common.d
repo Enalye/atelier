@@ -825,7 +825,7 @@ package final class SceneDefinition {
 
         void processTile(int x, int y, Vec2i[4] neighborsOffset) {
             int tileId = 0;
-            uint tileIndex = 0;
+            int tileIndex = 0;
             Vec2i neighbor;
             int neighborBrush;
             int neighborLevel;
@@ -862,9 +862,14 @@ package final class SceneDefinition {
             if (!brush) {
                 brush = _terrainMap.getBrush(0);
             }
-            int[] tiles = brush.tiles[tileIndex];
-            if (tiles.length) {
-                tileId = tiles[(x + y) % tiles.length];
+            if (tileIndex >= 0) {
+                int[] tiles = brush.tiles[tileIndex];
+                if (tiles.length) {
+                    tileId = tiles[(x + y) % tiles.length];
+                }
+            }
+            else {
+                tileId = -1;
             }
             foreach (size_t i, Tilemap tilemap; _lowerTilemaps) {
                 tilemap.setTile(x, y, (level == i) ? tileId : -1);

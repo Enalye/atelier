@@ -368,6 +368,7 @@ final class ProjectBuilder : Modal {
         }
         else {
             _title.text = "Échec de l’export";
+            _okBtn.isEnabled = true;
         }
     }
 }
@@ -461,7 +462,7 @@ final class CompileExeThread : Thread {
                 [
                 "dub", "build", "--compiler=ldmd2", "--config=export",
                 "--build=release-nobounds"
-            ], Redirect.stdout | Redirect.stderr);
+            ], Redirect.stdout | Redirect.stderrToStdout);
             scope (exit) {
                 wait(process.pid);
             }

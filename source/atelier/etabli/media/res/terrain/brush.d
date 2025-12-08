@@ -30,7 +30,9 @@ package final class BrushList : UIElement {
 
         class Brush {
             private {
+                uint _id;
                 string _name;
+                int _material;
                 Tilemap _tilemap;
             }
 
@@ -43,13 +45,31 @@ package final class BrushList : UIElement {
                     return _name = name_;
                 }
 
-                Tilemap tilemap() {
-                    return _tilemap;
+                int material() const {
+                    return _material;
                 }
+
+                int material(int material_) {
+                    return _material = material_;
+                }
+
+                uint id() const {
+                    return _id;
+                }
+
+                uint id(uint id_) {
+                    return _id = id_;
+                }
+
+                /* Tilemap tilemap() {
+                    return _tilemap;
+                }*/
             }
 
-            this(string name_) {
+            this(string name_, uint id_, int material_) {
                 _name = name_;
+                _id = id_;
+                _material = material_;
                 _tilemap = new Tilemap(_tileset, _columns, _lines);
             }
 
@@ -154,7 +174,7 @@ package final class BrushList : UIElement {
     private void _onAddItem() {
         auto modal = new AddBrushElement;
         modal.addEventListener("apply", {
-            Brush brush = new Brush(modal.getName());
+            Brush brush = new Brush(modal.getName(), modal.getID(), modal.getMaterial());
             _brushes ~= brush;
             _rebuildList();
             _select(brush);
@@ -163,9 +183,11 @@ package final class BrushList : UIElement {
     }
 
     private void _onEditItem(Brush brush) {
-        auto modal = new EditBrushElement(brush.name);
+        auto modal = new EditBrushElement(brush.name, brush.id, brush.material);
         modal.addEventListener("apply", {
             brush.name = modal.getName();
+            brush.id = modal.getID();
+            brush.material = modal.getMaterial();
             _rebuildList();
             _select(brush);
         });
@@ -181,6 +203,7 @@ package final class BrushList : UIElement {
             _currentBrush.remove();
             _currentBrush = null;
             _rebuildList();
+            dispatchEvent("parameter_brushes", false);
         });
         Atelier.ui.pushModalUI(modal);
     }
@@ -205,14 +228,22 @@ package final class BrushList : UIElement {
         }
     }
 
-    Tilemap getCurrentTilemap() {
-        if (!_currentBrush)
-            return null;
-        return _currentBrush.tilemap;
+    string[] getBrushNames() {
+        string[] names;
+        foreach (i, brush; _brushes) {
+            names ~= format("%d - %s", i, brush.name);
+        }
+        return names;
     }
 
     void save(Farfadet ffd) {
-        foreach (Brush brush; _brushes) {
+        foreach (brush; _brushes) {
+            Farfadet node = ffd.addNode("brush");
+            node.addNode("id").add(brush.id);
+            node.addNode("name").add(brush.name);
+            node.addNode("material").add(brush.material);
+        }
+        /*foreach (Brush brush; _brushes) {
             Farfadet node = ffd.addNode("brush").add(brush.name);
             int[][TerrainMap.Brush.TilesSize] tiles;
             int[][TerrainMap.Brush.CliffsSize] cliffs;
@@ -240,11 +271,28 @@ package final class BrushList : UIElement {
                 node.addNode("cliffs").add(brushId).add(cliffs[i]);
                 brushId++;
             }
-        }
+        }*/
     }
 
     void load(Farfadet ffd) {
         _brushes.length = 0;
+        foreach (Farfadet node; ffd.getNodes("brush")) {
+            uint id;
+            if (node.hasNode("id")) {
+                id = node.getNode("id").get!uint(0);
+            }
+            string name;
+            if (node.hasNode("name")) {
+                name = node.getNode("name").get!string(0);
+            }
+            int material = -1;
+            if (node.hasNode("material")) {
+                material = node.getNode("material").get!int(0);
+            }
+            Brush brush = new Brush(name, id, material);
+            _brushes ~= brush;
+        }
+        /*_brushes.length = 0;
         foreach (Farfadet node; ffd.getNodes("brush")) {
             Brush brush = new Brush(node.get!string(0));
 
@@ -273,7 +321,7 @@ package final class BrushList : UIElement {
                 }
             }
             _brushes ~= brush;
-        }
+        }*/
         _rebuildList();
     }
 }
@@ -300,7 +348,7 @@ package final class BrushElement : UIElement {
         _rect.isVisible = false;
         addImage(_rect);
 
-        _label = new Label(_brush.name, Atelier.theme.font);
+        _label = new Label(getName(), Atelier.theme.font);
         _label.setAlign(UIAlignX.left, UIAlignY.center);
         _label.setPosition(Vec2f(64f, 0f));
         addUI(_label);
@@ -376,5 +424,9 @@ package final class BrushElement : UIElement {
         else {
             _onMouseLeave();
         }
+    }
+
+    string getName() {
+        return format("%s (%d)", _brush.name, _brush.id);
     }
 }

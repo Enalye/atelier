@@ -89,8 +89,8 @@ package final class ParameterWindow : UIElement {
         return _tilesetSelect.getName();
     }
 
-    Tilemap getBrushTilemap() {
-        return _brushList.getCurrentTilemap();
+    string[] getBrushNames() {
+        return _brushList.getBrushNames();
     }
 
     void save(Farfadet ffd) {

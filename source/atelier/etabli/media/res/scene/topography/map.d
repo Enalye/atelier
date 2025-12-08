@@ -98,7 +98,7 @@ package(atelier.etabli.media.res.scene) final class TopographicMap : UIElement {
                     _brush = _terrainMap.getBrush(_toolbox.getBrushName());
                 }
                 else {
-                    _brush = null;
+                    _brush = TerrainMap.Brush();
                 }
                 _brushLevel = _toolbox.getBrushLevel();
             });
@@ -186,7 +186,7 @@ package(atelier.etabli.media.res.scene) final class TopographicMap : UIElement {
             _brushId = -1;
         }
         else {
-            _brushId = _brush ? _brush.id : -1;
+            _brushId = _brush.isValid ? _brush.id : -1;
         }
 
         _pasteBrushTool();

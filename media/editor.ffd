@@ -373,8 +373,8 @@ tileset "editor:collision" {
 }
 tileset "editor:autotile" {
     texture "editor"
-    clip 96 144 16 16
-    lines 7
+    clip 96 176 16 16
+    lines 5
     columns 8
     maxCount 54
     margin 0 0

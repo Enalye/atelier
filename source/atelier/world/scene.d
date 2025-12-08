@@ -561,6 +561,13 @@ final class Scene : Resource!Scene {
         }
 
         void processCliff(int x, int y, Vec2i[4] neighborsOffset) {
+        }
+
+        void processTile(int x, int y, Vec2i[4] neighborsOffset) {
+        }
+
+        /*
+        void processCliff(int x, int y, Vec2i[4] neighborsOffset) {
             Vec2i neighbor;
             int neighborLevel;
             int neighborBrush;
@@ -726,7 +733,7 @@ final class Scene : Resource!Scene {
             foreach (size_t i, Tilemap tilemap; _lowerTilemaps) {
                 tilemap.setTile(x, y, (level == i) ? tileId : -1);
             }
-        }
+        }*/
 
         void updateTiles() {
             if (!_terrainMap)

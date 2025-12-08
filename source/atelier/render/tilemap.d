@@ -102,6 +102,13 @@ final class Tilemap : Image, Resource!Tilemap {
         setTiles(0, 0, tiles_);
     }
 
+    int getRawTile(int index) {
+        if (index < 0 || index >= _tiles.length)
+            return defaultTile;
+
+        return _tiles[index].id;
+    }
+
     int getTile(int x, int y) {
         if (x < 0 || y < 0 || x >= _columns || y >= _lines)
             return defaultTile;
@@ -110,7 +117,7 @@ final class Tilemap : Image, Resource!Tilemap {
     }
 
     void setRawTile(int index, int tileId) {
-        if (index >= _tiles.length)
+        if (index < 0 || index >= _tiles.length)
             return;
 
         _tiles[index].id = tileId;

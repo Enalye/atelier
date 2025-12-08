@@ -30,15 +30,15 @@ final class TerrainResourceEditor : ResourceBaseEditor {
         Vec2f _positionMouse = Vec2f.zero;
         ParameterWindow _parameterWindow;
         Toolbox _toolbox;
-        int _colliderTileId, _brushTileId;
-        int _material = -1;
+        int _cliffId, _brushTileId;
+        int _brushId = -1;
         bool _isApplyingTool;
 
         string _name;
         uint _columns, _lines;
         string _tilesetRID;
         Tileset _tileset;
-        Tilemap _tilemap, _collTilemap, _matTilemap;
+        Tilemap _tilemap, _brushTilemap, _cliffTilemap;
         Rectangle _rectangle;
     }
 
@@ -47,14 +47,14 @@ final class TerrainResourceEditor : ResourceBaseEditor {
         _ffd = ffd;
 
         _tilemap = new Tilemap(0, 0);
-        _collTilemap = new Tilemap(Atelier.res.get!Tileset("editor:collision"), 0, 0);
-        _matTilemap = new Tilemap(0, 0);
+        _cliffTilemap = new Tilemap(Atelier.res.get!Tileset("editor:autotile"), 0, 0);
+        _brushTilemap = new Tilemap(0, 0);
 
-        _collTilemap.defaultTile = -1;
-        _matTilemap.defaultTile = -1;
+        _cliffTilemap.defaultTile = -1;
+        _brushTilemap.defaultTile = -1;
 
-        _collTilemap.alpha = .5f;
-        _matTilemap.alpha = .5f;
+        _cliffTilemap.alpha = .5f;
+        _brushTilemap.alpha = .5f;
 
         _rectangle = Rectangle.fill(Vec2f(16f, 16f));
         _rectangle.anchor = Vec2f.zero;
@@ -73,24 +73,33 @@ final class TerrainResourceEditor : ResourceBaseEditor {
             _setTilesetRID(_ffd.getNode("tileset").get!string(0));
         }
 
-        if (_ffd.hasNode("collision")) {
-            _collTilemap.setTiles(0, 0, _ffd.getNode("collision").get!(int[][])(0));
+        if (_ffd.hasNode("cliffmap")) {
+            _cliffTilemap.setTiles(0, 0, _ffd.getNode("cliffmap").get!(int[][])(0));
         }
 
-        if (_ffd.hasNode("material")) {
-            _matTilemap.setTiles(0, 0, _ffd.getNode("material").get!(int[][])(0));
+        if (_ffd.hasNode("brushmap")) {
+            _brushTilemap.setTiles(0, 0, _ffd.getNode("brushmap").get!(int[][])(0));
         }
 
         _parameterWindow = new ParameterWindow(_tilesetRID, _tileset ?
                 _tileset.columns : 0, _tileset ? _tileset.lines : 0);
         _parameterWindow.load(_ffd);
 
-        _toolbox = new Toolbox;
+        _toolbox = new Toolbox();
 
         _toolbox.addEventListener("tool", {
-            _colliderTileId = _toolbox.getColliderId();
-            _brushTileId = _toolbox.getBrushId();
-            _material = _toolbox.getMaterial();
+            _cliffId = _toolbox.getCliffId();
+            _brushId = _toolbox.getBrushId();
+        });
+
+        _toolbox.addEventListener("tool_replaceBrush", {
+            Vec2i brushReplaceIds = _toolbox.getBrushReplaceIds();
+            int len = cast(int)(_brushTilemap.lines * _brushTilemap.columns);
+            for (int i; i < len; ++i) {
+                if (_brushTilemap.getRawTile(i) == brushReplaceIds.x) {
+                    _brushTilemap.setRawTile(i, brushReplaceIds.y);
+                }
+            }
         });
 
         addEventListener("update", &_onUpdate);
@@ -101,14 +110,12 @@ final class TerrainResourceEditor : ResourceBaseEditor {
         addEventListener("mouseleave", {
             _isApplyingTool = false;
             removeEventListener("mousemove", &_onDrag);
-            removeEventListener("mousemove", &_onCopyMaterialTool);
-            removeEventListener("mousemove", &_onPasteMaterialTool);
-            removeEventListener("mousemove", &_onCopyCollisionTool);
-            removeEventListener("mousemove", &_onPasteCollisionTool);
-            removeEventListener("mousemove", &_onEraseCollisionTool);
             removeEventListener("mousemove", &_onCopyBrushTool);
             removeEventListener("mousemove", &_onPasteBrushTool);
             removeEventListener("mousemove", &_onEraseBrushTool);
+            removeEventListener("mousemove", &_onCopyCliffTool);
+            removeEventListener("mousemove", &_onPasteCliffTool);
+            removeEventListener("mousemove", &_onEraseCliffTool);
         });
 
         _parameterWindow.addEventListener("property_tilesetRID", {
@@ -123,8 +130,8 @@ final class TerrainResourceEditor : ResourceBaseEditor {
         Farfadet node = ffd.addNode("terrain").add(_name);
         node.addNode("tileset").add(_tilesetRID);
         node.addNode("size").add(_columns).add(_lines);
-        node.addNode("collision").add(_collTilemap.getTiles());
-        node.addNode("material").add(_matTilemap.getTiles());
+        node.addNode("cliffmap").add(_cliffTilemap.getTiles());
+        node.addNode("brushmap").add(_brushTilemap.getTiles());
         _parameterWindow.save(node);
         return node;
     }
@@ -145,8 +152,8 @@ final class TerrainResourceEditor : ResourceBaseEditor {
         _lines = _tileset.lines;
 
         _tilemap.setDimensions(_columns, _lines);
-        _collTilemap.setDimensions(_columns, _lines);
-        _matTilemap.setDimensions(_columns << 1, _lines << 1);
+        _cliffTilemap.setDimensions(_columns, _lines);
+        _brushTilemap.setDimensions(_columns << 1, _lines << 1);
 
         int id;
         __tilesetLoop: for (int y; y < _tileset.lines; ++y) {
@@ -182,17 +189,11 @@ final class TerrainResourceEditor : ResourceBaseEditor {
         _tilemap.position = getCenter() + _mapPosition;
         _tilemap.size = _mapSize;
 
-        _collTilemap.position = getCenter() + _mapPosition;
-        _collTilemap.size = _mapSize;
+        _cliffTilemap.position = getCenter() + _mapPosition;
+        _cliffTilemap.size = _mapSize;
 
-        _matTilemap.position = getCenter() + _mapPosition;
-        _matTilemap.size = _mapSize;
-
-        Tilemap tilemap = _parameterWindow.getBrushTilemap();
-        if (tilemap) {
-            tilemap.position = getCenter() + _mapPosition;
-            tilemap.size = _mapSize;
-        }
+        _brushTilemap.position = getCenter() + _mapPosition;
+        _brushTilemap.size = _mapSize;
     }
 
     private void _onMouseDown() {
@@ -206,37 +207,8 @@ final class TerrainResourceEditor : ResourceBaseEditor {
             switch (_toolbox.getTool()) {
             case 0:
                 _positionMouse = (getMousePosition() - (_tilemap.position - _tilemap.size / 2f)) / _zoom;
-                if (hasControlModifier()) {
-                    addEventListener("mousemove", &_onCopyMaterialTool);
-                    _onCopyMaterialTool();
-                }
-                else {
-                    addEventListener("mousemove", &_onPasteMaterialTool);
-                    _onPasteMaterialTool();
-                }
-                break;
-            case 1:
-                _positionMouse = (getMousePosition() - (_tilemap.position - _tilemap.size / 2f)) / _zoom;
                 if (hasControlModifier() && hasAltModifier()) {
-                    _colliderTileId = -1;
-                }
-                else if (hasControlModifier()) {
-                    addEventListener("mousemove", &_onCopyCollisionTool);
-                    _onCopyCollisionTool();
-                }
-                else if (hasAltModifier()) {
-                    addEventListener("mousemove", &_onEraseCollisionTool);
-                    _onEraseCollisionTool();
-                }
-                else {
-                    addEventListener("mousemove", &_onPasteCollisionTool);
-                    _onPasteCollisionTool();
-                }
-                break;
-            case 2:
-                _positionMouse = (getMousePosition() - (_tilemap.position - _tilemap.size / 2f)) / _zoom;
-                if (hasControlModifier() && hasAltModifier()) {
-                    _brushTileId = -1;
+                    _brushId = -1;
                 }
                 else if (hasControlModifier()) {
                     addEventListener("mousemove", &_onCopyBrushTool);
@@ -249,6 +221,24 @@ final class TerrainResourceEditor : ResourceBaseEditor {
                 else {
                     addEventListener("mousemove", &_onPasteBrushTool);
                     _onPasteBrushTool();
+                }
+                break;
+            case 1:
+                _positionMouse = (getMousePosition() - (_tilemap.position - _tilemap.size / 2f)) / _zoom;
+                if (hasControlModifier() && hasAltModifier()) {
+                    _cliffId = -1;
+                }
+                else if (hasControlModifier()) {
+                    addEventListener("mousemove", &_onCopyCliffTool);
+                    _onCopyCliffTool();
+                }
+                else if (hasAltModifier()) {
+                    addEventListener("mousemove", &_onEraseCliffTool);
+                    _onEraseCliffTool();
+                }
+                else {
+                    addEventListener("mousemove", &_onPasteCliffTool);
+                    _onPasteCliffTool();
                 }
                 break;
             default:
@@ -270,20 +260,15 @@ final class TerrainResourceEditor : ResourceBaseEditor {
             _isApplyingTool = false;
             switch (_toolbox.getTool()) {
             case 0:
-                removeEventListener("mousemove", &_onCopyMaterialTool);
-                removeEventListener("mousemove", &_onPasteMaterialTool);
-                _positionMouse = Vec2f.zero;
-                break;
-            case 1:
-                removeEventListener("mousemove", &_onCopyCollisionTool);
-                removeEventListener("mousemove", &_onPasteCollisionTool);
-                removeEventListener("mousemove", &_onEraseCollisionTool);
-                _positionMouse = Vec2f.zero;
-                break;
-            case 2:
                 removeEventListener("mousemove", &_onCopyBrushTool);
                 removeEventListener("mousemove", &_onPasteBrushTool);
                 removeEventListener("mousemove", &_onEraseBrushTool);
+                _positionMouse = Vec2f.zero;
+                break;
+            case 1:
+                removeEventListener("mousemove", &_onCopyCliffTool);
+                removeEventListener("mousemove", &_onPasteCliffTool);
+                removeEventListener("mousemove", &_onEraseCliffTool);
                 _positionMouse = Vec2f.zero;
                 break;
             default:
@@ -326,12 +311,7 @@ final class TerrainResourceEditor : ResourceBaseEditor {
 
         switch (_toolbox.getTool()) {
         case 1:
-            _collTilemap.draw();
-            break;
-        case 2:
-            Tilemap tilemap = _parameterWindow.getBrushTilemap();
-            if (tilemap)
-                tilemap.draw();
+            _cliffTilemap.draw();
             break;
         default:
             break;
@@ -348,15 +328,15 @@ final class TerrainResourceEditor : ResourceBaseEditor {
                 for (uint x; x < (_tileset.columns << 1); ++x) {
                     Vec4f clip = Vec4f(x, y, 1f, 1f) * 8f * _zoom;
 
-                    int material = _matTilemap.getTile(x, y);
-                    if (material == _material) {
+                    int brushId = _brushTilemap.getTile(x, y);
+                    if (brushId == _brushId) {
                         _rectangle.draw(origin + clip.xy);
                         drawText(origin + Vec2f(2f, 8f - 2f) + clip.xy,
-                            to!dstring(material), Atelier.theme.font, Atelier.theme.onAccent);
+                            to!dstring(brushId), Atelier.theme.font, Atelier.theme.onAccent);
                     }
                     else {
                         drawText(origin + Vec2f(2f, 8f - 2f) + clip.xy,
-                            to!dstring(material), Atelier.theme.font, Atelier.theme.onNeutral);
+                            to!dstring(brushId), Atelier.theme.font, Atelier.theme.onNeutral);
                     }
 
                     Atelier.renderer.drawRect(origin + clip.xy, clip.zw,
@@ -401,57 +381,37 @@ final class TerrainResourceEditor : ResourceBaseEditor {
         return tilePos;
     }
 
-    private void _onCopyMaterialTool() {
-        Vec2i tilePos = getSubTilePos();
-        _material = _matTilemap.getTile(tilePos.x, tilePos.y);
-    }
-
-    private void _onPasteMaterialTool() {
-        Vec2i tilePos = getSubTilePos();
-        _matTilemap.setTile(tilePos.x, tilePos.y, hasAltModifier() ? -1 : _material);
-        setDirty();
-    }
-
-    private void _onCopyCollisionTool() {
-        Vec2i tilePos = getTilePos();
-        _colliderTileId = _collTilemap.getTile(tilePos.x, tilePos.y);
-    }
-
-    private void _onPasteCollisionTool() {
-        Vec2i tilePos = getTilePos();
-        _collTilemap.setTile(tilePos.x, tilePos.y, _colliderTileId);
-        setDirty();
-    }
-
-    private void _onEraseCollisionTool() {
-        Vec2i tilePos = getTilePos();
-        _collTilemap.setTile(tilePos.x, tilePos.y, -1);
-        setDirty();
-    }
-
     private void _onCopyBrushTool() {
-        Tilemap tilemap = _parameterWindow.getBrushTilemap();
-        if (!tilemap)
-            return;
-        Vec2i tilePos = getTilePos();
-        _brushTileId = tilemap.getTile(tilePos.x, tilePos.y);
+        Vec2i tilePos = getSubTilePos();
+        _brushId = _brushTilemap.getTile(tilePos.x, tilePos.y);
     }
 
     private void _onPasteBrushTool() {
-        Tilemap tilemap = _parameterWindow.getBrushTilemap();
-        if (!tilemap)
-            return;
-        Vec2i tilePos = getTilePos();
-        tilemap.setTile(tilePos.x, tilePos.y, _brushTileId);
+        Vec2i tilePos = getSubTilePos();
+        _brushTilemap.setTile(tilePos.x, tilePos.y, hasAltModifier() ? -1 : _brushId);
         setDirty();
     }
 
     private void _onEraseBrushTool() {
-        Tilemap tilemap = _parameterWindow.getBrushTilemap();
-        if (!tilemap)
-            return;
+        Vec2i tilePos = getSubTilePos();
+        _brushTilemap.setTile(tilePos.x, tilePos.y, -1);
+        setDirty();
+    }
+
+    private void _onCopyCliffTool() {
         Vec2i tilePos = getTilePos();
-        tilemap.setTile(tilePos.x, tilePos.y, -1);
+        _cliffId = _cliffTilemap.getTile(tilePos.x, tilePos.y);
+    }
+
+    private void _onPasteCliffTool() {
+        Vec2i tilePos = getTilePos();
+        _cliffTilemap.setTile(tilePos.x, tilePos.y, _cliffId);
+        setDirty();
+    }
+
+    private void _onEraseCliffTool() {
+        Vec2i tilePos = getTilePos();
+        _cliffTilemap.setTile(tilePos.x, tilePos.y, -1);
         setDirty();
     }
 }

@@ -22,13 +22,14 @@ package(atelier.etabli.media.res.terrain) class Toolbox : Modal {
     private {
         ToolGroup _toolGroup;
         int _tool;
-        TilePicker _collTilePicker, _brushTilePicker;
-        SelectButton _materialSelect;
-        HBox _materialBox;
+        IntegerField _brushField;
+        TilePicker _cliffTilePicker;
+        VBox _brushBox;
+        int _srcBrush, _dstBrush;
     }
 
     this() {
-        setSize(Vec2f(256f, 200f));
+        setSize(Vec2f(256f, 250f));
         setAlign(UIAlignX.left, UIAlignY.top);
         setPosition(Vec2f(258f, 75f));
 
@@ -47,7 +48,7 @@ package(atelier.etabli.media.res.terrain) class Toolbox : Modal {
             addUI(hbox);
 
             _toolGroup = new ToolGroup;
-            foreach (key; ["material", "pen", "brush"]) {
+            foreach (key; ["material", "brush"]) {
                 ToolButton btn = new ToolButton(_toolGroup,
                     "editor:" ~ key ~ "-button", key == "selection");
                 btn.setSize(Vec2f(32f, 32f));
@@ -64,37 +65,63 @@ package(atelier.etabli.media.res.terrain) class Toolbox : Modal {
 
         addEventListener("globalkey", &_onKey);
 
-        _collTilePicker = new TilePicker;
-        _collTilePicker.setAlign(UIAlignX.center, UIAlignY.bottom);
-        _collTilePicker.setPosition(Vec2f(0f, 8f));
-        _collTilePicker.addEventListener("value", {
+        _cliffTilePicker = new TilePicker;
+        _cliffTilePicker.setAlign(UIAlignX.center, UIAlignY.bottom);
+        _cliffTilePicker.setPosition(Vec2f(0f, 8f));
+        _cliffTilePicker.addEventListener("value", {
             dispatchEvent("tool", false);
         });
-        _collTilePicker.setTileset("editor:collision");
-
-        _brushTilePicker = new TilePicker;
-        _brushTilePicker.setAlign(UIAlignX.center, UIAlignY.bottom);
-        _brushTilePicker.setPosition(Vec2f(0f, 8f));
-        _brushTilePicker.addEventListener("value", {
-            dispatchEvent("tool", false);
-        });
-        _brushTilePicker.setTileset("editor:autotile");
+        _cliffTilePicker.setTileset("editor:autotile");
 
         {
-            _materialBox = new HBox;
-            _materialBox.setSpacing(16f);
+            _brushBox = new VBox;
+            _brushBox.setAlign(UIAlignX.center, UIAlignY.bottom);
+            _brushBox.setPosition(Vec2f(0f, 8f));
+            _brushBox.setSpacing(16f);
 
-            _materialBox.addUI(new Label("Matériau:", Atelier.theme.font));
+            {
+                HLayout hlayout = new HLayout;
+                hlayout.setPadding(Vec2f(200, 0f));
+                _brushBox.addUI(hlayout);
 
-            string[] materialList;
-            foreach (i, mat; Atelier.world.getMaterials()) {
-                materialList ~= to!string(i) ~ " - " ~ mat.name;
+                hlayout.addUI(new Label("Pinceau:", Atelier.theme.font));
+
+                _brushField = new IntegerField();
+                _brushField.setRange(-1, 255);
+                _brushField.addEventListener("value", {
+                    dispatchEvent("tool", false);
+                });
+                hlayout.addUI(_brushField);
             }
-            _materialSelect = new SelectButton(materialList, "");
-            _materialSelect.addEventListener("value", {
-                dispatchEvent("tool", false);
-            });
-            _materialBox.addUI(_materialSelect);
+            {
+                HLayout hlayout = new HLayout;
+                hlayout.setPadding(Vec2f(200, 0f));
+                _brushBox.addUI(hlayout);
+
+                hlayout.addUI(new Label("Remplacer:", Atelier.theme.font));
+
+                IntegerField srcField = new IntegerField();
+                srcField.setRange(-1, 255);
+                hlayout.addUI(srcField);
+
+                hlayout = new HLayout;
+                hlayout.setPadding(Vec2f(200, 0f));
+                _brushBox.addUI(hlayout);
+
+                hlayout.addUI(new Label("Par:", Atelier.theme.font));
+
+                IntegerField dstField = new IntegerField();
+                dstField.setRange(-1, 255);
+                hlayout.addUI(dstField);
+
+                NeutralButton replaceBtn = new NeutralButton("Remplacer");
+                replaceBtn.addEventListener("click", {
+                    _srcBrush = srcField.value();
+                    _dstBrush = dstField.value();
+                    dispatchEvent("tool_replaceBrush", false);
+                });
+                _brushBox.addUI(replaceBtn);
+            }
         }
 
         _onToolChange();
@@ -111,9 +138,6 @@ package(atelier.etabli.media.res.terrain) class Toolbox : Modal {
             case alpha2:
                 _toolGroup.value = 1;
                 break;
-            case alpha3:
-                _toolGroup.value = 2;
-                break;
             default:
                 break;
             }
@@ -121,19 +145,15 @@ package(atelier.etabli.media.res.terrain) class Toolbox : Modal {
     }
 
     private void _onToolChange() {
-        _collTilePicker.removeUI();
-        _materialBox.removeUI();
-        _brushTilePicker.removeUI();
+        _brushBox.removeUI();
+        _cliffTilePicker.removeUI();
 
         switch (_toolGroup.value()) {
         case 0:
-            addUI(_materialBox);
+            addUI(_brushBox);
             break;
         case 1:
-            addUI(_collTilePicker);
-            break;
-        case 2:
-            addUI(_brushTilePicker);
+            addUI(_cliffTilePicker);
             break;
         default:
             break;
@@ -146,15 +166,15 @@ package(atelier.etabli.media.res.terrain) class Toolbox : Modal {
         return _toolGroup.value();
     }
 
-    int getColliderId() const {
-        return _collTilePicker.getTileId();
-    }
-
-    int getMaterial() const {
-        return _materialSelect.ivalue();
+    int getCliffId() const {
+        return _cliffTilePicker.getTileId();
     }
 
     int getBrushId() const {
-        return _brushTilePicker.getTileId();
+        return _brushField.value();
+    }
+
+    Vec2i getBrushReplaceIds() const {
+        return Vec2i(_srcBrush, _dstBrush);
     }
 }

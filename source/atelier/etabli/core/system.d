@@ -337,23 +337,43 @@ final class Etabli {
             auto terrainRes = getResource("terrain", rid);
             terrainMap = new TerrainMap;
 
+            if (terrainRes.farfadet.hasNode("size")) {
+                Farfadet sizeNode = terrainRes.farfadet.getNode("size");
+                uint columns = sizeNode.get!uint(0);
+                uint lines = sizeNode.get!uint(1);
+                terrainMap.setSize(columns, lines);
+            }
+
             if (terrainRes.farfadet.hasNode("tileset")) {
                 terrainMap.tileset = terrainRes.farfadet.getNode("tileset").get!string(0);
             }
 
-            if (terrainRes.farfadet.hasNode("collision")) {
-                terrainMap.setCollisions(0, 0,
-                    terrainRes.farfadet.getNode("collision").get!(int[][])(0));
+            if (terrainRes.farfadet.hasNode("cliffmap")) {
+                terrainMap.setCliffmap(0, 0,
+                    terrainRes.farfadet.getNode("cliffmap").get!(int[][])(0));
             }
 
-            if (terrainRes.farfadet.hasNode("material")) {
-                terrainMap.setMaterials(0, 0,
-                    terrainRes.farfadet.getNode("material").get!(int[][])(0));
+            if (terrainRes.farfadet.hasNode("brushmap")) {
+                terrainMap.setBrushmap(0, 0,
+                    terrainRes.farfadet.getNode("brushmap").get!(int[][])(0));
             }
 
             foreach (brushNode; terrainRes.farfadet.getNodes("brush")) {
-                TerrainMap.Brush brush = terrainMap.addBrush(brushNode.get!string(0));
-                foreach (tileNode; brushNode.getNodes("tiles")) {
+                uint id;
+                if (brushNode.hasNode("id")) {
+                    id = brushNode.getNode("id").get!uint(0);
+                }
+                string name;
+                if (brushNode.hasNode("name")) {
+                    name = brushNode.getNode("name").get!string(0);
+                }
+                int material = -1;
+                if (brushNode.hasNode("material")) {
+                    material = brushNode.getNode("material").get!int(0);
+                }
+
+                terrainMap.addBrush(name, id, material);
+                /*foreach (tileNode; brushNode.getNodes("tiles")) {
                     uint id = tileNode.get!uint(0);
                     if (id >= TerrainMap.Brush.TilesSize)
                         continue;
@@ -364,8 +384,10 @@ final class Etabli {
                     if (id >= TerrainMap.Brush.CliffsSize)
                         continue;
                     brush.cliffs[id] = tileNode.get!(int[])(1);
-                }
+                }*/
             }
+
+            terrainMap.cache();
         }
 
         return terrainMap;

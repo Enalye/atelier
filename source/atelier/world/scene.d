@@ -35,6 +35,18 @@ final class Scene : Resource!Scene {
             Color color(Color color_) {
                 return _tilemap.color = color_;
             }
+
+            Tilemap tilemap() {
+                return _tilemap;
+            }
+
+            string terrainRID() {
+                return _terrainRID;
+            }
+
+            string terrainRID(string id) {
+                return _terrainRID = id;
+            }
         }
 
         this(uint width, uint height) {

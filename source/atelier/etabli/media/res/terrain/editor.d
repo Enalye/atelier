@@ -317,6 +317,10 @@ final class TerrainResourceEditor : ResourceBaseEditor {
             break;
         }
 
+        immutable Vec2i[4] cornerOffsets = [
+            Vec2i(0, 0), Vec2i(1, 0), Vec2i(1, 1), Vec2i(0, 1)
+        ];
+
         Vec2f origin = _tilemap.position - _tilemap.size / 2f;
         uint frame;
 
@@ -324,23 +328,42 @@ final class TerrainResourceEditor : ResourceBaseEditor {
         case 0:
             _rectangle.size = Vec2f.one * 8f * _zoom;
 
-            for (uint y; y < (_tileset.lines << 1); ++y) {
-                for (uint x; x < (_tileset.columns << 1); ++x) {
-                    Vec4f clip = Vec4f(x, y, 1f, 1f) * 8f * _zoom;
-
-                    int brushId = _brushTilemap.getTile(x, y);
-                    if (brushId == _brushId) {
-                        _rectangle.draw(origin + clip.xy);
-                        drawText(origin + Vec2f(2f, 8f - 2f) + clip.xy,
-                            to!dstring(brushId), Atelier.theme.font, Atelier.theme.onAccent);
-                    }
-                    else {
-                        drawText(origin + Vec2f(2f, 8f - 2f) + clip.xy,
-                            to!dstring(brushId), Atelier.theme.font, Atelier.theme.onNeutral);
+            Vec2i coords;
+            for (uint y; y < _tileset.lines; ++y) {
+                for (uint x; x < _tileset.columns; ++x) {
+                    int cliffId = _cliffTilemap.getTile(x, y);
+                    int cliffMask = 0b1111;
+                    if (cliffId >= 0) {
+                        cliffMask = TerrainMap.cliffMasks[cliffId];
                     }
 
-                    Atelier.renderer.drawRect(origin + clip.xy, clip.zw,
-                        Atelier.theme.neutral, 1f, false);
+                    for (uint i; i < 4; ++i) {
+                        coords.x = (x << 1) + cornerOffsets[i].x;
+                        coords.y = (y << 1) + cornerOffsets[i].y;
+                        Vec4f clip = Vec4f(coords.x, coords.y, 1f, 1f) * 8f * _zoom;
+
+                        int brushId = _brushTilemap.getTile(coords.x, coords.y);
+
+                        if ((cliffMask & (1 << i)) > 0) {
+                            if (brushId == _brushId) {
+                                _rectangle.color = Atelier.theme.accent;
+                                _rectangle.draw(origin + clip.xy);
+                                drawText(origin + Vec2f(2f, 8f - 2f) + clip.xy,
+                                    to!dstring(brushId), Atelier.theme.font, Atelier.theme.onAccent);
+                            }
+                            else {
+                                drawText(origin + Vec2f(2f, 8f - 2f) + clip.xy,
+                                    to!dstring(brushId), Atelier.theme.font, Atelier
+                                        .theme.onNeutral);
+                            }
+                        }
+                        else {
+                            _rectangle.color = Atelier.theme.danger;
+                            _rectangle.draw(origin + clip.xy);
+                        }
+
+                        Atelier.renderer.drawRect(origin + clip.xy, clip.zw, Atelier.theme.neutral, 1f, false);
+                    }
 
                     frame++;
                 }
@@ -383,17 +406,23 @@ final class TerrainResourceEditor : ResourceBaseEditor {
 
     private void _onCopyBrushTool() {
         Vec2i tilePos = getSubTilePos();
+        if (!_isSubTileValid(tilePos))
+            return;
         _brushId = _brushTilemap.getTile(tilePos.x, tilePos.y);
     }
 
     private void _onPasteBrushTool() {
         Vec2i tilePos = getSubTilePos();
+        if (!_isSubTileValid(tilePos))
+            return;
         _brushTilemap.setTile(tilePos.x, tilePos.y, hasAltModifier() ? -1 : _brushId);
         setDirty();
     }
 
     private void _onEraseBrushTool() {
         Vec2i tilePos = getSubTilePos();
+        if (!_isSubTileValid(tilePos))
+            return;
         _brushTilemap.setTile(tilePos.x, tilePos.y, -1);
         setDirty();
     }
@@ -413,5 +442,33 @@ final class TerrainResourceEditor : ResourceBaseEditor {
         Vec2i tilePos = getTilePos();
         _cliffTilemap.setTile(tilePos.x, tilePos.y, -1);
         setDirty();
+    }
+
+    private bool _isSubTileValid(Vec2i pos) {
+        if (pos.x < 0 || pos.y < 0)
+            return false;
+
+        Vec2i cliffPos = pos >> 1;
+        int cliffId = _cliffTilemap.getTile(cliffPos.x, cliffPos.y);
+        if (cliffId < 0)
+            return true;
+
+        /*
+            x: 0, y: 0 -> 0
+            x: 1, y: 0 -> 1
+            x: 1, y: 1 -> 2
+            x: 0, y: 1 -> 3
+        */
+
+        int shift;
+        if (pos.x & 0x1) {
+            shift = 1 + (pos.y & 0x1);
+        }
+        else {
+            shift = (pos.y & 0x1) * 3;
+        }
+
+        int cliffMask = TerrainMap.cliffMasks[cliffId];
+        return ((cliffMask & (1 << shift)) > 0);
     }
 }

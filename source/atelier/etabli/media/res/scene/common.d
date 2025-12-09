@@ -538,15 +538,10 @@ package final class SceneDefinition {
             _levelGrid.setValue(x, y, level);
         }
 
-        /*void processCliff(int x, int y, Vec2i[4] neighborsOffset) {
-            // Désactivé, voir fonction ci-dessous
-        }*/
-
         void processCliff(int x, int y, Vec2i[4] neighborsOffset) {
             Vec2i neighbor;
             int neighborLevel;
             int neighborBrush;
-            TerrainMap.Brush brush, currentBrush;
             int[4] levels;
             int minLevel, maxLevel;
             int tileIndex;
@@ -555,7 +550,6 @@ package final class SceneDefinition {
                 neighbor = Vec2i(x, y) + neighborOffset;
                 neighborBrush = _brushGrid.getValue(neighbor.x, neighbor.y);
                 neighborLevel = _levelGrid.getValue(neighbor.x, neighbor.y);
-                currentBrush = _terrainMap.getBrush(neighborBrush);
 
                 if (i == 0) {
                     minLevel = neighborLevel;
@@ -569,16 +563,7 @@ package final class SceneDefinition {
                 }
 
                 levels[i] = neighborLevel;
-
-                /*if (currentBrush && brush) {
-                    if (currentBrush.id != brush.id) {
-                        break;
-                    }
-                }
-                if (currentBrush) {
-                    brush = currentBrush;
-                }*/
-                tileIndex |= neighborBrush << (i << 2);
+                tileIndex |= neighborBrush << (i << 3);
             }
 
             for (int level; level < _levels; ++level) {
@@ -640,18 +625,7 @@ package final class SceneDefinition {
                         }
                     }
                 }
-                /*if (level == maxLevel) {
-                    int upperTileIndex = 0;
-                    for (int i; i < 4; ++i) {
-                        if (levels[i] == level) {
-                            upperTileIndex |= 0x1 << i;
-                        }
-                    }
-                    if (upperTileIndex == 0 || upperTileIndex == 15)
-                        continue;
 
-                    tiles = brush.tiles[27 + upperTileIndex];
-                }*/
                 int lowerTileId = -1;
                 int upperTileId = -1;
                 if (upperTiles.length) {
@@ -660,171 +634,14 @@ package final class SceneDefinition {
                 if (lowerTiles.length) {
                     lowerTileId = lowerTiles[(x + y) % lowerTiles.length];
                 }
-                //if (tileId >= 0) {
+
                 if (lowerTileId >= 0) {
                     _lowerTilemaps[level].setTile(x, y, lowerTileId);
                 }
 
                 _upperTilemaps[level].setTile(x, y, upperTileId);
-                //log(x, ":", y, ", ", level, " -> ", tileId);
-                //}
             }
         }
-
-        /+
-        void processCliff(int x, int y, Vec2i[4] neighborsOffset) {
-            Vec2i neighbor;
-            int neighborLevel;
-            int neighborBrush;
-            TerrainMap.Brush brush, currentBrush;
-            int[4] levels;
-            int minLevel, maxLevel;
-            foreach (int i, Vec2i neighborOffset; neighborsOffset) {
-                neighbor = Vec2i(x, y) + neighborOffset;
-                neighborBrush = _brushGrid.getValue(neighbor.x, neighbor.y);
-                neighborLevel = _levelGrid.getValue(neighbor.x, neighbor.y);
-                currentBrush = _terrainMap.getBrush(neighborBrush);
-
-                if (i == 0) {
-                    minLevel = neighborLevel;
-                    maxLevel = minLevel;
-                }
-                else if (neighborLevel > maxLevel) {
-                    maxLevel = neighborLevel;
-                }
-                else if (neighborLevel < minLevel) {
-                    minLevel = neighborLevel;
-                }
-
-                levels[i] = neighborLevel;
-
-                if (currentBrush && brush) {
-                    if (currentBrush.id != brush.id) {
-                        break;
-                    }
-                }
-                if (currentBrush) {
-                    brush = currentBrush;
-                }
-            }
-
-            if (!brush) {
-                brush = _terrainMap.getBrush(0);
-            }
-
-            int upperTileIndex = 0;
-            int lowerTileIndex = 0;
-            for (int i; i < 4; ++i) {
-                if (levels[i] == maxLevel) {
-                    upperTileIndex |= 0x1 << i;
-                }
-                if (levels[i] == minLevel) {
-                    lowerTileIndex |= 0x1 << i;
-                }
-            }
-
-            foreach (size_t tilemapLevel, Tilemap tilemap; _tilemaps) {
-                bool isUpper, isBelow;
-
-                isUpper = tilemapLevel == maxLevel;
-                isBelow = tilemapLevel == minLevel;
-
-                int[] tiles;
-                if (isUpper) {
-                    if (upperTileIndex == 0 || upperTileIndex == 15)
-                        continue;
-
-                    tiles = brush.tiles[27 + upperTileIndex];
-                }
-                else if (isBelow) {
-                    if (upperTileIndex == 15)
-                        continue;
-
-                    immutable int[15] swapTable = [
-                        0, 0, 0, 0, 1, 2, 3, 3, 4, 5, 6, 5, 7, 8, 9
-                    ];
-                    tiles = brush.tiles[16 + swapTable[lowerTileIndex]];
-                }
-                else if (tilemapLevel > minLevel && tilemapLevel < maxLevel) {
-                    int currentTileIndex = 0;
-                    for (int i; i < 4; ++i) {
-                        if (levels[i] != tilemapLevel) {
-                            currentTileIndex |= 0x1 << i;
-                        }
-                    }
-                    /*
-                    if(upperTileIndex == 0b11 && lowerTileIndex == 0b11) {
-                        tiles = brush.tiles[16];
-                    }
-                    else if(upperTileIndex == 0b10 && lowerTileIndex == 0b1101) {
-                        tiles = brush.tiles[50];
-                    }
-                    else if(upperTileIndex == 0b1 && lowerTileIndex == 0b1110) {
-                        tiles = brush.tiles[51];
-                    }
-                    else if((upperTileIndex == 0b111 && lowerTileIndex == 0b1)
-                    || (upperTileIndex == 0b10 && lowerTileIndex == 0b1101)
-                    || (upperTileIndex == 0b101 && lowerTileIndex == 0b1010)) {
-                        tiles = brush.tiles[27];
-                    }
-                    else if((upperTileIndex == 0b1011 && lowerTileIndex == 0b100)
-                    || (upperTileIndex == 0b1 && lowerTileIndex == 0b1110)
-                    || (upperTileIndex == 0b1010 && lowerTileIndex == 0b101)) {
-                        tiles = brush.tiles[28];
-                    }
-                    else if(upperTileIndex == 0b10 && lowerTileIndex == 0b1000) {
-                        tiles = brush.tiles[45];
-                    }
-                    else if(upperTileIndex == 0b1 && lowerTileIndex == 0b100) {
-                        tiles = brush.tiles[44];
-                    }
-                    else if(upperTileIndex == 0b11 && lowerTileIndex == 0b100) {
-                        tiles = brush.tiles[48];
-                    }
-                    else if(upperTileIndex == 0b11 && lowerTileIndex == 0b1000) {
-                        tiles = brush.tiles[49];
-                    }
-                    else if(upperTileIndex == 0b1 && lowerTileIndex == 0b1100) {
-                        tiles = brush.tiles[43];
-                    }
-                    else if(upperTileIndex == 0b10 && lowerTileIndex == 0b1100) {
-                        tiles = brush.tiles[42];
-                    }
-                    else if(upperTileIndex == 0b10 && lowerTileIndex == 0b100) {
-                        tiles = brush.tiles[46];
-                    }
-                    else if(upperTileIndex == 0b1 && lowerTileIndex == 0b1000) {
-                        tiles = brush.tiles[47];
-                    }*/
-                }
-                /*else if (tilemapLevel + 1 == maxLevel) {
-                    for (int y2 = y; y2 <= _columns; ++y2) {
-                        Tile leftTile = _grid.getValue(x + neighborsOffset[3].x, y2);
-                        Tile rightTile = _grid.getValue(x + neighborsOffset[2].x, y2);
-
-                        if (leftTile.level <= tilemapLevel && rightTile.level <= tilemapLevel) {
-                            tiles = brush.tiles[16];
-                            break;
-                        }
-                        else if (rightTile.level <= tilemapLevel) {
-                            tiles = brush.tiles[27];
-                            break;
-                        }
-                        else if (leftTile.level <= tilemapLevel) {
-                            tiles = brush.tiles[26];
-                            break;
-                        }
-                    }
-                }*/
-                int tileId = -1;
-                if (tiles.length) {
-                    tileId = tiles[(x + y) % tiles.length];
-                }
-                if (tileId > 0) {
-                    tilemap.setTile(x, y, tileId);
-                }
-            }
-        }+/
 
         void processTile(int x, int y, Vec2i[4] neighborsOffset) {
             int tileId = -1;
@@ -833,7 +650,6 @@ package final class SceneDefinition {
             int neighborBrush;
             int neighborLevel;
             bool neighborCliff;
-            //TerrainMap.Brush brush, currentBrush;
             int level = int.max;
 
             foreach (int i, Vec2i neighborOffset; neighborsOffset) {
@@ -841,27 +657,12 @@ package final class SceneDefinition {
                 neighborBrush = _brushGrid.getValue(neighbor.x, neighbor.y);
                 neighborLevel = _levelGrid.getValue(neighbor.x, neighbor.y);
                 neighborCliff = _cliffGrid.getValue(neighbor.x, neighbor.y);
-                //currentBrush = _terrainMap.getBrush(neighborBrush);
 
                 if (neighborLevel < level) {
                     level = neighborLevel;
                 }
 
-                /*if (currentBrush && brush) {
-                    if (currentBrush.id != brush.id) {
-                        tileIndex = -1;
-                        break;
-                    }
-                }
-                if (currentBrush) {
-                    brush = currentBrush;
-                }*/
-
-                /*if (neighborBrush != -1 || neighborCliff) {
-                    tileIndex |= 0x1 << i;
-                }*/
-
-                tileIndex |= neighborBrush << (i << 2);
+                tileIndex |= neighborBrush << (i << 3);
             }
 
             if (tileIndex >= 0) {

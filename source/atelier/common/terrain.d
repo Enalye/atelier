@@ -43,18 +43,7 @@ final class TerrainMap : Resource!TerrainMap {
             });
         }
     }
-    /*
-    class Brush {
-        enum TilesSize = 16;
 
-        string name;
-        uint id;
-        int material;
-        int[][TilesSize] tiles;
-        int[][CliffsSize] cliffs;
-
-
-    }*/
     enum CliffsSize = 39;
 
     struct CliffInfo {
@@ -173,6 +162,56 @@ final class TerrainMap : Resource!TerrainMap {
         CliffInfo(0, 0b0110, 0b1001, false),
     ];
 
+    static immutable cliffMasks = [
+        // 1ère ligne
+        0b0100, //
+        0b1100, //
+        0b1000, //
+        0b0110, //
+        0b1001, //
+        0b0010, //
+        0b0001, //
+        0b0111, //
+
+        // 2ème ligne
+        0b0010, //
+        0b0011, //
+        0b0001, //
+        0b1110, //
+        0b1101, //
+        0b1010, //
+        0b0101, //
+        0b1011, //
+
+        // 3ème ligne
+        0b0010, //
+        0b0011, //
+        0b0001, //
+        0b0111, //
+        0b1011, //
+        0b1011, //
+        0b0111, //
+        0b1011, //
+
+        // 4ème ligne
+        0b1111, //
+        0b1111, //
+        0b1111, //
+        0b0010, //
+        0b0001, //
+        0b0011, //
+        0b0011, //
+        0b0111, //
+
+        // 5ème ligne
+        0b1010, //
+        0b0101, //
+        0b0110, //
+        0b1001, //
+        0b1011, //
+        0b0111, //        
+    ];
+
     @property {
         string tileset() const {
             return _tilesetRID;
@@ -225,24 +264,6 @@ final class TerrainMap : Resource!TerrainMap {
             }
 
             addBrush(name, id, material);
-            /*Brush brush = new Brush;
-            brush.name = brushNode.get!string(0);
-            brush.id = cast(uint) _brushes.length;
-
-            foreach (tileNode; brushNode.getNodes("tiles")) {
-                uint id = tileNode.get!uint(0);
-                if (id >= Brush.TilesSize)
-                    continue;
-                brush.tiles[id] = tileNode.get!(int[])(1);
-            }
-
-            foreach (tileNode; brushNode.getNodes("cliffs")) {
-                uint id = tileNode.get!uint(0);
-                if (id >= Brush.CliffsSize)
-                    continue;
-                brush.cliffs[id] = tileNode.get!(int[])(1);
-            }
-            _brushes ~= brush;*/
         }
 
         cache();
@@ -264,29 +285,50 @@ final class TerrainMap : Resource!TerrainMap {
         Vec2i coords;
         for (uint y; y < _lines; ++y) {
             for (uint x; x < _columns; ++x) {
-                uint cliffValue = _cliffmap.getValue(x, y) + 1;
+                int cliffValue = _cliffmap.getValue(x, y);
                 uint tileValue;
+                uint cliffMask = 0b1111;
+
+                if (cliffValue >= 0) {
+                    cliffMask = TerrainMap.cliffMasks[cliffValue];
+                }
 
                 for (uint i; i < 4; ++i) {
+                    if ((cliffMask & (1 << i)) == 0)
+                        continue;
+
                     coords.x = (x << 1) + cornerOffsets[i].x;
                     coords.y = (y << 1) + cornerOffsets[i].y;
                     uint corner = _brushmap.getValue(coords.x, coords.y);
-                    tileValue |= corner << (i << 2);
+                    tileValue |= corner << (i << 3);
                 }
 
-                _cliffs[cliffValue].addTile(tileValue, tileId);
+                _cliffs[cliffValue + 1].addTile(tileValue, tileId);
                 tileId++;
             }
         }
     }
 
     int[] getTiles(int cliffIndex, uint brushIndex) {
-        cliffIndex++;
-        if (cliffIndex < 0 || cliffIndex >= _cliffs.length) {
+        if (cliffIndex == -1) {
+            auto pTiles = brushIndex in _cliffs[0].tiles;
+            return pTiles !is null ? pTiles.ids : [];
+        }
+
+        if (cliffIndex < 0 || (cliffIndex + 1) >= _cliffs.length) {
             return [];
         }
 
-        auto pTiles = brushIndex in _cliffs[cliffIndex].tiles;
+        int cliffMask = TerrainMap.cliffMasks[cliffIndex];
+        int brushMask;
+        for (uint i; i < 4; ++i) {
+            if (cliffMask & (1 << i)) {
+                brushMask |= 0xff << (i << 3);
+            }
+        }
+        brushIndex &= brushMask;
+
+        auto pTiles = brushIndex in _cliffs[cliffIndex + 1].tiles;
         return pTiles !is null ? pTiles.ids : [];
     }
 
@@ -294,24 +336,20 @@ final class TerrainMap : Resource!TerrainMap {
     TerrainMap fetch() {
         return this;
     }
-    /*
+
     void serialize(OutStream stream) {
-        stream.write(_tilesetRID);
-        stream.write(_columns);
-        stream.write(_lines);
+        stream.write!string(_tilesetRID);
+        stream.write!uint(_columns);
+        stream.write!uint(_lines);
 
         stream.write!(int[][])(_cliffmap.getValues());
         stream.write!(int[][])(_brushmap.getValues());
 
-        stream.write(_brushes.length);
+        stream.write!uint(cast(uint) _brushes.length);
         foreach (ref brush; _brushes) {
             stream.write(brush.name);
-            for (size_t i; i < Brush.TilesSize; ++i) {
-                stream.write!(int[])(brush.tiles[i]);
-            }
-            for (size_t i; i < Brush.CliffsSize; ++i) {
-                stream.write!(int[])(brush.cliffs[i]);
-            }
+            stream.write(brush.id);
+            stream.write(brush.material);
         }
     }
 
@@ -325,21 +363,17 @@ final class TerrainMap : Resource!TerrainMap {
         _cliffmap.setValues(0, 0, stream.read!(int[][])());
         _brushmap.setValues(0, 0, stream.read!(int[][])());
 
-        _brushes.length = stream.read!size_t();
-        for (size_t i; i < _brushes.length; ++i) {
-            Brush brush = new Brush;
-            brush.name = stream.read!string();
-            brush.id = cast(uint) i;
-            for (size_t y; y < Brush.TilesSize; ++y) {
-                brush.tiles[y] = stream.read!(int[])();
-            }
-            for (size_t y; y < Brush.CliffsSize; ++y) {
-                brush.cliffs[y] = stream.read!(int[])();
-            }
-            _brushes[brush.id] = brush;
+        uint brushCount = stream.read!uint();
+        for (size_t i; i < brushCount; ++i) {
+            string name = stream.read!string();
+            uint id = stream.read!uint();
+            int material = stream.read!int();
+            addBrush(name, id, material);
         }
+
+        cache();
     }
-*/
+
     void setCliffmap(int x, int y, int[][] values) {
         _cliffmap.setValues(x, y, values);
     }
@@ -391,8 +425,9 @@ final class TerrainMap : Resource!TerrainMap {
         Vec2i coords = Vec2i(tileId % _brushmap.columns, tileId / _brushmap.columns);
         coords.y <<= 1;
         coords += subCoords;
-        //return _brushmap.getValue(coords.x, coords.y);
-        // TODO: Convertir _brushmap.getValue -> _brushes[value].material
-        return 0;
+        int brush = _brushmap.getValue(coords.x, coords.y);
+        if (brush < 0 || brush >= _brushes.length)
+            return -1;
+        return _brushes[brush].material;
     }
 }

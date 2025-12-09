@@ -561,24 +561,17 @@ final class Scene : Resource!Scene {
         }
 
         void processCliff(int x, int y, Vec2i[4] neighborsOffset) {
-        }
-
-        void processTile(int x, int y, Vec2i[4] neighborsOffset) {
-        }
-
-        /*
-        void processCliff(int x, int y, Vec2i[4] neighborsOffset) {
             Vec2i neighbor;
             int neighborLevel;
             int neighborBrush;
-            TerrainMap.Brush brush, currentBrush;
             int[4] levels;
             int minLevel, maxLevel;
+            int tileIndex;
+
             foreach (int i, Vec2i neighborOffset; neighborsOffset) {
                 neighbor = Vec2i(x, y) + neighborOffset;
                 neighborBrush = _brushGrid.getValue(neighbor.x, neighbor.y);
                 neighborLevel = _levelGrid.getValue(neighbor.x, neighbor.y);
-                currentBrush = _terrainMap.getBrush(neighborBrush);
 
                 if (i == 0) {
                     minLevel = neighborLevel;
@@ -592,19 +585,7 @@ final class Scene : Resource!Scene {
                 }
 
                 levels[i] = neighborLevel;
-
-                if (currentBrush && brush) {
-                    if (currentBrush.id != brush.id) {
-                        break;
-                    }
-                }
-                if (currentBrush) {
-                    brush = currentBrush;
-                }
-            }
-
-            if (!brush) {
-                brush = _terrainMap.getBrush(0);
+                tileIndex |= neighborBrush << (i << 3);
             }
 
             for (int level; level < _levels; ++level) {
@@ -622,45 +603,44 @@ final class Scene : Resource!Scene {
                 }
 
                 int[] lowerTiles, upperTiles;
-                for (int i; i < TerrainMap.Brush.cliffIndexes.length; ++i) {
-                    TerrainMap.Brush.CliffInfo info = TerrainMap.Brush.cliffIndexes[i];
+                for (int i; i < TerrainMap.cliffIndexes.length; ++i) {
+                    TerrainMap.CliffInfo info = TerrainMap.cliffIndexes[i];
                     if (tileValue == info.index) {
                         if (info.isUpperLayer) {
-                            upperTiles = brush.cliffs[i];
+                            upperTiles = _terrainMap.getTiles(i, tileIndex);
                         }
                         else {
-                            lowerTiles = brush.cliffs[i];
+                            lowerTiles = _terrainMap.getTiles(i, tileIndex);
                         }
                         break;
                     }
                 }
                 if (lowerTiles.length == 0 && upperTiles.length == 0) {
-                    for (int i; i < TerrainMap.Brush.composedCliffIndexes.length;
-                        ++i) {
-                        TerrainMap.Brush.ComposedCliffInfo info =
-                            TerrainMap.Brush.composedCliffIndexes[i];
+                    for (int i; i < TerrainMap.composedCliffIndexes.length; ++i) {
+                        TerrainMap.ComposedCliffInfo info =
+                            TerrainMap.composedCliffIndexes[i];
                         if (tileValue == info.index) {
                             if (info.firstTile >= 0) {
-                                TerrainMap.Brush.CliffInfo firstCliffInfo =
-                                    TerrainMap.Brush.cliffIndexes[info.firstTile];
+                                TerrainMap.CliffInfo firstCliffInfo =
+                                    TerrainMap.cliffIndexes[info.firstTile];
 
                                 if (firstCliffInfo.isUpperLayer) {
-                                    upperTiles = brush.cliffs[info.firstTile];
+                                    upperTiles = _terrainMap.getTiles(info.firstTile, tileIndex);
                                 }
                                 else {
-                                    lowerTiles = brush.cliffs[info.firstTile];
+                                    lowerTiles = _terrainMap.getTiles(info.firstTile, tileIndex);
                                 }
                             }
 
                             if (info.secondTile >= 0) {
-                                TerrainMap.Brush.CliffInfo secondCliffInfo =
-                                    TerrainMap.Brush.cliffIndexes[info.secondTile];
+                                TerrainMap.CliffInfo secondCliffInfo =
+                                    TerrainMap.cliffIndexes[info.secondTile];
 
                                 if (secondCliffInfo.isUpperLayer) {
-                                    upperTiles = brush.cliffs[info.secondTile];
+                                    upperTiles = _terrainMap.getTiles(info.secondTile, tileIndex);
                                 }
                                 else {
-                                    lowerTiles = brush.cliffs[info.secondTile];
+                                    lowerTiles = _terrainMap.getTiles(info.secondTile, tileIndex);
                                 }
                             }
                             break;
@@ -688,13 +668,12 @@ final class Scene : Resource!Scene {
         }
 
         void processTile(int x, int y, Vec2i[4] neighborsOffset) {
-            int tileId = 0;
+            int tileId = -1;
             uint tileIndex = 0;
             Vec2i neighbor;
             int neighborBrush;
             int neighborLevel;
             bool neighborCliff;
-            TerrainMap.Brush brush, currentBrush;
             int level = int.max;
 
             foreach (int i, Vec2i neighborOffset; neighborsOffset) {
@@ -702,38 +681,24 @@ final class Scene : Resource!Scene {
                 neighborBrush = _brushGrid.getValue(neighbor.x, neighbor.y);
                 neighborLevel = _levelGrid.getValue(neighbor.x, neighbor.y);
                 neighborCliff = _cliffGrid.getValue(neighbor.x, neighbor.y);
-                currentBrush = _terrainMap.getBrush(neighborBrush);
 
                 if (neighborLevel < level) {
                     level = neighborLevel;
                 }
 
-                if (currentBrush && brush) {
-                    if (currentBrush.id != brush.id) {
-                        tileIndex = -1;
-                        break;
-                    }
-                }
-                if (currentBrush) {
-                    brush = currentBrush;
-                }
-
-                if (neighborBrush != -1 || neighborCliff) {
-                    tileIndex |= 0x1 << i;
-                }
+                tileIndex |= neighborBrush << (i << 3);
             }
 
-            if (!brush) {
-                brush = _terrainMap.getBrush(0);
-            }
-            int[] tiles = brush.tiles[tileIndex];
-            if (tiles.length) {
-                tileId = tiles[(x + y) % tiles.length];
+            if (tileIndex >= 0) {
+                int[] tiles = _terrainMap.getTiles(-1, tileIndex);
+                if (tiles.length) {
+                    tileId = tiles[(x + y) % tiles.length];
+                }
             }
             foreach (size_t i, Tilemap tilemap; _lowerTilemaps) {
                 tilemap.setTile(x, y, (level == i) ? tileId : -1);
             }
-        }*/
+        }
 
         void updateTiles() {
             if (!_terrainMap)

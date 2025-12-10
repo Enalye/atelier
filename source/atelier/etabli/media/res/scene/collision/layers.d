@@ -6,11 +6,12 @@ import atelier.core;
 import atelier.input;
 import atelier.ui;
 import atelier.render;
+
+import atelier.etabli.common;
 import atelier.etabli.ui;
 import atelier.etabli.media.res.base;
 import atelier.etabli.media.res.scene.common;
 import atelier.etabli.media.res.scene.editor;
-import atelier.etabli.media.res.scene.selection;
 import atelier.etabli.media.res.scene.settings;
 import atelier.etabli.media.res.scene.collision.add;
 import atelier.etabli.media.res.scene.collision.duplicate;
@@ -28,7 +29,7 @@ package(atelier.etabli.media.res.scene) final class CollisionList : UIElement {
         SceneDefinition.CollisionLayer _currentLayer;
 
         int _tool;
-        TilesSelection _selection;
+        TilesSelection!int _selection;
         int _brushSize = 1;
         int _brushTileId;
         Tilemap _previewSelectionTM;

@@ -1,11 +1,12 @@
-module atelier.etabli.media.res.grid.selection;
+module atelier.etabli.common.tile.selection;
 
 import atelier.common;
 
-package struct TilesSelection(T) {
+struct TilesSelection(T) {
     T[][] tiles;
     uint width, height;
     bool isValid;
+    T defaultValue;
 
     void flipH() {
         if (!isValid)
@@ -31,7 +32,7 @@ package struct TilesSelection(T) {
         tiles = result;
     }
 
-    T getFirst(T default_) const {
+    T getFirst(T default_ = defaultValue) const {
         if (width > 0 && height > 0)
             return tiles[0][0];
         return default_;

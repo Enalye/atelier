@@ -12,10 +12,9 @@ import atelier.core;
 import atelier.ui;
 import atelier.render;
 
+import atelier.etabli.common;
 import atelier.etabli.ui;
 import atelier.etabli.media.res.base;
-import atelier.etabli.media.res.scene.tilepicker;
-import atelier.etabli.media.res.scene.selection;
 
 package(atelier.etabli.media.res.scene) class TopographyToolbox : Modal {
     private {

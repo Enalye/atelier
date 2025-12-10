@@ -11,9 +11,9 @@ import atelier.common;
 import atelier.core;
 import atelier.ui;
 import atelier.render;
+import atelier.etabli.common;
 import atelier.etabli.ui;
 import atelier.etabli.media.res.base;
-import atelier.etabli.media.res.grid.selection;
 
 package class Toolbox(T) : Modal {
     private {

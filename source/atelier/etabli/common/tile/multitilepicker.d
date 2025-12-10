@@ -1,4 +1,4 @@
-module atelier.etabli.media.res.scene.tilepicker;
+module atelier.etabli.common.tile.multitilepicker;
 
 import std.file;
 import std.path;
@@ -12,11 +12,10 @@ import atelier.input;
 import atelier.ui;
 import atelier.render;
 
-import atelier.etabli.media.res.base;
-import atelier.etabli.media.res.scene.selection;
+import atelier.etabli.common.tile.selection;
 import atelier.etabli.ui;
 
-package(atelier.etabli.media.res.scene) final class TilePicker : UIElement {
+final class MultiTilePicker : UIElement {
     private {
         Tileset _tileset;
         Tilemap _tilemap;
@@ -28,10 +27,12 @@ package(atelier.etabli.media.res.scene) final class TilePicker : UIElement {
         Rectangle _background;
     }
 
-    TilesSelection selection;
+    TilesSelection!int selection;
 
     this(float height_ = 384f) {
         setSize(Vec2f(256f, height_));
+
+        selection.defaultValue = -1;
 
         {
             _background = Rectangle.fill(getSize());
@@ -59,6 +60,12 @@ package(atelier.etabli.media.res.scene) final class TilePicker : UIElement {
             rect.position = Vec2f.zero;
             addImage(rect);
         }
+    }
+
+    Tileset getTileset() {
+        if (_tilemap)
+            return _tilemap.tileset;
+        return null;
     }
 
     void setTileset(string rid) {

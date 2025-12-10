@@ -11,13 +11,13 @@ import atelier.core;
 import atelier.input;
 import atelier.ui;
 import atelier.render;
+import atelier.etabli.common;
 import atelier.etabli.ui;
 import atelier.etabli.media.res.base;
 import atelier.etabli.media.res.editor;
 import atelier.etabli.media.res.grid.gridmap;
 import atelier.etabli.media.res.grid.toolbox;
 import atelier.etabli.media.res.grid.parameter;
-import atelier.etabli.media.res.grid.selection;
 
 final class GridResourceEditor(T) : ResourceBaseEditor {
     private {

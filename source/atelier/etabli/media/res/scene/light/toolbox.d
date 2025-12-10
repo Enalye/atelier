@@ -15,7 +15,6 @@ import atelier.render;
 
 import atelier.etabli.ui;
 import atelier.etabli.media.res.base;
-import atelier.etabli.media.res.scene.selection;
 
 package(atelier.etabli.media.res.scene) class LightToolbox : Modal {
     private {

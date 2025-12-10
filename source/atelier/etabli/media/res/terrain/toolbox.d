@@ -13,17 +13,16 @@ import atelier.input;
 import atelier.ui;
 import atelier.render;
 
+import atelier.etabli.common;
 import atelier.etabli.ui;
 import atelier.etabli.media.res.base;
-import atelier.etabli.media.res.terrain.tilepicker;
-import atelier.etabli.media.res.terrain.selection;
 
 package(atelier.etabli.media.res.terrain) class Toolbox : Modal {
     private {
         ToolGroup _toolGroup;
         int _tool;
         IntegerField _brushField;
-        TilePicker _cliffTilePicker;
+        MultiTilePicker _cliffTilePicker;
         VBox _brushBox;
         int _srcBrush, _dstBrush;
     }
@@ -65,13 +64,14 @@ package(atelier.etabli.media.res.terrain) class Toolbox : Modal {
 
         addEventListener("globalkey", &_onKey);
 
-        _cliffTilePicker = new TilePicker;
+        _cliffTilePicker = new MultiTilePicker(128f);
         _cliffTilePicker.setAlign(UIAlignX.center, UIAlignY.bottom);
         _cliffTilePicker.setPosition(Vec2f(0f, 8f));
         _cliffTilePicker.addEventListener("value", {
             dispatchEvent("tool", false);
         });
         _cliffTilePicker.setTileset("editor:autotile");
+        _cliffTilePicker.setRectMode(true);
 
         {
             _brushBox = new VBox;
@@ -166,15 +166,23 @@ package(atelier.etabli.media.res.terrain) class Toolbox : Modal {
         return _toolGroup.value();
     }
 
-    int getCliffId() const {
-        return _cliffTilePicker.getTileId();
+    TilesSelection!int getSelection() {
+        return _cliffTilePicker.selection;
     }
 
     int getBrushId() const {
         return _brushField.value();
     }
 
+    void setBrushId(int id) {
+        _brushField.value = id;
+    }
+
     Vec2i getBrushReplaceIds() const {
         return Vec2i(_srcBrush, _dstBrush);
+    }
+
+    Tileset getTileset() {
+        return _cliffTilePicker.getTileset();
     }
 }

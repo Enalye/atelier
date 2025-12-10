@@ -1,4 +1,4 @@
-module atelier.etabli.media.res.terrain.tilepicker;
+module atelier.etabli.common.tile.singletilepicker;
 
 import std.file;
 import std.path;
@@ -16,7 +16,7 @@ import atelier.etabli.media.res.base;
 import atelier.etabli.media.res.terrain.selection;
 import atelier.etabli.ui;
 
-package(atelier.etabli.media.res.terrain) final class TilePicker : UIElement {
+final class SingleTilePicker : UIElement {
     private {
         Tileset _tileset;
         Tilemap _tilemap;

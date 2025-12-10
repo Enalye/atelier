@@ -13,10 +13,9 @@ import atelier.input;
 import atelier.ui;
 import atelier.render;
 
+import atelier.etabli.common;
 import atelier.etabli.ui;
 import atelier.etabli.media.res.base;
-import atelier.etabli.media.res.scene.tilepicker;
-import atelier.etabli.media.res.scene.selection;
 
 package(atelier.etabli.media.res.scene) class CollisionToolbox : Modal {
     private {
@@ -24,7 +23,7 @@ package(atelier.etabli.media.res.scene) class CollisionToolbox : Modal {
         int _tool;
         ToolGroup _modeGroup;
         int _mode;
-        TilePicker _tilePicker;
+        MultiTilePicker _tilePicker;
         HBox _brushSizeBox;
         Label _brushSizeLabel;
         IntegerField _brushSizeField;
@@ -90,7 +89,7 @@ package(atelier.etabli.media.res.scene) class CollisionToolbox : Modal {
 
         addEventListener("globalkey", &_onKey);
 
-        _tilePicker = new TilePicker(128f);
+        _tilePicker = new MultiTilePicker(128f);
         _tilePicker.setAlign(UIAlignX.center, UIAlignY.bottom);
         _tilePicker.setPosition(Vec2f(0f, 8f));
         _tilePicker.addEventListener("value", { dispatchEvent("tool", false); });
@@ -179,7 +178,7 @@ package(atelier.etabli.media.res.scene) class CollisionToolbox : Modal {
         return _modeGroup.value();
     }
 
-    TilesSelection getSelection() {
+    TilesSelection!int getSelection() {
         return _tilePicker.selection;
     }
 

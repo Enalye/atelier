@@ -13,6 +13,7 @@ import atelier.input;
 import atelier.ui;
 import atelier.render;
 
+import atelier.etabli.common;
 import atelier.etabli.ui;
 import atelier.etabli.media.res.base;
 import atelier.etabli.media.res.editor;
@@ -33,6 +34,10 @@ final class TerrainResourceEditor : ResourceBaseEditor {
         int _cliffId, _brushTileId;
         int _brushId = -1;
         bool _isApplyingTool;
+
+        Vec2i _startTile, _endTile;
+        TilesSelection!int _selection;
+        Tilemap _previewSelectionTM;
 
         string _name;
         uint _columns, _lines;
@@ -88,8 +93,15 @@ final class TerrainResourceEditor : ResourceBaseEditor {
         _toolbox = new Toolbox();
 
         _toolbox.addEventListener("tool", {
-            _cliffId = _toolbox.getCliffId();
+            //_cliffId = _toolbox.getCliffId();
             _brushId = _toolbox.getBrushId();
+
+            _selection = _toolbox.getSelection();
+            if (_selection.isValid && _selection.width >= 1 && _selection.height >= 1) {
+                _cliffId = _selection.tiles[0][0];
+            }
+
+            updateSelectionPreview();
         });
 
         _toolbox.addEventListener("tool_replaceBrush", {
@@ -138,6 +150,13 @@ final class TerrainResourceEditor : ResourceBaseEditor {
 
     override UIElement getPanel() {
         return _parameterWindow;
+    }
+
+    private void updateSelectionPreview() {
+        _previewSelectionTM = new Tilemap(_toolbox.getTileset(),
+            _selection.width, _selection.height);
+        _previewSelectionTM.setTiles(0, 0, _selection.tiles);
+        _previewSelectionTM.anchor = Vec2f.zero;
     }
 
     private void _setTilesetRID(string rid) {
@@ -194,6 +213,8 @@ final class TerrainResourceEditor : ResourceBaseEditor {
 
         _brushTilemap.position = getCenter() + _mapPosition;
         _brushTilemap.size = _mapSize;
+
+        _endTile = getTilePos();
     }
 
     private void _onMouseDown() {
@@ -225,6 +246,9 @@ final class TerrainResourceEditor : ResourceBaseEditor {
                 break;
             case 1:
                 _positionMouse = (getMousePosition() - (_tilemap.position - _tilemap.size / 2f)) / _zoom;
+                _startTile = getTilePos();
+                _endTile = _startTile;
+
                 if (hasControlModifier() && hasAltModifier()) {
                     _cliffId = -1;
                 }
@@ -266,6 +290,8 @@ final class TerrainResourceEditor : ResourceBaseEditor {
                 _positionMouse = Vec2f.zero;
                 break;
             case 1:
+                _endTile = getTilePos();
+
                 removeEventListener("mousemove", &_onCopyCliffTool);
                 removeEventListener("mousemove", &_onPasteCliffTool);
                 removeEventListener("mousemove", &_onEraseCliffTool);
@@ -308,14 +334,6 @@ final class TerrainResourceEditor : ResourceBaseEditor {
             return;
 
         _tilemap.draw();
-
-        switch (_toolbox.getTool()) {
-        case 1:
-            _cliffTilemap.draw();
-            break;
-        default:
-            break;
-        }
 
         immutable Vec2i[4] cornerOffsets = [
             Vec2i(0, 0), Vec2i(1, 0), Vec2i(1, 1), Vec2i(0, 1)
@@ -369,7 +387,9 @@ final class TerrainResourceEditor : ResourceBaseEditor {
                 }
             }
             break;
-        default:
+        case 1:
+            _cliffTilemap.draw();
+
             _rectangle.size = Vec2f.one * 16f * _zoom;
 
             for (uint y; y < _tileset.lines; ++y) {
@@ -382,6 +402,37 @@ final class TerrainResourceEditor : ResourceBaseEditor {
                     frame++;
                 }
             }
+
+            if (hasAltModifier()) {
+                Atelier.renderer.drawRect(origin + (cast(Vec2f) _endTile) * 16f * _zoom,
+                    Vec2f.one * 16f * _zoom, Atelier.theme.neutral, 1f, false);
+            }
+            else if (hasControlModifier()) {
+                if (_isApplyingTool) {
+                    Vec4i rect = getSelectionRect();
+                    Vec2i startPos = rect.xy;
+                    Vec2i endPos = rect.zw;
+
+                    Atelier.renderer.drawRect(origin + (cast(Vec2f) startPos) * 16f * _zoom,
+                        cast(Vec2f)(endPos + 1 - startPos) * 16f * _zoom,
+                        Atelier.theme.danger, 1f, false);
+                }
+            }
+            else {
+                if (_selection.isValid) {
+                    if (_previewSelectionTM) {
+                        _previewSelectionTM.size = Vec2f(_selection.width,
+                            _selection.height) * 16f * _zoom;
+                        _previewSelectionTM.draw(origin + (cast(Vec2f) _endTile) * 16f * _zoom);
+                    }
+
+                    Atelier.renderer.drawRect(origin + (cast(Vec2f) _endTile) * 16f * _zoom,
+                        Vec2f(_selection.width, _selection.height) * 16f * _zoom, _isApplyingTool ?
+                            Atelier.theme.accent : Atelier.theme.onAccent, 1f, false);
+                }
+            }
+            break;
+        default:
             break;
         }
     }
@@ -409,6 +460,7 @@ final class TerrainResourceEditor : ResourceBaseEditor {
         if (!_isSubTileValid(tilePos))
             return;
         _brushId = _brushTilemap.getTile(tilePos.x, tilePos.y);
+        _toolbox.setBrushId(_brushId);
     }
 
     private void _onPasteBrushTool() {
@@ -427,18 +479,50 @@ final class TerrainResourceEditor : ResourceBaseEditor {
         setDirty();
     }
 
+    private Vec4i getSelectionRect() {
+        Vec2i startPos = _startTile.min(_endTile);
+        Vec2i endPos = _startTile.max(_endTile);
+
+        return Vec4i(startPos, endPos);
+    }
+
     private void _onCopyCliffTool() {
-        Vec2i tilePos = getTilePos();
-        _cliffId = _cliffTilemap.getTile(tilePos.x, tilePos.y);
+        _endTile = getTilePos();
+
+        Vec4i rect = getSelectionRect();
+        Vec2i startPos = rect.xy;
+        Vec2i endPos = rect.zw;
+
+        int width_ = endPos.x + 1 - startPos.x;
+        int height_ = endPos.y + 1 - startPos.y;
+
+        _selection.width = width_;
+        _selection.height = height_;
+        _selection.tiles = new int[][](height_, width_);
+
+        for (int iy; iy < height_; ++iy) {
+            for (int ix; ix < width_; ++ix) {
+                _selection.tiles[iy][ix] = _cliffTilemap.getTile(startPos.x + ix,
+                    startPos.y + iy);
+            }
+        }
+        _selection.isValid = true;
+
+        updateSelectionPreview();
+
     }
 
     private void _onPasteCliffTool() {
-        Vec2i tilePos = getTilePos();
-        _cliffTilemap.setTile(tilePos.x, tilePos.y, _cliffId);
-        setDirty();
+        _endTile = getTilePos();
+
+        if (_selection.isValid) {
+            _cliffTilemap.setTiles(_endTile.x, _endTile.y, _selection.tiles);
+            setDirty();
+        }
     }
 
     private void _onEraseCliffTool() {
+        _endTile = getTilePos();
         Vec2i tilePos = getTilePos();
         _cliffTilemap.setTile(tilePos.x, tilePos.y, -1);
         setDirty();

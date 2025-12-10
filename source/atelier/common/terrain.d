@@ -420,6 +420,13 @@ final class TerrainMap : Resource!TerrainMap {
         return Brush();
     }
 
+    Brush getDefaultBrush() {
+        if (_brushIndexes.length > 0) {
+            return getBrush(_brushIndexes[0]);
+        }
+        return Brush();
+    }
+
     int getMaterial(int tileId, Vec2i subCoords) {
         tileId <<= 1;
         Vec2i coords = Vec2i(tileId % _brushmap.columns, tileId / _brushmap.columns);

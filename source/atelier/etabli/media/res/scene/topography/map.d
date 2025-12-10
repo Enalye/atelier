@@ -85,7 +85,7 @@ package(atelier.etabli.media.res.scene) final class TopographicMap : UIElement {
 
         _terrainMap = Atelier.etabli.getTerrain(_definition.topologicMap.terrainRID);
         if (_terrainMap) {
-            _brush = _terrainMap.getBrush(0);
+            _brush = _terrainMap.getDefaultBrush();
         }
     }
 

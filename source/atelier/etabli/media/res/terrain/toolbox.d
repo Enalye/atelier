@@ -101,6 +101,7 @@ package(atelier.etabli.media.res.terrain) class Toolbox : Modal {
 
                 _mainBrushField = new IntegerField();
                 _mainBrushField.setRange(-1, 255);
+                _mainBrushField.value = _brushID;
                 _mainBrushField.addEventListener("value", {
                     _brushID = _mainBrushField.value;
                     dispatchEvent("tool", false);
@@ -243,6 +244,7 @@ package(atelier.etabli.media.res.terrain) class Toolbox : Modal {
 
                 _brushField = new IntegerField();
                 _brushField.setRange(-1, 255);
+                _brushField.value = _brushID;
                 _brushField.addEventListener("value", {
                     _brushID = _brushField.value();
                     dispatchEvent("tool", false);

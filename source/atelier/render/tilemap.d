@@ -14,6 +14,7 @@ final class Tilemap : Image, Resource!Tilemap {
     private {
         struct Tile {
             int id;
+            int angle;
         }
 
         Tileset _tileset;
@@ -116,18 +117,24 @@ final class Tilemap : Image, Resource!Tilemap {
         return _tiles[x + y * _columns].id;
     }
 
-    void setRawTile(int index, int tileId) {
+    void setRawTile(int index, int tileId, int angle = 0) {
         if (index < 0 || index >= _tiles.length)
             return;
 
-        _tiles[index].id = tileId;
+        Tile tile;
+        tile.id = tileId;
+        tile.angle = angle;
+        _tiles[index] = tile;
     }
 
-    void setTile(int x, int y, int tileId) {
+    void setTile(int x, int y, int tileId, int angle = 0) {
         if (x < 0 || y < 0 || x >= _columns || y >= _lines)
             return;
 
-        _tiles[x + y * _columns].id = tileId;
+        Tile tile;
+        tile.id = tileId;
+        tile.angle = angle;
+        _tiles[x + y * _columns] = tile;
     }
 
     void setTiles(const(int[][]) tiles_) {
@@ -245,10 +252,12 @@ final class Tilemap : Image, Resource!Tilemap {
 
             if (index >= _tiles.length)
                 break;
-            int tileId = _tiles[index].id;
+
+            Tile tile = _tiles[index];
+            int tileId = tile.id;
 
             if (tileId >= 0)
-                _tileset.draw(tileId, tilePos, finalClipSize, angle);
+                _tileset.draw(tileId, tilePos, finalClipSize, tile.angle);
         }
     }
 
@@ -281,10 +290,11 @@ final class Tilemap : Image, Resource!Tilemap {
                     tilePos.x += (x - y) * halfTile.x;
                     tilePos.y += (x + y) * halfTile.y;
 
-                    int tileId = _tiles[x + y * _columns].id;
+                    Tile tile = _tiles[x + y * _columns];
+                    int tileId = tile.id;
 
                     if (tileId >= 0)
-                        _tileset.draw(tileId, tilePos, finalClipSize, angle);
+                        _tileset.draw(tileId, tilePos, finalClipSize, tile.angle);
                 }
             }
         }
@@ -308,10 +318,12 @@ final class Tilemap : Image, Resource!Tilemap {
                     tilePos.x += x * finalTileSize.x;
                     tilePos.y += y * finalTileSize.y;
 
-                    int tileId = _tiles[x + y * _columns].id;
+                    Tile tile = _tiles[x + y * _columns];
+
+                    int tileId = tile.id;
 
                     if (tileId >= 0)
-                        _tileset.draw(tileId, tilePos, finalClipSize, angle);
+                        _tileset.draw(tileId, tilePos, finalClipSize, tile.angle);
                 }
             }
         }

@@ -25,6 +25,7 @@ final class MultiTilePicker : UIElement {
         bool _isRect;
         Color _colorMod = Color.white;
         Rectangle _background;
+        int _maxTile = -1;
     }
 
     TilesSelection!int selection;
@@ -60,6 +61,10 @@ final class MultiTilePicker : UIElement {
             rect.position = Vec2f.zero;
             addImage(rect);
         }
+    }
+
+    void setMaxTile(int maxTile) {
+        _maxTile = maxTile;
     }
 
     Tileset getTileset() {
@@ -169,6 +174,10 @@ final class MultiTilePicker : UIElement {
 
         selection.tiles = _tilemap.getTiles(x, y, width_, height_);
         selection.isValid = true;
+
+        if (_maxTile >= 0) {
+            selection.replace!">="(_maxTile, -1);
+        }
     }
 
     private void _onDrag() {

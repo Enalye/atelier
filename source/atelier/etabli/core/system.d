@@ -358,6 +358,10 @@ final class Etabli {
                     terrainRes.farfadet.getNode("brushmap").get!(int[][])(0));
             }
 
+            foreach (brushmapNode; terrainRes.farfadet.getNodes("brushmapAlt")) {
+                terrainMap.addAltBrushmap(0, 0, brushmapNode.get!(int[][])(0));
+            }
+
             foreach (brushNode; terrainRes.farfadet.getNodes("brush")) {
                 uint id;
                 if (brushNode.hasNode("id")) {
@@ -373,18 +377,6 @@ final class Etabli {
                 }
 
                 terrainMap.addBrush(name, id, material);
-                /*foreach (tileNode; brushNode.getNodes("tiles")) {
-                    uint id = tileNode.get!uint(0);
-                    if (id >= TerrainMap.Brush.TilesSize)
-                        continue;
-                    brush.tiles[id] = tileNode.get!(int[])(1);
-                }
-                foreach (tileNode; brushNode.getNodes("cliffs")) {
-                    uint id = tileNode.get!uint(0);
-                    if (id >= TerrainMap.Brush.CliffsSize)
-                        continue;
-                    brush.cliffs[id] = tileNode.get!(int[])(1);
-                }*/
             }
 
             terrainMap.cache();

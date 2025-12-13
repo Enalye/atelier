@@ -139,6 +139,6 @@ final class Tileset : Resource!Tileset {
         _imageData.color = color;
         _imageData.blend = blend;
         _imageData.alpha = alpha;
-        _imageData.draw(position, size, currentClip, angle);
+        _imageData.draw(position, size, currentClip, angle, Vec2f.half);
     }
 }

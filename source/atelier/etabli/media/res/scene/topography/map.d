@@ -21,6 +21,8 @@ package(atelier.etabli.media.res.scene) final class TopographicMap : UIElement {
         int _brushSize = 1;
         int _brushLevel = 0;
         int _brushId = -1;
+        bool _canCopyBrush = true;
+        bool _canCopyLevel = true;
 
         Vec2i _startTile, _endTile;
         Vec2f _centerPosition = Vec2f.zero;
@@ -106,6 +108,11 @@ package(atelier.etabli.media.res.scene) final class TopographicMap : UIElement {
                 _definition.topologicMap.debugMode = _toolbox.getDebugMode();
                 _definition.topologicMap.debugLevel = _toolbox.getDebugLevel();
             });
+            _toolbox.addEventListener("copy", {
+                int copyMode = _toolbox.getCopyMode();
+                _canCopyBrush = copyMode == 0 || copyMode == 1;
+                _canCopyLevel = copyMode == 0 || copyMode == 2;
+            });
         }
 
         Atelier.ui.addUI(_toolbox);
@@ -124,11 +131,6 @@ package(atelier.etabli.media.res.scene) final class TopographicMap : UIElement {
     private void _onTool() {
     }
 
-    bool hasControlModifier() const {
-        return Atelier.input.isPressed(InputEvent.KeyButton.Button.leftControl) ||
-            Atelier.input.isPressed(InputEvent.KeyButton.Button.rightControl);
-    }
-
     void updateView(Vec2f centerPosition, Vec2f mapPosition, float zoom) {
         _centerPosition = centerPosition;
         _mapPosition = mapPosition;
@@ -138,12 +140,36 @@ package(atelier.etabli.media.res.scene) final class TopographicMap : UIElement {
         _mapSize = (cast(Vec2f) dimensions * tileSize) * _zoom;
     }
 
+    private void _copyBrushTool() {
+        Vec2i tilePos = _endTile;
+
+        int level = _definition.topologicMap.getLevel(_endTile.x, _endTile.y);
+        tilePos.y -= level;
+
+        if (_canCopyBrush) {
+            _brushId = _definition.topologicMap.getTile(tilePos.x, tilePos.y);
+        }
+
+        if (_terrainMap) {
+            if (_canCopyBrush) {
+                _brush = _terrainMap.getBrush(_brushId);
+                _toolbox.setBrushName(_brush.name);
+            }
+        }
+
+        if (_canCopyLevel) {
+            _brushLevel = level;
+            _toolbox.setLevel(_brushLevel);
+        }
+    }
+
     private void _pasteBrushTool() {
         int brushSize = _brushSize;
         int offset = brushSize & 0x1;
-        Vec2i startTile = _endTile - ((brushSize >> 1) + offset);
+        Vec2i tilePos = _endTile;
+        Vec2i startTile = tilePos - ((brushSize >> 1) + offset);
         float brushSize2 = (brushSize / 2f) - (offset ? 0.5f : 0f);
-        Vec2f center = (cast(Vec2f) _endTile) - (offset ? Vec2f.zero : Vec2f.half);
+        Vec2f center = (cast(Vec2f) tilePos) - (offset ? Vec2f.zero : Vec2f.half);
 
         for (int y; y <= brushSize + offset; ++y) {
             for (int x; x <= brushSize + offset; ++x) {
@@ -165,11 +191,6 @@ package(atelier.etabli.media.res.scene) final class TopographicMap : UIElement {
         setDirty();
     }
 
-    bool hasAltModifier() const {
-        return Atelier.input.isPressed(InputEvent.KeyButton.Button.leftAlt) ||
-            Atelier.input.isPressed(InputEvent.KeyButton.Button.rightAlt);
-    }
-
     void startTool(Vec2f mousePos) {
         _isApplyingTool = true;
 
@@ -182,15 +203,21 @@ package(atelier.etabli.media.res.scene) final class TopographicMap : UIElement {
         _startTile = tilePos;
         _endTile = _startTile;
 
-        if (hasAltModifier()) {
-            _brushId = -1;
+        if (Atelier.input.hasCtrl()) {
+            _copyBrushTool();
+            _updateToolFunc = &_copyBrushTool;
         }
         else {
-            _brushId = _brush.isValid ? _brush.id : -1;
-        }
+            if (Atelier.input.hasAlt()) {
+                _brushId = -1;
+            }
+            else {
+                _brushId = _brush.isValid ? _brush.id : -1;
+            }
 
-        _pasteBrushTool();
-        _updateToolFunc = &_pasteBrushTool;
+            _pasteBrushTool();
+            _updateToolFunc = &_pasteBrushTool;
+        }
     }
 
     void updateTool(Vec2f mousePos) {
@@ -234,16 +261,27 @@ package(atelier.etabli.media.res.scene) final class TopographicMap : UIElement {
 
         Color color = _isApplyingTool ? Atelier.theme.accent : Atelier.theme.onAccent;
 
-        if (hasControlModifier()) {
-            color = Atelier.theme.danger;
-        }
-
         if (_definition.topologicMap.debugMode == 2 || _definition.topologicMap.debugMode == 3) {
             renderDebug(_definition.topologicMap.debugLevel);
         }
 
-        Atelier.renderer.drawRect(origin + (cast(Vec2f) _endTile) * 16f * _zoom,
-            Vec2f.one * 16f * _zoom, color, 1f, false);
+        Vec2f tilePos = cast(Vec2f) _endTile;
+        if (Atelier.input.hasCtrl()) {
+            Atelier.renderer.drawRect(origin + tilePos * 16f * _zoom,
+                Vec2f.one * 16f * _zoom, color, 1f, false);
+
+            int level = _definition.topologicMap.getLevel(_endTile.x, _endTile.y);
+            tilePos.y -= level;
+
+            Atelier.renderer.drawRect(origin + tilePos * 16f * _zoom,
+                Vec2f.one * 16f * _zoom, Atelier.theme.danger, 1f, false);
+        }
+        else {
+            tilePos.y -= _brushLevel;
+
+            Atelier.renderer.drawRect(origin + tilePos * 16f * _zoom,
+                Vec2f.one * 16f * _zoom, color, 1f, false);
+        }
     }
 
     void renderDebug(int levelToShow) {

@@ -526,7 +526,11 @@ package final class SceneDefinition {
             updateTiles();
         }
 
-        void setTile(int x, int y, uint brushId, uint level) {
+        int getTile(int x, int y) {
+            return _brushGrid.getValue(x, y);
+        }
+
+        void setTile(int x, int y, int brushId, int level) {
             int oldBrush = _brushGrid.getValue(x, y);
             int oldLevel = _levelGrid.getValue(x, y);
             if (oldBrush == brushId && oldLevel == level)

@@ -20,12 +20,13 @@ package(atelier.etabli.media.res.scene) class TopographyToolbox : Modal {
     private {
         SelectButton _brushSelect;
         IntegerField _levelField, _brushSizeField;
+        CarouselButton _copyMode;
         CarouselButton _debugLevelMode;
         IntegerField _debugLevelField;
     }
 
     this(TerrainMap terrainMap) {
-        setSize(Vec2f(284f, 228f));
+        setSize(Vec2f(284f, 250f));
         setAlign(UIAlignX.left, UIAlignY.top);
         setPosition(Vec2f(258f, 75f));
 
@@ -93,6 +94,21 @@ package(atelier.etabli.media.res.scene) class TopographyToolbox : Modal {
         }
 
         {
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(getWidth() - 16f, 0f));
+            vbox.addUI(hlayout);
+
+            hlayout.addUI(new Label("Copie:", Atelier.theme.font));
+
+            _copyMode = new CarouselButton([
+                "Pinceau & Niveau", "Pinceau", "Niveau"
+            ], "Pinceau & Niveau");
+            hlayout.addUI(_copyMode);
+
+            _copyMode.addEventListener("value", { dispatchEvent("copy", false); });
+        }
+
+        {
             LabelSeparator sep = new LabelSeparator("Débug", Atelier.theme.font);
             sep.setColor(Atelier.theme.neutral);
             sep.setPadding(Vec2f(getWidth() - 16f, 0f));
@@ -151,11 +167,23 @@ package(atelier.etabli.media.res.scene) class TopographyToolbox : Modal {
         return _brushSelect.value;
     }
 
+    void setBrushName(string name) {
+        _brushSelect.value = name;
+    }
+
+    void setLevel(int level) {
+        _levelField.value = level;
+    }
+
     int getDebugMode() {
         return _debugLevelMode.ivalue;
     }
 
     int getDebugLevel() {
         return _debugLevelField.value;
+    }
+
+    int getCopyMode() {
+        return _copyMode.ivalue;
     }
 }

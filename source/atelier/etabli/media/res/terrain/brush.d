@@ -15,11 +15,6 @@ import atelier.etabli.media.res.terrain.add_brush;
 import atelier.etabli.media.res.terrain.edit_brush;
 import atelier.etabli.media.res.terrain.remove_brush;
 
-private immutable int[] brushSwapTable = [
-    // Sol
-    8, 10, 9, 13, 1, 15, 5, 4, 2, 6, 7, 3, 14, 11, 12, 0
-];
-
 package final class BrushList : UIElement {
     private {
         VBox _vbox;
@@ -60,10 +55,6 @@ package final class BrushList : UIElement {
                 uint id(uint id_) {
                     return _id = id_;
                 }
-
-                /* Tilemap tilemap() {
-                    return _tilemap;
-                }*/
             }
 
             this(string name_, uint id_, int material_) {
@@ -243,35 +234,6 @@ package final class BrushList : UIElement {
             node.addNode("name").add(brush.name);
             node.addNode("material").add(brush.material);
         }
-        /*foreach (Brush brush; _brushes) {
-            Farfadet node = ffd.addNode("brush").add(brush.name);
-            int[][TerrainMap.Brush.TilesSize] tiles;
-            int[][TerrainMap.Brush.CliffsSize] cliffs;
-
-            int tileId;
-            foreach (int value; brush.tilemap.getRawTiles()) {
-                if (value >= 0 && value < TerrainMap.Brush.TilesSize) {
-                    tiles[value] ~= tileId;
-                }
-                else if (value >= TerrainMap.Brush.TilesSize &&
-                    value < (TerrainMap.Brush.TilesSize + TerrainMap.Brush.CliffsSize)) {
-                    cliffs[value - (cast(int) TerrainMap.Brush.TilesSize)] ~= tileId;
-                }
-                tileId++;
-            }
-
-            int brushId;
-            foreach (int i; brushSwapTable) {
-                node.addNode("tiles").add(brushId).add(tiles[i]);
-                brushId++;
-            }
-
-            brushId = 0;
-            for (int i; i < TerrainMap.Brush.CliffsSize; ++i) {
-                node.addNode("cliffs").add(brushId).add(cliffs[i]);
-                brushId++;
-            }
-        }*/
     }
 
     void load(Farfadet ffd) {
@@ -292,36 +254,7 @@ package final class BrushList : UIElement {
             Brush brush = new Brush(name, id, material);
             _brushes ~= brush;
         }
-        /*_brushes.length = 0;
-        foreach (Farfadet node; ffd.getNodes("brush")) {
-            Brush brush = new Brush(node.get!string(0));
 
-            foreach (tilesNode; node.getNodes("tiles")) {
-                int brushId = tilesNode.get!int(0);
-                int[] tiles = tilesNode.get!(int[])(1);
-
-                if (brushId >= 0 && brushId < TerrainMap.Brush.TilesSize) {
-                    int id = brushSwapTable[brushId];
-
-                    foreach (int tile; tiles) {
-                        brush.tilemap.setRawTile(tile, id);
-                    }
-                }
-            }
-            foreach (tilesNode; node.getNodes("cliffs")) {
-                int brushId = tilesNode.get!int(0);
-                int[] tiles = tilesNode.get!(int[])(1);
-
-                if (brushId >= 0 && brushId < TerrainMap.Brush.CliffsSize) {
-                    int id = brushId + TerrainMap.Brush.TilesSize;
-
-                    foreach (int tile; tiles) {
-                        brush.tilemap.setRawTile(tile, id);
-                    }
-                }
-            }
-            _brushes ~= brush;
-        }*/
         _rebuildList();
     }
 }

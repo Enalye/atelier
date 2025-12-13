@@ -37,4 +37,16 @@ struct TilesSelection(T) {
             return tiles[0][0];
         return default_;
     }
+
+    void replace(string op)(T maxValue, T default_ = defaultValue) {
+        for (int iy; iy < height; ++iy) {
+            for (int ix; ix < width; ++ix) {
+                bool isReplacing;
+                mixin("isReplacing = tiles[iy][ix] ", op, " maxValue;");
+                if (isReplacing) {
+                    tiles[iy][ix] = default_;
+                }
+            }
+        }
+    }
 }

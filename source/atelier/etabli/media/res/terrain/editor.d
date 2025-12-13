@@ -180,8 +180,9 @@ final class TerrainResourceEditor : ResourceBaseEditor {
         node.addNode("tileset").add(_tilesetRID);
         node.addNode("size").add(_columns).add(_lines);
         node.addNode("cliffmap").add(_cliffTilemap.getTiles());
+        node.addNode("brushmap").add(_brushTilemap.getTiles());
         foreach (brushTilemap; _altBrushTilemaps) {
-            node.addNode("brushmap").add(brushTilemap.getTiles());
+            node.addNode("brushmapAlt").add(brushTilemap.getTiles());
         }
         _parameterWindow.save(node);
         return node;

@@ -315,8 +315,6 @@ package(atelier.etabli.media.res.scene) final class TopographicMap : UIElement {
         Vec2f offset = _centerPosition + _mapPosition;
         Vec2f origin = offset + Vec2f(-8f, -8f) * _zoom - _mapSize / 2f;
 
-        Color color = _isApplyingTool ? Atelier.theme.accent : Atelier.theme.onAccent;
-
         if (_definition.topologicMap.debugMode == 2 || _definition.topologicMap.debugMode == 3) {
             renderDebug(_definition.topologicMap.debugLevel);
         }
@@ -324,7 +322,7 @@ package(atelier.etabli.media.res.scene) final class TopographicMap : UIElement {
         Vec2f tilePos = cast(Vec2f) _endTile;
         if (Atelier.input.hasCtrl()) {
             Atelier.renderer.drawRect(origin + tilePos * 16f * _zoom,
-                Vec2f.one * 16f * _zoom, color, 1f, false);
+                Vec2f.one * 16f * _zoom, Atelier.theme.neutral, 1f, false);
 
             int level = _definition.topologicMap.getLevel(_endTile.x, _endTile.y);
             tilePos.y -= level;
@@ -333,6 +331,9 @@ package(atelier.etabli.media.res.scene) final class TopographicMap : UIElement {
                 Vec2f.one * 16f * _zoom, Atelier.theme.danger, 1f, false);
         }
         else if (Atelier.input.hasShift()) {
+            Atelier.renderer.drawRect(origin + tilePos * 16f * _zoom,
+                Vec2f.one * 16f * _zoom, Atelier.theme.neutral, 1f, false);
+
             tilePos.y -= _brushLevel;
 
             HSLColor col = HSLColor.fromColor(Atelier.theme.accent);
@@ -342,8 +343,12 @@ package(atelier.etabli.media.res.scene) final class TopographicMap : UIElement {
                 Vec2f.one * 16f * _zoom, col.toColor(), 1f, false);
         }
         else {
+            Atelier.renderer.drawRect(origin + tilePos * 16f * _zoom,
+                Vec2f.one * 16f * _zoom, Atelier.theme.neutral, 1f, false);
+
             tilePos.y -= _brushLevel;
 
+            Color color = _isApplyingTool ? Atelier.theme.accent : Atelier.theme.onAccent;
             Atelier.renderer.drawRect(origin + tilePos * 16f * _zoom,
                 Vec2f.one * 16f * _zoom, color, 1f, false);
         }

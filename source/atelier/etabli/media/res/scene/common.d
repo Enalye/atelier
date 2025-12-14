@@ -462,6 +462,10 @@ package final class SceneDefinition {
             }
         }
 
+        Vec2u getGridSize() const {
+            return Vec2u(_brushGrid.columns, _brushGrid.lines);
+        }
+
         int getLevel(int x, int y) {
             return _levelGrid.getValue(x, y);
         }

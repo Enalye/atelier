@@ -186,6 +186,58 @@ package(atelier.etabli.media.res.scene) final class TopographicMap : UIElement {
         setDirty();
     }
 
+    private void _fillBrushTool() {
+        Vec2u gridSize = _definition.topologicMap.getGridSize();
+
+        Vec2i[] getNeighbors(ref Vec2i tile) {
+            Vec2i[] neighbors;
+            if (tile.x > 0)
+                neighbors ~= Vec2i(tile.x - 1, tile.y);
+            if (tile.x + 1 < gridSize.x)
+                neighbors ~= Vec2i(tile.x + 1, tile.y);
+            if (tile.y > 0)
+                neighbors ~= Vec2i(tile.x, tile.y - 1);
+            if (tile.y + 1 < gridSize.y)
+                neighbors ~= Vec2i(tile.x, tile.y + 1);
+            return neighbors;
+        }
+
+        int x = _endTile.x;
+        int y = _endTile.y;
+
+        x = clamp(x, 0, gridSize.x - 1);
+        y = clamp(y, 0, gridSize.y - 1);
+
+        const int brushToReplace = _definition.topologicMap.getTile(x, y);
+        const int levelToReplace = _definition.topologicMap.getLevel(x, y);
+
+        if ((!_canCopyBrush || brushToReplace == _brushId) &&
+            (!_canCopyLevel || levelToReplace == _brushLevel))
+            return;
+
+        Vec2i[] frontiers;
+        frontiers ~= Vec2i(x, y);
+        _definition.topologicMap.setTile(x, y, _brushId, _brushLevel);
+
+        while (frontiers.length) {
+            Vec2i current = frontiers[0];
+            frontiers = frontiers[1 .. $];
+
+            foreach (ref neighbor; getNeighbors(current)) {
+                const int brush = _definition.topologicMap.getTile(neighbor.x, neighbor.y);
+                const int level = _definition.topologicMap.getLevel(neighbor.x, neighbor.y);
+
+                if ((_canCopyBrush && brush != brushToReplace) ||
+                    (_canCopyLevel && level != levelToReplace))
+                    continue;
+                _definition.topologicMap.setTile(neighbor.x, neighbor.y, _brushId, _brushLevel);
+                frontiers ~= neighbor;
+            }
+        }
+        _definition.topologicMap.updateTiles();
+        setDirty();
+    }
+
     private void _setTile(int x, int y) {
         _definition.topologicMap.setTile(x, y, _brushId, _brushLevel);
         setDirty();
@@ -206,6 +258,10 @@ package(atelier.etabli.media.res.scene) final class TopographicMap : UIElement {
         if (Atelier.input.hasCtrl()) {
             _copyBrushTool();
             _updateToolFunc = &_copyBrushTool;
+        }
+        else if (Atelier.input.hasShift()) {
+            _brushId = _brush.isValid ? _brush.id : -1;
+            _fillBrushTool();
         }
         else {
             if (Atelier.input.hasAlt()) {
@@ -275,6 +331,15 @@ package(atelier.etabli.media.res.scene) final class TopographicMap : UIElement {
 
             Atelier.renderer.drawRect(origin + tilePos * 16f * _zoom,
                 Vec2f.one * 16f * _zoom, Atelier.theme.danger, 1f, false);
+        }
+        else if (Atelier.input.hasShift()) {
+            tilePos.y -= _brushLevel;
+
+            HSLColor col = HSLColor.fromColor(Atelier.theme.accent);
+            col.h = col.h - 60f;
+
+            Atelier.renderer.drawRect(origin + tilePos * 16f * _zoom,
+                Vec2f.one * 16f * _zoom, col.toColor(), 1f, false);
         }
         else {
             tilePos.y -= _brushLevel;

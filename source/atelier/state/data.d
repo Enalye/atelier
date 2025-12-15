@@ -1,4 +1,4 @@
-module atelier.env.data;
+module atelier.state.data;
 
 import std.file;
 import std.zlib;
@@ -7,15 +7,15 @@ import farfadet;
 
 import atelier.common;
 
-package template isEnvType(T) {
-    enum isEnvType = is(T == string) ||
+package template isStateType(T) {
+    enum isStateType = is(T == string) ||
         is(T == bool) ||
         is(T == int) ||
         is(T == uint) ||
         is(T == float);
 }
 
-final class EnvData {
+final class StateData {
     private {
         string _playerController;
         string _playerActor;

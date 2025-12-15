@@ -9,18 +9,18 @@ import farfadet;
 import grimoire;
 
 import atelier.audio;
+import atelier.console;
 import atelier.common;
-import atelier.env;
+import atelier.etabli;
 import atelier.input;
 import atelier.locale;
 import atelier.nav;
 import atelier.physics;
 import atelier.render;
 import atelier.script;
+import atelier.state;
 import atelier.ui;
 import atelier.world;
-import atelier.console;
-import atelier.etabli;
 
 import atelier.core.build;
 import atelier.core.loader;
@@ -79,7 +79,7 @@ final class Atelier {
         AudioMixer _audioMixer;
         World _world;
         NavMesh _navMesh;
-        Env _env;
+        State _state;
         Console _console;
         Script _script;
         RNG _rng;
@@ -143,8 +143,8 @@ final class Atelier {
         }
 
         /// Environnement
-        Env env() {
-            return _env;
+        State state() {
+            return _state;
         }
 
         /// Le terminal de commande
@@ -284,7 +284,7 @@ final class Atelier {
         _resourceManager = new ResourceManager();
         _world = new World();
         _navMesh = new NavMesh();
-        _env = new Env();
+        _state = new State();
         _physics = new Physics();
         _rng = new RNG();
         _theme = new Theme();

@@ -1,17 +1,17 @@
-module atelier.env.system;
+module atelier.state.system;
 
 import std.conv : to;
 import std.path : buildNormalizedPath, setExtension;
 
-import atelier.env.data;
+import atelier.state.data;
 
-final class Env {
+final class State {
     private {
-        EnvData _current;
+        StateData _current;
     }
 
     this() {
-        _current = new EnvData;
+        _current = new StateData;
     }
 
     private string getFilePath(int index) {

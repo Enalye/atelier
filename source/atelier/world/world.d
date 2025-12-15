@@ -5,10 +5,10 @@ import std.conv : to;
 
 import atelier.common;
 import atelier.core;
-import atelier.env;
 import atelier.input;
 import atelier.physics;
 import atelier.render;
+import atelier.state;
 import atelier.ui;
 import atelier.world.audio;
 import atelier.world.camera;
@@ -209,7 +209,7 @@ final class World {
 
     private void _setupPlayerController() {
         if (!_playerController) {
-            _player.setController(Atelier.env.getPlayerController());
+            _player.setController(Atelier.state.getPlayerController());
         }
     }
 
@@ -222,7 +222,7 @@ final class World {
 
     void load(string sceneRid, string tpName = "") {
         _isRunning = true;
-        Atelier.env.setScene(sceneRid, tpName);
+        Atelier.state.setScene(sceneRid, tpName);
 
         _sceneRid = sceneRid;
         _tpName = tpName;
@@ -252,8 +252,8 @@ final class World {
             addRenderedEntity(_player);
             _player.setName("player");
         }
-        else if (Atelier.env.getPlayerActor().length) {
-            _player = Atelier.res.get!Actor(Atelier.env.getPlayerActor());
+        else if (Atelier.state.getPlayerActor().length) {
+            _player = Atelier.res.get!Actor(Atelier.state.getPlayerActor());
             _player.setPosition(Vec3i(0, 0, 0));
             _player.setName("player");
             _player.setGraphic("idle");
@@ -312,7 +312,7 @@ final class World {
                             _playerController.onTeleport(teleporter.direction + 4, true);
                         }
 
-                        Atelier.env.setTeleporterDirection(teleporter.direction + 4);
+                        Atelier.state.setTeleporterDirection(teleporter.direction + 4);
                     }
                     else { // Position par défaut
                         _player.setPosition(teleporter.getPosition());

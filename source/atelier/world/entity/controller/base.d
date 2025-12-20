@@ -43,6 +43,20 @@ abstract class Controller(T : Entity) : ControllerWrapper {
     void onStart() {
     }
 
+    void onEnable() {
+        if (!_behavior)
+            return;
+
+        _behavior.onEnable();
+    }
+
+    void onDisable() {
+        if (!_behavior)
+            return;
+
+        _behavior.onDisable();
+    }
+
     void onClose() {
     }
 

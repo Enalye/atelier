@@ -4,6 +4,7 @@ import grimoire;
 
 import atelier.common;
 import atelier.core;
+import atelier.physics;
 import atelier.render;
 import atelier.world;
 import atelier.ui;
@@ -69,6 +70,12 @@ package void loadLibWorld_entity(GrModule mod) {
     mod.setDescription(GrLocale.fr_FR, "Active/Désactive l’entité");
     mod.setParameters(["entity", "state"]);
     mod.addFunction(&_setEnabled, "setEnabled", [
+            entityType, grBool
+        ]);
+
+    mod.setDescription(GrLocale.fr_FR, "Active/Désactive la collision de l’entité");
+    mod.setParameters(["entity", "state"]);
+    mod.addFunction(&_setCollidable, "setCollidable", [
             entityType, grBool
         ]);
 
@@ -188,6 +195,12 @@ private void _addPosition(GrCall call) {
 private void _setEnabled(GrCall call) {
     Entity entity = call.getNative!Entity(0);
     entity.setEnabled(call.getBool(1));
+}
+
+private void _setCollidable(GrCall call) {
+    Entity entity = call.getNative!Entity(0);
+    Hurtbox hurtbox = entity.getHurtbox();
+    hurtbox.isCollidable(call.getBool(1));
 }
 
 private void _getPosition(GrCall call) {

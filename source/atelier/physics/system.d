@@ -1188,4 +1188,53 @@ final class Physics {
         }
         return hit;
     }
+
+    void draw(Vec2f offset) {
+        if (_showActors) {
+            foreach (actor; _actors) {
+                if (actor.entity.isInRenderList())
+                    continue;
+
+                actor.drawBack(offset + actor.entity.cameraPosition());
+                actor.drawFront(offset + actor.entity.cameraPosition());
+            }
+        }
+        if (_showSolids) {
+            foreach (solid; _solids) {
+                if (solid.entity.isInRenderList())
+                    continue;
+
+                solid.drawBack(offset + solid.entity.cameraPosition());
+                solid.drawFront(offset + solid.entity.cameraPosition());
+            }
+        }
+        if (_showShots) {
+            foreach (shot; _shots) {
+                if (shot.entity.isInRenderList())
+                    continue;
+
+                shot.drawBack(offset + shot.entity.cameraPosition());
+                shot.drawFront(offset + shot.entity.cameraPosition());
+            }
+        }
+        if (_showTriggers) {
+            foreach (trigger; _triggers) {
+                if (trigger.entity.isInRenderList())
+                    continue;
+
+                trigger.drawBack(offset + trigger.entity.cameraPosition());
+                trigger.drawFront(offset + trigger.entity.cameraPosition());
+            }
+        }
+        if (_showHurtboxes) {
+            for (uint i; i < 32; ++i) {
+                foreach (hurtbox; _hurtboxLayersInternal[i].hurtboxes) {
+                    if (hurtbox.entity.isInRenderList())
+                        continue;
+
+                    hurtbox.draw(offset + hurtbox.entity.cameraPosition());
+                }
+            }
+        }
+    }
 }

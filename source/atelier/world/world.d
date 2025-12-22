@@ -956,6 +956,7 @@ final class World {
         }
 
         Atelier.nav.draw(entityOffset);
+        Atelier.physics.draw(entityOffset);
 
         _lighting.draw(entityOffset);
         _weather.draw(entityOffset);

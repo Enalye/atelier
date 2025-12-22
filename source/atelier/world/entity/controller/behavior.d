@@ -43,6 +43,12 @@ abstract class Behavior(T : Entity) {
     void onStart() {
     }
 
+    void onEnable() {
+    }
+
+    void onDisable() {
+    }
+
     void onClose() {
     }
 

@@ -99,7 +99,6 @@ final class Physics {
         Array!TriggerCollider _triggers;
         Array!Repulsor _repulsors;
         bool _hasColliderToRemove;
-        bool _hasHurtboxToRemove;
         bool _hasRepulsorToRemove;
         bool _areTriggersActive;
         bool _isBounded;
@@ -353,6 +352,7 @@ final class Physics {
                     continue;
                 }
             }
+
             _hurtboxLayersInternal[layer].hurtboxes.sweep();
         }
 
@@ -458,7 +458,6 @@ final class Physics {
 
     void removeHurtbox(Hurtbox hurtbox) {
         if (hurtbox.isRegistered) {
-            _hasHurtboxToRemove = true;
             hurtbox.isRegistered = false;
         }
     }

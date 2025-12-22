@@ -85,6 +85,20 @@ mixin template EntityController() {
         return _controller.onEvent(event);
     }
 
+    final override void onEnable() {
+        if (!_controller)
+            return;
+
+        _controller.onEnable();
+    }
+
+    final override void onDisable() {
+        if (!_controller)
+            return;
+
+        _controller.onDisable();
+    }
+
     final private void onHit(Entity target, Vec3f normal) {
         if (!_controller)
             return;
@@ -1058,6 +1072,7 @@ abstract class Entity {
     final void setEnabled(bool enabled) {
         if (enabled) {
             _isEnabled = true;
+            onEnable();
             if (_collider)
                 _collider.register();
             if (_hurtbox)
@@ -1065,6 +1080,7 @@ abstract class Entity {
         }
         else {
             _isEnabled = false;
+            onDisable();
             if (_collider)
                 _collider.unregister();
             if (_hurtbox)
@@ -1098,6 +1114,12 @@ abstract class Entity {
         removeController();
 
         onUnregisterEntity();
+    }
+
+    void onEnable() {
+    }
+
+    void onDisable() {
     }
 
     void onRegisterEntity() {

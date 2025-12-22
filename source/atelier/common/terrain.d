@@ -210,7 +210,8 @@ final class TerrainMap : Resource!TerrainMap {
         0b0100, //
         0b1000, //
         0b1001, //
-        0b0110, //        
+        0b0110, //
+        0b1111, //
     ];
 
     @property {
@@ -301,6 +302,15 @@ final class TerrainMap : Resource!TerrainMap {
 
                 if (cliffValue >= 0) {
                     cliffMask = TerrainMap.cliffMasks[cliffValue];
+                }
+
+                if (cliffValue < 0) {
+                    tileId++;
+                    continue;
+                }
+
+                if (cliffValue == 38) {
+                    cliffValue = -1;
                 }
 
                 {

@@ -79,7 +79,7 @@ package(atelier.etabli.media.res.terrain) class Toolbox : Modal {
         _cliffTilePicker = new MultiTilePicker(128f);
         _cliffTilePicker.setAlign(UIAlignX.center, UIAlignY.bottom);
         _cliffTilePicker.setPosition(Vec2f(0f, 8f));
-        _cliffTilePicker.setMaxTile(TerrainMap.CliffsSize);
+        _cliffTilePicker.setMaxTile(TerrainMap.CliffsSize + 1);
         _cliffTilePicker.addEventListener("value", {
             dispatchEvent("tool", false);
         });

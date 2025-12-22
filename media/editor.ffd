@@ -376,7 +376,7 @@ tileset "editor:autotile" {
     clip 96 176 16 16
     lines 5
     columns 8
-    maxCount 54
+    maxCount 55
     margin 0 0
     frameTime 0
 }

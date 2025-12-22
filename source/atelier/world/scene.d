@@ -97,6 +97,10 @@ final class Scene : Resource!Scene {
             _tilemap.setTiles(0, 0, stream.read!(int[][])());
         }
 
+        void update() {
+            _tilemap.update();
+        }
+
         void drawLine(int y, Vec2f offset) {
             _tilemap.drawLine(y, offset);
         }
@@ -194,6 +198,10 @@ final class Scene : Resource!Scene {
             _lines = stream.read!uint();
             _tilesetRID = stream.read!string();
             _tilemap.setTiles(0, 0, stream.read!(int[][])());
+        }
+
+        void update() {
+            _tilemap.update();
         }
 
         void draw(Vec2f offset) {
@@ -683,22 +691,29 @@ final class Scene : Resource!Scene {
             int tileId = -1;
             uint tileIndex = 0;
             Vec2i neighbor;
-            int neighborBrush;
-            int neighborLevel;
+            int[4] neighborBrushes;
+            int[4] neighborLevels;
             bool neighborCliff;
             int level = int.max;
 
             foreach (int i, Vec2i neighborOffset; neighborsOffset) {
                 neighbor = Vec2i(x, y) + neighborOffset;
-                neighborBrush = _brushGrid.getValue(neighbor.x, neighbor.y);
-                neighborLevel = _levelGrid.getValue(neighbor.x, neighbor.y);
+                neighborBrushes[i] = _brushGrid.getValue(neighbor.x, neighbor.y);
+                neighborLevels[i] = _levelGrid.getValue(neighbor.x, neighbor.y);
                 neighborCliff = _cliffGrid.getValue(neighbor.x, neighbor.y);
 
-                if (neighborLevel < level) {
-                    level = neighborLevel;
+                if (neighborLevels[i] < level) {
+                    level = neighborLevels[i];
                 }
 
-                tileIndex |= neighborBrush << (i << 3);
+                if (i == 3 && neighborLevels[i] > neighborLevels[0]) {
+                    neighborBrushes[i] = neighborBrushes[0];
+                }
+                else if (i == 2 && neighborLevels[i] > neighborLevels[1]) {
+                    neighborBrushes[i] = neighborBrushes[1];
+                }
+
+                tileIndex |= neighborBrushes[i] << (i << 3);
             }
 
             if (tileIndex >= 0) {
@@ -823,6 +838,15 @@ final class Scene : Resource!Scene {
                 for (uint x = 1; x < _columns; ++x) {
                     processShadow(x, y, innerOffsets);
                 }
+            }
+        }
+
+        void update() {
+            foreach (tilemap; _lowerTilemaps) {
+                tilemap.update();
+            }
+            foreach (tilemap; _upperTilemaps) {
+                tilemap.update();
             }
         }
     }
@@ -1058,6 +1082,16 @@ final class Scene : Resource!Scene {
         for (uint i; i < lightCount; ++i) {
             _lights[i] = new LightBuilder(stream);
         }
+    }
+
+    void update() {
+        _topologicMap.update();
+
+        foreach (layer; _terrainlayers)
+            layer.update();
+
+        foreach (layer; _parallaxLayers)
+            layer.update();
     }
 
     int getBaseZ(Vec2i pos) {

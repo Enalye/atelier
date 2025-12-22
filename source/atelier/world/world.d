@@ -535,6 +535,10 @@ final class World {
                 _transition = null;
             }
         }
+
+        if (_scene) {
+            _scene.update();
+        }
         _updateRenderList();
         _frame++;
     }

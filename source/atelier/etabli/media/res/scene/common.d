@@ -655,22 +655,29 @@ package final class SceneDefinition {
             int tileId = -1;
             int tileIndex = 0;
             Vec2i neighbor;
-            int neighborBrush;
-            int neighborLevel;
+            int[4] neighborBrushes;
+            int[4] neighborLevels;
             bool neighborCliff;
             int level = int.max;
 
             foreach (int i, Vec2i neighborOffset; neighborsOffset) {
                 neighbor = Vec2i(x, y) + neighborOffset;
-                neighborBrush = _brushGrid.getValue(neighbor.x, neighbor.y);
-                neighborLevel = _levelGrid.getValue(neighbor.x, neighbor.y);
+                neighborBrushes[i] = _brushGrid.getValue(neighbor.x, neighbor.y);
+                neighborLevels[i] = _levelGrid.getValue(neighbor.x, neighbor.y);
                 neighborCliff = _cliffGrid.getValue(neighbor.x, neighbor.y);
 
-                if (neighborLevel < level) {
-                    level = neighborLevel;
+                if (neighborLevels[i] < level) {
+                    level = neighborLevels[i];
                 }
 
-                tileIndex |= neighborBrush << (i << 3);
+                if (i == 3 && neighborLevels[i] > neighborLevels[0]) {
+                    neighborBrushes[i] = neighborBrushes[0];
+                }
+                else if (i == 2 && neighborLevels[i] > neighborLevels[1]) {
+                    neighborBrushes[i] = neighborBrushes[1];
+                }
+
+                tileIndex |= neighborBrushes[i] << (i << 3);
             }
 
             if (tileIndex >= 0) {

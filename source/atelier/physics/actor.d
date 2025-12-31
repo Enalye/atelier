@@ -282,9 +282,43 @@ final class ActorCollider : Collider {
                 Physics.TerrainHit terrainHit = Atelier.physics.hitTerrain(hitPosition, hitbox);
                 if (terrainHit.isColliding) {
                     Physics.CollisionHit data;
-                    data.normal = terrainHit.normal;
-                    data.type = hitType;
-                    entity.onCollide(data);
+                    bool isLeft;
+                    switch (terrainHit.shape) with (Physics.Shape) {
+                    case slopeLeft:
+                    case startSlopeLeft:
+                    case middleSlopeLeft:
+                    case endSlopeLeft:
+                        isLeft = true;
+                        goto case slopeRight;
+                    case slopeRight:
+                    case startSlopeRight:
+                    case middleSlopeRight:
+                    case endSlopeRight:
+                        int deltaZ = terrainHit.height - hitPosition.z;
+                        if ((stepDir.x > 0 && isLeft) ||
+                            (stepDir.x < 0 && !isLeft)) {
+                            goto default;
+                        }
+                        Physics.SolidHit solidHitUp = Atelier.physics.collidesAt(hitPosition + Vec3i(0,
+                                0, deltaZ), hitbox);
+                        if (solidHitUp.isColliding) {
+                            data.normal = Vec3f(0, 0, deltaZ > 0 ? -1 : 1);
+                            data.type = hitType;
+                            entity.onCollide(data);
+                        }
+                        else {
+                            entity.moveRaw(Vec3i(stepDir.x, 0, deltaZ),
+                                terrainHit.height, Atelier.world.scene.getMaterial(
+                                    entity.getPosition()));
+                        }
+                        break;
+                    default:
+                        data.normal = terrainHit.normal;
+                        data.type = hitType;
+                        entity.onCollide(data);
+                        break;
+                    }
+                    break;
                 }
                 else {
                     Physics.SolidHit solidHit = Atelier.physics.collidesAt(hitPosition, hitbox);
@@ -333,9 +367,43 @@ final class ActorCollider : Collider {
                 Physics.TerrainHit terrainHit = Atelier.physics.hitTerrain(hitPosition, hitbox);
                 if (terrainHit.isColliding) {
                     Physics.CollisionHit data;
-                    data.normal = terrainHit.normal;
-                    data.type = hitType;
-                    entity.onCollide(data);
+                    bool isUp;
+                    switch (terrainHit.shape) with (Physics.Shape) {
+                    case slopeUp:
+                    case startSlopeUp:
+                    case middleSlopeUp:
+                    case endSlopeUp:
+                        isUp = true;
+                        goto case slopeDown;
+                    case slopeDown:
+                    case startSlopeDown:
+                    case middleSlopeDown:
+                    case endSlopeDown:
+                        int deltaZ = terrainHit.height - hitPosition.z;
+                        if ((stepDir.y > 0 && isUp) ||
+                            (stepDir.y < 0 && !isUp)) {
+                            goto default;
+                        }
+                        Physics.TerrainHit terrainHitUp = Atelier.physics.hitTerrain(hitPosition + Vec3i(0,
+                                0, deltaZ), hitbox);
+                        if (terrainHitUp.isColliding) {
+                            data.normal = Vec3f(0, 0, deltaZ > 0 ? -1 : 1);
+                            data.type = hitType;
+                            entity.onCollide(data);
+                        }
+                        else {
+                            entity.moveRaw(Vec3i(0, stepDir.y, deltaZ),
+                                terrainHit.height, Atelier.world.scene.getMaterial(
+                                    entity.getPosition()));
+                        }
+                        break;
+                    default:
+                        data.normal = terrainHit.normal;
+                        data.type = hitType;
+                        entity.onCollide(data);
+                        break;
+                    }
+                    break;
                 }
                 else {
                     Physics.SolidHit solidHit = Atelier.physics.collidesAt(hitPosition, hitbox);

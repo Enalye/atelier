@@ -17,6 +17,26 @@ import atelier.physics.shot;
 import atelier.physics.trigger;
 
 final class Physics {
+    enum Shape {
+        box,
+        slopeUp,
+        slopeDown,
+        slopeLeft,
+        slopeRight,
+        startSlopeUp,
+        middleSlopeUp,
+        endSlopeUp,
+        startSlopeDown,
+        middleSlopeDown,
+        endSlopeDown,
+        startSlopeLeft,
+        middleSlopeLeft,
+        endSlopeLeft,
+        startSlopeRight,
+        middleSlopeRight,
+        endSlopeRight,
+    }
+
     private struct HurtboxLayerInternal {
         ubyte[] collisionList;
         Array!Hurtbox hurtboxes;
@@ -208,6 +228,7 @@ final class Physics {
         bool isOnGround = false;
         Vec3f normal = Vec3f.zero;
         int height = -16;
+        Shape shape = Shape.box;
     }
 
     struct SolidHit {
@@ -506,6 +527,8 @@ final class Physics {
         TerrainHit endResult;
         TerrainHit result;
 
+        int tileZ = 16;
+
         foreach_reverse (layer; Atelier.world.scene.collisionLayers) {
             if (layer.level > endCoords.z)
                 continue;
@@ -537,183 +560,355 @@ final class Physics {
                     if (!checkSubColl(Vec4i(0, 0, 0, 0)))
                         continue;
 
-                    switch (id) {
-                    case 0b1111: // Zone pleine
-                        result.isColliding = true;
-                        result.normal = Vec3f(0f, 0f, 1f);
-                        break __tilesLoop;
-                    case 0b0110: // Coin gauche
-                        if (relativePos.z > 8) {
+                    if (id > 0xf) {
+                        Shape shape = cast(Shape)(id & 0xf);
+                        int relativeZ = point.z - (layer.level * 16);
+                        final switch (shape) with (Shape) {
+                        case box:
                             result.isColliding = true;
-                            result.normal = Vec3f(-1f, 0f, 0f);
+                            result.normal = Vec3f(0f, 0f, 1f);
                             break __tilesLoop;
+                        case slopeUp:
+                            tileZ = clamp(16 - relativePos.y, 0, 16);
+                            result.height = (layer.level * 16) + tileZ;
+                            if (relativeZ < tileZ) {
+                                result.isColliding = true;
+                                result.normal = Vec3f(0f, 1f, 1f);
+                                result.shape = shape;
+                                break __tilesLoop;
+                            }
+                            break;
+                        case slopeDown:
+                            tileZ = clamp(relativePos.w, 0, 16);
+                            result.height = (layer.level * 16) + tileZ;
+                            if (relativeZ < tileZ) {
+                                result.isColliding = true;
+                                result.normal = Vec3f(0f, -1f, 1f);
+                                result.shape = shape;
+                                break __tilesLoop;
+                            }
+                            break;
+                        case slopeRight:
+                            tileZ = clamp(relativePos.z, 0, 16);
+                            result.height = (layer.level * 16) + tileZ;
+                            if (relativeZ < tileZ) {
+                                result.isColliding = true;
+                                result.normal = Vec3f(1f, 0f, 1f);
+                                result.shape = shape;
+                                break __tilesLoop;
+                            }
+                            break;
+                        case slopeLeft:
+                            tileZ = clamp(16 - relativePos.x, 0, 16);
+                            result.height = (layer.level * 16) + tileZ;
+                            if (relativeZ < tileZ) {
+                                result.isColliding = true;
+                                result.normal = Vec3f(-1f, 0f, 1f);
+                                result.shape = shape;
+                                break __tilesLoop;
+                            }
+                            break;
+                        case startSlopeUp:
+                            tileZ = clamp(8 - relativePos.y, 0, 8);
+                            result.height = (layer.level * 16) + tileZ;
+                            if (relativeZ < tileZ) {
+                                result.isColliding = true;
+                                result.normal = Vec3f(0f, 1f, 1f);
+                                result.shape = shape;
+                                break __tilesLoop;
+                            }
+                            break;
+                        case middleSlopeUp:
+                            tileZ = clamp(24 - relativePos.y, 8, 24);
+                            result.height = (layer.level * 16) + tileZ;
+                            if (relativeZ < tileZ) {
+                                result.isColliding = true;
+                                result.normal = Vec3f(0f, 1f, 1f);
+                                result.shape = shape;
+                                break __tilesLoop;
+                            }
+                            break;
+                        case endSlopeUp:
+                            tileZ = clamp(24 - relativePos.y, 8, 16);
+                            result.height = (layer.level * 16) + tileZ;
+                            if (relativeZ < tileZ) {
+                                result.isColliding = true;
+                                result.normal = Vec3f(0f, 1f, 1f);
+                                result.shape = shape;
+                                break __tilesLoop;
+                            }
+                            break;
+                        case startSlopeDown:
+                            tileZ = clamp(relativePos.w - 8, 0, 8);
+                            result.height = (layer.level * 16) + tileZ;
+                            if (relativeZ < tileZ) {
+                                result.isColliding = true;
+                                result.normal = Vec3f(0f, -1f, 1f);
+                                result.shape = shape;
+                                break __tilesLoop;
+                            }
+                            break;
+                        case middleSlopeDown:
+                            tileZ = clamp(relativePos.w + 8, 8, 24);
+                            result.height = (layer.level * 16) + tileZ;
+                            if (relativeZ < tileZ) {
+                                result.isColliding = true;
+                                result.normal = Vec3f(0f, -1f, 1f);
+                                result.shape = shape;
+                                break __tilesLoop;
+                            }
+                            break;
+                        case endSlopeDown:
+                            tileZ = clamp(relativePos.w + 8, 8, 16);
+                            result.height = (layer.level * 16) + tileZ;
+                            if (relativeZ < tileZ) {
+                                result.isColliding = true;
+                                result.normal = Vec3f(0f, -1f, 1f);
+                                result.shape = shape;
+                                break __tilesLoop;
+                            }
+                            break;
+                        case startSlopeRight:
+                            tileZ = clamp(relativePos.z - 8, 0, 8);
+                            result.height = (layer.level * 16) + tileZ;
+                            if (relativeZ < tileZ) {
+                                result.isColliding = true;
+                                result.normal = Vec3f(1f, 0f, 1f);
+                                result.shape = shape;
+                                break __tilesLoop;
+                            }
+                            break;
+                        case middleSlopeRight:
+                            tileZ = clamp(relativePos.z + 8, 8, 24);
+                            result.height = (layer.level * 16) + tileZ;
+                            if (relativeZ < tileZ) {
+                                result.isColliding = true;
+                                result.normal = Vec3f(1f, 0f, 1f);
+                                result.shape = shape;
+                                break __tilesLoop;
+                            }
+                            break;
+                        case endSlopeRight:
+                            tileZ = clamp(relativePos.z + 8, 8, 16);
+                            result.height = (layer.level * 16) + tileZ;
+                            if (relativeZ < tileZ) {
+                                result.isColliding = true;
+                                result.normal = Vec3f(1f, 0f, 1f);
+                                result.shape = shape;
+                                break __tilesLoop;
+                            }
+                            break;
+                        case startSlopeLeft:
+                            tileZ = clamp(8 - relativePos.x, 0, 8);
+                            result.height = (layer.level * 16) + tileZ;
+                            if (relativeZ < tileZ) {
+                                result.isColliding = true;
+                                result.normal = Vec3f(-1f, 0f, 1f);
+                                result.shape = shape;
+                                break __tilesLoop;
+                            }
+                            break;
+                        case middleSlopeLeft:
+                            tileZ = clamp(24 - relativePos.x, 8, 24);
+                            result.height = (layer.level * 16) + tileZ;
+                            if (relativeZ < tileZ) {
+                                result.isColliding = true;
+                                result.normal = Vec3f(-1f, 0f, 1f);
+                                result.shape = shape;
+                                break __tilesLoop;
+                            }
+                            break;
+                        case endSlopeLeft:
+                            tileZ = clamp(24 - relativePos.x, 8, 16);
+                            result.height = (layer.level * 16) + tileZ;
+                            if (relativeZ < tileZ) {
+                                result.isColliding = true;
+                                result.normal = Vec3f(-1f, 0f, 1f);
+                                result.shape = shape;
+                                break __tilesLoop;
+                            }
+                            break;
                         }
-                        break;
-                    case 0b1001: // Coin droite
-                        if (relativePos.x < 8) {
+                    }
+                    else {
+                        switch (id & 0xf) {
+                        case 0b1111: // Zone pleine
                             result.isColliding = true;
-                            result.normal = Vec3f(1f, 0f, 0f);
+                            result.normal = Vec3f(0f, 0f, 1f);
                             break __tilesLoop;
-                        }
-                        break;
-                    case 0b1100: // Coin haut
-                        if (relativePos.w > 8) {
-                            result.isColliding = true;
-                            result.normal = Vec3f(0f, -1f, 0f);
-                            break __tilesLoop;
-                        }
-                        break;
-                    case 0b0011: // Coin bas
-                        if (relativePos.y < 8) {
-                            result.isColliding = true;
-                            result.normal = Vec3f(0f, 1f, 0f);
-                            break __tilesLoop;
-                        }
-                        break;
-                    case 0b1110: // Coin 3/4 haut-gauche
-                        if (checkSubColl(Vec4i(0, 0, 8, 8))) {
-                            if ((relativePos.z + relativePos.w) > 8) {
+                        case 0b0110: // Coin gauche
+                            if (relativePos.z > 8) {
+                                result.isColliding = true;
+                                result.normal = Vec3f(-1f, 0f, 0f);
+                                break __tilesLoop;
+                            }
+                            break;
+                        case 0b1001: // Coin droite
+                            if (relativePos.x < 8) {
+                                result.isColliding = true;
+                                result.normal = Vec3f(1f, 0f, 0f);
+                                break __tilesLoop;
+                            }
+                            break;
+                        case 0b1100: // Coin haut
+                            if (relativePos.w > 8) {
+                                result.isColliding = true;
+                                result.normal = Vec3f(0f, -1f, 0f);
+                                break __tilesLoop;
+                            }
+                            break;
+                        case 0b0011: // Coin bas
+                            if (relativePos.y < 8) {
+                                result.isColliding = true;
+                                result.normal = Vec3f(0f, 1f, 0f);
+                                break __tilesLoop;
+                            }
+                            break;
+                        case 0b1110: // Coin 3/4 haut-gauche
+                            if (checkSubColl(Vec4i(0, 0, 8, 8))) {
+                                if ((relativePos.z + relativePos.w) > 8) {
+                                    result.isColliding = true;
+                                    result.normal = Vec3f(-1f, -1f, 0f);
+                                    break __tilesLoop;
+                                }
+                            }
+                            else {
                                 result.isColliding = true;
                                 result.normal = Vec3f(-1f, -1f, 0f);
                                 break __tilesLoop;
                             }
-                        }
-                        else {
-                            result.isColliding = true;
-                            result.normal = Vec3f(-1f, -1f, 0f);
-                            break __tilesLoop;
-                        }
-                        break;
-                    case 0b1011: // Coin 3/4 bas-droite
-                        if (checkSubColl(Vec4i(8, 8, 0, 0))) {
-                            if ((relativePos.x + relativePos.y) < 24) {
+                            break;
+                        case 0b1011: // Coin 3/4 bas-droite
+                            if (checkSubColl(Vec4i(8, 8, 0, 0))) {
+                                if ((relativePos.x + relativePos.y) < 24) {
+                                    result.isColliding = true;
+                                    result.normal = Vec3f(1f, 1f, 0f);
+                                    break __tilesLoop;
+                                }
+                            }
+                            else {
                                 result.isColliding = true;
                                 result.normal = Vec3f(1f, 1f, 0f);
                                 break __tilesLoop;
                             }
-                        }
-                        else {
-                            result.isColliding = true;
-                            result.normal = Vec3f(1f, 1f, 0f);
-                            break __tilesLoop;
-                        }
-                        break;
-                    case 0b1101: // Coin 3/4 haut-droite
-                        if (checkSubColl(Vec4i(8, 0, 0, 8))) {
-                            if ((relativePos.w + 8) > relativePos.x) {
+                            break;
+                        case 0b1101: // Coin 3/4 haut-droite
+                            if (checkSubColl(Vec4i(8, 0, 0, 8))) {
+                                if ((relativePos.w + 8) > relativePos.x) {
+                                    result.isColliding = true;
+                                    result.normal = Vec3f(1f, -1f, 0f);
+                                    break __tilesLoop;
+                                }
+                            }
+                            else {
                                 result.isColliding = true;
                                 result.normal = Vec3f(1f, -1f, 0f);
                                 break __tilesLoop;
                             }
-                        }
-                        else {
-                            result.isColliding = true;
-                            result.normal = Vec3f(1f, -1f, 0f);
-                            break __tilesLoop;
-                        }
-                        break;
-                    case 0b0111: // Coin 3/4 bas-gauche
-                        if (checkSubColl(Vec4i(0, 8, 8, 0))) {
-                            if ((relativePos.z + 8) > relativePos.y) {
+                            break;
+                        case 0b0111: // Coin 3/4 bas-gauche
+                            if (checkSubColl(Vec4i(0, 8, 8, 0))) {
+                                if ((relativePos.z + 8) > relativePos.y) {
+                                    result.isColliding = true;
+                                    result.normal = Vec3f(-1f, 1f, 0f);
+                                    break __tilesLoop;
+                                }
+                            }
+                            else {
                                 result.isColliding = true;
                                 result.normal = Vec3f(-1f, 1f, 0f);
                                 break __tilesLoop;
                             }
-                        }
-                        else {
-                            result.isColliding = true;
-                            result.normal = Vec3f(-1f, 1f, 0f);
-                            break __tilesLoop;
-                        }
-                        break;
-                    case 0b0100: // Coin 1/4 haut-gauche
-                        if (checkSubColl(Vec4i(8, 8, 0, 0))) {
-                            if ((relativePos.z + relativePos.w) > 24) {
+                            break;
+                        case 0b0100: // Coin 1/4 haut-gauche
+                            if (checkSubColl(Vec4i(8, 8, 0, 0))) {
+                                if ((relativePos.z + relativePos.w) > 24) {
+                                    result.isColliding = true;
+                                    result.normal = Vec3f(-1f, -1f, 0f);
+                                    break __tilesLoop;
+                                }
+                            }
+                            break;
+                        case 0b0001: // Coin 1/4 bas-droite
+                            if (checkSubColl(Vec4i(0, 0, 8, 8))) {
+                                if ((relativePos.x + relativePos.y) < 8) {
+                                    result.isColliding = true;
+                                    result.normal = Vec3f(1f, 1f, 0f);
+                                    break __tilesLoop;
+                                }
+                            }
+                            break;
+                        case 0b1000: // Coin 1/4 haut-droite
+                            if (checkSubColl(Vec4i(0, 8, 8, 0))) {
+                                if ((relativePos.w - 8) > relativePos.x) {
+                                    result.isColliding = true;
+                                    result.normal = Vec3f(1f, -1f, 0f);
+                                    break __tilesLoop;
+                                }
+                            }
+                            break;
+                        case 0b0010: // Coin 1/4 bas-gauche
+                            if (checkSubColl(Vec4i(8, 0, 0, 8))) {
+                                if ((relativePos.z - 8) > relativePos.y) {
+                                    result.isColliding = true;
+                                    result.normal = Vec3f(-1f, 1f, 0f);
+                                    break __tilesLoop;
+                                }
+                            }
+                            break;
+                        case 0b0101: // Diagonale haut-gauche / bas-droite
+                            if (checkSubColl(Vec4i(8, 0, 0, 8))) {
+                                if ((relativePos.w + 8) > relativePos.x) {
+                                    result.isColliding = true;
+                                    result.normal = Vec3f(1f, -1f, 0f);
+                                    break __tilesLoop;
+                                }
+                            }
+                            else if (checkSubColl(Vec4i(0, 8, 8, 0))) {
+                                if ((relativePos.z + 8) > relativePos.y) {
+                                    result.isColliding = true;
+                                    result.normal = Vec3f(-1f, 1f, 0f);
+                                    break __tilesLoop;
+                                }
+                            }
+                            else {
                                 result.isColliding = true;
-                                result.normal = Vec3f(-1f, -1f, 0f);
+                                result.normal = (relativePos.x > relativePos.y) ?
+                                    Vec3f(1f, -1f, 0f) : Vec3f(-1f, 1f, 0f);
                                 break __tilesLoop;
                             }
-                        }
-                        break;
-                    case 0b0001: // Coin 1/4 bas-droite
-                        if (checkSubColl(Vec4i(0, 0, 8, 8))) {
-                            if ((relativePos.x + relativePos.y) < 8) {
+                            break;
+                        case 0b1010: // Diagonale haut-droite / bas-gauche
+                            if (checkSubColl(Vec4i(0, 0, 8, 8))) {
+                                if ((relativePos.z + relativePos.w) > 8) {
+                                    result.isColliding = true;
+                                    result.normal = Vec3f(-1f, -1f, 0f);
+                                    break __tilesLoop;
+                                }
+                            }
+                            else if (checkSubColl(Vec4i(8, 8, 0, 0))) {
+                                if ((relativePos.x + relativePos.y) < 24) {
+                                    result.isColliding = true;
+                                    result.normal = Vec3f(1f, 1f, 0f);
+                                    break __tilesLoop;
+                                }
+                            }
+                            else {
                                 result.isColliding = true;
-                                result.normal = Vec3f(1f, 1f, 0f);
+                                result.normal = (relativePos.x + relativePos.y > 16) ?
+                                    Vec3f(1f, 1f, 0f) : Vec3f(-1f, -1f, 0f);
                                 break __tilesLoop;
                             }
+                            break;
+                        default:
+                            break;
                         }
-                        break;
-                    case 0b1000: // Coin 1/4 haut-droite
-                        if (checkSubColl(Vec4i(0, 8, 8, 0))) {
-                            if ((relativePos.w - 8) > relativePos.x) {
-                                result.isColliding = true;
-                                result.normal = Vec3f(1f, -1f, 0f);
-                                break __tilesLoop;
-                            }
-                        }
-                        break;
-                    case 0b0010: // Coin 1/4 bas-gauche
-                        if (checkSubColl(Vec4i(8, 0, 0, 8))) {
-                            if ((relativePos.z - 8) > relativePos.y) {
-                                result.isColliding = true;
-                                result.normal = Vec3f(-1f, 1f, 0f);
-                                break __tilesLoop;
-                            }
-                        }
-                        break;
-                    case 0b0101: // Diagonale haut-gauche / bas-droite
-                        if (checkSubColl(Vec4i(8, 0, 0, 8))) {
-                            if ((relativePos.w + 8) > relativePos.x) {
-                                result.isColliding = true;
-                                result.normal = Vec3f(1f, -1f, 0f);
-                                break __tilesLoop;
-                            }
-                        }
-                        else if (checkSubColl(Vec4i(0, 8, 8, 0))) {
-                            if ((relativePos.z + 8) > relativePos.y) {
-                                result.isColliding = true;
-                                result.normal = Vec3f(-1f, 1f, 0f);
-                                break __tilesLoop;
-                            }
-                        }
-                        else {
-                            result.isColliding = true;
-                            result.normal = (relativePos.x > relativePos.y) ?
-                                Vec3f(1f, -1f, 0f) : Vec3f(-1f, 1f, 0f);
-                            break __tilesLoop;
-                        }
-                        break;
-                    case 0b1010: // Diagonale haut-droite / bas-gauche
-                        if (checkSubColl(Vec4i(0, 0, 8, 8))) {
-                            if ((relativePos.z + relativePos.w) > 8) {
-                                result.isColliding = true;
-                                result.normal = Vec3f(-1f, -1f, 0f);
-                                break __tilesLoop;
-                            }
-                        }
-                        else if (checkSubColl(Vec4i(8, 8, 0, 0))) {
-                            if ((relativePos.x + relativePos.y) < 24) {
-                                result.isColliding = true;
-                                result.normal = Vec3f(1f, 1f, 0f);
-                                break __tilesLoop;
-                            }
-                        }
-                        else {
-                            result.isColliding = true;
-                            result.normal = (relativePos.x + relativePos.y > 16) ?
-                                Vec3f(1f, 1f, 0f) : Vec3f(-1f, -1f, 0f);
-                            break __tilesLoop;
-                        }
-                        break;
-                    default:
-                        break;
                     }
                 }
             }
 
             if (result.isColliding) {
-                result.height = (layer.level + 1) * 16;
+                result.height = (layer.level * 16) + tileZ;
 
                 if (point.z > result.height) {
                     result.isColliding = false;

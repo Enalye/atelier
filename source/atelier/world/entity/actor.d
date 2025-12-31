@@ -257,7 +257,7 @@ final class Actor : Entity, Resource!Actor {
                 maxHeight = heights[i];
         }
 
-        if (maxHeight != baseZ) {
+        if (maxHeight > (baseZ + 8)) {
             for (uint i; i < 4; ++i) {
                 if (heights[i] == maxHeight) {
                     force += (cast(Vec2f)(corners[i].xy - position));

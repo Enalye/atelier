@@ -3,6 +3,7 @@ module atelier.nav.system;
 import std.datetime, std.conv;
 import atelier.common;
 import atelier.core;
+import atelier.physics;
 import atelier.world;
 
 private struct NavEdge {
@@ -22,8 +23,44 @@ private struct NavEdge {
 final class NavSector {
     private {
         int _level;
+        int _upHeight;
+        int _downHeight;
+        int _leftHeight;
+        int _rightHeight;
+        bool _isUpConnectable;
+        bool _isDownConnectable;
+        bool _isLeftConnectable;
+        bool _isRightConnectable;
         Vec2i _start, _end;
         NavEdge[] _edges;
+    }
+
+    bool canConnectUp(NavSector other) {
+        return _isUpConnectable &&
+            other._isDownConnectable &&
+            (_upHeight == other._downHeight) &&
+            (_start.y == other._end.y + 1);
+    }
+
+    bool canConnectDown(NavSector other) {
+        return _isDownConnectable &&
+            other._isUpConnectable &&
+            (_downHeight == other._upHeight) &&
+            (other._start.y == _end.y + 1);
+    }
+
+    bool canConnectLeft(NavSector other) {
+        return _isLeftConnectable &&
+            other._isRightConnectable &&
+            (_leftHeight == other._rightHeight) &&
+            (_start.x == other._end.x + 1);
+    }
+
+    bool canConnectRight(NavSector other) {
+        return _isRightConnectable &&
+            other._isLeftConnectable &&
+            (_rightHeight == other._leftHeight) &&
+            (other._start.x == _end.x + 1);
     }
 
     float distanceFromSquared(Vec3i position) {
@@ -160,7 +197,7 @@ final class NavMesh {
         _connectSectors();
     }
 
-    // Retourne le secteur dans lequel le point se situe
+    /// Retourne le secteur dans lequel le point se situe
     uint getSectorID(Vec3i position) {
         uint sectorID;
         float nearest = _sectors[0].distanceFromSquared(position);
@@ -176,32 +213,23 @@ final class NavMesh {
     }
 
     /// Calcule le chemin le plus court du départ à l’arrivé.
-    NavPath getPath(Vec3i from, Vec3i to) {
+    NavPath getPath(Vec3i from, Vec3i to, uint maxIterations = 1024) {
+        // On détermine dans quel secteur les points se situent
+        uint srcId = getSectorID(from);
+        uint dstId = getSectorID(to);
+
+        return getPath(from, to, srcId, dstId, maxIterations);
+    }
+
+    /// Ditto
+    NavPath getPath(Vec3i from, Vec3i to, uint fromSectorID, uint toSectorID, uint maxIterations = 1024) {
         NavPath result;
 
         if (!_sectors.length)
             return result;
 
-        // On détermine dans quel secteur les points se situent
-        uint srcId, dstId;
-        float nearestSrc = _sectors[0].distanceFromSquared(from);
-        float nearestDst = _sectors[0].distanceFromSquared(to);
-
-        for (uint id = 1; id < _sectors.length; ++id) {
-            float dist = _sectors[id].distanceFromSquared(from);
-            if (dist < nearestSrc) {
-                nearestSrc = dist;
-                srcId = id;
-            }
-            dist = _sectors[id].distanceFromSquared(to);
-            if (dist < nearestDst) {
-                nearestDst = dist;
-                dstId = id;
-            }
-        }
-
-        result.srcSectorID = srcId;
-        result.dstSectorID = dstId;
+        result.srcSectorID = fromSectorID;
+        result.dstSectorID = toSectorID;
 
         final class NavNode {
             Vec3i position, start, end;
@@ -228,18 +256,20 @@ final class NavMesh {
         import std.container.binaryheap;
 
         auto frontiers = heapify!"a > b"([
-            new NavNode(from, from, from, srcId, uint.max, 0)
+            new NavNode(from, from, from, fromSectorID, uint.max, 0)
         ]);
         NavPath.Node[Vec3i] cameFrom;
         float[Vec3i] costSoFar;
         cameFrom[from] = NavPath.Node(from);
         costSoFar[from] = 0f;
 
-        while (!frontiers.empty) {
+        int iteration;
+
+        while (!frontiers.empty && iteration < maxIterations) {
             NavNode node = frontiers.front;
             frontiers.removeFront();
 
-            if (node.sectorId == dstId) {
+            if (node.sectorId == toSectorID) {
                 if (to != node.position) {
                     cameFrom[to] = NavPath.Node(node.position, node.start, node.end);
                 }
@@ -273,6 +303,8 @@ final class NavMesh {
                     cameFrom[position] = NavPath.Node(node.position, node.start, node.end);
                 }
             }
+
+            iteration++;
         }
 
         if (result.isValid) {
@@ -296,8 +328,25 @@ final class NavMesh {
 
             for (uint y; y < Atelier.world.scene.lines << 1; ++y) {
                 for (uint x; x < Atelier.world.scene.columns << 1; ++x) {
-                    if (!_tiles.getValue(x, y) && _canWalk(x, y, z)) {
-                        NavSector sector = _createSector(x, y, z);
+                    if (_tiles.getValue(x, y))
+                        continue;
+
+                    NavSector sector;
+                    foreach_reverse (layer; Atelier.world.scene.collisionLayers) {
+                        if (layer.level != z)
+                            continue;
+
+                        int id = layer.getId(x >> 1, y >> 1);
+                        if (!_tiles.getValue(x, y) && id > 0xf) {
+                            Physics.Shape shape = cast(Physics.Shape)(id & 0xf);
+                            sector = _createSector(x, y, layer.level, shape);
+                        }
+                    }
+                    if (!sector && _canWalk(x, y, z)) {
+                        sector = _createSector(x, y, z, Physics.Shape.box);
+                    }
+
+                    if (sector) {
                         x = sector._end.x;
 
                         for (uint y2 = sector._start.y; y2 <= sector._end.y; ++y2) {
@@ -320,10 +369,7 @@ final class NavMesh {
             for (uint neightborId = sectorId + 1; neightborId < _sectors.length; ++neightborId) {
                 NavSector neighborSector = _sectors[neightborId];
 
-                if (currentSector._level != neighborSector._level) // Temporaire
-                    continue;
-
-                if (currentSector._start.y == neighborSector._end.y + 1) {
+                if (currentSector.canConnectUp(neighborSector)) {
                     uint startX = max(currentSector._start.x, neighborSector._start.x);
                     uint endX = min(currentSector._end.x, neighborSector._end.x);
 
@@ -334,7 +380,7 @@ final class NavMesh {
                         neighborSector.addEdge(sectorId, edgeId1, startX, endX, NavEdge.Dir.down);
                     }
                 }
-                else if (neighborSector._start.y == currentSector._end.y + 1) {
+                else if (currentSector.canConnectDown(neighborSector)) {
                     uint startX = max(currentSector._start.x, neighborSector._start.x);
                     uint endX = min(currentSector._end.x, neighborSector._end.x);
 
@@ -346,7 +392,7 @@ final class NavMesh {
                     }
                 }
 
-                if (currentSector._start.x == neighborSector._end.x + 1) {
+                if (currentSector.canConnectLeft(neighborSector)) {
                     uint startY = max(currentSector._start.y, neighborSector._start.y);
                     uint endY = min(currentSector._end.y, neighborSector._end.y);
 
@@ -357,7 +403,7 @@ final class NavMesh {
                         neighborSector.addEdge(sectorId, edgeId1, startY, endY, NavEdge.Dir.right);
                     }
                 }
-                else if (neighborSector._start.x == currentSector._end.x + 1) {
+                else if (currentSector.canConnectRight(neighborSector)) {
                     uint startY = max(currentSector._start.y, neighborSector._start.y);
                     uint endY = min(currentSector._end.y, neighborSector._end.y);
 
@@ -372,66 +418,72 @@ final class NavMesh {
         }
     }
 
-    private bool _canWalk(uint x, uint y, int level) {
+    private bool _canWalk(int x, int y, int level) {
+        if (x < 0 || y < 0)
+            return false;
+
         int groundLevel = Atelier.world.scene.getLevel((x + 1) >> 1, (y + 1) >> 1);
 
         if (level < groundLevel)
             return false;
 
         bool hasLevel = false;
+
         Vec2i subCoords = Vec2i(x, y) & 0x1;
+        x >>= 1;
+        y >>= 1;
         foreach_reverse (layer; Atelier.world.scene.collisionLayers) {
             if (layer.level + 1 == level) {
-                int id = layer.getId(x >> 1, y >> 1);
+                int id = layer.getId(x, y);
                 switch (id) {
                 case 0b1111: // Zone pleine
                     hasLevel = true;
                     break;
-                case 0b0110: // Coin gauche
+                case 0b1001: // Coin gauche
                     if (subCoords.x == 0)
                         hasLevel = true;
                     break;
-                case 0b1001: // Coin droite
+                case 0b0110: // Coin droite
                     if (subCoords.x == 1)
                         hasLevel = true;
                     break;
-                case 0b1100: // Coin haut
+                case 0b0011: // Coin haut
                     if (subCoords.y == 0)
                         hasLevel = true;
                     break;
-                case 0b0011: // Coin bas
+                case 0b1100: // Coin bas
                     if (subCoords.y == 1)
                         hasLevel = true;
                     break;
-                case 0b1110: // Coin 3/4 haut-gauche
+                case 0b1011: // Coin 3/4 haut-gauche
                     if (subCoords.x == 0 || subCoords.y == 0)
                         hasLevel = true;
                     break;
-                case 0b1011: // Coin 3/4 bas-droite
+                case 0b1110: // Coin 3/4 bas-droite
                     if (subCoords.x == 1 || subCoords.y == 1)
                         hasLevel = true;
                     break;
-                case 0b1101: // Coin 3/4 haut-droite
+                case 0b0111: // Coin 3/4 haut-droite
                     if (subCoords.x == 1 || subCoords.y == 0)
                         hasLevel = true;
                     break;
-                case 0b0111: // Coin 3/4 bas-gauche
+                case 0b1101: // Coin 3/4 bas-gauche
                     if (subCoords.x == 0 || subCoords.y == 1)
                         hasLevel = true;
                     break;
-                case 0b0100: // Coin 1/4 haut-gauche
+                case 0b0001: // Coin 1/4 haut-gauche
                     if (subCoords.x == 0 && subCoords.y == 0)
                         hasLevel = true;
                     break;
-                case 0b0001: // Coin 1/4 bas-droite
+                case 0b0100: // Coin 1/4 bas-droite
                     if (subCoords.x == 1 && subCoords.y == 1)
                         hasLevel = true;
                     break;
-                case 0b1000: // Coin 1/4 haut-droite
+                case 0b0010: // Coin 1/4 haut-droite
                     if (subCoords.x == 1 && subCoords.y == 0)
                         hasLevel = true;
                     break;
-                case 0b0010: // Coin 1/4 bas-gauche
+                case 0b1000: // Coin 1/4 bas-gauche
                     if (subCoords.x == 0 && subCoords.y == 1)
                         hasLevel = true;
                     break;
@@ -448,55 +500,57 @@ final class NavMesh {
                 }
             }
             else if (layer.level == level) {
-                int id = layer.getId(x >> 1, y >> 1);
+                int id = layer.getId(x, y);
+                if (id > 0xf)
+                    return false;
                 switch (id) {
                 case 0b1111: // Zone pleine
                     return false;
-                case 0b0110: // Coin gauche
+                case 0b1001: // Coin gauche
                     if (subCoords.x == 0)
                         return false;
                     break;
-                case 0b1001: // Coin droite
+                case 0b0110: // Coin droite
                     if (subCoords.x == 1)
                         return false;
                     break;
-                case 0b1100: // Coin haut
+                case 0b0011: // Coin haut
                     if (subCoords.y == 0)
                         return false;
                     break;
-                case 0b0011: // Coin bas
+                case 0b1100: // Coin bas
                     if (subCoords.y == 1)
                         return false;
                     break;
-                case 0b1110: // Coin 3/4 haut-gauche
+                case 0b1011: // Coin 3/4 haut-gauche
                     if (subCoords.x == 0 || subCoords.y == 0)
                         return false;
                     break;
-                case 0b1011: // Coin 3/4 bas-droite
+                case 0b1110: // Coin 3/4 bas-droite
                     if (subCoords.x == 1 || subCoords.y == 1)
                         return false;
                     break;
-                case 0b1101: // Coin 3/4 haut-droite
+                case 0b0111: // Coin 3/4 haut-droite
                     if (subCoords.x == 1 || subCoords.y == 0)
                         return false;
                     break;
-                case 0b0111: // Coin 3/4 bas-gauche
+                case 0b1101: // Coin 3/4 bas-gauche
                     if (subCoords.x == 0 || subCoords.y == 1)
                         return false;
                     break;
-                case 0b0100: // Coin 1/4 haut-gauche
+                case 0b0001: // Coin 1/4 haut-gauche
                     if (subCoords.x == 0 && subCoords.y == 0)
                         return false;
                     break;
-                case 0b0001: // Coin 1/4 bas-droite
+                case 0b0100: // Coin 1/4 bas-droite
                     if (subCoords.x == 1 && subCoords.y == 1)
                         return false;
                     break;
-                case 0b1000: // Coin 1/4 haut-droite
+                case 0b0010: // Coin 1/4 haut-droite
                     if (subCoords.x == 1 && subCoords.y == 0)
                         return false;
                     break;
-                case 0b0010: // Coin 1/4 bas-gauche
+                case 0b1000: // Coin 1/4 bas-gauche
                     if (subCoords.x == 0 && subCoords.y == 1)
                         return false;
                     break;
@@ -517,15 +571,257 @@ final class NavMesh {
         return (level == groundLevel || hasLevel);
     }
 
-    private NavSector _createSector(uint x, uint y, uint z) {
+    private NavSector _createSector(uint x, uint y, uint z, Physics.Shape shape) {
         NavSector sector = new NavSector;
         sector._start = Vec2i(x, y);
         sector._end = sector._start;
         sector._level = z;
+        Vec2i subCoords = Vec2i(x, y) & 0x1;
 
-        _extendSectorDiagonally(sector);
+        final switch (shape) with (Physics.Shape) {
+        case box:
+            sector._upHeight = z * 16;
+            sector._downHeight = z * 16;
+            sector._rightHeight = z * 16;
+            sector._leftHeight = z * 16;
+            sector._isUpConnectable = true;
+            sector._isDownConnectable = true;
+            sector._isRightConnectable = true;
+            sector._isLeftConnectable = true;
+            break;
+        case slopeUp:
+            sector._upHeight = z * 16 + (2 - subCoords.y) * 8;
+            sector._downHeight = z * 16 + (1 - subCoords.y) * 8;
+            sector._isUpConnectable = true;
+            sector._isDownConnectable = true;
+            sector._isRightConnectable = false;
+            sector._isLeftConnectable = false;
+            break;
+        case slopeDown:
+            sector._downHeight = z * 16 + (1 + subCoords.y) * 8;
+            sector._upHeight = z * 16 + subCoords.y * 8;
+            sector._isUpConnectable = true;
+            sector._isDownConnectable = true;
+            sector._isRightConnectable = false;
+            sector._isLeftConnectable = false;
+            break;
+        case slopeRight:
+            sector._rightHeight = z * 16 + (1 + subCoords.x) * 8;
+            sector._leftHeight = z * 16 + subCoords.x * 8;
+            sector._isUpConnectable = false;
+            sector._isDownConnectable = false;
+            sector._isRightConnectable = true;
+            sector._isLeftConnectable = true;
+            break;
+        case slopeLeft:
+            sector._leftHeight = z * 16 + (2 - subCoords.x) * 8;
+            sector._rightHeight = z * 16 + (1 - subCoords.x) * 8;
+            sector._isUpConnectable = false;
+            sector._isDownConnectable = false;
+            sector._isRightConnectable = true;
+            sector._isLeftConnectable = true;
+            break;
+        case startSlopeUp:
+            sector._upHeight = z * 16 + (1 - subCoords.y) * 8;
+            sector._downHeight = z * 16;
+            sector._isUpConnectable = true;
+            sector._isDownConnectable = true;
+            sector._isRightConnectable = false;
+            sector._isLeftConnectable = false;
+            break;
+        case middleSlopeUp:
+            sector._upHeight = z * 16 + (3 - subCoords.y) * 8;
+            sector._downHeight = z * 16 + (2 - subCoords.y) * 8;
+            sector._isUpConnectable = true;
+            sector._isDownConnectable = true;
+            sector._isRightConnectable = false;
+            sector._isLeftConnectable = false;
+            break;
+        case endSlopeUp:
+            sector._upHeight = z * 16 + 16;
+            sector._downHeight = z * 16 + (2 - subCoords.y) * 8;
+            sector._isUpConnectable = true;
+            sector._isDownConnectable = true;
+            sector._isRightConnectable = false;
+            sector._isLeftConnectable = false;
+            break;
+        case startSlopeDown:
+            sector._downHeight = z * 16 + subCoords.y * 8;
+            sector._upHeight = z * 16;
+            sector._isUpConnectable = true;
+            sector._isDownConnectable = true;
+            sector._isRightConnectable = false;
+            sector._isLeftConnectable = false;
+            break;
+        case middleSlopeDown:
+            sector._downHeight = z * 16 + (2 + subCoords.y) * 8;
+            sector._upHeight = z * 16 + (1 + subCoords.y) * 8;
+            sector._isUpConnectable = true;
+            sector._isDownConnectable = true;
+            sector._isRightConnectable = false;
+            sector._isLeftConnectable = false;
+            break;
+        case endSlopeDown:
+            sector._downHeight = z * 16 + 16;
+            sector._upHeight = z * 16 + (1 + subCoords.y) * 8;
+            sector._isUpConnectable = true;
+            sector._isDownConnectable = true;
+            sector._isRightConnectable = false;
+            sector._isLeftConnectable = false;
+            break;
+        case startSlopeRight:
+            sector._rightHeight = z * 16 + subCoords.x * 8;
+            sector._leftHeight = z * 16;
+            sector._isUpConnectable = false;
+            sector._isDownConnectable = false;
+            sector._isRightConnectable = true;
+            sector._isLeftConnectable = true;
+            break;
+        case middleSlopeRight:
+            sector._rightHeight = z * 16 + (2 + subCoords.x) * 8;
+            sector._leftHeight = z * 16 + (1 + subCoords.x) * 8;
+            sector._isUpConnectable = false;
+            sector._isDownConnectable = false;
+            sector._isRightConnectable = true;
+            sector._isLeftConnectable = true;
+            break;
+        case endSlopeRight:
+            sector._rightHeight = z * 16 + 16;
+            sector._leftHeight = z * 16 + (1 + subCoords.x) * 8;
+            sector._isUpConnectable = false;
+            sector._isDownConnectable = false;
+            sector._isRightConnectable = true;
+            sector._isLeftConnectable = true;
+            break;
+        case startSlopeLeft:
+            sector._leftHeight = z * 16 + (1 - subCoords.x) * 8;
+            sector._rightHeight = z * 16;
+            sector._isUpConnectable = false;
+            sector._isDownConnectable = false;
+            sector._isRightConnectable = true;
+            sector._isLeftConnectable = true;
+            break;
+        case middleSlopeLeft:
+            sector._leftHeight = z * 16 + (3 - subCoords.x) * 8;
+            sector._rightHeight = z * 16 + (2 - subCoords.x) * 8;
+            sector._isUpConnectable = false;
+            sector._isDownConnectable = false;
+            sector._isRightConnectable = true;
+            sector._isLeftConnectable = true;
+            break;
+        case endSlopeLeft:
+            sector._leftHeight = z * 16 + 16;
+            sector._rightHeight = z * 16 + (2 - subCoords.x) * 8;
+            sector._isUpConnectable = false;
+            sector._isDownConnectable = false;
+            sector._isRightConnectable = true;
+            sector._isLeftConnectable = true;
+            break;
+        }
+
+        _extendSector(sector, shape);
 
         return sector;
+    }
+
+    void _extendSector(NavSector sector, Physics.Shape shape) {
+        final switch (shape) with (Physics.Shape) {
+        case box:
+            _extendSectorDiagonally(sector);
+            break;
+        case slopeUp:
+        case slopeDown:
+        case startSlopeUp:
+        case middleSlopeUp:
+        case endSlopeUp:
+        case startSlopeDown:
+        case middleSlopeDown:
+        case endSlopeDown:
+            _extendSlopedSectorHorizontally(sector, shape);
+            break;
+        case slopeRight:
+        case slopeLeft:
+        case startSlopeRight:
+        case middleSlopeRight:
+        case endSlopeRight:
+        case startSlopeLeft:
+        case middleSlopeLeft:
+        case endSlopeLeft:
+            _extendSlopedSectorVertically(sector, shape);
+            break;
+        }
+    }
+
+    void _extendSlopedSectorVertically(NavSector sector, Physics.Shape shape) {
+        uint y = sector._end.y;
+
+        for (;;) {
+            y++;
+
+            bool canContinue = false;
+
+            for (uint x = sector._start.x; x <= sector._end.x; ++x) {
+                if (_tiles.getValue(x, y)) {
+                    return;
+                }
+
+                foreach_reverse (layer; Atelier.world.scene.collisionLayers) {
+                    if (layer.level != sector._level)
+                        continue;
+
+                    int id = layer.getId(x >> 1, y >> 1);
+                    if (id > 0xf) {
+                        Physics.Shape otherShape = cast(Physics.Shape)(id & 0xf);
+                        if (otherShape == shape) {
+                            canContinue = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (!canContinue) {
+                break;
+            }
+
+            sector._end.y = y;
+        }
+    }
+
+    void _extendSlopedSectorHorizontally(NavSector sector, Physics.Shape shape) {
+        uint x = sector._end.x;
+
+        for (;;) {
+            x++;
+
+            bool canContinue = false;
+
+            for (uint y = sector._start.y; y <= sector._end.y; ++y) {
+                if (_tiles.getValue(x, y)) {
+                    return;
+                }
+
+                foreach_reverse (layer; Atelier.world.scene.collisionLayers) {
+                    if (layer.level != sector._level)
+                        continue;
+
+                    int id = layer.getId(x >> 1, y >> 1);
+                    if (id > 0xf) {
+                        Physics.Shape otherShape = cast(Physics.Shape)(id & 0xf);
+                        if (otherShape == shape) {
+                            canContinue = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (!canContinue) {
+                break;
+            }
+
+            sector._end.x = x;
+        }
     }
 
     void _extendSectorDiagonally(NavSector sector) {

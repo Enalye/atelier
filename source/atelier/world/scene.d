@@ -7,6 +7,7 @@ import std.exception : enforce;
 import farfadet;
 import atelier.common;
 import atelier.core;
+import atelier.physics;
 import atelier.render;
 import atelier.world.weather;
 import atelier.world.entity;
@@ -259,23 +260,23 @@ final class Scene : Resource!Scene {
         int getId(int x, int y) {
             switch (_grid.getValue(x, y)) {
             case 0:
-                return 0b1111;
-            case 1:
                 return 0b1110;
-            case 2:
+            case 1:
                 return 0b1101;
-            case 3:
+            case 2:
                 return 0b0100;
-            case 4:
+            case 3:
                 return 0b1000;
-            case 5:
+            case 4:
                 return 0b1010;
-            case 6:
+            case 5:
                 return 0b0011;
-            case 7:
+            case 6:
                 return 0b0110;
-            case 8:
+            case 7:
                 return 0b1001;
+            case 8:
+                return 0b1100;
             case 9:
                 return 0b0111;
             case 10:
@@ -287,7 +288,39 @@ final class Scene : Resource!Scene {
             case 13:
                 return 0b0101;
             case 14:
-                return 0b1100;
+                return 0b1111;
+            case 15:
+                return 0x10 | Physics.Shape.slopeUp;
+            case 16:
+                return 0x10 | Physics.Shape.slopeDown;
+            case 17:
+                return 0x10 | Physics.Shape.slopeRight;
+            case 18:
+                return 0x10 | Physics.Shape.slopeLeft;
+            case 19:
+                return 0x10 | Physics.Shape.startSlopeUp;
+            case 20:
+                return 0x10 | Physics.Shape.middleSlopeUp;
+            case 21:
+                return 0x10 | Physics.Shape.endSlopeUp;
+            case 22:
+                return 0x10 | Physics.Shape.startSlopeDown;
+            case 23:
+                return 0x10 | Physics.Shape.middleSlopeDown;
+            case 24:
+                return 0x10 | Physics.Shape.endSlopeDown;
+            case 25:
+                return 0x10 | Physics.Shape.startSlopeRight;
+            case 26:
+                return 0x10 | Physics.Shape.middleSlopeRight;
+            case 27:
+                return 0x10 | Physics.Shape.endSlopeRight;
+            case 28:
+                return 0x10 | Physics.Shape.startSlopeLeft;
+            case 29:
+                return 0x10 | Physics.Shape.middleSlopeLeft;
+            case 30:
+                return 0x10 | Physics.Shape.endSlopeLeft;
             default:
                 return 0;
             }

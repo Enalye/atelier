@@ -146,6 +146,7 @@ abstract class Entity {
         Layer _layer = Layer.scene;
         string _baseControllerId;
         bool _hasCulling = true;
+        uint _sectorID;
     }
 
     protected {
@@ -275,6 +276,7 @@ abstract class Entity {
         _shadow = other._shadow;
         _isEnabled = other._isEnabled;
         _hasCulling = other._hasCulling;
+        _sectorID = other._sectorID;
 
         foreach (id, renderer; other._graphics) {
             _graphics[id] = renderer.fetch();
@@ -861,6 +863,7 @@ abstract class Entity {
             else {
                 moveRaw(dir);
             }
+            _sectorID = Atelier.nav.getSectorID(_position);
         }
     }
 
@@ -957,6 +960,10 @@ abstract class Entity {
 
     final void accelerate(Vec3f dir) {
         _acceleration = dir;
+    }
+
+    final uint getSectorID() {
+        return _sectorID;
     }
 
     final void lookAt(Vec2i target) {

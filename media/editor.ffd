@@ -4,15 +4,15 @@ texture "editor" {
 }
 sprite "editor:entity-trigger" {
     texture "editor"
-    clip 224 144 32 32
+    clip 224 160 32 32
 }
 sprite "editor:entity-teleporter" {
     texture "editor"
-    clip 224 176 32 32
+    clip 224 192 32 32
 }
 sprite "editor:entity-note" {
     texture "editor"
-    clip 224 208 32 32
+    clip 224 224 32 32
 }
 sprite "editor:arrow-right" {
     texture "editor"
@@ -365,9 +365,9 @@ sprite "editor:hidden" {
 tileset "editor:collision" {
     texture "editor"
     clip 96 112 16 16
-    lines 2
-    columns 8
-    maxCount 15
+    lines 4
+    columns 9
+    maxCount 31
     margin 0 0
     frameTime 0
 }

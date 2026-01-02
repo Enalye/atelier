@@ -68,7 +68,7 @@ package(atelier.etabli.media.res.scene) class EntityToolbox : Modal {
             hlayout.addUI(new Label("Type:", Atelier.theme.font));
 
             _typeBtn = new SelectButton([
-                "prop", "actor", "trigger", "teleporter", "note"
+                "prop", "actor", "trigger", "teleporter", "note", "marker"
             ], "prop");
             _typeBtn.addEventListener("value", &_onType);
             hlayout.addUI(_typeBtn);

@@ -105,16 +105,6 @@ package(atelier.etabli.media.res.scene) final class EntityParameters : UIElement
         dispatchEvent("property_dirty", false);
     }
 
-    bool hasControlModifier() const {
-        return Atelier.input.isPressed(InputEvent.KeyButton.Button.leftControl) ||
-            Atelier.input.isPressed(InputEvent.KeyButton.Button.rightControl);
-    }
-
-    bool hasAltModifier() const {
-        return Atelier.input.isPressed(InputEvent.KeyButton.Button.leftAlt) ||
-            Atelier.input.isPressed(InputEvent.KeyButton.Button.rightAlt);
-    }
-
     void startTool(Vec2f mousePos) {
         _isApplyingTool = true;
 
@@ -141,11 +131,11 @@ package(atelier.etabli.media.res.scene) final class EntityParameters : UIElement
             }
             else {
                 _captureSelection(true);
-                _moveZ = hasControlModifier();
+                _moveZ = Atelier.input.hasCtrl();
             }
             break;
         case 1:
-            if (!hasControlModifier()) {
+            if (!Atelier.input.hasCtrl()) {
                 _unselectEntities();
             }
 
@@ -155,7 +145,7 @@ package(atelier.etabli.media.res.scene) final class EntityParameters : UIElement
             if (_selectedEntities.length == 0) {
                 _captureSelection(true);
             }
-            _moveZ = hasControlModifier();
+            _moveZ = Atelier.input.hasCtrl();
             break;
         case 3:
             _createEntity();
@@ -238,7 +228,7 @@ package(atelier.etabli.media.res.scene) final class EntityParameters : UIElement
             }
             else {
                 if (_startMousePosition == _endMousePosition) {
-                    if (!hasControlModifier()) {
+                    if (!Atelier.input.hasCtrl()) {
                         _unselectEntities();
                     }
                     _captureSelection(true);
@@ -332,7 +322,7 @@ package(atelier.etabli.media.res.scene) final class EntityParameters : UIElement
             break;
         }
 
-        if (!hasControlModifier()) {
+        if (!Atelier.input.hasCtrl()) {
             _unselectEntities();
         }
 

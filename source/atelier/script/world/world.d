@@ -34,6 +34,12 @@ package void loadLibWorld_world(GrModule mod) {
             grOptional(actorType)
         ]);
 
+    mod.setDescription(GrLocale.fr_FR, "Récupère le marqueur");
+    mod.setParameters(["name"]);
+    mod.addStatic(&_getMarker, worldType, "getMarker", [grString], [
+            grInt, grInt, grInt
+        ]);
+
     /+GrType sceneType = grGetNativeType("Scene");
     GrType particleSourceType = grGetNativeType("ParticleSource");
     GrType actorType = grGetNativeType("Actor");
@@ -109,7 +115,6 @@ package void loadLibWorld_world(GrModule mod) {
     mod.addStatic(&_findByTag, worldType, "findEntitiesByTag",
         [grString], [grList(entityType)]);
 
-
     mod.setDescription(GrLocale.fr_FR,
         "Lance un lecteur audio");
     mod.setParameters(["audio resource"]);
@@ -118,7 +123,6 @@ package void loadLibWorld_world(GrModule mod) {
         ]);
 
 }
-
 
 private void playSound(GrCall call) {
     Sound sound = Atelier.res.get!Sound(call.getString(0));
@@ -147,6 +151,13 @@ private void _getPlayer(GrCall call) {
     else {
         call.setNull();
     }
+}
+
+private void _getMarker(GrCall call) {
+    Vec3i position = Atelier.world.getMarker(call.getString(0));
+    call.setInt(position.x);
+    call.setInt(position.y);
+    call.setInt(position.z);
 }
 /+
 private void _clear(GrCall call) {

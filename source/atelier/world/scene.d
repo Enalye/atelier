@@ -1220,7 +1220,8 @@ final class EntityBuilder {
         actor,
         trigger,
         teleporter,
-        note
+        note,
+        marker
     }
 
     private {
@@ -1291,6 +1292,8 @@ final class EntityBuilder {
         case note:
             _note = new NoteBuilderData(ffd);
             break;
+        case marker:
+            break;
         }
     }
 
@@ -1314,6 +1317,8 @@ final class EntityBuilder {
         case note:
             _note = new NoteBuilderData(stream);
             break;
+        case marker:
+            break;
         }
     }
 
@@ -1336,6 +1341,8 @@ final class EntityBuilder {
             break;
         case note:
             _note.serialize(stream);
+            break;
+        case marker:
             break;
         }
     }

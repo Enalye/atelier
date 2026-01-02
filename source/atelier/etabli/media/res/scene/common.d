@@ -910,7 +910,8 @@ package final class SceneDefinition {
             actor,
             trigger,
             teleporter,
-            note
+            note,
+            marker
         }
 
         bool isAlive = true;
@@ -1618,7 +1619,60 @@ package final class SceneDefinition {
 
                 Atelier.renderer.drawRect(origin - offset, hitboxSize.xy, Color.green, 0.2f * hitboxAlpha, true);
 
-                drawText((origin - offset) + Vec2f(1f, hitboxSize.y - 1f), to!dstring(name),
+                drawText((origin - offset) + Vec2f(1f, hitboxSize.y - 1f), to!dstring(
+                        entityData.name),
+                    Atelier.theme.font, Atelier.theme.onNeutral);
+            }
+
+            override void drawSnapshot(Vec2f origin) {
+
+            }
+
+            override string getTypeInfo() const {
+                return format("{%d, %d, %d}",
+                    entityData.position.x, entityData.position.y, entityData.position.z);
+            }
+        }
+
+        final class MarkerBuilderData : BuilderData {
+            private {
+                Sprite _sprite;
+            }
+
+            this(Farfadet ffd) {
+                _sprite = Atelier.res.get!Sprite("editor:marker");
+                _hitbox = Vec3i(16, 16, 0);
+            }
+
+            this() {
+                _sprite = Atelier.res.get!Sprite("editor:marker");
+                _hitbox = Vec3i(16, 16, 0);
+            }
+
+            override void save(Farfadet ffd) {
+            }
+
+            override UIElement createSettingsWindow() {
+                return new MarkerSettings(this.outer);
+            }
+
+            override void update(float zoom) {
+            }
+
+            override void draw(Vec2f origin, Vec3f hitboxSize, Vec2f offset) {
+                float hitboxAlpha = (_isHovered || _isTempSelected) ? 0.5f : 1f;
+                Color hitboxColor = (_isSelected || _isTempSelected) ? Atelier.theme.danger
+                    : Atelier.theme.onNeutral;
+
+                Atelier.renderer.drawRect(origin - (offset + Vec2f(0f, hitboxSize.z)), hitboxSize.xy,
+                    hitboxColor, 0.2f * hitboxAlpha, false);
+
+                Atelier.renderer.drawRect(origin - (offset + Vec2f(0f, hitboxSize.z)), hitboxSize.xy, Color.green, 0.2f * hitboxAlpha, true);
+
+                _sprite.draw(origin + Vec2f(0f, hitboxSize.z));
+
+                drawText((origin - (offset + Vec2f(0f, hitboxSize.z))) + Vec2f(1f, hitboxSize.y - 1f), to!dstring(
+                        entityData.name),
                     Atelier.theme.font, Atelier.theme.onNeutral);
             }
 
@@ -1666,6 +1720,11 @@ package final class SceneDefinition {
                 return _note;
             }
 
+            MarkerBuilderData marker() {
+                enforce(_type == Type.marker, "Type d’entité invalide");
+                return _marker;
+            }
+
             Vec3i tempPosition() const {
                 return entityData.position + (cast(Vec3i) _tempMove.round());
             }
@@ -1685,6 +1744,7 @@ package final class SceneDefinition {
                 TriggerBuilderData _trigger;
                 TeleporterBuilderData _teleporter;
                 NoteBuilderData _note;
+                MarkerBuilderData _marker;
             }
 
             BuilderData _data;
@@ -1716,6 +1776,10 @@ package final class SceneDefinition {
                 _note = new NoteBuilderData(ffd);
                 _data = _note;
                 break;
+            case marker:
+                _marker = new MarkerBuilderData(ffd);
+                _data = _marker;
+                break;
             }
         }
 
@@ -1741,6 +1805,10 @@ package final class SceneDefinition {
             case note:
                 _note = new NoteBuilderData;
                 _data = _note;
+                break;
+            case marker:
+                _marker = new MarkerBuilderData;
+                _data = _marker;
                 break;
             }
         }

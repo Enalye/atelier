@@ -14,6 +14,14 @@ sprite "editor:entity-note" {
     texture "editor"
     clip 224 224 32 32
 }
+sprite "editor:entity-marker" {
+    texture "editor"
+    clip 224 80 32 32
+}
+sprite "editor:marker" {
+    texture "editor"
+    clip 240 112 15 15
+}
 sprite "editor:arrow-right" {
     texture "editor"
     clip 0 0 16 16
@@ -190,17 +198,21 @@ sprite "editor:ffd-instrument" {
     texture "editor"
     clip 240 64 16 16
 }
-sprite "editor:ffd-note" {
+sprite "editor:ffd-trigger" {
     texture "editor"
-    clip 224 48 16 16
+    clip 192 48 16 16
 }
 sprite "editor:ffd-teleporter" {
     texture "editor"
     clip 208 48 16 16
 }
-sprite "editor:ffd-trigger" {
+sprite "editor:ffd-note" {
     texture "editor"
-    clip 192 48 16 16
+    clip 224 48 16 16
+}
+sprite "editor:ffd-marker" {
+    texture "editor"
+    clip 240 48 16 16
 }
 sprite "editor:selection-button" {
     texture "editor"

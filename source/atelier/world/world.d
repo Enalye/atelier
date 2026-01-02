@@ -44,6 +44,7 @@ final class World {
         Vec2f _mousePosition = Vec2f.zero;
 
         Material[] _materials;
+        Vec3i[string] _markers;
 
         Vec3i _lastPlayerPosition;
 
@@ -128,6 +129,15 @@ final class World {
 
     Material[] getMaterials() {
         return _materials;
+    }
+
+    void addMarker(string name, Vec3i position) {
+        _markers[name] = position;
+    }
+
+    Vec3i getMarker(string name) {
+        auto p = name in _markers;
+        return p ? *p : Vec3i.zero;
     }
 
     void setTransition(Transition function(string, string, Actor, bool) transitionFunc = &_createDefaultTransition) {
@@ -330,6 +340,9 @@ final class World {
                 }
                 break;
             case note:
+                break;
+            case marker:
+                addMarker(entityBuilder.data.name, entityBuilder.data.position);
                 break;
             }
         }

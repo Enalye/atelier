@@ -156,6 +156,9 @@ final class SceneEntityList : UIElement {
             case note:
                 _addIcon("editor:entity-note");
                 break;
+            case marker:
+                _addIcon("editor:entity-marker");
+                break;
             }
 
             {

@@ -5,6 +5,7 @@ import atelier.script.world.actor;
 import atelier.script.world.audio;
 import atelier.script.world.camera;
 import atelier.script.world.dialog;
+import atelier.script.world.effect;
 import atelier.script.world.entity;
 import atelier.script.world.graphic;
 import atelier.script.world.grid;
@@ -23,6 +24,7 @@ package(atelier.script) GrModuleLoader[] getLibLoaders_world() {
         &loadLibWorld_audio, //
         &loadLibWorld_camera, //
         &loadLibWorld_dialog, //
+        &loadLibWorld_effect, //
         &loadLibWorld_entity, //
         &loadLibWorld_graphic, //
         &loadLibWorld_grid, //

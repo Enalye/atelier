@@ -17,6 +17,7 @@ package void loadLibWorld_entity(GrModule mod) {
 
     GrType entityType = mod.addNative("Entity");
     GrType graphicType = grGetNativeType("EntityGraphic");
+    GrType graphicEffectType = grGetNativeType("EntityGraphicEffect");
     GrType layerType = mod.addEnum("EntityLayer", grNativeEnum!(Entity.Layer)());
 
     mod.setDescription(GrLocale.fr_FR, "Retire l’entité");
@@ -138,6 +139,7 @@ package void loadLibWorld_entity(GrModule mod) {
     mod.addFunction(&_hasGraphic, "hasGraphic", [entityType, grString], [grBool]);
     mod.addFunction(&_getBaseMaterial, "getBaseMaterial", [entityType], [grInt]);
     mod.addFunction(&_setShadow, "setShadow", [entityType, grString]);
+    mod.addFunction(&_setEffect, "setEffect", [entityType, graphicEffectType]);
 }
 
 private void _unregister(GrCall call) {
@@ -281,4 +283,10 @@ private void _getBaseMaterial(GrCall call) {
 private void _setShadow(GrCall call) {
     Entity entity = call.getNative!Entity(0);
     entity.setShadow(call.getString(1));
+}
+
+private void _setEffect(GrCall call) {
+    Entity entity = call.getNative!Entity(0);
+    EntityGraphicEffect effect = call.getNative!EntityGraphicEffect(1);
+    entity.setEffect(effect);
 }

@@ -143,8 +143,7 @@ final class SceneEntityList : UIElement {
             addUI(_typeLabel);
 
             final switch (_entity.type) with (SceneDefinition.Entity.Type) {
-            case actor:
-            case prop:
+            case entity:
                 addEventListener("draw", &_onDraw);
                 break;
             case trigger:

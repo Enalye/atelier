@@ -5,7 +5,7 @@ import atelier.common;
 import atelier.core;
 import atelier.ui;
 import atelier.world.entity;
-import atelier.world.world;
+import atelier.world.system;
 import atelier.world.dialog.blocker;
 import atelier.world.dialog.bubble;
 import atelier.world.dialog.choice;

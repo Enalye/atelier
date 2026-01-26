@@ -16,39 +16,44 @@ struct HurtboxData {
     int angle, angleDelta;
     int offsetDist, offsetAngle;
 
-    void load(Farfadet ffd) {
-        hasHurtbox = true;
+    void load(const(Farfadet) ffd) {
+        hasHurtbox = false;
 
-        if (ffd.hasNode("layer")) {
-            layer = ffd.getNode("layer").get!uint(0);
-        }
+        if (ffd.hasNode("hurtbox")) {
+            const Farfadet node = ffd.getNode("hurtbox");
+            hasHurtbox = true;
 
-        if (ffd.hasNode("minRadius")) {
-            minRadius = ffd.getNode("minRadius").get!uint(0);
-        }
+            if (node.hasNode("layer")) {
+                layer = node.getNode("layer").get!uint(0);
+            }
 
-        if (ffd.hasNode("maxRadius")) {
-            maxRadius = ffd.getNode("maxRadius").get!uint(0);
-        }
+            if (node.hasNode("minRadius")) {
+                minRadius = node.getNode("minRadius").get!uint(0);
+            }
 
-        if (ffd.hasNode("height")) {
-            height = ffd.getNode("height").get!uint(0);
-        }
+            if (node.hasNode("maxRadius")) {
+                maxRadius = node.getNode("maxRadius").get!uint(0);
+            }
 
-        if (ffd.hasNode("angle")) {
-            angle = ffd.getNode("angle").get!int(0);
-        }
+            if (node.hasNode("height")) {
+                height = node.getNode("height").get!uint(0);
+            }
 
-        if (ffd.hasNode("angleDelta")) {
-            angleDelta = ffd.getNode("angleDelta").get!int(0);
-        }
+            if (node.hasNode("angle")) {
+                angle = node.getNode("angle").get!int(0);
+            }
 
-        if (ffd.hasNode("offsetDist")) {
-            offsetDist = ffd.getNode("offsetDist").get!int(0);
-        }
+            if (node.hasNode("angleDelta")) {
+                angleDelta = node.getNode("angleDelta").get!int(0);
+            }
 
-        if (ffd.hasNode("offsetAngle")) {
-            offsetAngle = ffd.getNode("offsetAngle").get!int(0);
+            if (node.hasNode("offsetDist")) {
+                offsetDist = node.getNode("offsetDist").get!int(0);
+            }
+
+            if (node.hasNode("offsetAngle")) {
+                offsetAngle = node.getNode("offsetAngle").get!int(0);
+            }
         }
     }
 

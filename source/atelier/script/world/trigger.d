@@ -8,6 +8,7 @@ import atelier.render;
 import atelier.world;
 import atelier.script.util;
 
+/*
 package void loadLibWorld_trigger(GrModule mod) {
     mod.setModule("world.trigger");
     mod.setModuleInfo(GrLocale.fr_FR, "Définit un déclencheur");
@@ -43,3 +44,4 @@ private void _isActiveOnce(string op)(GrCall call) {
 }
 
 
+*/

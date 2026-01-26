@@ -11,6 +11,7 @@ import atelier.world;
 import atelier.core.runtime;
 import atelier.core.loader.util;
 
+/*
 package void compileParticle(string path, const Farfadet ffd, OutStream stream) {
     const string rid = ffd.get!string(0);
     stream.write!string(rid);
@@ -40,3 +41,4 @@ package void loadParticle(InStream stream) {
         return source;
     });
 }
+*/

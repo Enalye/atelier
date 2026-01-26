@@ -2,7 +2,7 @@ module atelier.world.grid;
 
 import atelier.common;
 import atelier.world.scene;
-import atelier.world.world;
+
 /*
 package(atelier.world) void registerSystems_grid(World world) {
     world.registerSystem!SystemUpdater("grid", &_updateSystem);

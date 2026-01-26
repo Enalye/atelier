@@ -4,8 +4,9 @@ import atelier.common;
 import atelier.core;
 import atelier.audio;
 import atelier.world.scene;
-import atelier.world.world;
+import atelier.world.system;
 import atelier.world.camera;
+
 /*
 package(atelier.world) void registerSystems_audio(World world) {
     world.registerSystem!SystemUpdater("audio", &_updateSystem);

@@ -14,7 +14,7 @@ package void compileScene(string path, const Farfadet ffd, OutStream stream) {
     scene.serialize(stream);
 }
 
-package void loadScene(InStream stream) {
+package void setScene(InStream stream) {
     const string rid = stream.read!string();
     Scene scene = new Scene;
     scene.deserialize(stream);

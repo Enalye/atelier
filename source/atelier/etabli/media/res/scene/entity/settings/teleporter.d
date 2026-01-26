@@ -84,6 +84,22 @@ package(atelier.etabli.media.res.scene) class TeleporterSettings : BaseEntitySet
             hlayout.setPadding(Vec2f(284f, 0f));
             addProperty(hlayout);
 
+            hlayout.addUI(new Label("Actif ?", Atelier.theme.font));
+
+            Checkbox isActiveCheck = new Checkbox;
+            isActiveCheck.value = _entity.teleporter.isActive;
+            isActiveCheck.addEventListener("value", {
+                _entity.teleporter.isActive = isActiveCheck.value;
+                setDirty();
+            });
+            hlayout.addUI(isActiveCheck);
+        }
+
+        {
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(284f, 0f));
+            addProperty(hlayout);
+
             hlayout.addUI(new Label("x:", Atelier.theme.font));
 
             IntegerField hitboxXField = new IntegerField;

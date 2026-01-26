@@ -4,20 +4,24 @@ import atelier.common;
 import atelier.core;
 import atelier.input;
 import atelier.world.entity;
-import atelier.world.entity.controller.behavior;
+import atelier.world.entity.controller.base;
+import atelier.world.entity.controller.state;
 
-final class DefaultPlayerController : Controller!Actor {
+final class DefaultPlayerController : EntityController {
     override void onStart() {
-        setBehavior(new DefaultMoveBehavior);
-    }
-
-    override void onTeleport(uint direction, bool isExit) {
-        setBehavior(new DefaultTeleporterBehavior(direction, isExit));
+        addState("move", new DefaultMoveState);
+        addState("enter", new DefaultEnterState);
+        addState("exit", new DefaultExitState);
+        setDefaultState("move");
     }
 }
 
-final class DefaultMoveBehavior : Behavior!Actor {
-    override void update() {
+final class DefaultMoveState : EntityControllerState {
+    override void onSceneEnter(uint direction_) {
+        runState("enter");
+    }
+
+    override void onUpdate() {
         Vec2f acceldir = Vec2f.zero;
         Vec2f movedir = Atelier.input.getActionVector("left", "right", "up", "down");
 
@@ -27,24 +31,49 @@ final class DefaultMoveBehavior : Behavior!Actor {
             acceldir += movedir * 1f;
         }
 
-        entity.accelerate(Vec3f(acceldir, 0f));
+        entity.setAccel(Vec3f(acceldir, 0f));
     }
 }
 
-final class DefaultTeleporterBehavior : Behavior!Actor {
+final class DefaultEnterState : EntityControllerState {
     private {
         uint _direction;
-        bool _isExit;
     }
 
-    this(uint direction_, bool isExit) {
+    override void onStartSceneEnter(uint direction_) {
         _direction = direction_ % 8;
-        _isExit = isExit;
     }
 
-    override void update() {
-        Vec2f acceldir = Vec2f.angled(degToRad((_direction * -45f))) * (_isExit ? 0.3f : 0.65f);
+    override void onSceneExit(uint direction_) {
+        runState("exit");
+    }
+
+    override void onUpdate() {
+        Vec2f acceldir = Vec2f.angled(degToRad((_direction * -45f))) * 0.65f;
         entity.angle = radToDeg(acceldir.angle());
-        entity.accelerate(Vec3f(acceldir, 0f));
+        entity.setAccel(Vec3f(acceldir, 0f));
+    }
+}
+
+final class DefaultExitState : EntityControllerState {
+    private {
+        uint _direction;
+        Timer _timer;
+    }
+
+    override void onStartSceneExit(uint direction_) {
+        _direction = direction_ % 8;
+        _timer.start(60);
+    }
+
+    override void onUpdate() {
+        _timer.update();
+        Vec2f acceldir = Vec2f.angled(degToRad((_direction * -45f))) * 0.3f;
+        entity.angle = radToDeg(acceldir.angle());
+        entity.setAccel(Vec3f(acceldir, 0f));
+
+        if (!_timer.isRunning) {
+            runState("move");
+        }
     }
 }

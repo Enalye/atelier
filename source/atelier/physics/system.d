@@ -317,16 +317,16 @@ final class Physics {
         }
 
         if (Atelier.world.player) {
-            ActorCollider player = Atelier.world.player.getCollider();
+            Collider player = Atelier.world.player.getCollider();
             if (player) {
                 foreach (i, trigger; _triggers) {
                     if (!trigger.isRegistered) {
                         _triggers.mark(i);
                     }
                     else if (_areTriggersActive && trigger.isActive) {
-                        ActorHit hit = player.collidesWith(trigger.entity.getPosition(), trigger
+                        bool hit = trigger.collidesWith(player.entity.getPosition(), player
                                 .hitbox);
-                        if (hit.isColliding) {
+                        if (hit) {
                             if (trigger.isActiveOnce) {
                                 trigger.isActive = false;
                             }

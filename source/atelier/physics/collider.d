@@ -1,10 +1,147 @@
 module atelier.physics.collider;
 
+import farfadet;
 import atelier.common;
 import atelier.core;
 import atelier.world;
+import atelier.physics.actor;
 import atelier.physics.solid;
 import atelier.physics.system;
+
+struct HitboxData {
+    enum Type {
+        none,
+        actor,
+        solid,
+        shot
+    }
+
+    Type type = Type.none;
+    Vec3u size;
+    string shape = "box";
+    float bounciness = 0f;
+
+    void load(const Farfadet ffd) {
+        type = Type.none;
+
+        Farfadet hitboxNode;
+        if (ffd.hasNode("hitbox")) {
+            hitboxNode = ffd.getNode("hitbox");
+            if (hitboxNode.hasNode("type")) {
+                type = hitboxNode.getNode("type").get!Type(0);
+            }
+        }
+
+        final switch (type) with (Type) {
+        case none:
+            break;
+        case actor:
+            if (hitboxNode.hasNode("size")) {
+                size = hitboxNode.getNode("size").get!Vec3u(0);
+            }
+            if (hitboxNode.hasNode("bounciness")) {
+                bounciness = hitboxNode.getNode("bounciness").get!float(0);
+            }
+            break;
+        case solid:
+            if (hitboxNode.hasNode("size")) {
+                size = hitboxNode.getNode("size").get!Vec3u(0);
+            }
+            if (hitboxNode.hasNode("shape")) {
+                shape = hitboxNode.getNode("shape").get!string(0);
+            }
+            if (hitboxNode.hasNode("bounciness")) {
+                bounciness = hitboxNode.getNode("bounciness").get!float(0);
+            }
+            break;
+        case shot:
+            if (hitboxNode.hasNode("size")) {
+                size = hitboxNode.getNode("size").get!Vec3u(0);
+            }
+            break;
+        }
+    }
+
+    void save(Farfadet ffd) {
+        final switch (type) with (Type) {
+        case none:
+            break;
+        case actor:
+            Farfadet node = ffd.addNode("hitbox");
+            node.addNode("type").add(type);
+            node.addNode("size").add(size);
+            node.addNode("bounciness").add(bounciness);
+            break;
+        case solid:
+            Farfadet node = ffd.addNode("hitbox");
+            node.addNode("type").add(type);
+            node.addNode("size").add(size);
+            node.addNode("shape").add(shape);
+            node.addNode("bounciness").add(bounciness);
+            break;
+        case shot:
+            Farfadet node = ffd.addNode("hitbox");
+            node.addNode("type").add(type);
+            node.addNode("size").add(size);
+            break;
+        }
+    }
+
+    void serialize(OutStream stream) {
+        stream.write!Type(type);
+
+        final switch (type) with (Type) {
+        case none:
+            break;
+        case actor:
+            stream.write!Vec3u(size);
+            stream.write!float(bounciness);
+            break;
+        case solid:
+            stream.write!Vec3u(size);
+            stream.write!string(shape);
+            stream.write!float(bounciness);
+            break;
+        case shot:
+            stream.write!Vec3u(size);
+            break;
+        }
+    }
+
+    void deserialize(InStream stream) {
+        type = stream.read!Type();
+
+        final switch (type) with (Type) {
+        case none:
+            break;
+        case actor:
+            size = stream.read!Vec3u();
+            bounciness = stream.read!float();
+            break;
+        case solid:
+            size = stream.read!Vec3u();
+            shape = stream.read!string();
+            bounciness = stream.read!float();
+            break;
+        case shot:
+            size = stream.read!Vec3u();
+            break;
+        }
+    }
+
+    Collider fetch() {
+        final switch (type) with (Type) {
+        case none:
+            return null;
+        case actor:
+            return new ActorCollider(size, bounciness);
+        case solid:
+            return new SolidCollider(size, shape, bounciness);
+        case shot:
+            return null;
+        }
+    }
+}
 
 /// Base des collisions
 abstract class Collider {

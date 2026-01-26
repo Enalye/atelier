@@ -50,7 +50,7 @@ void cliDefault(Cli.Result cli) {
 void cliTest(Cli.Result cli) {
     Atelier atelier = _boot();
     atelier.renderer.setPixelSharpness(2);
-    Atelier.addStartCommand("loadscene test_niveau");
+    Atelier.addStartCommand("setscene test_niveau");
     atelier.run();
 }
 */

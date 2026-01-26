@@ -13,26 +13,31 @@ struct RepulsorData {
     uint radius;
     uint height;
 
-    void load(Farfadet ffd) {
-        if (ffd.hasNode("type")) {
-            type = ffd.getNode("type").get!string(0);
-        }
-        else {
-            type = "none";
-        }
+    void load(const(Farfadet) ffd) {
+        type = "none";
+        if (ffd.hasNode("repulsor")) {
+            const Farfadet node = ffd.getNode("repulsor");
 
-        if (ffd.hasNode("radius")) {
-            radius = ffd.getNode("radius").get!uint(0);
-        }
+            if (node.hasNode("type")) {
+                type = node.getNode("type").get!string(0);
+            }
+            else {
+                type = "none";
+            }
 
-        if (ffd.hasNode("height")) {
-            height = ffd.getNode("height").get!uint(0);
+            if (node.hasNode("radius")) {
+                radius = node.getNode("radius").get!uint(0);
+            }
+
+            if (node.hasNode("height")) {
+                height = node.getNode("height").get!uint(0);
+            }
         }
     }
 
     void save(Farfadet ffd) {
-        Farfadet node = ffd.addNode("repulsor");
         if (type != "none") {
+            Farfadet node = ffd.addNode("repulsor");
             node.addNode("type").add(type);
             node.addNode("radius").add(radius);
             node.addNode("height").add(height);

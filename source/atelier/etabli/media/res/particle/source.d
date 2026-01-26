@@ -8,7 +8,6 @@ import atelier.common;
 import atelier.core;
 import atelier.ui;
 import atelier.world;
-import atelier.etabli.media.res.entity_base;
 import atelier.etabli.media.res.particle.editor;
 
 package final class EditorParticleSource {
@@ -16,7 +15,7 @@ package final class EditorParticleSource {
         ParticleResourceEditor _editor;
         EntityGraphic[string] _graphics;
         ParticleData _data;
-        Array!Particle _particles, _spawnedParticles;
+        //Array!Particle _particles, _spawnedParticles;
         Timer _emitTimer, _delayTimer;
         GrEvent _grEvent;
         uint _generation;
@@ -30,26 +29,26 @@ package final class EditorParticleSource {
 
     this(ParticleResourceEditor editor) {
         _editor = editor;
-        _particles = new Array!Particle;
-        _spawnedParticles = new Array!Particle;
+        //_particles = new Array!Particle;
+        //_spawnedParticles = new Array!Particle;
     }
 
-    void setGraphics(EntityRenderData[] renders) {
-        _graphics.clear();
-        //foreach (render; renders) {
-        //    _graphics[render.name()] = render.createEntityGraphicData();
-        //}
-    }
+    //void setGraphics(EntityRenderData[] renders) {
+    //    _graphics.clear();
+    //    //foreach (render; renders) {
+    //    //    _graphics[render.name()] = render.createEntityGraphicData();
+    //    //}
+    //}
 
     void setData(ParticleData data) {
         _data = data;
     }
 
     void update() {
-        foreach (particle; _spawnedParticles) {
+        /*foreach (particle; _spawnedParticles) {
             _particles ~= particle;
         }
-        _spawnedParticles.clear();
+        _spawnedParticles.clear();*/
 
         if (_emitTimer.isRunning()) {
             _emitTimer.update();
@@ -66,7 +65,7 @@ package final class EditorParticleSource {
             }
         }
 
-        foreach (i, particle; _particles) {
+        /*foreach (i, particle; _particles) {
             particle.update();
             particle.updateMovement();
             particle.updateEntity();
@@ -81,13 +80,13 @@ package final class EditorParticleSource {
                 particle.onUnregister();
             }
         }
-        _particles.sweep();
+        _particles.sweep();*/
     }
 
     void draw(Vec2f offset) {
-        foreach (particle; _particles) {
+        /*foreach (particle; _particles) {
             particle.draw(offset);
-        }
+        }*/
     }
 
     void start() {
@@ -132,7 +131,7 @@ package final class EditorParticleSource {
     }
 
     private void _emitSpread() {
-        uint particleCount = Atelier.rng.randVariance(_data.quantity, _data.quantityVariance);
+        /*uint particleCount = Atelier.rng.randVariance(_data.quantity, _data.quantityVariance);
         float angle = Atelier.rng.randVariance(_data.angle, _data.angleVariance) - (
             _data.angleSpread / 2f);
         float distance = Atelier.rng.randVariance(_data.distance, _data.distanceVariance);
@@ -148,11 +147,11 @@ package final class EditorParticleSource {
             _addParticle(particle);
 
             angle += spreadPerParticle;
-        }
+        }*/
     }
 
     private void _emitRectangle() {
-        uint particleCount = Atelier.rng.randVariance(_data.quantity, _data.quantityVariance);
+        /*uint particleCount = Atelier.rng.randVariance(_data.quantity, _data.quantityVariance);
         float angle = Atelier.rng.randVariance(_data.angle, _data.angleVariance) - (
             _data.angleSpread / 2f);
         float spreadPerParticle = _data.angleSpread / particleCount;
@@ -170,11 +169,11 @@ package final class EditorParticleSource {
             _addParticle(particle);
 
             angle += spreadPerParticle;
-        }
+        }*/
     }
 
     private void _emitEllipsis() {
-        uint particleCount = Atelier.rng.randVariance(_data.quantity, _data.quantityVariance);
+        /*uint particleCount = Atelier.rng.randVariance(_data.quantity, _data.quantityVariance);
         float angle = Atelier.rng.randVariance(_data.angle, _data.angleVariance) - (
             _data.angleSpread / 2f);
         float spreadPerParticle = _data.angleSpread / particleCount;
@@ -190,13 +189,13 @@ package final class EditorParticleSource {
             _addParticle(particle);
 
             angle += spreadPerParticle;
-        }
+        }*/
     }
 
-    private void _addParticle(Particle particle) {
+    /*private void _addParticle(Particle particle) {
         particle.isRegistered = true;
         particle.onRegister();
         particle.setupPosition();
         _spawnedParticles ~= particle;
-    }
+    }*/
 }

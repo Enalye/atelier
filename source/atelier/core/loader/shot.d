@@ -38,7 +38,7 @@ struct HitboxData {
         }
     }
 }
-
+/*
 package void compileShot(string path, const Farfadet ffd, OutStream stream) {
     const string rid = ffd.get!string(0);
     stream.write!string(rid);
@@ -120,3 +120,4 @@ package void loadShot(InStream stream) {
         return shot;
     });
 }
+*/

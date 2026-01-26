@@ -8,7 +8,7 @@ import atelier.ui;
 import atelier.render;
 import atelier.world;
 import atelier.etabli.ui;
-import atelier.etabli.media.res.entity_base;
+import atelier.etabli.media.res.entity.data;
 
 package struct HitboxData {
     Vec3u size = Vec3u.zero;

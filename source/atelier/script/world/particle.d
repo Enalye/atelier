@@ -28,7 +28,7 @@ src.setPivotDistance(60, 100, 150f, 100f, Spline.sineInOut);
 src.start(5);
 
 scene.setParticleSource(entity, src, false);");
-
+    /*
     GrType sourceType = mod.addNative("ParticleSource");
     GrType particleType = mod.addNative("Particle", [], "Entity");
 
@@ -48,7 +48,7 @@ scene.setParticleSource(entity, src, false);");
     mod.setParameters(["particle", "angle"]);
     mod.addFunction(&_setRelativeAngle, "setRelativeAngle", [
             particleType, grFloat
-        ]);
+        ]);*/
     /+
     GrType sourceType = mod.addNative("ParticleSource");
     mod.setDescription(GrLocale.fr_FR, "Mode d’émission des particules");
@@ -295,7 +295,7 @@ scene.setParticleSource(entity, src, false);");
     mod.addFunction(&_setEffectInterval!("Float", "Alpha"), "setAlpha",
         [sourceType, grUInt, grUInt, grFloat, grFloat, splineType]);+/
 }
-
+/*
 private void _attachTo(GrCall call) {
     Particle particle = call.getNative!Particle(0);
     Entity entity = call.getNative!Entity(1);
@@ -319,7 +319,7 @@ private void _setRelativeAngle(GrCall call) {
     Particle particle = call.getNative!Particle(0);
     particle.setRelativeAngle(call.getFloat(1));
 }
-
+*/
 /+
 private void _ctor(GrCall call) {
     ParticleSource source = new ParticleSource;

@@ -312,11 +312,8 @@ package(atelier.etabli.media.res.scene) final class EntityParameters : UIElement
         entity.entityData.position = Vec3i(cast(Vec2i) _endMousePosition, 0);
 
         switch (_toolbox.getType()) {
-        case "prop":
-            entity.prop.rid = _toolbox.getRID();
-            break;
-        case "actor":
-            entity.actor.rid = _toolbox.getRID();
+        case "entity":
+            entity.entity.rid = _toolbox.getRID();
             break;
         default:
             break;

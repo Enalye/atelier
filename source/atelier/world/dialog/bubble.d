@@ -4,8 +4,8 @@ import atelier.common;
 import atelier.core;
 import atelier.ui;
 import atelier.render;
-import atelier.world.world;
 import atelier.world.entity;
+import atelier.world.system;
 import atelier.world.dialog.choice;
 import atelier.world.dialog.system;
 

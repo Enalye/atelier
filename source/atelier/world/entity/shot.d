@@ -7,6 +7,7 @@ import atelier.render;
 import atelier.world.entity.base;
 import atelier.world.entity.controller;
 
+/+
 final class Shot : Entity, Resource!Shot {
     mixin EntityController;
 
@@ -162,7 +163,7 @@ final class Shot : Entity, Resource!Shot {
                     _collider.unregister();
                 setShadow("");
             }
-            _velocity += _acceleration;
+            _velocity += _accel;
             move(_velocity);
             break;
         case fading:
@@ -176,7 +177,7 @@ final class Shot : Entity, Resource!Shot {
                     _graphic.setAlpha(alpha);
                 }
             }
-            _velocity += _acceleration;
+            _velocity += _accel;
             move(_velocity);
             break;
         case impact:
@@ -193,9 +194,10 @@ final class Shot : Entity, Resource!Shot {
                     _graphic.setBlend(Blend.additive);
                 }
             }
-            _velocity += _acceleration;
+            _velocity += _accel;
             move(_velocity);
             break;
         }
     }
 }
++/

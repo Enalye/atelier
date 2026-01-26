@@ -68,8 +68,8 @@ package(atelier.etabli.media.res.scene) class EntityToolbox : Modal {
             hlayout.addUI(new Label("Type:", Atelier.theme.font));
 
             _typeBtn = new SelectButton([
-                "prop", "actor", "trigger", "teleporter", "note", "marker"
-            ], "prop");
+                "entity", "trigger", "teleporter", "note", "marker"
+            ], "entity");
             _typeBtn.addEventListener("value", &_onType);
             hlayout.addUI(_typeBtn);
         }
@@ -79,7 +79,7 @@ package(atelier.etabli.media.res.scene) class EntityToolbox : Modal {
             hlayout.setPadding(Vec2f(getWidth() - 16f, 0f));
             vbox.addUI(hlayout);
 
-            hlayout.addUI(new Label("RID:", Atelier.theme.font));
+            hlayout.addUI(new Label("Entité:", Atelier.theme.font));
 
             _ridBtn = new ResourceButton("", _typeBtn.value, [_typeBtn.value]);
             hlayout.addUI(_ridBtn);
@@ -97,8 +97,7 @@ package(atelier.etabli.media.res.scene) class EntityToolbox : Modal {
 
     private void _onType() {
         switch (_typeBtn.value) {
-        case "prop":
-        case "actor":
+        case "entity":
             _ridBtn.setTypes([_typeBtn.value]);
             _ridBtn.setValue(_typeBtn.value, "");
             _ridBtn.isEnabled = true;

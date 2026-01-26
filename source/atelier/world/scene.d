@@ -1216,8 +1216,7 @@ final class LightBuilder {
 
 final class EntityBuilder {
     enum Type {
-        prop,
-        actor,
+        entity,
         trigger,
         teleporter,
         note,
@@ -1228,8 +1227,7 @@ final class EntityBuilder {
         Type _type;
         EntityData _data;
         union {
-            PropBuilderData _prop;
-            ActorBuilderData _actor;
+            EntityBuilderData _entity;
             TriggerBuilderData _trigger;
             TeleporterBuilderData _teleporter;
             NoteBuilderData _note;
@@ -1245,12 +1243,8 @@ final class EntityBuilder {
             return _data;
         }
 
-        PropBuilderData prop() {
-            return _prop;
-        }
-
-        ActorBuilderData actor() {
-            return _actor;
+        EntityBuilderData entity() {
+            return _entity;
         }
 
         TriggerBuilderData trigger() {
@@ -1271,17 +1265,14 @@ final class EntityBuilder {
             _type = to!Type(ffd.get!string(0));
         }
         catch (Exception e) {
-            _type = Type.prop;
+            _type = Type.entity;
         }
 
         _data.load(ffd);
 
         final switch (_type) with (Type) {
-        case prop:
-            _prop = new PropBuilderData(ffd);
-            break;
-        case actor:
-            _actor = new ActorBuilderData(ffd);
+        case entity:
+            _entity = new EntityBuilderData(ffd);
             break;
         case trigger:
             _trigger = new TriggerBuilderData(ffd);
@@ -1302,11 +1293,8 @@ final class EntityBuilder {
         _data.deserialize(stream);
 
         final switch (_type) with (Type) {
-        case prop:
-            _prop = new PropBuilderData(stream);
-            break;
-        case actor:
-            _actor = new ActorBuilderData(stream);
+        case entity:
+            _entity = new EntityBuilderData(stream);
             break;
         case trigger:
             _trigger = new TriggerBuilderData(stream);
@@ -1327,11 +1315,8 @@ final class EntityBuilder {
         _data.serialize(stream);
 
         final switch (_type) with (Type) {
-        case prop:
-            _prop.serialize(stream);
-            break;
-        case actor:
-            _actor.serialize(stream);
+        case entity:
+            _entity.serialize(stream);
             break;
         case trigger:
             _trigger.serialize(stream);
@@ -1348,55 +1333,7 @@ final class EntityBuilder {
     }
 }
 
-final class PropBuilderData {
-    private {
-        float _angle = 180f;
-        string _rid;
-        string _graphic;
-    }
-
-    @property {
-        string rid() const {
-            return _rid;
-        }
-
-        string graphic() const {
-            return _graphic;
-        }
-
-        float angle() const {
-            return _angle;
-        }
-    }
-
-    this(Farfadet ffd) {
-        if (ffd.hasNode("rid")) {
-            _rid = ffd.getNode("rid").get!string(0);
-        }
-
-        if (ffd.hasNode("graphic")) {
-            _graphic = ffd.getNode("graphic").get!string(0);
-        }
-
-        if (ffd.hasNode("angle")) {
-            _angle = ffd.getNode("angle").get!float(0);
-        }
-    }
-
-    this(InStream stream) {
-        _rid = stream.read!string();
-        _graphic = stream.read!string();
-        _angle = stream.read!float();
-    }
-
-    void serialize(OutStream stream) {
-        stream.write!string(_rid);
-        stream.write!string(_graphic);
-        stream.write!float(_angle);
-    }
-}
-
-final class ActorBuilderData {
+final class EntityBuilderData {
     private {
         float _angle = 180f;
         string _rid;
@@ -1447,6 +1384,8 @@ final class ActorBuilderData {
 final class TriggerBuilderData {
     private {
         string _event;
+        bool _isActive;
+        bool _isActiveOnce;
         Vec3i _hitbox;
     }
 
@@ -1458,6 +1397,14 @@ final class TriggerBuilderData {
         Vec3i hitbox() const {
             return _hitbox;
         }
+
+        bool isActive() const {
+            return _isActive;
+        }
+
+        bool isActiveOnce() const {
+            return _isActiveOnce;
+        }
     }
 
     this(Farfadet ffd) {
@@ -1467,16 +1414,26 @@ final class TriggerBuilderData {
         if (ffd.hasNode("hitbox")) {
             _hitbox = ffd.getNode("hitbox").get!Vec3i(0);
         }
+        if (ffd.hasNode("isActive")) {
+            _isActive = ffd.getNode("isActive").get!bool(0);
+        }
+        if (ffd.hasNode("isActiveOnce")) {
+            _isActiveOnce = ffd.getNode("isActiveOnce").get!bool(0);
+        }
     }
 
     this(InStream stream) {
         _event = stream.read!string();
         _hitbox = stream.read!Vec3i();
+        _isActive = stream.read!bool();
+        _isActiveOnce = stream.read!bool();
     }
 
     void serialize(OutStream stream) {
         stream.write!string(_event);
         stream.write!Vec3i(_hitbox);
+        stream.write!bool(_isActive);
+        stream.write!bool(_isActiveOnce);
     }
 }
 
@@ -1486,6 +1443,7 @@ final class TeleporterBuilderData {
         string _target;
         uint _direction;
         Vec3i _hitbox;
+        bool _isActive;
     }
 
     @property {
@@ -1504,6 +1462,10 @@ final class TeleporterBuilderData {
         Vec3i hitbox() const {
             return _hitbox;
         }
+
+        bool isActive() const {
+            return _isActive;
+        }
     }
 
     this(Farfadet ffd) {
@@ -1519,6 +1481,9 @@ final class TeleporterBuilderData {
         if (ffd.hasNode("hitbox")) {
             _hitbox = ffd.getNode("hitbox").get!Vec3i(0);
         }
+        if (ffd.hasNode("isActive")) {
+            _isActive = ffd.getNode("isActive").get!bool(0);
+        }
     }
 
     this(InStream stream) {
@@ -1526,6 +1491,7 @@ final class TeleporterBuilderData {
         _target = stream.read!string();
         _direction = stream.read!uint();
         _hitbox = stream.read!Vec3i();
+        _isActive = stream.read!bool();
     }
 
     void serialize(OutStream stream) {
@@ -1533,6 +1499,7 @@ final class TeleporterBuilderData {
         stream.write!string(_target);
         stream.write!uint(_direction);
         stream.write!Vec3i(_hitbox);
+        stream.write!bool(_isActive);
     }
 }
 

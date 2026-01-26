@@ -34,7 +34,7 @@ enum ParticleMode {
     rectangle,
     ellipsis
 }
-
+/+
 final class ParticleSource : Resource!ParticleSource {
     private {
         Entity _base;
@@ -445,3 +445,4 @@ final class Particle : Entity {
         _frame++;
     }
 }
++/

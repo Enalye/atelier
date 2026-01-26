@@ -15,7 +15,7 @@ import atelier.render;
 import atelier.world;
 
 import atelier.etabli.ui;
-import atelier.etabli.media.res.entity_base;
+import atelier.etabli.media.res.entity;
 import atelier.etabli.media.res.scene.terrain;
 import atelier.etabli.media.res.scene.parallax;
 import atelier.etabli.media.res.scene.collision;
@@ -906,8 +906,7 @@ package final class SceneDefinition {
 
     final class Entity {
         enum Type {
-            prop,
-            actor,
+            entity,
             trigger,
             teleporter,
             note,
@@ -932,7 +931,7 @@ package final class SceneDefinition {
             string getTypeInfo() const;
         }
 
-        final class PropBuilderData : BuilderData {
+        final class EntityBuilderData : BuilderData {
             private {
                 EntityRenderData[] _graphics, _auxGraphics, _auxGraphicsStack;
                 string _graphic;
@@ -1011,238 +1010,13 @@ package final class SceneDefinition {
             }
 
             override UIElement createSettingsWindow() {
-                return new PropSettings(this.outer);
+                return new EntitySettings(this.outer);
             }
 
             void reload() {
                 Farfadet ffd;
                 try {
-                    ffd = Atelier.etabli.getResource("prop", _rid).farfadet;
-                }
-                catch (Exception e) {
-                    return;
-                }
-
-                if (ffd.hasNode("hitbox")) {
-                    Farfadet hitboxNode = ffd.getNode("hitbox");
-                    if (hitboxNode.hasNode("size")) {
-                        _hitbox = hitboxNode.getNode("size").get!Vec3i(0);
-                    }
-                }
-
-                _graphics.length = 0;
-                foreach (size_t i, Farfadet renderNode; ffd.getNodes("graphic")) {
-                    EntityRenderData render = new EntityRenderData(renderNode);
-                    render.isVisible = false;
-                    _graphics ~= render;
-                }
-
-                _auxGraphics.length = 0;
-                foreach (size_t i, Farfadet renderNode; ffd.getNodes("auxGraphic")) {
-                    EntityRenderData render = new EntityRenderData(renderNode);
-                    render.isVisible = false;
-                    _auxGraphics ~= render;
-                }
-
-                EntityRenderData mainRenderData;
-                foreach (size_t i, EntityRenderData render; _graphics) {
-                    render.isVisible = false;
-                    if ((_graphic.length && render.name == _graphic) ||
-                        (!_graphic.length && render.isDefault)) {
-                        mainRenderData = render;
-                        mainRenderData.isVisible = true;
-                        break;
-                    }
-                }
-
-                if (!mainRenderData && _graphics.length > 0) {
-                    mainRenderData = _graphics[0];
-                    mainRenderData.isVisible = true;
-                }
-
-                _auxGraphicsStack.length = 0;
-                if (mainRenderData) {
-                    foreach (size_t i, EntityRenderData render; _auxGraphics) {
-                        if (mainRenderData) {
-                            render.isVisible = mainRenderData && mainRenderData.hasAuxGraphic(
-                                render.name);
-                            if (render.isVisible) {
-                                _auxGraphicsStack ~= render;
-                            }
-                        }
-                        else {
-                            render.isVisible = false;
-                        }
-                    }
-                    _auxGraphicsStack.sort!((a, b) => a.order < b.order)();
-                }
-            }
-
-            override void update(float zoom) {
-                _zoom = zoom;
-                foreach (EntityRenderData render; _graphics) {
-                    render.update();
-                }
-                foreach (EntityRenderData render; _auxGraphics) {
-                    render.update();
-                }
-            }
-
-            private void _render(Vec2f graphicOffset, float zoom) {
-                if (_auxGraphicsStack.length) {
-                    foreach (EntityRenderData render; _auxGraphicsStack) {
-                        if (render.getIsBehind()) {
-                            render.setZoom(zoom);
-                            render.draw(graphicOffset, _angle);
-                        }
-                    }
-
-                    foreach (EntityRenderData render; _graphics) {
-                        render.setZoom(zoom);
-                        render.draw(graphicOffset, _angle);
-                    }
-
-                    foreach (EntityRenderData render; _auxGraphicsStack) {
-                        if (!render.getIsBehind()) {
-                            render.setZoom(zoom);
-                            render.draw(graphicOffset, _angle);
-                        }
-                    }
-                }
-                else {
-                    foreach (EntityRenderData render; _graphics) {
-                        render.setZoom(zoom);
-                        render.draw(graphicOffset, _angle);
-                    }
-                }
-            }
-
-            override void draw(Vec2f origin, Vec3f hitboxSize, Vec2f offset) {
-                bool showHitbox = _isHovered || _isSelected || _isTempSelected;
-                float hitboxAlpha = (_isHovered || _isTempSelected) ? 0.5f : 1f;
-                Color hitboxColor = (_isSelected || _isTempSelected) ? Atelier.theme.danger
-                    : Atelier.theme.onNeutral;
-
-                if (showHitbox) {
-                    Atelier.renderer.drawRect(origin - offset, hitboxSize.xy,
-                        hitboxColor, 0.2f * hitboxAlpha, false);
-                }
-
-                _render(origin, _zoom);
-
-                if (showHitbox) {
-                    Atelier.renderer.drawRect(origin - (offset + Vec2f(0f,
-                            hitboxSize.z)), hitboxSize.xy, Color.yellow, 0.2f * hitboxAlpha, true);
-
-                    Atelier.renderer.drawRect(origin + Vec2f(0f,
-                            hitboxSize.y) - (offset + Vec2f(0f, hitboxSize.z)),
-                        hitboxSize.xz, Color.orange, 0.2f * hitboxAlpha, true);
-
-                    Atelier.renderer.drawRect(origin - (offset + Vec2f(0f, hitboxSize.z)),
-                        hitboxSize.xy, hitboxColor, hitboxAlpha, false);
-
-                    Atelier.renderer.drawRect(origin - (offset + Vec2f(0f,
-                            hitboxSize.z)), hitboxSize.xy + Vec2f(0f, hitboxSize.z),
-                        hitboxColor, hitboxAlpha, false);
-                }
-            }
-
-            override void drawSnapshot(Vec2f origin) {
-                _render(origin, 1f);
-            }
-
-            override string getTypeInfo() const {
-                return format("(%s) {%d, %d, %d}", _rid,
-                    entityData.position.x, entityData.position.y, entityData.position.z);
-            }
-        }
-
-        final class ActorBuilderData : BuilderData {
-            private {
-                EntityRenderData[] _graphics, _auxGraphics, _auxGraphicsStack;
-                string _graphic;
-                float _angle = 180f;
-                string _rid;
-                float _zoom = 1f;
-                Vec2f _imageOffset = Vec2f.zero;
-            }
-
-            @property {
-                string rid() const {
-                    return _rid;
-                }
-
-                string rid(string rid_) {
-                    if (_rid != rid_) {
-                        _rid = rid_;
-                        _graphic.length = 0;
-                        reload();
-                    }
-                    return _rid;
-                }
-
-                string graphic() const {
-                    return _graphic;
-                }
-
-                string graphic(string graphic_) {
-                    if (_graphic != graphic_) {
-                        _graphic = graphic_;
-                        reload();
-                    }
-                    return _graphic;
-                }
-
-                float angle() const {
-                    return _angle;
-                }
-
-                float angle(float angle_) {
-                    return _angle = angle_;
-                }
-            }
-
-            this(Farfadet ffd) {
-                if (ffd.hasNode("graphic")) {
-                    _graphic = ffd.getNode("graphic").get!string(0);
-                }
-
-                if (ffd.hasNode("angle")) {
-                    _angle = ffd.getNode("angle").get!float(0);
-                }
-
-                if (ffd.hasNode("rid")) {
-                    _rid = ffd.getNode("rid").get!string(0);
-                }
-
-                reload();
-            }
-
-            this() {
-            }
-
-            string[] getGraphicList() {
-                string[] names;
-                foreach (graphic; _graphics) {
-                    names ~= graphic.name;
-                }
-                return names;
-            }
-
-            override void save(Farfadet ffd) {
-                ffd.addNode("graphic").add(_graphic);
-                ffd.addNode("angle").add(_angle);
-                ffd.addNode("rid").add(_rid);
-            }
-
-            override UIElement createSettingsWindow() {
-                return new ActorSettings(this.outer);
-            }
-
-            void reload() {
-                Farfadet ffd;
-                try {
-                    ffd = Atelier.etabli.getResource("actor", _rid).farfadet;
+                    ffd = Atelier.etabli.getResource("entity", _rid).farfadet;
                 }
                 catch (Exception e) {
                     return;
@@ -1385,6 +1159,8 @@ package final class SceneDefinition {
         final class TriggerBuilderData : BuilderData {
             private {
                 string _event;
+                bool _isActive;
+                bool _isActiveOnce;
             }
 
             @property {
@@ -1403,6 +1179,22 @@ package final class SceneDefinition {
                 Vec3i hitbox(Vec3i hitbox_) {
                     return _hitbox = hitbox_;
                 }
+
+                bool isActive() const {
+                    return _isActive;
+                }
+
+                bool isActive(bool isActive_) {
+                    return _isActive = isActive_;
+                }
+
+                bool isActiveOnce() const {
+                    return _isActiveOnce;
+                }
+
+                bool isActiveOnce(bool isActiveOnce_) {
+                    return _isActiveOnce = isActiveOnce_;
+                }
             }
 
             this(Farfadet ffd) {
@@ -1414,6 +1206,14 @@ package final class SceneDefinition {
                 if (ffd.hasNode("hitbox")) {
                     _hitbox = ffd.getNode("hitbox").get!Vec3i(0);
                 }
+
+                if (ffd.hasNode("isActive")) {
+                    _isActive = ffd.getNode("isActive").get!bool(0);
+                }
+
+                if (ffd.hasNode("isActiveOnce")) {
+                    _isActiveOnce = ffd.getNode("isActiveOnce").get!bool(0);
+                }
             }
 
             this() {
@@ -1423,6 +1223,8 @@ package final class SceneDefinition {
             override void save(Farfadet ffd) {
                 ffd.addNode("event").add(_event);
                 ffd.addNode("hitbox").add(_hitbox);
+                ffd.addNode("isActive").add(_isActive);
+                ffd.addNode("isActiveOnce").add(_isActiveOnce);
             }
 
             override UIElement createSettingsWindow() {
@@ -1469,6 +1271,7 @@ package final class SceneDefinition {
             private {
                 string _scene, _target;
                 uint _direction;
+                bool _isActive;
             }
 
             @property {
@@ -1503,6 +1306,14 @@ package final class SceneDefinition {
                 Vec3i hitbox(Vec3i hitbox_) {
                     return _hitbox = hitbox_;
                 }
+
+                bool isActive() const {
+                    return _isActive;
+                }
+
+                bool isActive(bool isActive_) {
+                    return _isActive = isActive_;
+                }
             }
 
             this(Farfadet ffd) {
@@ -1522,6 +1333,10 @@ package final class SceneDefinition {
                 if (ffd.hasNode("hitbox")) {
                     _hitbox = ffd.getNode("hitbox").get!Vec3i(0);
                 }
+
+                if (ffd.hasNode("isActive")) {
+                    _isActive = ffd.getNode("isActive").get!bool(0);
+                }
             }
 
             this() {
@@ -1533,6 +1348,7 @@ package final class SceneDefinition {
                 ffd.addNode("target").add(_target);
                 ffd.addNode("direction").add(_direction);
                 ffd.addNode("hitbox").add(_hitbox);
+                ffd.addNode("isActive").add(_isActive);
             }
 
             override UIElement createSettingsWindow() {
@@ -1695,14 +1511,9 @@ package final class SceneDefinition {
                 return _hitbox;
             }
 
-            PropBuilderData prop() {
-                enforce(_type == Type.prop, "Type d’entité invalide");
-                return _prop;
-            }
-
-            ActorBuilderData actor() {
-                enforce(_type == Type.actor, "Type d’entité invalide");
-                return _actor;
+            EntityBuilderData entity() {
+                enforce(_type == Type.entity, "Type d’entité invalide");
+                return _entity;
             }
 
             TriggerBuilderData trigger() {
@@ -1739,8 +1550,7 @@ package final class SceneDefinition {
             Vec3i _hitbox;
             Type _type;
             union {
-                PropBuilderData _prop;
-                ActorBuilderData _actor;
+                EntityBuilderData _entity;
                 TriggerBuilderData _trigger;
                 TeleporterBuilderData _teleporter;
                 NoteBuilderData _note;
@@ -1751,18 +1561,14 @@ package final class SceneDefinition {
         }
 
         this(Farfadet ffd) {
-            _type = asEnum!Type(ffd.get!string(0), Type.prop);
+            _type = asEnum!Type(ffd.get!string(0), Type.entity);
 
             entityData.load(ffd);
 
             final switch (_type) with (Type) {
-            case prop:
-                _prop = new PropBuilderData(ffd);
-                _data = _prop;
-                break;
-            case actor:
-                _actor = new ActorBuilderData(ffd);
-                _data = _actor;
+            case entity:
+                _entity = new EntityBuilderData(ffd);
+                _data = _entity;
                 break;
             case trigger:
                 _trigger = new TriggerBuilderData(ffd);
@@ -1786,13 +1592,9 @@ package final class SceneDefinition {
         this(Type type_) {
             _type = type_;
             final switch (_type) with (Type) {
-            case prop:
-                _prop = new PropBuilderData;
-                _data = _prop;
-                break;
-            case actor:
-                _actor = new ActorBuilderData;
-                _data = _actor;
+            case entity:
+                _entity = new EntityBuilderData;
+                _data = _entity;
                 break;
             case trigger:
                 _trigger = new TriggerBuilderData;

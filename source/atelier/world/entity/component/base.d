@@ -17,6 +17,9 @@ abstract class EntityComponent {
         }
     }
 
-    void setup();
-    void update();
+    void setup() {
+    }
+
+    void update() {
+    }
 }

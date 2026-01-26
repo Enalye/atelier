@@ -13,8 +13,8 @@ import atelier.physics.system;
 
 final class TriggerCollider : Collider {
     private {
-        bool _isActiveOnce;
-        bool _isActive;
+        bool _isActiveOnce = true;
+        bool _isActive = true;
     }
 
     @property {
@@ -55,6 +55,19 @@ final class TriggerCollider : Collider {
     override bool move(Vec3f moveDir,
         Physics.CollisionHit.Type hitType = Physics.CollisionHit.Type.none) {
         entity.moveRaw(moveDir);
+        return true;
+    }
+
+    /// Vérifie s’il y a collision avec ce déclencheur
+    bool collidesWith(Vec3i point_, Vec3i hitbox_) {
+        point_.x -= hitbox_.x - (hitbox_.x >> 1);
+        point_.y -= hitbox_.y - (hitbox_.y >> 1);
+
+        if (!((left < (point_.x + hitbox_.x)) && (up < (point_.y + hitbox_.y)) &&
+                (bottom < (point_.z + hitbox_.z)) && (right > point_.x) && (down > point_.y)
+                && (top > point_.z)))
+            return false;
+
         return true;
     }
 }

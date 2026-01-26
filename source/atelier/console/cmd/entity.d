@@ -8,7 +8,7 @@ import atelier.console.system;
 
 package void _entityCmd(Cli cli) {
     cli.addCommand(&_addentity, "addentity", "Ajoute une entité", [
-            "S:type", "S:rid"
+            "S:rid"
         ]);
     cli.addCommandOption("addentity", "p", "pos",
         "Positionne l’entité créée", ["I:x", "I:y", "I:z"]);
@@ -41,28 +41,17 @@ package void _entityCmd(Cli cli) {
 }
 
 private void _addentity(Cli.Result cli) {
+    string rid = cli.getRequiredParamAs!string(0);
     Entity entity;
-    string type = cli.getRequiredParamAs!string(0);
-    string rid = cli.getRequiredParamAs!string(1);
 
     Vec3i position = Vec3i(cast(Vec2i) Atelier.world.camera.getPosition(), 0);
     position.z = Atelier.world.scene.getBaseZ(position.xy);
 
     try {
-        switch (type) {
-        case "prop":
-            entity = Atelier.res.get!Prop(rid);
-            break;
-        case "actor":
-            entity = Atelier.res.get!Actor(rid);
-            break;
-        default:
-            Atelier.console.log("Le type peut-être soit `prop`, soit `actor`");
-            return;
-        }
+        entity = Atelier.res.get!Entity(rid);
     }
     catch (Exception e) {
-        Atelier.console.log("Aucune entité `", rid, "` de type `", type, "` trouvé");
+        Atelier.console.log("Aucune entité `", rid, "` trouvé");
         return;
     }
 

@@ -35,6 +35,38 @@ package(atelier.etabli.media.res.scene) class TriggerSettings : BaseEntitySettin
         }
 
         {
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(284f, 0f));
+            addProperty(hlayout);
+
+            hlayout.addUI(new Label("Actif ?", Atelier.theme.font));
+
+            Checkbox isActiveCheck = new Checkbox;
+            isActiveCheck.value = _entity.trigger.isActive;
+            isActiveCheck.addEventListener("value", {
+                _entity.trigger.isActive = isActiveCheck.value;
+                setDirty();
+            });
+            hlayout.addUI(isActiveCheck);
+        }
+
+        {
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(284f, 0f));
+            addProperty(hlayout);
+
+            hlayout.addUI(new Label("Unique ?", Atelier.theme.font));
+
+            Checkbox isActiveOnceCheck = new Checkbox;
+            isActiveOnceCheck.value = _entity.trigger.isActiveOnce;
+            isActiveOnceCheck.addEventListener("value", {
+                _entity.trigger.isActiveOnce = isActiveOnceCheck.value;
+                setDirty();
+            });
+            hlayout.addUI(isActiveOnceCheck);
+        }
+
+        {
             LabelSeparator title = new LabelSeparator("Taille", Atelier.theme.font);
             title.setColor(Atelier.theme.neutral);
             title.setPadding(Vec2f(284f, 0f));

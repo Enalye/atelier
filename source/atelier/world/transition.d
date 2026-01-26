@@ -67,7 +67,7 @@ final class DefaultTransition : Transition {
         }
     }
 
-    this(string sceneRid, string tpName, Actor actor, bool skip) {
+    this(string sceneRid, string tpName, Entity entity, bool skip) {
         _sceneRid = sceneRid;
         _tpName = tpName;
 

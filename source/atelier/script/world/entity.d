@@ -19,6 +19,13 @@ package void loadLibWorld_entity(GrModule mod) {
     GrType graphicType = grGetNativeType("EntityGraphic");
     GrType graphicEffectType = grGetNativeType("EntityGraphicEffect");
     GrType layerType = mod.addEnum("EntityLayer", grNativeEnum!(Entity.Layer)());
+    GrType componentType = grGetNativeType("EntityComponent");
+    GrType controllerType = grGetNativeType("EntityController");
+    GrType behaviorType = grGetNativeType("EntityBehavior");
+
+    mod.setDescription(GrLocale.fr_FR, "Crée une entité");
+    mod.setParameters(["rid"]);
+    mod.addConstructor(&_ctor, entityType, [grString]);
 
     mod.setDescription(GrLocale.fr_FR, "Retire l’entité");
     mod.setParameters(["entity"]);
@@ -120,9 +127,15 @@ package void loadLibWorld_entity(GrModule mod) {
     mod.setParameters(["entity"]);
     mod.addFunction(&_getAngle, "getAngle", [entityType], [grFloat]);
 
+    mod.setDescription(GrLocale.fr_FR, "Récupère l'accélération de l'entité");
+    mod.setParameters(["entity"]);
+    mod.addFunction(&_getAccel, "getAccel", [
+            entityType
+        ], [grFloat, grFloat, grFloat]);
+
     mod.setDescription(GrLocale.fr_FR, "Change l'accélération de l'entité");
     mod.setParameters(["entity", "x", "y", "z"]);
-    mod.addFunction(&_accelerate, "accelerate", [
+    mod.addFunction(&_setAccel, "setAccel", [
             entityType, grFloat, grFloat, grFloat
         ]);
 
@@ -140,6 +153,35 @@ package void loadLibWorld_entity(GrModule mod) {
     mod.addFunction(&_getBaseMaterial, "getBaseMaterial", [entityType], [grInt]);
     mod.addFunction(&_setShadow, "setShadow", [entityType, grString]);
     mod.addFunction(&_setEffect, "setEffect", [entityType, graphicEffectType]);
+
+    mod.setDescription(GrLocale.fr_FR, "Récupère le controleur de l’entité");
+    mod.setParameters(["entity"]);
+    mod.addFunction(&_getController, "getController", [entityType], [
+            controllerType
+        ]);
+
+    mod.setDescription(GrLocale.fr_FR, "Définit le controleur de l’entité");
+    mod.setParameters(["entity", "id"]);
+    mod.addFunction(&_setController, "setController", [entityType, grString], [
+            controllerType
+        ]);
+
+    mod.setDescription(GrLocale.fr_FR, "Récupère le comportement de l’entité");
+    mod.setParameters(["entity"]);
+    mod.addFunction(&_getBehavior, "getBehavior", [entityType], [
+            behaviorType
+        ]);
+
+    mod.setDescription(GrLocale.fr_FR, "Définit le comportement de l’entité");
+    mod.setParameters(["entity", "id"]);
+    mod.addFunction(&_setBehavior, "setBehavior", [entityType, grString], [
+            behaviorType
+        ]);
+}
+
+private void _ctor(GrCall call) {
+    Entity entity = Atelier.res.get!Entity(call.getString(0));
+    call.setNative(entity);
 }
 
 private void _unregister(GrCall call) {
@@ -248,9 +290,17 @@ private void _isEnabled(GrCall call) {
     call.setBool(entity.isEnabled());
 }
 
-private void _accelerate(GrCall call) {
+private void _getAccel(GrCall call) {
     Entity entity = call.getNative!Entity(0);
-    entity.accelerate(Vec3f(call.getFloat(1), call.getFloat(2), call.getFloat(3)));
+    Vec3f accel = entity.getAccel();
+    call.setFloat(accel.x);
+    call.setFloat(accel.y);
+    call.setFloat(accel.z);
+}
+
+private void _setAccel(GrCall call) {
+    Entity entity = call.getNative!Entity(0);
+    entity.setAccel(Vec3f(call.getFloat(1), call.getFloat(2), call.getFloat(3)));
 }
 
 private void _lookAt_xy(GrCall call) {
@@ -289,4 +339,26 @@ private void _setEffect(GrCall call) {
     Entity entity = call.getNative!Entity(0);
     EntityGraphicEffect effect = call.getNative!EntityGraphicEffect(1);
     entity.setEffect(effect);
+}
+
+private void _getController(GrCall call) {
+    Entity entity = call.getNative!Entity(0);
+    call.setNative(entity.getController());
+}
+
+private void _setController(GrCall call) {
+    Entity entity = call.getNative!Entity(0);
+    string id = call.getString(1);
+    call.setNative(entity.setController(id));
+}
+
+private void _getBehavior(GrCall call) {
+    Entity entity = call.getNative!Entity(0);
+    call.setNative(entity.getBehavior());
+}
+
+private void _setBehavior(GrCall call) {
+    Entity entity = call.getNative!Entity(0);
+    string id = call.getString(1);
+    call.setNative(entity.setBehavior(id));
 }

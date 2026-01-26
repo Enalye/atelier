@@ -154,19 +154,19 @@ sprite "editor:ffd-skill" {
     texture "editor"
     clip 176 80 16 16
 }
-sprite "editor:ffd-actor" {
+sprite "editor:ffd-entity" {
     texture "editor"
     clip 192 64 16 16
 }
-sprite "editor:ffd-prop" {
+sprite "editor:ffd-unused_00000" {
     texture "editor"
     clip 192 80 16 16
 }
-sprite "editor:ffd-shot" {
+sprite "editor:ffd-unused_00001" {
     texture "editor"
     clip 192 96 16 16
 }
-sprite "editor:ffd-proxy" {
+sprite "editor:ffd-unused_00002" {
     texture "editor"
     clip 208 80 16 16
 }

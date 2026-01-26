@@ -225,25 +225,10 @@ final class Etabli {
 
             return new SceneResourceEditor(editor, path, ffd, size);
         });
-        ResourceEditor.add("prop", (ResourceEditor editor, string path, Farfadet ffd, Vec2f size) {
-            import atelier.etabli.media.res.prop : PropResourceEditor;
+        ResourceEditor.add("entity", (ResourceEditor editor, string path, Farfadet ffd, Vec2f size) {
+            import atelier.etabli.media.res.entity : EntityResourceEditor;
 
-            return new PropResourceEditor(editor, path, ffd, size);
-        });
-        ResourceEditor.add("actor", (ResourceEditor editor, string path, Farfadet ffd, Vec2f size) {
-            import atelier.etabli.media.res.actor : ActorResourceEditor;
-
-            return new ActorResourceEditor(editor, path, ffd, size);
-        });
-        ResourceEditor.add("shot", (ResourceEditor editor, string path, Farfadet ffd, Vec2f size) {
-            import atelier.etabli.media.res.shot : ShotResourceEditor;
-
-            return new ShotResourceEditor(editor, path, ffd, size);
-        });
-        ResourceEditor.add("proxy", (ResourceEditor editor, string path, Farfadet ffd, Vec2f size) {
-            import atelier.etabli.media.res.proxy : ProxyResourceEditor;
-
-            return new ProxyResourceEditor(editor, path, ffd, size);
+            return new EntityResourceEditor(editor, path, ffd, size);
         });
         ResourceEditor.add("shadow", (ResourceEditor editor, string path, Farfadet ffd, Vec2f size) {
             import atelier.etabli.media.res.shadow : ShadowResourceEditor;

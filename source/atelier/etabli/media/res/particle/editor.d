@@ -13,7 +13,7 @@ import atelier.world;
 import atelier.etabli.ui;
 import atelier.etabli.media.res.base;
 import atelier.etabli.media.res.editor;
-import atelier.etabli.media.res.entity_base;
+import atelier.etabli.media.res.entity.data;
 import atelier.etabli.media.res.particle.parameter;
 import atelier.etabli.media.res.particle.player;
 import atelier.etabli.media.res.particle.source;
@@ -89,7 +89,7 @@ final class ParticleResourceEditor : ResourceBaseEditor {
                 _graphics ~= render;
             }
             _player.setRenders(_graphics);
-            _source.setGraphics(_graphics);
+            //_source.setGraphics(_graphics);
             setDirty();
         });
 
@@ -115,7 +115,7 @@ final class ParticleResourceEditor : ResourceBaseEditor {
         });
         addEventListener("size", { _player.setWidth(getWidth()); });
 
-        _source.setGraphics(_graphics);
+        //_source.setGraphics(_graphics);
         _source.setData(_particle);
 
     }

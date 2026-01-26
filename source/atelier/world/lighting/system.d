@@ -4,7 +4,7 @@ import atelier.common;
 import atelier.core;
 import atelier.render;
 import atelier.world.scene;
-import atelier.world.world;
+import atelier.world.system;
 import atelier.world.lighting.darkness;
 import atelier.world.lighting.light;
 

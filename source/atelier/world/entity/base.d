@@ -9,10 +9,11 @@ import atelier.core;
 import atelier.physics;
 import atelier.render;
 import atelier.world.lighting;
-import atelier.world.world;
+import atelier.world.system;
 import atelier.world.entity.component;
 import atelier.world.entity.controller;
 import atelier.world.entity.effect;
+import atelier.world.entity.behavior;
 import atelier.world.entity.renderer;
 import atelier.world.entity.shadow;
 
@@ -20,8 +21,10 @@ import atelier.world.entity.shadow;
 struct BaseEntityData {
     string[] tags;
     string controller;
+    string behavior;
     string shadow;
     int zOrderOffset;
+    int material;
 
     mixin Serializer;
 }
@@ -37,114 +40,22 @@ struct EntityData {
     mixin Serializer;
 }
 
-mixin template EntityController() {
-    private {
-        alias T = typeof(this);
+final class Entity : Resource!Entity {
+    mixin ControllerMixin;
 
-        static assert(__traits(isAbstractClass, T) == false,
-            "EntityController ne doit pas être intégré dans une classe abstraite");
-
-        Controller!T _controller;
-    }
-
-    Controller!T getController() {
-        return _controller;
-    }
-
-    override bool hasController() {
-        return _controller !is null;
-    }
-
-    override void removeController() {
-        if (_controller) {
-            _controller.unregister();
-            _controller = null;
-        }
-    }
-
-    override void setController(string id) {
-        import atelier.core : Atelier;
-
-        if (_controller) {
-            _controller.unregister();
-        }
-
-        _controller = Atelier.world.fetchController!T(id);
-
-        if (_controller) {
-            _controller.setup(this);
-            Atelier.world.registerController(_controller);
-            _controller.onStart();
-        }
-    }
-
-    override string sendEvent(string event) {
-        if (!_controller)
-            return "";
-
-        return _controller.onEvent(event);
-    }
-
-    final override void onEnable() {
-        if (!_controller)
-            return;
-
-        _controller.onEnable();
-    }
-
-    final override void onDisable() {
-        if (!_controller)
-            return;
-
-        _controller.onDisable();
-    }
-
-    final private void onHit(Entity target, Vec3f normal) {
-        if (!_controller)
-            return;
-
-        _controller.onHit(target, normal);
-    }
-
-    final private void onSquish(Vec3f normal) {
-        if (!_controller)
-            return;
-
-        _controller.onSquish(normal);
-    }
-
-    final private void onImpact(Entity target, Vec3f normal) {
-        if (!_controller)
-            return;
-
-        _controller.onImpact(target, normal);
-    }
-}
-
-abstract class Entity {
     enum Layer {
         scene,
         above,
         glow
     }
 
-    enum Type {
-        actor,
-        prop,
-        particle,
-        proxy,
-        shot,
-        teleporter,
-        trigger
-    }
-
     private {
-        Type _type;
         bool _isRegistered = false;
         string _name;
         string[] _tags;
         Layer _layer = Layer.scene;
         string _baseControllerId;
+        string _baseBehaviorId;
         bool _hasCulling = true;
         uint _sectorID;
     }
@@ -167,6 +78,8 @@ abstract class Entity {
         EntityGraphicEffectWrapper _effect;
         Collider _collider;
         Hurtbox _hurtbox;
+        Repulsor _repulsor;
+        EntityBehavior _behavior;
         float _angle = 180f;
         int _material = 0;
         int _baseZ = 0;
@@ -175,7 +88,7 @@ abstract class Entity {
         Vec3i _position = Vec3i.zero;
         Vec3f _subPosition = Vec3f.zero;
         Vec3f _velocity = Vec3f.zero;
-        Vec3f _acceleration = Vec3f.zero;
+        Vec3f _accel = Vec3f.zero;
         Shadow _shadow;
         int _shadowBaseZ = 0;
         bool _isMoving;
@@ -190,36 +103,32 @@ abstract class Entity {
     }
 
     @property {
-        final Type type() const {
-            return _type;
-        }
-
-        final Vec2f cameraPosition() const {
+        Vec2f cameraPosition() const {
             return Vec2f(_position.x, _position.y - _position.z);
         }
 
-        final bool isRegistered() const {
+        bool isRegistered() const {
             return _isRegistered;
         }
 
         /*package(atelier.world) */
-        final bool isRegistered(bool value) {
+        bool isRegistered(bool value) {
             return _isRegistered = value;
         }
 
-        final bool isRendered() const {
+        bool isRendered() const {
             return _isRendered;
         }
 
-        final bool isRendered(bool value) {
+        bool isRendered(bool value) {
             return _isRendered = value;
         }
 
-        final int isInRenderList() const {
+        int isInRenderList() const {
             return _isInRenderList;
         }
 
-        final int isInRenderList(int value) {
+        int isInRenderList(int value) {
             return _isInRenderList = value;
         }
 
@@ -256,12 +165,10 @@ abstract class Entity {
         }
     }
 
-    this(Type type_) {
-        _type = type_;
+    this() {
     }
 
     this(Entity other) {
-        _type = other._type;
         _name = other._name;
         _tags = other._tags;
         _layer = other._layer;
@@ -270,6 +177,7 @@ abstract class Entity {
         _material = other._material;
         _baseZ = other._baseZ;
         _baseControllerId = other._baseControllerId;
+        _baseBehaviorId = other._baseBehaviorId;
         _zOrderOffset = other._zOrderOffset;
         _baseMaterial = other._baseMaterial;
         _shadowBaseZ = other._shadowBaseZ;
@@ -289,6 +197,11 @@ abstract class Entity {
         if (other._collider) {
             _collider = other._collider.fetch();
             _collider.setEntity(this);
+        }
+
+        if (other._repulsor) {
+            _repulsor = new Repulsor(other._repulsor);
+            _repulsor.setEntity(this);
         }
 
         if (other._hurtbox) {
@@ -313,7 +226,11 @@ abstract class Entity {
         _updateAuxGraphics();
     }
 
-    final void setData(const(EntityData) data) {
+    Entity fetch() {
+        return new Entity(this);
+    }
+
+    void setData(const(EntityData) data) {
         _name = data.name;
         _tags ~= data.tags.dup;
         _layer = asEnum!Layer(data.layer);
@@ -324,18 +241,20 @@ abstract class Entity {
         }
     }
 
-    final void setBaseEntityData(const(BaseEntityData) data) {
+    void setBaseEntityData(const(BaseEntityData) data) {
         _tags ~= data.tags.dup;
         _baseControllerId = data.controller;
+        _baseBehaviorId = data.behavior;
         _zOrderOffset = data.zOrderOffset;
+        _material = data.material;
         setShadow(data.shadow);
     }
 
-    final Layer getLayer() const {
+    Layer getLayer() const {
         return _layer;
     }
 
-    final void setLayer(Layer layer) {
+    void setLayer(Layer layer) {
         _layer = layer;
     }
 
@@ -348,20 +267,56 @@ abstract class Entity {
         }());
     }
 
-    void addComponent(T : EntityComponent)() {
-        if (T.stringof in _components)
-            return;
+    T addComponent(T : EntityComponent)() {
+        auto p = T.stringof in _components;
+        if (p)
+            return cast(T)(*p);
         T component = new T;
         component.entity = this;
         component.setup();
         _components[T.stringof] = component;
+        return component;
     }
 
     void removeComponent(T : EntityComponent)() {
         _components.remove(T.stringof);
     }
 
-    final void removeCollider() {
+    void setupRepulsor(RepulsorData data) {
+        if (_repulsor) {
+            _repulsor.unregister();
+            _repulsor = null;
+        }
+
+        if (data.type == "none")
+            return;
+
+        _repulsor = new Repulsor(this, data);
+    }
+
+    Repulsor getRepulsor() {
+        return _repulsor;
+    }
+
+    void setCollider(HitboxData data) {
+        removeCollider();
+        _collider = data.fetch();
+
+        if (_collider) {
+            _collider.setEntity(this);
+        }
+    }
+
+    void setCollider(Collider collider) {
+        removeCollider();
+        _collider = collider;
+
+        if (_collider) {
+            _collider.setEntity(this);
+        }
+    }
+
+    void removeCollider() {
         if (_collider) {
             _collider.setEntity(null);
             _collider.unregister();
@@ -369,31 +324,42 @@ abstract class Entity {
         }
     }
 
-    final Collider getBaseCollider() {
+    Collider getCollider() {
         return _collider;
     }
 
-    final void unregister() {
+    EntityBehavior getBehavior() {
+        return _behavior;
+    }
+
+    EntityBehavior setBehavior(string id) {
+        _behavior = Atelier.world.fetchBehavior(id);
+        _behavior.entity = this;
+        _behavior.setup();
+        return _behavior;
+    }
+
+    void unregister() {
         _isRegistered = false;
     }
 
-    final int getColumn() const {
+    int getColumn() const {
         return _position.x / 16;
     }
 
-    final int getLine() const {
+    int getLine() const {
         return _position.y / 16;
     }
 
-    final int getLevel() const {
+    int getLevel() const {
         return _position.z / 16;
     }
 
-    final Vec3i getTilePosition() const {
+    Vec3i getTilePosition() const {
         return _position >> 4;
     }
 
-    final void setTilePosition(Vec3i pos) {
+    void setTilePosition(Vec3i pos) {
         _position = pos << 4;
         if (_collider) {
             Vec2i offset = _collider.getTileOffset();
@@ -404,7 +370,7 @@ abstract class Entity {
         reloadTerrainInfo();
     }
 
-    final int getYOrder() const {
+    int getYOrder() const {
         if (_collider) {
             return _collider.down();
         }
@@ -414,53 +380,53 @@ abstract class Entity {
         return _position.y;
     }
 
-    final Vec3i getGroundPosition() const {
+    Vec3i getGroundPosition() const {
         return Vec3i(_position.x, _position.y, _baseZ);
     }
 
-    final Vec3i getPosition() const {
+    Vec3i getPosition() const {
         return _position;
     }
 
-    final void setPosition(Vec3i pos) {
+    void setPosition(Vec3i pos) {
         _position = pos;
         _subPosition = Vec3f.zero;
         reloadTerrainInfo();
     }
 
-    final void addPosition(Vec3i pos) {
+    void addPosition(Vec3i pos) {
         _position += pos;
         reloadTerrainInfo();
     }
 
-    final void setPosition(Vec3f pos) {
+    void setPosition(Vec3f pos) {
         _position = Vec3i.zero;
         moveRaw(pos);
     }
 
-    final Vec3f getSubPosition() const {
+    Vec3f getSubPosition() const {
         return _subPosition;
     }
 
-    final void setSubPosition(Vec3f pos) {
+    void setSubPosition(Vec3f pos) {
         _subPosition = pos;
     }
 
-    final void setPositionRaw(Vec3i pos, Vec3f subPos) {
+    void setPositionRaw(Vec3i pos, Vec3f subPos) {
         _position = pos;
         _subPosition = subPos;
         reloadTerrainInfo();
     }
 
-    final void addGraphic(string name, EntityGraphic graphic) {
+    void addGraphic(string name, EntityGraphic graphic) {
         _graphics[name] = graphic;
     }
 
-    final void addAuxGraphic(string name, EntityGraphic graphic) {
+    void addAuxGraphic(string name, EntityGraphic graphic) {
         _auxGraphics[name] = graphic;
     }
 
-    final void setDefaultGraphic() {
+    void setDefaultGraphic() {
         if (_graphic && _graphic.getDefault())
             return;
 
@@ -494,7 +460,7 @@ abstract class Entity {
         }
     }
 
-    final void setGraphic(string id, bool forceUpdate = false) {
+    void setGraphic(string id, bool forceUpdate = false) {
         if (!id.length) {
             setDefaultGraphic();
             return;
@@ -628,57 +594,57 @@ abstract class Entity {
         _auxGraphicSlots[index].graphic.setAngle(_angle);
     }
 
-    final EntityGraphic getGraphic(string id) {
+    EntityGraphic getGraphic(string id) {
         auto p = id in _graphics;
         return p ? *p : null;
     }
 
-    final EntityGraphic getGraphic() {
+    EntityGraphic getGraphic() {
         return _graphic;
     }
 
-    final EntityGraphic[string] getGraphics() {
+    EntityGraphic[string] getGraphics() {
         return _graphics;
     }
 
-    final EntityGraphic getAuxGraphic(string id) {
+    EntityGraphic getAuxGraphic(string id) {
         auto p = id in _auxGraphics;
         return p ? *p : null;
     }
 
-    final EntityGraphic getAuxGraphic(uint index) {
+    EntityGraphic getAuxGraphic(uint index) {
         if (index >= _auxGraphicSlots.length)
             return null;
 
         return _auxGraphicSlots[index].graphic;
     }
 
-    final EntityGraphic[string] getAuxGraphics() {
+    EntityGraphic[string] getAuxGraphics() {
         return _auxGraphics;
     }
 
-    final void setEffect(EntityGraphicEffect effect) {
+    void setEffect(EntityGraphicEffect effect) {
         _effect = effect.setup(this);
     }
 
-    final void setShadow(string shadow) {
+    void setShadow(string shadow) {
         _shadow = shadow.length ?
             Atelier.res.get!Shadow(shadow) : null;
     }
 
-    final void setMaterial(int mat) {
+    void setMaterial(int mat) {
         _material = mat;
     }
 
-    final int getMaterial() const {
+    int getMaterial() const {
         return _material;
     }
 
-    final int getBaseMaterial() const {
+    int getBaseMaterial() const {
         return _baseMaterial;
     }
 
-    final void setupHurtbox(HurtboxData data) {
+    void setupHurtbox(HurtboxData data) {
         if (_hurtbox) {
             _hurtbox.unregister();
             _hurtbox = null;
@@ -690,10 +656,7 @@ abstract class Entity {
         _hurtbox = new Hurtbox(this, data);
     }
 
-    void update() {
-    }
-
-    final void updateEntityGraphics() {
+    void updateGraphics() {
         if (_graphic) {
             _graphic.update();
         }
@@ -706,8 +669,12 @@ abstract class Entity {
         }
     }
 
-    final void updateEntity() {
+    void update() {
         if (_isEnabled) {
+            if (_behavior) {
+                _behavior.update();
+            }
+
             foreach (component; _components) {
                 component.update();
             }
@@ -733,28 +700,28 @@ abstract class Entity {
         }
     }
 
-    final void clearRenderInfo() {
+    void clearRenderInfo() {
         _isInRenderList = 0;
         _renderEntitiesAbove.length = 0;
         _renderEntitiesBehind.length = 0;
     }
 
-    final void addRenderChild(Entity child, bool inFront) {
+    void addRenderChild(Entity child, bool inFront) {
         if (inFront)
             _renderEntitiesAbove ~= child;
         else
             _renderEntitiesBehind ~= child;
     }
 
-    final void setZOrderOffset(int offset) {
+    void setZOrderOffset(int offset) {
         _zOrderOffset = offset;
     }
 
-    final int getZOrder() const {
+    int getZOrder() const {
         return _position.z + _zOrderOffset;
     }
 
-    final bool isAbove(Entity entity, bool verbose = false) {
+    bool isAbove(Entity entity, bool verbose = false) {
         if (_collider && entity._collider)
             return _collider.isAbove(entity._collider);
         if (_collider && entity._graphic) {
@@ -790,7 +757,7 @@ abstract class Entity {
         return false;
     }
 
-    final bool isBehind(Entity entity) {
+    bool isBehind(Entity entity) {
         if (_collider && entity._collider)
             return _collider.isBehind(entity._collider);
         if (_graphic && entity._graphic)
@@ -799,11 +766,11 @@ abstract class Entity {
         return false;
     }
 
-    final void setCulling(bool culling) {
+    void setCulling(bool culling) {
         _hasCulling = culling;
     }
 
-    final bool isCulled(Vec4f bounds) const {
+    bool isCulled(Vec4f bounds) const {
         if (!_graphic)
             return true;
         if (!_hasCulling)
@@ -814,7 +781,7 @@ abstract class Entity {
             (_graphic.getUp(_position.y - _position.z) > bounds.w);
     }
 
-    final void moveRaw(Vec3f dir) {
+    void moveRaw(Vec3f dir) {
         _subPosition += dir;
         Vec3i delta = cast(Vec3i) _subPosition.round();
         _subPosition -= cast(Vec3f) delta;
@@ -822,7 +789,7 @@ abstract class Entity {
         reloadTerrainInfo();
     }
 
-    final void moveTileRaw(Vec3i dir) {
+    void moveTileRaw(Vec3i dir) {
         _targetPosition = (getTilePosition() << 4) + dir * 16;
         if (_collider) {
             Vec2i offset = _collider.getTileOffset();
@@ -834,13 +801,13 @@ abstract class Entity {
         reloadTerrainInfo();
     }
 
-    final void moveRaw(Vec3i dir, int baseZ_, int material_) {
+    void moveRaw(Vec3i dir, int baseZ_, int material_) {
         _position += dir;
         _baseZ = baseZ_;
         _baseMaterial = material_;
     }
 
-    final void moveTile(Vec3i dir) {
+    void moveTile(Vec3i dir) {
         if (_collider) {
             _collider.moveTile(dir);
         }
@@ -849,7 +816,7 @@ abstract class Entity {
         }
     }
 
-    final void move(Vec3f dir) {
+    void move(Vec3f dir) {
         version (AtelierEtabli) {
             moveRaw(dir);
         }
@@ -857,7 +824,7 @@ abstract class Entity {
             if (_collider) {
                 if (!_collider.move(dir)) {
                     _velocity.set(0f, 0f, 0f);
-                    _acceleration.set(0f, 0f, 0f);
+                    _accel.set(0f, 0f, 0f);
                 }
             }
             else {
@@ -898,21 +865,21 @@ abstract class Entity {
         return _hurtbox;
     }
 
-    final void setName(string name_) {
+    void setName(string name_) {
         _name = name_;
     }
 
-    final string getName() const {
+    string getName() const {
         return _name;
     }
 
-    final void addTag(string tag_) {
+    void addTag(string tag_) {
         if (hasTag(tag_))
             return;
         _tags ~= tag_;
     }
 
-    final bool hasTag(string tag_) const {
+    bool hasTag(string tag_) const {
         foreach (tag; _tags) {
             if (tag == tag_)
                 return true;
@@ -921,52 +888,43 @@ abstract class Entity {
     }
 
     /// À changer plus tard
-    final bool hasGraphic(string graphic_) const {
+    bool hasGraphic(string graphic_) const {
         return _graphic == _graphics[graphic_];
-    }
-
-    bool hasController() {
-        return false;
-    }
-
-    void removeController() {
-    }
-
-    void setController(string id) {
     }
 
     string sendEvent(string event) {
         return "";
     }
 
-    void updateMovement() {
-    }
-
-    final void setSpeed(float xySpeed, float zSpeed) {
+    void setSpeed(float xySpeed, float zSpeed) {
         _velocity = Vec3f(Vec2f.angled(degToRad(_angle)) * xySpeed, zSpeed);
     }
 
-    final void addSpeed(float xySpeed, float zSpeed) {
+    void addSpeed(float xySpeed, float zSpeed) {
         _velocity += Vec3f(Vec2f.angled(degToRad(_angle)) * xySpeed, zSpeed);
     }
 
-    final void setVelocity(Vec3f dir) {
+    void setVelocity(Vec3f dir) {
         _velocity = dir;
     }
 
-    final void addVelocity(Vec3f dir) {
+    void addVelocity(Vec3f dir) {
         _velocity += dir;
     }
 
-    final void accelerate(Vec3f dir) {
-        _acceleration = dir;
+    Vec3f getAccel() const {
+        return _accel;
     }
 
-    final uint getSectorID() {
+    void setAccel(Vec3f dir) {
+        _accel = dir;
+    }
+
+    uint getSectorID() {
         return _sectorID;
     }
 
-    final void lookAt(Vec2i target) {
+    void lookAt(Vec2i target) {
         Vec2i origin = getPosition().xy;
 
         if (target == origin)
@@ -977,11 +935,11 @@ abstract class Entity {
         angle(clampDeg(radToDeg(angle_)));
     }
 
-    final void lookAt(Entity target) {
+    void lookAt(Entity target) {
         lookAt(target.getPosition().xy);
     }
 
-    final void draw(Vec2f offset) {
+    void draw(Vec2f offset) {
         Vec2f drawPos = offset + cameraPosition();
 
         foreach (child; _renderEntitiesBehind) {
@@ -1010,7 +968,7 @@ abstract class Entity {
         }
     }
 
-    final void drawTransition(Vec2f offset, float tTransition, bool drawGraphics) {
+    void drawTransition(Vec2f offset, float tTransition, bool drawGraphics) {
         Vec2f drawPos = offset + cameraPosition();
 
         foreach (child; _renderEntitiesBehind) {
@@ -1026,7 +984,7 @@ abstract class Entity {
         }
     }
 
-    final void render(Vec2f offset, float alpha = 1f) {
+    void render(Vec2f offset, float alpha = 1f) {
         if (_effect) {
             _effect.draw(offset, alpha);
         }
@@ -1035,7 +993,7 @@ abstract class Entity {
         }
     }
 
-    final void renderShadow(Vec2f offset, float alpha = 1f) {
+    void renderShadow(Vec2f offset, float alpha = 1f) {
         if (!_shadow)
             return;
 
@@ -1049,7 +1007,7 @@ abstract class Entity {
         _shadow.draw(offset, _position.xy, getAltitude(), _angle, alpha);
     }
 
-    final void renderGraphic(Vec2f offset, float alpha = 1f) {
+    void renderGraphic(Vec2f offset, float alpha = 1f) {
         Color color = Atelier.world.getDepthColor(_position.z);
 
         if (_auxGraphicStack.length) {
@@ -1076,7 +1034,7 @@ abstract class Entity {
         }
     }
 
-    final void setEnabled(bool enabled) {
+    void setEnabled(bool enabled) {
         if (enabled) {
             _isEnabled = true;
             onEnable();
@@ -1095,23 +1053,33 @@ abstract class Entity {
         }
     }
 
-    final void onRegister() {
+    void onRegister() {
         if (_collider) {
             _collider.register();
         }
+
         if (_hurtbox) {
             _hurtbox.register();
         }
+
         if (!hasController()) {
             if (_baseControllerId.length) {
                 setController(_baseControllerId);
             }
         }
 
-        onRegisterEntity();
+        if (!_behavior) {
+            if (_baseBehaviorId.length) {
+                setBehavior(_baseBehaviorId);
+            }
+        }
+
+        if (_repulsor) {
+            _repulsor.register();
+        }
     }
 
-    final void onUnregister() {
+    void onUnregister() {
         if (_collider) {
             _collider.unregister();
         }
@@ -1120,24 +1088,59 @@ abstract class Entity {
         }
         removeController();
 
-        onUnregisterEntity();
+        if (_repulsor) {
+            _repulsor.unregister();
+        }
     }
 
     void onEnable() {
+        onEnableController();
     }
 
     void onDisable() {
-    }
-
-    void onRegisterEntity() {
-    }
-
-    void onUnregisterEntity() {
+        onDisableController();
     }
 
     void onCollide(Physics.CollisionHit hit) {
+        if (!_isEnabled)
+            return;
+
+        final switch (hit.type) with (Physics.CollisionHit.Type) {
+        case none:
+            Vec3f normal = hit.normal;
+            if (normal.lengthSquared() > 0f) {
+                Vec3f bounceVec = _velocity.dot(normal) * normal;
+                float bounciness = hit.solid ? hit.solid.bounciness : 0f;
+                bounciness += _collider ? (cast(ActorCollider) _collider).bounciness : 0f;
+                _velocity += -(1f + bounciness) * bounceVec;
+            }
+            if (normal.z > 0f) {
+                _velocity.z = 0f;
+
+                if (hit.solid && _collider) {
+                    _baseZ = hit.solid.getBaseZ(cast(ActorCollider) _collider);
+                    _baseMaterial = hit.solid.entity.getMaterial();
+                }
+                else {
+                    _baseMaterial = Atelier.world.scene.getMaterial(_position);
+                }
+            }
+            onHit(hit.entity, hit.normal);
+            break;
+        case squish:
+            onSquish(hit.normal);
+            break;
+        case impact:
+            onImpact(hit.entity, hit.normal);
+            break;
+        }
     }
 
     void onTrigger() {
+        foreach (component; _components) {
+            if (TriggerComponent trigger = cast(TriggerComponent) component) {
+                trigger.onTrigger();
+            }
+        }
     }
 }

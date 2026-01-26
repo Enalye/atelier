@@ -7,9 +7,9 @@ public {
     import atelier.world.entity;
     import atelier.world.grid;
     import atelier.world.lighting;
-    import atelier.world.world;
     import atelier.world.particle;
     import atelier.world.scene;
+    import atelier.world.system;
     import atelier.world.transition;
     import atelier.world.weather;
 }

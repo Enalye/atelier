@@ -1,0 +1,992 @@
+module atelier.world.system;
+
+import std.algorithm;
+import std.conv : to;
+
+import atelier.common;
+import atelier.core;
+import atelier.input;
+import atelier.physics;
+import atelier.render;
+import atelier.state;
+import atelier.ui;
+import atelier.world.audio;
+import atelier.world.camera;
+import atelier.world.dialog;
+import atelier.world.entity;
+import atelier.world.glow;
+import atelier.world.grid;
+import atelier.world.lighting;
+import atelier.world.particle;
+import atelier.world.scene;
+import atelier.world.transition;
+import atelier.world.weather;
+import atelier.world.controller;
+
+private Transition _createDefaultTransition(string sceneRid, string tpName, Entity entity, bool skip) {
+    return new DefaultTransition(sceneRid, tpName, entity, skip);
+}
+
+/// Gère les différentes scènes
+final class World {
+    private {
+        UIManager _uiManager;
+        Scene _scene;
+        Camera _camera;
+        Dialog _dialog;
+        Lighting _lighting;
+        Weather _weather;
+        //Array!ParticleSource _particleSources;
+        Array!Entity _entities, _enemies;
+        Array!Entity _renderedEntities;
+        Array!ControllerWrapper _controllers;
+        int _frame;
+        Vec2f _mousePosition = Vec2f.zero;
+
+        Material[] _materials;
+        Vec3i[string] _markers;
+
+        Vec3i _lastPlayerPosition;
+
+        int[] _renderReferenceCounters;
+        size_t _renderUpdateIndex;
+        Entity[] _renderListRoots, _postRenderListAbove, _postRenderListGlow;
+        Glow _glow;
+
+        // Transition
+        Transition _transition;
+        string _sceneRid, _tpName;
+        Entity _player;
+
+        bool _isPaused, _isRunning;
+
+        Factory _factory;
+        EntityController _playerController;
+        Transition function(string, string, Entity, bool) _transitionFunc;
+    }
+
+    @property {
+        Camera camera() {
+            return _camera;
+        }
+
+        Scene scene() {
+            return _scene;
+        }
+
+        Lighting lighting() {
+            return _lighting;
+        }
+
+        Dialog dialog() {
+            return _dialog;
+        }
+
+        Weather weather() {
+            return _weather;
+        }
+
+        Entity player() {
+            return _player;
+        }
+    }
+
+    this() {
+        _uiManager = new UIManager();
+        _uiManager.isWorldUI = true;
+        _camera = new Camera;
+        _dialog = new Dialog;
+        _lighting = new Lighting;
+        _entities = new Array!Entity;
+        _renderedEntities = new Array!Entity;
+        _controllers = new Array!ControllerWrapper;
+        _weather = new Weather;
+        _enemies = new Array!Entity;
+        //_particleSources = new Array!ParticleSource;
+        _glow = new Glow;
+        _factory = new Factory;
+
+        setTransition(&_createDefaultTransition);
+        addController("player", { return new DefaultPlayerController(); });
+        addBehavior("unit", { return new UnitBehavior(); });
+        addBehavior("proxy", { return new ProxyBehavior(); });
+    }
+
+    void addMaterial(string name, MaterialData data) {
+        if (data.slot >= _materials.length)
+            _materials.length = data.slot + 1;
+
+        Material material;
+        material.name = name;
+        material.friction = data.friction;
+        _materials[data.slot] = material;
+    }
+
+    Material getMaterial(int id) {
+        if (id < 0 || id >= _materials.length) {
+            return Material();
+        }
+        return _materials[id];
+    }
+
+    Material[] getMaterials() {
+        return _materials;
+    }
+
+    void addMarker(string name, Vec3i position) {
+        _markers[name] = position;
+    }
+
+    Vec3i getMarker(string name) {
+        auto p = name in _markers;
+        return p ? *p : Vec3i.zero;
+    }
+
+    void setTransition(Transition function(string, string, Entity, bool) transitionFunc = &_createDefaultTransition) {
+        _transitionFunc = transitionFunc;
+    }
+
+    void setPause(bool value) {
+        _isPaused = value;
+    }
+
+    /// Ajoute un élément d’interface
+    void addUI(UIElement ui) {
+        _uiManager.addUI(ui);
+    }
+
+    /// Supprime les interfaces
+    void clearUI() {
+        _uiManager.clearUI();
+    }
+
+    /// Récupère l’entité par son nom (peut être nul)
+    Entity find(string name) {
+        foreach (entity; _entities) {
+            if (entity.getName() == name)
+                return entity;
+        }
+        return null;
+    }
+
+    /// Récupère l’entité par tag
+    Entity[] findByTag(string tag) {
+        Entity[] result;
+        foreach (entity; _entities) {
+            if (entity.hasTag(tag))
+                result ~= entity;
+        }
+        return result;
+    }
+
+    /// Récupère l’entité par tags
+    Entity[] findByTags(string[] tags) {
+        if (!tags.length)
+            return _entities.array;
+
+        Entity[] result;
+        __findByTag_entityLoop: foreach (entity; _entities) {
+            foreach (tag; tags) {
+                if (!entity.hasTag(tag))
+                    continue __findByTag_entityLoop;
+            }
+            result ~= entity;
+        }
+        return result;
+    }
+
+    /// Récupère toutes les entités
+    Array!Entity getEntities() {
+        return _entities;
+    }
+
+    void runScene(string rid, string tpName, uint direction) {
+        bool skip = _transition !is null;
+
+        if (_transitionFunc) {
+            _transition = _transitionFunc(rid, tpName, _player, skip);
+        }
+
+        _setupPlayerController();
+        if (_playerController) {
+            _playerController.onSceneExit(direction);
+        }
+
+        _weather.run("", 0f, 60);
+        Atelier.physics.setTriggersActive(false);
+        Atelier.physics.setBounds(false);
+        Atelier.script.killTasks();
+        _transition.update();
+    }
+
+    private void _setupPlayerController() {
+        if (!_playerController) {
+            _player.setController(Atelier.state.getPlayerController());
+        }
+    }
+
+    void close() {
+        if (_isRunning) {
+            _isRunning = false;
+            clear();
+        }
+    }
+
+    void load(string sceneRid, string tpName = "") {
+        _isRunning = true;
+        Atelier.state.setScene(sceneRid, tpName);
+
+        _sceneRid = sceneRid;
+        _tpName = tpName;
+        _frame = 0;
+
+        Vec2f oldCameraDeltaPosition = _camera.getTargetPosition() - _camera.getPosition(true);
+
+        clear();
+        _lighting.setup();
+        _scene = Atelier.res.get!Scene(_sceneRid);
+
+        Atelier.nav.generate();
+
+        Vec2f rendererSize = cast(Vec2f) Atelier.renderer.size;
+        Vec2f halfRendererSize = rendererSize / 2f;
+        Vec2f mapSize = Vec2f(_scene.columns, _scene.lines) * 16f;
+
+        bool hasXBounds = rendererSize.x <= mapSize.x;
+        bool hasYBounds = rendererSize.y <= mapSize.y;
+
+        if (_playerController) {
+            _controllers ~= _playerController;
+        }
+
+        if (_player) {
+            addEntity(_player);
+            addRenderedEntity(_player);
+            _player.setName("player");
+        }
+        else if (Atelier.state.getPlayerActor().length) {
+            _player = Atelier.res.get!Entity(Atelier.state.getPlayerActor());
+            _player.setPosition(Vec3i(0, 0, 0));
+            _player.setName("player");
+            _player.setGraphic("idle");
+            _player.angle = 0f;
+            addEntity(_player);
+
+            _camera.setPosition(_player.cameraPosition() - oldCameraDeltaPosition);
+            _camera.follow(_player, Vec2f.one * 1f, Vec2f.zero);
+
+            _setupPlayerController();
+            if (_playerController) {
+                _playerController.onStart();
+            }
+            //_player.isPlayer = true;
+        }
+
+        _camera.setBounds(hasXBounds, hasYBounds, halfRendererSize, mapSize - halfRendererSize);
+
+        foreach (entityBuilder; _scene.entities) {
+            final switch (entityBuilder.type) with (EntityBuilder.Type) {
+            case entity:
+                Entity entity = Atelier.res.get!Entity(entityBuilder.entity.rid);
+                entity.setData(entityBuilder.data);
+                entity.setGraphic(entityBuilder.entity.graphic);
+                entity.angle = entityBuilder.entity.angle;
+                addEntity(entity);
+                break;
+            case trigger:
+                Entity entity = new Entity;
+                entity.setData(entityBuilder.data);
+
+                TriggerEventComponent triggerEventComponent = entity.addComponent!TriggerEventComponent();
+                triggerEventComponent.setEvent(entityBuilder.trigger.event);
+                TriggerCollider collider = new TriggerCollider(
+                    cast(Vec3u) entityBuilder.trigger.hitbox);
+                collider.isActive = entityBuilder.trigger.isActive;
+                collider.isActiveOnce = entityBuilder.trigger.isActiveOnce;
+                entity.setCollider(collider);
+                addEntity(entity);
+                break;
+            case teleporter:
+                Entity entity = new Entity;
+                entity.setData(entityBuilder.data);
+
+                TeleporterComponent teleporterComponent = entity.addComponent!TeleporterComponent();
+                teleporterComponent.setTarget(entityBuilder.teleporter.scene, entityBuilder
+                        .teleporter.target, entityBuilder.teleporter.direction);
+                TriggerCollider collider = new TriggerCollider(
+                    cast(Vec3u) entityBuilder.teleporter.hitbox);
+                collider.isActive = entityBuilder.teleporter.isActive;
+                entity.setCollider(collider);
+                addEntity(entity);
+
+                if (_player && entity.getName() == _tpName) {
+                    if (_transition) {
+                        _player.setPosition(teleporterComponent.getExitPosition(_player));
+
+                        _setupPlayerController();
+                        if (_playerController) {
+                            _playerController.onSceneEnter(teleporterComponent.direction + 4);
+                        }
+
+                        Atelier.state.setTeleporterDirection(teleporterComponent.direction + 4);
+                    }
+                    else { // Position par défaut
+                        _player.setPosition(entity.getPosition());
+
+                        _setupPlayerController();
+                        if (_playerController) {
+                            _playerController.onStart();
+                        }
+                        _player.angle = entityBuilder.teleporter.direction * -45f;
+                    }
+                }
+
+                if (!entity.getName().length) {
+                    collider.isActive(false);
+                }
+                break;
+            case note:
+                break;
+            case marker:
+                addMarker(entityBuilder.data.name, entityBuilder.data.position);
+                break;
+            }
+        }
+
+        if (_player) {
+            _camera.setPosition(_player.cameraPosition() - oldCameraDeltaPosition);
+            _camera.follow(_player, Vec2f.one * 1f, Vec2f.zero);
+            _camera.setDefault();
+
+            if (_transition) {
+                _camera.moveTo(_camera.getBoundedPositionOf(_player.cameraPosition()), 30, Spline
+                        .quadInOut);
+                _camera.setOnMoveCallback(&_onTransitionMoved);
+            }
+        }
+
+        foreach (lightBuilder; _scene.lights) {
+            Light light = new Light(lightBuilder.rid, lightBuilder.data);
+            _lighting.addLight(light);
+        }
+
+        _weather.run(_scene.weatherType, _scene.weatherValue, 30);
+        _lighting.setBrightness(_scene.brightness, 30, Spline.sineInOut);
+
+        if (!_transition) {
+            Atelier.script.callEvent("scene_" ~ _sceneRid);
+            Atelier.physics.setTriggersActive(true);
+        }
+
+        Atelier.physics.setBounds(true);
+        _tpName = "";
+    }
+
+    private void _onTransitionMoved() {
+        if (_transition) {
+            _transition.onCameraMoved();
+        }
+        if (_player) {
+            _setupPlayerController();
+            if (_playerController) {
+                _playerController.onStart();
+            }
+            Atelier.script.callEvent("scene_" ~ _sceneRid);
+            Atelier.physics.setTriggersActive(true);
+        }
+    }
+
+    void addEntity(Entity entity) {
+        _entities ~= entity;
+
+        entity.isRegistered = true;
+        entity.onRegister();
+    }
+
+    void addRenderedEntity(Entity entity) {
+        if (!entity.getGraphic())
+            return;
+
+        _renderedEntities ~= entity;
+    }
+
+    /*void addParticleSource(ParticleSource source) {
+        _particleSources ~= source;
+        source.isRegistered = true;
+    }*/
+
+    void addBehavior(string id, EntityBehavior delegate() func) {
+        _factory.store(id, func);
+    }
+
+    package EntityBehavior fetchBehavior(string id) {
+        return _factory.build!(EntityBehavior)(id);
+    }
+
+    void addController(string id, EntityController delegate() func) {
+        _factory.store(id, func);
+    }
+
+    package EntityController fetchController(T : Entity)(string id) {
+        return _factory.build!(EntityController)(id);
+    }
+
+    package void registerController(EntityController controller) {
+        _controllers ~= controller;
+    }
+
+    void addController(string id, LightController delegate() func) {
+        _factory.store(id, func);
+    }
+
+    package LightController fetchController(T : Light)(string id) {
+        return _factory.build!(LightController)(id);
+    }
+
+    package void registerController(LightController controller) {
+        _controllers ~= controller;
+    }
+
+    void clear() {
+        _uiManager.clearUI();
+
+        foreach (entity; _entities) {
+            entity.onUnregister();
+        }
+        _entities.clear();
+        _controllers.clear();
+        _renderedEntities.clear();
+        //_particleSources.clear();
+        _lighting.clear();
+        Atelier.physics.clear();
+        Atelier.nav.clear();
+        _renderReferenceCounters.length = 0;
+        _renderUpdateIndex = 0;
+        _renderListRoots.length = 0;
+        _postRenderListAbove.length = 0;
+    }
+
+    private void _dispatch(InputEvent event) {
+        switch (event.type) with (InputEvent.Type) {
+        case mouseButton:
+            Vec2f pos = event.asMouseButton().position;
+            _mousePosition = pos - (cast(Vec2f) Atelier.renderer.size) / 2f;
+            break;
+        case mouseMotion:
+            Vec2f pos = event.asMouseMotion().position;
+            _mousePosition = pos - (cast(Vec2f) Atelier.renderer.size) / 2f;
+            break;
+        default:
+            break;
+        }
+        _uiManager.dispatch(event);
+    }
+
+    Vec2f getMousePosition() const {
+        return _mousePosition + _camera.getPosition();
+    }
+
+    void update(InputEvent[] inputEvents) {
+        if (!_isRunning) {
+            _scene = null;
+            _player = null;
+            _playerController = null;
+            _sceneRid.length = 0;
+            _tpName.length = 0;
+            return;
+        }
+
+        foreach (InputEvent event; inputEvents) {
+            _dispatch(event);
+        }
+
+        if (_isPaused)
+            return;
+
+        if (!_dialog.isRunning) {
+            foreach (i, controller; _controllers) {
+                controller.update();
+                if (!controller.isRunning) {
+                    _controllers.mark(i);
+                }
+            }
+            _controllers.sweep();
+        }
+
+        _dialog.update();
+
+        /*foreach (i, source; _particleSources) {
+            source.update();
+            if (!source.isRegistered) {
+                _particleSources.mark(i);
+            }
+        }
+        _particleSources.sweep();*/
+
+        foreach (i, entity; _entities) {
+            entity.update();
+            if (!entity.isRegistered) {
+                _entities.mark(i);
+                entity.onUnregister();
+            }
+        }
+        _entities.sweep();
+
+        // Rendus
+        foreach (i, entity; _renderedEntities) {
+            EntityGraphic graphic = entity.getGraphic();
+            if (!graphic || !entity.isRegistered) {
+                _renderedEntities.mark(i);
+                continue;
+            }
+            entity.updateGraphics();
+        }
+        _renderedEntities.sweep();
+
+        _camera.update();
+        _uiManager.cameraPosition = (
+            ((cast(Vec2f) Atelier.renderer.size) / 2f) -
+                _camera.getPosition(_transition is null)
+                .round());
+        _uiManager.update();
+        _lighting.update();
+
+        _weather.update();
+
+        if (_transition) {
+            _transition.update();
+
+            if (!_transition.isRunning) {
+                _transition = null;
+            }
+        }
+
+        if (_scene) {
+            _scene.update();
+        }
+        _updateRenderList();
+        _frame++;
+    }
+
+    private void _updateRenderList() {
+        sort!((a, b) => (a.getZOrder() < b.getZOrder()), SwapStrategy.stable)(
+            _renderedEntities.array);
+
+        foreach (entity; _renderedEntities) {
+            entity.clearRenderInfo();
+        }
+
+        void _updateRenderNode(size_t index) {
+            Entity entity = _renderedEntities[index];
+
+            struct RenderNode {
+                Entity entity;
+                bool inFront;
+                int rc;
+            }
+
+            RenderNode[] renderNodes;
+            for (size_t i = index + 1; i < _renderedEntities.length; ++i) {
+                Entity other = _renderedEntities[i];
+
+                if (other.getLayer() != Entity.Layer.scene)
+                    continue;
+
+                if ((other.getLevel() > entity.getLevel()) &&
+                    (other.getLine() == entity.getLine()) && other.isBehind(entity)) {
+
+                    renderNodes ~= RenderNode(other, false, other.isInRenderList);
+                    _updateRenderNode(i);
+                }
+                else if (other.isAbove(entity) && entity.getYOrder() > other.getYOrder() &&
+                    entity.getZOrder() < other.getZOrder()) {
+
+                    renderNodes ~= RenderNode(other, true, other.isInRenderList);
+                    _updateRenderNode(i);
+                }
+            }
+
+            foreach (RenderNode node; renderNodes) {
+                if (node.entity.isInRenderList == node.rc) {
+                    node.entity.isInRenderList = node.entity.isInRenderList + 1;
+                    entity.addRenderChild(node.entity, node.inFront);
+                }
+            }
+        }
+
+        Vec2f rendererSize = cast(Vec2f) Atelier.renderer.size;
+        Vec2f halfRendererSize = rendererSize / 2f;
+        Vec2f cameraPos = _camera.getPosition();
+        Vec4f cameraBounds;
+        cameraBounds.x = cameraPos.x - halfRendererSize.x;
+        cameraBounds.y = cameraPos.y - halfRendererSize.y;
+        cameraBounds.z = cameraPos.x + halfRendererSize.x;
+        cameraBounds.w = cameraPos.y + halfRendererSize.y;
+
+        _renderUpdateIndex = 0;
+        _renderListRoots.length = 0;
+        _postRenderListAbove.length = 0;
+        _postRenderListGlow.length = 0;
+        for (; _renderUpdateIndex < _renderedEntities.length; ++_renderUpdateIndex) {
+            Entity entity = _renderedEntities[_renderUpdateIndex];
+
+            if (entity.isCulled(cameraBounds)) {
+                continue;
+            }
+
+            if (entity.isInRenderList == 0) {
+                final switch (entity.getLayer()) with (Entity.Layer) {
+                case scene:
+                    _updateRenderNode(_renderUpdateIndex);
+                    _renderListRoots ~= entity;
+                    break;
+                case above:
+                    _postRenderListAbove ~= entity;
+                    break;
+                case glow:
+                    _postRenderListGlow ~= entity;
+                    break;
+                }
+            }
+        }
+
+        sort!((a, b) => (a.getYOrder() < b.getYOrder()), SwapStrategy.stable)(
+            _renderListRoots);
+    }
+
+    void renderEntityTransition(Entity entity, Vec2f offset, float tTransition, bool drawGraphics) {
+        if (!_transition)
+            return;
+
+        _transition.renderEntity(entity, offset, tTransition, drawGraphics);
+    }
+
+    Color getDepthColor(int zPos) {
+        if (!_player)
+            return Color.white;
+
+        int baseLevel = _player.getPosition().z;
+
+        float deltaLevel = zPos - cast(float) baseLevel;
+
+        Color color = Color.white;
+        if (deltaLevel > 0) {
+            float diff = min(deltaLevel / (4f * 16f), 1f);
+            color = color.lerp(Color.blue, easeInOutSine(diff) * 0.3f);
+        }
+        else if (deltaLevel < 0f) {
+            float diff = min(-deltaLevel / (4f * 16f), 1f);
+            color = color.lerp(Color.blue, easeInOutSine(diff) * 0.3f);
+        }
+
+        return color;
+    }
+
+    void draw(Vec2f origin) {
+        if (!_scene)
+            return;
+
+        size_t renderEntityIndex = 0;
+        _renderReferenceCounters.length = _renderedEntities.length;
+        _renderReferenceCounters[] = 0;
+
+        Atelier.renderer.pushCanvas(_camera.canvas);
+        Atelier.renderer.clearCanvas(Color.black, 1f);
+
+        Vec2f cameraPosition = _camera.getPosition(_transition is null).round();
+        Vec2f rendererSize = cast(Vec2f) Atelier.renderer.size;
+        Vec2f halfRendererSize = rendererSize / 2f;
+        Vec2f mapSize = Vec2f(_scene.columns, _scene.lines) * 16f;
+
+        Vec2f offset = mapSize / 2f + halfRendererSize - cameraPosition;
+        Vec2f entityOffset = halfRendererSize - cameraPosition;
+
+        Vec4f cameraBounds;
+        cameraBounds.x = cameraPosition.x - halfRendererSize.x;
+        cameraBounds.y = cameraPosition.y - halfRendererSize.y;
+        cameraBounds.z = cameraPosition.x + halfRendererSize.y;
+        cameraBounds.w = cameraPosition.y + halfRendererSize.y;
+
+        foreach (entity; _renderedEntities) {
+            entity.isRendered = false;
+        }
+
+        if (_transition) {
+            // Parallax
+            if (_transition.showTiles()) {
+                foreach_reverse (layer; _scene.parallaxLayers) {
+                    layer.draw(offset - 16 + cameraPosition / layer.distance);
+                }
+            }
+
+            if (_transition.showTiles()) {
+                foreach_reverse (layer; _scene.terrainLayers) {
+                    if (layer.level >= 0)
+                        continue;
+
+                    layer.color = getDepthColor(layer.level << 4);
+                    layer.draw(offset - Vec2f(0f, layer.level * 16f));
+                }
+            }
+
+            // Entités en haut
+            for (; renderEntityIndex < _renderListRoots.length; ++renderEntityIndex) {
+                Entity entity = _renderListRoots[renderEntityIndex];
+
+                if (entity.getYOrder() >= 0f)
+                    break;
+
+                if (!entity.isRendered) {
+                    entity.isRendered = true;
+                    _transition.drawEntity(entity, entityOffset);
+                }
+            }
+
+            for (size_t i = renderEntityIndex; i < _renderListRoots.length; ++i) {
+                Entity entity = _renderListRoots[i];
+
+                if (entity.getPosition().z >= 0f || entity.getYOrder() >= (_scene.lines - 1) * 16f)
+                    continue;
+
+                if (!entity.isRendered) {
+                    _renderReferenceCounters[i]++;
+                    if (_renderReferenceCounters[i] >= entity.isInRenderList) {
+                        entity.isRendered = true;
+                        _transition.drawEntity(entity, entityOffset);
+                    }
+                }
+            }
+
+            _transition.setupDrawStep(_scene, entityOffset, _camera.getTargetPosition().round());
+
+            int levels = _scene.levels;
+            Tilemap[] lowerTopographicLayers;
+            Tilemap[] upperTopographicLayers;
+            Tilemap[] shadowTopographicLayers;
+
+            if (_transition.showTiles()) {
+                lowerTopographicLayers = _scene.topologicMap.lowerTilemaps;
+                upperTopographicLayers = _scene.topologicMap.upperTilemaps;
+                shadowTopographicLayers = _scene.topologicMap.shadowTilemaps;
+            }
+
+            for (int y = 0; y < _scene.lines; ++y) {
+                for (int level; level < levels; ++level) {
+                    Color color = getDepthColor(cast(int)(level << 4));
+
+                    const float yLine = (y - cast(int) level) << 4;
+                    if ((yLine + 16) < cameraBounds.y || (yLine > cameraBounds.w))
+                        continue;
+
+                    if (level < lowerTopographicLayers.length) {
+                        lowerTopographicLayers[level].color = color;
+                        lowerTopographicLayers[level].drawLine(y, offset);
+                    }
+
+                    if (level < upperTopographicLayers.length) {
+                        upperTopographicLayers[level].color = color;
+                        upperTopographicLayers[level].drawLine(y, offset);
+                    }
+
+                    if (level < shadowTopographicLayers.length) {
+                        shadowTopographicLayers[level].drawLine(y, offset);
+                    }
+
+                    if (y > 0 && _transition.showTiles()) {
+                        foreach_reverse (layer; _scene.terrainLayers) {
+                            if (layer.level != level)
+                                continue;
+
+                            layer.color = color;
+                            layer.drawLine(y, offset - Vec2f(0f, level << 4));
+                        }
+                    }
+
+                    _transition.drawLine(offset, y, level);
+
+                    for (size_t i = renderEntityIndex; i < _renderListRoots.length;
+                        ++i) {
+                        Entity entity = _renderListRoots[i];
+
+                        if (entity.getLevel() != level ||
+                            entity.getYOrder() < (y << 4) ||
+                            entity.getYOrder() >= ((y + 1) << 4))
+                            continue;
+
+                        if (!entity.isRendered) {
+                            entity.isRendered = true;
+                            _transition.drawEntity(entity, entityOffset);
+                        }
+                    }
+                }
+
+                if (_transition.showTiles()) {
+                    foreach_reverse (layer; _scene.terrainLayers) {
+                        if (layer.level <= levels)
+                            continue;
+
+                        layer.color = getDepthColor(layer.level << 4);
+                        layer.drawLine(y, offset - Vec2f(0f, layer.level * 16f));
+                    }
+                }
+            }
+
+            // Entités en bas
+            for (; renderEntityIndex < _renderListRoots.length; ++renderEntityIndex) {
+                Entity entity = _renderListRoots[renderEntityIndex];
+
+                if (!entity.isRendered) {
+                    entity.isRendered = true;
+                    _transition.drawEntity(entity, entityOffset);
+                }
+            }
+
+            // Entités en post-rendu
+            foreach (Entity entity; _postRenderListAbove) {
+                if (!entity.isRendered) {
+                    entity.isRendered = true;
+                    _transition.drawEntity(entity, entityOffset);
+                }
+            }
+
+            // Entités en post-rendu additif
+            _glow.drawTransition(_transition, _postRenderListGlow, entityOffset);
+
+            _transition.drawAbove();
+        }
+        else {
+            // Parallax
+            foreach_reverse (layer; _scene.parallaxLayers) {
+                layer.draw(offset - 16 + cameraPosition / layer.distance);
+            }
+
+            foreach_reverse (layer; _scene.terrainLayers) {
+                if (layer.level >= 0)
+                    continue;
+
+                layer.color = getDepthColor(layer.level << 4);
+                layer.draw(offset - Vec2f(0f, layer.level * 16f));
+            }
+
+            // Entités en haut
+            for (; renderEntityIndex < _renderListRoots.length; ++renderEntityIndex) {
+                Entity entity = _renderListRoots[renderEntityIndex];
+
+                if (entity.getYOrder() >= 0f)
+                    break;
+
+                if (!entity.isRendered) {
+                    entity.isRendered = true;
+                    entity.draw(entityOffset);
+                }
+            }
+
+            for (size_t i = renderEntityIndex; i < _renderListRoots.length; ++i) {
+                Entity entity = _renderListRoots[i];
+
+                if (entity.getPosition().z >= 0f || entity.getYOrder() >= (_scene.lines - 1) * 16f)
+                    continue;
+
+                if (!entity.isRendered) {
+                    _renderReferenceCounters[i]++;
+                    if (_renderReferenceCounters[i] >= entity.isInRenderList) {
+                        entity.isRendered = true;
+                        entity.draw(entityOffset);
+                    }
+                }
+            }
+
+            int levels = _scene.levels;
+            Tilemap[] lowerTopographicLayers = _scene.topologicMap.lowerTilemaps;
+            Tilemap[] upperTopographicLayers = _scene.topologicMap.upperTilemaps;
+            Tilemap[] shadowTopographicLayers = _scene.topologicMap.shadowTilemaps;
+
+            for (int y = 0; y < (_scene.lines + levels); ++y) {
+                for (int level; level < levels; ++level) {
+                    Color color = getDepthColor(cast(int)(level << 4));
+
+                    const float yLine = (y - cast(int) level) << 4;
+                    if ((yLine + 16) < cameraBounds.y || (yLine > cameraBounds.w))
+                        continue;
+
+                    if (level < lowerTopographicLayers.length) {
+                        lowerTopographicLayers[level].color = color;
+                        lowerTopographicLayers[level].drawLine(y, offset);
+                    }
+
+                    if (level < upperTopographicLayers.length) {
+                        upperTopographicLayers[level].color = color;
+                        upperTopographicLayers[level].drawLine(y, offset);
+                    }
+
+                    if (level < shadowTopographicLayers.length) {
+                        shadowTopographicLayers[level].drawLine(y, offset);
+                    }
+
+                    if (y > 0) {
+                        foreach_reverse (layer; _scene.terrainLayers) {
+                            if (layer.level != level)
+                                continue;
+
+                            layer.color = color;
+                            layer.drawLine(y, offset - Vec2f(0f, level << 4));
+                        }
+                    }
+
+                    for (size_t i = renderEntityIndex; i < _renderListRoots.length;
+                        ++i) {
+                        Entity entity = _renderListRoots[i];
+
+                        if (entity.getLevel() != level ||
+                            entity.getYOrder() < (y << 4) ||
+                            entity.getYOrder() >= ((y + 1) << 4))
+                            continue;
+
+                        if (!entity.isRendered) {
+                            entity.isRendered = true;
+                            entity.draw(entityOffset);
+                        }
+                    }
+                }
+
+                foreach_reverse (layer; _scene.terrainLayers) {
+                    if (layer.level <= levels)
+                        continue;
+
+                    layer.color = getDepthColor(layer.level << 4);
+                    layer.drawLine(y, offset - Vec2f(0f, layer.level * 16f));
+                }
+            }
+
+            // Entités en bas
+            for (; renderEntityIndex < _renderListRoots.length; ++renderEntityIndex) {
+                Entity entity = _renderListRoots[renderEntityIndex];
+
+                if (!entity.isRendered) {
+                    entity.isRendered = true;
+                    entity.draw(entityOffset);
+                }
+            }
+
+            // Entités en post-rendu
+            foreach (Entity entity; _postRenderListAbove) {
+                if (!entity.isRendered) {
+                    entity.isRendered = true;
+                    entity.draw(entityOffset);
+                }
+            }
+
+            // Entités en post-rendu additif
+            _glow.draw(_postRenderListGlow, entityOffset);
+        }
+
+        Atelier.nav.draw(entityOffset);
+        Atelier.physics.draw(entityOffset);
+
+        _lighting.draw(entityOffset);
+        _weather.draw(entityOffset);
+        _uiManager.draw();
+        Atelier.renderer.popCanvas();
+        _camera.draw();
+    }
+}

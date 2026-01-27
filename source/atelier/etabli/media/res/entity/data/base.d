@@ -98,6 +98,23 @@ mixin template BaseDataEntityParameter() {
             hlayout.setPadding(Vec2f(284f, 0f));
             vlist.addList(hlayout);
 
+            hlayout.addUI(new Label("Calque:", Atelier.theme.font));
+
+            SelectButton layerBtn = new SelectButton(asList!(Entity.Layer)(), _baseEntityData.layer);
+            layerBtn.setListAlign(UIAlignX.right, UIAlignY.top);
+            _baseEntityData.layer = layerBtn.value;
+            layerBtn.addEventListener("value", {
+                _baseEntityData.layer = layerBtn.value();
+                dispatchEvent("property_base");
+            });
+            hlayout.addUI(layerBtn);
+        }
+
+        {
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(284f, 0f));
+            vlist.addList(hlayout);
+
             hlayout.addUI(new Label("Tags:", Atelier.theme.font));
 
             TextField tagsField = new TextField;

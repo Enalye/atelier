@@ -25,6 +25,7 @@ struct BaseEntityData {
     string shadow;
     int zOrderOffset;
     int material;
+    string layer = Entity.Layer.scene.stringof;
 
     mixin Serializer;
 }
@@ -33,7 +34,6 @@ struct BaseEntityData {
 struct EntityData {
     string name;
     string[] tags;
-    string layer = Entity.Layer.scene.stringof;
     Vec3i position;
     string controller;
 
@@ -233,7 +233,6 @@ final class Entity : Resource!Entity {
     void setData(const(EntityData) data) {
         _name = data.name;
         _tags ~= data.tags.dup;
-        _layer = asEnum!Layer(data.layer);
         setPosition(data.position);
 
         if (data.controller.length) {
@@ -247,6 +246,7 @@ final class Entity : Resource!Entity {
         _baseBehaviorId = data.behavior;
         _zOrderOffset = data.zOrderOffset;
         _material = data.material;
+        _layer = asEnum!Layer(data.layer);
         setShadow(data.shadow);
     }
 

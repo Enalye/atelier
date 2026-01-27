@@ -141,23 +141,6 @@ package(atelier.etabli.media.res.scene) abstract class BaseEntitySettings : UIEl
             hlayout.addUI(_posZField);
         }
 
-        {
-            HLayout hlayout = new HLayout;
-            hlayout.setPadding(Vec2f(284f, 0f));
-            addProperty(hlayout);
-
-            hlayout.addUI(new Label("Calque:", Atelier.theme.font));
-
-            _layerBtn = new SelectButton(asList!(Entity.Layer)(), _entity.entityData.layer);
-            _layerBtn.setListAlign(UIAlignX.right, UIAlignY.top);
-            _entity.entityData.layer = _layerBtn.value;
-            _layerBtn.addEventListener("value", {
-                _entity.entityData.layer = _layerBtn.value();
-                setDirty();
-            });
-            hlayout.addUI(_layerBtn);
-        }
-
         loadProperties();
 
         {

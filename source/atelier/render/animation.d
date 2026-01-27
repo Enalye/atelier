@@ -34,6 +34,8 @@ final class Animation : Image, Resource!Animation {
 
     Vec2f size = Vec2f.zero;
 
+    int[] flipsX, flipsY;
+
     @property {
         pragma(inline) uint width() const {
             return _imageData.width;
@@ -90,6 +92,8 @@ final class Animation : Image, Resource!Animation {
         repeat = anim.repeat;
         margin = anim.margin;
         size = anim.size;
+        flipsX = anim.flipsX;
+        flipsY = anim.flipsY;
     }
 
     /// Accès à la ressource
@@ -188,10 +192,19 @@ final class Animation : Image, Resource!Animation {
         Vec4u imageClip = Vec4u(clip.x + coord.x * (clip.z + margin.x),
             clip.y + coord.y * (clip.w + margin.y), clip.z, clip.w);
 
+        bool frameFlipX = flipX;
+        if (_frame < flipsX.length) {
+            frameFlipX = (flipsX[_frame] > 0) ? !frameFlipX : frameFlipX;
+        }
+        bool frameFlipY = flipY;
+        if (_frame < flipsY.length) {
+            frameFlipY = (flipsY[_frame] > 0) ? !frameFlipY : frameFlipY;
+        }
+
         _imageData.color = color;
         _imageData.blend = blend;
         _imageData.alpha = alpha;
         _imageData.draw(origin + (position - anchor * size), size, imageClip,
-            angle, pivot, flipX, flipY);
+            angle, pivot, frameFlipX, frameFlipY);
     }
 }

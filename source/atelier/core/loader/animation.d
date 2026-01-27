@@ -51,6 +51,16 @@ package void compileAnimation(string path, const Farfadet ffd, OutStream stream)
         margin = ffd.getNode("margin", 2).get!Vec2i(0);
     }
 
+    int[] flipsX;
+    if (ffd.hasNode("flipsX")) {
+        flipsX = ffd.getNode("flipsX", 1).get!(int[])(0);
+    }
+
+    int[] flipsY;
+    if (ffd.hasNode("flipsY")) {
+        flipsY = ffd.getNode("flipsY", 1).get!(int[])(0);
+    }
+
     stream.write!string(rid);
     stream.write!string(textureRID);
     stream.write!Vec4u(clip);
@@ -61,6 +71,8 @@ package void compileAnimation(string path, const Farfadet ffd, OutStream stream)
     stream.write!uint(lines);
     stream.write!uint(maxCount);
     stream.write!Vec2i(margin);
+    stream.write!(int[])(flipsX);
+    stream.write!(int[])(flipsY);
 }
 
 package void loadAnimation(InStream stream) {
@@ -74,6 +86,8 @@ package void loadAnimation(InStream stream) {
     uint lines = stream.read!uint();
     uint maxCount = stream.read!uint();
     Vec2i margin = stream.read!Vec2i();
+    int[] flipsX = stream.read!(int[])();
+    int[] flipsY = stream.read!(int[])();
 
     Atelier.res.store(rid, {
         Texture texture = Atelier.res.get!Texture(textureRID);
@@ -82,6 +96,8 @@ package void loadAnimation(InStream stream) {
         animation.repeat = repeat;
         animation.frames = frames;
         animation.frameTime = frameTime;
+        animation.flipsX = flipsX;
+        animation.flipsY = flipsY;
         return animation;
     });
 }

@@ -82,15 +82,15 @@ sprite "editor:pause" {
     texture "editor"
     clip 32 32 32 32
 }
-sprite "editor:stop" {
+sprite "editor:play-once" {
     texture "editor"
     clip 64 32 32 32
 }
-sprite "editor:play-once" {
+sprite "editor:play-repeat" {
     texture "editor"
     clip 96 32 32 32
 }
-sprite "editor:clear" {
+sprite "editor:stop" {
     texture "editor"
     clip 128 32 32 32
 }

@@ -14,7 +14,7 @@ package final class EditorParticleSource {
     private {
         ParticleResourceEditor _editor;
         EntityGraphic[string] _graphics;
-        ParticleData _data;
+        //ParticleData _data;
         //Array!Particle _particles, _spawnedParticles;
         Timer _emitTimer, _delayTimer;
         GrEvent _grEvent;
@@ -40,9 +40,9 @@ package final class EditorParticleSource {
     //    //}
     //}
 
-    void setData(ParticleData data) {
-        _data = data;
-    }
+    //void setData(ParticleData data) {
+    //    _data = data;
+    //}
 
     void update() {
         /*foreach (particle; _spawnedParticles) {
@@ -50,7 +50,7 @@ package final class EditorParticleSource {
         }
         _spawnedParticles.clear();*/
 
-        if (_emitTimer.isRunning()) {
+        /*if (_emitTimer.isRunning()) {
             _emitTimer.update();
             _delayTimer.update();
 
@@ -63,7 +63,7 @@ package final class EditorParticleSource {
                 _delayTimer.start(_data.delay);
                 emit();
             }
-        }
+        }*/
 
         /*foreach (i, particle; _particles) {
             particle.update();
@@ -88,7 +88,7 @@ package final class EditorParticleSource {
             particle.draw(offset);
         }*/
     }
-
+    /*
     void start() {
         _emitTimer.start(_data.duration);
         _generation = 0;
@@ -129,7 +129,7 @@ package final class EditorParticleSource {
         }
         _generation++;
     }
-
+*/
     private void _emitSpread() {
         /*uint particleCount = Atelier.rng.randVariance(_data.quantity, _data.quantityVariance);
         float angle = Atelier.rng.randVariance(_data.angle, _data.angleVariance) - (

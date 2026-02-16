@@ -11,15 +11,20 @@ import atelier.script.util;
 import atelier.audio;
 
 package void loadLibWorld_system(GrModule mod) {
-    mod.setModule("world.world");
+    mod.setModule("world.system");
     mod.setModuleInfo(GrLocale.fr_FR, "Niveau actuel");
 
     GrType worldType = mod.addNative("World");
     GrType entityType = grGetNativeType("Entity");
+    GrType particleType = grGetNativeType("Particle");
 
     mod.setDescription(GrLocale.fr_FR, "Ajoute l’entité à la scène");
     mod.setParameters(["entity"]);
     mod.addStatic(&_addEntity, worldType, "addEntity", [entityType]);
+
+    mod.setDescription(GrLocale.fr_FR, "Ajoute la particule à la scène");
+    mod.setParameters(["particle"]);
+    mod.addStatic(&_addParticle, worldType, "addParticle", [particleType]);
 
     mod.setDescription(GrLocale.fr_FR, "Récupère l’entité par son nom");
     mod.setParameters(["name"]);
@@ -130,6 +135,10 @@ private void playSound(GrCall call) {
 
 private void _addEntity(GrCall call) {
     Atelier.world.addEntity(call.getNative!Entity(0));
+}
+
+private void _addParticle(GrCall call) {
+    Atelier.world.addParticle(call.getNative!Particle(0));
 }
 
 private void _find(GrCall call) {

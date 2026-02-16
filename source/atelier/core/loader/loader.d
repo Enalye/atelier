@@ -44,7 +44,7 @@ void setupDefaultResourceLoaders(ResourceManager res) {
     res.setLoader("music", &compileMusic, &loadMusic);
     res.setLoader("truetype", &compileTrueType, &loadTrueType);
     res.setLoader("bitmapfont", &compileBitmapFont, &loadBitmapFont);
-    //res.setLoader("particle", &compileParticle, &loadParticle);
+    res.setLoader("particle", &compileParticle, &loadParticle);
     res.setLoader("pixelfontbordered", &compilePixelFont, &loadPixelFont!PixelFontBordered);
     res.setLoader("pixelfontshadowed", &compilePixelFont, &loadPixelFont!PixelFontShadowed);
     res.setLoader("pixelfontstandard", &compilePixelFont, &loadPixelFont!PixelFontStandard);

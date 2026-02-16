@@ -577,6 +577,7 @@ class UIElement {
         element.isAlive = true;
         _children ~= element;
 
+        element.dispatchEvent("parent", false);
         dispatchEvent("addchild", false);
     }
 

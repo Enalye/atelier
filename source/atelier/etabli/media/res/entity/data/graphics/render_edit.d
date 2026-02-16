@@ -103,7 +103,7 @@ final class EntityEditGraphicData : Modal {
             hlayout.setPadding(Vec2f(400f, 0f));
             vbox.addUI(hlayout);
 
-            hlayout.addUI(new Label("Name:", Atelier.theme.font));
+            hlayout.addUI(new Label("Nom:", Atelier.theme.font));
 
             _nameField = new TextField;
             _nameField.value = _data.name;

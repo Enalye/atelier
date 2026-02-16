@@ -28,16 +28,36 @@ src.setPivotDistance(60, 100, 150f, 100f, Spline.sineInOut);
 src.start(5);
 
 scene.setParticleSource(entity, src, false);");
-    /*
-    GrType sourceType = mod.addNative("ParticleSource");
-    GrType particleType = mod.addNative("Particle", [], "Entity");
 
-    mod.setDescription(GrLocale.fr_FR, "Position relative à l’entité");
+    GrType particleType = mod.addNative("Particle");
+
+    mod.addConstructor(&_ctor, particleType, [grString]);
+
+    mod.setDescription(GrLocale.fr_FR, "Récupère la position de la particule");
+    mod.setParameters(["particle"]);
+    mod.addFunction(&_getPosition, "getPosition", [particleType], [
+            grInt, grInt, grInt
+        ]);
+
+    mod.setDescription(GrLocale.fr_FR, "Modifie la position de la particule");
+    mod.setParameters(["particle", "x", "y", "z"]);
+    mod.addFunction(&_setPosition, "setPosition", [
+            particleType, grInt, grInt, grInt
+        ]);
+
+    mod.setDescription(GrLocale.fr_FR, "Repositionne la particle");
+    mod.setParameters(["particle", "x", "y", "z"]);
+    mod.addFunction(&_addPosition, "addPosition", [
+            particleType, grInt, grInt, grInt
+        ]);
+
+    /*mod.setDescription(GrLocale.fr_FR, "Position relative à l’entité");
     mod.setParameters(["particle", "x", "y", "z"]);
     mod.addFunction(&_setRelativePosition, "setRelativePosition", [
             particleType, grFloat, grFloat, grFloat
-        ]);
+        ]);*/
 
+    /*
     mod.setDescription(GrLocale.fr_FR, "Décalage de l’entité en coordonnées polaires");
     mod.setParameters(["particle", "dist"]);
     mod.addFunction(&_setRelativeDistance, "setRelativeDistance", [
@@ -61,7 +81,6 @@ scene.setParticleSource(entity, src, false);");
     GrType vec2fType = grGetNativeType("Vec2", [grFloat]);
 
     mod.addConstructor(&_ctor, sourceType);
-    mod.addConstructor(&_ctor_str, sourceType, [grString]);
 
     mod.setDescription(GrLocale.fr_FR, "Associe une source de particules à l’entité");
     mod.setParameters(["entity", "source", "isInFront"]);
@@ -320,12 +339,30 @@ private void _setRelativeAngle(GrCall call) {
     particle.setRelativeAngle(call.getFloat(1));
 }
 */
-/+
 private void _ctor(GrCall call) {
-    ParticleSource source = new ParticleSource;
-    call.setNative(source);
+    Particle particle = Atelier.res.get!Particle(call.getString(0));
+    call.setNative(particle);
 }
 
+private void _getPosition(GrCall call) {
+    Particle particle = call.getNative!Particle(0);
+    Vec3i position = particle.getPosition();
+    call.setInt(position.x);
+    call.setInt(position.y);
+    call.setInt(position.z);
+}
+
+private void _setPosition(GrCall call) {
+    Particle particle = call.getNative!Particle(0);
+    particle.setPosition(Vec3i(call.getInt(1), call.getInt(2), call.getInt(3)));
+}
+
+private void _addPosition(GrCall call) {
+    Particle particle = call.getNative!Particle(0);
+    particle.addPosition(Vec3i(call.getInt(1), call.getInt(2), call.getInt(3)));
+}
+
+/+
 private void _ctor_str(GrCall call) {
     ParticleSource source = Atelier.res.get!ParticleSource(call.getString(0));
     call.setNative(source);
@@ -351,15 +388,6 @@ private void _name(string op)(GrCall call) {
         source.name = call.getString(1);
     }
     call.setString(source.name);
-}
-
-private void _position(string op)(GrCall call) {
-    ParticleSource source = call.getNative!ParticleSource(0);
-
-    static if (op == "set") {
-        source.position = call.getNative!SVec2f(1);
-    }
-    call.setNative(svec2(source.position));
 }
 
 private void _isVisible(string op)(GrCall call) {

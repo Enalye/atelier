@@ -36,7 +36,7 @@ final class World {
         Dialog _dialog;
         Lighting _lighting;
         Weather _weather;
-        //Array!ParticleSource _particleSources;
+        ParticleSystem _particle;
         Array!Entity _entities, _enemies;
         Array!Entity _renderedEntities;
         Array!ControllerWrapper _controllers;
@@ -102,7 +102,7 @@ final class World {
         _controllers = new Array!ControllerWrapper;
         _weather = new Weather;
         _enemies = new Array!Entity;
-        //_particleSources = new Array!ParticleSource;
+        _particle = new ParticleSystem;
         _glow = new Glow;
         _factory = new Factory;
 
@@ -396,6 +396,10 @@ final class World {
         }
     }
 
+    void addParticle(Particle particle) {
+        _particle.addParticle(particle);
+    }
+
     void addEntity(Entity entity) {
         _entities ~= entity;
 
@@ -409,11 +413,6 @@ final class World {
 
         _renderedEntities ~= entity;
     }
-
-    /*void addParticleSource(ParticleSource source) {
-        _particleSources ~= source;
-        source.isRegistered = true;
-    }*/
 
     void addBehavior(string id, EntityBehavior delegate() func) {
         _factory.store(id, func);
@@ -456,7 +455,7 @@ final class World {
         _entities.clear();
         _controllers.clear();
         _renderedEntities.clear();
-        //_particleSources.clear();
+        _particle.clear();
         _lighting.clear();
         Atelier.physics.clear();
         Atelier.nav.clear();
@@ -515,14 +514,6 @@ final class World {
 
         _dialog.update();
 
-        /*foreach (i, source; _particleSources) {
-            source.update();
-            if (!source.isRegistered) {
-                _particleSources.mark(i);
-            }
-        }
-        _particleSources.sweep();*/
-
         foreach (i, entity; _entities) {
             entity.update();
             if (!entity.isRegistered) {
@@ -542,6 +533,8 @@ final class World {
             entity.updateGraphics();
         }
         _renderedEntities.sweep();
+
+        _particle.update();
 
         _camera.update();
         _uiManager.cameraPosition = (
@@ -983,6 +976,7 @@ final class World {
         Atelier.nav.draw(entityOffset);
         Atelier.physics.draw(entityOffset);
 
+        _particle.draw(entityOffset);
         _lighting.draw(entityOffset);
         _weather.draw(entityOffset);
         _uiManager.draw();

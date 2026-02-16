@@ -7,6 +7,7 @@ import std.math : abs;
 import farfadet;
 
 import atelier.common;
+import atelier.core;
 import atelier.input;
 import atelier.ui;
 import atelier.world;
@@ -25,15 +26,13 @@ final class ParticleResourceEditor : ResourceBaseEditor {
         ParameterWindow _parameterWindow;
         MediaPlayer _player;
 
-        EntityRenderData[] _graphics, _auxGraphics, _auxGraphicsStack;
-        HitboxData _hitbox;
-        ParticleData _particle;
-        BaseEntityData _baseEntityData;
+        string _textureId;
+        ParticleSystem _system;
+        Particle _particle;
 
         Vec2f _originPosition = Vec2f.zero;
         float _zoom = 1f;
-
-        EditorParticleSource _source;
+        int _time;
     }
 
     this(ResourceEditor editor, string path_, Farfadet ffd, Vec2f size) {
@@ -42,95 +41,68 @@ final class ParticleResourceEditor : ResourceBaseEditor {
 
         _name = ffd.get!string(0);
 
-        _hitbox.load(ffd);
-        _particle.load(ffd);
-        _baseEntityData.load(ffd);
+        _system = new ParticleSystem;
+        _particle = new Particle;
 
-        foreach (size_t i, Farfadet renderNode; ffd.getNodes("graphic")) {
-            EntityRenderData render = new EntityRenderData(renderNode);
-            render.isVisible = (i == 0);
-            _graphics ~= render;
+        if (ffd.hasNode("texture")) {
+            _textureId = ffd.getNode("texture").get!string(0);
         }
 
-        foreach (size_t i, Farfadet renderNode; ffd.getNodes("auxGraphic")) {
-            EntityRenderData render = new EntityRenderData(renderNode);
-            _auxGraphics ~= render;
-        }
+        _particle.load(_ffd);
+        _particle.setup();
+        _system.addParticle(_particle);
 
-        _source = new EditorParticleSource(this);
+        _parameterWindow = new ParameterWindow(_system);
 
-        _parameterWindow = new ParameterWindow(_graphics, _auxGraphics, _baseEntityData, _hitbox, _particle);
-
-        _player = new MediaPlayer();
-        _player.setRenders(_graphics);
+        _player = new MediaPlayer(_textureId, size.x, _ffd, _particle);
         addUI(_player);
 
-        _parameterWindow.addEventListener("property_hitbox", {
-            _hitbox = _parameterWindow.getHitbox();
-            setDirty();
+        _player.addEventListener("item.select", {
+            _parameterWindow.setItem(_player.getSelectedItem());
         });
 
-        _parameterWindow.addEventListener("property_particle", {
-            _particle = _parameterWindow.getParticle();
-            _source.setData(_particle);
+        _player.addEventListener("property", {
+            _textureId = _player.getTextureID();
             setDirty();
-        });
 
-        _parameterWindow.addEventListener("property_base", {
-            _baseEntityData = _parameterWindow.getBaseEntityData();
-            setDirty();
-        });
-
-        _parameterWindow.addEventListener("property_render", {
-            _graphics.length = 0;
-            foreach (size_t i, EntityRenderData renderData; _parameterWindow.getRenders()) {
-                EntityRenderData render = new EntityRenderData(renderData);
-                render.isVisible = (i == _player.getRender());
-                _graphics ~= render;
+            _system.clear();
+            if (_player.isRunning()) {
+                _particle.setup();
+                _system.addParticle(_particle);
             }
-            _player.setRenders(_graphics);
-            //_source.setGraphics(_graphics);
-            setDirty();
         });
 
-        _player.addEventListener("particle_graphic", {
-            //foreach (size_t i, EntityRenderData render; _graphics) {
-            //    render.isVisible = (i == _player.getRender());
-            //}
-            //_source.setGraphics(_graphics);
+        _parameterWindow.addEventListener("size", {
+            _player.setWidth(getWidth() - _parameterWindow.getWidth());
         });
 
-        _player.addEventListener("particle_start", { _source.start(); });
-        _player.addEventListener("particle_stop", { _source.stop(); });
-        _player.addEventListener("particle_emit", { _source.emit(); });
-        _player.addEventListener("particle_clear", { _source.clear(); });
+        _player.addEventListener("particle_start", {
+            _particle.setup();
+            _system.clear();
+            _system.addParticle(_particle);
+        });
+        _player.addEventListener("particle_stop", { _system.clear(); });
 
-        addEventListener("update", &_onUpdate);
-        addEventListener("draw", &_onDraw);
         addEventListener("wheel", &_onWheel);
         addEventListener("mousedown", &_onMouseDown);
         addEventListener("mouseup", &_onMouseUp);
         addEventListener("mouseleave", {
             removeEventListener("mousemove", &_onDrag);
         });
-        addEventListener("size", { _player.setWidth(getWidth()); });
 
-        //_source.setGraphics(_graphics);
-        _source.setData(_particle);
-
+        addEventListener("update", &_onUpdate);
+        addEventListener("draw", &_onDraw);
     }
 
     override Farfadet save(Farfadet ffd) {
         Farfadet node = ffd.addNode("particle").add(_name);
-        foreach (EntityRenderData render; _graphics) {
-            render.save(node);
+        node.addNode("texture").add(_textureId);
+        foreach (key, value; _particle.getElementsInstructions()) {
+            node.addNode(value);
         }
-        foreach (EntityRenderData render; _auxGraphics) {
-            render.save(node);
+        foreach (key, value; _particle.getSourcesInstructions()) {
+            node.addNode(value);
         }
-        _hitbox.save(node);
-        _particle.save(node);
-        _baseEntityData.save(node);
         return node;
     }
 
@@ -174,20 +146,57 @@ final class ParticleResourceEditor : ResourceBaseEditor {
         Vec2f mouseOffset = getMousePosition() - getCenter();
         Vec2f delta = (mouseOffset - _originPosition) / _zoom;
         _zoom *= zoomDelta;
+        _zoom = clamp(_zoom, 1f, 32f);
         Vec2f delta2 = (mouseOffset - _originPosition) / _zoom;
 
         _originPosition += (delta2 - delta) * _zoom;
     }
 
     private void _onUpdate() {
-        _source.update();
+        if (_player.isRunning()) {
+            _system.update();
+            _time++;
 
-        if (_player.isRunning() && !_source.isRunning()) {
-            _player.stop();
+            if (!_system.isPlaying()) {
+                _time = 0;
+
+                if (_player.isRepeating()) {
+                    _system.clear();
+                    _particle.setup();
+                    _system.addParticle(_particle);
+                }
+                else {
+                    _player.stop();
+                }
+            }
         }
+
+        _player.setTime(_time);
     }
 
     private void _onDraw() {
-        _source.draw(getCenter());
+        Vec2f size = getSize() - Vec2f(0f, _player.getHeight());
+        Vec2f center = size / 2f;
+
+        // dfmt off
+        Vec2f shift = -((_originPosition) % (16f * _zoom));
+        Vec2i checkerOffset = cast(Vec2i) (_originPosition / (16f * _zoom));
+        Vec2f startPos = center - (_zoom * ((Vec2f.one * 16f).contain(size / 2f) + 11.5f) + shift);
+        Vec2f endPos = startPos + _zoom * ((Vec2f.one * 16f).contain(size) + 32f);
+        Vec2f blockSize = Vec2f.one * 16f * _zoom;
+        for ({float y = startPos.y; int iy = 0; }  y <= endPos.y; y += blockSize.y, ++iy) {
+            for ({float x = startPos.x; int ix = 0; } x <= endPos.x; x += blockSize.x, ++ix) {
+                Atelier.renderer.drawRect(Vec2f(x, y), blockSize,
+                ((ix + iy + checkerOffset.sum()) & 0b1) ? Atelier.theme.surface
+                : Atelier.theme.container, 1f, true);
+            }
+        }
+        // dfmt on
+
+        center += _originPosition;
+        Atelier.renderer.drawLine(Vec2f(0f, center.y), Vec2f(size.x, center.y), Color.white, 0.5f);
+        Atelier.renderer.drawLine(Vec2f(center.x, 0f), Vec2f(center.x, size.y), Color.white, 0.5f);
+
+        _system.draw(center, _zoom);
     }
 }

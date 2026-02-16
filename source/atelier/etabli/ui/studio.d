@@ -282,14 +282,14 @@ final class EtabliUI : UIElement {
         }
 
         _mediaExplorer.setSize(Vec2f(LeftPanelSize, getHeight()));
-        setLowerPanel(null);
-        setRightPanel(null);
     }
 
     private void _onTab() {
         if (_contentEditor) {
             _contentEditor.removeUI();
             _contentEditor = null;
+            setLowerPanel(null);
+            setRightPanel(null);
         }
 
         string path = _tabBar.value;

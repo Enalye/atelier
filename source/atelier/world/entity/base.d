@@ -830,7 +830,6 @@ final class Entity : Resource!Entity {
             else {
                 moveRaw(dir);
             }
-            _sectorID = Atelier.nav.getSectorID(_position);
         }
     }
 
@@ -921,6 +920,7 @@ final class Entity : Resource!Entity {
     }
 
     uint getSectorID() {
+        _sectorID = Atelier.nav.updateSectorID(_position, _sectorID);
         return _sectorID;
     }
 

@@ -10,7 +10,7 @@ import atelier.script.util;
 
 package void loadLibWorld_behavior(GrModule mod) {
     mod.setModule("world.behavior");
-    mod.setModuleInfo(GrLocale.fr_FR, "Définit un acteur");
+    mod.setModuleInfo(GrLocale.fr_FR, "Comportement des entités");
 
     GrType behaviorType = mod.addNative("EntityBehavior");
     GrType unitType = mod.addNative("UnitBehavior", [], "EntityBehavior");
@@ -18,9 +18,6 @@ package void loadLibWorld_behavior(GrModule mod) {
     GrType entityType = grGetNativeType("Entity");
 
     mod.addFunction(&_setGravity, "setGravity", [
-            unitType, grFloat
-        ]);
-    mod.addFunction(&_setFrictionBrake, "setFrictionBrake", [
             unitType, grFloat
         ]);
 
@@ -47,11 +44,6 @@ package void loadLibWorld_behavior(GrModule mod) {
         ]);
 
     mod.addCast(&_as_proxy, behaviorType, grOptional(proxyType), true);
-}
-
-private void _setFrictionBrake(GrCall call) {
-    UnitBehavior unit = call.getNative!UnitBehavior(0);
-    unit.setFrictionBrake(call.getFloat(1));
 }
 
 private void _setGravity(GrCall call) {

@@ -35,6 +35,11 @@ final class NavSector {
         NavEdge[] _edges;
     }
 
+    bool isInside(Vec3i position) const {
+        Vec2i coords = position.xy >> 3;
+        return coords.isBetween(_start, _end + 1);
+    }
+
     bool canConnectUp(NavSector other) {
         return _isUpConnectable &&
             other._isDownConnectable &&
@@ -195,6 +200,13 @@ final class NavMesh {
 
         _generateSectors();
         _connectSectors();
+    }
+
+    uint updateSectorID(Vec3i position, uint sectorID) {
+        if (sectorID < _sectors.length && _sectors[sectorID].isInside(position))
+            return sectorID;
+
+        return getSectorID(position);
     }
 
     /// Retourne le secteur dans lequel le point se situe

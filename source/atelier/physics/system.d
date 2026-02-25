@@ -1330,7 +1330,7 @@ final class Physics {
         }
     }
 
-    void showHurtboxes(bool show) {
+    void showHitboxes(bool show) {
         if (show == _showHurtboxes)
             return;
 

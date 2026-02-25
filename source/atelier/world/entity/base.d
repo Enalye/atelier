@@ -460,6 +460,10 @@ final class Entity : Resource!Entity {
         }
     }
 
+    string getGraphicID() const {
+        return _graphicId;
+    }
+
     void setGraphic(string id, bool forceUpdate = false) {
         if (!id.length) {
             setDefaultGraphic();

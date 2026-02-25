@@ -1,6 +1,7 @@
 module atelier.console.cmd.loader;
 
 import atelier.common;
+import atelier.console.system;
 import atelier.console.cmd.base;
 import atelier.console.cmd.entity;
 import atelier.console.cmd.physics;
@@ -11,7 +12,7 @@ import atelier.console.cmd.script;
 import atelier.console.cmd.weather;
 import atelier.console.cmd.world;
 
-private void function(Cli)[] _cmdList = [
+private void function(Console)[] _cmdList = [
     &_baseCmd, //
     &_entityCmd, //
     &_physicsCmd, //
@@ -23,8 +24,8 @@ private void function(Cli)[] _cmdList = [
     &_worldCmd, //
 ];
 
-package(atelier.console) void console_registerCommands(Cli cli) {
+package(atelier.console) void console_registerCommands(Console console) {
     foreach (cmd; _cmdList) {
-        cmd(cli);
+        cmd(console);
     }
 }

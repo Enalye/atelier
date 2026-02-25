@@ -1,31 +1,38 @@
 module atelier.console.system;
 
+import std.format : format;
 import std.conv : to;
 import std.string : lineSplitter;
+
 import atelier.common;
 import atelier.core;
 import atelier.ui;
 import atelier.input;
+import atelier.console.error;
 import atelier.console.cmd;
+import atelier.console.command;
+import atelier.console.token;
+import atelier.console.tokenizer;
+import atelier.console.value;
 
 final class Console {
     private {
         ConsoleUI _ui;
         bool _isDisplayed;
-        Cli _cli;
+        ConsoleCommand[string] _commands;
     }
 
     @property {
-        Cli cli() {
-            return _cli;
-        }
+        /*Cli cli() {
+            return _console;
+        }*/
     }
 
     this() {
-        _cli = new Cli();
-        console_registerCommands(_cli);
+        //_console = new Cli();
+        console_registerCommands(this);
 
-        _ui = new ConsoleUI(_cli);
+        _ui = new ConsoleUI(this);
     }
 
     void clear() {
@@ -41,11 +48,127 @@ final class Console {
     }
 
     void showHelp(string command) {
-        _ui.log(_cli.getHelp(command));
+        //_ui.log(_console.getHelp(command));
     }
 
     void showHelp() {
-        _ui.log(_cli.getHelp());
+        //_ui.log(_console.getHelp());
+    }
+
+    ConsoleCommand addCommand(string name) {
+        ConsoleCommand command = new ConsoleCommand;
+        _commands[name] = command;
+        return command;
+    }
+
+    void run(string text) {
+        ConsoleTokenizer tokenizer = new ConsoleTokenizer(text);
+        ConsoleCommand command;
+        ConsoleValue[] values;
+        ConsoleCommand.Parameter[] parameters;
+        ConsoleCommand.Option[] options;
+
+        while (!tokenizer.isEndToken()) {
+            ConsoleToken token = tokenizer.getToken();
+            tokenizer.check(command || token.type == ConsoleToken.Type.key,
+                format!"commande attendue, `%s` trouvé à la place"(token.toString()));
+            tokenizer.advanceToken();
+
+            final switch (token.type) with (ConsoleToken.Type) {
+            case key:
+                if (values.length) {
+                    Atelier.log("Erreur: commande invalide après liste d’arguments");
+                    return;
+                }
+
+                if (command) {
+                    command = command.getCommand(token.strValue);
+                }
+                else {
+                    command = getCommand(token.strValue);
+                }
+
+                if (command) {
+                    parameters = command.getParameters();
+                    options = command.getOptions();
+                }
+                else {
+                    log("Erreur: pas de commande ", token.strValue);
+                    return;
+                }
+                break;
+            case int_:
+                values ~= ConsoleValue(token.intValue);
+                break;
+            case uint_:
+                values ~= ConsoleValue(token.uintValue);
+                break;
+            case char_:
+                values ~= ConsoleValue(token.charValue);
+                break;
+            case float_:
+                values ~= ConsoleValue(token.floatValue);
+                break;
+            case bool_:
+                values ~= ConsoleValue(token.boolValue);
+                break;
+            case string_:
+                values ~= ConsoleValue(token.strValue);
+                break;
+            }
+        }
+
+        if (!command)
+            return;
+
+        ConsoleCommand.Callback callback = command.getCallback();
+        ConsoleResult result = new ConsoleResult(this);
+
+        if (!callback) {
+            log("Erreur: aucun callback");
+            return;
+        }
+
+        if (values.length > (parameters.length + options.length)) {
+            log("Erreur: trop d’arguments");
+            return;
+        }
+
+        foreach (option; options) {
+            result.setArgument(option.name, option.value);
+        }
+
+        uint argIndex;
+        for (; argIndex < parameters.length; ++argIndex) {
+            string name = parameters[argIndex].name;
+
+            if (argIndex >= values.length) {
+                log("Erreur: pas assez d’arguments");
+                return;
+            }
+
+            result.setArgument(name, values[argIndex]);
+        }
+        for (uint i; i < options.length; ++i, ++argIndex) {
+            string name = options[i].name;
+
+            if (argIndex >= values.length)
+                break;
+
+            result.setArgument(name, values[argIndex]);
+        }
+
+        try {
+            callback(result);
+        }
+        catch (ConsoleException e) {
+            log("Erreur: ", e.msg);
+        }
+    }
+
+    ConsoleCommand getCommand(string name) {
+        auto p = name in _commands;
+        return p ? *p : null;
     }
 
     bool dispatch(InputEvent input) {
@@ -85,7 +208,7 @@ final class Console {
 private final class ConsoleUI : UIElement {
     private {
         VBox _logBox;
-        Cli _cli;
+        Console _console;
         TextField _inputField;
         bool _isTransitionning;
         string[] _history;
@@ -98,8 +221,8 @@ private final class ConsoleUI : UIElement {
         }
     }
 
-    this(Cli cli) {
-        _cli = cli;
+    this(Console console) {
+        _console = console;
         setSize(Vec2f(Atelier.window.width, 300));
         setAlign(UIAlignX.left, UIAlignY.top);
 
@@ -185,7 +308,7 @@ private final class ConsoleUI : UIElement {
         }
         _historyPos = _history.length;
 
-        string[] command;
+        /*string[] command;
         bool inQuotes;
         string current;
         foreach (ch; value) {
@@ -204,19 +327,19 @@ private final class ConsoleUI : UIElement {
         }
         if (current.length) {
             command ~= current;
-        }
+        }*/
         try {
-            _cli.parse(command, false);
+            _console.run(value);
         }
         catch (CliException e) {
             log("[red]Erreur:[white] " ~ e.msg);
 
-            if (e.command.length) {
-                log("\n", _cli.getHelp(e.command));
-            }
-            else {
-                log("\n", _cli.getHelp());
-            }
+            // if (e.command.length) {
+            // log("\n", _console.getHelp(e.command));
+            // }
+            // else {
+            // log("\n", _console.getHelp());
+            // }
         }
     }
 
@@ -270,8 +393,4 @@ private final class ConsoleUI : UIElement {
     private void _onDraw() {
         Atelier.renderer.drawRect(Vec2f.zero, getSize(), Atelier.theme.background, 0.8f, true);
     }
-}
-
-class Command {
-    string name;
 }

@@ -9,6 +9,8 @@ final class Weather {
         BaseWeather _targetWeather;
         BaseWeather _currentWeather;
         Timer _timer;
+        string _type;
+        float _intensity = 0f;
 
         alias WeatherBuilder = BaseWeather function(float);
         static WeatherBuilder[string] _weatherBuilders;
@@ -42,12 +44,26 @@ final class Weather {
         }
     }
 
+    string getType() const {
+        return _type;
+    }
+
+    float getIntensity() const {
+        return _intensity;
+    }
+
     void set(string type, float value) {
+        _type = type;
+        _intensity = value;
+
         _resetTransition();
         _currentWeather = _create(type, value);
     }
 
     void run(string type, float value, uint duration) {
+        _type = type;
+        _intensity = value;
+
         _resetTransition();
         _targetWeather = _create(type, value);
         if (_currentWeather)

@@ -11,7 +11,7 @@ package void _navCmd(Console console) {
     // nav
     ConsoleCommand nav = console.addCommand("nav");
 
-    // nav debug
+    // nav debug [B:show]
     ConsoleCommand nav_debug = nav.addCommand("debug");
     nav_debug.addOption("show", ConsoleType.bool_, ConsoleValue(true));
     nav_debug.setHint("Affiche le navmesh");
@@ -34,26 +34,26 @@ package void _navCmd(Console console) {
     nav_generate.setCallback(&_nav_generate);
 }
 
-private void _nav_debug(ConsoleResult result) {
-    Atelier.nav.isDebug = result.getArgument!bool("show");
+private void _nav_debug(ConsoleCall call) {
+    Atelier.nav.isDebug = call.getArgument!bool("show");
 
     if (Atelier.nav.isDebug)
-        Atelier.log("Navigation affichée");
+        call.console.log("Navigation affichée");
     else
-        Atelier.log("Navigation masquée");
+        call.console.log("Navigation masquée");
 }
 
-private void _nav_debug_setlevel(ConsoleResult result) {
-    Atelier.nav.levelToDraw = result.getArgument!int("level");
-    Atelier.log("Niveau de navigation affiché reglé sur ", Atelier.nav.levelToDraw);
+private void _nav_debug_setlevel(ConsoleCall call) {
+    Atelier.nav.levelToDraw = call.getArgument!int("level");
+    call.console.log("Niveau de navigation affiché reglé sur ", Atelier.nav.levelToDraw);
 }
 
-private void _nav_debug_unsetlevel(ConsoleResult result) {
+private void _nav_debug_unsetlevel(ConsoleCall call) {
     Atelier.nav.levelToDraw = -1;
-    Atelier.log("Niveau de navigation affiché reglé sur tous");
+    call.console.log("Niveau de navigation affiché reglé sur tous");
 }
 
-private void _nav_generate(ConsoleResult result) {
-    Atelier.log("Génération du navmesh");
+private void _nav_generate(ConsoleCall call) {
+    call.console.log("Génération du navmesh");
     Atelier.nav.generate();
 }

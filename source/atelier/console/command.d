@@ -13,7 +13,7 @@ enum ConsoleType {
     string_,
 }
 
-final class ConsoleResult {
+final class ConsoleCall {
     private {
         Console _console;
         ConsoleValue[string] _arguments;
@@ -44,7 +44,7 @@ final class ConsoleResult {
 }
 
 final class ConsoleCommand {
-    alias Callback = void function(ConsoleResult);
+    alias Callback = void function(ConsoleCall);
 
     struct Parameter {
         string name;
@@ -113,5 +113,9 @@ final class ConsoleCommand {
 
     Option[] getOptions() {
         return _options;
+    }
+
+    ConsoleCommand[string] getCommands() {
+        return _commands;
     }
 }

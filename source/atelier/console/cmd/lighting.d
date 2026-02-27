@@ -6,6 +6,7 @@ import atelier.console.system;
 import atelier.console.command;
 
 package void _lightingCmd(Console console) {
+    // light <F:strength>
     ConsoleCommand light = console.addCommand("light");
     light.addParameter("strength", ConsoleType.float_);
     light.setHint("Éclairage de la scène");
@@ -16,21 +17,21 @@ package void _lightingCmd(Console console) {
     //cli.addCommand(&_removelight, "removelight", "Retire une lumière");
 }
 
-private void _light(ConsoleResult result) {
-    float value = clamp(result.getArgument!float("strength"), 0f, 1f);
+private void _light(ConsoleCall call) {
+    float value = clamp(call.getArgument!float("strength"), 0f, 1f);
     Atelier.world.lighting.setBrightness(value);
-    Atelier.console.log("Luminosité réglée sur ", value);
+    call.console.log("Luminosité réglée sur ", value);
 }
 /*
 private void _darkness(Cli.Result cli) {
-    Atelier.console.log("Non-implémenté");
+    call.console.log("Non-implémenté");
 }
 
 private void _addlight(Cli.Result cli) {
-    Atelier.console.log("Non-implémenté");
+    call.console.log("Non-implémenté");
 }
 
 private void _removelight(Cli.Result cli) {
-    Atelier.console.log("Non-implémenté");
+    call.console.log("Non-implémenté");
 }
 */

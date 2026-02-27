@@ -10,23 +10,25 @@ import atelier.console.value;
 import atelier.console.system;
 
 package void _scriptCmd(Console console) {
+    // script
     ConsoleCommand script = console.addCommand("script");
 
+    // script bytecode <S:path>
     ConsoleCommand script_bytecode = script.addCommand("bytecode");
     script_bytecode.addParameter("path", ConsoleType.string_);
     script_bytecode.setHint("Enregistre le bytecode en format lisible");
     script_bytecode.setCallback(&_script_bytecode);
 }
 
-private void _script_bytecode(ConsoleResult result) {
-    string path = result.getArgument!string("path");
+private void _script_bytecode(ConsoleCall call) {
+    string path = call.getArgument!string("path");
     GrBytecode bytecode = Atelier.script.getBytecode();
     if (!bytecode) {
-        Atelier.console.log("Aucun bytecode de disponible");
+        call.console.log("Aucun bytecode de disponible");
         return;
     }
     string exeDir = dirName(thisExePath());
     path = buildNormalizedPath(exeDir, path);
     std.file.write(path, bytecode.prettify());
-    Atelier.console.log("Bytecode enregistré dans `", path, "`");
+    call.console.log("Bytecode enregistré dans `", path, "`");
 }

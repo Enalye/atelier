@@ -2,12 +2,14 @@ module atelier.console.system;
 
 import std.format : format;
 import std.conv : to;
-import std.string : lineSplitter;
+import std.string : lineSplitter, indexOf;
+import std.typecons : No;
 
 import atelier.common;
 import atelier.core;
 import atelier.ui;
 import atelier.input;
+import atelier.render;
 import atelier.console.error;
 import atelier.console.cmd;
 import atelier.console.command;
@@ -41,6 +43,10 @@ final class Console {
 
     void clearLog() {
         _ui.clearLog();
+    }
+
+    void warn(T...)(T args) {
+        _ui.log("[red]Error: ", args);
     }
 
     void log(T...)(T args) {
@@ -77,7 +83,7 @@ final class Console {
             final switch (token.type) with (ConsoleToken.Type) {
             case key:
                 if (values.length) {
-                    Atelier.log("Erreur: commande invalide après liste d’arguments");
+                    warn("Commande invalide après liste d’arguments");
                     return;
                 }
 
@@ -93,7 +99,7 @@ final class Console {
                     options = command.getOptions();
                 }
                 else {
-                    log("Erreur: pas de commande ", token.strValue);
+                    warn("Aucune commande `", token.strValue, "`");
                     return;
                 }
                 break;
@@ -122,20 +128,20 @@ final class Console {
             return;
 
         ConsoleCommand.Callback callback = command.getCallback();
-        ConsoleResult result = new ConsoleResult(this);
+        ConsoleCall call = new ConsoleCall(this);
 
         if (!callback) {
-            log("Erreur: aucun callback");
+            warn("Aucun callback défini");
             return;
         }
 
         if (values.length > (parameters.length + options.length)) {
-            log("Erreur: trop d’arguments");
+            warn("Trop d’arguments");
             return;
         }
 
         foreach (option; options) {
-            result.setArgument(option.name, option.value);
+            call.setArgument(option.name, option.value);
         }
 
         uint argIndex;
@@ -143,11 +149,11 @@ final class Console {
             string name = parameters[argIndex].name;
 
             if (argIndex >= values.length) {
-                log("Erreur: pas assez d’arguments");
+                warn("Arguments manquants");
                 return;
             }
 
-            result.setArgument(name, values[argIndex]);
+            call.setArgument(name, values[argIndex]);
         }
         for (uint i; i < options.length; ++i, ++argIndex) {
             string name = options[i].name;
@@ -155,20 +161,206 @@ final class Console {
             if (argIndex >= values.length)
                 break;
 
-            result.setArgument(name, values[argIndex]);
+            call.setArgument(name, values[argIndex]);
         }
 
         try {
-            callback(result);
+            callback(call);
         }
         catch (ConsoleException e) {
-            log("Erreur: ", e.msg);
+            warn(e.msg);
+        }
+    }
+
+    ColoredLabel[] getSuggestions(string text, Font font) {
+        try {
+            ConsoleTokenizer tokenizer = new ConsoleTokenizer(text);
+            ConsoleCommand command, lastCommand;
+            string validCommands;
+            string partialCommand;
+
+            while (!tokenizer.isEndToken()) {
+                ConsoleToken token = tokenizer.getToken();
+                tokenizer.advanceToken();
+
+                if (token.type == ConsoleToken.Type.key) {
+                    command = command ? command.getCommand(
+                        token.strValue) : getCommand(token.strValue);
+
+                    if (command) {
+                        lastCommand = command;
+
+                        if (validCommands.length) {
+                            validCommands ~= " ";
+                        }
+                        validCommands ~= token.strValue;
+                    }
+                    else {
+                        partialCommand = token.strValue;
+                        break;
+                    }
+                }
+                else {
+                    break;
+                }
+            }
+
+            string _getType(ConsoleType type) {
+                final switch (type) with (ConsoleType) {
+                case bool_:
+                    return "B";
+                case int_:
+                    return "I";
+                case uint_:
+                    return "U";
+                case float_:
+                    return "F";
+                case string_:
+                    return "S";
+                }
+            }
+
+            ColoredLabel[] labels;
+            if (lastCommand) {
+                if (!partialCommand.length) {
+                    ColoredLabel label = new ColoredLabel(font);
+
+                    string line = validCommands;
+
+                    ColoredLabel.Token token;
+                    token.index = 0;
+                    token.textColor = Atelier.theme.onNeutral;
+                    label.tokens ~= token;
+
+                    token.index = line.length;
+                    token.textColor = Color.fromHex(0xbbd4e2);
+                    label.tokens ~= token;
+
+                    foreach (param; lastCommand.getParameters()) {
+                        line ~= " <" ~ _getType(param.type) ~ ":" ~ param.name ~ ">";
+                    }
+
+                    foreach (option; lastCommand.getOptions()) {
+                        line ~= " [" ~ _getType(option.type) ~ ":" ~ option.name ~ "]";
+                    }
+
+                    token.index = line.length;
+                    token.textColor = Color.fromHex(0x7a8f6d);
+                    label.tokens ~= token;
+
+                    line ~= " " ~ lastCommand.getHint();
+
+                    label.text = line;
+                    labels ~= label;
+                }
+
+                foreach (subCommandName, subCommand; lastCommand.getCommands()) {
+                    ColoredLabel label = new ColoredLabel(font);
+
+                    string line = validCommands ~ " " ~ subCommandName;
+
+                    size_t startSearch = (validCommands.length + 1);
+                    ptrdiff_t index = indexOf(line[startSearch .. $], partialCommand, No
+                            .caseSentitive);
+
+                    ColoredLabel.Token token;
+                    token.index = 0;
+                    token.textColor = Atelier.theme.onNeutral;
+                    label.tokens ~= token;
+
+                    if (index == 0) {
+                        token.index = validCommands.length + 1;
+                        token.textColor = Color.fromHex(0xe5eba9);
+                        label.tokens ~= token;
+
+                        startSearch += partialCommand.length;
+                    }
+
+                    token.index = startSearch;
+                    token.textColor = Atelier.theme.neutral;
+                    label.tokens ~= token;
+
+                    token.index = line.length;
+                    token.textColor = Color.fromHex(0xbbd4e2);
+                    label.tokens ~= token;
+
+                    foreach (param; subCommand.getParameters()) {
+                        line ~= " <" ~ _getType(param.type) ~ ":" ~ param.name ~ ">";
+                    }
+
+                    foreach (option; subCommand.getOptions()) {
+                        line ~= " [" ~ _getType(option.type) ~ ":" ~ option.name ~ "]";
+                    }
+
+                    token.index = line.length;
+                    token.textColor = Color.fromHex(0x7a8f6d);
+                    label.tokens ~= token;
+
+                    line ~= " " ~ subCommand.getHint();
+
+                    label.text = line;
+                    labels ~= label;
+                }
+            }
+            else if (text.length) {
+                foreach (subCommandName, subCommand; _commands) {
+                    ColoredLabel label = new ColoredLabel(font);
+
+                    string line = subCommandName;
+                    ptrdiff_t index = indexOf(line, partialCommand, No
+                            .caseSentitive);
+
+                    size_t startSearch = 0;
+                    ColoredLabel.Token token;
+                    if (index == 0) {
+                        token.index = index;
+                        token.textColor = Color.fromHex(0xe5eba9);
+                        label.tokens ~= token;
+
+                        startSearch += partialCommand.length;
+                    }
+
+                    token.index = startSearch;
+                    token.textColor = Atelier.theme.neutral;
+                    label.tokens ~= token;
+
+                    token.index = line.length;
+                    token.textColor = Color.fromHex(0xbbd4e2);
+                    label.tokens ~= token;
+
+                    foreach (param; subCommand.getParameters()) {
+                        line ~= " <" ~ _getType(param.type) ~ ":" ~ param.name ~ ">";
+                    }
+
+                    foreach (option; subCommand.getOptions()) {
+                        line ~= " [" ~ _getType(option.type) ~ ":" ~ option.name ~ "]";
+                    }
+
+                    token.index = line.length;
+                    token.textColor = Color.fromHex(0x7a8f6d);
+                    label.tokens ~= token;
+
+                    line ~= " " ~ subCommand.getHint();
+
+                    label.text = line;
+                    labels ~= label;
+                }
+            }
+
+            return labels;
+        }
+        catch (Exception e) {
+            return [];
         }
     }
 
     ConsoleCommand getCommand(string name) {
         auto p = name in _commands;
         return p ? *p : null;
+    }
+
+    void setFont(Font font) {
+        _ui.setFont(font);
     }
 
     bool dispatch(InputEvent input) {
@@ -205,6 +397,37 @@ final class Console {
     }
 }
 
+private final class ConsoleSuggestions : Modal {
+    private {
+        VBox _vbox;
+    }
+
+    this(float width) {
+        setSize(Vec2f(width, 16f));
+        isEnabled = false;
+
+        _vbox = new VBox;
+        _vbox.setAlign(UIAlignX.left, UIAlignY.center);
+        _vbox.setPosition(Vec2f(16f, 0f));
+        _vbox.setChildAlign(UIAlignX.left);
+        _vbox.setSpacing(4f);
+        addUI(_vbox);
+
+        _vbox.addEventListener("size", { setHeight(_vbox.getHeight() + 16f); });
+    }
+
+    void setList(ColoredLabel[] list) {
+        _vbox.clearUI();
+
+        foreach (line; list) {
+            /*ColoredTextFormat ctf = formatColoredText(line);
+            ColoredLabel label = new ColoredLabel(ctf.text, font);
+            label.tokens = ctf.tokens;*/
+            _vbox.addUI(line);
+        }
+    }
+}
+
 private final class ConsoleUI : UIElement {
     private {
         VBox _logBox;
@@ -213,6 +436,8 @@ private final class ConsoleUI : UIElement {
         bool _isTransitionning;
         string[] _history;
         size_t _historyPos;
+        Font _font;
+        ConsoleSuggestions _suggestions;
     }
 
     @property {
@@ -260,6 +485,39 @@ private final class ConsoleUI : UIElement {
         addState(hiddenState);
 
         setState("hidden");
+        setFont(null);
+    }
+
+    void setSuggestions(ColoredLabel[] list) {
+        if (list.length) {
+            if (!_suggestions) {
+                _suggestions = new ConsoleSuggestions(getWidth());
+                _suggestions.setAlign(UIAlignX.left, UIAlignY.bottom);
+                _suggestions.setPosition(Vec2f(0f, _inputField.getHeight() + 2f));
+                addUI(_suggestions);
+            }
+            _suggestions.setList(list);
+        }
+        else if (_suggestions) {
+            _suggestions.removeUI();
+            _suggestions = null;
+        }
+    }
+
+    void setFont(Font font) {
+        _font = font;
+
+        if (!_font) {
+            _font = Atelier.theme.font;
+        }
+
+        if (_font) {
+            _inputField.setFont(_font);
+
+            foreach (label; cast(ColoredLabel[]) _logBox.getChildren().array) {
+                label.font = _font;
+            }
+        }
     }
 
     void activate() {
@@ -284,7 +542,7 @@ private final class ConsoleUI : UIElement {
 
         foreach (line; msg.lineSplitter) {
             ColoredTextFormat ctf = formatColoredText(line);
-            ColoredLabel label = new ColoredLabel(ctf.text, Atelier.theme.font);
+            ColoredLabel label = new ColoredLabel(ctf.text, _font);
             label.tokens = ctf.tokens;
             _logBox.addUI(label);
         }
@@ -308,38 +566,11 @@ private final class ConsoleUI : UIElement {
         }
         _historyPos = _history.length;
 
-        /*string[] command;
-        bool inQuotes;
-        string current;
-        foreach (ch; value) {
-            if (ch == '\"') {
-                inQuotes = !inQuotes;
-                continue;
-            }
-            if (!inQuotes && ch <= 0x20) {
-                if (current.length) {
-                    command ~= current;
-                    current.length = 0;
-                }
-                continue;
-            }
-            current ~= ch;
-        }
-        if (current.length) {
-            command ~= current;
-        }*/
         try {
             _console.run(value);
         }
         catch (CliException e) {
-            log("[red]Erreur:[white] " ~ e.msg);
-
-            // if (e.command.length) {
-            // log("\n", _console.getHelp(e.command));
-            // }
-            // else {
-            // log("\n", _console.getHelp());
-            // }
+            log("[red]Erreur: " ~ e.msg);
         }
     }
 
@@ -374,6 +605,8 @@ private final class ConsoleUI : UIElement {
                 }
             }
         }
+
+        setSuggestions(_console.getSuggestions(_inputField.value, _font));
     }
 
     private void _onState() {

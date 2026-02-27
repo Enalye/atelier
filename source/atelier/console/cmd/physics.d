@@ -46,30 +46,50 @@ package void _physicsCmd(Console console) {
     coll_debug_showhitboxes.setCallback(&_coll_debug_showhitboxes);
 }
 
-private void _coll_debug_showall(ConsoleResult result) {
-    bool show = result.getArgument!bool("show");
+private void _coll_debug_showall(ConsoleCall call) {
+    bool show = call.getArgument!bool("show");
     Atelier.physics.showActors(show);
     Atelier.physics.showSolids(show);
     Atelier.physics.showTriggers(show);
     Atelier.physics.showHitboxes(show);
 }
 
-private void _coll_debug_showactors(ConsoleResult result) {
-    bool show = result.getArgument!bool("show");
+private void _coll_debug_showactors(ConsoleCall call) {
+    bool show = call.getArgument!bool("show");
     Atelier.physics.showActors(show);
+
+    if (Atelier.nav.isDebug)
+        call.console.log("Collision des acteurs affichée");
+    else
+        call.console.log("Collision des acteurs masquée");
 }
 
-private void _coll_debug_showsolids(ConsoleResult result) {
-    bool show = result.getArgument!bool("show");
+private void _coll_debug_showsolids(ConsoleCall call) {
+    bool show = call.getArgument!bool("show");
     Atelier.physics.showSolids(show);
+
+    if (Atelier.nav.isDebug)
+        call.console.log("Collision des solides affichée");
+    else
+        call.console.log("Collision des solides masquée");
 }
 
-private void _coll_debug_showtriggers(ConsoleResult result) {
-    bool show = result.getArgument!bool("show");
+private void _coll_debug_showtriggers(ConsoleCall call) {
+    bool show = call.getArgument!bool("show");
     Atelier.physics.showTriggers(show);
+
+    if (Atelier.nav.isDebug)
+        call.console.log("Collision des déclencheurs affichée");
+    else
+        call.console.log("Collision des déclencheurs masquée");
 }
 
-private void _coll_debug_showhitboxes(ConsoleResult result) {
-    bool show = result.getArgument!bool("show");
+private void _coll_debug_showhitboxes(ConsoleCall call) {
+    bool show = call.getArgument!bool("show");
     Atelier.physics.showHitboxes(show);
+
+    if (Atelier.nav.isDebug)
+        call.console.log("Collision des hitbox affichée");
+    else
+        call.console.log("Collision des hitbox masquée");
 }

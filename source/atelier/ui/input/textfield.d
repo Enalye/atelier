@@ -22,6 +22,7 @@ final class TextField : UIElement {
         Rectangle _caret, _selection;
         UIElement _textContainer;
         Label _label;
+        Font _font;
         dstring _text, _allowedCharacters;
         uint _caretIndex = 0U, _selectionIndex = 0u;
         Timer _timer;
@@ -84,6 +85,8 @@ final class TextField : UIElement {
         inputable = true;
         _timer.mode = Timer.Mode.bounce;
 
+        _font = Atelier.theme.font;
+
         _background = RoundedRectangle.fill(getSize(), Atelier.theme.corner);
         _background.anchor = Vec2f.zero;
         _background.color = Atelier.theme.background;
@@ -96,26 +99,26 @@ final class TextField : UIElement {
 
         _textContainer = new UIElement;
         _textContainer.setAlign(UIAlignX.left, UIAlignY.center);
-        _textContainer.setSize(Vec2f(getWidth() - _innerMargins.sum(), Atelier.theme.font.size()));
+        _textContainer.setSize(Vec2f(getWidth() - _innerMargins.sum(), _font.size()));
         _textContainer.setPosition(Vec2f(_innerMargins.x, 0f));
         _textContainer.isEnabled = false;
         addUI(_textContainer);
 
-        _selection = Rectangle.fill(Vec2f(2f, Atelier.theme.font.size()));
+        _selection = Rectangle.fill(Vec2f(2f, _font.size()));
         _selection.anchor = Vec2f(0f, 0.5f);
         _selection.color = Atelier.theme.accent;
         _selection.alpha = 0.5f;
         _selection.isVisible = false;
         _textContainer.addImage(_selection);
 
-        _caret = Rectangle.fill(Vec2f(1f, Atelier.theme.font.size()));
+        _caret = Rectangle.fill(Vec2f(1f, _font.size()));
         _caret.anchor = Vec2f.half;
         _caret.color = Atelier.theme.onNeutral;
         _caret.isVisible = false;
         _caret.alpha = 0f;
         _textContainer.addImage(_caret);
 
-        _label = new Label("", Atelier.theme.font);
+        _label = new Label("", _font);
         _label.textColor = Atelier.theme.onNeutral;
         _label.setPosition(Vec2f(0f, 0f));
         _label.setAlign(UIAlignX.left, UIAlignY.center);
@@ -151,7 +154,7 @@ final class TextField : UIElement {
         _background.size = getSize();
         _outline.size = getSize();
         _outline.size = getSize();
-        _textContainer.setSize(Vec2f(getWidth() - _innerMargins.sum(), Atelier.theme.font.size()));
+        _textContainer.setSize(Vec2f(getWidth() - _innerMargins.sum(), _font.size()));
         _textContainer.setPosition(Vec2f(_innerMargins.x, 0f));
         _onSelectionChange();
     }
@@ -523,7 +526,13 @@ final class TextField : UIElement {
 
     void setInnerMargin(float leftMargin, float rightMargin) {
         _innerMargins = Vec2f(leftMargin, rightMargin);
-        _textContainer.setSize(Vec2f(getWidth() - _innerMargins.sum(), Atelier.theme.font.size()));
+        _textContainer.setSize(Vec2f(getWidth() - _innerMargins.sum(), _font.size()));
         _textContainer.setPosition(Vec2f(_innerMargins.x, 0f));
+    }
+
+    void setFont(Font font) {
+        _font = font ? font : Atelier.theme.font;
+        _label.font = _font;
+        _textContainer.setSize(Vec2f(getWidth() - _innerMargins.sum(), _font.size()));
     }
 }

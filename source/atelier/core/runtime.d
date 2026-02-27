@@ -194,9 +194,6 @@ final class Atelier {
 
     static void log(T...)(T args) {
         _logger_log(args);
-        if (_console) {
-            _console.log(args);
-        }
     }
 
     /// Demande le rechargement de l’application (valide seulement en mode développement)

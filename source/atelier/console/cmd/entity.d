@@ -68,7 +68,6 @@ package void _entityCmd(Console console) {
     entity_moveGround.addOption("z", ConsoleType.int_, ConsoleValue(0));
     entity_moveGround.setHint("Déplace une entité par rapport au terrain");
     entity_moveGround.setCallback(&_entity_moveGround);
-
 }
 
 private void _entity_add(ConsoleCall call) {

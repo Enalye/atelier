@@ -172,7 +172,14 @@ final class Console {
         }
     }
 
-    ColoredLabel[] getSuggestions(string text, Font font) {
+    auto getSuggestions(string text, Font font) {
+        struct Result {
+            ColoredLabel[] labels;
+            string autocomplete;
+        }
+
+        Result result;
+
         try {
             ConsoleTokenizer tokenizer = new ConsoleTokenizer(text);
             ConsoleCommand command, lastCommand;
@@ -220,7 +227,6 @@ final class Console {
                 }
             }
 
-            ColoredLabel[] labels;
             if (lastCommand) {
                 if (!partialCommand.length) {
                     ColoredLabel label = new ColoredLabel(font);
@@ -251,7 +257,7 @@ final class Console {
                     line ~= " " ~ lastCommand.getHint();
 
                     label.text = line;
-                    labels ~= label;
+                    result.labels ~= label;
                 }
 
                 foreach (subCommandName, subCommand; lastCommand.getCommands()) {
@@ -273,7 +279,10 @@ final class Console {
                         token.textColor = Color.fromHex(0xe5eba9);
                         label.tokens ~= token;
 
-                        startSearch += partialCommand.length;
+                        if (partialCommand.length) {
+                            startSearch += partialCommand.length;
+                            result.autocomplete = subCommandName[partialCommand.length .. $];
+                        }
                     }
 
                     token.index = startSearch;
@@ -299,7 +308,7 @@ final class Console {
                     line ~= " " ~ subCommand.getHint();
 
                     label.text = line;
-                    labels ~= label;
+                    result.labels ~= label;
                 }
             }
             else if (text.length) {
@@ -317,7 +326,10 @@ final class Console {
                         token.textColor = Color.fromHex(0xe5eba9);
                         label.tokens ~= token;
 
-                        startSearch += partialCommand.length;
+                        if (partialCommand.length) {
+                            startSearch += partialCommand.length;
+                            result.autocomplete = subCommandName[partialCommand.length .. $];
+                        }
                     }
 
                     token.index = startSearch;
@@ -343,15 +355,14 @@ final class Console {
                     line ~= " " ~ subCommand.getHint();
 
                     label.text = line;
-                    labels ~= label;
+                    result.labels ~= label;
                 }
             }
-
-            return labels;
         }
         catch (Exception e) {
-            return [];
         }
+
+        return result;
     }
 
     ConsoleCommand getCommand(string name) {
@@ -466,6 +477,7 @@ private final class ConsoleUI : UIElement {
         _inputField.setWidth(getWidth());
         _inputField.hasBackground = false;
         _inputField.limit = 300;
+        _inputField.addEventListener("value", &_onChange);
         vbox.addUI(_inputField);
 
         addEventListener("draw", &_onDraw);
@@ -488,7 +500,7 @@ private final class ConsoleUI : UIElement {
         setFont(null);
     }
 
-    void setSuggestions(ColoredLabel[] list) {
+    void setSuggestions(ColoredLabel[] list, string autocomplete) {
         if (list.length) {
             if (!_suggestions) {
                 _suggestions = new ConsoleSuggestions(getWidth());
@@ -502,6 +514,8 @@ private final class ConsoleUI : UIElement {
             _suggestions.removeUI();
             _suggestions = null;
         }
+
+        _inputField.setAutocomplete(autocomplete);
     }
 
     void setFont(Font font) {
@@ -603,10 +617,15 @@ private final class ConsoleUI : UIElement {
                 default:
                     break;
                 }
+
+                _onChange();
             }
         }
+    }
 
-        setSuggestions(_console.getSuggestions(_inputField.value, _font));
+    private void _onChange() {
+        auto suggestions = _console.getSuggestions(_inputField.value, _font);
+        setSuggestions(suggestions.labels, suggestions.autocomplete);
     }
 
     private void _onState() {

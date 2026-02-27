@@ -21,7 +21,7 @@ final class TextField : UIElement {
         RoundedRectangle _background, _outline;
         Rectangle _caret, _selection;
         UIElement _textContainer;
-        Label _label;
+        Label _label, _autocompleteLabel;
         Font _font;
         dstring _text, _allowedCharacters;
         uint _caretIndex = 0U, _selectionIndex = 0u;
@@ -136,6 +136,28 @@ final class TextField : UIElement {
         addEventListener("disable", &_onDisable);
 
         _onSelectionChange();
+    }
+
+    void setAutocomplete(string value) {
+        if (value.length) {
+            if (!_autocompleteLabel) {
+                _autocompleteLabel = new Label(value, _font);
+                _autocompleteLabel.textColor = Atelier.theme.neutral;
+                _autocompleteLabel.setPosition(Vec2f(_label.getWidth() + 8f, 0f));
+                _autocompleteLabel.setAlign(UIAlignX.left, UIAlignY.center);
+                _textContainer.addUI(_autocompleteLabel);
+            }
+            else {
+                _autocompleteLabel.text = value;
+                _autocompleteLabel.setPosition(Vec2f(_label.getWidth() + 8f, 0f));
+            }
+        }
+        else {
+            if (_autocompleteLabel) {
+                _autocompleteLabel.removeUI();
+                _autocompleteLabel = null;
+            }
+        }
     }
 
     private void _onEnable() {
@@ -379,6 +401,11 @@ final class TextField : UIElement {
                 _onSelectionChange();
             }
             break;
+        case tab:
+            if (_autocompleteLabel && _autocompleteLabel.text.length) {
+                _insertText(to!dstring(_autocompleteLabel.text));
+            }
+            break;
         case enter:
         case enter2:
             dispatchEvent("validate", false);
@@ -391,16 +418,21 @@ final class TextField : UIElement {
     private void _onText() {
         if (_caretIndex >= _limit)
             return;
+
         UIManager manager = getManager();
         const auto textInput = to!dstring(manager.input.asTextInput().text);
+
         if (_allowedCharacters.length) {
             if (indexOf(_allowedCharacters, textInput) == -1)
                 return;
         }
+
         _insertText(textInput);
     }
 
     private void _insertText(dstring textInput) {
+        setAutocomplete("");
+
         if (_caretIndex == _selectionIndex) {
             if (_caretIndex == _text.length)
                 _text ~= textInput;
@@ -462,6 +494,8 @@ final class TextField : UIElement {
     }
 
     private void _removeSelection(int direction) {
+        setAutocomplete("");
+
         if (_text.length) {
             if (_caretIndex == _selectionIndex) {
                 if (direction > 0) {

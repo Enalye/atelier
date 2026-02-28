@@ -10,7 +10,7 @@ import atelier.core;
 import atelier.world;
 import atelier.physics.actor;
 import atelier.physics.collider;
-import atelier.physics.hurt;
+import atelier.physics.hitbox;
 import atelier.physics.repulsor;
 import atelier.physics.solid;
 import atelier.physics.shot;
@@ -37,12 +37,12 @@ final class Physics {
         endSlopeRight,
     }
 
-    private struct HurtboxLayerInternal {
+    private struct HitboxLayerInternal {
         ubyte[] collisionList;
-        Array!Hurtbox hurtboxes;
+        Array!Hitbox hitboxes;
     }
 
-    struct HurtboxLayer {
+    struct HitboxLayer {
         string name;
         uint collisionMask;
         uint repeatMask;
@@ -130,11 +130,11 @@ final class Physics {
         bool _showSolids;
         bool _showShots;
         bool _showTriggers;
-        bool _showHurtboxes;
+        bool _showHitboxes;
         bool _showRepulsors;
 
-        HurtboxLayer[32] _hurtboxLayers;
-        HurtboxLayerInternal[32] _hurtboxLayersInternal;
+        HitboxLayer[32] _hitboxLayers;
+        HitboxLayerInternal[32] _hitboxLayersInternal;
     }
 
     void load(Farfadet ffd) {
@@ -142,55 +142,55 @@ final class Physics {
             return;
 
         Farfadet node = ffd.getNode("physics");
-        foreach (hurtboxLayerNode; node.getNodes("hurtboxLayer")) {
-            HurtboxLayer data;
-            data.load(hurtboxLayerNode);
-            setHurtboxLayer(hurtboxLayerNode.get!uint(0), data);
+        foreach (hitboxLayerNode; node.getNodes("hitboxLayer")) {
+            HitboxLayer data;
+            data.load(hitboxLayerNode);
+            setHitboxLayer(hitboxLayerNode.get!uint(0), data);
         }
     }
 
     void save(Farfadet ffd) {
         Farfadet node = ffd.addNode("physics");
 
-        foreach (i, data; _hurtboxLayers) {
-            Farfadet hurtboxLayerNode = node.addNode("hurtboxLayer").add!uint(cast(uint) i);
-            data.save(hurtboxLayerNode);
+        foreach (i, data; _hitboxLayers) {
+            Farfadet hitboxLayerNode = node.addNode("hitboxLayer").add!uint(cast(uint) i);
+            data.save(hitboxLayerNode);
         }
     }
 
     void deserialize(InStream stream) {
         for (uint i; i < 32; ++i) {
-            HurtboxLayer data;
+            HitboxLayer data;
             data.deserialize(stream);
-            setHurtboxLayer(i, data);
+            setHitboxLayer(i, data);
         }
     }
 
     void serialize(OutStream stream) {
         for (uint i; i < 32; ++i) {
-            _hurtboxLayers[i].serialize(stream);
+            _hitboxLayers[i].serialize(stream);
         }
     }
 
-    void setHurtboxLayer(uint layer, HurtboxLayer data) {
-        enforce(layer < _hurtboxLayers.length, "Le calque de collision " ~ to!string(
+    void setHitboxLayer(uint layer, HitboxLayer data) {
+        enforce(layer < _hitboxLayers.length, "Le calque de collision " ~ to!string(
                 layer) ~ " dépasse la limite");
 
         uint collisionMask = data.collisionMask;
 
-        _hurtboxLayers[layer] = data;
-        _hurtboxLayersInternal[layer].collisionList.length = 0;
+        _hitboxLayers[layer] = data;
+        _hitboxLayersInternal[layer].collisionList.length = 0;
         for (ubyte maskId; maskId < 32; ++maskId) {
             if (collisionMask & (1 << maskId)) {
-                _hurtboxLayersInternal[layer].collisionList ~= maskId;
+                _hitboxLayersInternal[layer].collisionList ~= maskId;
             }
         }
     }
 
-    HurtboxLayer getHurtboxLayer(uint layer) {
-        enforce(layer < _hurtboxLayers.length, "Le calque de collision " ~ to!string(
+    HitboxLayer getHitboxLayer(uint layer) {
+        enforce(layer < _hitboxLayers.length, "Le calque de collision " ~ to!string(
                 layer) ~ " dépasse la limite");
-        return _hurtboxLayers[layer];
+        return _hitboxLayers[layer];
     }
 
     @property {
@@ -237,7 +237,7 @@ final class Physics {
         int baseZ = -16;
     }
 
-    struct HurtboxHit {
+    struct HitboxHit {
         bool isColliding = false;
         Vec3f normal = Vec3f.zero;
     }
@@ -255,7 +255,7 @@ final class Physics {
         _repulsors = new Array!Repulsor;
 
         for (uint i; i < 32; ++i) {
-            _hurtboxLayersInternal[i].hurtboxes = new Array!Hurtbox;
+            _hitboxLayersInternal[i].hitboxes = new Array!Hitbox;
         }
     }
 
@@ -267,7 +267,7 @@ final class Physics {
         _repulsors.clear();
 
         for (uint i; i < 32; ++i) {
-            _hurtboxLayersInternal[i].hurtboxes.clear();
+            _hitboxLayersInternal[i].hitboxes.clear();
         }
     }
 
@@ -292,7 +292,7 @@ final class Physics {
         if (_hasColliderToRemove) {
             _hasColliderToRemove = false;
 
-            // À faire: la boucle ne sert qu’à vérifier l’existance des hitbox.
+            // À faire: la boucle ne sert qu’à vérifier l’existance des collider.
             // -> Trouver un autre endroit où le faire
             foreach (i, solid; _solids) {
                 if (!solid.isRegistered) {
@@ -325,7 +325,7 @@ final class Physics {
                     }
                     else if (_areTriggersActive && trigger.isActive) {
                         bool hit = trigger.collidesWith(player.entity.getPosition(), player
-                                .hitbox);
+                                .collider);
                         if (hit) {
                             if (trigger.isActiveOnce) {
                                 trigger.isActive = false;
@@ -343,7 +343,7 @@ final class Physics {
         if (_hasRepulsorToRemove) {
             _hasRepulsorToRemove = false;
 
-            // À faire: la boucle ne sert qu’à vérifier l’existance des hitbox.
+            // À faire: la boucle ne sert qu’à vérifier l’existance des collider.
             // -> Trouver un autre endroit où le faire
             foreach (i, collider; _repulsors) {
                 if (!collider.isRegistered) {
@@ -363,59 +363,59 @@ final class Physics {
             _repulsors[i].apply();
         }
 
-        // Hurtbox
+        // Hitbox
         for (uint layer; layer < 32; ++layer) {
-            foreach (hurtboxID, hurtbox; _hurtboxLayersInternal[layer].hurtboxes) {
-                hurtbox.update();
-                if (!hurtbox.isRegistered) {
-                    hurtbox.clear();
-                    _hurtboxLayersInternal[layer].hurtboxes.mark(hurtboxID);
+            foreach (hitboxID, hitbox; _hitboxLayersInternal[layer].hitboxes) {
+                hitbox.update();
+                if (!hitbox.isRegistered) {
+                    hitbox.clear();
+                    _hitboxLayersInternal[layer].hitboxes.mark(hitboxID);
                     continue;
                 }
             }
 
-            _hurtboxLayersInternal[layer].hurtboxes.sweep();
+            _hitboxLayersInternal[layer].hitboxes.sweep();
         }
 
         for (uint layerA; layerA < 32; ++layerA) {
-            foreach (layerB; _hurtboxLayersInternal[layerA].collisionList) {
-                foreach (hurtboxAID, hurtboxA; _hurtboxLayersInternal[layerA].hurtboxes) {
-                    if (!hurtboxA.isCollidable())
+            foreach (layerB; _hitboxLayersInternal[layerA].collisionList) {
+                foreach (hitboxAID, hitboxA; _hitboxLayersInternal[layerA].hitboxes) {
+                    if (!hitboxA.isCollidable())
                         continue;
 
-                    foreach (hurtboxBID, hurtboxB; _hurtboxLayersInternal[layerB].hurtboxes) {
-                        if (hurtboxA == hurtboxB ||
-                            !hurtboxB.isCollidable() ||
-                            hurtboxA.isExcluded(hurtboxB) ||
-                            hurtboxB.isExcluded(hurtboxA))
+                    foreach (hitboxBID, hitboxB; _hitboxLayersInternal[layerB].hitboxes) {
+                        if (hitboxA == hitboxB ||
+                            !hitboxB.isCollidable() ||
+                            hitboxA.isExcluded(hitboxB) ||
+                            hitboxB.isExcluded(hitboxA))
                             continue;
 
-                        HurtboxHit hurtboxHit = hurtboxA.collidesWith(hurtboxB);
-                        if (hurtboxHit.isColliding) {
+                        HitboxHit hitboxHit = hitboxA.collidesWith(hitboxB);
+                        if (hitboxHit.isColliding) {
                             CollisionHit hit;
                             hit.type = CollisionHit.Type.impact;
-                            hit.normal = hurtboxHit.normal;
-                            hit.entity = hurtboxA.entity;
-                            hurtboxB.entity.onCollide(hit);
-                            hit.normal = -hurtboxHit.normal;
-                            hit.entity = hurtboxB.entity;
-                            hurtboxA.entity.onCollide(hit);
+                            hit.normal = hitboxHit.normal;
+                            hit.entity = hitboxA.entity;
+                            hitboxB.entity.onCollide(hit);
+                            hit.normal = -hitboxHit.normal;
+                            hit.entity = hitboxB.entity;
+                            hitboxA.entity.onCollide(hit);
 
-                            if (!_hurtboxLayers[layerA].getRepeat(layerB))
-                                hurtboxA.exclude(hurtboxB);
+                            if (!_hitboxLayers[layerA].getRepeat(layerB))
+                                hitboxA.exclude(hitboxB);
 
-                            if (!_hurtboxLayers[layerB].getRepeat(layerA))
-                                hurtboxB.exclude(hurtboxA);
+                            if (!_hitboxLayers[layerB].getRepeat(layerA))
+                                hitboxB.exclude(hitboxA);
 
-                            if (_hurtboxLayers[layerA].getRemove(layerB))
-                                hurtboxA.isRegistered = false;
+                            if (_hitboxLayers[layerA].getRemove(layerB))
+                                hitboxA.isRegistered = false;
                             else
-                                hurtboxA.setIFrames(_hurtboxLayers[layerA].iframes);
+                                hitboxA.setIFrames(_hitboxLayers[layerA].iframes);
 
-                            if (_hurtboxLayers[layerB].getRemove(layerA))
-                                hurtboxB.isRegistered = false;
+                            if (_hitboxLayers[layerB].getRemove(layerA))
+                                hitboxB.isRegistered = false;
                             else
-                                hurtboxB.setIFrames(_hurtboxLayers[layerB].iframes);
+                                hitboxB.setIFrames(_hitboxLayers[layerB].iframes);
                         }
                     }
                 }
@@ -468,26 +468,26 @@ final class Physics {
         }
     }
 
-    void addHurtbox(Hurtbox hurtbox) {
-        enforce(hurtbox.layer < _hurtboxLayers.length, "Le calque de collision " ~ to!string(
-                hurtbox.layer) ~ " dépasse la limite");
+    void addHitbox(Hitbox hitbox) {
+        enforce(hitbox.layer < _hitboxLayers.length, "Le calque de collision " ~ to!string(
+                hitbox.layer) ~ " dépasse la limite");
 
-        hurtbox.isRegistered = true;
-        _hurtboxLayersInternal[hurtbox.layer].hurtboxes ~= hurtbox;
-        hurtbox.isDisplayed = _showHurtboxes;
+        hitbox.isRegistered = true;
+        _hitboxLayersInternal[hitbox.layer].hitboxes ~= hitbox;
+        hitbox.isDisplayed = _showHitboxes;
     }
 
-    void removeHurtbox(Hurtbox hurtbox) {
-        if (hurtbox.isRegistered) {
-            hurtbox.isRegistered = false;
+    void removeHitbox(Hitbox hitbox) {
+        if (hitbox.isRegistered) {
+            hitbox.isRegistered = false;
         }
     }
 
     /// Est-ce qu’on chevauche un solide ?
-    SolidHit collidesAt(Vec3i point, Vec3i hitbox) {
+    SolidHit collidesAt(Vec3i point, Vec3i collider) {
         SolidHit hit;
         foreach (SolidCollider solid; _solids) {
-            hit = solid.collidesWith(point, hitbox);
+            hit = solid.collidesWith(point, collider);
             if (hit.isColliding) {
                 break;
             }
@@ -496,30 +496,30 @@ final class Physics {
         return hit;
     }
 
-    TerrainHit hitTileTerrain(Vec3i tile, Vec3i hitbox) {
+    TerrainHit hitTileTerrain(Vec3i tile, Vec3i collider) {
         TerrainHit hit;
         hit.height = 0;
         return hit;
     }
 
-    TerrainHit hitTerrain(Vec3i point, Vec3i hitbox) {
-        TerrainHit hitTopology = hitTerrainTopology(point, hitbox);
+    TerrainHit hitTerrain(Vec3i point, Vec3i collider) {
+        TerrainHit hitTopology = hitTerrainTopology(point, collider);
         if (hitTopology.isColliding)
             return hitTopology;
-        TerrainHit hitCollisionLayer = hitTerrainCollisionLayers(point, hitbox);
+        TerrainHit hitCollisionLayer = hitTerrainCollisionLayers(point, collider);
         if (hitTopology.height > hitCollisionLayer.height)
             return hitTopology;
         return hitCollisionLayer;
     }
 
-    TerrainHit hitTerrainCollisionLayers(Vec3i point, Vec3i hitbox) {
-        point.x -= (hitbox.x - (hitbox.x >> 1));
-        point.y -= (hitbox.y - (hitbox.y >> 1));
+    TerrainHit hitTerrainCollisionLayers(Vec3i point, Vec3i collider) {
+        point.x -= (collider.x - (collider.x >> 1));
+        point.y -= (collider.y - (collider.y >> 1));
         Vec3i coords = Vec3i(((point.x / 16) - (point.x < 0 ? 1 : 0)),
             ((point.y / 16) - (point.y < 0 ? 1 : 0)),
             ((point.z / 16) - (point.z < 0 ? 1 : 0)));
 
-        Vec3i endPoint = point + hitbox;
+        Vec3i endPoint = point + collider;
         Vec3i endCoords = Vec3i(((endPoint.x / 16) - (endPoint.x < 0 ? 1 : 0)),
             ((endPoint.y / 16) - (endPoint.y < 0 ? 1 : 0)),
             ((endPoint.z / 16) - (endPoint.z < 0 ? 1 : 0)));
@@ -541,8 +541,8 @@ final class Physics {
                         (x + 1) * 16,
                         (y + 1) * 16);
                     Vec4i aabb = Vec4i(point.x, point.y,
-                        point.x + hitbox.x,
-                        point.y + hitbox.y);
+                        point.x + collider.x,
+                        point.y + collider.y);
 
                     Vec4i relativePos = aabb;
                     relativePos.x -= tileBox.x;
@@ -934,13 +934,13 @@ final class Physics {
         return endResult;
     }
 
-    TerrainHit hitTerrainTopology(Vec3i point, Vec3i hitbox) {
-        point.x -= (hitbox.x - (hitbox.x >> 1));
-        point.y -= (hitbox.y - (hitbox.y >> 1));
+    TerrainHit hitTerrainTopology(Vec3i point, Vec3i collider) {
+        point.x -= (collider.x - (collider.x >> 1));
+        point.y -= (collider.y - (collider.y >> 1));
         Vec2i coords = Vec2i(((point.x / 16) - (point.x < 0 ? 1 : 0)),
             ((point.y / 16) - (point.y < 0 ? 1 : 0)));
 
-        Vec2i endPoint = point.xy + hitbox.xy;
+        Vec2i endPoint = point.xy + collider.xy;
         Vec2i endCoords = Vec2i(((endPoint.x / 16) - (endPoint.x < 0 ? 1 : 0)),
             ((endPoint.y / 16) - (endPoint.y < 0 ? 1 : 0)));
 
@@ -989,7 +989,8 @@ final class Physics {
 
                     if (point.z <= maxZ) {
                         Vec4i tileBox = Vec4i(x * 16, y * 16, (x + 1) * 16, (y + 1) * 16);
-                        Vec4i aabb = Vec4i(point.x, point.y, point.x + hitbox.x, point.y + hitbox.y);
+                        Vec4i aabb = Vec4i(point.x, point.y, point.x + collider.x, point.y + collider
+                                .y);
                         Vec4i relativePos = aabb;
                         relativePos.x -= tileBox.x;
                         relativePos.y -= tileBox.y;
@@ -1283,11 +1284,11 @@ final class Physics {
         return _triggers;
     }
 
-    Array!Hurtbox getAllHurtboxes(uint layer) {
-        enforce(layer < _hurtboxLayers.length, "Le calque de collision " ~ to!string(
+    Array!Hitbox getAllHitboxes(uint layer) {
+        enforce(layer < _hitboxLayers.length, "Le calque de collision " ~ to!string(
                 layer) ~ " dépasse la limite");
 
-        return _hurtboxLayersInternal[layer].hurtboxes;
+        return _hitboxLayersInternal[layer].hitboxes;
     }
 
     void showActors(bool show) {
@@ -1331,13 +1332,13 @@ final class Physics {
     }
 
     void showHitboxes(bool show) {
-        if (show == _showHurtboxes)
+        if (show == _showHitboxes)
             return;
 
-        _showHurtboxes = show;
+        _showHitboxes = show;
         for (uint i; i < 32; ++i) {
-            foreach (hurtbox; _hurtboxLayersInternal[i].hurtboxes) {
-                hurtbox.isDisplayed = _showHurtboxes;
+            foreach (hitbox; _hitboxLayersInternal[i].hitboxes) {
+                hitbox.isDisplayed = _showHitboxes;
             }
         }
     }
@@ -1421,13 +1422,13 @@ final class Physics {
                 trigger.drawFront(offset + trigger.entity.cameraPosition());
             }
         }
-        if (_showHurtboxes) {
+        if (_showHitboxes) {
             for (uint i; i < 32; ++i) {
-                foreach (hurtbox; _hurtboxLayersInternal[i].hurtboxes) {
-                    if (hurtbox.entity.isInRenderList())
+                foreach (hitbox; _hitboxLayersInternal[i].hitboxes) {
+                    if (hitbox.entity.isInRenderList())
                         continue;
 
-                    hurtbox.draw(offset + hurtbox.entity.cameraPosition());
+                    hitbox.draw(offset + hitbox.entity.cameraPosition());
                 }
             }
         }

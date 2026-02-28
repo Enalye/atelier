@@ -59,12 +59,12 @@ final class TriggerCollider : Collider {
     }
 
     /// Vérifie s’il y a collision avec ce déclencheur
-    bool collidesWith(Vec3i point_, Vec3i hitbox_) {
-        point_.x -= hitbox_.x - (hitbox_.x >> 1);
-        point_.y -= hitbox_.y - (hitbox_.y >> 1);
+    bool collidesWith(Vec3i point_, Vec3i size_) {
+        point_.x -= size_.x - (size_.x >> 1);
+        point_.y -= size_.y - (size_.y >> 1);
 
-        if (!((left < (point_.x + hitbox_.x)) && (up < (point_.y + hitbox_.y)) &&
-                (bottom < (point_.z + hitbox_.z)) && (right > point_.x) && (down > point_.y)
+        if (!((left < (point_.x + size_.x)) && (up < (point_.y + size_.y)) &&
+                (bottom < (point_.z + size_.z)) && (right > point_.x) && (down > point_.y)
                 && (top > point_.z)))
             return false;
 

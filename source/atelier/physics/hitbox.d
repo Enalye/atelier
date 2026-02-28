@@ -1,4 +1,4 @@
-module atelier.physics.hurt;
+module atelier.physics.hitbox;
 
 import std.conv : to;
 import std.math;
@@ -8,8 +8,8 @@ import atelier.core;
 import atelier.world.entity;
 import atelier.physics.system;
 
-struct HurtboxData {
-    bool hasHurtbox;
+struct HitboxData {
+    bool hasHitbox;
     uint layer;
     uint minRadius, maxRadius;
     uint height;
@@ -17,11 +17,11 @@ struct HurtboxData {
     int offsetDist, offsetAngle;
 
     void load(const(Farfadet) ffd) {
-        hasHurtbox = false;
+        hasHitbox = false;
 
-        if (ffd.hasNode("hurtbox")) {
-            const Farfadet node = ffd.getNode("hurtbox");
-            hasHurtbox = true;
+        if (ffd.hasNode("hitbox")) {
+            const Farfadet node = ffd.getNode("hitbox");
+            hasHitbox = true;
 
             if (node.hasNode("layer")) {
                 layer = node.getNode("layer").get!uint(0);
@@ -58,10 +58,10 @@ struct HurtboxData {
     }
 
     void save(Farfadet ffd) {
-        if (!hasHurtbox)
+        if (!hasHitbox)
             return;
 
-        Farfadet node = ffd.addNode("hurtbox");
+        Farfadet node = ffd.addNode("hitbox");
         node.addNode("layer").add(layer);
         node.addNode("minRadius").add(minRadius);
         node.addNode("maxRadius").add(maxRadius);
@@ -73,8 +73,8 @@ struct HurtboxData {
     }
 
     void serialize(OutStream stream) {
-        stream.write!bool(hasHurtbox);
-        if (hasHurtbox) {
+        stream.write!bool(hasHitbox);
+        if (hasHitbox) {
             stream.write!uint(layer);
             stream.write!uint(minRadius);
             stream.write!uint(maxRadius);
@@ -87,8 +87,8 @@ struct HurtboxData {
     }
 
     void deserialize(InStream stream) {
-        hasHurtbox = stream.read!bool();
-        if (hasHurtbox) {
+        hasHitbox = stream.read!bool();
+        if (hasHitbox) {
             layer = stream.read!uint();
             minRadius = stream.read!uint();
             maxRadius = stream.read!uint();
@@ -101,7 +101,7 @@ struct HurtboxData {
     }
 }
 
-final class Hurtbox {
+final class Hitbox {
     private {
         bool _isRegistered = true;
         Entity _entity;
@@ -112,7 +112,7 @@ final class Hurtbox {
         uint _layer;
         bool _isDisplayed;
         bool _isCollidable = true;
-        Hurtbox[size_t] _exclusionList;
+        Hitbox[size_t] _exclusionList;
         uint _iframes;
     }
 
@@ -154,7 +154,7 @@ final class Hurtbox {
         }
     }
 
-    this(Entity entity_, HurtboxData data) {
+    this(Entity entity_, HitboxData data) {
         _entity = entity_;
         _minRadius = data.minRadius;
         _maxRadius = data.maxRadius;
@@ -166,7 +166,7 @@ final class Hurtbox {
         _layer = data.layer;
     }
 
-    this(Hurtbox other) {
+    this(Hitbox other) {
         _entity = other._entity;
         _layer = other.layer;
         _minRadius = other._minRadius;
@@ -183,11 +183,11 @@ final class Hurtbox {
     }
 
     void register() {
-        Atelier.physics.addHurtbox(this);
+        Atelier.physics.addHitbox(this);
     }
 
     void unregister() {
-        Atelier.physics.removeHurtbox(this);
+        Atelier.physics.removeHitbox(this);
     }
 
     float getAngle() const {
@@ -220,11 +220,11 @@ final class Hurtbox {
         _iframes = iframes_;
     }
 
-    void exclude(Hurtbox other) {
+    void exclude(Hitbox other) {
         _exclusionList[cast(size_t) cast(void*) other] = other;
     }
 
-    bool isExcluded(Hurtbox other) {
+    bool isExcluded(Hitbox other) {
         return ((cast(size_t) cast(void*) other) in _exclusionList) !is null;
     }
 
@@ -235,7 +235,7 @@ final class Hurtbox {
         _exclusionList.clear();
     }
 
-    void removeExcluded(Hurtbox other) {
+    void removeExcluded(Hitbox other) {
         _exclusionList.remove(cast(size_t) cast(void*) other);
     }
 
@@ -323,8 +323,8 @@ final class Hurtbox {
         return false;
     }
 
-    Physics.HurtboxHit collidesWith(Hurtbox other) const {
-        Physics.HurtboxHit hit;
+    Physics.HitboxHit collidesWith(Hitbox other) const {
+        Physics.HitboxHit hit;
 
         if (!_isCollidable || !other._isCollidable)
             return hit;
@@ -519,7 +519,7 @@ final class Hurtbox {
     }
 
     void draw(Vec2f origin) {
-        Vec2f hurtOrigin = origin + Vec2f.angled(
+        Vec2f hitOrigin = origin + Vec2f.angled(
             degToRad(_entity.angle + cast(float) _offsetAngle)) * _offsetDist;
 
         bool hasAngles = (_angleDelta > 0 && _angleDelta < 180);
@@ -544,8 +544,8 @@ final class Hurtbox {
 
         void drawLine(Vec2f a, Vec2f b, float height) {
             Atelier.renderer.drawLine(
-                hurtOrigin + (a + Vec2f(0f, -height)),
-                hurtOrigin + (b + Vec2f(0f, -height)),
+                hitOrigin + (a + Vec2f(0f, -height)),
+                hitOrigin + (b + Vec2f(0f, -height)),
                 Color.red, 1f);
         }
 

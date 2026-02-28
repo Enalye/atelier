@@ -94,8 +94,8 @@ final class Shot : Entity, Resource!Shot {
             _currentBounce++;
 
             if (_hasBounces && _currentBounce > _bounces) {
-                if (_hurtbox)
-                    _hurtbox.unregister();
+                if (_hitbox)
+                    _hitbox.unregister();
                 if (_collider)
                     _collider.unregister();
                 isRegistered = false;
@@ -115,8 +115,8 @@ final class Shot : Entity, Resource!Shot {
             isRegistered = false;
             break;
         case impact:
-            if (_hurtbox)
-                _hurtbox.unregister();
+            if (_hitbox)
+                _hitbox.unregister();
             if (_collider)
                 _collider.unregister();
             _state = State.impact;
@@ -157,8 +157,8 @@ final class Shot : Entity, Resource!Shot {
                 _stateTimer.start(30);
                 setGraphic("fading");
 
-                if (_hurtbox)
-                    _hurtbox.unregister();
+                if (_hitbox)
+                    _hitbox.unregister();
                 if (_collider)
                     _collider.unregister();
                 setShadow("");

@@ -1,7 +1,7 @@
 module atelier.etabli.ui;
 
 public {
-    import atelier.etabli.ui.hurtbox_layers;
+    import atelier.etabli.ui.hitbox_layers;
     import atelier.etabli.ui.fileexplorer;
     import atelier.etabli.ui.knob;
     import atelier.etabli.ui.newfile;

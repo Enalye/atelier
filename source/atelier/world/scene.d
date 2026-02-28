@@ -1386,7 +1386,7 @@ final class TriggerBuilderData {
         string _event;
         bool _isActive;
         bool _isActiveOnce;
-        Vec3i _hitbox;
+        Vec3i _collider;
     }
 
     @property {
@@ -1394,8 +1394,8 @@ final class TriggerBuilderData {
             return _event;
         }
 
-        Vec3i hitbox() const {
-            return _hitbox;
+        Vec3i collider() const {
+            return _collider;
         }
 
         bool isActive() const {
@@ -1411,8 +1411,8 @@ final class TriggerBuilderData {
         if (ffd.hasNode("event")) {
             _event = ffd.getNode("event").get!string(0);
         }
-        if (ffd.hasNode("hitbox")) {
-            _hitbox = ffd.getNode("hitbox").get!Vec3i(0);
+        if (ffd.hasNode("collider")) {
+            _collider = ffd.getNode("collider").get!Vec3i(0);
         }
         if (ffd.hasNode("isActive")) {
             _isActive = ffd.getNode("isActive").get!bool(0);
@@ -1424,14 +1424,14 @@ final class TriggerBuilderData {
 
     this(InStream stream) {
         _event = stream.read!string();
-        _hitbox = stream.read!Vec3i();
+        _collider = stream.read!Vec3i();
         _isActive = stream.read!bool();
         _isActiveOnce = stream.read!bool();
     }
 
     void serialize(OutStream stream) {
         stream.write!string(_event);
-        stream.write!Vec3i(_hitbox);
+        stream.write!Vec3i(_collider);
         stream.write!bool(_isActive);
         stream.write!bool(_isActiveOnce);
     }
@@ -1442,7 +1442,7 @@ final class TeleporterBuilderData {
         string _scene;
         string _target;
         uint _direction;
-        Vec3i _hitbox;
+        Vec3i _collider;
         bool _isActive;
     }
 
@@ -1459,8 +1459,8 @@ final class TeleporterBuilderData {
             return _direction;
         }
 
-        Vec3i hitbox() const {
-            return _hitbox;
+        Vec3i collider() const {
+            return _collider;
         }
 
         bool isActive() const {
@@ -1478,8 +1478,8 @@ final class TeleporterBuilderData {
         if (ffd.hasNode("direction")) {
             _direction = ffd.getNode("direction").get!uint(0);
         }
-        if (ffd.hasNode("hitbox")) {
-            _hitbox = ffd.getNode("hitbox").get!Vec3i(0);
+        if (ffd.hasNode("collider")) {
+            _collider = ffd.getNode("collider").get!Vec3i(0);
         }
         if (ffd.hasNode("isActive")) {
             _isActive = ffd.getNode("isActive").get!bool(0);
@@ -1490,7 +1490,7 @@ final class TeleporterBuilderData {
         _scene = stream.read!string();
         _target = stream.read!string();
         _direction = stream.read!uint();
-        _hitbox = stream.read!Vec3i();
+        _collider = stream.read!Vec3i();
         _isActive = stream.read!bool();
     }
 
@@ -1498,7 +1498,7 @@ final class TeleporterBuilderData {
         stream.write!string(_scene);
         stream.write!string(_target);
         stream.write!uint(_direction);
-        stream.write!Vec3i(_hitbox);
+        stream.write!Vec3i(_collider);
         stream.write!bool(_isActive);
     }
 }

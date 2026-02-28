@@ -8,32 +8,32 @@ import atelier.world;
 import atelier.core.runtime;
 import atelier.core.loader.util;
 
-struct HitboxData {
-    bool hasHitbox = false;
+struct ColliderData {
+    bool hasCollider = false;
     Vec3u size;
 
     void load(const Farfadet ffd) {
-        if (ffd.hasNode("hitbox")) {
-            hasHitbox = true;
-            Farfadet hitboxNode = ffd.getNode("hitbox");
-            if (hitboxNode.hasNode("size")) {
-                size = hitboxNode.getNode("size").get!Vec3u(0);
+        if (ffd.hasNode("collider")) {
+            hasCollider = true;
+            Farfadet colliderNode = ffd.getNode("collider");
+            if (colliderNode.hasNode("size")) {
+                size = colliderNode.getNode("size").get!Vec3u(0);
             }
         }
     }
 
     void serialize(OutStream stream) {
-        stream.write!bool(hasHitbox);
+        stream.write!bool(hasCollider);
 
-        if (hasHitbox) {
+        if (hasCollider) {
             stream.write!Vec3u(size);
         }
     }
 
     void deserialize(InStream stream) {
-        hasHitbox = stream.read!bool();
+        hasCollider = stream.read!bool();
 
-        if (hasHitbox) {
+        if (hasCollider) {
             size = stream.read!Vec3u();
         }
     }
@@ -49,17 +49,17 @@ package void compileShot(string path, const Farfadet ffd, OutStream stream) {
     }
     stream.write!string(name);
 
+    ColliderData collider;
+    if (ffd.hasNode("collider")) {
+        collider.load(ffd);
+    }
+    collider.serialize(stream);
+
     HitboxData hitbox;
     if (ffd.hasNode("hitbox")) {
-        hitbox.load(ffd);
+        hitbox.load(ffd.getNode("hitbox"));
     }
     hitbox.serialize(stream);
-
-    HurtboxData hurtbox;
-    if (ffd.hasNode("hurtbox")) {
-        hurtbox.load(ffd.getNode("hurtbox"));
-    }
-    hurtbox.serialize(stream);
 
     bool hasTtl = false;
     uint ttl;
@@ -93,11 +93,11 @@ package void loadShot(InStream stream) {
     const string rid = stream.read!string();
     const string name = stream.read!string();
 
+    ColliderData collider;
+    collider.deserialize(stream);
+
     HitboxData hitbox;
     hitbox.deserialize(stream);
-
-    HurtboxData hurtbox;
-    hurtbox.deserialize(stream);
 
     bool hasTtl = stream.read!bool();
     uint ttl = stream.read!uint();
@@ -109,10 +109,10 @@ package void loadShot(InStream stream) {
     Atelier.res.store(rid, {
         Shot shot = new Shot;
         buildEntityGraphics(shot, graphicDataList);
-        if (hitbox.hasHitbox) {
-            shot.setupCollider(hitbox.size);
+        if (collider.hasCollider) {
+            shot.setupCollider(collider.size);
         }
-        shot.setupHurtbox(hurtbox);
+        shot.setupHitbox(hitbox);
         shot.setMaterial(material);
         shot.setName(name);
         shot.setTtl(hasTtl, ttl);

@@ -28,9 +28,9 @@ final class EntityResourceEditor : ResourceBaseEditor {
         Toolbox _toolbox;
 
         EntityRenderData[] _graphics, _auxGraphics, _auxGraphicsStack;
-        HitboxData _hitbox;
+        ColliderData _collider;
         RepulsorData _repulsor;
-        HurtboxData _hurtbox;
+        HitboxData _hitbox;
         BaseEntityData _baseEntityData;
 
         Vec2f _originPosition = Vec2f.zero;
@@ -44,8 +44,8 @@ final class EntityResourceEditor : ResourceBaseEditor {
         _name = ffd.get!string(0);
 
         _baseEntityData.load(ffd);
+        _collider.load(ffd);
         _hitbox.load(ffd);
-        _hurtbox.load(ffd);
         _repulsor.load(ffd);
 
         foreach (size_t i, Farfadet renderNode; ffd.getNodes("graphic")) {
@@ -59,13 +59,13 @@ final class EntityResourceEditor : ResourceBaseEditor {
             _auxGraphics ~= render;
         }
 
-        _parameterWindow = new ParameterWindow(_graphics, _auxGraphics, _hitbox, _repulsor, _hurtbox, _baseEntityData);
+        _parameterWindow = new ParameterWindow(_graphics, _auxGraphics, _collider, _repulsor, _hitbox, _baseEntityData);
 
         _toolbox = new Toolbox();
         _toolbox.setRenders(_graphics);
 
-        _parameterWindow.addEventListener("property_hitbox", {
-            _hitbox = _parameterWindow.getHitbox();
+        _parameterWindow.addEventListener("property_collider", {
+            _collider = _parameterWindow.getCollider();
             setDirty();
         });
 
@@ -74,8 +74,8 @@ final class EntityResourceEditor : ResourceBaseEditor {
             setDirty();
         });
 
-        _parameterWindow.addEventListener("property_hurtbox", {
-            _hurtbox = _parameterWindow.getHurtbox();
+        _parameterWindow.addEventListener("property_hitbox", {
+            _hitbox = _parameterWindow.getHitbox();
             setDirty();
         });
 
@@ -150,8 +150,8 @@ final class EntityResourceEditor : ResourceBaseEditor {
         Farfadet node = ffd.addNode("entity").add(_name);
 
         _baseEntityData.save(node);
+        _collider.save(node);
         _hitbox.save(node);
-        _hurtbox.save(node);
         _repulsor.save(node);
 
         foreach (EntityRenderData render; _graphics) {
@@ -271,42 +271,42 @@ final class EntityResourceEditor : ResourceBaseEditor {
     }
 
     private void _onDraw() {
-        if (_hitbox.type != HitboxData.Type.none) {
-            Vec3f hitboxSize = (cast(Vec3f) _hitbox.size) * _zoom;
-            Vec2f offset = (cast(Vec2f)(_hitbox.size.xy - (_hitbox.size.xy >> 1))) * _zoom;
+        if (_collider.type != ColliderData.Type.none) {
+            Vec3f colliderSize = (cast(Vec3f) _collider.size) * _zoom;
+            Vec2f offset = (cast(Vec2f)(_collider.size.xy - (_collider.size.xy >> 1))) * _zoom;
 
             Atelier.renderer.drawRect(_originPosition + getCenter() - offset,
-                hitboxSize.xy, Atelier.theme.onNeutral, 0.2f, false);
+                colliderSize.xy, Atelier.theme.onNeutral, 0.2f, false);
 
             _render();
 
             Atelier.renderer.drawRect(_originPosition + getCenter() - (offset + Vec2f(0f,
-                    hitboxSize.z)), hitboxSize.xy, Color.yellow, 0.2f, true);
+                    colliderSize.z)), colliderSize.xy, Color.yellow, 0.2f, true);
 
             Atelier.renderer.drawRect(_originPosition + getCenter() + Vec2f(0f,
-                    hitboxSize.y) - (offset + Vec2f(0f, hitboxSize.z)),
-                hitboxSize.xz, Color.orange, 0.2f, true);
+                    colliderSize.y) - (offset + Vec2f(0f, colliderSize.z)),
+                colliderSize.xz, Color.orange, 0.2f, true);
 
             Atelier.renderer.drawRect(_originPosition + getCenter() - (offset + Vec2f(0f,
-                    hitboxSize.z)), hitboxSize.xy, Atelier.theme.onNeutral, 1f, false);
+                    colliderSize.z)), colliderSize.xy, Atelier.theme.onNeutral, 1f, false);
 
             Atelier.renderer.drawRect(_originPosition + getCenter() - (offset + Vec2f(0f,
-                    hitboxSize.z)), hitboxSize.xy + Vec2f(0f, hitboxSize.z),
+                    colliderSize.z)), colliderSize.xy + Vec2f(0f, colliderSize.z),
                 Atelier.theme.onNeutral, 1f, false);
         }
         else {
             _render();
         }
 
-        if (_hurtbox.hasHurtbox) {
-            Vec2f hurtOrigin = _originPosition + getCenter() + Vec2f.angled(
-                degToRad(cast(float) _hurtbox.offsetAngle)) * _hurtbox.offsetDist * _zoom;
+        if (_hitbox.hasHitbox) {
+            Vec2f hitOrigin = _originPosition + getCenter() + Vec2f.angled(
+                degToRad(cast(float) _hitbox.offsetAngle)) * _hitbox.offsetDist * _zoom;
 
-            bool hasAngles = (_hurtbox.angleDelta > 0 && _hurtbox.angleDelta < 180);
+            bool hasAngles = (_hitbox.angleDelta > 0 && _hitbox.angleDelta < 180);
             int startAngle, endAngle;
             if (hasAngles) {
-                startAngle = _hurtbox.angle - _hurtbox.angleDelta;
-                endAngle = _hurtbox.angle + _hurtbox.angleDelta;
+                startAngle = _hitbox.angle - _hitbox.angleDelta;
+                endAngle = _hitbox.angle + _hitbox.angleDelta;
             }
             else {
                 startAngle = 0;
@@ -323,8 +323,8 @@ final class EntityResourceEditor : ResourceBaseEditor {
 
             void drawLine(Vec2f a, Vec2f b, float height) {
                 Atelier.renderer.drawLine(
-                    hurtOrigin + (a + Vec2f(0f, -height)) * _zoom,
-                    hurtOrigin + (b + Vec2f(0f, -height)) * _zoom,
+                    hitOrigin + (a + Vec2f(0f, -height)) * _zoom,
+                    hitOrigin + (b + Vec2f(0f, -height)) * _zoom,
                     Color.red, 1f);
             }
 
@@ -352,42 +352,42 @@ final class EntityResourceEditor : ResourceBaseEditor {
                 for (int i; i < segments; ++i) {
                     int currentEnd = currentAngle + 5;
 
-                    drawCurve(currentAngle, currentEnd, _hurtbox.minRadius, 0);
-                    drawCurve(currentAngle, currentEnd, _hurtbox.maxRadius, 0);
-                    drawCurve(currentAngle, currentEnd, _hurtbox.minRadius, _hurtbox.height);
-                    drawCurve(currentAngle, currentEnd, _hurtbox.maxRadius, _hurtbox.height);
+                    drawCurve(currentAngle, currentEnd, _hitbox.minRadius, 0);
+                    drawCurve(currentAngle, currentEnd, _hitbox.maxRadius, 0);
+                    drawCurve(currentAngle, currentEnd, _hitbox.minRadius, _hitbox.height);
+                    drawCurve(currentAngle, currentEnd, _hitbox.maxRadius, _hitbox.height);
 
                     currentAngle = currentEnd;
                 }
 
                 if ((endAngle - currentAngle) > 0) {
-                    drawCurve(currentAngle, endAngle, _hurtbox.minRadius, 0);
-                    drawCurve(currentAngle, endAngle, _hurtbox.maxRadius, 0);
-                    drawCurve(currentAngle, endAngle, _hurtbox.minRadius, _hurtbox.height);
-                    drawCurve(currentAngle, endAngle, _hurtbox.maxRadius, _hurtbox.height);
+                    drawCurve(currentAngle, endAngle, _hitbox.minRadius, 0);
+                    drawCurve(currentAngle, endAngle, _hitbox.maxRadius, 0);
+                    drawCurve(currentAngle, endAngle, _hitbox.minRadius, _hitbox.height);
+                    drawCurve(currentAngle, endAngle, _hitbox.maxRadius, _hitbox.height);
                 }
 
                 if (!hasAngles || (0 > startAngle && 0 < endAngle) || (360 > startAngle && 360 < endAngle)) {
-                    drawAngleHeightLine(0f, _hurtbox.minRadius, _hurtbox.height);
-                    drawAngleHeightLine(0f, _hurtbox.maxRadius, _hurtbox.height);
+                    drawAngleHeightLine(0f, _hitbox.minRadius, _hitbox.height);
+                    drawAngleHeightLine(0f, _hitbox.maxRadius, _hitbox.height);
                 }
 
                 if (!hasAngles || (180 > startAngle && 180 < endAngle)) {
-                    drawAngleHeightLine(180f, _hurtbox.minRadius, _hurtbox.height);
-                    drawAngleHeightLine(180f, _hurtbox.maxRadius, _hurtbox.height);
+                    drawAngleHeightLine(180f, _hitbox.minRadius, _hitbox.height);
+                    drawAngleHeightLine(180f, _hitbox.maxRadius, _hitbox.height);
                 }
 
                 if (hasAngles) {
-                    drawAngleLine(startAngle, _hurtbox.minRadius, _hurtbox.maxRadius, 0);
-                    drawAngleLine(endAngle, _hurtbox.minRadius, _hurtbox.maxRadius, 0);
-                    drawAngleLine(startAngle, _hurtbox.minRadius, _hurtbox.maxRadius, _hurtbox
+                    drawAngleLine(startAngle, _hitbox.minRadius, _hitbox.maxRadius, 0);
+                    drawAngleLine(endAngle, _hitbox.minRadius, _hitbox.maxRadius, 0);
+                    drawAngleLine(startAngle, _hitbox.minRadius, _hitbox.maxRadius, _hitbox
                             .height);
-                    drawAngleLine(endAngle, _hurtbox.minRadius, _hurtbox.maxRadius, _hurtbox.height);
+                    drawAngleLine(endAngle, _hitbox.minRadius, _hitbox.maxRadius, _hitbox.height);
 
-                    drawAngleHeightLine(startAngle, _hurtbox.minRadius, _hurtbox.height);
-                    drawAngleHeightLine(startAngle, _hurtbox.maxRadius, _hurtbox.height);
-                    drawAngleHeightLine(endAngle, _hurtbox.minRadius, _hurtbox.height);
-                    drawAngleHeightLine(endAngle, _hurtbox.maxRadius, _hurtbox.height);
+                    drawAngleHeightLine(startAngle, _hitbox.minRadius, _hitbox.height);
+                    drawAngleHeightLine(startAngle, _hitbox.maxRadius, _hitbox.height);
+                    drawAngleHeightLine(endAngle, _hitbox.minRadius, _hitbox.height);
+                    drawAngleHeightLine(endAngle, _hitbox.maxRadius, _hitbox.height);
                 }
             }
         }

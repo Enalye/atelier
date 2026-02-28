@@ -18,17 +18,17 @@ package void compileEntity(string path, const Farfadet ffd, OutStream stream) {
     }
     stream.write!string(name);
 
-    HitboxData hitbox;
-    hitbox.load(ffd);
-    hitbox.serialize(stream);
+    ColliderData collider;
+    collider.load(ffd);
+    collider.serialize(stream);
 
     RepulsorData repulsor;
     repulsor.load(ffd);
     repulsor.serialize(stream);
 
-    HurtboxData hurtbox;
-    hurtbox.load(ffd);
-    hurtbox.serialize(stream);
+    HitboxData hitbox;
+    hitbox.load(ffd);
+    hitbox.serialize(stream);
 
     BaseEntityData baseEntityData;
     baseEntityData.load(ffd);
@@ -41,14 +41,14 @@ package void loadEntity(InStream stream) {
     const string rid = stream.read!string();
     const string name = stream.read!string();
 
-    HitboxData hitbox;
-    hitbox.deserialize(stream);
+    ColliderData collider;
+    collider.deserialize(stream);
 
     RepulsorData repulsor;
     repulsor.deserialize(stream);
 
-    HurtboxData hurtbox;
-    hurtbox.deserialize(stream);
+    HitboxData hitbox;
+    hitbox.deserialize(stream);
 
     BaseEntityData baseEntityData;
     baseEntityData.deserialize(stream);
@@ -58,9 +58,9 @@ package void loadEntity(InStream stream) {
     Atelier.res.store(rid, {
         Entity entity = new Entity;
         buildEntityGraphics(entity, graphicDataList);
-        entity.setCollider(hitbox);
+        entity.setCollider(collider);
         entity.setupRepulsor(repulsor);
-        entity.setupHurtbox(hurtbox);
+        entity.setupHitbox(hitbox);
         entity.setName(name);
         entity.setBaseEntityData(baseEntityData);
         return entity;

@@ -129,7 +129,7 @@ final class ActorCollider : Collider {
 
             if (axis[0]) {
                 Vec3i hitPosition = entity.getTilePosition() + Vec3i(stepDir.x, 0, 0);
-                Physics.TerrainHit terrainHit = Atelier.physics.hitTileTerrain(hitPosition, hitbox);
+                Physics.TerrainHit terrainHit = Atelier.physics.hitTileTerrain(hitPosition, collider);
                 if (terrainHit.isColliding) {
                     //Physics.CollisionHit data;
                     //data.normal = terrainHit.normal;
@@ -143,7 +143,7 @@ final class ActorCollider : Collider {
             }
             if (axis[1]) {
                 Vec3i hitPosition = entity.getTilePosition() + Vec3i(0, stepDir.y, 0);
-                Physics.TerrainHit terrainHit = Atelier.physics.hitTileTerrain(hitPosition, hitbox);
+                Physics.TerrainHit terrainHit = Atelier.physics.hitTileTerrain(hitPosition, collider);
                 if (terrainHit.isColliding) {
                     //Physics.CollisionHit data;
                     //data.normal = terrainHit.normal;
@@ -157,7 +157,7 @@ final class ActorCollider : Collider {
             }
             if (axis[2]) {
                 Vec3i hitPosition = entity.getTilePosition() + Vec3i(0, 0, stepDir.z);
-                Physics.TerrainHit terrainHit = Atelier.physics.hitTileTerrain(hitPosition, hitbox);
+                Physics.TerrainHit terrainHit = Atelier.physics.hitTileTerrain(hitPosition, collider);
                 if (terrainHit.isColliding) {
                     //Physics.CollisionHit data;
                     //data.normal = terrainHit.normal;
@@ -279,7 +279,7 @@ final class ActorCollider : Collider {
 
             if (axis[0]) {
                 Vec3i hitPosition = entity.getPosition() + Vec3i(stepDir.x, 0, 0);
-                Physics.TerrainHit terrainHit = Atelier.physics.hitTerrain(hitPosition, hitbox);
+                Physics.TerrainHit terrainHit = Atelier.physics.hitTerrain(hitPosition, collider);
                 if (terrainHit.isColliding) {
                     Physics.CollisionHit data;
                     bool isLeft;
@@ -300,7 +300,7 @@ final class ActorCollider : Collider {
                             goto default;
                         }
                         Physics.SolidHit solidHitUp = Atelier.physics.collidesAt(hitPosition + Vec3i(0,
-                                0, deltaZ), hitbox);
+                                0, deltaZ), collider);
                         if (solidHitUp.isColliding) {
                             data.normal = Vec3f(0, 0, deltaZ > 0 ? -1 : 1);
                             data.type = hitType;
@@ -321,7 +321,7 @@ final class ActorCollider : Collider {
                     break;
                 }
                 else {
-                    Physics.SolidHit solidHit = Atelier.physics.collidesAt(hitPosition, hitbox);
+                    Physics.SolidHit solidHit = Atelier.physics.collidesAt(hitPosition, collider);
                     if (solidHit.isColliding) {
                         Physics.CollisionHit data;
                         switch (solidHit.solid.shape) with (SolidCollider.Shape) {
@@ -334,7 +334,7 @@ final class ActorCollider : Collider {
                                 goto default;
                             }
                             Physics.SolidHit solidHitUp = Atelier.physics.collidesAt(hitPosition + Vec3i(0,
-                                    0, deltaZ), hitbox);
+                                    0, deltaZ), collider);
                             if (solidHitUp.isColliding) {
                                 data.solid = solidHit.solid;
                                 data.entity = solidHit.solid.entity;
@@ -364,7 +364,7 @@ final class ActorCollider : Collider {
             }
             if (axis[1]) {
                 Vec3i hitPosition = entity.getPosition() + Vec3i(0, stepDir.y, 0);
-                Physics.TerrainHit terrainHit = Atelier.physics.hitTerrain(hitPosition, hitbox);
+                Physics.TerrainHit terrainHit = Atelier.physics.hitTerrain(hitPosition, collider);
                 if (terrainHit.isColliding) {
                     Physics.CollisionHit data;
                     bool isUp;
@@ -385,7 +385,7 @@ final class ActorCollider : Collider {
                             goto default;
                         }
                         Physics.TerrainHit terrainHitUp = Atelier.physics.hitTerrain(hitPosition + Vec3i(0,
-                                0, deltaZ), hitbox);
+                                0, deltaZ), collider);
                         if (terrainHitUp.isColliding) {
                             data.normal = Vec3f(0, 0, deltaZ > 0 ? -1 : 1);
                             data.type = hitType;
@@ -406,7 +406,7 @@ final class ActorCollider : Collider {
                     break;
                 }
                 else {
-                    Physics.SolidHit solidHit = Atelier.physics.collidesAt(hitPosition, hitbox);
+                    Physics.SolidHit solidHit = Atelier.physics.collidesAt(hitPosition, collider);
                     if (solidHit.isColliding) {
                         Physics.CollisionHit data;
                         switch (solidHit.solid.shape) with (SolidCollider.Shape) {
@@ -419,7 +419,7 @@ final class ActorCollider : Collider {
                                 goto default;
                             }
                             Physics.SolidHit solidHitUp = Atelier.physics.collidesAt(hitPosition + Vec3i(0,
-                                    0, deltaZ), hitbox);
+                                    0, deltaZ), collider);
                             if (solidHitUp.isColliding) {
                                 data.solid = solidHit.solid;
                                 data.entity = solidHit.solid.entity;
@@ -449,7 +449,7 @@ final class ActorCollider : Collider {
             }
             if (axis[2]) {
                 Vec3i hitPosition = entity.getPosition() + Vec3i(0, 0, stepDir.z);
-                Physics.TerrainHit terrainHit = Atelier.physics.hitTerrain(hitPosition, hitbox);
+                Physics.TerrainHit terrainHit = Atelier.physics.hitTerrain(hitPosition, collider);
                 if (terrainHit.isColliding) {
                     Physics.CollisionHit data;
                     data.normal = Vec3f(0f, 0f, 1f);
@@ -457,7 +457,7 @@ final class ActorCollider : Collider {
                     entity.onCollide(data);
                 }
                 else {
-                    Physics.SolidHit solidHit = Atelier.physics.collidesAt(hitPosition, hitbox);
+                    Physics.SolidHit solidHit = Atelier.physics.collidesAt(hitPosition, collider);
                     if (solidHit.isColliding) {
                         Physics.CollisionHit data;
                         data.solid = solidHit.solid;
@@ -506,7 +506,7 @@ final class ActorCollider : Collider {
     }
 
     /// Vérifie s’il y a collision entre ce solide et une boite
-    Physics.ActorHit collidesWith(Vec3i point_, Vec3i hitbox_) {
+    Physics.ActorHit collidesWith(Vec3i point_, Vec3i collider_) {
         Physics.ActorHit hit;
         hit.actor = this;
 
@@ -514,11 +514,11 @@ final class ActorCollider : Collider {
         //    return hit;
         //}
 
-        point_.x -= hitbox_.x - (hitbox_.x >> 1);
-        point_.y -= hitbox_.y - (hitbox_.y >> 1);
+        point_.x -= collider_.x - (collider_.x >> 1);
+        point_.y -= collider_.y - (collider_.y >> 1);
 
-        if (!((left < (point_.x + hitbox_.x)) && (up < (point_.y + hitbox_.y)) &&
-                (bottom < (point_.z + hitbox_.z)) && (right > point_.x) && (down > point_.y)
+        if (!((left < (point_.x + collider_.x)) && (up < (point_.y + collider_.y)) &&
+                (bottom < (point_.z + collider_.z)) && (right > point_.x) && (down > point_.y)
                 && (top > point_.z)))
             return hit;
 

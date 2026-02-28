@@ -876,14 +876,14 @@ package final class SceneDefinition {
         }
 
         void draw() {
-            bool showHitbox = _isHovered || _isSelected || _isTempSelected;
+            bool showCollider = _isHovered || _isSelected || _isTempSelected;
             float alpha = (_isHovered || _isTempSelected) ? 0.5f : 1f;
 
             _circle.alpha = alpha;
             _icon.alpha = alpha;
 
             _circle.filled = _isHovered;
-            if (showHitbox) {
+            if (showCollider) {
                 _circle.draw();
             }
             _icon.draw();
@@ -1022,10 +1022,10 @@ package final class SceneDefinition {
                     return;
                 }
 
-                if (ffd.hasNode("hitbox")) {
-                    Farfadet hitboxNode = ffd.getNode("hitbox");
-                    if (hitboxNode.hasNode("size")) {
-                        _hitbox = hitboxNode.getNode("size").get!Vec3i(0);
+                if (ffd.hasNode("collider")) {
+                    Farfadet colliderNode = ffd.getNode("collider");
+                    if (colliderNode.hasNode("size")) {
+                        _collider = colliderNode.getNode("size").get!Vec3i(0);
                     }
                 }
 
@@ -1116,33 +1116,33 @@ package final class SceneDefinition {
                 }
             }
 
-            override void draw(Vec2f origin, Vec3f hitboxSize, Vec2f offset) {
-                bool showHitbox = _isHovered || _isSelected || _isTempSelected;
-                float hitboxAlpha = (_isHovered || _isTempSelected) ? 0.5f : 1f;
-                Color hitboxColor = (_isSelected || _isTempSelected) ? Atelier.theme.danger
+            override void draw(Vec2f origin, Vec3f colliderSize, Vec2f offset) {
+                bool showCollider = _isHovered || _isSelected || _isTempSelected;
+                float colliderAlpha = (_isHovered || _isTempSelected) ? 0.5f : 1f;
+                Color colliderColor = (_isSelected || _isTempSelected) ? Atelier.theme.danger
                     : Atelier.theme.onNeutral;
 
-                if (showHitbox) {
-                    Atelier.renderer.drawRect(origin - offset, hitboxSize.xy,
-                        hitboxColor, 0.2f * hitboxAlpha, false);
+                if (showCollider) {
+                    Atelier.renderer.drawRect(origin - offset, colliderSize.xy,
+                        colliderColor, 0.2f * colliderAlpha, false);
                 }
 
                 _render(origin, _zoom);
 
-                if (showHitbox) {
+                if (showCollider) {
                     Atelier.renderer.drawRect(origin - (offset + Vec2f(0f,
-                            hitboxSize.z)), hitboxSize.xy, Color.yellow, 0.2f * hitboxAlpha, true);
+                            colliderSize.z)), colliderSize.xy, Color.yellow, 0.2f * colliderAlpha, true);
 
                     Atelier.renderer.drawRect(origin + Vec2f(0f,
-                            hitboxSize.y) - (offset + Vec2f(0f, hitboxSize.z)),
-                        hitboxSize.xz, Color.orange, 0.2f * hitboxAlpha, true);
+                            colliderSize.y) - (offset + Vec2f(0f, colliderSize.z)),
+                        colliderSize.xz, Color.orange, 0.2f * colliderAlpha, true);
 
-                    Atelier.renderer.drawRect(origin - (offset + Vec2f(0f, hitboxSize.z)),
-                        hitboxSize.xy, hitboxColor, hitboxAlpha, false);
+                    Atelier.renderer.drawRect(origin - (offset + Vec2f(0f, colliderSize.z)),
+                        colliderSize.xy, colliderColor, colliderAlpha, false);
 
                     Atelier.renderer.drawRect(origin - (offset + Vec2f(0f,
-                            hitboxSize.z)), hitboxSize.xy + Vec2f(0f, hitboxSize.z),
-                        hitboxColor, hitboxAlpha, false);
+                            colliderSize.z)), colliderSize.xy + Vec2f(0f, colliderSize.z),
+                        colliderColor, colliderAlpha, false);
                 }
             }
 
@@ -1172,12 +1172,12 @@ package final class SceneDefinition {
                     return _event = event_;
                 }
 
-                Vec3i hitbox() const {
-                    return _hitbox;
+                Vec3i collider() const {
+                    return _collider;
                 }
 
-                Vec3i hitbox(Vec3i hitbox_) {
-                    return _hitbox = hitbox_;
+                Vec3i collider(Vec3i collider_) {
+                    return _collider = collider_;
                 }
 
                 bool isActive() const {
@@ -1202,9 +1202,9 @@ package final class SceneDefinition {
                     _event = ffd.getNode("event").get!string(0);
                 }
 
-                _hitbox = Vec3i(16, 16, 16);
-                if (ffd.hasNode("hitbox")) {
-                    _hitbox = ffd.getNode("hitbox").get!Vec3i(0);
+                _collider = Vec3i(16, 16, 16);
+                if (ffd.hasNode("collider")) {
+                    _collider = ffd.getNode("collider").get!Vec3i(0);
                 }
 
                 if (ffd.hasNode("isActive")) {
@@ -1217,12 +1217,12 @@ package final class SceneDefinition {
             }
 
             this() {
-                _hitbox = Vec3i(16, 16, 16);
+                _collider = Vec3i(16, 16, 16);
             }
 
             override void save(Farfadet ffd) {
                 ffd.addNode("event").add(_event);
-                ffd.addNode("hitbox").add(_hitbox);
+                ffd.addNode("collider").add(_collider);
                 ffd.addNode("isActive").add(_isActive);
                 ffd.addNode("isActiveOnce").add(_isActiveOnce);
             }
@@ -1234,27 +1234,27 @@ package final class SceneDefinition {
             override void update(float zoom) {
             }
 
-            override void draw(Vec2f origin, Vec3f hitboxSize, Vec2f offset) {
-                float hitboxAlpha = (_isHovered || _isTempSelected) ? 0.5f : 1f;
-                Color hitboxColor = (_isSelected || _isTempSelected) ? Atelier.theme.danger
+            override void draw(Vec2f origin, Vec3f colliderSize, Vec2f offset) {
+                float colliderAlpha = (_isHovered || _isTempSelected) ? 0.5f : 1f;
+                Color colliderColor = (_isSelected || _isTempSelected) ? Atelier.theme.danger
                     : Atelier.theme.onNeutral;
 
-                Atelier.renderer.drawRect(origin - offset, hitboxSize.xy,
-                    hitboxColor, 0.2f * hitboxAlpha, false);
+                Atelier.renderer.drawRect(origin - offset, colliderSize.xy,
+                    colliderColor, 0.2f * colliderAlpha, false);
 
                 Atelier.renderer.drawRect(origin - (offset + Vec2f(0f,
-                        hitboxSize.z)), hitboxSize.xy, Color.cyan, 0.2f * hitboxAlpha, true);
+                        colliderSize.z)), colliderSize.xy, Color.cyan, 0.2f * colliderAlpha, true);
 
                 Atelier.renderer.drawRect(origin + Vec2f(0f,
-                        hitboxSize.y) - (offset + Vec2f(0f, hitboxSize.z)),
-                    hitboxSize.xz, Color.blue, 0.2f * hitboxAlpha, true);
+                        colliderSize.y) - (offset + Vec2f(0f, colliderSize.z)),
+                    colliderSize.xz, Color.blue, 0.2f * colliderAlpha, true);
 
-                Atelier.renderer.drawRect(origin - (offset + Vec2f(0f, hitboxSize.z)),
-                    hitboxSize.xy, hitboxColor, hitboxAlpha, false);
+                Atelier.renderer.drawRect(origin - (offset + Vec2f(0f, colliderSize.z)),
+                    colliderSize.xy, colliderColor, colliderAlpha, false);
 
                 Atelier.renderer.drawRect(origin - (offset + Vec2f(0f,
-                        hitboxSize.z)), hitboxSize.xy + Vec2f(0f, hitboxSize.z),
-                    hitboxColor, hitboxAlpha, false);
+                        colliderSize.z)), colliderSize.xy + Vec2f(0f, colliderSize.z),
+                    colliderColor, colliderAlpha, false);
             }
 
             override void drawSnapshot(Vec2f origin) {
@@ -1299,12 +1299,12 @@ package final class SceneDefinition {
                     return _direction = direction_;
                 }
 
-                Vec3i hitbox() const {
-                    return _hitbox;
+                Vec3i collider() const {
+                    return _collider;
                 }
 
-                Vec3i hitbox(Vec3i hitbox_) {
-                    return _hitbox = hitbox_;
+                Vec3i collider(Vec3i collider_) {
+                    return _collider = collider_;
                 }
 
                 bool isActive() const {
@@ -1329,9 +1329,9 @@ package final class SceneDefinition {
                     _direction = ffd.getNode("direction").get!uint(0);
                 }
 
-                _hitbox = Vec3i(16, 16, 16);
-                if (ffd.hasNode("hitbox")) {
-                    _hitbox = ffd.getNode("hitbox").get!Vec3i(0);
+                _collider = Vec3i(16, 16, 16);
+                if (ffd.hasNode("collider")) {
+                    _collider = ffd.getNode("collider").get!Vec3i(0);
                 }
 
                 if (ffd.hasNode("isActive")) {
@@ -1340,14 +1340,14 @@ package final class SceneDefinition {
             }
 
             this() {
-                _hitbox = Vec3i(16, 16, 16);
+                _collider = Vec3i(16, 16, 16);
             }
 
             override void save(Farfadet ffd) {
                 ffd.addNode("scene").add(_scene);
                 ffd.addNode("target").add(_target);
                 ffd.addNode("direction").add(_direction);
-                ffd.addNode("hitbox").add(_hitbox);
+                ffd.addNode("collider").add(_collider);
                 ffd.addNode("isActive").add(_isActive);
             }
 
@@ -1358,27 +1358,27 @@ package final class SceneDefinition {
             override void update(float zoom) {
             }
 
-            override void draw(Vec2f origin, Vec3f hitboxSize, Vec2f offset) {
-                float hitboxAlpha = (_isHovered || _isTempSelected) ? 0.5f : 1f;
-                Color hitboxColor = (_isSelected || _isTempSelected) ? Atelier.theme.danger
+            override void draw(Vec2f origin, Vec3f colliderSize, Vec2f offset) {
+                float colliderAlpha = (_isHovered || _isTempSelected) ? 0.5f : 1f;
+                Color colliderColor = (_isSelected || _isTempSelected) ? Atelier.theme.danger
                     : Atelier.theme.onNeutral;
 
-                Atelier.renderer.drawRect(origin - offset, hitboxSize.xy,
-                    hitboxColor, 0.2f * hitboxAlpha, false);
+                Atelier.renderer.drawRect(origin - offset, colliderSize.xy,
+                    colliderColor, 0.2f * colliderAlpha, false);
 
                 Atelier.renderer.drawRect(origin - (offset + Vec2f(0f,
-                        hitboxSize.z)), hitboxSize.xy, Color.cyan, 0.2f * hitboxAlpha, true);
+                        colliderSize.z)), colliderSize.xy, Color.cyan, 0.2f * colliderAlpha, true);
 
                 Atelier.renderer.drawRect(origin + Vec2f(0f,
-                        hitboxSize.y) - (offset + Vec2f(0f, hitboxSize.z)),
-                    hitboxSize.xz, Color.blue, 0.2f * hitboxAlpha, true);
+                        colliderSize.y) - (offset + Vec2f(0f, colliderSize.z)),
+                    colliderSize.xz, Color.blue, 0.2f * colliderAlpha, true);
 
-                Atelier.renderer.drawRect(origin - (offset + Vec2f(0f, hitboxSize.z)),
-                    hitboxSize.xy, hitboxColor, hitboxAlpha, false);
+                Atelier.renderer.drawRect(origin - (offset + Vec2f(0f, colliderSize.z)),
+                    colliderSize.xy, colliderColor, colliderAlpha, false);
 
                 Atelier.renderer.drawRect(origin - (offset + Vec2f(0f,
-                        hitboxSize.z)), hitboxSize.xy + Vec2f(0f, hitboxSize.z),
-                    hitboxColor, hitboxAlpha, false);
+                        colliderSize.z)), colliderSize.xy + Vec2f(0f, colliderSize.z),
+                    colliderColor, colliderAlpha, false);
             }
 
             override void drawSnapshot(Vec2f origin) {
@@ -1394,28 +1394,28 @@ package final class SceneDefinition {
         final class NoteBuilderData : BuilderData {
             @property {
                 Vec2i size() const {
-                    return _hitbox.xy;
+                    return _collider.xy;
                 }
 
                 Vec2i size(Vec2i size_) {
-                    _hitbox.xy = size_;
-                    return _hitbox.xy;
+                    _collider.xy = size_;
+                    return _collider.xy;
                 }
             }
 
             this(Farfadet ffd) {
-                _hitbox = Vec3i(16, 16, 0);
+                _collider = Vec3i(16, 16, 0);
                 if (ffd.hasNode("size")) {
-                    _hitbox = Vec3i(ffd.getNode("size").get!Vec2i(0), 0);
+                    _collider = Vec3i(ffd.getNode("size").get!Vec2i(0), 0);
                 }
             }
 
             this() {
-                _hitbox = Vec3i(16, 16, 0);
+                _collider = Vec3i(16, 16, 0);
             }
 
             override void save(Farfadet ffd) {
-                ffd.addNode("size").add(_hitbox.xy);
+                ffd.addNode("size").add(_collider.xy);
             }
 
             override UIElement createSettingsWindow() {
@@ -1425,17 +1425,17 @@ package final class SceneDefinition {
             override void update(float zoom) {
             }
 
-            override void draw(Vec2f origin, Vec3f hitboxSize, Vec2f offset) {
-                float hitboxAlpha = (_isHovered || _isTempSelected) ? 0.5f : 1f;
-                Color hitboxColor = (_isSelected || _isTempSelected) ? Atelier.theme.danger
+            override void draw(Vec2f origin, Vec3f colliderSize, Vec2f offset) {
+                float colliderAlpha = (_isHovered || _isTempSelected) ? 0.5f : 1f;
+                Color colliderColor = (_isSelected || _isTempSelected) ? Atelier.theme.danger
                     : Atelier.theme.onNeutral;
 
-                Atelier.renderer.drawRect(origin - offset, hitboxSize.xy,
-                    hitboxColor, 0.2f * hitboxAlpha, false);
+                Atelier.renderer.drawRect(origin - offset, colliderSize.xy,
+                    colliderColor, 0.2f * colliderAlpha, false);
 
-                Atelier.renderer.drawRect(origin - offset, hitboxSize.xy, Color.green, 0.2f * hitboxAlpha, true);
+                Atelier.renderer.drawRect(origin - offset, colliderSize.xy, Color.green, 0.2f * colliderAlpha, true);
 
-                drawText((origin - offset) + Vec2f(1f, hitboxSize.y - 1f), to!dstring(
+                drawText((origin - offset) + Vec2f(1f, colliderSize.y - 1f), to!dstring(
                         entityData.name),
                     Atelier.theme.font, Atelier.theme.onNeutral);
             }
@@ -1457,12 +1457,12 @@ package final class SceneDefinition {
 
             this(Farfadet ffd) {
                 _sprite = Atelier.res.get!Sprite("editor:marker");
-                _hitbox = Vec3i(16, 16, 0);
+                _collider = Vec3i(16, 16, 0);
             }
 
             this() {
                 _sprite = Atelier.res.get!Sprite("editor:marker");
-                _hitbox = Vec3i(16, 16, 0);
+                _collider = Vec3i(16, 16, 0);
             }
 
             override void save(Farfadet ffd) {
@@ -1475,19 +1475,19 @@ package final class SceneDefinition {
             override void update(float zoom) {
             }
 
-            override void draw(Vec2f origin, Vec3f hitboxSize, Vec2f offset) {
-                float hitboxAlpha = (_isHovered || _isTempSelected) ? 0.5f : 1f;
-                Color hitboxColor = (_isSelected || _isTempSelected) ? Atelier.theme.danger
+            override void draw(Vec2f origin, Vec3f colliderSize, Vec2f offset) {
+                float colliderAlpha = (_isHovered || _isTempSelected) ? 0.5f : 1f;
+                Color colliderColor = (_isSelected || _isTempSelected) ? Atelier.theme.danger
                     : Atelier.theme.onNeutral;
 
-                Atelier.renderer.drawRect(origin - (offset + Vec2f(0f, hitboxSize.z)), hitboxSize.xy,
-                    hitboxColor, 0.2f * hitboxAlpha, false);
+                Atelier.renderer.drawRect(origin - (offset + Vec2f(0f, colliderSize.z)), colliderSize.xy,
+                    colliderColor, 0.2f * colliderAlpha, false);
 
-                Atelier.renderer.drawRect(origin - (offset + Vec2f(0f, hitboxSize.z)), hitboxSize.xy, Color.green, 0.2f * hitboxAlpha, true);
+                Atelier.renderer.drawRect(origin - (offset + Vec2f(0f, colliderSize.z)), colliderSize.xy, Color.green, 0.2f * colliderAlpha, true);
 
-                _sprite.draw(origin + Vec2f(0f, hitboxSize.z));
+                _sprite.draw(origin + Vec2f(0f, colliderSize.z));
 
-                drawText((origin - (offset + Vec2f(0f, hitboxSize.z))) + Vec2f(1f, hitboxSize.y - 1f), to!dstring(
+                drawText((origin - (offset + Vec2f(0f, colliderSize.z))) + Vec2f(1f, colliderSize.y - 1f), to!dstring(
                         entityData.name),
                     Atelier.theme.font, Atelier.theme.onNeutral);
             }
@@ -1507,8 +1507,8 @@ package final class SceneDefinition {
                 return entityData.position.z / 16;
             }
 
-            Vec3i hitbox() {
-                return _hitbox;
+            Vec3i collider() {
+                return _collider;
             }
 
             EntityBuilderData entity() {
@@ -1542,12 +1542,12 @@ package final class SceneDefinition {
 
             int yOrder() const {
                 return entityData.position.y + (cast(int) round(_tempMove.y)) + (
-                    _hitbox.y - (_hitbox.y / 2));
+                    _collider.y - (_collider.y / 2));
             }
         }
 
         private {
-            Vec3i _hitbox;
+            Vec3i _collider;
             Type _type;
             union {
                 EntityBuilderData _entity;
@@ -1658,20 +1658,20 @@ package final class SceneDefinition {
         }
 
         bool isInside(Vec2f minPos, Vec2f maxPos) {
-            Vec2f a = Vec2f(entityData.position.x - _hitbox.x / 2f,
-                entityData.position.y - (entityData.position.z + _hitbox.y / 2f + _hitbox.z));
+            Vec2f a = Vec2f(entityData.position.x - _collider.x / 2f,
+                entityData.position.y - (entityData.position.z + _collider.y / 2f + _collider.z));
 
-            Vec2f b = Vec2f(entityData.position.x + _hitbox.x / 2f,
-                entityData.position.y + _hitbox.y / 2f - entityData.position.z);
+            Vec2f b = Vec2f(entityData.position.x + _collider.x / 2f,
+                entityData.position.y + _collider.y / 2f - entityData.position.z);
 
             return minPos.x < b.x && maxPos.x > a.x && minPos.y < b.y && maxPos.y > a.y;
         }
 
         bool checkHover(Vec2f pos) {
-            return pos.isBetween(Vec2f(entityData.position.x - _hitbox.x / 2f,
-                    entityData.position.y - (entityData.position.z + _hitbox.y / 2f + _hitbox.z)),
-                Vec2f(entityData.position.x + _hitbox.x / 2f,
-                    entityData.position.y + _hitbox.y / 2f - entityData.position.z));
+            return pos.isBetween(Vec2f(entityData.position.x - _collider.x / 2f,
+                    entityData.position.y - (entityData.position.z + _collider.y / 2f + _collider.z)),
+                Vec2f(entityData.position.x + _collider.x / 2f,
+                    entityData.position.y + _collider.y / 2f - entityData.position.z));
         }
 
         void setHover(bool hover) {
@@ -1690,16 +1690,16 @@ package final class SceneDefinition {
         }
 
         void draw() {
-            Vec3f hitboxSize = (cast(Vec3f) _hitbox) * _zoom;
-            Vec2f offset = (cast(Vec2f)(_hitbox.xy - (_hitbox.xy >> 1))) * _zoom;
+            Vec3f colliderSize = (cast(Vec3f) _collider) * _zoom;
+            Vec2f offset = (cast(Vec2f)(_collider.xy - (_collider.xy >> 1))) * _zoom;
             Vec2f origin = _offset + Vec2f(entityData.position.x + _tempMove.x,
                 entityData.position.y + _tempMove.y - (entityData.position.z + _tempMove.z)) * _zoom;
 
-            _data.draw(origin, hitboxSize, offset);
+            _data.draw(origin, colliderSize, offset);
         }
 
         void drawSnapshot(Vec2f origin) {
-            Vec2f offset = (cast(Vec2f)(_hitbox.xy - (_hitbox.xy >> 1)));
+            Vec2f offset = (cast(Vec2f)(_collider.xy - (_collider.xy >> 1)));
             _data.drawSnapshot(origin + offset);
         }
     }

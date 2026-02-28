@@ -3,7 +3,7 @@ module atelier.physics;
 public {
     import atelier.physics.actor;
     import atelier.physics.collider;
-    import atelier.physics.hurt;
+    import atelier.physics.hitbox;
     import atelier.physics.repulsor;
     import atelier.physics.shot;
     import atelier.physics.solid;

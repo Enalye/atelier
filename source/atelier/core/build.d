@@ -168,15 +168,15 @@ final class ProjectBuilder : Modal {
             _archives ~= ArchiveData(path, isArchived);
         }
 
-        Physics.HurtboxLayer[32] hurtboxLayers;
+        Physics.HitboxLayer[32] hitboxLayers;
         if (configFfd.hasNode("physics")) {
             Farfadet node = configFfd.getNode("physics");
-            foreach (hurtboxLayerNode; node.getNodes("hurtboxLayer")) {
-                uint layer = hurtboxLayerNode.get!uint(0);
+            foreach (hitboxLayerNode; node.getNodes("hitboxLayer")) {
+                uint layer = hitboxLayerNode.get!uint(0);
                 if (layer < 32) {
-                    Physics.HurtboxLayer data;
-                    data.load(hurtboxLayerNode);
-                    hurtboxLayers[layer] = data;
+                    Physics.HitboxLayer data;
+                    data.load(hitboxLayerNode);
+                    hitboxLayers[layer] = data;
                 }
             }
         }
@@ -190,7 +190,7 @@ final class ProjectBuilder : Modal {
             stream.write!bool(archiveData.isArchived);
         }
         for (uint i; i < 32; ++i) {
-            hurtboxLayers[i].serialize(stream);
+            hitboxLayers[i].serialize(stream);
         }
         std.file.write(configExportPath, compress(stream.data));
 

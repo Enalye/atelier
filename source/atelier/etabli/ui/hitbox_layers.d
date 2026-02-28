@@ -1,4 +1,4 @@
-module atelier.etabli.ui.hurtbox_layers;
+module atelier.etabli.ui.hitbox_layers;
 
 import std.format : format;
 import std.file;
@@ -12,19 +12,19 @@ import atelier.render;
 
 import atelier.etabli.ui.studio;
 
-private final class HurtboxLayerData {
-    Physics.HurtboxLayer data;
+private final class HitboxLayerData {
+    Physics.HitboxLayer data;
 }
 
-final class HurtboxLayersManager : Modal {
+final class HitboxLayersManager : Modal {
     private {
-        HurtboxLayerData[32] _layers;
+        HitboxLayerData[32] _layers;
     }
 
     this() {
         setSize(Vec2f(700f, 500f));
 
-        Label titleLabel = new Label("Calques de Hurtbox", Atelier.theme.font);
+        Label titleLabel = new Label("Calques de Hitbox", Atelier.theme.font);
         titleLabel.setAlign(UIAlignX.center, UIAlignY.top);
         titleLabel.setPosition(Vec2f(0f, 4f));
         addUI(titleLabel);
@@ -44,8 +44,8 @@ final class HurtboxLayersManager : Modal {
 
             hlayout.addUI(new Label(format("%d", layer + 1), Atelier.theme.font));
 
-            _layers[layer] = new HurtboxLayerData;
-            _layers[layer].data = Atelier.physics.getHurtboxLayer(layer);
+            _layers[layer] = new HitboxLayerData;
+            _layers[layer].data = Atelier.physics.getHitboxLayer(layer);
 
             () {
                 // On delegate sinon layer est mal capturé (merci dlang…)
@@ -77,7 +77,7 @@ final class HurtboxLayersManager : Modal {
                 {
                     NeutralButton editBtn = new NeutralButton("Configurer");
                     editBtn.addEventListener("click", {
-                        auto modal = new EditHurtboxLayer(layerId, _layers[layerId].data, _layers);
+                        auto modal = new EditHitboxLayer(layerId, _layers[layerId].data, _layers);
                         modal.addEventListener("apply", {
                             _layers[layerId].data = modal.getData();
                         });
@@ -107,20 +107,20 @@ final class HurtboxLayersManager : Modal {
 
     private void _onApply() {
         for (uint layer; layer < 32; ++layer) {
-            Atelier.physics.setHurtboxLayer(layer, _layers[layer].data);
+            Atelier.physics.setHitboxLayer(layer, _layers[layer].data);
         }
         dispatchEvent("apply", false);
         removeUI();
     }
 }
 
-final class EditHurtboxLayer : Modal {
+final class EditHitboxLayer : Modal {
     private {
         uint _layer;
-        Physics.HurtboxLayer _data;
+        Physics.HitboxLayer _data;
     }
 
-    this(uint layer, Physics.HurtboxLayer data, HurtboxLayerData[32] layers) {
+    this(uint layer, Physics.HitboxLayer data, HitboxLayerData[32] layers) {
         _layer = layer;
         _data = data;
         setSize(Vec2f(800f, 500f));
@@ -229,7 +229,7 @@ final class EditHurtboxLayer : Modal {
         }
     }
 
-    Physics.HurtboxLayer getData() {
+    Physics.HitboxLayer getData() {
         return _data;
     }
 }

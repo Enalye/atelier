@@ -58,7 +58,7 @@ final class TeleporterComponent : TriggerComponent {
         Vec3i result = entity.getPosition();
         Vec3i entitySize;
         if (other.getCollider()) {
-            entitySize = (other.getCollider().hitbox() / 2) + 1;
+            entitySize = (other.getCollider().collider() / 2) + 1;
         }
 
         if (!entity.getCollider())

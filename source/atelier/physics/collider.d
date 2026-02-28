@@ -8,7 +8,7 @@ import atelier.physics.actor;
 import atelier.physics.solid;
 import atelier.physics.system;
 
-struct HitboxData {
+struct ColliderData {
     enum Type {
         none,
         actor,
@@ -24,11 +24,11 @@ struct HitboxData {
     void load(const Farfadet ffd) {
         type = Type.none;
 
-        Farfadet hitboxNode;
-        if (ffd.hasNode("hitbox")) {
-            hitboxNode = ffd.getNode("hitbox");
-            if (hitboxNode.hasNode("type")) {
-                type = hitboxNode.getNode("type").get!Type(0);
+        Farfadet colliderNode;
+        if (ffd.hasNode("collider")) {
+            colliderNode = ffd.getNode("collider");
+            if (colliderNode.hasNode("type")) {
+                type = colliderNode.getNode("type").get!Type(0);
             }
         }
 
@@ -36,27 +36,27 @@ struct HitboxData {
         case none:
             break;
         case actor:
-            if (hitboxNode.hasNode("size")) {
-                size = hitboxNode.getNode("size").get!Vec3u(0);
+            if (colliderNode.hasNode("size")) {
+                size = colliderNode.getNode("size").get!Vec3u(0);
             }
-            if (hitboxNode.hasNode("bounciness")) {
-                bounciness = hitboxNode.getNode("bounciness").get!float(0);
+            if (colliderNode.hasNode("bounciness")) {
+                bounciness = colliderNode.getNode("bounciness").get!float(0);
             }
             break;
         case solid:
-            if (hitboxNode.hasNode("size")) {
-                size = hitboxNode.getNode("size").get!Vec3u(0);
+            if (colliderNode.hasNode("size")) {
+                size = colliderNode.getNode("size").get!Vec3u(0);
             }
-            if (hitboxNode.hasNode("shape")) {
-                shape = hitboxNode.getNode("shape").get!string(0);
+            if (colliderNode.hasNode("shape")) {
+                shape = colliderNode.getNode("shape").get!string(0);
             }
-            if (hitboxNode.hasNode("bounciness")) {
-                bounciness = hitboxNode.getNode("bounciness").get!float(0);
+            if (colliderNode.hasNode("bounciness")) {
+                bounciness = colliderNode.getNode("bounciness").get!float(0);
             }
             break;
         case shot:
-            if (hitboxNode.hasNode("size")) {
-                size = hitboxNode.getNode("size").get!Vec3u(0);
+            if (colliderNode.hasNode("size")) {
+                size = colliderNode.getNode("size").get!Vec3u(0);
             }
             break;
         }
@@ -67,20 +67,20 @@ struct HitboxData {
         case none:
             break;
         case actor:
-            Farfadet node = ffd.addNode("hitbox");
+            Farfadet node = ffd.addNode("collider");
             node.addNode("type").add(type);
             node.addNode("size").add(size);
             node.addNode("bounciness").add(bounciness);
             break;
         case solid:
-            Farfadet node = ffd.addNode("hitbox");
+            Farfadet node = ffd.addNode("collider");
             node.addNode("type").add(type);
             node.addNode("size").add(size);
             node.addNode("shape").add(shape);
             node.addNode("bounciness").add(bounciness);
             break;
         case shot:
-            Farfadet node = ffd.addNode("hitbox");
+            Farfadet node = ffd.addNode("collider");
             node.addNode("type").add(type);
             node.addNode("size").add(size);
             break;
@@ -149,9 +149,9 @@ abstract class Collider {
         bool _isRegistered = true;
         bool _isTiled;
         Entity _entity;
-        Vec3i _hitbox = Vec3i.zero;
-        Vec2i _hitboxHalf1 = Vec2i.zero;
-        Vec2i _hitboxHalf2 = Vec2i.zero;
+        Vec3i _collider = Vec3i.zero;
+        Vec2i _colliderHalf1 = Vec2i.zero;
+        Vec2i _colliderHalf2 = Vec2i.zero;
         Vec2i _tileboxHalf1 = Vec2i.zero;
         Vec2i _tileboxHalf2 = Vec2i.zero;
         int _zTilebox;
@@ -190,33 +190,33 @@ abstract class Collider {
             return _entity;
         }
 
-        final Vec3i hitbox() const {
-            return _hitbox;
+        final Vec3i collider() const {
+            return _collider;
         }
 
         /// Coin gauche de la boite de collision (Axe X)
         final int left() const {
-            return _entity.getPosition().x - _hitboxHalf1.x;
+            return _entity.getPosition().x - _colliderHalf1.x;
         }
 
         /// Coin droite de la boite de collision (Axe X)
         final int right() const {
-            return _entity.getPosition().x + _hitboxHalf2.x;
+            return _entity.getPosition().x + _colliderHalf2.x;
         }
 
         /// Coin bas de la boite de collision (Axe Y)
         final int down() const {
-            return _entity.getPosition().y + _hitboxHalf2.y;
+            return _entity.getPosition().y + _colliderHalf2.y;
         }
 
         /// Coin haut de la boite de collision (Axe Y)
         final int up() const {
-            return _entity.getPosition().y - _hitboxHalf1.y;
+            return _entity.getPosition().y - _colliderHalf1.y;
         }
 
         /// Coin dessus la boite de collision (Axe Z)
         final int top() const {
-            return _entity.getPosition().z + _hitbox.z;
+            return _entity.getPosition().z + _collider.z;
         }
 
         /// Coin dessous la boite de collision (Axe Z)
@@ -234,10 +234,10 @@ abstract class Collider {
     }
 
     this(Vec3u size_) {
-        _hitbox = cast(Vec3i) size_;
-        _hitboxHalf2 = (_hitbox.xy >> 1);
-        _hitboxHalf1 = _hitbox.xy - _hitboxHalf2;
-        _zTilebox = (_hitbox.z >> 4) + ((_hitbox.z & 0x10) > 0 ? 1 : 0);
+        _collider = cast(Vec3i) size_;
+        _colliderHalf2 = (_collider.xy >> 1);
+        _colliderHalf1 = _collider.xy - _colliderHalf2;
+        _zTilebox = (_collider.z >> 4) + ((_collider.z & 0x10) > 0 ? 1 : 0);
         _tileboxHalf1.x = (_tileboxHalf1.x >> 4) + ((_tileboxHalf1.x & 0x10) > 0 ? 1 : 0);
         _tileboxHalf1.y = (_tileboxHalf1.y >> 4) + ((_tileboxHalf1.y & 0x10) > 0 ? 1 : 0);
         _tileboxHalf2.x = (_tileboxHalf2.x >> 4) + ((_tileboxHalf2.x & 0x10) > 0 ? 1 : 0);
@@ -246,9 +246,9 @@ abstract class Collider {
 
     this(Collider other) {
         _type = other._type;
-        _hitbox = other._hitbox;
-        _hitboxHalf1 = other._hitboxHalf1;
-        _hitboxHalf2 = other._hitboxHalf2;
+        _collider = other._collider;
+        _colliderHalf1 = other._colliderHalf1;
+        _colliderHalf2 = other._colliderHalf2;
         _zTilebox = other._zTilebox;
         _tileboxHalf1 = other._tileboxHalf1;
         _tileboxHalf2 = other._tileboxHalf2;
@@ -273,7 +273,7 @@ abstract class Collider {
     }
 
     Physics.TerrainHit hitTerrain() {
-        return Atelier.physics.hitTerrain(_entity.getPosition(), hitbox);
+        return Atelier.physics.hitTerrain(_entity.getPosition(), collider);
     }
 
     final bool isAbove(Collider other) {
@@ -291,20 +291,20 @@ abstract class Collider {
     abstract bool move(Vec3f dir, Physics.CollisionHit.Type type = Physics.CollisionHit.Type.none);
 
     final void drawBox(Vec2f origin, float alpha) {
-        Vec2f offset = cast(Vec2f)(_hitbox.xy - (_hitbox.xy >> 1));
+        Vec2f offset = cast(Vec2f)(_collider.xy - (_collider.xy >> 1));
 
-        Atelier.renderer.drawRect(origin - (offset + Vec2f(0f, _hitbox.z)),
-            cast(Vec2f) _hitbox.xy, Color.white, alpha, true);
+        Atelier.renderer.drawRect(origin - (offset + Vec2f(0f, _collider.z)),
+            cast(Vec2f) _collider.xy, Color.white, alpha, true);
 
         Atelier.renderer.drawRect(origin + Vec2f(0f,
-                _hitbox.y) - (offset + Vec2f(0f, _hitbox.z)),
-            cast(Vec2f) _hitbox.xz, Color.grey, alpha, true);
+                _collider.y) - (offset + Vec2f(0f, _collider.z)),
+            cast(Vec2f) _collider.xz, Color.grey, alpha, true);
     }
 
     final void drawBack(Vec2f origin) {
-        Vec2f offset = cast(Vec2f)(_hitbox.xy - (_hitbox.xy >> 1));
+        Vec2f offset = cast(Vec2f)(_collider.xy - (_collider.xy >> 1));
 
-        Atelier.renderer.drawRect(origin - offset, cast(Vec2f) _hitbox.xy,
+        Atelier.renderer.drawRect(origin - offset, cast(Vec2f) _collider.xy,
             Atelier.theme.onNeutral, 0.2f, false);
     }
 
@@ -328,20 +328,20 @@ abstract class Collider {
                 tileBox + Vec2f(0f, zHeight), Atelier.theme.onNeutral, 1f, false);
         }
         else {
-            Vec2f offset = cast(Vec2f)(_hitbox.xy - (_hitbox.xy >> 1));
+            Vec2f offset = cast(Vec2f)(_collider.xy - (_collider.xy >> 1));
 
-            Atelier.renderer.drawRect(origin - (offset + Vec2f(0f, _hitbox.z)),
-                cast(Vec2f) _hitbox.xy, Color.yellow, 0.2f, true);
+            Atelier.renderer.drawRect(origin - (offset + Vec2f(0f, _collider.z)),
+                cast(Vec2f) _collider.xy, Color.yellow, 0.2f, true);
 
             Atelier.renderer.drawRect(origin + Vec2f(0f,
-                    _hitbox.y) - (offset + Vec2f(0f, _hitbox.z)),
-                cast(Vec2f) _hitbox.xz, Color.orange, 0.2f, true);
+                    _collider.y) - (offset + Vec2f(0f, _collider.z)),
+                cast(Vec2f) _collider.xz, Color.orange, 0.2f, true);
 
-            Atelier.renderer.drawRect(origin - (offset + Vec2f(0f, _hitbox.z)),
-                cast(Vec2f) _hitbox.xy, Atelier.theme.onNeutral, 1f, false);
+            Atelier.renderer.drawRect(origin - (offset + Vec2f(0f, _collider.z)),
+                cast(Vec2f) _collider.xy, Atelier.theme.onNeutral, 1f, false);
 
-            Atelier.renderer.drawRect(origin - (offset + Vec2f(0f, _hitbox.z)),
-                cast(Vec2f) _hitbox.xy + Vec2f(0f, _hitbox.z), Atelier.theme.onNeutral, 1f, false);
+            Atelier.renderer.drawRect(origin - (offset + Vec2f(0f, _collider.z)),
+                cast(Vec2f) _collider.xy + Vec2f(0f, _collider.z), Atelier.theme.onNeutral, 1f, false);
         }
     }
 }

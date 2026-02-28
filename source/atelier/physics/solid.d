@@ -204,7 +204,7 @@ final class SolidCollider : Collider {
     }
 
     /// Vérifie s’il y a collision entre ce solide et une boite
-    Physics.SolidHit collidesWith(Vec3i point_, Vec3i hitbox_) {
+    Physics.SolidHit collidesWith(Vec3i point_, Vec3i size_) {
         Physics.SolidHit hit;
         hit.solid = this;
 
@@ -212,11 +212,11 @@ final class SolidCollider : Collider {
             return hit;
         }
 
-        point_.x -= hitbox_.x - (hitbox_.x >> 1);
-        point_.y -= hitbox_.y - (hitbox_.y >> 1);
+        point_.x -= size_.x - (size_.x >> 1);
+        point_.y -= size_.y - (size_.y >> 1);
 
-        if (!((left < (point_.x + hitbox_.x)) && (up < (point_.y + hitbox_.y)) &&
-                (bottom < (point_.z + hitbox_.z)) && (right > point_.x) && (down > point_.y)))
+        if (!((left < (point_.x + size_.x)) && (up < (point_.y + size_.y)) &&
+                (bottom < (point_.z + size_.z)) && (right > point_.x) && (down > point_.y)))
             return hit;
 
         final switch (_shape) with (Shape) {
@@ -224,19 +224,19 @@ final class SolidCollider : Collider {
             hit.baseZ = top;
             break;
         case slopeUp:
-            float t = clamp((point_.y - up) / cast(float) hitbox.y, 0f, 1f);
+            float t = clamp((point_.y - up) / cast(float) collider.y, 0f, 1f);
             hit.baseZ = cast(int) round(lerp(cast(float) top, cast(float) bottom, t));
             break;
         case slopeDown:
-            float t = clamp((down - (point_.y + hitbox_.y)) / cast(float) hitbox.y, 0f, 1f);
+            float t = clamp((down - (point_.y + size_.y)) / cast(float) collider.y, 0f, 1f);
             hit.baseZ = cast(int) round(lerp(cast(float) top, cast(float) bottom, t));
             break;
         case slopeLeft:
-            float t = clamp((point_.x - left) / cast(float) hitbox.x, 0f, 1f);
+            float t = clamp((point_.x - left) / cast(float) collider.x, 0f, 1f);
             hit.baseZ = cast(int) round(lerp(cast(float) top, cast(float) bottom, t));
             break;
         case slopeRight:
-            float t = clamp((right - (point_.x + hitbox_.x)) / cast(float) hitbox.x, 0f, 1f);
+            float t = clamp((right - (point_.x + size_.x)) / cast(float) collider.x, 0f, 1f);
             hit.baseZ = cast(int) round(lerp(cast(float) top, cast(float) bottom, t));
             break;
         }
@@ -263,19 +263,19 @@ final class SolidCollider : Collider {
             hit.baseZ = top;
             break;
         case slopeUp:
-            float t = clamp((actor.up - up) / cast(float) hitbox.y, 0f, 1f);
+            float t = clamp((actor.up - up) / cast(float) collider.y, 0f, 1f);
             hit.baseZ = cast(int) round(lerp(cast(float) top, cast(float) bottom, t));
             break;
         case slopeDown:
-            float t = clamp((down - actor.down) / cast(float) hitbox.y, 0f, 1f);
+            float t = clamp((down - actor.down) / cast(float) collider.y, 0f, 1f);
             hit.baseZ = cast(int) round(lerp(cast(float) top, cast(float) bottom, t));
             break;
         case slopeLeft:
-            float t = clamp((actor.left - left) / cast(float) hitbox.x, 0f, 1f);
+            float t = clamp((actor.left - left) / cast(float) collider.x, 0f, 1f);
             hit.baseZ = cast(int) round(lerp(cast(float) top, cast(float) bottom, t));
             break;
         case slopeRight:
-            float t = clamp((right - actor.right) / cast(float) hitbox.x, 0f, 1f);
+            float t = clamp((right - actor.right) / cast(float) collider.x, 0f, 1f);
             hit.baseZ = cast(int) round(lerp(cast(float) top, cast(float) bottom, t));
             break;
         }
@@ -297,16 +297,16 @@ final class SolidCollider : Collider {
         case box:
             return top;
         case slopeUp:
-            float t = clamp((actor.up - up) / cast(float) hitbox.y, 0f, 1f);
+            float t = clamp((actor.up - up) / cast(float) collider.y, 0f, 1f);
             return cast(int) round(lerp(cast(float) top, cast(float) bottom, t));
         case slopeDown:
-            float t = clamp((down - actor.down) / cast(float) hitbox.y, 0f, 1f);
+            float t = clamp((down - actor.down) / cast(float) collider.y, 0f, 1f);
             return cast(int) round(lerp(cast(float) top, cast(float) bottom, t));
         case slopeLeft:
-            float t = clamp((actor.left - left) / cast(float) hitbox.x, 0f, 1f);
+            float t = clamp((actor.left - left) / cast(float) collider.x, 0f, 1f);
             return cast(int) round(lerp(cast(float) top, cast(float) bottom, t));
         case slopeRight:
-            float t = clamp((right - actor.right) / cast(float) hitbox.x, 0f, 1f);
+            float t = clamp((right - actor.right) / cast(float) collider.x, 0f, 1f);
             return cast(int) round(lerp(cast(float) top, cast(float) bottom, t));
         }
     }
@@ -324,16 +324,16 @@ final class SolidCollider : Collider {
         case box:
             return top;
         case slopeUp:
-            float t = clamp((position.y - up) / cast(float) hitbox.y, 0f, 1f);
+            float t = clamp((position.y - up) / cast(float) collider.y, 0f, 1f);
             return cast(int) round(lerp(cast(float) top, cast(float) bottom, t));
         case slopeDown:
-            float t = clamp((down - position.y) / cast(float) hitbox.y, 0f, 1f);
+            float t = clamp((down - position.y) / cast(float) collider.y, 0f, 1f);
             return cast(int) round(lerp(cast(float) top, cast(float) bottom, t));
         case slopeLeft:
-            float t = clamp((position.x - left) / cast(float) hitbox.x, 0f, 1f);
+            float t = clamp((position.x - left) / cast(float) collider.x, 0f, 1f);
             return cast(int) round(lerp(cast(float) top, cast(float) bottom, t));
         case slopeRight:
-            float t = clamp((right - position.x) / cast(float) hitbox.x, 0f, 1f);
+            float t = clamp((right - position.x) / cast(float) collider.x, 0f, 1f);
             return cast(int) round(lerp(cast(float) top, cast(float) bottom, t));
         }
     }

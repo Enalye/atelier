@@ -13,14 +13,14 @@ mixin template ColliderDataEntityParameter() {
     import atelier.etabli.ui;
 
     private {
-        HitboxData _hitbox;
+        ColliderData _collider;
         SelectButton _typeSelect, _shapeBtn;
         IntegerField _collXField, _collYField, _collZField;
         NumberField _bouncinessField;
     }
 
-    void setupEntityColliderParameters(VList vlist, HitboxData data) {
-        _hitbox = data;
+    void setupEntityColliderParameters(VList vlist, ColliderData data) {
+        _collider = data;
 
         {
             LabelSeparator sep = new LabelSeparator("Collision", Atelier
@@ -41,13 +41,14 @@ mixin template ColliderDataEntityParameter() {
                     .theme.font));
 
             _typeSelect = new SelectButton([
-                __traits(allMembers, HitboxData.Type)
-            ], to!string(_hitbox.type));
-            _hitbox.type = asEnum!(HitboxData.Type)(_typeSelect.value, HitboxData.Type.none);
+                __traits(allMembers, ColliderData.Type)
+            ], to!string(_collider.type));
+            _collider.type = asEnum!(ColliderData.Type)(_typeSelect.value, ColliderData.Type.none);
             _typeSelect.addEventListener("value", {
-                _hitbox.type = asEnum!(HitboxData.Type)(_typeSelect.value, HitboxData.Type.none);
+                _collider.type = asEnum!(ColliderData.Type)(_typeSelect.value, ColliderData
+                    .Type.none);
                 _updateFields();
-                dispatchEvent("property_hitbox");
+                dispatchEvent("property_collider");
             });
             hlayout.addUI(_typeSelect);
         }
@@ -60,22 +61,22 @@ mixin template ColliderDataEntityParameter() {
             hlayout.addUI(new Label("x:", Atelier.theme.font));
 
             _collXField = new IntegerField;
-            _collXField.value = _hitbox.size.x;
+            _collXField.value = _collider.size.x;
             _collXField.setMinValue(0);
             _collXField.addEventListener("value", {
-                _hitbox.size.x = _collXField.value;
-                dispatchEvent("property_hitbox");
+                _collider.size.x = _collXField.value;
+                dispatchEvent("property_collider");
             });
             hlayout.addUI(_collXField);
 
             hlayout.addUI(new Label("y:", Atelier.theme.font));
 
             _collYField = new IntegerField;
-            _collYField.value = _hitbox.size.y;
+            _collYField.value = _collider.size.y;
             _collYField.setMinValue(0);
             _collYField.addEventListener("value", {
-                _hitbox.size.y = _collYField.value;
-                dispatchEvent("property_hitbox");
+                _collider.size.y = _collYField.value;
+                dispatchEvent("property_collider");
             });
             hlayout.addUI(_collYField);
         }
@@ -88,11 +89,11 @@ mixin template ColliderDataEntityParameter() {
             hlayout.addUI(new Label("z:", Atelier.theme.font));
 
             _collZField = new IntegerField;
-            _collZField.value = _hitbox.size.z;
+            _collZField.value = _collider.size.z;
             _collZField.setMinValue(0);
             _collZField.addEventListener("value", {
-                _hitbox.size.z = _collZField.value;
-                dispatchEvent("property_hitbox");
+                _collider.size.z = _collZField.value;
+                dispatchEvent("property_collider");
             });
             hlayout.addUI(_collZField);
         }
@@ -107,11 +108,11 @@ mixin template ColliderDataEntityParameter() {
 
             _shapeBtn = new SelectButton([
                 __traits(allMembers, SolidCollider.Shape)
-            ], _hitbox.shape);
-            _hitbox.shape = _shapeBtn.value;
+            ], _collider.shape);
+            _collider.shape = _shapeBtn.value;
             _shapeBtn.addEventListener("value", {
-                _hitbox.shape = _shapeBtn.value;
-                dispatchEvent("property_hitbox");
+                _collider.shape = _shapeBtn.value;
+                dispatchEvent("property_collider");
             });
             hlayout.addUI(_shapeBtn);
         }
@@ -125,10 +126,10 @@ mixin template ColliderDataEntityParameter() {
 
             _bouncinessField = new NumberField;
             _bouncinessField.setMinValue(0f);
-            _bouncinessField.value = _hitbox.bounciness;
+            _bouncinessField.value = _collider.bounciness;
             _bouncinessField.addEventListener("value", {
-                _hitbox.bounciness = _bouncinessField.value;
-                dispatchEvent("property_hitbox");
+                _collider.bounciness = _bouncinessField.value;
+                dispatchEvent("property_collider");
             });
             hlayout.addUI(_bouncinessField);
         }
@@ -137,7 +138,7 @@ mixin template ColliderDataEntityParameter() {
     }
 
     private void _updateFields() {
-        final switch (_hitbox.type) with (HitboxData.Type) {
+        final switch (_collider.type) with (ColliderData.Type) {
         case actor:
             _collXField.isEnabled = true;
             _collYField.isEnabled = true;
@@ -163,7 +164,7 @@ mixin template ColliderDataEntityParameter() {
         }
     }
 
-    HitboxData getHitbox() {
-        return _hitbox;
+    ColliderData getCollider() {
+        return _collider;
     }
 }

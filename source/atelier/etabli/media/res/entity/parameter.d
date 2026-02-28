@@ -24,9 +24,9 @@ package final class ParameterWindow : UIElement {
     mixin GraphicDataEntityParameter;
     mixin BaseDataEntityParameter;
     mixin ColliderDataEntityParameter;
-    mixin HurtboxDataEntityParameter;
+    mixin HitboxDataEntityParameter;
 
-    this(EntityRenderData[] graphics, EntityRenderData[] auxGraphics, HitboxData hitbox, RepulsorData repulsor, HurtboxData hurtbox, BaseEntityData baseEntityData) {
+    this(EntityRenderData[] graphics, EntityRenderData[] auxGraphics, ColliderData collider, RepulsorData repulsor, HitboxData hitbox, BaseEntityData baseEntityData) {
         VList vlist = new VList;
         vlist.setPosition(Vec2f(8f, 8f));
         vlist.setSize(Vec2f.zero.max(getSize() - Vec2f(8f, 8f)));
@@ -38,8 +38,8 @@ package final class ParameterWindow : UIElement {
 
         setupEntityGraphicsParameters(vlist, graphics, auxGraphics);
         setupEntityBaseParameters(vlist, baseEntityData);
-        setupEntityColliderParameters(vlist, hitbox);
-        setupEntityHurtboxParameters(vlist, hurtbox);
+        setupEntityColliderParameters(vlist, collider);
+        setupEntityHitboxParameters(vlist, hitbox);
 
         {
             LabelSeparator sep = new LabelSeparator("Répulsion", Atelier.theme.font);

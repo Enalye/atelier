@@ -82,24 +82,24 @@ package(atelier.etabli.media.res.scene) class TriggerSettings : BaseEntitySettin
 
             hlayout.addUI(new Label("x:", Atelier.theme.font));
 
-            IntegerField hitboxXField = new IntegerField;
-            hitboxXField.value = _entity.trigger.hitbox.x;
-            hitboxXField.addEventListener("value", {
-                _entity.trigger.hitbox = Vec3i(hitboxXField.value, _entity.trigger.hitbox.yz);
+            IntegerField colliderXField = new IntegerField;
+            colliderXField.value = _entity.trigger.collider.x;
+            colliderXField.addEventListener("value", {
+                _entity.trigger.collider = Vec3i(colliderXField.value, _entity.trigger.collider.yz);
                 setDirty();
             });
-            hlayout.addUI(hitboxXField);
+            hlayout.addUI(colliderXField);
 
             hlayout.addUI(new Label("y:", Atelier.theme.font));
 
-            IntegerField hitboxYField = new IntegerField;
-            hitboxYField.value = _entity.trigger.hitbox.y;
-            hitboxYField.addEventListener("value", {
-                _entity.trigger.hitbox = Vec3i(_entity.trigger.hitbox.x, hitboxYField.value, _entity
-                    .trigger.hitbox.z);
+            IntegerField colliderYField = new IntegerField;
+            colliderYField.value = _entity.trigger.collider.y;
+            colliderYField.addEventListener("value", {
+                _entity.trigger.collider = Vec3i(_entity.trigger.collider.x, colliderYField.value, _entity
+                    .trigger.collider.z);
                 setDirty();
             });
-            hlayout.addUI(hitboxYField);
+            hlayout.addUI(colliderYField);
 
             hlayout = new HLayout;
             hlayout.setPadding(Vec2f(284f, 0f));
@@ -107,13 +107,13 @@ package(atelier.etabli.media.res.scene) class TriggerSettings : BaseEntitySettin
 
             hlayout.addUI(new Label("z:", Atelier.theme.font));
 
-            IntegerField hitboxZField = new IntegerField;
-            hitboxZField.value = _entity.trigger.hitbox.z;
-            hitboxZField.addEventListener("value", {
-                _entity.trigger.hitbox = Vec3i(_entity.trigger.hitbox.xy, hitboxZField.value);
+            IntegerField colliderZField = new IntegerField;
+            colliderZField.value = _entity.trigger.collider.z;
+            colliderZField.addEventListener("value", {
+                _entity.trigger.collider = Vec3i(_entity.trigger.collider.xy, colliderZField.value);
                 setDirty();
             });
-            hlayout.addUI(hitboxZField);
+            hlayout.addUI(colliderZField);
         }
     }
 }

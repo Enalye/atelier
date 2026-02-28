@@ -77,7 +77,7 @@ final class Entity : Resource!Entity {
 
         EntityGraphicEffectWrapper _effect;
         Collider _collider;
-        Hurtbox _hurtbox;
+        Hitbox _hitbox;
         Repulsor _repulsor;
         EntityBehavior _behavior;
         float _angle = 180f;
@@ -204,9 +204,9 @@ final class Entity : Resource!Entity {
             _repulsor.setEntity(this);
         }
 
-        if (other._hurtbox) {
-            _hurtbox = new Hurtbox(other._hurtbox);
-            _hurtbox.setEntity(this);
+        if (other._hitbox) {
+            _hitbox = new Hitbox(other._hitbox);
+            _hitbox.setEntity(this);
         }
 
         // Graphique par défaut
@@ -298,7 +298,7 @@ final class Entity : Resource!Entity {
         return _repulsor;
     }
 
-    void setCollider(HitboxData data) {
+    void setCollider(ColliderData data) {
         removeCollider();
         _collider = data.fetch();
 
@@ -648,16 +648,16 @@ final class Entity : Resource!Entity {
         return _baseMaterial;
     }
 
-    void setupHurtbox(HurtboxData data) {
-        if (_hurtbox) {
-            _hurtbox.unregister();
-            _hurtbox = null;
+    void setupHitbox(HitboxData data) {
+        if (_hitbox) {
+            _hitbox.unregister();
+            _hitbox = null;
         }
 
-        if (!data.hasHurtbox)
+        if (!data.hasHitbox)
             return;
 
-        _hurtbox = new Hurtbox(this, data);
+        _hitbox = new Hitbox(this, data);
     }
 
     void updateGraphics() {
@@ -864,8 +864,8 @@ final class Entity : Resource!Entity {
         return _position.z - _baseZ;
     }
 
-    Hurtbox getHurtbox() {
-        return _hurtbox;
+    Hitbox getHitbox() {
+        return _hitbox;
     }
 
     void setName(string name_) {
@@ -962,8 +962,8 @@ final class Entity : Resource!Entity {
                 render(drawPos);
             }
 
-            if (_hurtbox && _hurtbox.isDisplayed) {
-                _hurtbox.draw(drawPos);
+            if (_hitbox && _hitbox.isDisplayed) {
+                _hitbox.draw(drawPos);
             }
         }
 
@@ -1044,16 +1044,16 @@ final class Entity : Resource!Entity {
             onEnable();
             if (_collider)
                 _collider.register();
-            if (_hurtbox)
-                _hurtbox.register();
+            if (_hitbox)
+                _hitbox.register();
         }
         else {
             _isEnabled = false;
             onDisable();
             if (_collider)
                 _collider.unregister();
-            if (_hurtbox)
-                _hurtbox.unregister();
+            if (_hitbox)
+                _hitbox.unregister();
         }
     }
 
@@ -1062,8 +1062,8 @@ final class Entity : Resource!Entity {
             _collider.register();
         }
 
-        if (_hurtbox) {
-            _hurtbox.register();
+        if (_hitbox) {
+            _hitbox.register();
         }
 
         if (!hasController()) {
@@ -1087,8 +1087,8 @@ final class Entity : Resource!Entity {
         if (_collider) {
             _collider.unregister();
         }
-        if (_hurtbox) {
-            _hurtbox.unregister();
+        if (_hitbox) {
+            _hitbox.unregister();
         }
         removeController();
 

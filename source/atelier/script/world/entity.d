@@ -243,8 +243,8 @@ private void _setEnabled(GrCall call) {
 
 private void _setCollidable(GrCall call) {
     Entity entity = call.getNative!Entity(0);
-    Hurtbox hurtbox = entity.getHurtbox();
-    hurtbox.isCollidable(call.getBool(1));
+    Hitbox hitbox = entity.getHitbox();
+    hitbox.isCollidable(call.getBool(1));
 }
 
 private void _getPosition(GrCall call) {

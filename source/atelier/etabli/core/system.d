@@ -95,8 +95,8 @@ final class Etabli {
             &(_onManageFolders));
         _bar.add("Fichier", "Fermer");
 
-        _bar.add("Physique", "Calques des Hurtbox").addEventListener("click", &(
-                _onManageHurtboxLayers));
+        _bar.add("Physique", "Calques des Hitbox").addEventListener("click", &(
+                _onManageHitboxLayers));
 
         Atelier.ui.addUI(_bar);
         Atelier.ui.addUI(_ui);
@@ -667,8 +667,8 @@ final class Etabli {
         _ui.saveFile();
     }
 
-    private void _onManageHurtboxLayers() {
-        auto modal = new HurtboxLayersManager;
+    private void _onManageHitboxLayers() {
+        auto modal = new HitboxLayersManager;
         modal.addEventListener("apply", { saveConfig(); });
         Atelier.ui.pushModalUI(modal);
     }

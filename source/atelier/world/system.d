@@ -300,7 +300,7 @@ final class World {
                 TriggerEventComponent triggerEventComponent = entity.addComponent!TriggerEventComponent();
                 triggerEventComponent.setEvent(entityBuilder.trigger.event);
                 TriggerCollider collider = new TriggerCollider(
-                    cast(Vec3u) entityBuilder.trigger.hitbox);
+                    cast(Vec3u) entityBuilder.trigger.collider);
                 collider.isActive = entityBuilder.trigger.isActive;
                 collider.isActiveOnce = entityBuilder.trigger.isActiveOnce;
                 entity.setCollider(collider);
@@ -314,7 +314,7 @@ final class World {
                 teleporterComponent.setTarget(entityBuilder.teleporter.scene, entityBuilder
                         .teleporter.target, entityBuilder.teleporter.direction);
                 TriggerCollider collider = new TriggerCollider(
-                    cast(Vec3u) entityBuilder.teleporter.hitbox);
+                    cast(Vec3u) entityBuilder.teleporter.collider);
                 collider.isActive = entityBuilder.teleporter.isActive;
                 entity.setCollider(collider);
                 addEntity(entity);

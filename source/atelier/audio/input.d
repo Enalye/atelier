@@ -11,7 +11,15 @@ import atelier.audio.recorder;
 import atelier.audio.config;
 
 /// Représente un périphérique audio
-final class AudioInput {
+interface AudioInput {
+    void record(AudioRecorder recorder);
+    void play();
+    void stop();
+    void clear();
+}
+
+/// Ditto
+final class AudioInputDevice : AudioInput {
     private {
         /// Représente le périphérique audio
         SDL_AudioDeviceID _deviceId;

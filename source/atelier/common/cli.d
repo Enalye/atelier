@@ -3,6 +3,7 @@ module atelier.common.cli;
 import std.conv : to, ConvException;
 import std.exception : enforce;
 import std.string;
+import std.uni : isWhite;
 
 import atelier.core;
 
@@ -270,10 +271,10 @@ final class Cli {
         Command addOption(Option option) {
             enforce!CliException(!hasOption(option._shortName),
                 "une option est déjà définie pour `" ~ option._shortName ~
-                "` pour la commande `" ~ _name ~ "`");
+                    "` pour la commande `" ~ _name ~ "`");
             enforce!CliException(!hasOption(option._longName),
                 "une option est déjà définie pour `" ~ option._longName ~
-                "` pour la commande `" ~ _name ~ "`");
+                    "` pour la commande `" ~ _name ~ "`");
             _options ~= option;
             return this;
         }
@@ -400,18 +401,24 @@ final class Cli {
             enforce!CliException(false, "commande inconnue `" ~ cmd ~ "`");
         }
 
+        private bool _isParam(string arg) const {
+            bool startWithHyphen = indexOf(arg, "-") == 0;
+            bool isNumber = arg.length >= 2 && arg[1] >= '0' && arg[1] <= '9';
+            return startWithHyphen && !isNumber;
+        }
+
         private void _parseCommand() {
             enforce!CliException(_args.length >= _command._requiredParams.length,
                 "paramètres manquants");
             string[] requiredParams = _args[0 .. _command._requiredParams.length];
             _args = _args[_command._requiredParams.length .. $];
             foreach (param; requiredParams) {
-                enforce!CliException(indexOf(param, "-") != 0, "paramètres manquants");
+                enforce!CliException(!_isParam(param), "paramètres manquants");
             }
 
             string[] optionalParams;
             while (_args.length && optionalParams.length < _command._optionalParams.length) {
-                if (indexOf(_args[0], "-") == 0)
+                if (_isParam(_args[0]))
                     break;
                 optionalParams ~= _args[0];
                 _args = _args[1 .. $];
@@ -429,7 +436,7 @@ final class Cli {
             bool hasOptions;
             string cmd = _args[0];
 
-            while (indexOf(cmd, "-") == 0) {
+            while (_isParam(cmd)) {
                 hasOptions = true;
                 Option currentOption = null;
                 if (indexOf(cmd, "--") == 0) {
@@ -462,7 +469,7 @@ final class Cli {
                 if (_command)
                     enforce!CliException(currentOption,
                         "l’option `" ~ cmd ~ "` n’est pas reconnue par la commande `" ~
-                        _command._name ~ "`");
+                            _command._name ~ "`");
                 else
                     enforce!CliException(currentOption,
                         "l’option `" ~ cmd ~ "` n’est pas reconnue");
@@ -482,12 +489,12 @@ final class Cli {
             string[] requiredParams = _args[0 .. option._requiredParams.length];
             _args = _args[option._requiredParams.length .. $];
             foreach (param; requiredParams) {
-                enforce!CliException(indexOf(param, "-") != 0, "paramètres manquants");
+                enforce!CliException(!_isParam(param), "paramètres manquants");
             }
 
             string[] optionalParams;
             while (_args.length && optionalParams.length < option._optionalParams.length) {
-                if (indexOf(_args[0], "-") == 0)
+                if (_isParam(_args[0]))
                     break;
                 optionalParams ~= _args[0];
                 _args = _args[1 .. $];
@@ -617,5 +624,40 @@ final class Cli {
             }
             throw e;
         }
+    }
+
+    /// Analyse une ligne de commande
+    void parse(string command, bool isExe = true) {
+        string[] args;
+
+        bool isStr, isEscape;
+        string arg;
+        foreach (ch; command) {
+            bool wasEscape = isEscape;
+            isEscape = false;
+
+            if (ch == '\\' && !wasEscape) {
+                isEscape = true;
+            }
+            else if (ch == '\"' && !wasEscape) {
+                isStr = !isStr;
+            }
+            else if (isStr) {
+                arg ~= ch;
+            }
+            else {
+                if (isWhite(ch)) {
+                    if (arg.length) {
+                        args ~= arg;
+                        arg.length = 0;
+                    }
+                }
+                else {
+                    arg ~= ch;
+                }
+            }
+        }
+
+        parse(args, isExe);
     }
 }

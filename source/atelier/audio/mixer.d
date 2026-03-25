@@ -40,8 +40,6 @@ final class AudioMixer {
         _masterBus = AudioBus.getMaster();
         _trackBus = new AudioBus();
         _trackBus.connectTo(_masterBus);
-
-        _output = new AudioOutput(_masterBus);
     }
 
     ~this() {
@@ -49,12 +47,37 @@ final class AudioMixer {
 
     void close() {
         closeInput();
-        _output.close();
+
+        if (_output) {
+            _output.close();
+        }
+    }
+
+    void openOutput(string deviceName = "") {
+        closeOutput();
+        _output = new AudioOutputDevice(_masterBus, deviceName);
+    }
+
+    void openOutput(AudioOutput output) {
+        closeOutput();
+        _output = output;
+    }
+
+    void closeOutput() {
+        if (_output) {
+            _output.clear();
+            _output = null;
+        }
     }
 
     void openInput(string deviceName = "") {
         closeInput();
-        _input = new AudioInput(deviceName);
+        _input = new AudioInputDevice(deviceName);
+    }
+
+    void openInput(AudioInput input) {
+        closeInput();
+        _input = input;
     }
 
     void closeInput() {

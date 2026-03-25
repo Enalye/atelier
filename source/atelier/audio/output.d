@@ -10,7 +10,15 @@ import atelier.audio.bus;
 import atelier.audio.config;
 
 /// Représente un périphérique audio
-final class AudioOutput {
+interface AudioOutput {
+    void play();
+    void stop();
+    void close();
+    void clear();
+}
+
+/// Ditto
+final class AudioOutputDevice : AudioOutput {
     private {
         /// Représente le périphérique audio
         SDL_AudioDeviceID _deviceId;
@@ -49,6 +57,7 @@ final class AudioOutput {
 
     /// Ferme le module audio
     void close() {
+        clear();
         _closeAudio();
     }
 
@@ -56,6 +65,12 @@ final class AudioOutput {
     private void _closeAudio() {
         SDL_CloseAudioDevice(_deviceId);
         _deviceId = 0;
+    }
+
+    void clear() {
+        if (_masterBus) {
+            _masterBus.clear();
+        }
     }
 
     void play() {

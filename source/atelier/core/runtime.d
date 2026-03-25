@@ -295,6 +295,8 @@ final class Atelier {
             _etabli = new Etabli;
         }
 
+        _audioMixer.openOutput();
+
         _loader = resLoader;
         setupDefaultResourceLoaders(_resourceManager);
         if (_loader) {

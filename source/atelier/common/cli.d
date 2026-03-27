@@ -658,6 +658,11 @@ final class Cli {
             }
         }
 
+        if (arg.length) {
+            args ~= arg;
+            arg.length = 0;
+        }
+
         parse(args, isExe);
     }
 }

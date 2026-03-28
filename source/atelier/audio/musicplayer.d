@@ -13,7 +13,7 @@ import atelier.audio.player;
 final class MusicPlayer : AudioPlayer {
     private {
         Music _music;
-        int _currentFrame, _startLoopFrame, _endLoopFrame;
+        int _currentFrame, _startLoopFrame, _endLoopFrame, _loopCount = -1;
         int _delayStartFrame, _delayPauseFrame, _delayStopFrame;
         SDL_AudioStream* _stream;
         AudioStream _decoder;
@@ -37,7 +37,7 @@ final class MusicPlayer : AudioPlayer {
         _delayStopFrame = -1;
         _delayPauseFrame = -1;
 
-        setLoop(_music.intro, _music.outro);
+        setLoop(_music.intro, _music.outro, _music.loopCount);
 
         _initDecoder();
         if (startPosition > 0f) {
@@ -56,9 +56,21 @@ final class MusicPlayer : AudioPlayer {
         return _volume;
     }
 
-    void setLoop(float intro, float outro) {
+    /**
+    intro:  Durée en secondes depuis le début. \
+            Position à laquelle la musique redémarrera après la boucle.
+    
+    outro:  Durée en secondes depuis le début. \
+            Position à laquelle la musique redémarre à `intro`
+
+    loopCount:  Si > 0:  Nombre de fois que la boucle s’activera. \
+                Si == 0: Aucune boucle. \
+                Si < 0:  Boucle infinie.
+    */
+    void setLoop(float intro, float outro, int loopCount = -1) {
         _startLoopFrame = 0;
         _endLoopFrame = cast(int) _music.samples;
+        _loopCount = loopCount;
 
         if (intro > 0f) {
             _startLoopFrame = clamp(cast(int)(intro * _music.sampleRate), 0,
@@ -118,22 +130,35 @@ final class MusicPlayer : AudioPlayer {
         int framesRead;
 
         for (;;) {
-            if (_currentFrame >= _endLoopFrame) {
-                _initDecoder();
-                _decoder.seekPosition(_startLoopFrame);
-                _currentFrame = _startLoopFrame;
-            }
-            else if (_currentFrame + framesToRead > _endLoopFrame) {
-                framesToRead = _endLoopFrame - _currentFrame;
+            if (_loopCount != 0) {
+                if (_currentFrame >= _endLoopFrame) {
+                    _initDecoder();
+                    _decoder.seekPosition(_startLoopFrame);
+                    _currentFrame = _startLoopFrame;
+
+                    if (_loopCount > 0)
+                        _loopCount--;
+                }
+                else if (_currentFrame + framesToRead > _endLoopFrame) {
+                    framesToRead = _endLoopFrame - _currentFrame;
+                }
             }
 
             framesRead = _decoder.readSamplesFloat(_decoderBuffer.ptr, framesToRead);
 
             if (framesRead == 0) {
-                _initDecoder();
-                _decoder.seekPosition(_startLoopFrame);
-                _currentFrame = _startLoopFrame;
-                continue;
+                if (_loopCount != 0) {
+                    _initDecoder();
+                    _decoder.seekPosition(_startLoopFrame);
+                    _currentFrame = _startLoopFrame;
+
+                    if (_loopCount > 0)
+                        _loopCount--;
+                    continue;
+                }
+                else {
+                    framesToRead = 0;
+                }
             }
 
             const int rc = SDL_AudioStreamPut(_stream, _decoderBuffer.ptr,

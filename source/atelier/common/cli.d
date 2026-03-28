@@ -102,6 +102,12 @@ final class Cli {
                             index) ~ "` n’est pas de type `" ~ T.sizeof ~ "`");
                 }
             }
+
+            Option on(string name, void delegate(Option) func) {
+                if (name == _shortName || name == _longName)
+                    func(this);
+                return this;
+            }
         }
 
         private {
@@ -210,6 +216,10 @@ final class Cli {
                     return option;
             }
             return null;
+        }
+
+        Option[] getOptions() {
+            return _options;
         }
 
         string getHelp() {

@@ -396,10 +396,10 @@ final class Physics {
                             hit.type = CollisionHit.Type.impact;
                             hit.normal = hitboxHit.normal;
                             hit.entity = hitboxA.entity;
-                            hitboxB.entity.onCollide(hit);
+                            hitboxB.entity.onCollisionHit(hit);
                             hit.normal = -hitboxHit.normal;
                             hit.entity = hitboxB.entity;
-                            hitboxA.entity.onCollide(hit);
+                            hitboxA.entity.onCollisionHit(hit);
 
                             if (!_hitboxLayers[layerA].getRepeat(layerB))
                                 hitboxA.exclude(hitboxB);

@@ -13,17 +13,23 @@ abstract class EntityController : ControllerWrapper {
         bool _isStartingState = true;
         EntityControllerState[string] _states;
         EntityControllerState _currentState;
+        string _id;
     }
 
     @property {
         Entity entity() {
             return _entity;
         }
+
+        string id() const {
+            return _id;
+        }
     }
 
-    final void setup(Entity entity_) {
+    final void setup(Entity entity_, string id_) {
         _isRunning = true;
         _entity = entity_;
+        _id = id_;
     }
 
     final string sendEvent(string event) {
@@ -71,12 +77,12 @@ abstract class EntityController : ControllerWrapper {
         }
     }
 
-    final void onHit(Entity other, Vec3f normal) {
+    final void onCollide(Entity other, Vec3f normal) {
         if (!_currentState)
             return;
 
         string stateId = _currentStateId;
-        _currentState.onHit(other, normal);
+        _currentState.onCollide(other, normal);
         if (stateId != _currentStateId) {
             _currentState.onStartHit(other, normal);
         }

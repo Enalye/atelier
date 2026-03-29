@@ -177,7 +177,7 @@ final class Repulsor {
         if (delta > 0 && distSq > 0) {
             Vec2f dir = (cast(Vec2f)(posB.xy - posA.xy)).normalized();
             Vec2f force = dir * delta;
-            force += (other._entity.velocity.xy - _entity.velocity.xy).length();
+            force += (other._entity.getVelocity().xy - _entity.getVelocity().xy).length();
 
             if (_type == other._type) {
                 _forces -= force * 0.02f;

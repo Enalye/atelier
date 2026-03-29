@@ -35,7 +35,7 @@ final class ProxyBehavior : EntityBehavior {
             return;
 
         Vec3f pos = cast(Vec3f) _component.base.getPosition();
-        _component.relativePosition += entity.velocity();
+        _component.relativePosition += entity.getVelocity();
         pos += _component.relativePosition;
         Vec2f dir = Vec2f.angled(degToRad(_component.relativeAngle));
         pos += Vec3f(dir * _component.relativeDistance, 0f).round();

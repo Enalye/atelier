@@ -94,6 +94,8 @@ package final class ParameterWindow : UIElement {
 
                     Atelier.ui.popModalUI();
 
+                    _updateItem();
+
                     select(newItem);
                 });
                 Atelier.ui.pushModalUI(modal);
@@ -128,6 +130,8 @@ package final class ParameterWindow : UIElement {
                     _stepsList.addList(item);
                 }
 
+                _updateItem();
+
                 select(newItem);
             });
             hbox.addUI(_duplicateBtn);
@@ -152,6 +156,7 @@ package final class ParameterWindow : UIElement {
                 }
 
                 _selectedStep = null;
+                _updateItem();
                 _updateParameters();
             });
             hbox.addUI(_removeBtn);
@@ -181,6 +186,8 @@ package final class ParameterWindow : UIElement {
                 foreach (ParticleStepItem item; items) {
                     _stepsList.addList(item);
                 }
+
+                _updateItem();
             });
             hbox.addUI(_upBtn);
 
@@ -205,6 +212,8 @@ package final class ParameterWindow : UIElement {
                 foreach (ParticleStepItem item; items) {
                     _stepsList.addList(item);
                 }
+
+                _updateItem();
             });
             hbox.addUI(_downBtn);
 

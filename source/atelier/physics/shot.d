@@ -142,7 +142,7 @@ final class ShotCollider : Collider {
                 if (terrainHit.isColliding) {
                     Physics.CollisionHit data;
                     data.normal = terrainHit.normal;
-                    entity.onCollide(data);
+                    entity.onCollisionHit(data);
                     break __checkLoop;
                 }
                 else {
@@ -151,7 +151,7 @@ final class ShotCollider : Collider {
                         Physics.CollisionHit data;
                         data.solid = solidHit.solid;
                         data.normal = Vec3f(-stepDir.x, 0, 0);
-                        entity.onCollide(data);
+                        entity.onCollisionHit(data);
                         break __checkLoop;
                     }
                     else {
@@ -165,7 +165,7 @@ final class ShotCollider : Collider {
                 if (terrainHit.isColliding) {
                     Physics.CollisionHit data;
                     data.normal = terrainHit.normal;
-                    entity.onCollide(data);
+                    entity.onCollisionHit(data);
                     break __checkLoop;
                 }
                 else {
@@ -174,7 +174,7 @@ final class ShotCollider : Collider {
                         Physics.CollisionHit data;
                         data.solid = solidHit.solid;
                         data.normal = Vec3f(0, -stepDir.y, 0);
-                        entity.onCollide(data);
+                        entity.onCollisionHit(data);
                         break __checkLoop;
                     }
                     else {
@@ -188,7 +188,7 @@ final class ShotCollider : Collider {
                 if (terrainHit.isColliding) {
                     Physics.CollisionHit data;
                     data.normal = Vec3f(0f, 0f, 1f);
-                    entity.onCollide(data);
+                    entity.onCollisionHit(data);
                     break __checkLoop;
                 }
                 else {
@@ -197,7 +197,7 @@ final class ShotCollider : Collider {
                         Physics.CollisionHit data;
                         data.solid = solidHit.solid;
                         data.normal = Vec3f(0, 0, -stepDir.z);
-                        entity.onCollide(data);
+                        entity.onCollisionHit(data);
                         break __checkLoop;
                     }
                     else {

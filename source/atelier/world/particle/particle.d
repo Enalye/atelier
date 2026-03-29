@@ -1,5 +1,7 @@
 module atelier.world.particle.particle;
 
+import std.algorithm.sorting : sort;
+
 import farfadet;
 import atelier.common;
 import atelier.core;
@@ -104,6 +106,8 @@ final class Particle : Resource!Particle {
     }
 
     void update(ParticleSystem system) {
+        sort!((a, b) => a.order < b.order)(_sources.array);
+
         foreach (i, source; _sources) {
             source.update(system);
             if (!source.isRunning) {

@@ -25,6 +25,9 @@ mixin template ControllerMixin() {
     EntityController setController(string id) {
         import atelier.core : Atelier;
 
+        if (_controller && _controller.id == id)
+            return _controller;
+
         if (_controller) {
             _controller.unregister();
         }
@@ -32,7 +35,7 @@ mixin template ControllerMixin() {
         _controller = Atelier.world.fetchController!Entity(id);
 
         if (_controller) {
-            _controller.setup(this);
+            _controller.setup(this, id);
             Atelier.world.registerController(_controller);
             _controller.onStart();
         }
@@ -61,11 +64,11 @@ mixin template ControllerMixin() {
         _controller.onDisable();
     }
 
-    private void onHit(Entity target, Vec3f normal) {
+    private void onCollide(Entity target, Vec3f normal) {
         if (!_controller)
             return;
 
-        _controller.onHit(target, normal);
+        _controller.onCollide(target, normal);
     }
 
     private void onSquish(Vec3f normal) {

@@ -617,27 +617,6 @@ package final class ParticleDataItem : UIElement {
         _stepsCountLabel.textColor = Atelier.theme.neutral;
         addUI(_stepsCountLabel);
 
-        /*{
-            _hbox = new HBox;
-            _hbox.setAlign(UIAlignX.right, UIAlignY.center);
-            _hbox.setPosition(Vec2f(12f, 0f));
-            _hbox.setSpacing(2f);
-            addUI(_hbox);
-
-            _upBtn = new IconButton("editor:arrow-small-up");
-            _upBtn.addEventListener("click", { this.outer.moveUpGraphic(this); });
-            _hbox.addUI(_upBtn);
-
-            _downBtn = new IconButton("editor:arrow-small-down");
-            _downBtn.addEventListener("click", {
-                this.outer.moveDownGraphic(this);
-            });
-            _hbox.addUI(_downBtn);
-
-            _hbox.isVisible = false;
-            _hbox.isEnabled = false;
-        }*/
-
         _updateDisplay();
 
         addEventListener("mouseenter", &_onMouseEnter);
@@ -673,7 +652,7 @@ package final class ParticleDataItem : UIElement {
 
     private void _updateDisplay() {
         _nameLabel.text = _name;
-        _stepsCountLabel.text = "(0)";
+        _stepsCountLabel.text = format("(%d)", _steps.length);
     }
 
     protected void updateSelection(bool select_) {

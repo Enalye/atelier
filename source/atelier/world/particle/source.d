@@ -19,6 +19,7 @@ final class ParticleSource {
     }
 
     uint waitFrame;
+    int order;
 
     @property {
         Particle particle() {

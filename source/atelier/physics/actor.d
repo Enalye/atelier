@@ -134,7 +134,7 @@ final class ActorCollider : Collider {
                     //Physics.CollisionHit data;
                     //data.normal = terrainHit.normal;
                     //data.type = hitType;
-                    //entity.onCollide(data);
+                    //entity.onCollisionHit(data);
                 }
                 else {
                     //_moveTileRaw(entity, Vec3i(stepDir.x, 0, 0), terrainHit.height);
@@ -148,7 +148,7 @@ final class ActorCollider : Collider {
                     //Physics.CollisionHit data;
                     //data.normal = terrainHit.normal;
                     //data.type = hitType;
-                    //entity.onCollide(data);
+                    //entity.onCollisionHit(data);
                 }
                 else {
                     //_moveTileRaw(entity, Vec3i(0, stepDir.y, 0), terrainHit.height);
@@ -162,7 +162,7 @@ final class ActorCollider : Collider {
                     //Physics.CollisionHit data;
                     //data.normal = terrainHit.normal;
                     //data.type = hitType;
-                    //entity.onCollide(data);
+                    //entity.onCollisionHit(data);
                 }
                 else {
                     //_moveTileRaw(entity, Vec3i(0, 0, stepDir.z), terrainHit.height);
@@ -304,7 +304,7 @@ final class ActorCollider : Collider {
                         if (solidHitUp.isColliding) {
                             data.normal = Vec3f(0, 0, deltaZ > 0 ? -1 : 1);
                             data.type = hitType;
-                            entity.onCollide(data);
+                            entity.onCollisionHit(data);
                         }
                         else {
                             entity.moveRaw(Vec3i(stepDir.x, 0, deltaZ),
@@ -315,7 +315,7 @@ final class ActorCollider : Collider {
                     default:
                         data.normal = terrainHit.normal;
                         data.type = hitType;
-                        entity.onCollide(data);
+                        entity.onCollisionHit(data);
                         break;
                     }
                     break;
@@ -340,7 +340,7 @@ final class ActorCollider : Collider {
                                 data.entity = solidHit.solid.entity;
                                 data.normal = Vec3f(0, 0, deltaZ > 0 ? -1 : 1);
                                 data.type = hitType;
-                                entity.onCollide(data);
+                                entity.onCollisionHit(data);
                             }
                             else {
                                 entity.moveRaw(Vec3i(stepDir.x, 0, deltaZ),
@@ -352,7 +352,7 @@ final class ActorCollider : Collider {
                             data.entity = solidHit.solid.entity;
                             data.normal = Vec3f(-stepDir.x, 0, 0);
                             data.type = hitType;
-                            entity.onCollide(data);
+                            entity.onCollisionHit(data);
                             break;
                         }
                         break;
@@ -389,7 +389,7 @@ final class ActorCollider : Collider {
                         if (terrainHitUp.isColliding) {
                             data.normal = Vec3f(0, 0, deltaZ > 0 ? -1 : 1);
                             data.type = hitType;
-                            entity.onCollide(data);
+                            entity.onCollisionHit(data);
                         }
                         else {
                             entity.moveRaw(Vec3i(0, stepDir.y, deltaZ),
@@ -400,7 +400,7 @@ final class ActorCollider : Collider {
                     default:
                         data.normal = terrainHit.normal;
                         data.type = hitType;
-                        entity.onCollide(data);
+                        entity.onCollisionHit(data);
                         break;
                     }
                     break;
@@ -425,7 +425,7 @@ final class ActorCollider : Collider {
                                 data.entity = solidHit.solid.entity;
                                 data.normal = Vec3f(0, 0, deltaZ > 0 ? -1 : 1);
                                 data.type = hitType;
-                                entity.onCollide(data);
+                                entity.onCollisionHit(data);
                             }
                             else {
                                 entity.moveRaw(Vec3i(0, stepDir.y, deltaZ),
@@ -437,7 +437,7 @@ final class ActorCollider : Collider {
                             data.entity = solidHit.solid.entity;
                             data.normal = Vec3f(0, -stepDir.y, 0);
                             data.type = hitType;
-                            entity.onCollide(data);
+                            entity.onCollisionHit(data);
                             break;
                         }
                         break;
@@ -454,7 +454,7 @@ final class ActorCollider : Collider {
                     Physics.CollisionHit data;
                     data.normal = Vec3f(0f, 0f, 1f);
                     data.type = hitType;
-                    entity.onCollide(data);
+                    entity.onCollisionHit(data);
                 }
                 else {
                     Physics.SolidHit solidHit = Atelier.physics.collidesAt(hitPosition, collider);
@@ -464,7 +464,7 @@ final class ActorCollider : Collider {
                         data.entity = solidHit.solid.entity;
                         data.normal = Vec3f(0, 0, -stepDir.z);
                         data.type = hitType;
-                        entity.onCollide(data);
+                        entity.onCollisionHit(data);
                         break;
                     }
                     else {

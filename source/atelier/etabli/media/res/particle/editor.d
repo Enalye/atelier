@@ -72,16 +72,13 @@ final class ParticleResourceEditor : ResourceBaseEditor {
             }
         });
 
-        _parameterWindow.addEventListener("size", {
-            _player.setWidth(getWidth() - _parameterWindow.getWidth());
-        });
-
         _player.addEventListener("particle_start", {
+            _time = 0;
             _particle.setup();
             _system.clear();
             _system.addParticle(_particle);
         });
-        _player.addEventListener("particle_stop", { _system.clear(); });
+        _player.addEventListener("particle_stop", { _system.clear(); _time = 0; });
 
         addEventListener("wheel", &_onWheel);
         addEventListener("mousedown", &_onMouseDown);
@@ -92,6 +89,8 @@ final class ParticleResourceEditor : ResourceBaseEditor {
 
         addEventListener("update", &_onUpdate);
         addEventListener("draw", &_onDraw);
+
+        addEventListener("size", { _player.setWidth(getWidth()); });
     }
 
     override Farfadet save(Farfadet ffd) {

@@ -23,7 +23,7 @@ final class UnitBehavior : EntityBehavior {
     }
 
     override void update() {
-        Vec3f velocity = entity.velocity;
+        Vec3f velocity = entity.getVelocity();
         Vec3f accel = entity.getAccel();
 
         float friction = Atelier.world.getMaterial(entity.getBaseMaterial()).friction;

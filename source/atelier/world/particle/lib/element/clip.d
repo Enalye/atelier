@@ -29,5 +29,5 @@ private void _clip(ParticleElement element, Farfadet ffd) {
 private void _addClip(ParticleElement element, Farfadet ffd) {
     Vec4i clip = cast(Vec4i) element.clip;
     clip += ffd.get!Vec4i(0);
-    element.clip += cast(Vec4u) clip.max(Vec4i.zero);
+    element.clip = cast(Vec4u) clip.max(Vec4i.zero);
 }

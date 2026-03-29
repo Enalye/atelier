@@ -100,7 +100,7 @@ abstract class EntityControllerState {
     void onClose() {
     }
 
-    void onHit(Entity target, Vec3f normal) {
+    void onCollide(Entity target, Vec3f normal) {
     }
 
     void onSquish(Vec3f normal) {

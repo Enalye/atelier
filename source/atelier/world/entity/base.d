@@ -58,9 +58,7 @@ final class Entity : Resource!Entity {
         string _baseBehaviorId;
         bool _hasCulling = true;
         uint _sectorID;
-    }
 
-    protected {
         EntityComponent[string] _components;
         EntityGraphic[string] _graphics, _auxGraphics;
         string _graphicId;
@@ -84,6 +82,7 @@ final class Entity : Resource!Entity {
         int _material = 0;
         int _baseZ = 0;
         int _baseMaterial = 0;
+        float _alpha = 1f;
 
         Vec3i _position = Vec3i.zero;
         Vec3f _subPosition = Vec3f.zero;
@@ -158,10 +157,6 @@ final class Entity : Resource!Entity {
             }
 
             return _angle;
-        }
-
-        Vec3f velocity() const {
-            return _velocity;
         }
     }
 
@@ -333,10 +328,18 @@ final class Entity : Resource!Entity {
     }
 
     EntityBehavior setBehavior(string id) {
+        if (_behavior && _behavior.id == id)
+            return _behavior;
+
         _behavior = Atelier.world.fetchBehavior(id);
         _behavior.entity = this;
+        _behavior.id = id;
         _behavior.setup();
         return _behavior;
+    }
+
+    void removeBehavior() {
+        _behavior = null;
     }
 
     void unregister() {
@@ -907,6 +910,10 @@ final class Entity : Resource!Entity {
         _velocity += Vec3f(Vec2f.angled(degToRad(_angle)) * xySpeed, zSpeed);
     }
 
+    Vec3f getVelocity() const {
+        return _velocity;
+    }
+
     void setVelocity(Vec3f dir) {
         _velocity = dir;
     }
@@ -926,6 +933,10 @@ final class Entity : Resource!Entity {
     uint getSectorID() {
         _sectorID = Atelier.nav.updateSectorID(_position, _sectorID);
         return _sectorID;
+    }
+
+    void setAlpha(float alpha) {
+        _alpha = alpha;
     }
 
     void lookAt(Vec2i target) {
@@ -951,15 +962,15 @@ final class Entity : Resource!Entity {
         }
 
         if (_isEnabled) {
-            renderShadow(drawPos);
+            renderShadow(drawPos, _alpha);
 
             if (_collider && _collider.isDisplayed) {
                 _collider.drawBack(drawPos);
-                render(drawPos);
+                render(drawPos, _alpha);
                 _collider.drawFront(drawPos);
             }
             else {
-                render(drawPos);
+                render(drawPos, _alpha);
             }
 
             if (_hitbox && _hitbox.isDisplayed) {
@@ -1105,7 +1116,7 @@ final class Entity : Resource!Entity {
         onDisableController();
     }
 
-    void onCollide(Physics.CollisionHit hit) {
+    void onCollisionHit(Physics.CollisionHit hit) {
         if (!_isEnabled)
             return;
 
@@ -1129,7 +1140,10 @@ final class Entity : Resource!Entity {
                     _baseMaterial = Atelier.world.scene.getMaterial(_position);
                 }
             }
-            onHit(hit.entity, hit.normal);
+            onCollide(hit.entity, hit.normal);
+            if (_behavior) {
+                _behavior.onCollide(hit.entity, hit.normal);
+            }
             break;
         case squish:
             onSquish(hit.normal);

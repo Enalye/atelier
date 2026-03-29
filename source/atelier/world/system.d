@@ -89,6 +89,10 @@ final class World {
         Entity player() {
             return _player;
         }
+
+        ParticleSystem particle() {
+            return _particle;
+        }
     }
 
     this() {

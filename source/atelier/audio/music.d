@@ -1,5 +1,6 @@
 module atelier.audio.music;
 
+import std.exception : enforce;
 import std.stdio;
 import std.file;
 import audioformats;
@@ -110,7 +111,7 @@ final class Music : Resource!Music {
 
         _channels = cast(ubyte) stream.getNumChannels();
         _samples = stream.getLengthInFrames();
-        assert(_samples != audiostreamUnknownLength);
+        enforce(_samples != audiostreamUnknownLength);
 
         _sampleRate = cast(int) stream.getSamplerate();
     }

@@ -1,5 +1,6 @@
 module atelier.audio.sound;
 
+import std.exception : enforce;
 import std.file;
 import audioformats;
 import bindbc.sdl;
@@ -72,12 +73,12 @@ final class Sound : Resource!Sound {
 
         _channels = cast(ubyte) stream.getNumChannels();
         _samples = stream.getLengthInFrames();
-        assert(_samples != audiostreamUnknownLength);
+        enforce(_samples != audiostreamUnknownLength);
 
         _buffer = new float[cast(size_t)(_samples * _channels)];
 
         const int framesRead = stream.readSamplesFloat(_buffer);
-        assert(framesRead == stream.getLengthInFrames());
+        enforce(framesRead == stream.getLengthInFrames());
         _sampleRate = cast(int) stream.getSamplerate();
 
         toStereo();

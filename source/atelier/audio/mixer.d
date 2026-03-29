@@ -216,4 +216,31 @@ final class AudioMixer {
 
     void playTrackInBetween(Music music, float fadeOut = 2f) {
     }
+
+    void update(float fadeIn) {
+        if (!_tracks.length)
+            return;
+
+        MusicPlayer player = _tracks[$ - 1];
+        if (!player.isAlive) {
+            _tracks.length--;
+
+            if (_tracks.length) {
+                player = _tracks[$ - 1];
+
+                AudioFader fader = new AudioFader;
+                fader.isFadeIn = true;
+                fader.duration = fadeIn;
+                fader.spline = Spline.linear;
+                fader.delay = 0f;
+
+                player.addEffect(fader);
+                player.resume(0f);
+            }
+        }
+    }
+
+    bool isPlayingTrack() const {
+        return _tracks.length > 0;
+    }
 }

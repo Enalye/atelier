@@ -19,6 +19,7 @@ final class MusicPlayer : AudioPlayer {
         AudioStream _decoder;
         float[] _decoderBuffer;
         float _volume = 1f;
+        bool _hasLoopEnded;
     }
 
     @property {
@@ -143,6 +144,13 @@ final class MusicPlayer : AudioPlayer {
                     framesToRead = _endLoopFrame - _currentFrame;
                 }
             }
+            else if (_currentFrame + framesToRead > _music.samples) {
+                framesToRead = (cast(int) _music.samples) - _currentFrame;
+
+                if (framesRead <= 0) {
+                    _hasLoopEnded = true;
+                }
+            }
 
             framesRead = _decoder.readSamplesFloat(_decoderBuffer.ptr, framesToRead);
 
@@ -217,6 +225,9 @@ final class MusicPlayer : AudioPlayer {
                 .sizeof), cast(int)(float.sizeof * Atelier_Audio_Channels * framesToRead));
 
         if (framesRead >= 0) {
+            if (_hasLoopEnded && framesRead == 0) {
+                remove();
+            }
             framesRead >>= 2;
 
             const float totalVolume = volToNonLinear(_music.volume * _volume);

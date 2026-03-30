@@ -103,10 +103,8 @@ final class Cli {
                 }
             }
 
-            Option on(string name, void delegate(Option) func) {
-                if (name == _shortName || name == _longName)
-                    func(this);
-                return this;
+            bool isNamed(string name) const {
+                return (name == _shortName || name == _longName);
             }
         }
 

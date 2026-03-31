@@ -69,7 +69,7 @@ private void _play(GrCall call) {
 private void _playTrack(GrCall call) {
     Music music = call.getNative!Music(0);
     float fadeOut = call.getFloat(1);
-    Atelier.audio.playTrack(music, fadeOut);
+    Atelier.audio.playTrack(music, fadeOut, -1);
 }
 
 private void _stopTrack(GrCall call) {

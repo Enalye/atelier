@@ -126,7 +126,7 @@ final class AudioMixer {
         _masterBus.play(player);
     }
 
-    void playTrack(Music music, float fadeOut) {
+    void playTrack(Music music, float fadeOut, int repeat) {
         if (_tracks.length) {
             MusicPlayer oldPlayer = _tracks[$ - 1];
             _tracks.length--;
@@ -143,6 +143,7 @@ final class AudioMixer {
             fadeOut = 0f;
         }
         MusicPlayer player = new MusicPlayer(music, fadeOut);
+        player.setRepeat(repeat);
         _tracks ~= player;
         _trackBus.play(player);
     }

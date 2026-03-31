@@ -2,6 +2,7 @@ module atelier.audio;
 
 public {
     import atelier.audio.bus;
+    import atelier.audio.clip;
     import atelier.audio.config;
     import atelier.audio.delay;
     import atelier.audio.effect;

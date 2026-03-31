@@ -146,11 +146,14 @@ final class Cli {
         }
 
         private void addOption(string shortName, string longName,
-            string[] requiredParams_, string[] optionalParams_) {
-            enforce!CliException(!hasOption(shortName),
-                "une option est déjà définie pour `" ~ shortName ~ "`");
-            enforce!CliException(!hasOption(longName),
-                "une option est déjà définie pour `" ~ longName ~ "`");
+            string[] requiredParams_, string[] optionalParams_, bool isUnique) {
+
+            if (isUnique) {
+                enforce!CliException(!hasOption(shortName),
+                    "une option est déjà définie pour `" ~ shortName ~ "`");
+                enforce!CliException(!hasOption(longName),
+                    "une option est déjà définie pour `" ~ longName ~ "`");
+            }
 
             _options ~= new Option(shortName, longName, requiredParams_, optionalParams_);
         }
@@ -235,15 +238,17 @@ final class Cli {
         private {
             string _shortName, _longName, _info;
             string[] _requiredParams, _optionalParams;
+            bool _isUnique = true;
         }
 
         this(string shortName, string longName, string info,
-            string[] requiredParams = [], string[] optionalParams = []) {
+            string[] requiredParams = [], string[] optionalParams = [], bool isUnique = true) {
             _shortName = shortName;
             _longName = longName;
             _info = info;
             _requiredParams = requiredParams;
             _optionalParams = optionalParams;
+            _isUnique = isUnique;
         }
     }
 
@@ -328,7 +333,7 @@ final class Cli {
 
     /// Ajoute une option
     void addOption(string shortName, string longName, string info,
-        string[] requiredParams = [], string[] optionalParams = []) {
+        string[] requiredParams = [], string[] optionalParams = [], bool isUnique = true) {
         enforce!CliException(shortName.length || longName.length,
             "l’option doit avoir au moins un nom");
         enforce!CliException(!hasOption(shortName),
@@ -336,7 +341,7 @@ final class Cli {
         enforce!CliException(!hasOption(longName),
             "une option est déjà définie pour `" ~ longName ~ "`");
 
-        _options ~= new Option(shortName, longName, info, requiredParams, optionalParams);
+        _options ~= new Option(shortName, longName, info, requiredParams, optionalParams, isUnique);
     }
 
     /// Ajoute une commande
@@ -350,14 +355,14 @@ final class Cli {
 
     /// Ajoute une option à une commande
     void addCommandOption(string name, string shortName, string longName,
-        string info, string[] requiredParams = [], string[] optionalParams = []) {
+        string info, string[] requiredParams = [], string[] optionalParams = [], bool isUnique = true) {
         enforce!CliException(shortName.length || longName.length,
             "l’option doit avoir au moins un nom");
 
         foreach (command; _commands) {
             if (command._name == name) {
                 command._options ~= new Option(shortName, longName, info,
-                    requiredParams, optionalParams);
+                    requiredParams, optionalParams, isUnique);
                 return;
             }
         }
@@ -508,7 +513,8 @@ final class Cli {
                 _args = _args[1 .. $];
             }
 
-            _result.addOption(option._shortName, option._longName, requiredParams, optionalParams);
+            _result.addOption(option._shortName, option._longName,
+                requiredParams, optionalParams, option._isUnique);
         }
     }
 

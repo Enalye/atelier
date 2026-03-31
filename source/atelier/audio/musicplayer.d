@@ -192,6 +192,7 @@ final class MusicPlayer : AudioPlayer {
             }
             else {
                 framesToRead = _delayStopFrame;
+                _delayStopFrame = 0;
                 remove();
 
                 if (framesToRead == 0)
@@ -205,6 +206,7 @@ final class MusicPlayer : AudioPlayer {
             }
             else {
                 framesToRead = _delayPauseFrame;
+                _delayPauseFrame = 0;
 
                 if (framesToRead == 0)
                     return 0;

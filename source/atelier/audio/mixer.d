@@ -33,6 +33,10 @@ final class AudioMixer {
         AudioBus master() {
             return _masterBus;
         }
+
+        AudioBus tracks() {
+            return _trackBus;
+        }
     }
 
     /// Init

@@ -13,7 +13,7 @@ import atelier.audio.player;
 final class MusicPlayer : AudioPlayer {
     private {
         Music _music;
-        int _currentFrame, _startLoopFrame, _endLoopFrame, _loopCount = -1;
+        int _currentFrame, _startLoopFrame, _endLoopFrame, _repeat = 0;
         int _delayStartFrame, _delayPauseFrame, _delayStopFrame;
         SDL_AudioStream* _stream;
         AudioStream _decoder;
@@ -38,7 +38,7 @@ final class MusicPlayer : AudioPlayer {
         _delayStopFrame = -1;
         _delayPauseFrame = -1;
 
-        setLoop(_music.intro, _music.outro, _music.loopCount);
+        setLoop(_music.intro, _music.outro);
 
         _initDecoder();
         if (startPosition > 0f) {
@@ -63,15 +63,10 @@ final class MusicPlayer : AudioPlayer {
     
     outro:  Durée en secondes depuis le début. \
             Position à laquelle la musique redémarre à `intro`
-
-    loopCount:  Si > 0:  Nombre de fois que la boucle s’activera. \
-                Si == 0: Aucune boucle. \
-                Si < 0:  Boucle infinie.
     */
-    void setLoop(float intro, float outro, int loopCount = -1) {
+    void setLoop(float intro, float outro) {
         _startLoopFrame = 0;
         _endLoopFrame = cast(int) _music.samples;
-        _loopCount = loopCount;
 
         if (intro > 0f) {
             _startLoopFrame = clamp(cast(int)(intro * _music.sampleRate), 0,
@@ -86,6 +81,15 @@ final class MusicPlayer : AudioPlayer {
         if (_startLoopFrame >= _endLoopFrame) {
             _startLoopFrame = 0;
         }
+    }
+
+    /**
+    Si  > 0: Nombre de fois que la boucle s’activera. \
+    Si == 0: Aucune boucle. \
+    Si  < 0: Boucle infinie.
+    */
+    void setRepeat(int repeat) {
+        _repeat = repeat;
     }
 
     void resume(float delay = 0f) {
@@ -131,14 +135,14 @@ final class MusicPlayer : AudioPlayer {
         int framesRead;
 
         for (;;) {
-            if (_loopCount != 0) {
+            if (_repeat != 0) {
                 if (_currentFrame >= _endLoopFrame) {
                     _initDecoder();
                     _decoder.seekPosition(_startLoopFrame);
                     _currentFrame = _startLoopFrame;
 
-                    if (_loopCount > 0)
-                        _loopCount--;
+                    if (_repeat > 0)
+                        _repeat--;
                 }
                 else if (_currentFrame + framesToRead > _endLoopFrame) {
                     framesToRead = _endLoopFrame - _currentFrame;
@@ -155,13 +159,13 @@ final class MusicPlayer : AudioPlayer {
             framesRead = _decoder.readSamplesFloat(_decoderBuffer.ptr, framesToRead);
 
             if (framesRead == 0) {
-                if (_loopCount != 0) {
+                if (_repeat != 0) {
                     _initDecoder();
                     _decoder.seekPosition(_startLoopFrame);
                     _currentFrame = _startLoopFrame;
 
-                    if (_loopCount > 0)
-                        _loopCount--;
+                    if (_repeat > 0)
+                        _repeat--;
                     continue;
                 }
                 else {

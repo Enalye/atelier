@@ -151,6 +151,7 @@ final class MusicResourceEditor : ResourceBaseEditor {
             _music.outro = _hasOutro ? _outroPosition : 0f;
             _musicPlayer = new MusicPlayer(_music, 0f,
                 _startPosition * _music.samples / _music.sampleRate);
+            _musicPlayer.setRepeat(-1);
             Atelier.audio.play(_musicPlayer);
             _isPlaying = true;
         }

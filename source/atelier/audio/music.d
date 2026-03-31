@@ -21,7 +21,6 @@ final class Music : Resource!Music {
         float _gain = 1f;
         float _intro = -1f;
         float _outro = -1f;
-        int _loopCount = 0;
     }
 
     @property {
@@ -59,19 +58,6 @@ final class Music : Resource!Music {
         /// Ditto
         float outro(float outro_) {
             return _outro = outro_;
-        }
-
-        /// Compteur de boucles. \
-        /// Si  > 0: Nombre de fois que la boucle s’activera. \
-        /// Si == 0: Aucune boucle. \
-        /// Si  < 0: Boucle infinie.
-        int loopCount() const {
-            return _loopCount;
-        }
-
-        /// Ditto
-        int loopCount(int loopCount_) {
-            return _loopCount = loopCount_;
         }
 
         const(ubyte)[] data() const {

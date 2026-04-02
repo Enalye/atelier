@@ -27,6 +27,7 @@ final class AudioMixer {
         AudioInput _input;
         AudioBus _masterBus, _trackBus;
         MusicPlayer[] _tracks;
+        bool _isStandalone;
     }
 
     @property {
@@ -40,7 +41,13 @@ final class AudioMixer {
     }
 
     /// Init
-    this() {
+    this(bool initAsStandalone = false) {
+        if (initAsStandalone) {
+            if (!SDL_WasInit(SDL_INIT_AUDIO)) {
+                SDL_InitSubSystem(SDL_INIT_AUDIO);
+                _isStandalone = true;
+            }
+        }
         _masterBus = AudioBus.getMaster();
         _trackBus = new AudioBus();
         _trackBus.connectTo(_masterBus);
@@ -54,6 +61,11 @@ final class AudioMixer {
 
         if (_output) {
             _output.close();
+        }
+
+        if (_isStandalone) {
+            _isStandalone = false;
+            SDL_QuitSubSystem(SDL_INIT_AUDIO);
         }
     }
 

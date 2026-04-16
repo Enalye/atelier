@@ -67,6 +67,7 @@ final class ToolButton : Button!RoundedRectangle {
     private {
         RoundedRectangle _background;
         Icon _icon;
+        Label _label;
         ToolGroup _group;
         bool _value;
     }
@@ -78,15 +79,24 @@ final class ToolButton : Button!RoundedRectangle {
     }
 
     this(ToolGroup group, string icon, bool isChecked = false) {
+        this(group, icon, "", isChecked);
+    }
+
+    this(ToolGroup group, string icon, string text, bool isChecked = false) {
         enforce(group, "groupe non-spécifié");
         _group = group;
         _value = _group.add(this, isChecked);
 
-        _icon = new Icon(icon);
-        _icon.setAlign(UIAlignX.center, UIAlignY.center);
-        addUI(_icon);
+        if (icon.length) {
+            _icon = new Icon(icon);
+            addUI(_icon);
+        }
+        if (text.length) {
+            _label = new Label(text, Atelier.theme.font);
+            addUI(_label);
+        }
 
-        setSize(_icon.getSize() + Vec2f(8f, 8f));
+        _updateElements();
 
         _background = RoundedRectangle.outline(getSize(), Atelier.theme.corner, 2f);
         _background.anchor = Vec2f.zero;
@@ -107,13 +117,74 @@ final class ToolButton : Button!RoundedRectangle {
         addEventListener("size", { _background.size = getSize(); });
     }
 
+    private void _updateElements() {
+        if (_label && _icon) {
+            _icon.setAlign(UIAlignX.left, UIAlignY.center);
+            _label.setAlign(UIAlignX.right, UIAlignY.center);
+
+            Vec2f size_ = Vec2f(12f, 8f);
+            size_.x = _label.getWidth() + _icon.getWidth();
+            size_.y = max(_label.getHeight(), _icon.getHeight());
+            setSize(size_);
+        }
+        else if (_label) {
+            _label.setAlign(UIAlignX.center, UIAlignY.center);
+            setSize(_label.getSize() + Vec2f(8f, 8f));
+        }
+        else if (_icon) {
+            _icon.setAlign(UIAlignX.center, UIAlignY.center);
+            setSize(_icon.getSize() + Vec2f(8f, 8f));
+        }
+        else {
+            setSize(Vec2f(8f, 8f));
+        }
+    }
+
     void setIcon(string icon) {
-        _icon.setIcon(icon);
-        setSize(_icon.getSize() + Vec2f(8f, 8f));
+        if (icon.length) {
+            if (!_icon) {
+                _icon = new Icon(icon);
+                addUI(_icon);
+            }
+            else {
+                _icon.setIcon(icon);
+            }
+        }
+        else {
+            if (_icon) {
+                _icon.removeUI();
+            }
+
+            _icon = null;
+        }
+        _updateElements();
     }
 
     void setIconColor(Color color_) {
+        if (!_icon)
+            return;
+
         _icon.color = color_;
+    }
+
+    void setText(string text) {
+        if (text.length) {
+            if (!_label) {
+                _label = new Label(text, Atelier.theme.font);
+                addUI(_label);
+            }
+            else {
+                _label.text = text;
+            }
+        }
+        else {
+            if (_label) {
+                _label.removeUI();
+            }
+
+            _label = null;
+        }
+        _updateElements();
     }
 
     void check() {

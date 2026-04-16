@@ -17,6 +17,8 @@ public {
     import atelier.audio.output;
     import atelier.audio.panner;
     import atelier.audio.player;
+    import atelier.audio.phoneme;
+    import atelier.audio.phonemeplayer;
     import atelier.audio.reverb;
     import atelier.audio.recorder;
     import atelier.audio.recorderplayer;

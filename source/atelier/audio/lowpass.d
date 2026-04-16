@@ -1,6 +1,6 @@
 module atelier.audio.lowpass;
 
-import std.math : round;
+import std.math : round, isFinite;
 
 import atelier.common;
 import atelier.core;
@@ -36,6 +36,10 @@ final class AudioLowPassFilter : AudioEffect {
     this() {
     }
 
+    private float _getAmp(float value) {
+        return isFinite(value) ? value : 0f;
+    }
+
     override void process(ref float[Atelier_Audio_BufferSize] buffer) {
         float eL = 3f * _leftDamping;
         float fL = -eL * _leftDamping;
@@ -54,15 +58,17 @@ final class AudioLowPassFilter : AudioEffect {
 
             // Initialisation
             for (size_t i; i < 6; i++) {
-                _samples[i] = buffer[i];
+                _samples[i] = _getAmp(buffer[i]);
             }
 
             startSample = 6;
         }
 
         for (size_t i = startSample; i < Atelier_Audio_BufferSize; i += 2) {
-            float a = eL * _samples[4] + fL * _samples[2] + gL * _samples[0] + hL * buffer[i];
-            float b = eR * _samples[5] + fR * _samples[3] + gR * _samples[1] + hR * buffer[i + 1];
+            // dfmt off
+            float a = eL * _samples[4] + fL * _samples[2] + gL * _samples[0] + hL * _getAmp(buffer[i]);
+            float b = eR * _samples[5] + fR * _samples[3] + gR * _samples[1] + hR * _getAmp(buffer[i + 1]);
+            // dfmt on
 
             buffer[i] = a;
             buffer[i + 1] = b;

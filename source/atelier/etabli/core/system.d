@@ -8,6 +8,7 @@ import std.process;
 
 import farfadet;
 
+import atelier.audio;
 import atelier.common;
 import atelier.core;
 import atelier.input;
@@ -261,6 +262,11 @@ final class Etabli {
 
             return new InstrumentResourceEditor(editor, path, ffd, size);
         });
+        ResourceEditor.add("phoneme", (ResourceEditor editor, string path, Farfadet ffd, Vec2f size) {
+            import atelier.etabli.media.res.phoneme : PhonemeResourceEditor;
+
+            return new PhonemeResourceEditor(editor, path, ffd, size);
+        });
         ResourceEditor.add("material", (ResourceEditor editor, string path, Farfadet ffd, Vec2f size) {
             import atelier.etabli.media.res.material : MaterialResourceEditor;
 
@@ -368,6 +374,30 @@ final class Etabli {
         }
 
         return terrainMap;
+    }
+
+    Sound getSound(string rid) {
+        Sound sound;
+
+        if (hasResource("sound", rid)) {
+            ResourceInfo info = getResource("sound", rid);
+
+            if (info.farfadet.hasNode("file")) {
+                string filePath = info.farfadet.getNode("file").get!string(0);
+                filePath = info.getPath(filePath);
+
+                if (exists(filePath)) {
+                    sound = Sound.fromFile(filePath);
+                }
+
+                if (sound) {
+                    if (info.farfadet.hasNode("volume"))
+                        sound.volume = info.farfadet.getNode("volume").get!float(0);
+                }
+            }
+        }
+
+        return sound;
     }
 
     Texture getTexture(string rid) {

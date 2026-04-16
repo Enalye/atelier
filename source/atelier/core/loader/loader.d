@@ -14,6 +14,7 @@ import atelier.core.loader.multidiranimation;
 import atelier.core.loader.music;
 import atelier.core.loader.ninepatch;
 import atelier.core.loader.particle;
+import atelier.core.loader.phoneme;
 import atelier.core.loader.pixelfont;
 import atelier.core.loader.pixelfontset;
 import atelier.core.loader.shadow;
@@ -45,6 +46,7 @@ void setupDefaultResourceLoaders(ResourceManager res) {
     res.setLoader("truetype", &compileTrueType, &loadTrueType);
     res.setLoader("bitmapfont", &compileBitmapFont, &loadBitmapFont);
     res.setLoader("particle", &compileParticle, &loadParticle);
+    res.setLoader("phoneme", &compilePhoneme, &loadPhoneme);
     res.setLoader("pixelfontbordered", &compilePixelFont, &loadPixelFont!PixelFontBordered);
     res.setLoader("pixelfontshadowed", &compilePixelFont, &loadPixelFont!PixelFontShadowed);
     res.setLoader("pixelfontstandard", &compilePixelFont, &loadPixelFont!PixelFontStandard);

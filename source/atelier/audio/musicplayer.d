@@ -151,7 +151,7 @@ final class MusicPlayer : AudioPlayer {
             else if (_currentFrame + framesToRead > _music.samples) {
                 framesToRead = (cast(int) _music.samples) - _currentFrame;
 
-                if (framesRead <= 0) {
+                if (framesToRead <= 0) {
                     _hasLoopEnded = true;
                 }
             }

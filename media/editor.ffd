@@ -198,6 +198,10 @@ sprite "editor:ffd-instrument" {
     texture "editor"
     clip 240 64 16 16
 }
+sprite "editor:ffd-phoneme" {
+    texture "editor"
+    clip 240 64 16 16
+}
 sprite "editor:ffd-trigger" {
     texture "editor"
     clip 192 48 16 16

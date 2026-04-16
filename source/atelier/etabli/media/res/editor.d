@@ -21,6 +21,7 @@ import atelier.etabli.media.res.multidiranimation;
 import atelier.etabli.media.res.music;
 import atelier.etabli.media.res.ninepatch;
 import atelier.etabli.media.res.particle;
+import atelier.etabli.media.res.phoneme;
 import atelier.etabli.media.res.scene;
 import atelier.etabli.media.res.shadedtexture;
 import atelier.etabli.media.res.shadow;

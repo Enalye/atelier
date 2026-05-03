@@ -18,6 +18,19 @@ double rlerp(double a, double b, double v) {
     return (v - a) / (b - a);
 }
 
+float sclamp(float value, float minimum, float maximum, float default_) {
+    if (maximum < minimum)
+        return default_;
+
+    if (value > maximum)
+        return maximum;
+
+    if (value < minimum)
+        return minimum;
+
+    return value;
+}
+
 float clampDeg(float angle) {
     if (angle < 0f) {
         angle += 360f * (1 + (cast(int) angle) / -360);

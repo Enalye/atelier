@@ -126,6 +126,7 @@ final class TextField : UIElement {
 
         addEventListener("mousedown", &_onMouseDown);
         addEventListener("mouserelease", &_onMouseRelease);
+        addEventListener("clickoutside", &blur);
         addEventListener("key", &_onKeyButton);
         addEventListener("text", &_onText);
         addEventListener("focus", &_onFocus);
@@ -191,6 +192,7 @@ final class TextField : UIElement {
         _selectionIndex = _caretIndex;
         _onSelectionChange();
         addEventListener("mousemove", &_onMouseMove);
+        focus();
     }
 
     private void _onMouseRelease() {

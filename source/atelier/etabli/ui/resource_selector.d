@@ -205,7 +205,7 @@ private final class ResourceSelectorModal : Modal {
             _searchField.addEventListener("value", &_onSearch);
             vbox.addUI(_searchField);
 
-            Atelier.ui.setFocus(_searchField);
+            Atelier.ui.focus(_searchField);
         }
 
         {

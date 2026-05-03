@@ -406,7 +406,13 @@ class UIElement {
 
     final void focus() {
         if (_manager) {
-            _manager.setFocus(this);
+            _manager.focus(this);
+        }
+    }
+
+    final void blur() {
+        if (_manager) {
+            _manager.blur(this);
         }
     }
 

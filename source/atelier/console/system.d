@@ -544,7 +544,7 @@ private final class ConsoleUI : UIElement {
         runState("hidden");
         _isTransitionning = true;
         _inputField.value = "";
-        Atelier.ui.setFocus(null);
+        Atelier.ui.focus(null);
         Atelier.input.setLock(false);
     }
 

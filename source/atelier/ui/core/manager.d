@@ -81,7 +81,7 @@ final class UIManager {
         _elements.sweep(true);
     }
 
-    void setFocus(UIElement element) {
+    void focus(UIElement element) {
         if (_focusedElement && _focusedElement != element) {
             _focusedElement.hasFocus = false;
         }
@@ -93,6 +93,14 @@ final class UIManager {
                 _focusedElement.hasFocus = true;
             }
         }
+    }
+
+    void blur(UIElement element) {
+        if (_focusedElement != element)
+            return;
+
+        _focusedElement.hasFocus = false;
+        _focusedElement = null;
     }
 
     void dispatch(InputEvent event) {
@@ -135,18 +143,8 @@ final class UIManager {
                     _grabbedElement = _tempGrabbedElement;
                 }
 
-                if (_focusedElement && _focusedElement != _pressedElement) {
-                    _focusedElement.hasFocus = false;
-                }
-                _focusedElement = null;
-
                 if (_pressedElement) {
                     _pressedElement.isPressed = true;
-
-                    if (_pressedElement.focusable) {
-                        _focusedElement = _pressedElement;
-                        _focusedElement.hasFocus = true;
-                    }
                 }
             }
             else {

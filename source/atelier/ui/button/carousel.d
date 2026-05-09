@@ -9,6 +9,8 @@ import atelier.ui.button.neutral;
 
 final class CarouselButton : UIElement {
     private {
+        NeutralButton _previousBtn;
+        NeutralButton _nextBtn;
         RoundedRectangle _background;
         Label _label;
         string[] _items;
@@ -66,29 +68,17 @@ final class CarouselButton : UIElement {
         _background.anchor = Vec2f.zero;
         addImage(_background);
 
-        NeutralButton previousBtn = new NeutralButton("<");
-        previousBtn.setAlign(UIAlignX.left, UIAlignY.center);
-        previousBtn.addEventListener("click", &_onPrevious);
-        addUI(previousBtn);
+        _previousBtn = new NeutralButton("<");
+        _previousBtn.setAlign(UIAlignX.left, UIAlignY.center);
+        _previousBtn.addEventListener("click", &_onPrevious);
+        addUI(_previousBtn);
 
-        NeutralButton nextBtn = new NeutralButton(">");
-        nextBtn.setAlign(UIAlignX.right, UIAlignY.center);
-        nextBtn.addEventListener("click", &_onNext);
-        addUI(nextBtn);
+        _nextBtn = new NeutralButton(">");
+        _nextBtn.setAlign(UIAlignX.right, UIAlignY.center);
+        _nextBtn.addEventListener("click", &_onNext);
+        addUI(_nextBtn);
 
-        {
-            Vec2f sz = Vec2f.zero;
-
-            foreach (item; _items) {
-                Vec2f textSize = getSizeOfText(Atelier.theme.font, to!dstring(item), 1f, 0f);
-                sz = sz.max(textSize);
-            }
-
-            sz.y = max(sz.y, previousBtn.getHeight());
-            sz.x += previousBtn.getWidth() + nextBtn.getWidth() + 24f;
-            setSize(sz);
-        }
-        _background.size = getSize();
+        _reloadSize();
 
         if (_items.length)
             _value = _items[0];
@@ -120,5 +110,28 @@ final class CarouselButton : UIElement {
             _label.text = _value;
             dispatchEvent("value", false);
         }
+    }
+
+    void setItems(string[] items) {
+        _items = items.dup;
+
+        _reloadSize();
+
+        _label.text = value(_value);
+    }
+
+    private void _reloadSize() {
+        Vec2f sz = Vec2f.zero;
+
+        foreach (item; _items) {
+            Vec2f textSize = getSizeOfText(Atelier.theme.font, to!dstring(item), 1f, 0f);
+            sz = sz.max(textSize);
+        }
+
+        sz.y = max(sz.y, _previousBtn.getHeight());
+        sz.x += _previousBtn.getWidth() + _nextBtn.getWidth() + 24f;
+        setSize(sz);
+
+        _background.size = getSize();
     }
 }

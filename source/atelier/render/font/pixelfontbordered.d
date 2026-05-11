@@ -33,7 +33,7 @@ final class PixelFontBordered : PixelFont, Resource!PixelFontBordered {
 
         /// Où le bas se situe par rapport à la ligne
         int descent() const {
-            return _descent * _weight + 2;
+            return _descent * _weight - 2;
         }
 
         /// Distance entre chaque ligne
@@ -44,6 +44,11 @@ final class PixelFontBordered : PixelFont, Resource!PixelFontBordered {
         /// Taille de la bordure
         int outline() const {
             return 0;
+        }
+
+        // Marge horizontale
+        int padding() const {
+            return 2;
         }
     }
 
@@ -227,7 +232,7 @@ private final class PixelGlyphBordered : Glyph {
         _imageData.color = Color.black;
         _imageData.blend = Blend.alpha;
         _imageData.alpha = alpha;
-        _imageData.draw(position, Vec2f((_width + 2) * scale,
+        _imageData.draw(position - Vec2f.one * scale, Vec2f((_width + 2) * scale,
                 (_height + 2) * scale), Vec4u(_x + _width, _y, _width + 2, _height + 2), 0f);
 
         _imageData.color = color;

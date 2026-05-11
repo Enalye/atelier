@@ -31,21 +31,30 @@ final class TrueTypeFont : Font, Resource!TrueTypeFont {
         int size() const {
             return _height;
         }
+
         /// Jusqu’où peut monter un caractère au-dessus la ligne
         int ascent() const {
             return _ascent;
         }
+
         /// Jusqu’où peut descendre un caractère en-dessous la ligne
         int descent() const {
             return _descent;
         }
+
         /// Distance entre chaque ligne
         int lineSkip() const {
             return _lineSkip;
         }
+
         /// Taille de la bordure
         int outline() const {
             return _outline;
+        }
+
+        // Marge horizontale
+        int padding() const {
+            return 0;
         }
     }
 

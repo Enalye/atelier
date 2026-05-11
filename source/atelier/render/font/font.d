@@ -18,6 +18,8 @@ interface Font {
         int lineSkip() const;
         /// Taille de la bordure
         int outline() const;
+        // Marge horizontale
+        int padding() const;
     }
 
     int getKerning(dchar prevChar, dchar currChar);

@@ -47,20 +47,29 @@ final class BitmapFont : Font, Resource!BitmapFont {
         int size() const {
             return _size;
         }
+
         /// Hauteur au dessus de la ligne
         int ascent() const {
             return _ascent;
         }
+
         /// Descente au dessous de la ligne
         int descent() const {
             return _descent;
         }
+
         /// Distance verticale entre chaque lignes
         int lineSkip() const {
             return (_ascent - _descent) + 1;
         }
+
         /// Taille de la bordure
         int outline() const {
+            return 0;
+        }
+
+        // Marge horizontale
+        int padding() const {
             return 0;
         }
     }

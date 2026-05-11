@@ -72,7 +72,7 @@ final class Label : UIElement {
     }
 
     private void _onDraw() {
-        drawText(Vec2f(0f, _font.outline + _font.ascent), _text,
+        drawText(Vec2f(_font.padding, _font.outline + _font.ascent), _text,
             _font, textColor, outlineColor, _charScale, _charSpacing);
     }
 
@@ -156,7 +156,7 @@ final class ColoredLabel : UIElement {
     }
 
     private void _onDraw() {
-        drawText(Vec2f(0f, _font.outline + _font.ascent), _text,
+        drawText(Vec2f(_font.padding, _font.outline + _font.ascent), _text,
             _font, tokens, _charScale, _charSpacing);
     }
 
@@ -199,8 +199,10 @@ Vec2f getSizeOfText(Font font, dstring text, float scale, float spacing,
         }
     }
 
-    if (text.length > 0)
-        totalSize_ += font.outline << 1;
+    if (text.length > 0) {
+        totalSize_ += (font.outline << 1);
+        totalSize_.x += (font.padding << 1);
+    }
 
     return totalSize_;
 }
@@ -213,6 +215,7 @@ size_t getIndexOfText(Font font, dstring text, float scale, float spacing, Vec2f
     bool isInit = true;
 
     currentPosition -= font.outline;
+    currentPosition.x -= font.padding;
 
     dchar prevChar;
     float advance = 0f;

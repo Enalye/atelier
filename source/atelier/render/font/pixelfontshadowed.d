@@ -28,12 +28,12 @@ final class PixelFontShadowed : PixelFont, Resource!PixelFontShadowed {
 
         /// Où le haut se situe par rapport à la ligne
         int ascent() const {
-            return _ascent * _weight + 1;
+            return _ascent * _weight;
         }
 
         /// Où le bas se situe par rapport à la ligne
         int descent() const {
-            return _descent * _weight + 1;
+            return _descent * _weight - 1;
         }
 
         /// Distance entre chaque ligne
@@ -43,6 +43,11 @@ final class PixelFontShadowed : PixelFont, Resource!PixelFontShadowed {
 
         /// Taille de la bordure
         int outline() const {
+            return 0;
+        }
+
+        // Marge horizontale
+        int padding() const {
             return 0;
         }
     }

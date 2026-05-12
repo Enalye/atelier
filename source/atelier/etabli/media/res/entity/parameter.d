@@ -50,6 +50,7 @@ package final class ParameterWindow : UIElement {
             vlist.addList(sep);
         }
 
+        _repulsor = repulsor;
         {
             HLayout hlayout = new HLayout;
             hlayout.setPadding(Vec2f(284f, 0f));
@@ -60,6 +61,7 @@ package final class ParameterWindow : UIElement {
             string[] repulsorTypes = "none" ~ [
                 __traits(allMembers, Repulsor.Type)
             ];
+
             _repulsorTypeBtn = new SelectButton(repulsorTypes, _repulsor.type);
             _repulsorTypeBtn.addEventListener("value", {
                 _repulsor.type = _repulsorTypeBtn.value;

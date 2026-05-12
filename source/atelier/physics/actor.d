@@ -176,17 +176,53 @@ final class ActorCollider : Collider {
         }
     }
 
+    private Vec3f _sweepMove(Vec3f moveDir, int step) {
+        Vec3f totalSwept = Vec3f.zero;
+        Vec3i sweepStep = cast(Vec3i)(moveDir.normalized() * step).floor();
+        float len = moveDir.length();
+        Vec3i sweepPosition = entity.getPosition();
+        Vec3i currentSwept;
+
+        while (len >= step) {
+            currentSwept += sweepStep;
+            Vec3i hitPosition = entity.getPosition() + currentSwept;
+            Physics.TerrainHit terrainHit = Atelier.physics.hitTerrain(hitPosition, collider);
+            if (terrainHit.isColliding) {
+                break;
+            }
+            else {
+                Physics.SolidHit solidHit = Atelier.physics.collidesAt(hitPosition, collider);
+                if (solidHit.isColliding) {
+                    break;
+                }
+            }
+
+            sweepPosition = hitPosition;
+            len -= step;
+            totalSwept = cast(Vec3f) currentSwept;
+        }
+
+        if (totalSwept != Vec3f.zero) {
+            moveDir -= totalSwept;
+            entity.moveRaw(totalSwept);
+        }
+
+        return moveDir;
+    }
+
     override bool move(Vec3f moveDir,
         Physics.CollisionHit.Type hitType = Physics.CollisionHit.Type.none) {
         Vec3f subMove = entity.getSubPosition();
 
-        if (moveDir.x >= 10 || moveDir.x <= -10 ||
-            moveDir.y >= 10 || moveDir.y <= -10 ||
-            moveDir.z >= 10 || moveDir.z <= -10 ||
-            isNaN(moveDir.x) || isNaN(moveDir.y) || isNaN(moveDir.z) ||
-            isInfinity(moveDir.x) || isInfinity(moveDir.y) || isInfinity(moveDir.z)) {
-            Atelier.log("[Atelier] Entité en survitesse: ", moveDir);
+        if (!(isFinite(moveDir.x) || isFinite(moveDir.y) || isFinite(moveDir.z))) {
+            Atelier.log("[Atelier] Vitesse invalide: ", moveDir);
             return false;
+        }
+
+        int sweepStep = collider.min();
+        while (sweepStep > 2) {
+            moveDir = _sweepMove(moveDir, sweepStep);
+            sweepStep >>= 1;
         }
 
         subMove += moveDir;

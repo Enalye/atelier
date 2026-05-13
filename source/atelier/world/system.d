@@ -46,8 +46,6 @@ final class World {
         Material[] _materials;
         Vec3i[string] _markers;
 
-        Vec3i _lastPlayerPosition;
-
         int[] _renderReferenceCounters;
         size_t _renderUpdateIndex;
         Entity[] _renderListRoots, _postRenderListAbove, _postRenderListGlow;
@@ -690,13 +688,13 @@ final class World {
         Atelier.renderer.pushCanvas(_camera.canvas);
         Atelier.renderer.clearCanvas(Color.black, 1f);
 
-        Vec2f cameraPosition = _camera.getPosition(_transition is null).round();
+        Vec2f cameraPosition = _camera.getRenderPosition(_transition is null);
         Vec2f rendererSize = cast(Vec2f) Atelier.renderer.size;
         Vec2f halfRendererSize = rendererSize / 2f;
         Vec2f mapSize = Vec2f(_scene.columns, _scene.lines) * 16f;
 
         Vec2f offset = mapSize / 2f + halfRendererSize - cameraPosition;
-        Vec2f entityOffset = halfRendererSize - cameraPosition;
+        Vec2f entityOffset = (halfRendererSize - cameraPosition).round();
 
         Vec4f cameraBounds;
         cameraBounds.x = cameraPosition.x - halfRendererSize.x;

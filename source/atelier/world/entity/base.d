@@ -94,6 +94,11 @@ final class Entity : Resource!Entity {
         Vec3i _targetPosition = Vec3i.zero;
         int _zOrderOffset;
 
+        // Interpolation
+        Vec2f _currentCameraPosition = Vec2f.zero;
+        Vec2f _lastCameraPosition = Vec2f.zero;
+        bool _wasBehaviorInit = false;
+
         bool _isEnabled = true;
         bool _isRendered;
         int _isInRenderList;
@@ -335,6 +340,7 @@ final class Entity : Resource!Entity {
         _behavior.entity = this;
         _behavior.id = id;
         _behavior.setup();
+        _wasBehaviorInit = false;
         return _behavior;
     }
 
@@ -677,6 +683,9 @@ final class Entity : Resource!Entity {
     }
 
     void update() {
+        _lastCameraPosition = cameraPosition();
+        _currentCameraPosition = _lastCameraPosition;
+
         if (_isEnabled) {
             if (_behavior) {
                 _behavior.update();
@@ -703,6 +712,12 @@ final class Entity : Resource!Entity {
                 if (_position == _targetPosition) {
                     _isMoving = false;
                 }
+            }
+
+            _currentCameraPosition = cameraPosition();
+            if (!_wasBehaviorInit) {
+                _wasBehaviorInit = true;
+                _lastCameraPosition = _currentCameraPosition;
             }
         }
     }
@@ -955,7 +970,7 @@ final class Entity : Resource!Entity {
     }
 
     void draw(Vec2f offset) {
-        Vec2f drawPos = offset + cameraPosition();
+        Vec2f drawPos = offset + lerp(_lastCameraPosition, _currentCameraPosition, Atelier.getFrameTime());
 
         foreach (child; _renderEntitiesBehind) {
             child.draw(offset);
@@ -984,7 +999,7 @@ final class Entity : Resource!Entity {
     }
 
     void drawTransition(Vec2f offset, float tTransition, bool drawGraphics) {
-        Vec2f drawPos = offset + cameraPosition();
+        Vec2f drawPos = offset + lerp(_lastCameraPosition, _currentCameraPosition, Atelier.getFrameTime());
 
         foreach (child; _renderEntitiesBehind) {
             child.drawTransition(offset, tTransition, drawGraphics);

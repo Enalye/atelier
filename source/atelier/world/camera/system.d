@@ -25,6 +25,7 @@ final class Camera {
         Sprite _sprite;
 
         Vec2f _position = Vec2f.zero;
+        Vec2f _lastPosition = Vec2f.zero;
         CameraPositioner _positioner, _defaultPositioner;
         CameraShaker _shaker;
         CameraZoomer _zoomer;
@@ -76,6 +77,16 @@ final class Camera {
         _maxBounds = maxBounds;
     }
 
+    Vec2f getRenderPosition(bool boundedPosition = true) const {
+        Vec2f lastPos = _lastPosition;
+        Vec2f currentPos = _position;
+        if (boundedPosition) {
+            lastPos = getBoundedPositionOf(lastPos);
+            currentPos = getBoundedPositionOf(currentPos);
+        }
+        return lerp(lastPos, currentPos, Atelier.getFrameTime());
+    }
+
     Vec2f getPosition(bool boundedPosition = true) const {
         if (boundedPosition)
             return getBoundedPositionOf(_position);
@@ -98,6 +109,7 @@ final class Camera {
         if (stopBehavior) {
             _positioner = null;
         }
+        _lastPosition = position_;
         _position = position_;
     }
 
@@ -119,16 +131,19 @@ final class Camera {
     }
 
     void moveTo(Vec2f position_, uint frames, Spline spline) {
+        _lastPosition = _position;
         _positioner = new MoveCameraPosition(this, position_, frames, spline);
         _onMoveFinishCallback = null;
     }
 
     void follow(Entity entity, Vec2f damping, Vec2f deadZone) {
+        _lastPosition = _position;
         _positioner = new FollowCameraPosition(this, entity, damping, deadZone);
         _onMoveFinishCallback = null;
     }
 
     void focus(Entity entity, Vec3i center, Vec2f damping, Vec2f deadZone) {
+        _lastPosition = _position;
         _positioner = new FocusCameraPosition(this, entity, center, damping, deadZone);
         _onMoveFinishCallback = null;
     }
@@ -185,6 +200,7 @@ final class Camera {
 
     void update() {
         if (_positioner) {
+            _lastPosition = _position;
             _positioner.update();
 
             if (!_positioner.isRunning) {

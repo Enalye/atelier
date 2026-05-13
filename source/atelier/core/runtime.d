@@ -59,6 +59,8 @@ final class Atelier {
         int _nominalFPS = 60;
         uint _freezeFrames = 0;
         float _timeScale = 1f;
+        float _frameTime = .0f;
+        bool _useFrameInterpolation = true;
 
         bool _isSlowingDown = false;
         uint _slowDownFrames = 0;
@@ -526,7 +528,8 @@ final class Atelier {
                     }
                 }
             }
-            accumulator += deltatime * _currentSlowDownFactor * _timeScale;
+            float currentTimeScale = _currentSlowDownFactor * _timeScale;
+            accumulator += deltatime * currentTimeScale;
 
             if (_mustReload) {
                 _reload();
@@ -575,6 +578,10 @@ final class Atelier {
 
             // Rendu
 
+            //_useFrameInterpolation = _inputManager.hasAlt();
+
+            _frameTime = (_useFrameInterpolation && currentTimeScale < 1f) ?
+                clamp(accumulator, 0f, 1f) : 1f;
             _renderer.startRenderPass();
             long startTime = Clock.currStdTime();
             _world.draw(cast(Vec2f) _renderer.center);
@@ -596,6 +603,14 @@ final class Atelier {
         }
 
         close();
+    }
+
+    static float getFrameTime() {
+        return _frameTime;
+    }
+
+    static void setFrameInterpolation(bool value) {
+        _useFrameInterpolation = value;
     }
 
     private static {

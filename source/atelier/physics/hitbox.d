@@ -191,7 +191,7 @@ final class Hitbox {
     }
 
     float getAngle() const {
-        return _angle + _entity.angle;
+        return _angle + _entity.getAngle();
     }
 
     Vec2f getCameraCenter() const {
@@ -204,7 +204,7 @@ final class Hitbox {
         Vec3i basePosition = _entity.getPosition();
         if (_offsetDist) {
             Vec2i offset = cast(Vec2i)(Vec2f.angled(
-                    degToRad(_entity.angle + cast(float) _offsetAngle)) * _offsetDist).round();
+                    degToRad(_entity.getAngle() + cast(float) _offsetAngle)) * _offsetDist).round();
             basePosition.x += offset.x;
             basePosition.y += offset.y;
         }
@@ -520,7 +520,7 @@ final class Hitbox {
 
     void draw(Vec2f origin) {
         Vec2f hitOrigin = origin + Vec2f.angled(
-            degToRad(_entity.angle + cast(float) _offsetAngle)) * _offsetDist;
+            degToRad(_entity.getAngle() + cast(float) _offsetAngle)) * _offsetDist;
 
         bool hasAngles = (_angleDelta > 0 && _angleDelta < 180);
         int startAngle, endAngle;

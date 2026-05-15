@@ -271,7 +271,7 @@ final class World {
             _player.setPosition(Vec3i(0, 0, 0));
             _player.setName("player");
             _player.setGraphic("idle");
-            _player.angle = 0f;
+            _player.setAngle(0f);
             addEntity(_player);
 
             _camera.setPosition(_player.cameraPosition() - oldCameraDeltaPosition);
@@ -292,7 +292,7 @@ final class World {
                 Entity entity = Atelier.res.get!Entity(entityBuilder.entity.rid);
                 entity.setData(entityBuilder.data);
                 entity.setGraphic(entityBuilder.entity.graphic);
-                entity.angle = entityBuilder.entity.angle;
+                entity.setAngle(entityBuilder.entity.angle);
                 addEntity(entity);
                 break;
             case trigger:
@@ -339,7 +339,7 @@ final class World {
                         if (_playerController) {
                             _playerController.onStart();
                         }
-                        _player.angle = entityBuilder.teleporter.direction * -45f;
+                        _player.setAngle(entityBuilder.teleporter.direction * -45f);
                     }
                 }
 

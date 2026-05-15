@@ -443,7 +443,7 @@ class UIElement {
 
     final void runState(string name) {
         auto ptr = name in states;
-        if (!ptr) {
+        if (!ptr || (targetState && targetState.name == name)) {
             return;
         }
 

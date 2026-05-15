@@ -143,26 +143,6 @@ final class Entity : Resource!Entity {
         bool isEnabled() const {
             return _isEnabled;
         }
-
-        float angle() const {
-            return _angle;
-        }
-
-        float angle(float angle_) {
-            _angle = angle_;
-            if (_graphic) {
-                _graphic.setAngle(_angle);
-            }
-
-            foreach (ref auxGraphic; _auxGraphicSlots) {
-                if (!auxGraphic.graphic)
-                    continue;
-
-                auxGraphic.graphic.setAngle(_angle);
-            }
-
-            return _angle;
-        }
     }
 
     this() {
@@ -945,6 +925,28 @@ final class Entity : Resource!Entity {
         _accel = dir;
     }
 
+    float getAngle() const {
+        return _angle;
+    }
+
+    void setAngle(float angle_) {
+        _angle = angle_;
+        if (_graphic) {
+            _graphic.setAngle(_angle);
+        }
+
+        foreach (ref auxGraphic; _auxGraphicSlots) {
+            if (!auxGraphic.graphic)
+                continue;
+
+            auxGraphic.graphic.setAngle(_angle);
+        }
+    }
+
+    void addAngle(float angle_) {
+        setAngle(clampDeg(_angle + angle_));
+    }
+
     uint getSectorID() {
         _sectorID = Atelier.nav.updateSectorID(_position, _sectorID);
         return _sectorID;
@@ -962,7 +964,7 @@ final class Entity : Resource!Entity {
 
         const float angle_ = (cast(Vec2f)(target - origin)).angle();
 
-        angle(clampDeg(radToDeg(angle_)));
+        setAngle(clampDeg(radToDeg(angle_)));
     }
 
     void lookAt(Entity target) {

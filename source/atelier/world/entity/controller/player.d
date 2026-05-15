@@ -27,7 +27,7 @@ final class DefaultMoveState : EntityControllerState {
 
         if (movedir != Vec2f.zero) {
             movedir.normalize();
-            entity.angle = radToDeg(movedir.angle());
+            entity.setAngle(radToDeg(movedir.angle()));
             acceldir += movedir * 1f;
         }
 
@@ -50,7 +50,7 @@ final class DefaultEnterState : EntityControllerState {
 
     override void onUpdate() {
         Vec2f acceldir = Vec2f.angled(degToRad((_direction * -45f))) * 0.65f;
-        entity.angle = radToDeg(acceldir.angle());
+        entity.setAngle(radToDeg(acceldir.angle()));
         entity.setAccel(Vec3f(acceldir, 0f));
     }
 }
@@ -69,7 +69,7 @@ final class DefaultExitState : EntityControllerState {
     override void onUpdate() {
         _timer.update();
         Vec2f acceldir = Vec2f.angled(degToRad((_direction * -45f))) * 0.3f;
-        entity.angle = radToDeg(acceldir.angle());
+        entity.setAngle(radToDeg(acceldir.angle()));
         entity.setAccel(Vec3f(acceldir, 0f));
 
         if (!_timer.isRunning) {

@@ -123,6 +123,12 @@ package void loadLibWorld_entity(GrModule mod) {
             entityType, grFloat,
         ]);
 
+    mod.setDescription(GrLocale.fr_FR, "Ajoute à l’angle de l’entité");
+    mod.setParameters(["entity", "degrees"]);
+    mod.addFunction(&_addAngle, "addAngle", [
+            entityType, grFloat,
+        ]);
+
     mod.setDescription(GrLocale.fr_FR, "Récupère l’angle de l’entité");
     mod.setParameters(["entity"]);
     mod.addFunction(&_getAngle, "getAngle", [entityType], [grFloat]);
@@ -277,12 +283,17 @@ private void _addVelocity(GrCall call) {
 
 private void _setAngle(GrCall call) {
     Entity entity = call.getNative!Entity(0);
-    entity.angle = call.getFloat(1);
+    entity.setAngle(call.getFloat(1));
+}
+
+private void _addAngle(GrCall call) {
+    Entity entity = call.getNative!Entity(0);
+    entity.addAngle(call.getFloat(1));
 }
 
 private void _getAngle(GrCall call) {
     Entity entity = call.getNative!Entity(0);
-    call.setFloat(entity.angle);
+    call.setFloat(entity.getAngle());
 }
 
 private void _isEnabled(GrCall call) {

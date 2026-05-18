@@ -60,6 +60,10 @@ final class Sprite : Image, Resource!Sprite {
         size = to!Vec2f(clip.zw).contain(size_);
     }
 
+    Grid!uint getPixels() {
+        return _imageData.getPixels(clip);
+    }
+
     override void draw(Vec2f origin = Vec2f.zero) {
         _imageData.color = color;
         _imageData.blend = blend;

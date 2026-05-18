@@ -17,6 +17,12 @@ abstract class ImageData {
         float alpha(float alpha_);
     }
 
+    /// Récupère les pixels
+    Grid!uint getPixels();
+
+    /// Récupère les pixels dans une région
+    Grid!uint getPixels(Vec4u clip);
+
     /// Dessine une section de l’image à cette position
     void draw(Vec2f position, Vec2f size, Vec4u clip, double angle,
         Vec2f pivot = Vec2f.zero, bool flipX = false, bool flipY = false);

@@ -167,6 +167,42 @@ final class Texture : ImageData, Resource!Texture {
         SDL_SetTextureAlphaMod(_texture, cast(ubyte)(clamp(_alpha, 0f, 1f) * 255f));
     }
 
+    /// Récupère les pixels
+    override Grid!uint getPixels() {
+        Grid!uint values = new Grid!uint(_surface.w, _surface.h);
+        uint* pixels = cast(uint*) _surface.pixels;
+        values.defaultValue = 0x0;
+        for (uint y; y < _surface.h; ++y) {
+            for (uint x; x < _surface.w; ++x) {
+                values.setValue(x, y, pixels[y * _surface.w + x]);
+            }
+        }
+        return values;
+    }
+
+    /// Récupère les pixels dans une région
+    override Grid!uint getPixels(Vec4u clip) {
+        Grid!uint values = new Grid!uint(_surface.w, _surface.h);
+        uint* pixels = cast(uint*) _surface.pixels;
+        values.defaultValue = 0x0;
+
+        clip.z += clip.x;
+        clip.w += clip.y;
+
+        if (clip.z >= _surface.w)
+            clip.z = cast(uint)(_surface.w - 1);
+
+        if (clip.w >= _surface.h)
+            clip.w = cast(uint)(_surface.h - 1);
+
+        for (uint y = clip.y, iy; y < clip.w; ++y, ++iy) {
+            for (uint x = clip.x, ix; x < clip.z; ++x, ++ix) {
+                values.setValue(ix, iy, pixels[y * _surface.w + x]);
+            }
+        }
+        return values;
+    }
+
     /// Dessine la texture
     override void draw(Vec2f position, Vec2f size, Vec4u clip, double angle,
         Vec2f pivot = Vec2f.half, bool flipX = false, bool flipY = false) {

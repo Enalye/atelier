@@ -141,6 +141,21 @@ final class WritableTexture : ImageData {
         SDL_SetTextureAlphaMod(_texture, cast(ubyte)(clamp(_alpha, 0f, 1f) * 255f));
     }
 
+    /// Récupère les pixels
+    override Grid!uint getPixels() {
+        Grid!uint values = new Grid!uint(1, 1);
+        assert(true, "Not implemented");
+        return values;
+    }
+
+    /// Récupère les pixels dans une région
+    override Grid!uint getPixels(Vec4u clip) {
+        Grid!uint values = new Grid!uint(1, 1);
+        //SDL_RenderReadPixels(renderer, rect, format, pixels, pitch);
+        assert(true, "Not implemented");
+        return values;
+    }
+
     /// Render a section of the texture here
     override void draw(Vec2f position, Vec2f size, Vec4u clip, double angle,
         Vec2f pivot = Vec2f.half, bool flipX = false, bool flipY = false) {

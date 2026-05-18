@@ -157,6 +157,21 @@ final class Canvas : ImageData {
         return this;
     }
 
+    /// Récupère les pixels
+    override Grid!uint getPixels() {
+        Grid!uint values = new Grid!uint(1, 1);
+        assert(true, "Not implemented");
+        return values;
+    }
+
+    /// Récupère les pixels dans une région
+    override Grid!uint getPixels(Vec4u clip) {
+        Grid!uint values = new Grid!uint(1, 1);
+        //SDL_RenderReadPixels(renderer, rect, format, pixels, pitch);
+        assert(true, "Not implemented");
+        return values;
+    }
+
     /// The size (in texels) of the surface to be rendered on.
     /// Changing that value allocate a new texture, so don't do it everytime.
     void setSize(uint width_, uint height_) {

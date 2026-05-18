@@ -6,6 +6,7 @@ import std.random;
 import std.algorithm.comparison : clamp, min, max;
 
 import atelier.common.color;
+import atelier.common.math;
 import atelier.common.stream;
 import atelier.common.vec3;
 
@@ -125,14 +126,18 @@ struct HSLColor {
     HSLColor opOpAssign(string op)(const HSLColor c) {
         mixin("
 			_h = clamp(_h ", op, "c._h, 0f, 360f);
-			_s = clamp(_s " ~ op ~ "c._s, 0f, 1f);
+			_s = clamp(_s ", op, "c._s, 0f, 1f);
 			_l = clamp(_l ", op, "c._l, 0f, 1f);
 			");
         return this;
     }
 
     HSLColor lerp(HSLColor end, float t) const {
-        return (this * (1f - t)) + (end * t);
+        HSLColor result;
+        result._h = slerpDeg(_h, end._h, t);
+        result._l = (_l * (1f - t)) + (end._l * t);
+        result._s = (_s * (1f - t)) + (end._s * t);
+        return result;
     }
 
     Color toColor() const {

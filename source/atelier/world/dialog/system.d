@@ -11,11 +11,6 @@ import atelier.world.dialog.bubble;
 import atelier.world.dialog.choice;
 
 final class Dialog {
-    enum BubbleMode {
-        say,
-        think
-    }
-
     private {
         /* À faire:
             - Bulles
@@ -31,7 +26,7 @@ final class Dialog {
         }
 
         Type _type = Type.none;
-        BaseDialogBubble[] _bubbles;
+        Array!BaseDialogBubble _bubbles;
         BaseDialogBubble _currentBubble;
         bool _isCompleted;
         bool _isCancellable;
@@ -39,7 +34,7 @@ final class Dialog {
         DialogBlocker _blocker;
         GrChannel _channel;
 
-        alias BubbleFunc = BaseDialogBubble function(Entity, BubbleMode);
+        alias BubbleFunc = BaseDialogBubble function(Entity, bool isBlocking);
         BubbleFunc _bubbleFunc;
 
         string _previousEvent;
@@ -54,12 +49,18 @@ final class Dialog {
         }
     }
 
+    this() {
+        _bubbles = new Array!BaseDialogBubble;
+    }
+
     void setup(BubbleFunc bubbleFunc, string previousEvent, string nextEvent, string validateEvent, string cancelEvent) {
         _bubbleFunc = bubbleFunc;
         _previousEvent = previousEvent;
         _nextEvent = nextEvent;
         _validateEvent = validateEvent;
         _cancelEvent = cancelEvent;
+
+        _bubbles.clear();
     }
 
     void update() {
@@ -104,6 +105,12 @@ final class Dialog {
                 //    _box.skip();
             }
         }
+
+        foreach (i, bubble; _bubbles) {
+            if (!bubble.isPlaying())
+                _bubbles.mark(i);
+        }
+        _bubbles.sweep();
     }
 
     void close(bool closeAll = true) {
@@ -116,10 +123,10 @@ final class Dialog {
             //_box = null;
             break;
         case bubble:
-            foreach (BaseDialogBubble bubble; _bubbles) {
+            foreach (bubble; _bubbles) {
                 bubble.dispatchEvent("dialog.close", false);
             }
-            _bubbles.length = 0;
+            _bubbles.clear();
             _currentBubble = null;
             break;
         case none:
@@ -133,19 +140,37 @@ final class Dialog {
         }
     }
 
-    BaseDialogBubble say(Entity entity, string text, DialogBlocker blocker) {
+    void say(Entity entity, string text, DialogBlocker blocker) {
         _blocker = blocker;
-        _addBubble(entity, text, BubbleMode.say);
-        return _currentBubble;
+        _setCurrentBubble(entity, text);
     }
 
-    BaseDialogBubble think(Entity entity, string text, DialogBlocker blocker) {
-        _blocker = blocker;
-        _addBubble(entity, text, BubbleMode.think);
-        return _currentBubble;
+    void say(Entity entity, string text, int timeOut) {
+        _addBubble(entity, text, timeOut);
     }
 
-    private void _addBubble(Entity entity, string text, BubbleMode mode) {
+    private void _addBubble(Entity entity, string text, int timeOut) {
+        foreach (bubble; _bubbles) {
+            if (bubble.isPlaying() && bubble.target == entity) {
+                bubble.setDialogText(text);
+                bubble.setDialogTimeout(timeOut);
+                return;
+            }
+        }
+
+        if (_bubbleFunc is null) {
+            Atelier.log("[ATELIER] Aucune bulle de dialogue définie");
+        }
+        else {
+            BaseDialogBubble bubble = _bubbleFunc(entity, false);
+            bubble.setDialogText(text);
+            bubble.setDialogTimeout(timeOut);
+            Atelier.world.addUI(bubble);
+            _bubbles ~= bubble;
+        }
+    }
+
+    private void _setCurrentBubble(Entity entity, string text) {
         //setDialogLock(true);
 
         if (_type == Type.box) {
@@ -159,14 +184,13 @@ final class Dialog {
         _type = Type.bubble;
         _isCompleted = false;
 
-        for (int i; i < _bubbles.length; ++i) {
-            if (_bubbles[i].target == entity) {
-                _bubbles[i].setDialogMode(mode);
-                _bubbles[i].setDialogText(text);
-                _currentBubble = _bubbles[i];
+        if (_currentBubble) {
+            if (_currentBubble.target == entity) {
+                _currentBubble.setDialogText(text);
             }
             else {
-                _bubbles[i].dispatchEvent("dialog.unfocus", false);
+                _currentBubble.dispatchEvent("dialog.close", false);
+                _currentBubble = null;
             }
         }
 
@@ -175,13 +199,12 @@ final class Dialog {
                 Atelier.log("[ATELIER] Aucune bulle de dialogue définie");
             }
             else {
-                _currentBubble = _bubbleFunc(entity, mode);
+                _currentBubble = _bubbleFunc(entity, true);
                 _currentBubble.setDialogText(text);
                 _currentBubble.addEventListener("dialog.end", {
                     _isCompleted = true;
                 });
                 Atelier.world.addUI(_currentBubble);
-                _bubbles ~= _currentBubble;
             }
         }
     }
@@ -190,25 +213,18 @@ final class Dialog {
         if (_type != Type.bubble)
             return;
 
-        for (int i; i < _bubbles.length; ++i) {
-            if (_bubbles[i].target == entity) {
-                _bubbles[i].dispatchEvent("dialog.close", false);
-                if (_bubbles[i] == _currentBubble) {
-                    _currentBubble = null;
-                }
+        if (_currentBubble) {
+            _currentBubble.dispatchEvent("dialog.close", false);
+            _currentBubble = null;
+        }
 
-                if ((i + 1) == _bubbles.length) {
-                    _bubbles.length--;
-                }
-                else if (i == 0) {
-                    _bubbles = _bubbles[1 .. $];
-                }
-                else {
-                    _bubbles = _bubbles[0 .. i] ~ _bubbles[(i + 1) .. $];
-                }
-                break;
+        foreach (i, bubble; _bubbles) {
+            if (bubble.target == entity) {
+                bubble.dispatchEvent("dialog.close", false);
+                _bubbles.mark(i);
             }
         }
+        _bubbles.sweep();
 
         if (!_bubbles.length) {
             _type = Type.none;
@@ -219,19 +235,17 @@ final class Dialog {
         _isChoosing = false;
         _channel = channel;
 
-        for (int i; i < _bubbles.length; ++i) {
-            if (_bubbles[i].target == entity) {
-                _bubbles[i].dispatchEvent("dialog.focus", false);
-                _currentBubble = _bubbles[i];
-            }
-            else {
-                _bubbles[i].dispatchEvent("dialog.unfocus", false);
-            }
+        /*if (_currentBubble.target == entity) {
+            //_currentBubble.dispatchEvent("dialog.focus", false);
+            _currentBubble = _bubbles[i];
         }
+        else {
+            //_bubbles[i].dispatchEvent("dialog.unfocus", false);
+        }*/
 
-        if (!_currentBubble) {
+        if (!_currentBubble || _currentBubble.target != entity) {
             // Au cas où
-            _addBubble(entity, "", BubbleMode.say);
+            _setCurrentBubble(entity, "");
         }
 
         //setDialogChoiceLock(true);

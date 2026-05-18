@@ -16,11 +16,13 @@ bool getDialogChoiceLock() {
 abstract class BaseDialogBubble : UIElement {
     @property {
         Entity target();
+
+        bool isPlaying() const;
     }
 
     void setDialogChoices(string[] choices, bool isCancellable);
     int getDialogChoice() const;
 
-    void setDialogMode(Dialog.BubbleMode mode);
     void setDialogText(string text);
+    void setDialogTimeout(int timeOut);
 }

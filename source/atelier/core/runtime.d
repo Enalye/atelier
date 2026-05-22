@@ -25,10 +25,11 @@ import atelier.world;
 import atelier.core.build;
 import atelier.core.loader;
 import atelier.core.logger;
-import atelier.core.theme;
-import atelier.core.window;
-import atelier.core.vignette;
 import atelier.core.overlay;
+import atelier.core.profiler;
+import atelier.core.theme;
+import atelier.core.vignette;
+import atelier.core.window;
 
 final class Atelier {
     static private {
@@ -83,6 +84,7 @@ final class Atelier {
         NavMesh _navMesh;
         State _state;
         Console _console;
+        Profiler _profiler;
         Script _script;
         RNG _rng;
         Theme _theme;
@@ -152,6 +154,11 @@ final class Atelier {
         /// Le terminal de commande
         Console console() {
             return _console;
+        }
+
+        /// Analyseur de performances
+        Profiler profiler() {
+            return _profiler;
         }
 
         /// Générateur standard de pseudo-aléatoire
@@ -288,6 +295,7 @@ final class Atelier {
         _rng = new RNG();
         _theme = new Theme();
         _console = new Console();
+        _profiler = new Profiler();
         _script = new Script(libLoader);
         _vignette = new Vignette();
         _overlay = new Overlay();
@@ -552,54 +560,50 @@ final class Atelier {
                         _uiManager.dispatch(event);
                     }
                 }
-                //long startTime = Clock.currStdTime();
 
+                _profiler.startPass("update");
+
+                _profiler.startPass("script");
                 _script.update();
+                _profiler.endPass("script");
+
+                _profiler.startPass("world.update");
                 _world.update(inputEvents);
+                _profiler.endPass("world.update");
+
+                _profiler.startPass("physics");
                 _physics.update();
+                _profiler.endPass("physics");
+
+                _profiler.startPass("ui.update");
                 _vignette.update();
                 _uiManager.update();
                 _overlay.update();
+                _profiler.endPass("ui.update");
 
-                //double loadDuration = (cast(double)(Clock.currStdTime() - startTime) / 10_000_000.0);
+                _profiler.endPass("update");
 
-                /*if (loadDuration < _minDur) {
-                    _minDur = loadDuration;
-                }
-                if (loadDuration > _maxDur) {
-                    _maxDur = loadDuration;
-                }
-                import std.stdio;
-
-                writeln("World.draw(ms) min: ", _minDur, ", max: ", _maxDur, " curr: ", loadDuration);
-*/
                 accumulator -= 1f;
             }
 
             // Rendu
-
-            //_useFrameInterpolation = _inputManager.hasAlt();
-
             _frameTime = (_useFrameInterpolation && currentTimeScale < 1f) ?
                 clamp(accumulator, 0f, 1f) : 1f;
             _renderer.startRenderPass();
-            long startTime = Clock.currStdTime();
+            _profiler.startPass("render");
+
+            _profiler.startPass("world.render");
             _world.draw(cast(Vec2f) _renderer.center);
+            _profiler.endPass("world.render");
+
+            _profiler.startPass("ui.render");
             _vignette.draw();
             _overlay.draw();
             _uiManager.draw();
-            double loadDuration = (cast(double)(Clock.currStdTime() - startTime) / 10_000.0);
+            _profiler.endPass("ui.render");
+
+            _profiler.endPass("render");
             _renderer.endRenderPass();
-            if (loadDuration < _minDur) {
-                _minDur = loadDuration;
-            }
-            if (loadDuration > _maxDur) {
-                _maxDur = loadDuration;
-            }
-            import std.stdio;
-
-            //writeln("World.draw(ms) min: ", _minDur, ", max: ", _maxDur, " curr: ", loadDuration);
-
         }
 
         close();
@@ -611,10 +615,5 @@ final class Atelier {
 
     static void setFrameInterpolation(bool value) {
         _useFrameInterpolation = value;
-    }
-
-    private static {
-        double _minDur = 1000.0;
-        double _maxDur = 0.0;
     }
 }

@@ -19,6 +19,7 @@ final class Particle : Resource!Particle {
 
         Array!ParticleSource _sources;
         Vec3i _position;
+        float _angle = 0f;
     }
 
     @property {
@@ -105,6 +106,18 @@ final class Particle : Resource!Particle {
         _position += position_;
     }
 
+    float getAngle() const {
+        return _angle;
+    }
+
+    void setAngle(float angle_) {
+        _angle = angle_;
+    }
+
+    void addAngle(float angle_) {
+        _angle += angle_;
+    }
+
     void update(ParticleSystem system) {
         sort!((a, b) => a.order < b.order)(_sources.array);
 
@@ -124,7 +137,7 @@ final class Particle : Resource!Particle {
         offset += cast(Vec2f) _position.proj2D();
 
         foreach (i, source; _sources) {
-            source.draw(_texture, offset, zoom);
+            source.draw(_texture, offset, _angle, zoom);
         }
     }
 }

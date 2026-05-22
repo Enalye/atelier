@@ -51,6 +51,24 @@ scene.setParticleSource(entity, src, false);");
             particleType, grInt, grInt, grInt
         ]);
 
+    mod.setDescription(GrLocale.fr_FR, "Récupère l’angle de la particule");
+    mod.setParameters(["particle"]);
+    mod.addFunction(&_getAngle, "getAngle", [particleType], [
+            grFloat
+        ]);
+
+    mod.setDescription(GrLocale.fr_FR, "Modifie l’angle de la particule");
+    mod.setParameters(["particle", "angle"]);
+    mod.addFunction(&_setAngle, "setAngle", [
+            particleType, grFloat
+        ]);
+
+    mod.setDescription(GrLocale.fr_FR, "Modifie l’angle de la particule");
+    mod.setParameters(["particle", "angle"]);
+    mod.addFunction(&_addAngle, "addAngle", [
+            particleType, grFloat
+        ]);
+
     /*mod.setDescription(GrLocale.fr_FR, "Position relative à l’entité");
     mod.setParameters(["particle", "x", "y", "z"]);
     mod.addFunction(&_setRelativePosition, "setRelativePosition", [
@@ -360,6 +378,21 @@ private void _setPosition(GrCall call) {
 private void _addPosition(GrCall call) {
     Particle particle = call.getNative!Particle(0);
     particle.addPosition(Vec3i(call.getInt(1), call.getInt(2), call.getInt(3)));
+}
+
+private void _getAngle(GrCall call) {
+    Particle particle = call.getNative!Particle(0);
+    call.setFloat(particle.getAngle());
+}
+
+private void _setAngle(GrCall call) {
+    Particle particle = call.getNative!Particle(0);
+    particle.setAngle(call.getFloat(1));
+}
+
+private void _addAngle(GrCall call) {
+    Particle particle = call.getNative!Particle(0);
+    particle.addAngle(call.getFloat(1));
 }
 
 /+

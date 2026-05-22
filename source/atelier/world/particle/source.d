@@ -81,9 +81,9 @@ final class ParticleSource {
         _frame++;
     }
 
-    void draw(Texture texture, Vec2f offset, float zoom = 1f) {
+    void draw(Texture texture, Vec2f offset, float offsetAngle, float zoom = 1f) {
         foreach (i, element; _elements) {
-            element.draw(texture, offset, zoom);
+            element.draw(texture, offset, offsetAngle, zoom);
         }
     }
 }

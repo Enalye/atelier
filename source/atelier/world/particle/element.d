@@ -65,14 +65,14 @@ final class ParticleElement {
         _frame++;
     }
 
-    void draw(Texture texture, Vec2f offset, float zoom = 1f) {
+    void draw(Texture texture, Vec2f offset, float offsetAngle, float zoom = 1f) {
         Vec2f delta = origin.proj2D();
-        delta += Vec2f.angled(degToRad(angle)) * distance;
+        delta += Vec2f.angled(degToRad(angle + offsetAngle)) * distance;
         delta += position.proj2D();
         Vec2f size = (cast(Vec2f) clip.zw) * scale * zoom;
         texture.blend = blend;
         texture.color = color;
         texture.alpha = alpha;
-        texture.draw((offset + delta * zoom) - size * 0.5f, size, clip, spriteAngle, Vec2f.half, flipX, flipY);
+        texture.draw((offset + delta * zoom) - size * 0.5f, size, clip, spriteAngle + offsetAngle, Vec2f.half, flipX, flipY);
     }
 }

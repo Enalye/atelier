@@ -12,6 +12,7 @@ public {
     import atelier.render;
     import atelier.world;
     import atelier.script;
+    import atelier.state;
     import atelier.ui;
     import farfadet;
     import grimoire;

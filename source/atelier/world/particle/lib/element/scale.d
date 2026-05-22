@@ -63,8 +63,8 @@ private final class ScaleFader : ParticleEffect!ParticleElement {
         if (ffd.hasNode("scale")) {
             Farfadet node = ffd.getNode("scale");
             Vec2f scale;
-            scale.x = Atelier.rng.rand(node.get!float(0), node.get!float(2));
-            scale.y = Atelier.rng.rand(node.get!float(1), node.get!float(3));
+            scale.x = Atelier.rng.randVariance(node.get!float(0), node.get!float(2));
+            scale.y = Atelier.rng.randVariance(node.get!float(1), node.get!float(3));
             _endScale = scale;
         }
     }

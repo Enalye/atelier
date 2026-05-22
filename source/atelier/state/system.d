@@ -4,6 +4,7 @@ import std.conv : to;
 import std.path : buildNormalizedPath, setExtension;
 
 import atelier.state.data;
+import atelier.state.game;
 
 final class State {
     private {
@@ -24,6 +25,14 @@ final class State {
         }
 
         return buildNormalizedPath("save", setExtension(fileName, "save"));
+    }
+
+    void setGameData(BaseGameStateData data) {
+        _current.setGameData(data);
+    }
+
+    void loadDefault() {
+        _current.loadDefault();
     }
 
     void load(int index) {

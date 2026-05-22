@@ -6,6 +6,7 @@ import std.zlib;
 import farfadet;
 
 import atelier.common;
+import atelier.state.game;
 
 package template isStateType(T) {
     enum isStateType = is(T == string) ||
@@ -27,6 +28,12 @@ final class StateData {
         uint[string] _uints;
         float[string] _floats;
         string[string] _strings;
+
+        BaseGameStateData _gameData;
+    }
+
+    void setGameData(BaseGameStateData data) {
+        _gameData = data;
     }
 
     void setPlayerActor(string id) {
@@ -144,7 +151,6 @@ final class StateData {
                 playerNode.addNode("scene").add(_scene);
             if (_teleporter.length)
                 playerNode.addNode("teleporter").add(_teleporter);
-            playerNode.addNode("teleporterDirection").add(_teleporterDirection);
         }
 
         Farfadet node;
@@ -156,6 +162,11 @@ final class StateData {
             mixin("foreach (key, value; _", stack, "s) {
                 node.addNode(key).add(value);
             }");
+        }
+
+        if (_gameData) {
+            Farfadet gameNode = ffd.addNode("game");
+            _gameData.save(gameNode);
         }
 
         std.file.write(filePath, cast(ubyte[]) compress(ffd.generate(0)));
@@ -178,6 +189,7 @@ final class StateData {
                 _teleporter = playerNode.getNode("teleporter").get!string(0);
             if (playerNode.hasNode("teleporterDirection"))
                 _teleporterDirection = playerNode.getNode("teleporterDirection").get!int(0);
+
         }
 
         static foreach (stack; [
@@ -189,6 +201,21 @@ final class StateData {
                     mixin("_", stack, "s[subNode.name] = subNode.get!", stack, "(0);");
                 }
             }
+        }
+
+        if (_gameData) {
+            _gameData.clear();
+            if (ffd.hasNode("game")) {
+                Farfadet gameNode = ffd.getNode("game");
+                _gameData.load(gameNode);
+            }
+        }
+    }
+
+    void loadDefault() {
+        if (_gameData) {
+            _gameData.clear();
+            _gameData.loadDefault();
         }
     }
 }

@@ -139,11 +139,21 @@ package void loadLibWorld_entity(GrModule mod) {
             entityType
         ], [grFloat, grFloat, grFloat]);
 
+    mod.setDescription(GrLocale.fr_FR, "Récupère l'altitude de l'entité");
+    mod.setParameters(["entity"]);
+    mod.addFunction(&_getAltitude, "getAltitude", [
+            entityType
+        ], [grInt]);
+
     mod.setDescription(GrLocale.fr_FR, "Change l'accélération de l'entité");
     mod.setParameters(["entity", "x", "y", "z"]);
     mod.addFunction(&_setAccel, "setAccel", [
             entityType, grFloat, grFloat, grFloat
         ]);
+
+    mod.setDescription(GrLocale.fr_FR, "Change l’opacité de l’entité");
+    mod.setParameters(["entity", "alpha"]);
+    mod.addFunction(&_setAlpha, "setAlpha", [entityType, grFloat]);
 
     mod.setDescription(GrLocale.fr_FR, "S’oriente vers une cible");
     mod.setParameters(["entity", "x", "y"]);
@@ -175,7 +185,7 @@ package void loadLibWorld_entity(GrModule mod) {
     mod.setDescription(GrLocale.fr_FR, "Récupère le comportement de l’entité");
     mod.setParameters(["entity"]);
     mod.addFunction(&_getBehavior, "getBehavior", [entityType], [
-            behaviorType
+            grOptional(behaviorType)
         ]);
 
     mod.setDescription(GrLocale.fr_FR, "Définit le comportement de l’entité");
@@ -309,9 +319,19 @@ private void _getAccel(GrCall call) {
     call.setFloat(accel.z);
 }
 
+private void _getAltitude(GrCall call) {
+    Entity entity = call.getNative!Entity(0);
+    call.setInt(entity.getAltitude());
+}
+
 private void _setAccel(GrCall call) {
     Entity entity = call.getNative!Entity(0);
     entity.setAccel(Vec3f(call.getFloat(1), call.getFloat(2), call.getFloat(3)));
+}
+
+private void _setAlpha(GrCall call) {
+    Entity entity = call.getNative!Entity(0);
+    entity.setAlpha(call.getFloat(1));
 }
 
 private void _lookAt_xy(GrCall call) {
@@ -365,7 +385,11 @@ private void _setController(GrCall call) {
 
 private void _getBehavior(GrCall call) {
     Entity entity = call.getNative!Entity(0);
-    call.setNative(entity.getBehavior());
+    EntityBehavior behavior = entity.getBehavior();
+    if (behavior)
+        call.setNative(behavior);
+    else
+        call.setNull();
 }
 
 private void _setBehavior(GrCall call) {

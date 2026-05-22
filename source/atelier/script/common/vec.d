@@ -228,6 +228,7 @@ private void _xy(int dimension, string type)(GrCall call) {
 private void _angled(int dimension, string type)(GrCall call) {
     mixin("SVec", dimension, "!Gr", type, " vec = new SVec", dimension, "!Gr", type, ";");
     mixin("vec._vector = SVec", dimension, "!(Gr", type, ").angled(call.get", type, "(0));");
+    call.setNative(vec);
 }
 
 private void _angle(int dimension, string type)(GrCall call) {

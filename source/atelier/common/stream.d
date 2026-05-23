@@ -121,6 +121,7 @@ class InStream {
     /// Extrait une liste
     T[] read(T : T[])() {
         T[] values;
+        enforce(_buffer.length >= size_t.sizeof);
         const size_t size = _buffer.read!size_t();
         if (size == 0)
             return values;
@@ -131,6 +132,7 @@ class InStream {
 
     /// Extrait une valeur
     T read(T)() if (isScalarType!T) {
+        enforce(_buffer.length >= T.sizeof);
         return _buffer.read!T();
     }
 }

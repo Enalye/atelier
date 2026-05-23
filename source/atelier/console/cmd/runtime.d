@@ -42,6 +42,15 @@ package void _runtimeCmd(Console console) {
     ConsoleCommand profile_restart = profile.addCommand("restart");
     profile_restart.setHint("Redémarre les passes");
     profile_restart.setCallback(&_profile_restart);
+
+    // ui
+    ConsoleCommand ui = console.addCommand("ui");
+
+    // ui debug <B:active>
+    ConsoleCommand ui_debug = ui.addCommand("debug");
+    ui_debug.addOption("active", ConsoleType.bool_, ConsoleValue(true));
+    ui_debug.setHint("Active le débug de l’interface");
+    ui_debug.setCallback(&_ui_debug);
 }
 
 private void _timescale(ConsoleCall call) {
@@ -89,4 +98,10 @@ private void _profile_clear(ConsoleCall call) {
 private void _profile_restart(ConsoleCall call) {
     call.console.log("Toutes les passes ont été réinitialisé du profilage");
     Atelier.profiler.restartPasses();
+}
+
+private void _ui_debug(ConsoleCall call) {
+    Atelier.ui.isDebug = call.getArgument!bool("active");
+    call.console.log("Le mode débug de l’interface est maintenant ",
+        Atelier.ui.isDebug ? "active" : "inactive");
 }

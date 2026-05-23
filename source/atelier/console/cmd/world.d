@@ -36,6 +36,15 @@ package void _worldCmd(Console console) {
     scene_set.addParameter("rid", ConsoleType.string_);
     scene_set.setHint("Change le niveau instantanément");
     scene_set.setCallback(&_scene_set);
+
+    // ui
+    ConsoleCommand ui = console.addCommand("ui");
+
+    // ui debug <B:active>
+    ConsoleCommand ui_debug = ui.addCommand("debug");
+    ui_debug.addOption("active", ConsoleType.bool_, ConsoleValue(true));
+    ui_debug.setHint("Active le débug de l’interface");
+    ui_debug.setCallback(&_ui_debug);
 }
 
 private void _scene(ConsoleCall call) {
@@ -78,4 +87,10 @@ private void _scene_set(ConsoleCall call) {
     else {
         call.console.log("La scène `", rid, "` n’existe pas");
     }
+}
+
+private void _ui_debug(ConsoleCall call) {
+    Atelier.world.isDebugUI = call.getArgument!bool("active");
+    call.console.log("Le mode débug de l’interface est maintenant ",
+        Atelier.world.isDebugUI ? "active" : "inactive");
 }

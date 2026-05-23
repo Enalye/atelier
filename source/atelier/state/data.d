@@ -136,9 +136,7 @@ final class StateData {
         }
     }
 
-    void save(string filePath) {
-        Farfadet ffd = new Farfadet();
-
+    void save(Farfadet ffd) {
         Farfadet envNode = ffd.addNode("env");
 
         {
@@ -157,7 +155,7 @@ final class StateData {
         static foreach (stack; [
                 "bool", "int", "uint", "float", "string"
             ]) {
-            node = envNode.addNode(stack);
+            node = envNode.addNode("flags." ~ stack);
 
             mixin("foreach (key, value; _", stack, "s) {
                 node.addNode(key).add(value);
@@ -168,37 +166,34 @@ final class StateData {
             Farfadet gameNode = ffd.addNode("game");
             _gameData.save(gameNode);
         }
-
-        std.file.write(filePath, cast(ubyte[]) compress(ffd.generate(0)));
     }
 
-    void load(string filePath) {
-        Farfadet ffd = Farfadet.fromBytes(cast(ubyte[]) uncompress(std.file.read(filePath)));
+    void load(Farfadet ffd) {
+        if (ffd.hasNode("env")) {
+            Farfadet envNode = ffd.getNode("env");
 
-        Farfadet envNode = ffd.getNode("env");
+            if (envNode.hasNode("player")) {
+                Farfadet playerNode = envNode.getNode("player");
+                if (playerNode.hasNode("actor"))
+                    _playerActor = playerNode.getNode("actor").get!string(0);
+                if (playerNode.hasNode("controller"))
+                    _playerController = playerNode.getNode("controller").get!string(0);
+                if (playerNode.hasNode("scene"))
+                    _scene = playerNode.getNode("scene").get!string(0);
+                if (playerNode.hasNode("teleporter"))
+                    _teleporter = playerNode.getNode("teleporter").get!string(0);
+                if (playerNode.hasNode("teleporterDirection"))
+                    _teleporterDirection = playerNode.getNode("teleporterDirection").get!int(0);
+            }
 
-        if (envNode.hasNode("player")) {
-            Farfadet playerNode = envNode.getNode("player");
-            if (playerNode.hasNode("actor"))
-                _playerActor = playerNode.getNode("actor").get!string(0);
-            if (playerNode.hasNode("controller"))
-                _playerController = playerNode.getNode("controller").get!string(0);
-            if (playerNode.hasNode("scene"))
-                _scene = playerNode.getNode("scene").get!string(0);
-            if (playerNode.hasNode("teleporter"))
-                _teleporter = playerNode.getNode("teleporter").get!string(0);
-            if (playerNode.hasNode("teleporterDirection"))
-                _teleporterDirection = playerNode.getNode("teleporterDirection").get!int(0);
-
-        }
-
-        static foreach (stack; [
-                "bool", "int", "uint", "float", "string"
-            ]) {
-            if (envNode.hasNode(stack)) {
-                Farfadet node = envNode.getNode(stack);
-                foreach (subNode; envNode.getNodes()) {
-                    mixin("_", stack, "s[subNode.name] = subNode.get!", stack, "(0);");
+            static foreach (stack; [
+                    "bool", "int", "uint", "float", "string"
+                ]) {
+                if (envNode.hasNode(stack)) {
+                    Farfadet node = envNode.getNode("flags." ~ stack);
+                    foreach (subNode; node.getNodes()) {
+                        mixin("_", stack, "s[subNode.name] = subNode.get!", stack, "(0);");
+                    }
                 }
             }
         }

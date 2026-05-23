@@ -91,6 +91,14 @@ final class World {
         ParticleSystem particle() {
             return _particle;
         }
+
+        bool isDebugUI() const {
+            return _uiManager.isDebug;
+        }
+
+        bool isDebugUI(bool isDebug_) {
+            return _uiManager.isDebug = isDebug_;
+        }
     }
 
     this() {

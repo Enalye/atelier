@@ -9,6 +9,7 @@ import atelier.console.cmd.runtime;
 import atelier.console.cmd.lighting;
 import atelier.console.cmd.nav;
 import atelier.console.cmd.script;
+import atelier.console.cmd.state;
 import atelier.console.cmd.weather;
 import atelier.console.cmd.world;
 
@@ -20,6 +21,7 @@ private void function(Console)[] _cmdList = [
     &_lightingCmd, //
     &_navCmd, //
     &_scriptCmd, //
+    &_stateCmd, //
     &_weatherCmd, //
     &_worldCmd, //
 ];

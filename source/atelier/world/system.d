@@ -59,7 +59,6 @@ final class World {
         bool _isPaused, _isRunning;
 
         Factory _factory;
-        EntityController _playerController;
         Transition function(string, string, Entity, bool) _transitionFunc;
     }
 
@@ -218,8 +217,9 @@ final class World {
         }
 
         _setupPlayerController();
-        if (_playerController) {
-            _playerController.onSceneExit(direction);
+        EntityController controller = _player ? _player.getController() : null;
+        if (controller) {
+            controller.onSceneExit(direction);
         }
 
         _weather.run("", 0f, 60);
@@ -230,7 +230,11 @@ final class World {
     }
 
     private void _setupPlayerController() {
-        if (!_playerController) {
+        if (!_player)
+            return;
+
+        EntityController controller = _player.getController();
+        if (!controller) {
             _player.setController(Atelier.state.getPlayerController());
         }
     }
@@ -265,8 +269,9 @@ final class World {
         bool hasXBounds = rendererSize.x <= mapSize.x;
         bool hasYBounds = rendererSize.y <= mapSize.y;
 
-        if (_playerController) {
-            _controllers ~= _playerController;
+        EntityController controller = _player ? _player.getController() : null;
+        if (controller) {
+            _controllers ~= controller;
         }
 
         if (_player) {
@@ -286,9 +291,10 @@ final class World {
             _camera.follow(_player, Vec2f.one * 1f, Vec2f.zero);
 
             _setupPlayerController();
-            if (_playerController) {
-                _playerController.onStart();
-            }
+            //EntityController controller = _player.getController();
+            //if (controller) {
+            //    //controller.onStart();
+            //}
             //_player.isPlayer = true;
         }
 
@@ -334,8 +340,8 @@ final class World {
                         _player.setPosition(teleporterComponent.getExitPosition(_player));
 
                         _setupPlayerController();
-                        if (_playerController) {
-                            _playerController.onSceneEnter(teleporterComponent.direction + 4);
+                        if (_player.getController()) {
+                            _player.getController().onSceneEnter(teleporterComponent.direction + 4);
                         }
 
                         Atelier.state.setTeleporterDirection(teleporterComponent.direction + 4);
@@ -344,9 +350,9 @@ final class World {
                         _player.setPosition(entity.getPosition());
 
                         _setupPlayerController();
-                        if (_playerController) {
-                            _playerController.onStart();
-                        }
+                        //if (controller) {
+                        //    //controller.onStart();
+                        //}
                         _player.setAngle(entityBuilder.teleporter.direction * -45f);
                     }
                 }
@@ -398,9 +404,9 @@ final class World {
         }
         if (_player) {
             _setupPlayerController();
-            if (_playerController) {
-                _playerController.onStart();
-            }
+            //if (_player.getController()) {
+            //    //_playerController.onStart();
+            //}
             Atelier.script.callEvent("scene_" ~ _sceneRid);
             Atelier.physics.setTriggersActive(true);
         }
@@ -499,7 +505,6 @@ final class World {
         if (!_isRunning) {
             _scene = null;
             _player = null;
-            _playerController = null;
             _sceneRid.length = 0;
             _tpName.length = 0;
             return;

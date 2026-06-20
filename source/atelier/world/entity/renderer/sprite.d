@@ -125,19 +125,19 @@ final class EntitySpriteRenderer : EntityGraphic {
     }
 
     override uint getWidth() const {
-        return _sprite.width;
+        return _sprite.clip.z;
     }
 
     override uint getHeight() const {
-        return _sprite.height;
+        return _sprite.clip.w;
     }
 
     override uint getEffectWidth() const {
-        return _sprite.width + _effectMargin.x;
+        return _sprite.clip.z + _effectMargin.x;
     }
 
     override uint getEffectHeight() const {
-        return _sprite.height + _effectMargin.y;
+        return _sprite.clip.w + _effectMargin.y;
     }
 
     override bool isBehind() const {

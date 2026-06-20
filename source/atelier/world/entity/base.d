@@ -49,6 +49,24 @@ final class Entity : Resource!Entity {
         glow
     }
 
+    enum InitSetting {
+        none = 0x0,
+
+        copyGraphics = 0x1,
+        initGraphics = 0x2,
+        allGraphics = copyGraphics | initGraphics,
+
+        copyCollider = 0x4,
+        copyRepulsor = 0x8,
+        copyHitbox = 0x10,
+        allPhysics = copyCollider | copyRepulsor | copyHitbox,
+
+        copyController = 0x20,
+        copyBehavior = 0x40,
+
+        all = allPhysics | allGraphics | copyController | copyBehavior
+    }
+
     private {
         bool _isRegistered = false;
         string _name;
@@ -63,6 +81,7 @@ final class Entity : Resource!Entity {
         EntityGraphic[string] _graphics, _auxGraphics;
         string _graphicId;
         EntityGraphic _graphic;
+        bool _areGraphicsUpdated = true;
 
         struct AuxGraphicSlot {
             string id;
@@ -149,6 +168,10 @@ final class Entity : Resource!Entity {
     }
 
     this(Entity other) {
+        this(other, InitSetting.all);
+    }
+
+    this(Entity other, InitSetting settings) {
         _name = other._name;
         _tags = other._tags;
         _layer = other._layer;
@@ -156,8 +179,15 @@ final class Entity : Resource!Entity {
         _angle = other._angle;
         _material = other._material;
         _baseZ = other._baseZ;
-        _baseControllerId = other._baseControllerId;
-        _baseBehaviorId = other._baseBehaviorId;
+
+        if (settings & InitSetting.copyController) {
+            _baseControllerId = other._baseControllerId;
+        }
+
+        if (settings & InitSetting.copyBehavior) {
+            _baseBehaviorId = other._baseBehaviorId;
+        }
+
         _zOrderOffset = other._zOrderOffset;
         _baseMaterial = other._baseMaterial;
         _shadowBaseZ = other._shadowBaseZ;
@@ -166,44 +196,54 @@ final class Entity : Resource!Entity {
         _hasCulling = other._hasCulling;
         _sectorID = other._sectorID;
 
-        foreach (id, renderer; other._graphics) {
-            _graphics[id] = renderer.fetch();
-        }
+        if (settings & InitSetting.copyGraphics) {
+            foreach (id, renderer; other._graphics) {
+                _graphics[id] = renderer.fetch();
+            }
 
-        foreach (id, renderer; other._auxGraphics) {
-            _auxGraphics[id] = renderer.fetch();
-        }
-
-        if (other._collider) {
-            _collider = other._collider.fetch();
-            _collider.setEntity(this);
-        }
-
-        if (other._repulsor) {
-            _repulsor = new Repulsor(other._repulsor);
-            _repulsor.setEntity(this);
-        }
-
-        if (other._hitbox) {
-            _hitbox = new Hitbox(other._hitbox);
-            _hitbox.setEntity(this);
-        }
-
-        // Graphique par défaut
-        foreach (graphicId, graphic; _graphics) {
-            if (graphic.getDefault()) {
-                _graphic = graphic;
-                _graphic.start();
-                _graphic.setAngle(_angle);
-                version (AtelierEtabli) {
-                }
-                else {
-                    Atelier.world.addRenderedEntity(this);
-                }
-                break;
+            foreach (id, renderer; other._auxGraphics) {
+                _auxGraphics[id] = renderer.fetch();
             }
         }
-        _updateAuxGraphics();
+
+        if (settings & InitSetting.copyCollider) {
+            if (other._collider) {
+                _collider = other._collider.fetch();
+                _collider.setEntity(this);
+            }
+        }
+
+        if (settings & InitSetting.copyRepulsor) {
+            if (other._repulsor) {
+                _repulsor = new Repulsor(other._repulsor);
+                _repulsor.setEntity(this);
+            }
+        }
+
+        if (settings & InitSetting.copyHitbox) {
+            if (other._hitbox) {
+                _hitbox = new Hitbox(other._hitbox);
+                _hitbox.setEntity(this);
+            }
+        }
+
+        if (settings & InitSetting.initGraphics) {
+            // Graphique par défaut
+            foreach (graphicId, graphic; _graphics) {
+                if (graphic.getDefault()) {
+                    _graphic = graphic;
+                    _graphic.start();
+                    _graphic.setAngle(_angle);
+                    version (AtelierEtabli) {
+                    }
+                    else {
+                        Atelier.world.addRenderedEntity(this);
+                    }
+                    break;
+                }
+            }
+            _updateAuxGraphics();
+        }
     }
 
     Entity fetch() {
@@ -272,6 +312,14 @@ final class Entity : Resource!Entity {
             return;
 
         _repulsor = new Repulsor(this, data);
+    }
+
+    void removeRepulsor() {
+        if (_repulsor) {
+            _repulsor.setEntity(null);
+            _repulsor.unregister();
+            _repulsor = null;
+        }
     }
 
     Repulsor getRepulsor() {
@@ -446,6 +494,41 @@ final class Entity : Resource!Entity {
 
         if (!_graphic) {
             Atelier.log("Pas d’état graphique par défaut trouvé");
+        }
+    }
+
+    void copyGraphics(Entity other) {
+        _graphicId = other._graphicId;
+        bool wasRendered = _graphic !is null;
+
+        _graphic = null;
+        if (other._graphic) {
+            _graphic = other._graphic.fetch();
+        }
+
+        _auxGraphicSlots.length = other._auxGraphicSlots.length;
+        for (uint i; i < _auxGraphicSlots.length; ++i) {
+            _auxGraphicSlots[i].id = other._auxGraphicSlots[i].id;
+            _auxGraphicSlots[i].isUpdated = other._auxGraphicSlots[i].isUpdated;
+            _auxGraphicSlots[i].graphic = other._auxGraphicSlots[i].graphic ?
+                other._auxGraphicSlots[i].graphic.fetch() : null;
+        }
+
+        _auxGraphicStack.length = 0;
+        for (uint i; i < _auxGraphicSlots.length; ++i) {
+            if (!_auxGraphicSlots[i].graphic)
+                continue;
+
+            _auxGraphicStack ~= _auxGraphicSlots[i].graphic;
+        }
+        _auxGraphicStack.sort!((a, b) => a.getOrder() < b.getOrder())();
+
+        if (!wasRendered) {
+            version (AtelierEtabli) {
+            }
+            else {
+                Atelier.world.addRenderedEntity(this);
+            }
         }
     }
 
@@ -649,7 +732,15 @@ final class Entity : Resource!Entity {
         _hitbox = new Hitbox(this, data);
     }
 
+    void setGraphicsUpdate(bool value) {
+        _areGraphicsUpdated = value;
+    }
+
     void updateGraphics() {
+        if (!_areGraphicsUpdated) {
+            return;
+        }
+
         if (_graphic) {
             _graphic.update();
         }

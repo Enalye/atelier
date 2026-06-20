@@ -18,7 +18,7 @@ final class BlinkEffect : EntityGraphicEffect {
 
     @property {
         /// L’effet est-il encore en cours d’exécution ?
-        bool isRunning() const {
+        override bool isRunning() const {
             return _isRunning;
         }
     }
@@ -35,7 +35,7 @@ final class BlinkEffect : EntityGraphicEffect {
     }
 
     ///Modify the effect sprite
-    void update(Sprite sprite) {
+    override void update(Sprite sprite) {
         _timer.update();
         if (_timer.isRunning()) {
             if (_timer.value01 < .5f) {
@@ -61,7 +61,7 @@ final class BlinkEffect : EntityGraphicEffect {
         }
     }
 
-    void draw(Sprite sprite, Vec2f position) {
+    override void draw(Sprite sprite, Vec2f position) {
         sprite.draw(position);
     }
 }

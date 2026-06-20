@@ -92,6 +92,7 @@ final class MultiDirAnimation : Image, Resource!MultiDirAnimation {
         super(anim);
         _imageData = anim._imageData;
         _frame = anim._frame;
+        _currentDir = anim._currentDir;
         _currentTick = anim._currentTick;
         _isRunning = anim._isRunning;
         frameTime = anim.frameTime;
@@ -101,6 +102,7 @@ final class MultiDirAnimation : Image, Resource!MultiDirAnimation {
         maxCount = anim.maxCount;
         repeat = anim.repeat;
         margin = anim.margin;
+        dirAngle = anim.dirAngle;
         dirStartAngle = anim.dirStartAngle;
         dirOffset = anim.dirOffset;
         dirIndexes = anim.dirIndexes;

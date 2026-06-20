@@ -128,19 +128,19 @@ final class EntityAnimRenderer : EntityGraphic {
     }
 
     override uint getWidth() const {
-        return _anim.width;
+        return _anim.clip.z;
     }
 
     override uint getHeight() const {
-        return _anim.height;
+        return _anim.clip.w;
     }
 
     override uint getEffectWidth() const {
-        return _anim.width + _effectMargin.x;
+        return _anim.clip.z + _effectMargin.x;
     }
 
     override uint getEffectHeight() const {
-        return _anim.height + _effectMargin.y;
+        return _anim.clip.w + _effectMargin.y;
     }
 
     override bool isBehind() const {

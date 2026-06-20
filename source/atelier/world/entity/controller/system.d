@@ -43,11 +43,11 @@ mixin template ControllerMixin() {
         return _controller;
     }
 
-    string sendEvent(string event) {
+    void sendEvent(string event) {
         if (!_controller)
-            return "";
+            return;
 
-        return _controller.onEvent(event);
+        _controller.onEvent(event);
     }
 
     private void onEnableController() {

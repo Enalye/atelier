@@ -17,16 +17,16 @@ final class SpawnEffect : EntityGraphicEffect {
 
     @property {
         ///Is the effect still running ?
-        bool isRunning() const {
+        override bool isRunning() const {
             return true;
         }
 
         /// Color
-        Color color() const {
+        Color fxColor() const {
             return _color;
         }
         /// Ditto
-        Color color(Color color_) {
+        Color fxColor(Color color_) {
             return _color = color_;
         }
     }
@@ -38,7 +38,7 @@ final class SpawnEffect : EntityGraphicEffect {
     }
 
     ///Modify the effect sprite
-    void update(Sprite sprite) {
+    override void update(Sprite sprite) {
         _timer.update();
         sprite.color = _color;
         if (_timer.isRunning()) {
@@ -56,7 +56,7 @@ final class SpawnEffect : EntityGraphicEffect {
         }
     }
 
-    void draw(Sprite sprite, Vec2f position) {
+    override void draw(Sprite sprite, Vec2f position) {
         sprite.draw(position);
     }
 }

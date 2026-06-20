@@ -19,7 +19,7 @@ final class FlashEffect : EntityGraphicEffect {
 
     @property {
         /// L’effet est-il encore en cours d’exécution ?
-        bool isRunning() const {
+        override bool isRunning() const {
             return _isRunning;
         }
     }
@@ -37,7 +37,7 @@ final class FlashEffect : EntityGraphicEffect {
     }
 
     ///Modify the effect sprite
-    void update(Sprite sprite) {
+    override void update(Sprite sprite) {
         _timer.update();
         if (_stayPhase) {
             sprite.alpha = _alpha;
@@ -57,7 +57,7 @@ final class FlashEffect : EntityGraphicEffect {
         }
     }
 
-    void draw(Sprite sprite, Vec2f position) {
+    override void draw(Sprite sprite, Vec2f position) {
         sprite.draw(position);
     }
 }

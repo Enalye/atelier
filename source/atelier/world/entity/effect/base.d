@@ -6,11 +6,18 @@ import atelier.render;
 import atelier.world.entity.base;
 import atelier.world.entity.renderer;
 
-interface EntityGraphicEffect {
+abstract class EntityGraphicEffect {
     @property {
         /// L’effet est-il encore en cours d’exécution ?
         bool isRunning() const;
     }
+
+    Blend blend = Blend.alpha;
+    Vec2f scale = Vec2f.one;
+    Color color = Color.white;
+    float alpha = 1f;
+    bool flipX, flipY;
+    double angle = 0.0;
 
     /// Modifie le rendu
     void update(Sprite sprite);
@@ -87,7 +94,13 @@ final class EntityGraphicEffectWrapper {
             _effect.draw(_fxSprite, center);
             Atelier.renderer.popCanvas();
 
-            _renderSprite.alpha = alpha;
+            _renderSprite.alpha = _effect.alpha * alpha;
+            _renderSprite.angle = _effect.angle;
+            _renderSprite.blend = _effect.blend;
+            _renderSprite.color = _effect.color;
+            _renderSprite.size = Vec2f(_canvas.width, _canvas.height) * _effect.scale;
+            _renderSprite.flipX = _effect.flipX;
+            _renderSprite.flipY = _effect.flipY;
             _renderSprite.draw(position);
         }
     }

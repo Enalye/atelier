@@ -8,12 +8,11 @@ import atelier.world.entity.controller.state;
 
 abstract class EntityController : ControllerWrapper {
     private {
+        string _id;
         Entity _entity;
-        string _currentStateId, _lastStateId, _defaultStateId;
-        bool _isStartingState = true;
         EntityControllerState[string] _states;
         EntityControllerState _currentState;
-        string _id;
+        string _defaultId, _currentStateId;
     }
 
     @property {
@@ -26,24 +25,105 @@ abstract class EntityController : ControllerWrapper {
         }
     }
 
+    this(string defaultId) {
+        _defaultId = defaultId;
+    }
+
     final void setup(Entity entity_, string id_) {
         _isRunning = true;
         _entity = entity_;
         _id = id_;
+        setState(_defaultId);
     }
 
-    final string sendEvent(string event) {
-        return onEvent(event);
+    private void _addCallback(string type, T)(string stateId, T callback) {
+        _states.update(stateId, {
+            EntityControllerState state = new EntityControllerState(stateId);
+            mixin("state.add", type, "(callback);");
+            return state;
+        }, (EntityControllerState state) {
+            mixin("state.add", type, "(callback);");
+        });
     }
 
-    void onUpdate() {
+    final void addUpdate(string stateId, EntityControllerState.OnUpdateCallback callback) {
+        _addCallback!("Update")(stateId, callback);
     }
 
-    string onEvent(string event) {
-        return "";
+    final void addStart(string stateId, EntityControllerState.OnStartCallback callback) {
+        _addCallback!("Start")(stateId, callback);
+    }
+
+    final void addEnd(string stateId, EntityControllerState.OnEndCallback callback) {
+        _addCallback!("End")(stateId, callback);
+    }
+
+    final void addEvent(string stateId, EntityControllerState.OnEventCallback callback) {
+        _addCallback!("Event")(stateId, callback);
+    }
+
+    final void addCollide(string stateId, EntityControllerState.OnCollideCallback callback) {
+        _addCallback!("Collide")(stateId, callback);
+    }
+
+    final void addSquish(string stateId, EntityControllerState.OnSquishCallback callback) {
+        _addCallback!("Squish")(stateId, callback);
+    }
+
+    final void addImpact(string stateId, EntityControllerState.OnImpactCallback callback) {
+        _addCallback!("Impact")(stateId, callback);
+    }
+
+    final void addSceneEnter(string stateId, EntityControllerState.OnSceneEnterCallback callback) {
+        _addCallback!("SceneEnter")(stateId, callback);
+    }
+
+    final void addSceneExit(string stateId, EntityControllerState.OnSceneExitCallback callback) {
+        _addCallback!("SceneExit")(stateId, callback);
+    }
+
+    final void addTransition(string stateId, string nextId, EntityControllerState
+            .TransitionCallback callback) {
+        _states.update(stateId, {
+            EntityControllerState state = new EntityControllerState(stateId);
+            state.addTransition(nextId, callback);
+            return state;
+        }, (EntityControllerState state) {
+            state.addTransition(nextId, callback);
+        });
+    }
+
+    final string getState() const {
+        return _currentStateId;
+    }
+
+    final void setState(string stateId) {
+        if (_currentStateId == stateId)
+            return;
+
+        if (_currentState) {
+            _currentState.onEnd();
+        }
+
+        auto pState = stateId in _states;
+        if (pState) {
+            _currentStateId = stateId;
+            _currentState = *pState;
+
+            if (_currentState) {
+                _currentState.onStart();
+            }
+        }
+        else {
+            _currentStateId = stateId;
+            _currentState = null;
+        }
     }
 
     void onStart() {
+    }
+
+    void onEnd() {
     }
 
     void onEnable() {
@@ -52,141 +132,90 @@ abstract class EntityController : ControllerWrapper {
     void onDisable() {
     }
 
-    void onClose() {
+    void onUpdate() {
+    }
+
+    final void onEvent(string event) {
+        if (!_currentState)
+            return;
+
+        _currentState.onEvent(event);
     }
 
     final void onSceneExit(uint direction) {
         if (!_currentState)
             return;
 
-        string stateId = _currentStateId;
         _currentState.onSceneExit(direction);
-        if (stateId != _currentStateId) {
-            _currentState.onStartSceneExit(direction);
-        }
     }
 
     final void onSceneEnter(uint direction) {
         if (!_currentState)
             return;
 
-        string stateId = _currentStateId;
         _currentState.onSceneEnter(direction);
-        if (stateId != _currentStateId) {
-            _currentState.onStartSceneEnter(direction);
-        }
     }
 
     final void onCollide(Entity other, Vec3f normal) {
         if (!_currentState)
             return;
 
-        string stateId = _currentStateId;
         _currentState.onCollide(other, normal);
-        if (stateId != _currentStateId) {
-            _currentState.onStartHit(other, normal);
-        }
     }
 
     final void onSquish(Vec3f normal) {
         if (!_currentState)
             return;
 
-        string stateId = _currentStateId;
         _currentState.onSquish(normal);
-        if (stateId != _currentStateId) {
-            _currentState.onStartSquish(normal);
-        }
     }
 
     final void onImpact(Entity other, Vec3f normal) {
         if (!_currentState)
             return;
 
-        string stateId = _currentStateId;
         _currentState.onImpact(other, normal);
-        if (stateId != _currentStateId) {
-            _currentState.onStartImpact(other, normal);
-        }
     }
 
     package(atelier.world) final void unregister() {
         if (_currentState) {
-            _currentState.onClose();
+            _currentState.onEnd();
             _currentState = null;
+            _currentStateId.length = 0;
         }
-        onClose();
+
         _isRunning = false;
-    }
-
-    final void addState(string id, EntityControllerState state) {
-        state.setup(this, id);
-        _states[id] = state;
-    }
-
-    final void setDefaultState(string id) {
-        _defaultStateId = id;
-    }
-
-    final void runPreviousState() {
-        runState(_lastStateId);
-    }
-
-    final void runDefaultState() {
-        runState(_defaultStateId);
-    }
-
-    final void runState(string id) {
-        if (_currentStateId == id)
-            return;
-
-        auto p = id in _states;
-        if (!p)
-            return;
-
-        if (_currentState) {
-            _currentState.onClose();
-
-            if (_currentState.canExit(id) && p.canEnter(_currentState.id)) {
-                _lastStateId = _currentStateId;
-                _currentStateId = id;
-                _currentState = *p;
-                _currentState.onStart();
-            }
-        }
-        else {
-            _lastStateId = _currentStateId;
-            _currentStateId = id;
-            _currentState = *p;
-            _currentState.onStart();
-        }
     }
 
     final override void update() {
         onUpdate();
 
-        if (!_entity.isRegistered) {
-            _isRunning = false;
-            if (_currentState) {
-                _currentState.onClose();
-                _currentState = null;
-            }
-            onClose();
-            return;
-        }
+        if (_currentState) {
+        __checkTransition:
+            string stateId = _currentState.checkTransitions();
+            if (_currentStateId != stateId) {
+                if (_currentState) {
+                    _currentState.onEnd();
+                }
+                auto pState = stateId in _states;
+                if (pState) {
+                    _currentStateId = stateId;
+                    _currentState = *pState;
 
-        if (!_currentState && _defaultStateId.length) {
-            runDefaultState();
+                    if (_currentState) {
+                        _currentState.onStart();
+                    }
+                    goto __checkTransition;
+                }
+                else {
+                    _currentStateId = stateId;
+                    _currentState = null;
+                }
+            }
         }
 
         if (_currentState) {
-            if (!_currentState.isRunning()) {
-                _currentState.onClose();
-                _currentState = null;
-            }
-            else {
-                _currentState.onUpdate();
-            }
+            _currentState.onUpdate();
         }
     }
 }

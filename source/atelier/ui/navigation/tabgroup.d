@@ -16,6 +16,7 @@ final class TabGroup : UIElement {
     private {
         string _value;
         int _index = -1;
+        int _maxPerLine = 0;
     }
 
     @property {
@@ -36,17 +37,55 @@ final class TabGroup : UIElement {
     }
 
     private void _onSize() {
+        removeEventListener("size", &_onSize);
         float count = getChildren().length;
+
+        setSizeLock(false, false);
+        if (_maxPerLine > 0) {
+            uint totalCount = cast(uint)(getChildren().length);
+            uint rows = totalCount / _maxPerLine;
+            uint leftOvers = totalCount % _maxPerLine;
+            if (leftOvers > 0)
+                rows++;
+            setHeight(max(1, rows) * 32f);
+        }
+        else {
+            setHeight(32f);
+        }
+        setSizeLock(false, true);
+
+        if (_maxPerLine > 0) {
+            count = min(count, _maxPerLine);
+        }
+
         float childWidth = 0f;
         if (count > 0) {
             childWidth = getWidth() / count;
         }
+        float posY = 0f;
         float posX = 0f;
+        int i;
         foreach (child; getChildren()) {
             child.setWidth(childWidth);
-            child.setPosition(Vec2f(posX, 0f));
-            posX += childWidth;
+            child.setPosition(Vec2f(posX, posY));
+
+            i++;
+            if (i >= _maxPerLine) {
+                posX = 0f;
+                posY = 32f;
+                i = 0;
+            }
+            else {
+                posX += childWidth;
+            }
         }
+        addEventListener("size", &_onSize);
+    }
+
+    void setMaxPerLine(int maxPerLine) {
+        _maxPerLine = maxPerLine;
+
+        _onSize();
     }
 
     bool hasTab(string id) {
@@ -93,7 +132,7 @@ final class TabGroup : UIElement {
             }
         }
 
-        if (!hasValue) {
+        if (!hasValue && tabs.length) {
             tabs[0].updateValue(true);
             _value = tabs[0]._id;
             _index = 0;

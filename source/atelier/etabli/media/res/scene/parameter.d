@@ -15,6 +15,7 @@ import atelier.render;
 import atelier.etabli.media.res.base;
 import atelier.etabli.media.res.scene.common;
 import atelier.etabli.media.res.scene.settings;
+import atelier.etabli.media.res.scene.editor;
 import atelier.etabli.media.res.scene.entity;
 import atelier.etabli.media.res.scene.light;
 import atelier.etabli.media.res.scene.topography;
@@ -30,16 +31,40 @@ package final class ParameterWindow : UIElement {
         TabGroup _tabs;
         VBox _vbox;
         Vec2f _viewDestination = Vec2f.zero;
-        EntityParameters _entityParameters;
-        LightParameters _lightParameters;
-        TopographicMap _topographicMap;
-        TerrainList _terrainList;
-        ParallaxList _parallaxList;
-        CollisionList _collisionList;
+        SceneSubEditor _subEditor;
+        SceneResourceEditor.SubEditorFunc[string] _subEditors;
     }
 
-    this(SceneDefinition definition) {
+    this(SceneDefinition definition, SceneResourceEditor.SubEditorDefinition[] subEditorDefinitions) {
         _definition = definition;
+
+        SceneResourceEditor.SubEditorDefinition[] subEditors;
+        subEditors ~= SceneResourceEditor.SubEditorDefinition(
+            "entity",
+            "editor:scene-entity",
+            (SceneDefinition def) { return new EntityParameters(def); });
+        subEditors ~= SceneResourceEditor.SubEditorDefinition(
+            "topography",
+            "editor:scene-topography",
+            (SceneDefinition def) { return new TopographicMap(def); });
+        subEditors ~= SceneResourceEditor.SubEditorDefinition(
+            "terrain",
+            "editor:scene-terrain",
+            (SceneDefinition def) { return new TerrainList(def); });
+        subEditors ~= SceneResourceEditor.SubEditorDefinition(
+            "parallax",
+            "editor:scene-parallax",
+            (SceneDefinition def) { return new ParallaxList(def); });
+        subEditors ~= SceneResourceEditor.SubEditorDefinition(
+            "collision",
+            "editor:scene-collision",
+            (SceneDefinition def) { return new CollisionList(def); });
+        subEditors ~= SceneResourceEditor.SubEditorDefinition(
+            "lighting",
+            "editor:scene-lighting",
+            (SceneDefinition def) { return new LightParameters(def); });
+
+        subEditors ~= subEditorDefinitions;
 
         VList vlist = new VList;
         vlist.setPosition(Vec2f(8f, 8f));
@@ -82,13 +107,15 @@ package final class ParameterWindow : UIElement {
         {
             _tabs = new TabGroup;
             _tabs.setWidth(284f);
-            _tabs.addTab("", "entity", "editor:scene-entity");
-            _tabs.addTab("", "topography", "editor:scene-topography");
-            _tabs.addTab("", "terrain", "editor:scene-terrain");
-            _tabs.addTab("", "parallax", "editor:scene-parallax");
-            _tabs.addTab("", "collision", "editor:scene-collision");
-            _tabs.addTab("", "lighting", "editor:scene-lighting");
+            _tabs.setMaxPerLine(6);
+
+            foreach (def; subEditors) {
+                _tabs.addTab("", def.id, def.icon);
+                _subEditors[def.id] = def.editorFunc;
+            }
             vlist.addList(_tabs);
+
+            Atelier.log(_tabs.getSize());
 
             _tabs.selectTab("entity");
 
@@ -119,324 +146,87 @@ package final class ParameterWindow : UIElement {
         _vbox.clearUI();
         closeToolbox();
 
-        _entityParameters = null;
-        _lightParameters = null;
-        _topographicMap = null;
-        _terrainList = null;
-        _parallaxList = null;
-        _collisionList = null;
+        _subEditor = null;
 
-        switch (_tabs.value()) {
-        case "entity":
-            _entityParameters = new EntityParameters(_definition);
-            _entityParameters.addEventListener("property_dirty", {
+        string id = _tabs.value();
+        auto p = id in _subEditors;
+        if (p) {
+            _subEditor = (*p)(_definition);
+
+            _subEditor.addEventListener("property_dirty", {
                 dispatchEvent("property_dirty", false);
             });
-            _entityParameters.addEventListener("property_centerView", {
-                _viewDestination = _entityParameters.getViewDestination();
+            _subEditor.addEventListener("property_centerView", {
+                _viewDestination = _subEditor.getViewDestination();
                 dispatchEvent("property_centerView", false);
             });
-            _vbox.addUI(_entityParameters);
-            break;
-        case "topography":
-            _topographicMap = new TopographicMap(_definition);
-            _topographicMap.addEventListener("property_dirty", {
-                dispatchEvent("property_dirty", false);
-            });
-            _vbox.addUI(_topographicMap);
-            break;
-        case "terrain":
-            _terrainList = new TerrainList(_definition);
-            _terrainList.addEventListener("property_dirty", {
-                dispatchEvent("property_dirty", false);
-            });
-            _vbox.addUI(_terrainList);
-            break;
-        case "parallax":
-            _parallaxList = new ParallaxList(_definition);
-            _parallaxList.addEventListener("property_dirty", {
-                dispatchEvent("property_dirty", false);
-            });
-            _vbox.addUI(_parallaxList);
-            break;
-        case "collision":
-            _collisionList = new CollisionList(_definition);
-            _collisionList.addEventListener("property_dirty", {
-                dispatchEvent("property_dirty", false);
-            });
-            _vbox.addUI(_collisionList);
-            break;
-        case "lighting":
-            _lightParameters = new LightParameters(_definition);
-            _lightParameters.addEventListener("property_dirty", {
-                dispatchEvent("property_dirty", false);
-            });
-            _lightParameters.addEventListener("property_centerView", {
-                _viewDestination = _lightParameters.getViewDestination();
-                dispatchEvent("property_centerView", false);
-            });
-            _vbox.addUI(_lightParameters);
-            break;
-        default:
-            break;
+            _vbox.addUI(_subEditor);
         }
-
         openToolbox();
     }
 
     void openToolbox() {
-        switch (_tabs.value()) {
-        case "entity":
-            if (_entityParameters) {
-                _entityParameters.openToolbox();
-            }
-            break;
-        case "topography":
-            if (_topographicMap) {
-                _topographicMap.openToolbox();
-            }
-            break;
-        case "terrain":
-            if (_terrainList) {
-                _terrainList.openToolbox();
-            }
-            break;
-        case "parallax":
-            if (_parallaxList) {
-                _parallaxList.openToolbox();
-            }
-            break;
-        case "collision":
-            if (_collisionList) {
-                _collisionList.openToolbox();
-            }
-            break;
-        case "lighting":
-            if (_lightParameters) {
-                _lightParameters.openToolbox();
-            }
-            break;
-        default:
-            break;
+        if (_subEditor) {
+            _subEditor.openToolbox();
         }
     }
 
     void closeToolbox() {
-        if (_entityParameters) {
-            _entityParameters.closeToolbox();
-        }
-        if (_topographicMap) {
-            _topographicMap.closeToolbox();
-        }
-        if (_terrainList) {
-            _terrainList.closeToolbox();
-        }
-        if (_parallaxList) {
-            _parallaxList.closeToolbox();
-        }
-        if (_collisionList) {
-            _collisionList.closeToolbox();
-        }
-        if (_lightParameters) {
-            _lightParameters.closeToolbox();
+        if (_subEditor) {
+            _subEditor.closeToolbox();
         }
     }
 
     void updateView(Vec2f centerPosition, Vec2f mapPosition, float zoom) {
-        switch (_tabs.value()) {
-        case "entity":
-            _entityParameters.updateView(centerPosition, mapPosition, zoom);
-            break;
-        case "topography":
-            _topographicMap.updateView(centerPosition, mapPosition, zoom);
-            break;
-        case "terrain":
-            _terrainList.updateView(centerPosition, mapPosition, zoom);
-            break;
-        case "parallax":
-            _parallaxList.updateView(centerPosition, mapPosition, zoom);
-            break;
-        case "collision":
-            _collisionList.updateView(centerPosition, mapPosition, zoom);
-            break;
-        case "lighting":
-            _lightParameters.updateView(centerPosition, mapPosition, zoom);
-            break;
-        default:
-            break;
+        if (_subEditor) {
+            _subEditor.updateView(centerPosition, mapPosition, zoom);
         }
     }
 
     void startTool(Vec2f mousePosition) {
-        switch (_tabs.value()) {
-        case "entity":
-            _entityParameters.startTool(mousePosition);
-            break;
-        case "topography":
-            _topographicMap.startTool(mousePosition);
-            break;
-        case "terrain":
-            _terrainList.startTool(mousePosition);
-            break;
-        case "parallax":
-            _parallaxList.startTool(mousePosition);
-            break;
-        case "collision":
-            _collisionList.startTool(mousePosition);
-            break;
-        case "lighting":
-            _lightParameters.startTool(mousePosition);
-            break;
-        default:
-            break;
+        if (_subEditor) {
+            _subEditor.startTool(mousePosition);
         }
     }
 
     void updateTool(Vec2f mousePosition) {
-        switch (_tabs.value()) {
-        case "entity":
-            _entityParameters.updateTool(mousePosition);
-            break;
-        case "topography":
-            _topographicMap.updateTool(mousePosition);
-            break;
-        case "terrain":
-            _terrainList.updateTool(mousePosition);
-            break;
-        case "parallax":
-            _parallaxList.updateTool(mousePosition);
-            break;
-        case "collision":
-            _collisionList.updateTool(mousePosition);
-            break;
-        case "lighting":
-            _lightParameters.updateTool(mousePosition);
-            break;
-        default:
-            break;
+        if (_subEditor) {
+            _subEditor.updateTool(mousePosition);
         }
     }
 
     void endTool(Vec2f mousePosition) {
-        switch (_tabs.value()) {
-        case "entity":
-            _entityParameters.endTool(mousePosition);
-            break;
-        case "topography":
-            _topographicMap.endTool(mousePosition);
-            break;
-        case "terrain":
-            _terrainList.endTool(mousePosition);
-            break;
-        case "parallax":
-            _parallaxList.endTool(mousePosition);
-            break;
-        case "collision":
-            _collisionList.endTool(mousePosition);
-            break;
-        case "lighting":
-            _lightParameters.endTool(mousePosition);
-            break;
-        default:
-            break;
+        if (_subEditor) {
+            _subEditor.endTool(mousePosition);
         }
     }
 
     Vec4f getCurrentLayerClip() const {
-        switch (_tabs.value()) {
-        case "entity":
-            return _entityParameters.getCurrentLayerClip();
-        case "topography":
-            return _topographicMap.getCurrentLayerClip();
-        case "terrain":
-            return _terrainList.getCurrentLayerClip();
-        case "parallax":
-            return _parallaxList.getCurrentLayerClip();
-        case "collision":
-            return _collisionList.getCurrentLayerClip();
-        case "lighting":
-            return _lightParameters.getCurrentLayerClip();
-        default:
-            return Vec4f.zero;
+        if (_subEditor) {
+            return _subEditor.getCurrentLayerClip();
         }
+        return Vec4f.zero;
     }
 
     void renderTool() {
-        switch (_tabs.value()) {
-        case "entity":
-            _entityParameters.renderTool();
-            break;
-        case "topography":
-            _topographicMap.renderTool();
-            break;
-        case "terrain":
-            _terrainList.renderTool();
-            break;
-        case "parallax":
-            _parallaxList.renderTool();
-            break;
-        case "collision":
-            _collisionList.renderTool();
-            break;
-        case "lighting":
-            _lightParameters.renderTool();
-            break;
-        default:
-            break;
+        if (_subEditor) {
+            _subEditor.renderTool();
         }
     }
 
     void saveView() {
         view.tab = _tabs.value;
 
-        switch (_tabs.value()) {
-        case "entity":
-            _entityParameters.saveView();
-            break;
-        case "topography":
-            _topographicMap.saveView();
-            break;
-        case "terrain":
-            _terrainList.saveView();
-            break;
-        case "parallax":
-            _parallaxList.saveView();
-            break;
-        case "collision":
-            _collisionList.saveView();
-            break;
-        case "lighting":
-            _lightParameters.saveView();
-            break;
-        default:
-            break;
+        if (_subEditor) {
+            _subEditor.saveView();
         }
     }
 
     void loadView() {
         _tabs.selectTab(view.tab);
 
-        switch (_tabs.value()) {
-        case "entity":
-            _entityParameters.loadView();
-            break;
-        case "topography":
-            _topographicMap.loadView();
-            break;
-        case "terrain":
-            _terrainList.loadView();
-            break;
-        case "parallax":
-            _parallaxList.loadView();
-            break;
-        case "collision":
-            _collisionList.loadView();
-            break;
-        case "lighting":
-            _lightParameters.loadView();
-            break;
-        default:
-            break;
+        if (_subEditor) {
+            _subEditor.loadView();
         }
     }
 }

@@ -20,7 +20,7 @@ import atelier.etabli.media.res.scene.parallax.edit;
 import atelier.etabli.media.res.scene.parallax.remove;
 import atelier.etabli.media.res.scene.parallax.toolbox;
 
-package(atelier.etabli.media.res.scene) final class ParallaxList : UIElement {
+package(atelier.etabli.media.res.scene) final class ParallaxList : SceneSubEditor {
     private {
         SceneDefinition _definition;
         VBox _vbox;
@@ -86,7 +86,7 @@ package(atelier.etabli.media.res.scene) final class ParallaxList : UIElement {
         addEventListener("globalkey", &_onKey);
     }
 
-    void openToolbox() {
+    override void openToolbox() {
         if (!_currentLayer) {
             return;
         }
@@ -94,7 +94,7 @@ package(atelier.etabli.media.res.scene) final class ParallaxList : UIElement {
         _currentLayer.toolbox.addEventListener("tool", &_onTool);
     }
 
-    void closeToolbox() {
+    override void closeToolbox() {
         if (!_currentLayer) {
             return;
         }
@@ -151,13 +151,13 @@ package(atelier.etabli.media.res.scene) final class ParallaxList : UIElement {
             Atelier.input.isPressed(InputEvent.KeyButton.Button.rightAlt);
     }
 
-    void updateView(Vec2f centerPosition, Vec2f mapPosition, float zoom) {
+    override void updateView(Vec2f centerPosition, Vec2f mapPosition, float zoom) {
         _centerPosition = centerPosition;
         _mapPosition = mapPosition;
         _zoom = zoom;
     }
 
-    void startTool(Vec2f mousePos) {
+    override void startTool(Vec2f mousePos) {
         if (!_currentLayer) {
             return;
         }
@@ -212,7 +212,7 @@ package(atelier.etabli.media.res.scene) final class ParallaxList : UIElement {
         }
     }
 
-    void updateTool(Vec2f mousePos) {
+    override void updateTool(Vec2f mousePos) {
         if (!_currentLayer) {
             return;
         }
@@ -230,7 +230,7 @@ package(atelier.etabli.media.res.scene) final class ParallaxList : UIElement {
         }
     }
 
-    void endTool(Vec2f mousePos) {
+    override void endTool(Vec2f mousePos) {
         if (!_currentLayer) {
             return;
         }
@@ -480,7 +480,7 @@ package(atelier.etabli.media.res.scene) final class ParallaxList : UIElement {
         _select(layer);
     }
 
-    Vec4f getCurrentLayerClip() const {
+    override Vec4f getCurrentLayerClip() const {
         if (!_currentLayer)
             return Vec4f.zero;
 
@@ -491,7 +491,7 @@ package(atelier.etabli.media.res.scene) final class ParallaxList : UIElement {
         return Vec4f(origin, mapSize);
     }
 
-    void renderTool() {
+    override void renderTool() {
         if (!_currentLayer)
             return;
 
@@ -538,11 +538,11 @@ package(atelier.etabli.media.res.scene) final class ParallaxList : UIElement {
         }
     }
 
-    void saveView() {
+    override void saveView() {
 
     }
 
-    void loadView() {
+    override void loadView() {
 
     }
 }

@@ -11,7 +11,7 @@ import atelier.etabli.media.res.scene.common;
 import atelier.etabli.media.res.scene.light.list;
 import atelier.etabli.media.res.scene.light.toolbox;
 
-package(atelier.etabli.media.res.scene) final class LightParameters : UIElement {
+package(atelier.etabli.media.res.scene) final class LightParameters : SceneSubEditor {
     private {
         SceneDefinition _definition;
         LightToolbox _toolbox;
@@ -45,7 +45,7 @@ package(atelier.etabli.media.res.scene) final class LightParameters : UIElement 
         _vbox.addEventListener("size", { setSize(_vbox.getSize()); });
     }
 
-    void openToolbox() {
+    override void openToolbox() {
         if (!_toolbox) {
             _toolbox = new LightToolbox();
             _toolbox.addEventListener("tool", {});
@@ -56,7 +56,7 @@ package(atelier.etabli.media.res.scene) final class LightParameters : UIElement 
         _openSettings();
     }
 
-    void closeToolbox() {
+    override void closeToolbox() {
         if (_toolbox) {
             _toolbox.removeUI();
         }
@@ -67,7 +67,7 @@ package(atelier.etabli.media.res.scene) final class LightParameters : UIElement 
     private void _onTool() {
     }
 
-    void updateView(Vec2f centerPosition, Vec2f mapPosition, float zoom) {
+    override void updateView(Vec2f centerPosition, Vec2f mapPosition, float zoom) {
         _centerPosition = centerPosition;
         _mapPosition = mapPosition;
         _zoom = zoom;
@@ -90,7 +90,7 @@ package(atelier.etabli.media.res.scene) final class LightParameters : UIElement 
             Atelier.input.isPressed(InputEvent.KeyButton.Button.rightAlt);
     }
 
-    void startTool(Vec2f mousePos) {
+    override void startTool(Vec2f mousePos) {
         _isApplyingTool = true;
 
         enum tileSize = 16;
@@ -138,7 +138,7 @@ package(atelier.etabli.media.res.scene) final class LightParameters : UIElement 
         }
     }
 
-    void updateTool(Vec2f mousePos) {
+    override void updateTool(Vec2f mousePos) {
         enum tileSize = 16;
         Vec2i dimensions = Vec2i(_definition.getWidth(), _definition.getHeight());
         _mapSize = (cast(Vec2f) dimensions * tileSize) * _zoom;
@@ -190,7 +190,7 @@ package(atelier.etabli.media.res.scene) final class LightParameters : UIElement 
         }
     }
 
-    void endTool(Vec2f mousePos) {
+    override void endTool(Vec2f mousePos) {
         if (!_isApplyingTool)
             return;
         _isApplyingTool = false;
@@ -360,11 +360,11 @@ package(atelier.etabli.media.res.scene) final class LightParameters : UIElement 
         }
     }
 
-    Vec2f getViewDestination() const {
+    override Vec2f getViewDestination() const {
         return _viewDestination;
     }
 
-    Vec4f getCurrentLayerClip() const {
+    override Vec4f getCurrentLayerClip() const {
         Vec2i dimensions = Vec2i(_definition.getWidth(), _definition.getHeight());
         Vec2f mapSize = (cast(Vec2f) dimensions * 16f) * _zoom;
         Vec2f offset = _centerPosition + _mapPosition;
@@ -372,7 +372,7 @@ package(atelier.etabli.media.res.scene) final class LightParameters : UIElement 
         return Vec4f(origin, mapSize);
     }
 
-    void renderTool() {
+    override void renderTool() {
         Vec2f offset = _centerPosition + _mapPosition;
         Vec2f origin = offset - _mapSize / 2f;
 
@@ -395,11 +395,11 @@ package(atelier.etabli.media.res.scene) final class LightParameters : UIElement 
         }
     }
 
-    void saveView() {
+    override void saveView() {
 
     }
 
-    void loadView() {
+    override void loadView() {
 
     }
 }

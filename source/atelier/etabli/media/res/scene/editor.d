@@ -31,6 +31,28 @@ final class SceneResourceEditor : ResourceBaseEditor {
         ParameterWindow _parameterWindow;
     }
 
+    package {
+        alias SubEditorFunc = SceneSubEditor delegate(SceneDefinition);
+
+        struct SubEditorDefinition {
+            string id;
+            string icon;
+            SubEditorFunc editorFunc;
+        }
+    }
+
+    static private {
+        SubEditorDefinition[] _subEditors;
+    }
+
+    static void addSubEditor(string id, string icon, SubEditorFunc editorFunc) {
+        SubEditorDefinition def;
+        def.id = id;
+        def.icon = icon;
+        def.editorFunc = editorFunc;
+        _subEditors ~= def;
+    }
+
     this(ResourceEditor editor, string path_, Farfadet ffd, Vec2f size) {
         super(editor, path_, ffd, size);
         _ffd = ffd;
@@ -41,7 +63,7 @@ final class SceneResourceEditor : ResourceBaseEditor {
         _nominalMapSize = Vec2f(_definition.getWidth(), _definition.getHeight()) * 16f;
         _mapSize = _nominalMapSize;
 
-        _parameterWindow = new ParameterWindow(_definition);
+        _parameterWindow = new ParameterWindow(_definition, _subEditors);
 
         addEventListener("update", &_onUpdate);
         addEventListener("draw", &_onDraw);

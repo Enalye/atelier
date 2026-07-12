@@ -20,7 +20,7 @@ import atelier.etabli.media.res.scene.terrain.edit;
 import atelier.etabli.media.res.scene.terrain.remove;
 import atelier.etabli.media.res.scene.terrain.toolbox;
 
-package(atelier.etabli.media.res.scene) final class TerrainList : UIElement {
+package(atelier.etabli.media.res.scene) final class TerrainList : SceneSubEditor {
     private {
         SceneDefinition _definition;
         VBox _vbox;
@@ -86,7 +86,7 @@ package(atelier.etabli.media.res.scene) final class TerrainList : UIElement {
         addEventListener("globalkey", &_onKey);
     }
 
-    void openToolbox() {
+    override void openToolbox() {
         if (!_currentLayer) {
             return;
         }
@@ -94,7 +94,7 @@ package(atelier.etabli.media.res.scene) final class TerrainList : UIElement {
         _currentLayer.toolbox.addEventListener("tool", &_onTool);
     }
 
-    void closeToolbox() {
+    override void closeToolbox() {
         if (!_currentLayer) {
             return;
         }
@@ -151,7 +151,7 @@ package(atelier.etabli.media.res.scene) final class TerrainList : UIElement {
             Atelier.input.isPressed(InputEvent.KeyButton.Button.rightAlt);
     }
 
-    void updateView(Vec2f centerPosition, Vec2f mapPosition, float zoom) {
+    override void updateView(Vec2f centerPosition, Vec2f mapPosition, float zoom) {
         _centerPosition = centerPosition;
         _mapPosition = mapPosition;
         _zoom = zoom;
@@ -160,7 +160,7 @@ package(atelier.etabli.media.res.scene) final class TerrainList : UIElement {
         _mapSize = (cast(Vec2f) dimensions * tileSize) * _zoom;
     }
 
-    void startTool(Vec2f mousePos) {
+    override void startTool(Vec2f mousePos) {
         if (!_currentLayer) {
             return;
         }
@@ -216,7 +216,7 @@ package(atelier.etabli.media.res.scene) final class TerrainList : UIElement {
         }
     }
 
-    void updateTool(Vec2f mousePos) {
+    override void updateTool(Vec2f mousePos) {
         if (!_currentLayer) {
             return;
         }
@@ -235,7 +235,7 @@ package(atelier.etabli.media.res.scene) final class TerrainList : UIElement {
         }
     }
 
-    void endTool(Vec2f mousePos) {
+    override void endTool(Vec2f mousePos) {
         if (!_currentLayer) {
             return;
         }
@@ -485,7 +485,7 @@ package(atelier.etabli.media.res.scene) final class TerrainList : UIElement {
         _select(layer);
     }
 
-    Vec4f getCurrentLayerClip() const {
+    override Vec4f getCurrentLayerClip() const {
         if (!_currentLayer)
             return Vec4f.zero;
 
@@ -497,7 +497,7 @@ package(atelier.etabli.media.res.scene) final class TerrainList : UIElement {
         return Vec4f(origin, mapSize);
     }
 
-    void renderTool() {
+    override void renderTool() {
         if (!_currentLayer)
             return;
 
@@ -545,11 +545,11 @@ package(atelier.etabli.media.res.scene) final class TerrainList : UIElement {
         }
     }
 
-    void saveView() {
+    override void saveView() {
 
     }
 
-    void loadView() {
+    override void loadView() {
 
     }
 }

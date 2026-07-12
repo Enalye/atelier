@@ -21,6 +21,24 @@ import atelier.etabli.media.res.scene.parallax;
 import atelier.etabli.media.res.scene.collision;
 import atelier.etabli.media.res.scene.entity;
 
+abstract class SceneSubEditor : UIElement {
+    void openToolbox();
+    void closeToolbox();
+    void updateView(Vec2f, Vec2f, float);
+    void startTool(Vec2f);
+    void updateTool(Vec2f);
+    void endTool(Vec2f);
+    Vec4f getCurrentLayerClip() const;
+
+    Vec2f getViewDestination() const {
+        return Vec2f.zero;
+    }
+
+    void renderTool();
+    void saveView();
+    void loadView();
+}
+
 package final class SceneDefinition {
     final class TerrainLayer {
         string name;

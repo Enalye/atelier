@@ -10,7 +10,7 @@ import atelier.etabli.ui;
 import atelier.etabli.media.res.scene.common;
 import atelier.etabli.media.res.scene.topography.toolbox;
 
-package(atelier.etabli.media.res.scene) final class TopographicMap : UIElement {
+package(atelier.etabli.media.res.scene) final class TopographicMap : SceneSubEditor {
     private {
         SceneDefinition _definition;
         TopographyToolbox _toolbox;
@@ -91,7 +91,7 @@ package(atelier.etabli.media.res.scene) final class TopographicMap : UIElement {
         }
     }
 
-    void openToolbox() {
+    override void openToolbox() {
         if (!_toolbox) {
             _toolbox = new TopographyToolbox(_terrainMap);
             _toolbox.addEventListener("tool", {
@@ -119,7 +119,7 @@ package(atelier.etabli.media.res.scene) final class TopographicMap : UIElement {
         _toolbox.addEventListener("tool", &_onTool);
     }
 
-    void closeToolbox() {
+    override void closeToolbox() {
         if (_toolbox) {
             _toolbox.removeUI();
         }
@@ -131,7 +131,7 @@ package(atelier.etabli.media.res.scene) final class TopographicMap : UIElement {
     private void _onTool() {
     }
 
-    void updateView(Vec2f centerPosition, Vec2f mapPosition, float zoom) {
+    override void updateView(Vec2f centerPosition, Vec2f mapPosition, float zoom) {
         _centerPosition = centerPosition;
         _mapPosition = mapPosition;
         _zoom = zoom;
@@ -243,7 +243,7 @@ package(atelier.etabli.media.res.scene) final class TopographicMap : UIElement {
         setDirty();
     }
 
-    void startTool(Vec2f mousePos) {
+    override void startTool(Vec2f mousePos) {
         _isApplyingTool = true;
 
         enum tileSize = 16;
@@ -276,7 +276,7 @@ package(atelier.etabli.media.res.scene) final class TopographicMap : UIElement {
         }
     }
 
-    void updateTool(Vec2f mousePos) {
+    override void updateTool(Vec2f mousePos) {
         enum tileSize = 16;
         Vec2i dimensions = Vec2i(_definition.getWidth() + 1, _definition.getHeight() + 1);
         _mapSize = (cast(Vec2f) dimensions * tileSize) * _zoom;
@@ -290,7 +290,7 @@ package(atelier.etabli.media.res.scene) final class TopographicMap : UIElement {
         }
     }
 
-    void endTool(Vec2f mousePos) {
+    override void endTool(Vec2f mousePos) {
         _isApplyingTool = false;
 
         enum tileSize = 16;
@@ -303,7 +303,7 @@ package(atelier.etabli.media.res.scene) final class TopographicMap : UIElement {
         _updateToolFunc = null;
     }
 
-    Vec4f getCurrentLayerClip() const {
+    override Vec4f getCurrentLayerClip() const {
         Vec2i dimensions = Vec2i(_definition.getWidth(), _definition.getHeight());
         Vec2f mapSize = (cast(Vec2f) dimensions * 16f) * _zoom;
         Vec2f offset = _centerPosition + _mapPosition;
@@ -311,7 +311,7 @@ package(atelier.etabli.media.res.scene) final class TopographicMap : UIElement {
         return Vec4f(origin, mapSize);
     }
 
-    void renderTool() {
+    override void renderTool() {
         Vec2f offset = _centerPosition + _mapPosition;
         Vec2f origin = offset + Vec2f(-8f, -8f) * _zoom - _mapSize / 2f;
 
@@ -390,11 +390,11 @@ package(atelier.etabli.media.res.scene) final class TopographicMap : UIElement {
         dispatchEvent("property_dirty", false);
     }
 
-    void saveView() {
+    override void saveView() {
 
     }
 
-    void loadView() {
+    override void loadView() {
 
     }
 }

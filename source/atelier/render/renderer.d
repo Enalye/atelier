@@ -318,9 +318,10 @@ final class Renderer {
         context.canvas.draw(position, size, context.clip, angle, pivot);
     }
 
-    void drawRect(Vec2f position, Vec2f size, Color color, float alpha, bool filled) {
+    void drawRect(Vec2f position, Vec2f size, Color color, float alpha,
+        bool filled, Blend blend = Blend.alpha) {
         const auto sdlColor = color.toSDL();
-        SDL_SetRenderDrawBlendMode(_sdlRenderer, getSDLBlend(Blend.alpha));
+        SDL_SetRenderDrawBlendMode(_sdlRenderer, getSDLBlend(blend));
         SDL_SetRenderDrawColor(_sdlRenderer, sdlColor.r, sdlColor.g,
             sdlColor.b, cast(ubyte)(clamp(alpha, 0f, 1f) * 255f));
 
@@ -332,9 +333,9 @@ final class Renderer {
             SDL_RenderDrawRectF(_sdlRenderer, &rect);
     }
 
-    void drawLine(Vec2f start, Vec2f end, Color color, float alpha) {
+    void drawLine(Vec2f start, Vec2f end, Color color, float alpha, Blend blend = Blend.alpha) {
         const auto sdlColor = color.toSDL();
-        SDL_SetRenderDrawBlendMode(_sdlRenderer, getSDLBlend(Blend.alpha));
+        SDL_SetRenderDrawBlendMode(_sdlRenderer, getSDLBlend(blend));
         SDL_SetRenderDrawColor(_sdlRenderer, sdlColor.r, sdlColor.g,
             sdlColor.b, cast(ubyte)(clamp(alpha, 0f, 1f) * 255f));
 

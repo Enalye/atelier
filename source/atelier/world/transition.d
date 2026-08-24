@@ -7,6 +7,10 @@ import atelier.world.scene;
 import atelier.world.entity;
 
 abstract class Transition {
+    private {
+        bool _hasTeleported = false;
+    }
+
     @property {
         bool showTiles() const {
             return true;
@@ -15,6 +19,17 @@ abstract class Transition {
         bool isRunning() const {
             return false;
         }
+    }
+
+    final void teleport() {
+        if (_hasTeleported)
+            return;
+
+        _hasTeleported = true;
+        Atelier.world.load();
+    }
+
+    void setup(Entity entity, bool skip) {
     }
 
     void update() {
@@ -41,7 +56,6 @@ abstract class Transition {
 
 final class DefaultTransition : Transition {
     private {
-        string _sceneRid, _tpName;
         bool _isRunning = true;
 
         enum State {
@@ -67,16 +81,16 @@ final class DefaultTransition : Transition {
         }
     }
 
-    this(string sceneRid, string tpName, Entity entity, bool skip) {
-        _sceneRid = sceneRid;
-        _tpName = tpName;
-
+    this() {
         _rect = Rectangle.fill(Vec2f(Atelier.renderer.size.x, Atelier.renderer.size.y));
         _rect.anchor = Vec2f.zero;
         _rect.color = Color.black;
         _rect.alpha = 1f;
 
         _timer.start(_fadeDuration);
+    }
+
+    override void setup(Entity entity, bool skip) {
     }
 
     override void update() {
@@ -98,7 +112,7 @@ final class DefaultTransition : Transition {
             final switch (_state) with (State) {
             case fadeOut:
                 _state = State.black;
-                Atelier.world.load(_sceneRid, _tpName);
+                teleport();
                 break;
             case black:
                 break;

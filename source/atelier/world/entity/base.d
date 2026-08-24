@@ -536,6 +536,10 @@ final class Entity : Resource!Entity {
         return _graphicId;
     }
 
+    bool isGraphicPlaying() const {
+        return _graphic && _graphic.isPlaying();
+    }
+
     void setGraphic(string id, bool forceUpdate = false) {
         if (!id.length) {
             setDefaultGraphic();
@@ -1176,7 +1180,7 @@ final class Entity : Resource!Entity {
         }
     }
 
-    void onRegister() {
+    void onRegister(bool isKeptFromScene = false) {
         if (_collider) {
             _collider.register();
         }
@@ -1185,13 +1189,16 @@ final class Entity : Resource!Entity {
             _hitbox.register();
         }
 
-        if (!hasController()) {
+        if (isKeptFromScene) {
+            onRegisterController();
+        }
+        else if (!hasController()) {
             if (_baseControllerId.length) {
                 setController(_baseControllerId);
             }
         }
 
-        if (!_behavior) {
+        if (!isKeptFromScene && !_behavior) {
             if (_baseBehaviorId.length) {
                 setBehavior(_baseBehaviorId);
             }

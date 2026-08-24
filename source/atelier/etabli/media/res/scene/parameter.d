@@ -138,6 +138,10 @@ package final class ParameterWindow : UIElement {
         _onTabChange();
     }
 
+    string getCurrentTab() const {
+        return _tabs.value();
+    }
+
     Vec2f getViewDestination() {
         return _viewDestination;
     }

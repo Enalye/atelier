@@ -200,6 +200,13 @@ final class Tilemap : Image, Resource!Tilemap {
         }
     }
 
+    void clear(int tileId = defaultTile) {
+        foreach (ref Tile tile; _tiles) {
+            tile.id = tileId;
+            tile.angle = 0;
+        }
+    }
+
     /// Redimensionne l’image pour qu’elle puisse tenir dans une taille donnée
     override void fit(Vec2f size_) {
         size = mapSize.fit(size_);
@@ -223,6 +230,37 @@ final class Tilemap : Image, Resource!Tilemap {
                 tile.id = _tileset.getTileFrame(tile.id);
             }
         }
+    }
+
+    void drawTile(int x, int y, Vec2f origin = Vec2f.zero, Vec2f scale = Vec2f.one) {
+        if (!_tileset || x < 0 || y < 0 || x > _columns || y > _lines) {
+            return;
+        }
+
+        _tileset.color = color;
+        _tileset.alpha = alpha;
+        _tileset.blend = blend;
+
+        Vec2f finalTileSize = size / Vec2f(_columns, _lines);
+        Vec2f ratio = size / mapSize();
+        Vec2f finalClipSize = (cast(Vec2f) _tileset.clip.zw) * ratio * scale;
+
+        Vec2f startPos = origin + position - size * anchor;
+        Vec2f tilePos;
+
+        tilePos = startPos;
+        tilePos.x += x * finalTileSize.x;
+        tilePos.y += y * finalTileSize.y;
+        int index = x + y * _columns;
+
+        if (index >= _tiles.length)
+            return;
+
+        Tile tile = _tiles[index];
+        int tileId = tile.id;
+
+        if (tileId >= 0)
+            _tileset.draw(tileId, tilePos, finalClipSize, tile.angle);
     }
 
     void drawLine(int y, Vec2f origin = Vec2f.zero) {

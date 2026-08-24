@@ -22,6 +22,7 @@ final class StateData {
         string _playerActor;
         string _scene, _teleporter;
         int _teleporterDirection;
+        Vec2i _spawnPosition;
 
         bool[string] _bools;
         int[string] _ints;
@@ -69,8 +70,16 @@ final class StateData {
         return _teleporter;
     }
 
-    int getTeleporterDirection() {
+    int getTeleporterDirection() const {
         return _teleporterDirection;
+    }
+
+    void setSpawnPosition(Vec2i position) {
+        _spawnPosition = position;
+    }
+
+    Vec2i getSpawnPosition() const {
+        return _spawnPosition;
     }
 
     T get(T)(string id) if (isEnvType!T) {

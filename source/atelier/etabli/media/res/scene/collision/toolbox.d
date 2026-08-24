@@ -53,7 +53,7 @@ package(atelier.etabli.media.res.scene) class CollisionToolbox : Modal {
             _modeGroup = new ToolGroup;
             foreach (key; ["collision", "navigation"]) {
                 ToolButton btn = new ToolButton(_modeGroup,
-                    "editor:" ~ key ~ "-button", key == "selection");
+                    "editor:" ~ key ~ "-button", key == "collision");
                 btn.setSize(Vec2f(32f, 32f));
                 hbox.addUI(btn);
             }
@@ -182,7 +182,7 @@ package(atelier.etabli.media.res.scene) class CollisionToolbox : Modal {
         return _tilePicker.selection;
     }
 
-    int getBrushSize() {
+    int getBrushSize() const {
         return _brushSizeField.value;
     }
 }

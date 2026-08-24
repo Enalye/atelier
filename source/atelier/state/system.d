@@ -224,8 +224,16 @@ final class State {
         _current.setTeleporterDirection(dir);
     }
 
-    int getTeleporterDirection() {
+    int getTeleporterDirection() const {
         return _current.getTeleporterDirection();
+    }
+
+    void setSpawnPosition(Vec2i position) {
+        _current.setSpawnPosition(position);
+    }
+
+    Vec2i getSpawnPosition() const {
+        return _current.getSpawnPosition();
     }
 
     T get(T)(string id) if (isEnvType!T) {

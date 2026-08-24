@@ -160,6 +160,10 @@ final class SceneResourceEditor : ResourceBaseEditor {
         }
         _definition.getLights().sweep();
 
+        foreach (id, component; _definition.getComponents()) {
+            component.update(getCenter() + _mapPosition, _mapSize, _zoom);
+        }
+
         _parameterWindow.updateView(getCenter(), _mapPosition, _zoom);
     }
 
@@ -299,6 +303,11 @@ final class SceneResourceEditor : ResourceBaseEditor {
                 continue;
 
             layer.tilemap.draw();
+        }
+
+        string currentTab = _parameterWindow.getCurrentTab();
+        foreach (id, component; _definition.getComponents()) {
+            component.draw(currentTab == id);
         }
 
         Vec4f layerClip = _parameterWindow.getCurrentLayerClip();

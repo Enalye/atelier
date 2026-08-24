@@ -137,5 +137,21 @@ package(atelier.etabli.media.res.scene) class TeleporterSettings : BaseEntitySet
             });
             hlayout.addUI(colliderZField);
         }
+
+        {
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(284f, 0f));
+            addProperty(hlayout);
+
+            hlayout.addUI(new Label("Transition:", Atelier.theme.font));
+
+            TextField transitionField = new TextField;
+            transitionField.value = _entity.teleporter.transition;
+            transitionField.addEventListener("value", {
+                _entity.teleporter.transition = transitionField.value;
+                setDirty();
+            });
+            hlayout.addUI(transitionField);
+        }
     }
 }

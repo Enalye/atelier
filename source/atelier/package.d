@@ -3,6 +3,7 @@ module atelier;
 public {
     import atelier.audio;
     import atelier.common;
+    import atelier.console;
     import atelier.core;
     import atelier.doc;
     import atelier.etabli;

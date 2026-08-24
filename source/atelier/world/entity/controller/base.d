@@ -13,6 +13,7 @@ abstract class EntityController : ControllerWrapper {
         EntityControllerState[string] _states;
         EntityControllerState _currentState;
         string _defaultId, _currentStateId;
+        uint _currentStateTime;
     }
 
     @property {
@@ -44,6 +45,10 @@ abstract class EntityController : ControllerWrapper {
         }, (EntityControllerState state) {
             mixin("state.add", type, "(callback);");
         });
+    }
+
+    final void addState(string stateId) {
+        _states.require(stateId, { return new EntityControllerState(stateId); }());
     }
 
     final void addUpdate(string stateId, EntityControllerState.OnUpdateCallback callback) {
@@ -111,6 +116,7 @@ abstract class EntityController : ControllerWrapper {
             _currentState = *pState;
 
             if (_currentState) {
+                _currentStateTime = 0;
                 _currentState.onStart();
             }
         }
@@ -118,6 +124,10 @@ abstract class EntityController : ControllerWrapper {
             _currentStateId = stateId;
             _currentState = null;
         }
+    }
+
+    final uint getStateTime() const {
+        return _currentStateTime;
     }
 
     void onStart() {
@@ -203,6 +213,7 @@ abstract class EntityController : ControllerWrapper {
                     _currentState = *pState;
 
                     if (_currentState) {
+                        _currentStateTime = 0;
                         _currentState.onStart();
                     }
                     goto __checkTransition;
@@ -216,6 +227,7 @@ abstract class EntityController : ControllerWrapper {
 
         if (_currentState) {
             _currentState.onUpdate();
+            _currentStateTime++;
         }
     }
 }

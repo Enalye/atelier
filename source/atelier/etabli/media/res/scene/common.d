@@ -39,7 +39,15 @@ abstract class SceneSubEditor : UIElement {
     void loadView();
 }
 
-package final class SceneDefinition {
+abstract class SceneComponentDefinition {
+    void setup(SceneDefinition);
+    void save(Farfadet);
+    void load(Farfadet);
+    void update(Vec2f, Vec2f, float);
+    void draw(bool);
+}
+
+final class SceneDefinition {
     final class TerrainLayer {
         string name;
         bool isVisible = true;
@@ -1287,7 +1295,7 @@ package final class SceneDefinition {
 
         final class TeleporterBuilderData : BuilderData {
             private {
-                string _scene, _target;
+                string _scene, _target, _transition;
                 uint _direction;
                 bool _isActive;
             }
@@ -1307,6 +1315,14 @@ package final class SceneDefinition {
 
                 string target(string target_) {
                     return _target = target_;
+                }
+
+                string transition() const {
+                    return _transition;
+                }
+
+                string transition(string transition_) {
+                    return _transition = transition_;
                 }
 
                 uint direction() const {
@@ -1343,6 +1359,10 @@ package final class SceneDefinition {
                     _target = ffd.getNode("target").get!string(0);
                 }
 
+                if (ffd.hasNode("transition")) {
+                    _transition = ffd.getNode("transition").get!string(0);
+                }
+
                 if (ffd.hasNode("direction")) {
                     _direction = ffd.getNode("direction").get!uint(0);
                 }
@@ -1364,6 +1384,7 @@ package final class SceneDefinition {
             override void save(Farfadet ffd) {
                 ffd.addNode("scene").add(_scene);
                 ffd.addNode("target").add(_target);
+                ffd.addNode("transition").add(_transition);
                 ffd.addNode("direction").add(_direction);
                 ffd.addNode("collider").add(_collider);
                 ffd.addNode("isActive").add(_isActive);
@@ -1731,6 +1752,36 @@ package final class SceneDefinition {
         int _levels;
         Array!Entity _entities;
         Array!Light _lights;
+
+        alias ComponentFunc = SceneComponentDefinition delegate();
+        static ComponentFunc[string] _componentDefinitions;
+        SceneComponentDefinition[string] _components;
+    }
+
+    static void addComponent(string id, ComponentFunc func) {
+        _componentDefinitions[id] = func;
+    }
+
+    SceneComponentDefinition[string] getComponents() {
+        return _components;
+    }
+
+    T getComponent(T : SceneComponentDefinition)(string id) {
+        auto p = id in _components;
+        if (p)
+            return cast(T)*p;
+
+        auto p2 = id in _componentDefinitions;
+        if (p2) {
+            SceneComponentDefinition component = (*p2)();
+            component.setup(this);
+            _components[id] = component;
+            return cast(T) component;
+        }
+
+        enforce(false, "Le composant `" ~ id ~ "` n’est pas défini");
+
+        return null;
     }
 
     string name;
@@ -1839,6 +1890,17 @@ package final class SceneDefinition {
             Light light = new Light(lightNode);
             _lights ~= light;
         }
+
+        foreach (componentNode; ffd.getNodes("component")) {
+            string id = componentNode.get!string(0);
+            auto p = id in _componentDefinitions;
+            if (p) {
+                SceneComponentDefinition component = (*p)();
+                component.setup(this);
+                component.load(componentNode);
+                _components[id] = component;
+            }
+        }
     }
 
     Farfadet save(Farfadet ffd) {
@@ -1870,6 +1932,11 @@ package final class SceneDefinition {
 
         foreach (light; _lights) {
             light.save(node);
+        }
+
+        foreach (id, component; _components) {
+            Farfadet componentNode = node.addNode("component").add(id);
+            component.save(componentNode);
         }
 
         return node;

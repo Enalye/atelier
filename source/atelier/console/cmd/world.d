@@ -53,15 +53,12 @@ private void _scene(ConsoleCall call) {
 
 private void _scene_reload(ConsoleCall call) {
     call.console.log("Rechargement de la scène `", Atelier.state.getScene(), "`");
-    Atelier.world.runScene(
-        Atelier.state.getScene(),
-        Atelier.state.getTeleporter(),
-        Atelier.state.getTeleporterDirection());
+    Atelier.world.runScene();
 }
 
 private void _scene_reset(ConsoleCall call) {
     call.console.log("Rechargement de la scène `", Atelier.state.getScene(), "`");
-    Atelier.world.load(Atelier.state.getScene());
+    Atelier.world.load();
 }
 
 private void _scene_change(ConsoleCall call) {
@@ -71,7 +68,8 @@ private void _scene_change(ConsoleCall call) {
 
     if (Atelier.res.has!Scene(rid)) {
         call.console.log("Chargement de la scène `", rid, "`");
-        Atelier.world.runScene(rid, teleporter, direction);
+        Atelier.world.setTeleporterDestination(rid, teleporter, direction);
+        Atelier.world.runScene();
     }
     else {
         call.console.log("La scène `", rid, "` n’existe pas");
@@ -82,7 +80,8 @@ private void _scene_set(ConsoleCall call) {
     string rid = call.getArgument!string("rid");
     if (Atelier.res.has!Scene(rid)) {
         call.console.log("Chargement de la scène `", rid, "`");
-        Atelier.world.load(rid);
+        Atelier.world.setTeleporterDestination(rid);
+        Atelier.world.load();
     }
     else {
         call.console.log("La scène `", rid, "` n’existe pas");

@@ -12,6 +12,7 @@ final class TeleporterComponent : TriggerComponent {
         string _scene;
         string _target;
         uint _direction;
+        string _transition;
     }
 
     @property {
@@ -105,7 +106,12 @@ final class TeleporterComponent : TriggerComponent {
         _direction = direction_;
     }
 
+    void setTransition(string transition) {
+        _transition = transition;
+    }
+
     override void onTrigger() {
-        Atelier.world.runScene(_scene, _target, _direction);
+        Atelier.world.setTeleporterDestination(_scene, _target, _direction);
+        Atelier.world.runScene(_transition);
     }
 }

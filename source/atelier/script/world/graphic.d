@@ -89,6 +89,10 @@ package void loadLibWorld_graphic(GrModule mod) {
     mod.setDescription(GrLocale.fr_FR, "Hauteur du rendu");
     mod.setParameters(["graphic"]);
     mod.addFunction(&_getHeight, "getHeight", [graphicType], [grUInt]);
+
+    mod.setDescription(GrLocale.fr_FR, "Le rendu est-il en pleine exécution ?");
+    mod.setParameters(["graphic"]);
+    mod.addFunction(&_isPlaying, "isPlaying", [graphicType], [grBool]);
 }
 
 private void _setAnchor(GrCall call) {
@@ -184,4 +188,9 @@ private void _getWidth(GrCall call) {
 private void _getHeight(GrCall call) {
     EntityGraphic graphic = call.getNative!EntityGraphic(0);
     call.setUInt(graphic.getHeight());
+}
+
+private void _isPlaying(GrCall call) {
+    EntityGraphic graphic = call.getNative!EntityGraphic(0);
+    call.setBool(graphic.isPlaying());
 }

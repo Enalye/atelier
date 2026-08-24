@@ -59,6 +59,12 @@ package void loadLibWorld_entity(GrModule mod) {
             grOptional(graphicType)
         ]);
 
+    mod.setDescription(GrLocale.fr_FR, "Un rendu est-il en cours d’exécution ?");
+    mod.setParameters(["entity"]);
+    mod.addFunction(&_isGraphicPlaying, "isGraphicPlaying", [entityType], [
+            grBool
+        ]);
+
     mod.setDescription(GrLocale.fr_FR, "Définit le calque de rendu");
     mod.setParameters(["entity", "layer"]);
     mod.addFunction(&_setLayer, "setLayer", [entityType, layerType]);
@@ -234,6 +240,11 @@ private void _getGraphic(GrCall call) {
     else {
         call.setNull();
     }
+}
+
+private void _isGraphicPlaying(GrCall call) {
+    Entity entity = call.getNative!Entity(0);
+    call.setBool(entity.isGraphicPlaying());
 }
 
 private void _setLayer(GrCall call) {

@@ -13,6 +13,17 @@ import atelier.world.weather;
 import atelier.world.entity;
 import atelier.world.lighting;
 
+abstract class SceneComponent {
+    void setScene(Scene);
+    void setup();
+    void load(Farfadet);
+    void serialize(OutStream);
+    void deserialize(InStream);
+    void start();
+    void update();
+    void drawLine(int y, int level, Vec2f offset, Vec2f entityOffset);
+}
+
 final class Scene : Resource!Scene {
     final class TerrainLayer {
         private {
@@ -898,6 +909,36 @@ final class Scene : Resource!Scene {
         float _brightness = 1f;
         string _weatherType;
         float _weatherValue = 1f;
+
+        alias ComponentFunc = SceneComponent delegate();
+        static ComponentFunc[string] _componentDefinitions;
+        SceneComponent[string] _components;
+    }
+
+    static void addComponent(string id, ComponentFunc func) {
+        _componentDefinitions[id] = func;
+    }
+
+    SceneComponent[string] getComponents() {
+        return _components;
+    }
+
+    T getComponent(T : SceneComponent)(string id) {
+        auto p = id in _components;
+        if (p)
+            return cast(T)*p;
+
+        auto p2 = id in _componentDefinitions;
+        if (p2) {
+            SceneComponent component = (*p2)();
+            component.setScene(this);
+            component.setup();
+            component.start();
+            _components[id] = component;
+            return cast(T) component;
+        }
+
+        return null;
     }
 
     @property {
@@ -968,6 +1009,10 @@ final class Scene : Resource!Scene {
         foreach (layer; _parallaxLayers) {
             layer.setup();
         }
+
+        foreach (component; _components) {
+            component.setup();
+        }
     }
 
     void load(const(Farfadet) ffd) {
@@ -1030,6 +1075,17 @@ final class Scene : Resource!Scene {
             LightBuilder light = new LightBuilder(lightNode);
             _lights ~= light;
         }
+
+        foreach (componentNode; ffd.getNodes("component")) {
+            string id = componentNode.get!string(0);
+            auto p = id in _componentDefinitions;
+            if (p) {
+                SceneComponent component = (*p)();
+                component.setScene(this);
+                component.load(componentNode);
+                _components[id] = component;
+            }
+        }
     }
 
     void serialize(OutStream stream) {
@@ -1067,6 +1123,12 @@ final class Scene : Resource!Scene {
         stream.write!uint(cast(uint) _lights.length);
         foreach (LightBuilder light; _lights) {
             light.serialize(stream);
+        }
+
+        stream.write!uint(cast(uint) _components.length);
+        foreach (id, component; _components) {
+            stream.write!string(id);
+            component.serialize(stream);
         }
     }
 
@@ -1115,6 +1177,24 @@ final class Scene : Resource!Scene {
         for (uint i; i < lightCount; ++i) {
             _lights[i] = new LightBuilder(stream);
         }
+
+        const uint componentCount = stream.read!uint();
+        for (uint i; i < componentCount; ++i) {
+            string id = stream.read!string();
+            auto p = id in _componentDefinitions;
+            if (p) {
+                SceneComponent component = (*p)();
+                component.setScene(this);
+                component.deserialize(stream);
+                _components[id] = component;
+            }
+        }
+    }
+
+    void start() {
+        foreach (component; _components) {
+            component.start();
+        }
     }
 
     void update() {
@@ -1125,6 +1205,9 @@ final class Scene : Resource!Scene {
 
         foreach (layer; _parallaxLayers)
             layer.update();
+
+        foreach (component; _components)
+            component.update();
     }
 
     int getBaseZ(Vec2i pos) {
@@ -1441,6 +1524,7 @@ final class TeleporterBuilderData {
     private {
         string _scene;
         string _target;
+        string _transition;
         uint _direction;
         Vec3i _collider;
         bool _isActive;
@@ -1453,6 +1537,10 @@ final class TeleporterBuilderData {
 
         string target() const {
             return _target;
+        }
+
+        string transition() const {
+            return _transition;
         }
 
         uint direction() const {
@@ -1475,6 +1563,9 @@ final class TeleporterBuilderData {
         if (ffd.hasNode("target")) {
             _target = ffd.getNode("target").get!string(0);
         }
+        if (ffd.hasNode("transition")) {
+            _transition = ffd.getNode("transition").get!string(0);
+        }
         if (ffd.hasNode("direction")) {
             _direction = ffd.getNode("direction").get!uint(0);
         }
@@ -1489,6 +1580,7 @@ final class TeleporterBuilderData {
     this(InStream stream) {
         _scene = stream.read!string();
         _target = stream.read!string();
+        _transition = stream.read!string();
         _direction = stream.read!uint();
         _collider = stream.read!Vec3i();
         _isActive = stream.read!bool();
@@ -1497,6 +1589,7 @@ final class TeleporterBuilderData {
     void serialize(OutStream stream) {
         stream.write!string(_scene);
         stream.write!string(_target);
+        stream.write!string(_transition);
         stream.write!uint(_direction);
         stream.write!Vec3i(_collider);
         stream.write!bool(_isActive);

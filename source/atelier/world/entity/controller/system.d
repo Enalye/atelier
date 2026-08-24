@@ -23,8 +23,6 @@ mixin template ControllerMixin() {
     }
 
     EntityController setController(string id) {
-        import atelier.core : Atelier;
-
         if (_controller && _controller.id == id)
             return _controller;
 
@@ -36,11 +34,18 @@ mixin template ControllerMixin() {
 
         if (_controller) {
             _controller.setup(this, id);
-            Atelier.world.registerController(_controller);
+            onRegisterController();
             _controller.onStart();
         }
 
         return _controller;
+    }
+
+    void onRegisterController() {
+        if (!_controller)
+            return;
+
+        Atelier.world.registerController(_controller);
     }
 
     void sendEvent(string event) {

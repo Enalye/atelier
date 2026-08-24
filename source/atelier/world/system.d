@@ -1,6 +1,7 @@
 module atelier.world.system;
 
 import std.algorithm;
+import std.algorithm.mutation;
 import std.conv : to;
 
 import atelier.common;
@@ -23,12 +24,14 @@ import atelier.world.transition;
 import atelier.world.weather;
 import atelier.world.controller;
 
-private Transition _createDefaultTransition(string sceneRid, string tpName, Entity entity, bool skip) {
-    return new DefaultTransition(sceneRid, tpName, entity, skip);
-}
-
 /// Gère les différentes scènes
 final class World {
+    private enum TeleporterMode {
+        default_,
+        teleporter,
+        position
+    }
+
     private {
         UIManager _uiManager;
         Scene _scene;
@@ -37,7 +40,7 @@ final class World {
         Lighting _lighting;
         Weather _weather;
         ParticleSystem _particle;
-        Array!Entity _entities, _enemies;
+        Array!Entity _entities;
         Array!Entity _renderedEntities;
         Array!ControllerWrapper _controllers;
         int _frame;
@@ -52,14 +55,22 @@ final class World {
         Glow _glow;
 
         // Transition
+        string _defaultTransition;
+        TeleporterMode _teleporterMode = TeleporterMode.default_;
         Transition _transition;
         string _sceneRid, _tpName;
+        uint _tpDirection;
+        Vec3i delegate() _tpPositionFunc;
         Entity _player;
 
         bool _isPaused, _isRunning;
 
         Factory _factory;
-        Transition function(string, string, Entity, bool) _transitionFunc;
+
+        alias Callback = void delegate();
+
+        Callback[] _onStartFuncs;
+        Callback[] _onUpdateFuncs;
     }
 
     @property {
@@ -110,12 +121,13 @@ final class World {
         _renderedEntities = new Array!Entity;
         _controllers = new Array!ControllerWrapper;
         _weather = new Weather;
-        _enemies = new Array!Entity;
         _particle = new ParticleSystem;
         _glow = new Glow;
         _factory = new Factory;
 
-        setTransition(&_createDefaultTransition);
+        addTransition("default", { return new DefaultTransition(); });
+        setDefaultTransition("default");
+
         addController("player", { return new DefaultPlayerController(); });
         addBehavior("unit", { return new UnitBehavior(); });
         addBehavior("proxy", { return new ProxyBehavior(); });
@@ -151,8 +163,12 @@ final class World {
         return p ? *p : Vec3i.zero;
     }
 
-    void setTransition(Transition function(string, string, Entity, bool) transitionFunc = &_createDefaultTransition) {
-        _transitionFunc = transitionFunc;
+    void addTransition(string id, Transition delegate() builder) {
+        _factory.store(id, builder);
+    }
+
+    void setDefaultTransition(string id) {
+        _defaultTransition = id;
     }
 
     void setPause(bool value) {
@@ -209,17 +225,21 @@ final class World {
         return _entities;
     }
 
-    void runScene(string rid, string tpName, uint direction) {
+    void runScene(string transitionId = "") {
         bool skip = _transition !is null;
 
-        if (_transitionFunc) {
-            _transition = _transitionFunc(rid, tpName, _player, skip);
+        if (!transitionId.length) {
+            _transition = _factory.build!(Transition)(_defaultTransition);
         }
+        else {
+            _transition = _factory.build!(Transition)(transitionId);
+        }
+        _transition.setup(_player, skip);
 
         _setupPlayerController();
         EntityController controller = _player ? _player.getController() : null;
         if (controller) {
-            controller.onSceneExit(direction);
+            controller.onSceneExit(_tpDirection);
         }
 
         _weather.run("", 0f, 60);
@@ -246,12 +266,28 @@ final class World {
         }
     }
 
-    void load(string sceneRid, string tpName = "") {
-        _isRunning = true;
-        Atelier.state.setScene(sceneRid, tpName);
+    void setTeleporterDestination(string sceneRid) {
+        _teleporterMode = TeleporterMode.default_;
+        _sceneRid = sceneRid;
+    }
 
+    void setTeleporterDestination(string sceneRid, string tpName, uint tpDirection) {
+        _teleporterMode = TeleporterMode.teleporter;
         _sceneRid = sceneRid;
         _tpName = tpName;
+        _tpDirection = tpDirection;
+    }
+
+    void setTeleporterDestination(string sceneRid, Vec3i delegate() positionFunc) {
+        _teleporterMode = TeleporterMode.position;
+        _sceneRid = sceneRid;
+        _tpPositionFunc = positionFunc;
+    }
+
+    void load() {
+        _isRunning = true;
+        Atelier.state.setScene(_sceneRid, _tpName);
+
         _frame = 0;
 
         Vec2f oldCameraDeltaPosition = _camera.getTargetPosition() - _camera.getPosition(true);
@@ -259,6 +295,7 @@ final class World {
         clear();
         _lighting.setup();
         _scene = Atelier.res.get!Scene(_sceneRid);
+        _scene.start();
 
         Atelier.nav.generate();
 
@@ -275,7 +312,9 @@ final class World {
         }
 
         if (_player) {
-            addEntity(_player);
+            _entities ~= _player;
+            _player.onRegister(true);
+            //addEntity(_player);
             addRenderedEntity(_player);
             _player.setName("player");
         }
@@ -300,6 +339,7 @@ final class World {
 
         _camera.setBounds(hasXBounds, hasYBounds, halfRendererSize, mapSize - halfRendererSize);
 
+        bool hasFoundTeleporter = false;
         foreach (entityBuilder; _scene.entities) {
             final switch (entityBuilder.type) with (EntityBuilder.Type) {
             case entity:
@@ -329,13 +369,19 @@ final class World {
                 TeleporterComponent teleporterComponent = entity.addComponent!TeleporterComponent();
                 teleporterComponent.setTarget(entityBuilder.teleporter.scene, entityBuilder
                         .teleporter.target, entityBuilder.teleporter.direction);
+                teleporterComponent.setTransition(entityBuilder.teleporter.transition);
+
                 TriggerCollider collider = new TriggerCollider(
                     cast(Vec3u) entityBuilder.teleporter.collider);
                 collider.isActive = entityBuilder.teleporter.isActive;
                 entity.setCollider(collider);
                 addEntity(entity);
 
-                if (_player && entity.getName() == _tpName) {
+                if (!hasFoundTeleporter && _player &&
+                    ((_teleporterMode == TeleporterMode.teleporter && entity.getName() == _tpName) ||
+                        (_teleporterMode == TeleporterMode.default_ && entity.getName().length == 0))) {
+                    hasFoundTeleporter = true;
+
                     if (_transition) {
                         _player.setPosition(teleporterComponent.getExitPosition(_player));
 
@@ -369,6 +415,16 @@ final class World {
             }
         }
 
+        if (_teleporterMode == TeleporterMode.position ||
+            (!hasFoundTeleporter && _teleporterMode == TeleporterMode.default_)) {
+            if (_tpPositionFunc) {
+                _player.setPosition(_tpPositionFunc());
+            }
+            else {
+                _player.setPosition(Vec3i.zero);
+            }
+        }
+
         if (_player) {
             _camera.setPosition(_player.cameraPosition() - oldCameraDeltaPosition);
             _camera.follow(_player, Vec2f.one * 1f, Vec2f.zero);
@@ -390,8 +446,7 @@ final class World {
         _lighting.setBrightness(_scene.brightness, 30, Spline.sineInOut);
 
         if (!_transition) {
-            Atelier.script.callEvent("scene_" ~ _sceneRid);
-            Atelier.physics.setTriggersActive(true);
+            _onStart();
         }
 
         Atelier.physics.setBounds(true);
@@ -407,9 +462,38 @@ final class World {
             //if (_player.getController()) {
             //    //_playerController.onStart();
             //}
-            Atelier.script.callEvent("scene_" ~ _sceneRid);
-            Atelier.physics.setTriggersActive(true);
         }
+
+        _onStart();
+    }
+
+    private void _onStart() {
+        _onUpdateFuncs.length = 0;
+        foreach (func; _onStartFuncs) {
+            func();
+        }
+        _onStartFuncs.length = 0;
+
+        Atelier.script.callEvent("scene_" ~ _sceneRid);
+        Atelier.physics.setTriggersActive(true);
+    }
+
+    /// Fonctions appelées lors du chargement complet de la scène,
+    /// au moment où les scripts sont lancés.
+    /// Ces fonctions sont supprimés dès leur exécution.
+    void addStart(Callback onStartFunc) {
+        _onStartFuncs ~= onStartFunc;
+    }
+
+    /// Fonctions appelées à chaque itération de la scène.
+    /// Ces fonctions sont supprimés au lancement d’une scène,
+    /// juste avant l’exécution des onStart.
+    void addUpdate(Callback onUpdateFunc) {
+        _onUpdateFuncs ~= onUpdateFunc;
+    }
+
+    void removeUpdate(Callback onUpdateFunc) {
+        _onUpdateFuncs.remove!(a => a == onUpdateFunc)();
     }
 
     void addParticle(Particle particle) {
@@ -466,6 +550,9 @@ final class World {
         _uiManager.clearUI();
 
         foreach (entity; _entities) {
+            if (entity == _player)
+                continue;
+
             entity.onUnregister();
         }
         _entities.clear();
@@ -528,6 +615,10 @@ final class World {
         }
 
         _dialog.update();
+
+        foreach (func; _onUpdateFuncs) {
+            func();
+        }
 
         foreach (i, entity; _entities) {
             entity.update();
@@ -810,6 +901,12 @@ final class World {
                         }
                     }
 
+                    if (_transition.showTiles()) {
+                        foreach (component; _scene.getComponents()) {
+                            component.drawLine(y, level, offset, entityOffset);
+                        }
+                    }
+
                     _transition.drawLine(offset, y, level);
 
                     for (size_t i = renderEntityIndex; i < _renderListRoots.length;
@@ -939,6 +1036,10 @@ final class World {
                             layer.color = color;
                             layer.drawLine(y, offset - Vec2f(0f, level << 4));
                         }
+                    }
+
+                    foreach (component; _scene.getComponents()) {
+                        component.drawLine(y, level, offset, entityOffset);
                     }
 
                     for (size_t i = renderEntityIndex; i < _renderListRoots.length;

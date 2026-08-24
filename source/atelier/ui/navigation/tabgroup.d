@@ -70,7 +70,7 @@ final class TabGroup : UIElement {
             child.setPosition(Vec2f(posX, posY));
 
             i++;
-            if (i >= _maxPerLine) {
+            if (_maxPerLine > 0 && i >= _maxPerLine) {
                 posX = 0f;
                 posY = 32f;
                 i = 0;

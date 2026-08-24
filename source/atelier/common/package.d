@@ -15,6 +15,7 @@ public {
     import atelier.common.mat3;
     import atelier.common.material;
     import atelier.common.math;
+    import atelier.common.optional;
     import atelier.common.resource;
     import atelier.common.rng;
     import atelier.common.serializer;

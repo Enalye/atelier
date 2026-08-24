@@ -46,9 +46,9 @@ final class RNG {
                 return maxValue;
             }
             else if (maxValue > 0) {
-                return (cast(int) _rand()) % maxValue;
+                return cast(int)(_rand() % (cast(uint) maxValue));
             }
-            return -((cast(int) _rand()) % -maxValue);
+            return -(cast(int)(_rand() % (cast(uint)-maxValue)));
         }
         assert(false);
     }
@@ -124,5 +124,27 @@ final class RNG {
         spared = v * s;
         hasSpared = true;
         return mean + deviation * u * s;
+    }
+
+    T roll(T)(T maxValue, uint times) {
+        if (times <= 0)
+            times = 1;
+
+        T result = 0;
+        for (uint i; i < times; ++i) {
+            result += rand(maxValue);
+        }
+        return result / times;
+    }
+
+    T roll(T)(T minValue, T maxValue, uint times) {
+        if (times <= 0)
+            times = 1;
+
+        T result = 0;
+        for (uint i; i < times; ++i) {
+            result += rand(minValue, maxValue);
+        }
+        return result / times;
     }
 }

@@ -493,7 +493,13 @@ final class World {
     }
 
     void removeUpdate(Callback onUpdateFunc) {
-        _onUpdateFuncs.remove!(a => a == onUpdateFunc)();
+        Callback[] result;
+        for (int i; i < _onUpdateFuncs.length; ++i) {
+            if (_onUpdateFuncs[i] != onUpdateFunc) {
+                result ~= _onUpdateFuncs[i];
+            }
+        }
+        _onUpdateFuncs = result;
     }
 
     void addParticle(Particle particle) {

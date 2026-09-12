@@ -30,6 +30,8 @@ final class Animation : Image, Resource!Animation {
 
     bool repeat = true;
 
+    int repeatIndex;
+
     Vec2i margin;
 
     Vec2f size = Vec2f.zero;
@@ -90,6 +92,7 @@ final class Animation : Image, Resource!Animation {
         lines = anim.lines;
         maxCount = anim.maxCount;
         repeat = anim.repeat;
+        repeatIndex = anim.repeatIndex;
         margin = anim.margin;
         size = anim.size;
         flipsX = anim.flipsX;
@@ -149,7 +152,7 @@ final class Animation : Image, Resource!Animation {
                 _frame++;
                 if (_frame >= frames.length) {
                     if (repeat) {
-                        _frame = 0;
+                        _frame = min((cast(int) frames.length) - 1, repeatIndex);
                     }
                     else {
                         _frame = (cast(int) frames.length) - 1;

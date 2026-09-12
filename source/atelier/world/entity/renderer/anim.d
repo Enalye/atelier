@@ -106,6 +106,10 @@ final class EntityAnimRenderer : EntityGraphic {
         return _anim.isPlaying();
     }
 
+    override bool isRepeating() const {
+        return _anim.repeat;
+    }
+
     override void draw(Vec2f offset, float alpha = 1f) {
         _anim.alpha = _alpha * alpha;
         _anim.draw(offset);

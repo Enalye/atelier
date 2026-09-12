@@ -31,6 +31,11 @@ package void compileAnimation(string path, const Farfadet ffd, OutStream stream)
         repeat = ffd.getNode("repeat", 1).get!bool(0);
     }
 
+    int repeatIndex;
+    if (ffd.hasNode("repeatIndex")) {
+        repeatIndex = ffd.getNode("repeatIndex", 1).get!int(0);
+    }
+
     uint columns;
     if (ffd.hasNode("columns")) {
         columns = ffd.getNode("columns", 1).get!int(0);
@@ -67,6 +72,7 @@ package void compileAnimation(string path, const Farfadet ffd, OutStream stream)
     stream.write!(int[])(frames);
     stream.write!uint(frameTime);
     stream.write!bool(repeat);
+    stream.write!int(repeatIndex);
     stream.write!uint(columns);
     stream.write!uint(lines);
     stream.write!uint(maxCount);
@@ -82,6 +88,7 @@ package void loadAnimation(InStream stream) {
     int[] frames = stream.read!(int[])();
     uint frameTime = stream.read!uint();
     bool repeat = stream.read!bool();
+    int repeatIndex = stream.read!int();
     uint columns = stream.read!uint();
     uint lines = stream.read!uint();
     uint maxCount = stream.read!uint();
@@ -94,6 +101,7 @@ package void loadAnimation(InStream stream) {
         Animation animation = new Animation(texture, clip, columns, lines, maxCount);
         animation.margin = margin;
         animation.repeat = repeat;
+        animation.repeatIndex = repeatIndex;
         animation.frames = frames;
         animation.frameTime = frameTime;
         animation.flipsX = flipsX;

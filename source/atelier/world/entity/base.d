@@ -540,6 +540,10 @@ final class Entity : Resource!Entity {
         return _graphic && _graphic.isPlaying();
     }
 
+    bool isGraphicRepeating() const {
+        return _graphic && _graphic.isRepeating();
+    }
+
     void setGraphic(string id, bool forceUpdate = false) {
         if (!id.length) {
             setDefaultGraphic();
@@ -1181,6 +1185,8 @@ final class Entity : Resource!Entity {
     }
 
     void onRegister(bool isKeptFromScene = false) {
+        _lastCameraPosition = _currentCameraPosition = cameraPosition();
+
         if (_collider) {
             _collider.register();
         }

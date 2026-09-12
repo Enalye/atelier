@@ -28,6 +28,7 @@ final class AnimationResourceEditor : ResourceBaseEditor {
         int[] _frames;
         int[] _flipsX, _flipsY;
         bool _repeat, _hasMaxCount;
+        int _repeatIndex;
         uint _frameTime;
         Vec2u _imageSize;
         Vec2f _position = Vec2f.zero;
@@ -69,6 +70,10 @@ final class AnimationResourceEditor : ResourceBaseEditor {
             _repeat = ffd.getNode("repeat").get!bool(0);
         }
 
+        if (ffd.hasNode("repeatIndex")) {
+            _repeatIndex = ffd.getNode("repeatIndex").get!int(0);
+        }
+
         if (ffd.hasNode("columns")) {
             _columns = ffd.getNode("columns").get!int(0);
         }
@@ -100,7 +105,7 @@ final class AnimationResourceEditor : ResourceBaseEditor {
         setTextureRID(_textureRID);
 
         _parameterWindow = new ParameterWindow(_textureRID, _clip, _columns,
-            _lines, _hasMaxCount, _maxCount, _margin, _repeat, _frameTime, _frames, _flipsX, _flipsX);
+            _lines, _hasMaxCount, _maxCount, _margin, _repeat, _repeatIndex, _frameTime, _frames, _flipsX, _flipsX);
 
         _toolbox = new Toolbox();
         _toolbox.setTexture(getTexture(), _clip, _columns, _lines, _maxCount);
@@ -124,7 +129,7 @@ final class AnimationResourceEditor : ResourceBaseEditor {
 
         _parameterWindow.addEventListener("property_misc", {
             _parameterWindow.getMisc(_columns, _lines, _hasMaxCount, _maxCount,
-                _margin, _repeat, _frameTime, _frames, _flipsX, _flipsY);
+                _margin, _repeat, _repeatIndex, _frameTime, _frames, _flipsX, _flipsY);
             _toolbox.setParameters(_frameTime, _frames, _columns, _lines,
                 _hasMaxCount ? _maxCount : (_columns * _lines), _margin, _flipsX, _flipsY);
             setDirty();
@@ -148,6 +153,7 @@ final class AnimationResourceEditor : ResourceBaseEditor {
         node.addNode("frameTime").add(_frameTime);
         node.addNode("frames").add(_frames);
         node.addNode("repeat").add(_repeat);
+        node.addNode("repeatIndex").add(_repeatIndex);
         node.addNode("lines").add(_lines);
         node.addNode("columns").add(_columns);
         if (_maxCount > 0 && _hasMaxCount) {
@@ -611,13 +617,13 @@ private final class ParameterWindow : UIElement {
         ResourceButton _textureSelect;
         IntegerField[] _clipFields, _marginFields, _countFields;
         TextField _framesField;
-        IntegerField _frameTimeField;
+        IntegerField _repeatIndexField, _frameTimeField;
         TextField _flipsXField, _flipsYField;
         Checkbox _repeatCB, _hasMaxCountCB;
     }
 
     this(string textureRID, Vec4u clip, uint columns, uint lines, bool hasMaxCount,
-        uint maxCount, Vec2i margin, bool repeat, uint frameTime, int[] frames, int[] flipsX, int[] flipsY) {
+        uint maxCount, Vec2i margin, bool repeat, int repeatIndex, uint frameTime, int[] frames, int[] flipsX, int[] flipsY) {
         VList vlist = new VList;
         vlist.setPosition(Vec2f(8f, 8f));
         vlist.setSize(Vec2f.zero.max(getSize() - Vec2f(8f, 8f)));
@@ -783,6 +789,23 @@ private final class ParameterWindow : UIElement {
             vlist.addList(hlayout);
 
             {
+                hlayout.addUI(new Label("Index bouclage:", Atelier.theme.font));
+
+                _repeatIndexField = new IntegerField();
+                _repeatIndexField.setMinValue(0);
+                _repeatIndexField.addEventListener("value", {
+                    dispatchEvent("property_misc", false);
+                });
+                hlayout.addUI(_repeatIndexField);
+
+                _repeatIndexField.value = repeatIndex;
+            }
+
+            hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(284f, 0f));
+            vlist.addList(hlayout);
+
+            {
                 hlayout.addUI(new Label("Délai inter-images:", Atelier.theme.font));
 
                 _frameTimeField = new IntegerField();
@@ -887,13 +910,14 @@ private final class ParameterWindow : UIElement {
     }
 
     void getMisc(ref uint columns, ref uint lines, ref bool hasMaxCount,
-        ref uint maxCount, ref Vec2i margin, ref bool repeat, ref uint frameTime, ref int[] frames, ref int[] flipsX, ref int[] flipsY) {
+        ref uint maxCount, ref Vec2i margin, ref bool repeat, ref int repeatIndex, ref uint frameTime, ref int[] frames, ref int[] flipsX, ref int[] flipsY) {
         columns = _countFields[0].value;
         lines = _countFields[1].value;
         maxCount = _countFields[2].value;
         hasMaxCount = _hasMaxCountCB.value;
         margin = Vec2i(_marginFields[0].value, _marginFields[1].value);
         repeat = _repeatCB.value;
+        repeatIndex = _repeatIndexField.value;
         frameTime = _frameTimeField.value;
 
         frames.length = 0;

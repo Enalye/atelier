@@ -86,6 +86,7 @@ abstract class EntityGraphic {
     void resume();
     void update();
     bool isPlaying() const;
+    bool isRepeating() const;
     void draw(Vec2f offset, float alpha = 1f);
     float getLeft(float x) const;
     float getRight(float x) const;

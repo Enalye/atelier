@@ -37,6 +37,7 @@ void loadLibRender_animation(GrModule mod) {
     mod.addProperty(&_size!"get", &_size!"set", "size", animationType, vec2fType);
     mod.addProperty(&_margin!"get", &_margin!"set", "margin", animationType, vec2iType);
     mod.addProperty(&_repeat!"get", &_repeat!"set", "repeat", animationType, grBool);
+    mod.addProperty(&_repeatIndex!"get", &_repeatIndex!"set", "repeatIndex", animationType, grInt);
     mod.addProperty(&_frameTime!"get", &_frameTime!"set", "frameTime", animationType, grInt);
     mod.addProperty(&_frames!"get", &_frames!"set", "frames", animationType, grList(grInt));
     mod.addProperty(&_columns!"get", &_columns!"set", "columns", animationType, grUInt);
@@ -95,6 +96,15 @@ private void _repeat(string op)(GrCall call) {
         animation.repeat = call.getBool(1);
     }
     call.setBool(animation.repeat);
+}
+
+private void _repeatIndex(string op)(GrCall call) {
+    Animation animation = call.getNative!Animation(0);
+
+    static if (op == "set") {
+        animation.repeatIndex = call.getInt(1);
+    }
+    call.setInt(animation.repeatIndex);
 }
 
 private void _frameTime(string op)(GrCall call) {

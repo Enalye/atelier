@@ -103,6 +103,10 @@ final class EntitySpriteRenderer : EntityGraphic {
         return false;
     }
 
+    override bool isRepeating() const {
+        return false;
+    }
+
     override void draw(Vec2f offset, float alpha = 1f) {
         _sprite.alpha = _alpha * alpha;
         _sprite.draw(offset);

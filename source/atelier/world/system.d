@@ -306,10 +306,10 @@ final class World {
         bool hasXBounds = rendererSize.x <= mapSize.x;
         bool hasYBounds = rendererSize.y <= mapSize.y;
 
-        EntityController controller = _player ? _player.getController() : null;
+        /*EntityController controller = _player ? _player.getController() : null;
         if (controller) {
             _controllers ~= controller;
-        }
+        }*/
 
         if (_player) {
             _entities ~= _player;

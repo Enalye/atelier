@@ -236,7 +236,7 @@ package(atelier.etabli.media.sequencer) final class PatternSequencerEditor : Seq
     }
 
     private void _onPlay() {
-        if (midiIsPlaying()) {
+        /* if (midiIsPlaying()) {
             midiStop();
             return;
         }
@@ -279,14 +279,14 @@ package(atelier.etabli.media.sequencer) final class PatternSequencerEditor : Seq
         midiProcess(_blocks, _bpm);
         midiPlay();
 
-        addEventListener("update", &_onPlaying);
+        addEventListener("update", &_onPlaying);*/
     }
 
     private void _onPlaying() {
-        if (!midiIsPlaying() || midiIsFinished()) {
+        /* if (!midiIsPlaying() || midiIsFinished()) {
             removeEventListener("update", &_onPlaying);
             midiStop();
-        }
+        }*/
     }
 
     bool hasControlModifier() const {
@@ -933,7 +933,7 @@ package(atelier.etabli.media.sequencer) final class PatternSequencerEditor : Seq
     }
 
     void playNote(uint note, bool state, uint velocity = 100) {
-        if (_noteStates[note] == state) {
+        /*if (_noteStates[note] == state) {
             return;
         }
         _noteStates[note] = state;
@@ -942,7 +942,7 @@ package(atelier.etabli.media.sequencer) final class PatternSequencerEditor : Seq
         }
         else {
             midiStopNote(note);
-        }
+        }*/
     }
 
     private void _onDraw() {
@@ -1004,14 +1004,14 @@ package(atelier.etabli.media.sequencer) final class PatternSequencerEditor : Seq
             }
         }
 
-        if (midiIsPlaying()) {
+        /* if (midiIsPlaying()) {
             double bpms = _bpm / 60_000.0;
             double time = midiGetTime() * bpms;
             double sz = _steps * StepWidth;
             time = (time * sz) / _blocks;
             Vec2f pos = Vec2f(offset.x + time, 0f);
             Atelier.renderer.drawLine(pos, Vec2f(pos.x, getHeight()), Atelier.theme.accent, 1f);
-        }
+        }*/
 
         if (_isEffectMode) {
             for (uint effect; effect < effectList.length; ++effect) {

@@ -16,7 +16,6 @@ import atelier.render;
 import atelier.ui;
 import atelier.etabli.ui;
 import atelier.etabli.media;
-import atelier.etabli.core.midi;
 
 final class Etabli {
     struct ResourceInfo {
@@ -103,7 +102,6 @@ final class Etabli {
         Atelier.ui.addUI(_ui);
 
         loadConfig();
-        initializeMidiDevices();
         reloadResources();
         Atelier.script.setCustomFiles(getScripts());
         updateRessourceFolders();
@@ -112,7 +110,6 @@ final class Etabli {
     }
 
     void close() {
-        closeMidiDevices();
     }
 
     private void _loadEditors() {

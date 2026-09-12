@@ -172,7 +172,7 @@ package(atelier.etabli.media.sequencer) final class TracklistSequencerEditor : S
     }
 
     private void _play() {
-        midiStartSession();
+        /*midiStartSession();
         foreach (tempo; _tempos) {
             midiAddTempoEvent(tempo.start, tempo.start + tempo.duration,
                 tempo.startValue, tempo.endValue, tempo.spline);
@@ -253,22 +253,22 @@ package(atelier.etabli.media.sequencer) final class TracklistSequencerEditor : S
         midiEndSession();
         _blocksTime = midiProcess(_blocks, 120.0);
         midiPlay();
-        _currentBlock = 0;
+        _currentBlock = 0;*/
     }
 
     private void _onPlay() {
-        if (midiIsPlaying()) {
+        /*if (midiIsPlaying()) {
             midiStop();
             _currentBlock = -1;
             return;
         }
 
         addEventListener("update", &_onPlaying);
-        _play();
+        _play();*/
     }
 
     private void _onRecord() {
-        if (midiIsPlaying()) {
+        /* if (midiIsPlaying()) {
             midiStop();
             _currentBlock = -1;
             _isRecording = false;
@@ -283,18 +283,18 @@ package(atelier.etabli.media.sequencer) final class TracklistSequencerEditor : S
         addEventListener("update", &_onRecording);
 
         _play();
-        _isRecording = true;
+        _isRecording = true;*/
     }
 
     private void _onPlaying() {
-        if (!midiIsPlaying() || midiIsFinished()) {
+        /*if (!midiIsPlaying() || midiIsFinished()) {
             removeEventListener("update", &_onPlaying);
             midiStop();
-        }
+        }*/
     }
 
     private void _onRecording() {
-        if (!midiIsPlaying() || midiIsFinished()) {
+        /*if (!midiIsPlaying() || midiIsFinished()) {
             removeEventListener("update", &_onRecording);
             midiStop();
 
@@ -302,7 +302,7 @@ package(atelier.etabli.media.sequencer) final class TracklistSequencerEditor : S
                 _recorder.remove();
                 _recorder = null;
             }
-        }
+        }*/
     }
 
     bool hasControlModifier() const {
@@ -810,7 +810,7 @@ package(atelier.etabli.media.sequencer) final class TracklistSequencerEditor : S
             pattern.draw(offset);
         }
 
-        if (midiIsPlaying() && _currentBlock >= 0 && _currentBlock < _blocksTime.length) {
+        /*if (midiIsPlaying() && _currentBlock >= 0 && _currentBlock < _blocksTime.length) {
             double time = midiGetTime();
             if (time >= _blocksTime[_currentBlock]) {
                 _currentBlock++;
@@ -819,7 +819,7 @@ package(atelier.etabli.media.sequencer) final class TracklistSequencerEditor : S
             Atelier.renderer.drawRect(Vec2f(pos, 0f), Vec2f(BlockWidth,
                     getHeight()), _isRecording ? Atelier.theme.danger
                     : Atelier.theme.accent, 0.5f, true);
-        }
+        }*/
 
         if (_isApplyingTool) {
             switch (_tool) {

@@ -1,6 +1,7 @@
 module atelier.audio.output;
 
 import core.thread;
+import std.conv : to;
 import std.exception : enforce;
 import std.stdio;
 import std.string;
@@ -52,6 +53,8 @@ final class AudioOutputDevice : AudioOutput {
         else {
             _deviceId = SDL_OpenAudioDevice(null, 0, &desired, &obtained, 0);
         }
+        enforce(_deviceId > 0, "Échec de l’initialisation de la sortie audio: " ~ to!string(
+                fromStringz(SDL_GetError())));
         play();
     }
 

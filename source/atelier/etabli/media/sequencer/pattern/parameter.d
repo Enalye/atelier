@@ -243,17 +243,17 @@ package final class PatternSequencerParameterWindow : UIElement {
     }
 
     private void _onPlayMidi() {
-        if (!midiIsPlaying()) {
+        /*if (!midiIsPlaying()) {
             _playBtn.removeEventListener("update", &_onPlayMidi);
             _playBtn.setText("Lecture");
-        }
+        }*/
     }
 
     void play() {
-        if (!midiIsPlaying()) {
+        /*if (!midiIsPlaying()) {
             _playBtn.setText("Pause");
             _playBtn.addEventListener("update", &_onPlayMidi);
-        }
+        }*/
     }
 
     string getInstrument() {

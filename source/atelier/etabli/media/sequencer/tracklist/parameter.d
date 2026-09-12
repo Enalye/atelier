@@ -80,35 +80,35 @@ package final class TracklistSequencerParameterWindow : UIElement {
     }
 
     private void _onPlayMidi() {
-        if (!midiIsPlaying()) {
+        /* if (!midiIsPlaying()) {
             _playBtn.removeEventListener("update", &_onPlayMidi);
             _playBtn.setText("Lecture");
             _recordBtn.isEnabled = true;
-        }
+        }*/
     }
 
     private void _onRecordMidi() {
-        if (!midiIsPlaying()) {
+        /* if (!midiIsPlaying()) {
             _recordBtn.removeEventListener("update", &_onPlayMidi);
             _recordBtn.setText("Enregistrer");
             _playBtn.isEnabled = true;
-        }
+        }*/
     }
 
     void play() {
-        if (!midiIsPlaying()) {
+        /* if (!midiIsPlaying()) {
             _recordBtn.isEnabled = false;
             _playBtn.setText("Pause");
             _playBtn.addEventListener("update", &_onPlayMidi);
-        }
+        }*/
     }
 
     void record() {
-        if (!midiIsPlaying()) {
+        /*if (!midiIsPlaying()) {
             _playBtn.isEnabled = false;
             _recordBtn.setText("Annuler");
             _recordBtn.addEventListener("update", &_onRecordMidi);
-        }
+        }*/
     }
 
     uint getBlocks() {

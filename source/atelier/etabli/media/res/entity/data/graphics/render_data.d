@@ -208,7 +208,7 @@ final class EntityRenderData {
         return false;
     }
 
-    void play() {
+    void start() {
         if (_anim) {
             _anim.start();
         }
@@ -220,17 +220,21 @@ final class EntityRenderData {
 
     void pause() {
         if (_anim) {
-            if (_anim.isPlaying())
-                _anim.pause();
-            else
-                _anim.resume();
+            _anim.pause();
         }
 
         if (_mdiranim) {
-            if (_mdiranim.isPlaying())
-                _mdiranim.pause();
-            else
-                _mdiranim.resume();
+            _mdiranim.pause();
+        }
+    }
+
+    void resume() {
+        if (_anim) {
+            _anim.resume();
+        }
+
+        if (_mdiranim) {
+            _mdiranim.resume();
         }
     }
 

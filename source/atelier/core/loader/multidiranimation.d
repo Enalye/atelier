@@ -16,9 +16,9 @@ package void compileMultiDirAnimation(string path, const Farfadet ffd, OutStream
 
     Vec4u clip = ffd.getNode("clip", 4).get!Vec4u(0);
 
-    uint frameTime;
-    if (ffd.hasNode("frameTime")) {
-        frameTime = ffd.getNode("frameTime", 1).get!uint(0);
+    uint[] frameTimes;
+    if (ffd.hasNode("frameTimes")) {
+        frameTimes = ffd.getNode("frameTimes", 1).get!(uint[])(0);
     }
 
     int[] frames;
@@ -29,6 +29,11 @@ package void compileMultiDirAnimation(string path, const Farfadet ffd, OutStream
     bool repeat;
     if (ffd.hasNode("repeat")) {
         repeat = ffd.getNode("repeat", 1).get!bool(0);
+    }
+
+    int repeatIndex;
+    if (ffd.hasNode("repeatIndex")) {
+        repeatIndex = ffd.getNode("repeatIndex", 1).get!int(0);
     }
 
     uint columns;
@@ -75,8 +80,9 @@ package void compileMultiDirAnimation(string path, const Farfadet ffd, OutStream
     stream.write!string(textureRID);
     stream.write!Vec4u(clip);
     stream.write!(int[])(frames);
-    stream.write!uint(frameTime);
+    stream.write!(uint[])(frameTimes);
     stream.write!bool(repeat);
+    stream.write!int(repeatIndex);
     stream.write!uint(columns);
     stream.write!uint(lines);
     stream.write!uint(maxCount);
@@ -92,8 +98,9 @@ package void loadMultiDirAnimation(InStream stream) {
     string textureRID = stream.read!string();
     Vec4u clip = stream.read!Vec4u();
     int[] frames = stream.read!(int[])();
-    uint frameTime = stream.read!uint();
+    uint[] frameTimes = stream.read!(uint[])();
     bool repeat = stream.read!bool();
+    int repeatIndex = stream.read!int();
     uint columns = stream.read!uint();
     uint lines = stream.read!uint();
     uint maxCount = stream.read!uint();
@@ -109,8 +116,9 @@ package void loadMultiDirAnimation(InStream stream) {
             columns, lines, maxCount);
         animation.margin = margin;
         animation.repeat = repeat;
+        animation.repeatIndex = repeatIndex;
         animation.frames = frames;
-        animation.frameTime = frameTime;
+        animation.frameTimes = frameTimes;
         animation.dirStartAngle = dirStartAngle;
         animation.dirOffset = dirOffset;
         animation.dirIndexes = dirIndexes;

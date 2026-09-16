@@ -485,21 +485,27 @@ final class Etabli {
                 frames = info.farfadet.getNode("frames").get!(int[])(0);
             }
 
-            uint frameTime;
-            if (info.farfadet.hasNode("frameTime")) {
-                frameTime = info.farfadet.getNode("frameTime").get!uint(0);
+            uint[] frameTimes;
+            if (info.farfadet.hasNode("frameTimes")) {
+                frameTimes = info.farfadet.getNode("frameTimes").get!(uint[])(0);
             }
 
-            bool repeat = true;
+            bool repeat;
             if (info.farfadet.hasNode("repeat")) {
                 repeat = info.farfadet.getNode("repeat").get!bool(0);
             }
 
+            int repeatIndex;
+            if (info.farfadet.hasNode("repeatIndex")) {
+                repeatIndex = info.farfadet.getNode("repeatIndex", 1).get!int(0);
+            }
+
             anim = new Animation(texture, clip, columns, lines, maxCount);
             anim.frames = frames;
-            anim.frameTime = frameTime;
+            anim.frameTimes = frameTimes;
             anim.margin = margin;
             anim.repeat = repeat;
+            anim.repeatIndex = repeatIndex;
         }
 
         return anim;
@@ -547,14 +553,19 @@ final class Etabli {
                 frames = info.farfadet.getNode("frames").get!(int[])(0);
             }
 
-            uint frameTime;
-            if (info.farfadet.hasNode("frameTime")) {
-                frameTime = info.farfadet.getNode("frameTime").get!uint(0);
+            uint[] frameTimes;
+            if (info.farfadet.hasNode("frameTimes")) {
+                frameTimes = info.farfadet.getNode("frameTimes").get!(uint[])(0);
             }
 
-            bool repeat = true;
+            bool repeat;
             if (info.farfadet.hasNode("repeat")) {
                 repeat = info.farfadet.getNode("repeat").get!bool(0);
+            }
+
+            int repeatIndex;
+            if (info.farfadet.hasNode("repeatIndex")) {
+                repeatIndex = info.farfadet.getNode("repeatIndex", 1).get!int(0);
             }
 
             float dirStartAngle = 0f;
@@ -579,9 +590,10 @@ final class Etabli {
 
             anim = new MultiDirAnimation(texture, clip, columns, lines, maxCount);
             anim.frames = frames;
-            anim.frameTime = frameTime;
+            anim.frameTimes = frameTimes;
             anim.margin = margin;
             anim.repeat = repeat;
+            anim.repeatIndex = repeatIndex;
             anim.dirStartAngle = dirStartAngle;
             anim.dirOffset = dirOffset;
             anim.dirIndexes = dirIndexes;

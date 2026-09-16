@@ -38,7 +38,9 @@ void loadLibRender_animation(GrModule mod) {
     mod.addProperty(&_margin!"get", &_margin!"set", "margin", animationType, vec2iType);
     mod.addProperty(&_repeat!"get", &_repeat!"set", "repeat", animationType, grBool);
     mod.addProperty(&_repeatIndex!"get", &_repeatIndex!"set", "repeatIndex", animationType, grInt);
-    mod.addProperty(&_frameTime!"get", &_frameTime!"set", "frameTime", animationType, grInt);
+    mod.addProperty(&_frameTime, null, "frameTime", animationType, grUInt);
+    mod.addProperty(&_frameTimes!"get", &_frameTimes!"set", "frameTimes", animationType, grList(
+            grUInt));
     mod.addProperty(&_frames!"get", &_frames!"set", "frames", animationType, grList(grInt));
     mod.addProperty(&_columns!"get", &_columns!"set", "columns", animationType, grUInt);
     mod.addProperty(&_lines!"get", &_lines!"set", "lines", animationType, grUInt);
@@ -107,13 +109,20 @@ private void _repeatIndex(string op)(GrCall call) {
     call.setInt(animation.repeatIndex);
 }
 
-private void _frameTime(string op)(GrCall call) {
+private void _frameTime(GrCall call) {
+    Animation animation = call.getNative!Animation(0);
+    call.setUInt(animation.frameTime);
+}
+
+private void _frameTimes(string op)(GrCall call) {
     Animation animation = call.getNative!Animation(0);
 
     static if (op == "set") {
-        animation.frameTime = call.getInt(1);
+        animation.frameTimes = call.getList(1).getUInts();
     }
-    call.setInt(animation.frameTime);
+    GrList list = new GrList;
+    list.setUInts(animation.frameTimes);
+    call.setList(list);
 }
 
 private void _frames(string op)(GrCall call) {

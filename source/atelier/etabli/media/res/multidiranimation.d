@@ -27,7 +27,8 @@ final class MultiDirAnimationResourceEditor : ResourceBaseEditor {
         Vec2i _margin;
         int[] _frames;
         bool _repeat, _hasMaxCount;
-        uint _frameTime;
+        int _repeatIndex;
+        uint[] _frameTimes;
 
         float _dirStartAngle = 0f;
         Vec2i _dirOffset;
@@ -61,8 +62,8 @@ final class MultiDirAnimationResourceEditor : ResourceBaseEditor {
             _clip = ffd.getNode("clip").get!Vec4u(0);
         }
 
-        if (ffd.hasNode("frameTime")) {
-            _frameTime = ffd.getNode("frameTime").get!uint(0);
+        if (ffd.hasNode("frameTimes")) {
+            _frameTimes = ffd.getNode("frameTimes").get!(uint[])(0);
         }
 
         if (ffd.hasNode("frames")) {
@@ -71,6 +72,10 @@ final class MultiDirAnimationResourceEditor : ResourceBaseEditor {
 
         if (ffd.hasNode("repeat")) {
             _repeat = ffd.getNode("repeat").get!bool(0);
+        }
+
+        if (ffd.hasNode("repeatIndex")) {
+            _repeatIndex = ffd.getNode("repeatIndex").get!int(0);
         }
 
         if (ffd.hasNode("columns")) {
@@ -112,12 +117,12 @@ final class MultiDirAnimationResourceEditor : ResourceBaseEditor {
         setTextureRID(_textureRID);
 
         _parameterWindow = new ParameterWindow(_textureRID, _clip, _columns,
-            _lines, _hasMaxCount, _maxCount, _margin, _repeat,
-            _frameTime, _frames, _dirStartAngle, _dirOffset, _dirIndexes, _dirFlipXs);
+            _lines, _hasMaxCount, _maxCount, _margin, _repeat, _repeatIndex,
+            _frameTimes, _frames, _dirStartAngle, _dirOffset, _dirIndexes, _dirFlipXs);
 
         _toolbox = new Toolbox();
         _toolbox.setTexture(getTexture(), _clip, _columns, _lines, _maxCount);
-        _toolbox.setParameters(_frameTime, _frames, _columns, _lines, _maxCount,
+        _toolbox.setParameters(_frameTimes, _frames, _repeatIndex, _columns, _lines, _maxCount,
             _margin, _dirStartAngle, _dirOffset, _dirIndexes, _dirFlipXs);
         Atelier.ui.addUI(_toolbox);
 
@@ -125,7 +130,7 @@ final class MultiDirAnimationResourceEditor : ResourceBaseEditor {
             _textureRID = _parameterWindow.getTextureRID();
             setTextureRID(_textureRID);
             _toolbox.setTexture(getTexture(), _clip, _columns, _lines, _maxCount);
-            _toolbox.setParameters(_frameTime, _frames, _columns, _lines, _hasMaxCount ? _maxCount
+            _toolbox.setParameters(_frameTimes, _frames, _repeatIndex, _columns, _lines, _hasMaxCount ? _maxCount
                 : (_columns * _lines), _margin, _dirStartAngle, _dirOffset,
                 _dirIndexes, _dirFlipXs);
             setDirty();
@@ -139,8 +144,8 @@ final class MultiDirAnimationResourceEditor : ResourceBaseEditor {
 
         _parameterWindow.addEventListener("property_misc", {
             _parameterWindow.getMisc(_columns, _lines, _hasMaxCount, _maxCount,
-                _margin, _repeat, _frameTime, _frames);
-            _toolbox.setParameters(_frameTime, _frames, _columns, _lines, _hasMaxCount ? _maxCount
+                _margin, _repeat, _repeatIndex, _frameTimes, _frames);
+            _toolbox.setParameters(_frameTimes, _frames, _repeatIndex, _columns, _lines, _hasMaxCount ? _maxCount
                 : (_columns * _lines), _margin, _dirStartAngle, _dirOffset,
                 _dirIndexes, _dirFlipXs);
             setDirty();
@@ -148,7 +153,7 @@ final class MultiDirAnimationResourceEditor : ResourceBaseEditor {
 
         _parameterWindow.addEventListener("property_dir", {
             _parameterWindow.getDir(_dirStartAngle, _dirOffset, _dirIndexes, _dirFlipXs);
-            _toolbox.setParameters(_frameTime, _frames, _columns, _lines, _hasMaxCount ? _maxCount
+            _toolbox.setParameters(_frameTimes, _frames, _repeatIndex, _columns, _lines, _hasMaxCount ? _maxCount
                 : (_columns * _lines), _margin, _dirStartAngle, _dirOffset,
                 _dirIndexes, _dirFlipXs);
             setDirty();
@@ -169,9 +174,10 @@ final class MultiDirAnimationResourceEditor : ResourceBaseEditor {
         node.add(_name);
         node.addNode("texture").add(_textureRID);
         node.addNode("clip").add(_clip);
-        node.addNode("frameTime").add(_frameTime);
+        node.addNode("frameTimes").add(_frameTimes);
         node.addNode("frames").add(_frames);
         node.addNode("repeat").add(_repeat);
+        node.addNode("repeatIndex").add(_repeatIndex);
         node.addNode("lines").add(_lines);
         node.addNode("columns").add(_columns);
         if (_maxCount > 0 && _hasMaxCount) {
@@ -555,7 +561,7 @@ private class Toolbox : Modal {
     }
 
     this() {
-        setSize(Vec2f(200f, 400f));
+        setSize(Vec2f(200f, 500f));
         setAlign(UIAlignX.left, UIAlignY.top);
         setPosition(Vec2f(258f, 75f));
 
@@ -566,12 +572,17 @@ private class Toolbox : Modal {
             addUI(title);
         }
 
+        VBox vbox = new VBox;
+        vbox.setAlign(UIAlignX.center, UIAlignY.top);
+        vbox.setPosition(Vec2f(0f, 32f));
+        vbox.setSpacing(16f);
+        vbox.setChildAlign(UIAlignX.center);
+        addUI(vbox);
+
         {
             HBox hbox = new HBox;
-            hbox.setAlign(UIAlignX.center, UIAlignY.top);
-            hbox.setPosition(Vec2f(0f, 32f));
             hbox.setSpacing(4f);
-            addUI(hbox);
+            vbox.addUI(hbox);
 
             _toolGroup = new ToolGroup;
             foreach (key; ["selection", "move", "corner", "side"]) {
@@ -585,15 +596,54 @@ private class Toolbox : Modal {
         {
             _dirKnob = new Knob;
             _dirKnob.setSize(Vec2f(128f, 128f));
-            _dirKnob.setAlign(UIAlignX.center, UIAlignY.top);
-            _dirKnob.setPosition(Vec2f(0f, 70f));
             _dirKnob.setRange(0f, 360f);
             _dirKnob.setAngleOffset(180f);
             _dirKnob.value = 0f;
             _dirKnob.addEventListener("value", {
                 _animation.dirAngle = _dirKnob.value;
             });
-            addUI(_dirKnob);
+            vbox.addUI(_dirKnob);
+        }
+
+        {
+            HBox hbox = new HBox;
+            hbox.setSpacing(4f);
+            vbox.addUI(hbox);
+
+            IconButton playBtn = new IconButton("editor:play");
+            hbox.addUI(playBtn);
+
+            IconButton backBtn = new IconButton("editor:play-back");
+            hbox.addUI(backBtn);
+
+            IconButton stopBtn = new IconButton("editor:stop");
+            hbox.addUI(stopBtn);
+
+            playBtn.addEventListener("click", {
+                if (_animation) {
+                    if (_animation.isPlaying()) {
+                        _animation.pause();
+                        playBtn.setIcon("editor:play");
+                    }
+                    else {
+                        _animation.resume();
+                        playBtn.setIcon("editor:pause");
+                    }
+                }
+            });
+
+            backBtn.addEventListener("click", {
+                if (_animation) {
+                    _animation.start();
+                    playBtn.setIcon("editor:pause");
+                }
+            });
+
+            stopBtn.addEventListener("click", {
+                if (_animation) {
+                    _animation.stop();
+                }
+            });
         }
 
         {
@@ -646,11 +696,12 @@ private class Toolbox : Modal {
             _animation.clip = clip;
     }
 
-    void setParameters(uint frameTime, int[] frames, uint columns, uint lines,
+    void setParameters(uint[] frameTimes, int[] frames, int repeatIndex, uint columns, uint lines,
         uint maxCount, Vec2i margin, float dirStartAngle, Vec2i dirOffset,
         int[] dirIndexes, int[] dirFlipXs) {
-        _animation.frameTime = frameTime;
+        _animation.frameTimes = frameTimes;
         _animation.frames = frames;
+        _animation.repeatIndex = repeatIndex;
         _animation.columns = columns;
         _animation.lines = lines;
         _animation.maxCount = maxCount;
@@ -678,7 +729,8 @@ private final class ParameterWindow : UIElement {
         ResourceButton _textureSelect;
         IntegerField[] _clipFields, _marginFields, _countFields;
         TextField _framesField;
-        IntegerField _frameTimeField;
+        TextField _frameTimesField;
+        IntegerField _repeatIndexField;
         Checkbox _repeatCB, _hasMaxCountCB;
         NumberField _dirStartAngle;
         IntegerField[] _dirOffsetFields;
@@ -686,7 +738,7 @@ private final class ParameterWindow : UIElement {
     }
 
     this(string textureRID, Vec4u clip, uint columns, uint lines, bool hasMaxCount,
-        uint maxCount, Vec2i margin, bool repeat, uint frameTime, int[] frames,
+        uint maxCount, Vec2i margin, bool repeat, int repeatIndex, uint[] frameTimes, int[] frames,
         float dirStartAngle, Vec2i dirOffset, int[] dirIndexes, int[] dirFlipXs) {
         VList vlist = new VList;
         vlist.setPosition(Vec2f(8f, 8f));
@@ -853,16 +905,37 @@ private final class ParameterWindow : UIElement {
             vlist.addList(hlayout);
 
             {
-                hlayout.addUI(new Label("Délai inter-images:", Atelier.theme.font));
+                hlayout.addUI(new Label("Index bouclage:", Atelier.theme.font));
 
-                _frameTimeField = new IntegerField();
-                _frameTimeField.setMinValue(0);
-                _frameTimeField.addEventListener("value", {
+                _repeatIndexField = new IntegerField();
+                _repeatIndexField.setMinValue(0);
+                _repeatIndexField.addEventListener("value", {
                     dispatchEvent("property_misc", false);
                 });
-                hlayout.addUI(_frameTimeField);
+                hlayout.addUI(_repeatIndexField);
 
-                _frameTimeField.value = frameTime;
+                _repeatIndexField.value = repeatIndex;
+            }
+
+            hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(284f, 0f));
+            vlist.addList(hlayout);
+
+            {
+                hlayout.addUI(new Label("Délai inter-images:", Atelier.theme.font));
+
+                _frameTimesField = new TextField();
+                _frameTimesField.setAllowedCharacters(" 0123456789");
+                _frameTimesField.addEventListener("value", {
+                    dispatchEvent("property_misc", false);
+                });
+                hlayout.addUI(_frameTimesField);
+
+                string value;
+                foreach (i; frameTimes) {
+                    value ~= to!string(i) ~ " ";
+                }
+                _frameTimesField.value = value;
             }
         }
 
@@ -1001,17 +1074,27 @@ private final class ParameterWindow : UIElement {
     }
 
     void getMisc(ref uint columns, ref uint lines, ref bool hasMaxCount,
-        ref uint maxCount, ref Vec2i margin, ref bool repeat, ref uint frameTime, ref int[] frames) {
+        ref uint maxCount, ref Vec2i margin, ref bool repeat, ref int repeatIndex, ref uint[] frameTimes, ref int[] frames) {
         columns = _countFields[0].value;
         lines = _countFields[1].value;
         maxCount = _countFields[2].value;
         hasMaxCount = _hasMaxCountCB.value;
         margin = Vec2i(_marginFields[0].value, _marginFields[1].value);
         repeat = _repeatCB.value;
-        frameTime = _frameTimeField.value;
+        repeatIndex = _repeatIndexField.value;
+
+        int count = hasMaxCount ? maxCount : (columns * lines);
+
+        frameTimes.length = 0;
+        foreach (element; _frameTimesField.value.split(' ')) {
+            try {
+                frameTimes ~= to!uint(element);
+            }
+            catch (ConvException e) {
+            }
+        }
 
         frames.length = 0;
-        int count = hasMaxCount ? maxCount : (columns * lines);
         foreach (element; _framesField.value.split(' ')) {
             try {
                 uint frame = to!uint(element);

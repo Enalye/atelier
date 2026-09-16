@@ -23,13 +23,15 @@ final class MultiDirAnimation : Image, Resource!MultiDirAnimation {
         bool _isRunning = true;
     }
 
-    uint frameTime;
+    uint[] frameTimes;
 
     int[] frames;
 
     uint columns = 1, lines = 1, maxCount = 1;
 
     bool repeat = true;
+
+    int repeatIndex;
 
     Vec2i margin;
 
@@ -72,6 +74,15 @@ final class MultiDirAnimation : Image, Resource!MultiDirAnimation {
             return frames[_frame];
         }
 
+        /// La durée de la frame
+        uint frameTime() const {
+            if (!frameTimes.length)
+                return 0;
+            if (_frame >= frameTimes.length)
+                return frameTimes[$ - 1];
+            return frameTimes[_frame];
+        }
+
         int currentDir() const {
             return _currentDir;
         }
@@ -95,12 +106,13 @@ final class MultiDirAnimation : Image, Resource!MultiDirAnimation {
         _currentDir = anim._currentDir;
         _currentTick = anim._currentTick;
         _isRunning = anim._isRunning;
-        frameTime = anim.frameTime;
+        frameTimes = anim.frameTimes;
         frames = anim.frames;
         columns = anim.columns;
         lines = anim.lines;
         maxCount = anim.maxCount;
         repeat = anim.repeat;
+        repeatIndex = anim.repeatIndex;
         margin = anim.margin;
         dirAngle = anim.dirAngle;
         dirStartAngle = anim.dirStartAngle;
@@ -143,7 +155,7 @@ final class MultiDirAnimation : Image, Resource!MultiDirAnimation {
     override void update() {
         if (_isRunning) {
             _currentTick++;
-            if (_currentTick >= frameTime) {
+            if (_currentTick >= frameTime()) {
                 _currentTick = 0;
 
                 if (!frames.length) {
@@ -153,7 +165,7 @@ final class MultiDirAnimation : Image, Resource!MultiDirAnimation {
                     _frame++;
                     if (_frame >= frames.length) {
                         if (repeat) {
-                            _frame = 0;
+                            _frame = min((cast(int) frames.length) - 1, repeatIndex);
                         }
                         else {
                             _frame = (cast(int) frames.length) - 1;

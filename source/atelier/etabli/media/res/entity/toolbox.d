@@ -18,7 +18,6 @@ package class Toolbox : Modal {
     private {
         SelectButton _imgSelect;
         Knob _dirKnob;
-        IconButton _playBtn, _pauseBtn, _stopBtn;
     }
 
     this() {
@@ -68,23 +67,29 @@ package class Toolbox : Modal {
             hbox.setSpacing(4f);
             vbox.addUI(hbox);
 
-            _playBtn = new IconButton("editor:play-once");
-            _playBtn.addEventListener("click", {
-                dispatchEvent("toolbox_play", false);
+            IconButton playBtn = new IconButton("editor:play");
+            playBtn.addEventListener("click", {
+                dispatchEvent("toolbox_resume", false);
             });
-            hbox.addUI(_playBtn);
+            hbox.addUI(playBtn);
 
-            _pauseBtn = new IconButton("editor:pause");
-            _pauseBtn.addEventListener("click", {
+            IconButton pauseBtn = new IconButton("editor:pause");
+            pauseBtn.addEventListener("click", {
                 dispatchEvent("toolbox_pause", false);
             });
-            hbox.addUI(_pauseBtn);
+            hbox.addUI(pauseBtn);
 
-            _stopBtn = new IconButton("editor:stop");
-            _stopBtn.addEventListener("click", {
+            IconButton startBtn = new IconButton("editor:play-back");
+            startBtn.addEventListener("click", {
+                dispatchEvent("toolbox_start", false);
+            });
+            hbox.addUI(startBtn);
+
+            IconButton stopBtn = new IconButton("editor:stop");
+            stopBtn.addEventListener("click", {
                 dispatchEvent("toolbox_stop", false);
             });
-            hbox.addUI(_stopBtn);
+            hbox.addUI(stopBtn);
         }
     }
 

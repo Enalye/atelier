@@ -22,7 +22,7 @@ final class Animation : Image, Resource!Animation {
         bool _isRunning = true;
     }
 
-    uint frameTime;
+    uint[] frameTimes;
 
     int[] frames;
 
@@ -67,6 +67,15 @@ final class Animation : Image, Resource!Animation {
 
             return frames[_frame];
         }
+
+        /// La durée de la frame
+        uint frameTime() const {
+            if (!frameTimes.length)
+                return 0;
+            if (_frame >= frameTimes.length)
+                return frameTimes[$ - 1];
+            return frameTimes[_frame];
+        }
     }
 
     /// Ctor
@@ -86,7 +95,7 @@ final class Animation : Image, Resource!Animation {
         _frame = anim._frame;
         _currentTick = anim._currentTick;
         _isRunning = anim._isRunning;
-        frameTime = anim.frameTime;
+        frameTimes = anim.frameTimes;
         frames = anim.frames;
         columns = anim.columns;
         lines = anim.lines;
@@ -113,8 +122,8 @@ final class Animation : Image, Resource!Animation {
 
     /// Démarre l’animation au hasard
     void startRand() {
-        _currentTick = Atelier.rng.rand(frameTime);
         _frame = Atelier.rng.rand(cast(uint) frames.length);
+        _currentTick = Atelier.rng.rand(frameTime());
         _isRunning = true;
     }
 
@@ -142,7 +151,7 @@ final class Animation : Image, Resource!Animation {
         }
 
         _currentTick++;
-        if (_currentTick >= frameTime) {
+        if (_currentTick >= frameTime()) {
             _currentTick = 0;
 
             if (!frames.length) {

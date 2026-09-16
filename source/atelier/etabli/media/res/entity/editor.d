@@ -105,12 +105,12 @@ final class EntityResourceEditor : ResourceBaseEditor {
 
         _toolbox.addEventListener("toolbox", &_onToolbox);
 
-        _toolbox.addEventListener("toolbox_play", {
+        _toolbox.addEventListener("toolbox_start", {
             foreach (EntityRenderData render; _graphics) {
-                render.play();
+                render.start();
             }
             foreach (EntityRenderData render; _auxGraphics) {
-                render.play();
+                render.start();
             }
         });
 
@@ -120,6 +120,15 @@ final class EntityResourceEditor : ResourceBaseEditor {
             }
             foreach (EntityRenderData render; _auxGraphics) {
                 render.pause();
+            }
+        });
+
+        _toolbox.addEventListener("toolbox_resume", {
+            foreach (EntityRenderData render; _graphics) {
+                render.resume();
+            }
+            foreach (EntityRenderData render; _auxGraphics) {
+                render.resume();
             }
         });
 

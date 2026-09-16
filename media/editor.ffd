@@ -94,7 +94,7 @@ sprite "editor:stop" {
     texture "editor"
     clip 128 32 32 32
 }
-sprite "editor:reload" {
+sprite "editor:play-back" {
     texture "editor"
     clip 160 32 32 32
 }

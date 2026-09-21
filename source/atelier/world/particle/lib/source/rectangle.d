@@ -10,7 +10,7 @@ import atelier.world.particle.particle;
 import atelier.world.particle.source;
 import atelier.world.particle.system;
 
-package(atelier.world.particle.lib.source) void particle_loadElementLibrary_rectangle(
+package(atelier.world.particle.lib.source) void particle_loadSourceLibrary_rectangle(
     ParticleSystem system) {
     // rectangle
     system.addSourceFunc(&_spawnRectangle, "spawnRectangle");

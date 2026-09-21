@@ -34,6 +34,12 @@ final class EntitySpriteRenderer : EntityGraphic {
         return new EntitySpriteRenderer(this);
     }
 
+    override void onUpdateAuxOffset() {
+        if (_isRotating) {
+            _sprite.angle = _angle + _angleOffset + auxAngle();
+        }
+    }
+
     override void setAnchor(Vec2f anchor) {
         _sprite.anchor = anchor;
     }
@@ -49,7 +55,7 @@ final class EntitySpriteRenderer : EntityGraphic {
     override void setAngle(float angle) {
         _angle = angle;
         if (_isRotating) {
-            _sprite.angle = _angle + _angleOffset;
+            _sprite.angle = _angle + _angleOffset + auxAngle();
         }
     }
 

@@ -242,11 +242,24 @@ final class EntityResourceEditor : ResourceBaseEditor {
     }
 
     private void _onUpdate() {
+        uint frameId;
+        uint dir;
+        EntityRenderData mainRenderData;
         foreach (EntityRenderData render; _graphics) {
             render.setZoom(_zoom);
             render.update();
+
+            if (render.isVisible) {
+                mainRenderData = render;
+                frameId = render.getFrameId();
+                dir = render.getDir();
+            }
         }
+
         foreach (EntityRenderData render; _auxGraphics) {
+            if (mainRenderData) {
+                render.setAuxOffset(mainRenderData.getAuxOffset(render.name, frameId, dir));
+            }
             render.setZoom(_zoom);
             render.update();
         }

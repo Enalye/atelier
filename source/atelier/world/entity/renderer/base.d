@@ -4,12 +4,53 @@ import atelier.common;
 import atelier.render;
 
 abstract class EntityGraphic {
+    final class AuxOffsetData {
+        struct Offset {
+            int[] xOffsets;
+            int[] yOffsets;
+            float[] angleOffsets;
+        }
+
+        private {
+            Offset _defaultOffset;
+            Offset[uint] _dirOffsets;
+        }
+
+        void addDir(uint dir, Offset offset) {
+            _dirOffsets[dir] = offset;
+        }
+
+        void setDefault(Offset offset) {
+            _defaultOffset = offset;
+        }
+
+        Offset getOffset(uint frameDir) {
+            auto p = frameDir in _dirOffsets;
+            if (!p)
+                return _defaultOffset;
+            return *p;
+        }
+    }
+
     private {
         bool _isDefault;
         int[] _isBehind;
         uint _slot;
         int _order;
-        string[] _auxGraphics;
+        AuxOffsetData[string] _auxGraphics;
+        AuxOffsetData _auxOffsetData;
+        Vec2f _auxOffset = Vec2f.zero;
+        float _auxAngle = 0f;
+    }
+
+    @property {
+        Vec2f auxOffset() const {
+            return _auxOffset;
+        }
+
+        float auxAngle() const {
+            return _auxAngle;
+        }
     }
 
     this() {
@@ -56,16 +97,75 @@ abstract class EntityGraphic {
         return _order;
     }
 
-    final void setAuxGraphics(string[] graphics) {
-        _auxGraphics = graphics;
-    }
+    final void addAuxGraphics(string id, uint[] dirs, int[] xOffsets, int[] yOffsets, float[] angleOffsets) {
+        AuxOffsetData data = _auxGraphics.require(id, { return new AuxOffsetData; }());
 
-    final void addAuxGraphic(string graphic) {
-        _auxGraphics ~= graphic;
+        if (dirs.length) {
+            foreach (dir; dirs) {
+                data.addDir(dir, AuxOffsetData.Offset(xOffsets, yOffsets, angleOffsets));
+            }
+        }
+        else {
+            data.setDefault(AuxOffsetData.Offset(xOffsets, yOffsets, angleOffsets));
+        }
     }
 
     final const(string[]) getAuxGraphics() const {
-        return _auxGraphics;
+        return _auxGraphics.keys;
+    }
+
+    final AuxOffsetData getAuxOffsetData(string id) {
+        auto p = id in _auxGraphics;
+        if (p)
+            return *p;
+        return null;
+    }
+
+    final void setAuxOffsetData(AuxOffsetData data) {
+        _auxOffsetData = data;
+    }
+
+    final void updateAuxOffset(uint frameId, uint frameDir) {
+        if (!_auxOffsetData) {
+            _auxOffset.set(0f, 0f);
+            _auxAngle = 0f;
+            return;
+        }
+
+        AuxOffsetData.Offset offset = _auxOffsetData.getOffset(frameDir);
+
+        if (frameId >= offset.xOffsets.length) {
+            if (offset.xOffsets.length)
+                _auxOffset.x = offset.xOffsets[$ - 1];
+            else
+                _auxOffset.x = 0f;
+        }
+        else {
+            _auxOffset.x = offset.xOffsets[frameId];
+        }
+
+        if (frameId >= offset.yOffsets.length) {
+            if (offset.yOffsets.length)
+                _auxOffset.y = offset.yOffsets[$ - 1];
+            else
+                _auxOffset.y = 0f;
+        }
+        else {
+            _auxOffset.y = offset.yOffsets[frameId];
+        }
+
+        if (frameId >= offset.angleOffsets.length) {
+            if (offset.angleOffsets.length)
+                _auxAngle = offset.angleOffsets[$ - 1];
+            else
+                _auxAngle = 0f;
+        }
+        else {
+            _auxAngle = offset.angleOffsets[frameId];
+        }
+    }
+
+    void onUpdateAuxOffset() {
     }
 
     EntityGraphic fetch();
@@ -97,4 +197,27 @@ abstract class EntityGraphic {
     uint getEffectWidth() const;
     uint getEffectHeight() const;
     bool isBehind() const;
+
+    uint getFrameTime() const {
+        return 0;
+    }
+
+    uint getFrame() const {
+        return 0;
+    }
+
+    uint getFrameId() const {
+        return 0;
+    }
+
+    uint getDir() const {
+        return 0;
+    }
+
+    uint getTick() const {
+        return 0;
+    }
+
+    void setTick(uint tick) {
+    }
 }

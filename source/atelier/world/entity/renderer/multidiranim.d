@@ -30,6 +30,10 @@ final class EntityMultiDirAnimRenderer : EntityGraphic {
         return new EntityMultiDirAnimRenderer(this);
     }
 
+    override void onUpdateAuxOffset() {
+        _anim.dirAngle = _angle + _angleOffset + auxAngle();
+    }
+
     override void setAnchor(Vec2f anchor) {
         _anim.anchor = anchor;
     }
@@ -44,7 +48,7 @@ final class EntityMultiDirAnimRenderer : EntityGraphic {
 
     override void setAngle(float angle) {
         _angle = angle;
-        _anim.dirAngle = _angle + _angleOffset;
+        _anim.dirAngle = _angle + _angleOffset + auxAngle();
     }
 
     override void setRotating(bool isRotating) {
@@ -52,7 +56,7 @@ final class EntityMultiDirAnimRenderer : EntityGraphic {
 
     override void setAngleOffset(float angle) {
         _angleOffset = angle;
-        _anim.dirAngle = _angle + _angleOffset;
+        _anim.dirAngle = _angle + _angleOffset + auxAngle();
     }
 
     override void setBlend(Blend blend) {
@@ -146,5 +150,29 @@ final class EntityMultiDirAnimRenderer : EntityGraphic {
         if (_anim.currentDir < rules.length)
             return rules[_anim.currentDir] != 0;
         return false;
+    }
+
+    override uint getFrameTime() const {
+        return _anim.frameTime;
+    }
+
+    override uint getFrame() const {
+        return _anim.frame();
+    }
+
+    override uint getFrameId() const {
+        return _anim.frameId();
+    }
+
+    override uint getDir() const {
+        return _anim.currentDir();
+    }
+
+    override uint getTick() const {
+        return _anim.getCurrentTick();
+    }
+
+    override void setTick(uint tick) {
+        _anim.setCurrentTick(tick);
     }
 }

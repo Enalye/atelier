@@ -32,6 +32,12 @@ final class EntityAnimRenderer : EntityGraphic {
         return new EntityAnimRenderer(this);
     }
 
+    override void onUpdateAuxOffset() {
+        if (_isRotating) {
+            _anim.angle = _angle + _angleOffset + auxAngle();
+        }
+    }
+
     override void setAnchor(Vec2f anchor) {
         _anim.anchor = anchor;
     }
@@ -47,7 +53,7 @@ final class EntityAnimRenderer : EntityGraphic {
     override void setAngle(float angle) {
         _angle = angle;
         if (_isRotating) {
-            _anim.angle = _angle + _angleOffset;
+            _anim.angle = _angle + _angleOffset + auxAngle();
         }
     }
 
@@ -153,5 +159,25 @@ final class EntityAnimRenderer : EntityGraphic {
         if (rules.length > 0)
             return rules[0] != 0;
         return false;
+    }
+
+    override uint getFrameTime() const {
+        return _anim.frameTime;
+    }
+
+    override uint getFrame() const {
+        return _anim.frame();
+    }
+
+    override uint getFrameId() const {
+        return _anim.frameId();
+    }
+
+    override uint getTick() const {
+        return _anim.getCurrentTick();
+    }
+
+    override void setTick(uint tick) {
+        _anim.setCurrentTick(tick);
     }
 }

@@ -603,6 +603,11 @@ final class Entity : Resource!Entity {
                 continue;
 
             _auxGraphicStack ~= _auxGraphicSlots[i].graphic;
+
+            EntityGraphic.AuxOffsetData auxOffsetData = _graphic.getAuxOffsetData(
+                _auxGraphicSlots[i].id);
+
+            _auxGraphicSlots[i].graphic.setAuxOffsetData(auxOffsetData);
         }
         _auxGraphicStack.sort!((a, b) => a.getOrder() < b.getOrder())();
     }
@@ -635,6 +640,7 @@ final class Entity : Resource!Entity {
             _auxGraphicSlots[slot].graphic.stop();
         }
 
+        _auxGraphicSlots[slot].id = id;
         _auxGraphicSlots[slot].isUpdated = true;
         _auxGraphicSlots[slot].graphic = graphic;
         _auxGraphicSlots[slot].graphic.start();
@@ -665,6 +671,7 @@ final class Entity : Resource!Entity {
                 Atelier.log("Pas d’état auxiliaire `", id, "` trouvé");
                 assert(false);
             }
+            _auxGraphicSlots[index].id.length = 0;
             _auxGraphicSlots[index].graphic = null;
             return;
         }
@@ -673,6 +680,7 @@ final class Entity : Resource!Entity {
             _auxGraphicSlots[index].graphic.stop();
         }
 
+        _auxGraphicSlots[index].id = id;
         _auxGraphicSlots[index].graphic = _graphics[id];
         _auxGraphicSlots[index].graphic.start();
         _auxGraphicSlots[index].graphic.setAngle(_angle);
@@ -749,14 +757,20 @@ final class Entity : Resource!Entity {
             return;
         }
 
+        int frameId;
+        int frameDir;
+
         if (_graphic) {
             _graphic.update();
+            frameId = _graphic.getFrameId();
+            frameDir = _graphic.getDir();
         }
 
         foreach (ref auxGraphic; _auxGraphicSlots) {
             if (!auxGraphic.graphic)
                 continue;
 
+            auxGraphic.graphic.updateAuxOffset(frameId, frameDir);
             auxGraphic.graphic.update();
         }
     }
@@ -1145,7 +1159,7 @@ final class Entity : Resource!Entity {
             for (size_t i; i < _auxGraphicStack.length; ++i) {
                 if (_auxGraphicStack[i].isBehind()) {
                     _auxGraphicStack[i].setColor(color);
-                    _auxGraphicStack[i].draw(offset, alpha);
+                    _auxGraphicStack[i].draw(offset + _auxGraphicStack[i].auxOffset(), alpha);
                 }
             }
 
@@ -1155,7 +1169,7 @@ final class Entity : Resource!Entity {
             for (size_t i; i < _auxGraphicStack.length; ++i) {
                 if (!_auxGraphicStack[i].isBehind()) {
                     _auxGraphicStack[i].setColor(color);
-                    _auxGraphicStack[i].draw(offset, alpha);
+                    _auxGraphicStack[i].draw(offset + _auxGraphicStack[i].auxOffset(), alpha);
                 }
             }
         }

@@ -86,6 +86,13 @@ final class Particle : Resource!Particle {
         }
     }
 
+    /// Interromp les sources. Les éléments poursuivent leur exécution.
+    void stop() {
+        foreach (source; _sources) {
+            source.stop();
+        }
+    }
+
     ParticleElement create(string id) {
         auto p = id in _elementsInstructions;
         if (p) {

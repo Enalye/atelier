@@ -1,5 +1,6 @@
 module atelier.etabli.media.res.entity.data.graphics.render_edit;
 
+import std.algorithm.sorting : sort;
 import std.array : split, join;
 import std.conv : to, ConvException;
 
@@ -16,13 +17,17 @@ final class EntityEditGraphicData : Modal {
         TextField _nameField;
         SelectButton _typeBtn, _layerBtn;
         ResourceButton _ridBtn;
+        VList _auxGraphicList;
         Checkbox _defaultBtn;
         bool _isDirty = false;
+        EntityRenderData[] _auxGraphics;
     }
 
-    this(EntityRenderData data, bool isAuxGraphic) {
+    this(EntityRenderData data, bool isAuxGraphic, EntityRenderData[] auxGraphics) {
         setAlign(UIAlignX.center, UIAlignY.center);
-        setSize(Vec2f(500f, 520f));
+        setSize(Vec2f(432f, 720f));
+
+        _auxGraphics = auxGraphics;
 
         bool isNew = false;
         if (data) {
@@ -440,6 +445,7 @@ final class EntityEditGraphicData : Modal {
                 });
                 hlayout.addUI(defaultBtn);
             }
+
             {
                 HLayout hlayout = new HLayout;
                 hlayout.setPadding(Vec2f(400f, 0f));
@@ -447,21 +453,427 @@ final class EntityEditGraphicData : Modal {
 
                 hlayout.addUI(new Label("Rendus Auxiliaires:", Atelier.theme.font));
 
-                TextField auxGraphicsField = new TextField;
-                auxGraphicsField.value = _data.auxGraphics.join(' ');
-                auxGraphicsField.addEventListener("value", {
-                    _data.auxGraphics.length = 0;
-                    foreach (element; auxGraphicsField.value.split(' ')) {
-                        _data.auxGraphics ~= element;
-                    }
-                    _isDirty = true;
+                _auxGraphicList = new VList;
+                _auxGraphicList.setSize(Vec2f(400f, 200f));
+
+                AccentButton addBtn = new AccentButton("Ajouter");
+                addBtn.addEventListener("click", {
+                    EntityEditAuxData modal = new EntityEditAuxData(
+                        EntityRenderData.AuxGraphicData(), _auxGraphics, true);
+                    modal.addEventListener("aux.new", {
+                        auto elt = new AuxElement(modal.getData());
+                        _auxGraphicList.addList(elt);
+                        elt.addEventListener("aux.dirty", { _isDirty = true; });
+                        Atelier.ui.popModalUI();
+                        _isDirty = true;
+                    });
+                    Atelier.ui.pushModalUI(modal);
                 });
-                hlayout.addUI(auxGraphicsField);
+                hlayout.addUI(addBtn);
+
+                vbox.addUI(_auxGraphicList);
+
+                foreach (render; _data.auxGraphics) {
+                    auto elt = new AuxElement(render);
+                    elt.addEventListener("aux.dirty", { _isDirty = true; });
+                    _auxGraphicList.addList(elt);
+                }
             }
         }
     }
 
+    private void moveUpGraphic(AuxElement item_) {
+        AuxElement[] elements = cast(AuxElement[]) _auxGraphicList.getList();
+        _auxGraphicList.clearList();
+
+        for (size_t i = 1; i < elements.length; ++i) {
+            if (elements[i] == item_) {
+                elements[i] = elements[i - 1];
+                elements[i - 1] = item_;
+                break;
+            }
+        }
+
+        foreach (AuxElement element; elements) {
+            _auxGraphicList.addList(element);
+        }
+    }
+
+    private void moveDownGraphic(AuxElement item_) {
+        AuxElement[] elements = cast(AuxElement[]) _auxGraphicList.getList();
+        _auxGraphicList.clearList();
+
+        for (size_t i = 0; (i + 1) < elements.length; ++i) {
+            if (elements[i] == item_) {
+                elements[i] = elements[i + 1];
+                elements[i + 1] = item_;
+                break;
+            }
+        }
+
+        foreach (AuxElement element; elements) {
+            _auxGraphicList.addList(element);
+        }
+    }
+
     EntityRenderData getData() {
+        AuxElement[] elements = cast(AuxElement[]) _auxGraphicList.getList();
+        _data.auxGraphics.length = 0;
+        for (size_t i = 0; i < elements.length; ++i) {
+            _data.auxGraphics ~= elements[i].getData();
+        }
+
+        return _data;
+    }
+
+    bool isDirty() {
+        return _isDirty;
+    }
+
+    private final class AuxElement : UIElement {
+        private {
+            EntityRenderData.AuxGraphicData _data;
+            Label _idLabel;
+            Label _dirsLabel;
+            Rectangle _rect;
+            HBox _hbox;
+            IconButton _upBtn, _downBtn;
+            Icon _icon, _checkmark;
+        }
+
+        this(EntityRenderData.AuxGraphicData data) {
+            _data = data;
+            setSize(Vec2f(400f, 32f));
+
+            _rect = Rectangle.fill(getSize());
+            _rect.anchor = Vec2f.zero;
+            _rect.color = Atelier.theme.foreground;
+            _rect.isVisible = false;
+            addImage(_rect);
+
+            {
+                HBox hbox = new HBox;
+                hbox.setAlign(UIAlignX.left, UIAlignY.center);
+                hbox.setPosition(Vec2f(16f, 0f));
+                hbox.setSpacing(8f);
+                hbox.isEnabled = false;
+                addUI(hbox);
+
+                _idLabel = new Label("", Atelier.theme.font);
+                _idLabel.textColor = Atelier.theme.onNeutral;
+                hbox.addUI(_idLabel);
+
+                _dirsLabel = new Label("", Atelier.theme.font);
+                _dirsLabel.textColor = Atelier.theme.neutral;
+                hbox.addUI(_dirsLabel);
+            }
+
+            {
+                _hbox = new HBox;
+                _hbox.setAlign(UIAlignX.right, UIAlignY.center);
+                _hbox.setPosition(Vec2f(12f, 0f));
+                _hbox.setSpacing(2f);
+                addUI(_hbox);
+
+                _upBtn = new IconButton("editor:arrow-small-up");
+                _upBtn.addEventListener("click", {
+                    this.outer.moveUpGraphic(this);
+                });
+                _hbox.addUI(_upBtn);
+
+                _downBtn = new IconButton("editor:arrow-small-down");
+                _downBtn.addEventListener("click", {
+                    this.outer.moveDownGraphic(this);
+                });
+                _hbox.addUI(_downBtn);
+
+                _hbox.isVisible = false;
+                _hbox.isEnabled = false;
+            }
+
+            _updateDisplay();
+
+            addEventListener("mouseenter", &_onMouseEnter);
+            addEventListener("mouseleave", &_onMouseLeave);
+            addEventListener("click", &_onClick);
+        }
+
+        private void _onMouseEnter() {
+            _rect.isVisible = true;
+            _hbox.isVisible = true;
+            _hbox.isEnabled = true;
+        }
+
+        private void _onMouseLeave() {
+            _rect.isVisible = false;
+            _hbox.isVisible = false;
+            _hbox.isEnabled = false;
+        }
+
+        private void _updateDisplay() {
+            _idLabel.text = _data.id;
+            _dirsLabel.text = "";
+            if (_data.dirs.length) {
+                string txt = "(";
+                for (int i; i < _data.dirs.length; ++i) {
+                    if (i != 0) {
+                        txt ~= ", ";
+                    }
+                    txt ~= to!string(_data.dirs[i]);
+                }
+                txt ~= ")";
+
+                _dirsLabel.text = txt;
+            }
+        }
+
+        private void _onClick() {
+            EntityEditAuxData modal = new EntityEditAuxData(_data, _auxGraphics, false);
+            modal.addEventListener("aux.apply", {
+                _data = modal.getData();
+                if (modal.isDirty()) {
+                    dispatchEvent("aux.dirty", false);
+                }
+                _updateDisplay();
+                Atelier.ui.popModalUI();
+            });
+            modal.addEventListener("aux.remove", {
+                dispatchEvent("aux.dirty", false);
+                Atelier.ui.popModalUI();
+                removeUI();
+            });
+            Atelier.ui.pushModalUI(modal);
+        }
+
+        EntityRenderData.AuxGraphicData getData() {
+            return _data;
+        }
+    }
+}
+
+private final class EntityEditAuxData : Modal {
+    private {
+        EntityRenderData.AuxGraphicData _data;
+        VList _auxGraphicList;
+        Checkbox _defaultBtn;
+        bool _isDirty = false;
+    }
+
+    this(EntityRenderData.AuxGraphicData data, EntityRenderData[] auxGraphicList, bool isNew) {
+        setAlign(UIAlignX.center, UIAlignY.center);
+        setSize(Vec2f(500f, 300f));
+
+        _data = data;
+
+        if (isNew) {
+            _isDirty = true;
+        }
+
+        {
+            Label title = new Label(isNew ? "Nouveau Rendu Auxiliaire" : "Éditer le Rendu Auxiliaire",
+                Atelier.theme.font);
+            title.setAlign(UIAlignX.center, UIAlignY.top);
+            title.setPosition(Vec2f(0f, 4f));
+            addUI(title);
+        }
+
+        {
+            IconButton exitBtn = new IconButton("editor:exit");
+            exitBtn.setAlign(UIAlignX.right, UIAlignY.top);
+            exitBtn.setPosition(Vec2f(4f, 4f));
+            exitBtn.addEventListener("click", &removeUI);
+            addUI(exitBtn);
+        }
+
+        {
+            HBox validationBox = new HBox;
+            validationBox.setAlign(UIAlignX.right, UIAlignY.bottom);
+            validationBox.setPosition(Vec2f(10f, 10f));
+            validationBox.setSpacing(8f);
+            addUI(validationBox);
+
+            if (isNew) {
+                NeutralButton cancelBtn = new NeutralButton("Annuler");
+                cancelBtn.addEventListener("click", &removeUI);
+                validationBox.addUI(cancelBtn);
+
+                AccentButton createBtn = new AccentButton("Créer");
+                createBtn.addEventListener("click", {
+                    dispatchEvent("aux.new", false);
+                });
+                validationBox.addUI(createBtn);
+            }
+            else {
+                DangerButton removeBtn = new DangerButton("Supprimer");
+                removeBtn.addEventListener("click", {
+                    dispatchEvent("aux.remove", false);
+                });
+                validationBox.addUI(removeBtn);
+
+                NeutralButton cancelBtn = new NeutralButton("Annuler");
+                cancelBtn.addEventListener("click", &removeUI);
+                validationBox.addUI(cancelBtn);
+
+                AccentButton applyBtn = new AccentButton("Appliquer");
+                applyBtn.addEventListener("click", {
+                    dispatchEvent("aux.apply", false);
+                });
+                validationBox.addUI(applyBtn);
+            }
+        }
+
+        VBox vbox;
+        vbox = new VBox;
+        vbox.setAlign(UIAlignX.left, UIAlignY.top);
+        vbox.setChildAlign(UIAlignX.left);
+        vbox.setSpacing(8f);
+        vbox.setPosition(Vec2f(16f, 32f));
+        addUI(vbox);
+
+        {
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(400f, 0f));
+            vbox.addUI(hlayout);
+
+            hlayout.addUI(new Label("Aux:", Atelier.theme.font));
+
+            string[] list;
+            foreach (auxGraphic; auxGraphicList) {
+                list ~= auxGraphic.name;
+            }
+            sort!((a, b) => (a < b))(list);
+
+            SelectButton idBtn = new SelectButton(list, _data.id);
+            _data.id = idBtn.value;
+            idBtn.addEventListener("value", {
+                _data.id = idBtn.value();
+                _isDirty = true;
+            });
+            hlayout.addUI(idBtn);
+        }
+
+        {
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(400f, 0f));
+            vbox.addUI(hlayout);
+
+            hlayout.addUI(new Label("Directions (Filtre):", Atelier.theme.font));
+
+            TextField dirsField = new TextField;
+            dirsField.setAllowedCharacters(" 0123456789");
+            dirsField.addEventListener("value", {
+                _data.dirs.length = 0;
+                foreach (element; dirsField.value.split(' ')) {
+                    try {
+                        _data.dirs ~= to!uint(element);
+                    }
+                    catch (ConvException e) {
+                    }
+                }
+
+                _isDirty = true;
+            });
+            hlayout.addUI(dirsField);
+
+            string value;
+            foreach (i; _data.dirs) {
+                value ~= to!string(i) ~ " ";
+            }
+            dirsField.value = value;
+        }
+
+        {
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(400f, 0f));
+            vbox.addUI(hlayout);
+
+            hlayout.addUI(new Label("Offsets X:", Atelier.theme.font));
+
+            TextField xOffsetsField = new TextField;
+            xOffsetsField.setAllowedCharacters(" 0123456789-");
+            xOffsetsField.addEventListener("value", {
+                _data.xOffsets.length = 0;
+                foreach (element; xOffsetsField.value.split(' ')) {
+                    try {
+                        _data.xOffsets ~= to!int(element);
+                    }
+                    catch (ConvException e) {
+                    }
+                }
+
+                _isDirty = true;
+            });
+            hlayout.addUI(xOffsetsField);
+
+            string value;
+            foreach (i; _data.xOffsets) {
+                value ~= to!string(i) ~ " ";
+            }
+            xOffsetsField.value = value;
+        }
+
+        {
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(400f, 0f));
+            vbox.addUI(hlayout);
+
+            hlayout.addUI(new Label("Offsets Y:", Atelier.theme.font));
+
+            TextField yOffsetsField = new TextField;
+            yOffsetsField.setAllowedCharacters(" 0123456789-");
+            yOffsetsField.addEventListener("value", {
+                _data.yOffsets.length = 0;
+                foreach (element; yOffsetsField.value.split(' ')) {
+                    try {
+                        _data.yOffsets ~= to!int(element);
+                    }
+                    catch (ConvException e) {
+                    }
+                }
+
+                _isDirty = true;
+            });
+            hlayout.addUI(yOffsetsField);
+
+            string value;
+            foreach (i; _data.yOffsets) {
+                value ~= to!string(i) ~ " ";
+            }
+            yOffsetsField.value = value;
+        }
+
+        {
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(400f, 0f));
+            vbox.addUI(hlayout);
+
+            hlayout.addUI(new Label("Offsets Angle:", Atelier.theme.font));
+
+            TextField angleOffsetsField = new TextField;
+            angleOffsetsField.setAllowedCharacters(" 0123456789.-");
+            angleOffsetsField.addEventListener("value", {
+                _data.angleOffsets.length = 0;
+                foreach (element; angleOffsetsField.value.split(' ')) {
+                    try {
+                        _data.angleOffsets ~= to!float(element);
+                    }
+                    catch (ConvException e) {
+                    }
+                }
+
+                _isDirty = true;
+            });
+            hlayout.addUI(angleOffsetsField);
+
+            string value;
+            foreach (i; _data.angleOffsets) {
+                value ~= to!string(i) ~ " ";
+            }
+            angleOffsetsField.value = value;
+        }
+    }
+
+    EntityRenderData.AuxGraphicData getData() {
         return _data;
     }
 

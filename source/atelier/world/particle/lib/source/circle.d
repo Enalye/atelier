@@ -10,7 +10,7 @@ import atelier.world.particle.particle;
 import atelier.world.particle.source;
 import atelier.world.particle.system;
 
-package(atelier.world.particle.lib.source) void particle_loadElementLibrary_circle(
+package(atelier.world.particle.lib.source) void particle_loadSourceLibrary_circle(
     ParticleSystem system) {
     // circle
     system.addSourceFunc(&_spawnCircle, "spawnCircle");

@@ -21,7 +21,28 @@ package(atelier.core.loader) struct EntityGraphicData {
     // Principal
     bool isDefault;
     Vec2i effectMargin;
-    string[] auxGraphics;
+
+    struct AuxGraphicData {
+        string id;
+        uint[] dirs;
+        // Offset du rendu auxiliaire en fonction de la frame de l’animation du rendu principal
+        int[] xOffsets;
+        int[] yOffsets;
+        float[] angleOffsets;
+
+        bool hasDir(uint dir) const {
+            if (!dirs.length)
+                return true;
+
+            foreach (dir_; dirs) {
+                if (dir_ == dir)
+                    return true;
+            }
+            return false;
+        }
+    }
+
+    AuxGraphicData[] auxGraphics;
 
     // Auxiliaire
     int[] isBehind;
@@ -44,7 +65,7 @@ package(atelier.core.loader) struct EntityGraphicData {
         // Principal
         stream.write!bool(isDefault);
         stream.write!Vec2i(effectMargin);
-        stream.write!(string[])(auxGraphics);
+        stream.write!(AuxGraphicData[])(auxGraphics);
 
         // Auxiliaire
         stream.write!(int[])(isBehind);
@@ -68,7 +89,7 @@ package(atelier.core.loader) struct EntityGraphicData {
         // Principal
         isDefault = stream.read!bool();
         effectMargin = stream.read!Vec2i();
-        auxGraphics = stream.read!(string[])();
+        auxGraphics = stream.read!(AuxGraphicData[])();
 
         // Auxiliaire
         isBehind = stream.read!(int[])();
@@ -142,8 +163,31 @@ package(atelier.core.loader) void serializeEntityGraphicData(const Farfadet ffd,
                     graphicData.effectMargin = graphicNode.getNode("effectMargin").get!Vec2i(0);
                 }
 
-                if (graphicNode.hasNode("auxGraphics")) {
-                    graphicData.auxGraphics = graphicNode.getNode("auxGraphics").get!(string[])(0);
+                graphicData.auxGraphics.length = 0;
+                foreach (auxNode; graphicNode.getNodes("auxGraphic")) {
+                    EntityGraphicData.AuxGraphicData graphic;
+
+                    if (auxNode.hasNode("id")) {
+                        graphic.id = auxNode.getNode("id").get!string(0);
+                    }
+
+                    if (auxNode.hasNode("dirs")) {
+                        graphic.dirs = auxNode.getNode("dirs").get!(uint[])(0);
+                    }
+
+                    if (auxNode.hasNode("xOffsets")) {
+                        graphic.xOffsets = auxNode.getNode("xOffsets").get!(int[])(0);
+                    }
+
+                    if (auxNode.hasNode("yOffsets")) {
+                        graphic.yOffsets = auxNode.getNode("yOffsets").get!(int[])(0);
+                    }
+
+                    if (auxNode.hasNode("angleOffsets")) {
+                        graphic.angleOffsets = auxNode.getNode("angleOffsets").get!(float[])(0);
+                    }
+
+                    graphicData.auxGraphics ~= graphic;
                 }
             }
 
@@ -194,7 +238,11 @@ package(atelier.core.loader) EntityGraphic createEntityGraphicData(EntityGraphic
     else {
         graphic.setDefault(data.isDefault);
         graphic.setEffectMargin(data.effectMargin);
-        graphic.setAuxGraphics(data.auxGraphics);
+
+        foreach (auxGraphic; data.auxGraphics) {
+            graphic.addAuxGraphics(auxGraphic.id, auxGraphic.dirs, auxGraphic.xOffsets, auxGraphic.yOffsets, auxGraphic
+                    .angleOffsets);
+        }
     }
 
     return graphic;

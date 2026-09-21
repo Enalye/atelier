@@ -13,6 +13,7 @@ import atelier.world.particle.lib.element.distance;
 import atelier.world.particle.lib.element.flip;
 import atelier.world.particle.lib.element.frame;
 import atelier.world.particle.lib.element.origin;
+import atelier.world.particle.lib.element.oscillate;
 import atelier.world.particle.lib.element.position;
 import atelier.world.particle.lib.element.scale;
 import atelier.world.particle.lib.element.sprite_angle;
@@ -28,6 +29,7 @@ package(atelier.world.particle) void particle_loadElementLibrary(ParticleSystem 
             &particle_loadElementLibrary_flip,
             &particle_loadElementLibrary_frame,
             &particle_loadElementLibrary_origin,
+            &particle_loadElementLibrary_oscillate,
             &particle_loadElementLibrary_position,
             &particle_loadElementLibrary_scale,
             &particle_loadElementLibrary_spriteAngle,

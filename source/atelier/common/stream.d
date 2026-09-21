@@ -50,9 +50,9 @@ class OutStream {
     }
 
     /// Ajoute une liste
-    void write(T : T[])(T[] values) {
+    void write(T : T[])(const(T[]) values) {
         write!size_t(values.length);
-        foreach (T value; values) {
+        foreach (const ref T value; values) {
             write!T(value);
         }
     }

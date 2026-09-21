@@ -30,7 +30,7 @@ mixin template GraphicDataEntityParameter() {
 
             AccentButton addBtn = new AccentButton("Ajouter");
             addBtn.addEventListener("click", {
-                EntityEditGraphicData modal = new EntityEditGraphicData(null, false);
+                EntityEditGraphicData modal = new EntityEditGraphicData(null, false, getAuxRenders());
                 modal.addEventListener("render.new", {
                     auto elt = new GraphicElement(modal.getData());
                     _graphicList.addList(elt);
@@ -67,7 +67,7 @@ mixin template GraphicDataEntityParameter() {
 
             AccentButton addBtn = new AccentButton("Ajouter");
             addBtn.addEventListener("click", {
-                EntityEditGraphicData modal = new EntityEditGraphicData(null, true);
+                EntityEditGraphicData modal = new EntityEditGraphicData(null, true, getAuxRenders());
                 modal.addEventListener("render.new", {
                     auto elt = new GraphicElement(modal.getData());
                     _auxGraphicList.addList(elt);
@@ -271,7 +271,7 @@ mixin template GraphicDataEntityParameter() {
         }
 
         private void _onClick() {
-            EntityEditGraphicData modal = new EntityEditGraphicData(_data, _data.isAuxGraphic);
+            EntityEditGraphicData modal = new EntityEditGraphicData(_data, _data.isAuxGraphic, getAuxRenders());
             modal.addEventListener("render.apply", {
                 _data = modal.getData();
                 if (modal.isDirty()) {

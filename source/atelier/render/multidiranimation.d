@@ -151,6 +151,15 @@ final class MultiDirAnimation : Image, Resource!MultiDirAnimation {
         _isRunning = true;
     }
 
+    /// Position dans la frame actuelle
+    void setCurrentTick(uint tick) {
+        _currentTick = tick;
+    }
+
+    uint getCurrentTick() const {
+        return _currentTick;
+    }
+
     /// Avance l’animation
     override void update() {
         if (_isRunning) {

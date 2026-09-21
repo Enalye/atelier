@@ -56,6 +56,11 @@ final class ParticleSource {
         return element;
     }
 
+    /// Interromp la source. Les éléments poursuivent leur exécution.
+    void stop() {
+        _pc = cast(uint) _instructions.length;
+    }
+
     void update(ParticleSystem system) {
         while (_pc < _instructions.length && _frame >= waitFrame) {
             Farfadet instruction = _instructions[_pc];

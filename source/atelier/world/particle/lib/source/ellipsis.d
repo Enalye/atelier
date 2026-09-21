@@ -12,7 +12,7 @@ import atelier.world.particle.particle;
 import atelier.world.particle.source;
 import atelier.world.particle.system;
 
-package(atelier.world.particle.lib.source) void particle_loadElementLibrary_ellipsis(
+package(atelier.world.particle.lib.source) void particle_loadSourceLibrary_ellipsis(
     ParticleSystem system) {
     // ellipsis
     system.addSourceFunc(&_spawnEllipsis, "spawnEllipsis");

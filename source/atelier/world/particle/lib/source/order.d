@@ -10,7 +10,7 @@ import atelier.world.particle.particle;
 import atelier.world.particle.source;
 import atelier.world.particle.system;
 
-package(atelier.world.particle.lib.source) void particle_loadElementLibrary_order(
+package(atelier.world.particle.lib.source) void particle_loadSourceLibrary_order(
     ParticleSystem system) {
     // order
     system.addSourceFunc(&_order, "order", [

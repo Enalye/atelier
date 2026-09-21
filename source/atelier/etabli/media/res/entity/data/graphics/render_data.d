@@ -33,12 +33,41 @@ final class EntityRenderData {
     // Principal
     bool isDefault;
     Vec2i effectMargin;
-    string[] auxGraphics;
+
+    struct AuxGraphicData {
+        string id;
+        uint[] dirs;
+        // Offset du rendu auxiliaire en fonction de la frame de l’animation du rendu principal
+        int[] xOffsets;
+        int[] yOffsets;
+        float[] angleOffsets;
+
+        bool hasDir(uint dir) const {
+            if (!dirs.length)
+                return true;
+
+            foreach (dir_; dirs) {
+                if (dir_ == dir)
+                    return true;
+            }
+            return false;
+        }
+    }
+
+    AuxGraphicData[] auxGraphics;
 
     // Aux
     int[] isBehind;
     int order;
     uint slot;
+
+    struct AuxOffset {
+        int x;
+        int y;
+        float angle = 0f;
+    }
+
+    AuxOffset auxOffset;
 
     @property {
         string name() const {
@@ -133,8 +162,31 @@ final class EntityRenderData {
                 effectMargin = ffd.getNode("effectMargin").get!Vec2i(0);
             }
 
-            if (ffd.hasNode("auxGraphics")) {
-                auxGraphics = ffd.getNode("auxGraphics").get!(string[])(0);
+            auxGraphics.length = 0;
+            foreach (auxNode; ffd.getNodes("auxGraphic")) {
+                AuxGraphicData graphic;
+
+                if (auxNode.hasNode("id")) {
+                    graphic.id = auxNode.getNode("id").get!string(0);
+                }
+
+                if (auxNode.hasNode("dirs")) {
+                    graphic.dirs = auxNode.getNode("dirs").get!(uint[])(0);
+                }
+
+                if (auxNode.hasNode("xOffsets")) {
+                    graphic.xOffsets = auxNode.getNode("xOffsets").get!(int[])(0);
+                }
+
+                if (auxNode.hasNode("yOffsets")) {
+                    graphic.yOffsets = auxNode.getNode("yOffsets").get!(int[])(0);
+                }
+
+                if (auxNode.hasNode("angleOffsets")) {
+                    graphic.angleOffsets = auxNode.getNode("angleOffsets").get!(float[])(0);
+                }
+
+                auxGraphics ~= graphic;
             }
         }
     }
@@ -156,6 +208,7 @@ final class EntityRenderData {
             isBehind = other.isBehind;
             order = other.order;
             slot = other.slot;
+            auxOffset = other.auxOffset;
         }
         else {
             isDefault = other.isDefault;
@@ -183,15 +236,21 @@ final class EntityRenderData {
         else {
             node.addNode("isDefault").add(isDefault);
             node.addNode("effectMargin").add(effectMargin);
-            node.addNode("auxGraphics").add(auxGraphics);
-
+            foreach (graphic; auxGraphics) {
+                Farfadet auxNode = node.addNode("auxGraphic");
+                auxNode.addNode("id").add(graphic.id);
+                auxNode.addNode("dirs").add(graphic.dirs);
+                auxNode.addNode("xOffsets").add(graphic.xOffsets);
+                auxNode.addNode("yOffsets").add(graphic.yOffsets);
+                auxNode.addNode("angleOffsets").add(graphic.angleOffsets);
+            }
         }
         return node;
     }
 
-    bool hasAuxGraphic(string graphic) const {
-        foreach (render; auxGraphics) {
-            if (render == graphic) {
+    bool hasAuxGraphic(string id) const {
+        foreach (auxGraphic; auxGraphics) {
+            if (auxGraphic.id == id) {
                 return true;
             }
         }
@@ -260,7 +319,7 @@ final class EntityRenderData {
         }
 
         if (_image) {
-            _image.position = (cast(Vec2f) offset) * zoom;
+            _image.position = (cast(Vec2f)(offset + Vec2i(auxOffset.x, auxOffset.y))) * zoom;
         }
     }
 
@@ -301,7 +360,7 @@ final class EntityRenderData {
             }
         }
 
-        float angle = angleOffset;
+        float angle = angleOffset + auxOffset.angle;
         if (isRotating) {
             angle += dirAngle;
         }
@@ -323,6 +382,59 @@ final class EntityRenderData {
         if (_image) {
             _image.draw(offset_);
         }
+    }
+
+    uint getFrameId() const {
+        if (_anim) {
+            return _anim.frameId();
+        }
+        if (_mdiranim) {
+            return _mdiranim.frameId();
+        }
+        return 0;
+    }
+
+    uint getDir() const {
+        if (_mdiranim) {
+            return _mdiranim.currentDir();
+        }
+        return 0;
+    }
+
+    AuxOffset getAuxOffset(string id, uint frameId, uint dir) {
+        AuxOffset result;
+
+        foreach (auxGraphic; auxGraphics) {
+            if (auxGraphic.id == id && auxGraphic.hasDir(dir)) {
+                if (auxGraphic.xOffsets.length) {
+                    if (frameId < auxGraphic.xOffsets.length)
+                        result.x = auxGraphic.xOffsets[frameId];
+                    else
+                        result.x = auxGraphic.xOffsets[$ - 1];
+                }
+
+                if (auxGraphic.yOffsets.length) {
+                    if (frameId < auxGraphic.yOffsets.length)
+                        result.y = auxGraphic.yOffsets[frameId];
+                    else
+                        result.y = auxGraphic.yOffsets[$ - 1];
+                }
+
+                if (auxGraphic.angleOffsets.length) {
+                    if (frameId < auxGraphic.angleOffsets.length)
+                        result.angle = auxGraphic.angleOffsets[frameId];
+                    else
+                        result.angle = auxGraphic.angleOffsets[$ - 1];
+                }
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    void setAuxOffset(AuxOffset offset) {
+        auxOffset = offset;
     }
 
     EntityGraphic createEntityRenderData() {

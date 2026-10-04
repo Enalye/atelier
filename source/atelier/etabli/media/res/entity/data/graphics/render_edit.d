@@ -517,10 +517,12 @@ final class EntityEditGraphicData : Modal {
     }
 
     EntityRenderData getData() {
-        AuxElement[] elements = cast(AuxElement[]) _auxGraphicList.getList();
-        _data.auxGraphics.length = 0;
-        for (size_t i = 0; i < elements.length; ++i) {
-            _data.auxGraphics ~= elements[i].getData();
+        if (!_data.isAuxGraphic) {
+            AuxElement[] elements = cast(AuxElement[]) _auxGraphicList.getList();
+            _data.auxGraphics.length = 0;
+            for (size_t i = 0; i < elements.length; ++i) {
+                _data.auxGraphics ~= elements[i].getData();
+            }
         }
 
         return _data;
@@ -661,7 +663,7 @@ private final class EntityEditAuxData : Modal {
 
     this(EntityRenderData.AuxGraphicData data, EntityRenderData[] auxGraphicList, bool isNew) {
         setAlign(UIAlignX.center, UIAlignY.center);
-        setSize(Vec2f(500f, 300f));
+        setSize(Vec2f(500f, 450f));
 
         _data = data;
 
@@ -870,6 +872,58 @@ private final class EntityEditAuxData : Modal {
                 value ~= to!string(i) ~ " ";
             }
             angleOffsetsField.value = value;
+        }
+
+        Checkbox overrideIsBehindBtn;
+        TextField isBehindField;
+
+        {
+
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(400f, 0f));
+            vbox.addUI(hlayout);
+
+            hlayout.addUI(new Label("Offsets Angle:", Atelier.theme.font));
+
+            overrideIsBehindBtn = new Checkbox(_data.overrideIsBehind);
+            overrideIsBehindBtn.addEventListener("value", {
+                _data.overrideIsBehind = overrideIsBehindBtn.value;
+                isBehindField.isEnabled = _data.overrideIsBehind;
+                _isDirty = true;
+            });
+            hlayout.addUI(overrideIsBehindBtn);
+        }
+
+        {
+            HLayout hlayout = new HLayout;
+            hlayout.setPadding(Vec2f(400f, 0f));
+            vbox.addUI(hlayout);
+
+            hlayout.addUI(new Label("Derrière:", Atelier.theme.font));
+
+            isBehindField = new TextField();
+            isBehindField.isEnabled = _data.overrideIsBehind;
+            isBehindField.setAllowedCharacters(" 01");
+            isBehindField.addEventListener("value", {
+                _data.isBehind.length = 0;
+                foreach (element; isBehindField.value.split(
+                    ' ')) {
+                    try {
+                        _data.isBehind ~= to!uint(element);
+                    }
+                    catch (ConvException e) {
+                    }
+                }
+
+                _isDirty = true;
+            });
+            hlayout.addUI(isBehindField);
+
+            string value;
+            foreach (i; _data.isBehind) {
+                value ~= to!string(i) ~ " ";
+            }
+            isBehindField.value = value;
         }
     }
 

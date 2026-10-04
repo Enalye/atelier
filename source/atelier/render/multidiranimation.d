@@ -160,29 +160,16 @@ final class MultiDirAnimation : Image, Resource!MultiDirAnimation {
         return _currentTick;
     }
 
+    void advance(uint ticks = 1) {
+        _currentTick += ticks;
+        _updateTick();
+    }
+
     /// Avance l’animation
     override void update() {
         if (_isRunning) {
             _currentTick++;
-            if (_currentTick >= frameTime()) {
-                _currentTick = 0;
-
-                if (!frames.length) {
-                    _frame = -1;
-                }
-                else {
-                    _frame++;
-                    if (_frame >= frames.length) {
-                        if (repeat) {
-                            _frame = min((cast(int) frames.length) - 1, repeatIndex);
-                        }
-                        else {
-                            _frame = (cast(int) frames.length) - 1;
-                            _isRunning = false;
-                        }
-                    }
-                }
-            }
+            _updateTick();
         }
 
         if (dirIndexes.length) {
@@ -192,6 +179,28 @@ final class MultiDirAnimation : Image, Resource!MultiDirAnimation {
                 angleDelta += 360f;
 
             _currentDir = cast(uint)(angleDelta / angleStep);
+        }
+    }
+
+    private void _updateTick() {
+        if (_currentTick >= frameTime()) {
+            _currentTick = 0;
+
+            if (!frames.length) {
+                _frame = -1;
+            }
+            else {
+                _frame++;
+                if (_frame >= frames.length) {
+                    if (repeat) {
+                        _frame = min((cast(int) frames.length) - 1, repeatIndex);
+                    }
+                    else {
+                        _frame = (cast(int) frames.length) - 1;
+                        _isRunning = false;
+                    }
+                }
+            }
         }
     }
 

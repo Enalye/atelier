@@ -21,7 +21,7 @@ package class Toolbox : Modal {
     }
 
     this() {
-        setSize(Vec2f(256f, 256f));
+        setSize(Vec2f(256f, 300f));
         setAlign(UIAlignX.left, UIAlignY.top);
         setPosition(Vec2f(258f, 75f));
 
@@ -90,6 +90,24 @@ package class Toolbox : Modal {
                 dispatchEvent("toolbox_stop", false);
             });
             hbox.addUI(stopBtn);
+        }
+
+        {
+            HBox hbox = new HBox;
+            hbox.setSpacing(4f);
+            vbox.addUI(hbox);
+
+            NeutralButton nextTickBtn = new NeutralButton("Tick suivant");
+            nextTickBtn.addEventListener("click", {
+                dispatchEvent("toolbox_nextTick", false);
+            });
+            hbox.addUI(nextTickBtn);
+
+            NeutralButton nextFrameBtn = new NeutralButton("Frame suivante");
+            nextFrameBtn.addEventListener("click", {
+                dispatchEvent("toolbox_nextFrame", false);
+            });
+            hbox.addUI(nextFrameBtn);
         }
     }
 

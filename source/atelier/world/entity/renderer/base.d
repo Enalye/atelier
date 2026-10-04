@@ -9,6 +9,8 @@ abstract class EntityGraphic {
             int[] xOffsets;
             int[] yOffsets;
             float[] angleOffsets;
+            bool overrideIsBehind;
+            int[] isBehind;
         }
 
         private {
@@ -41,6 +43,8 @@ abstract class EntityGraphic {
         AuxOffsetData _auxOffsetData;
         Vec2f _auxOffset = Vec2f.zero;
         float _auxAngle = 0f;
+        bool _overrideIsBehind;
+        int[] _overridenIsBehind;
     }
 
     @property {
@@ -78,6 +82,8 @@ abstract class EntityGraphic {
     }
 
     final const(int[]) getIsBehind() const {
+        if (_overrideIsBehind)
+            return _overridenIsBehind;
         return _isBehind;
     }
 
@@ -97,16 +103,16 @@ abstract class EntityGraphic {
         return _order;
     }
 
-    final void addAuxGraphics(string id, uint[] dirs, int[] xOffsets, int[] yOffsets, float[] angleOffsets) {
+    final void addAuxGraphics(string id, uint[] dirs, int[] xOffsets, int[] yOffsets, float[] angleOffsets, bool overrideIsBehind, int[] isBehind) {
         AuxOffsetData data = _auxGraphics.require(id, { return new AuxOffsetData; }());
 
         if (dirs.length) {
             foreach (dir; dirs) {
-                data.addDir(dir, AuxOffsetData.Offset(xOffsets, yOffsets, angleOffsets));
+                data.addDir(dir, AuxOffsetData.Offset(xOffsets, yOffsets, angleOffsets, overrideIsBehind, isBehind));
             }
         }
         else {
-            data.setDefault(AuxOffsetData.Offset(xOffsets, yOffsets, angleOffsets));
+            data.setDefault(AuxOffsetData.Offset(xOffsets, yOffsets, angleOffsets, overrideIsBehind, isBehind));
         }
     }
 
@@ -163,6 +169,10 @@ abstract class EntityGraphic {
         else {
             _auxAngle = offset.angleOffsets[frameId];
         }
+
+        _overrideIsBehind = offset.overrideIsBehind;
+        _overridenIsBehind = offset.isBehind;
+        onUpdateAuxOffset();
     }
 
     void onUpdateAuxOffset() {

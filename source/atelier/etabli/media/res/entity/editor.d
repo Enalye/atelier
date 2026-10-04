@@ -141,6 +141,31 @@ final class EntityResourceEditor : ResourceBaseEditor {
             }
         });
 
+        _toolbox.addEventListener("toolbox_nextTick", {
+            foreach (EntityRenderData render; _graphics) {
+                render.advance(1);
+            }
+            foreach (EntityRenderData render; _auxGraphics) {
+                render.advance(1);
+            }
+        });
+
+        _toolbox.addEventListener("toolbox_nextFrame", {
+            uint frameTime = 0;
+            foreach (EntityRenderData render; _graphics) {
+                if (render.isVisible) {
+                    frameTime = render.getFrameTime();
+                    break;
+                }
+            }
+            foreach (EntityRenderData render; _graphics) {
+                render.advance(frameTime);
+            }
+            foreach (EntityRenderData render; _auxGraphics) {
+                render.advance(frameTime);
+            }
+        });
+
         addEventListener("update", &_onUpdate);
         addEventListener("draw", &_onDraw);
         addEventListener("wheel", &_onWheel);

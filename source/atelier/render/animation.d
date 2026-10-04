@@ -153,6 +153,11 @@ final class Animation : Image, Resource!Animation {
         return _currentTick;
     }
 
+    void advance(uint ticks = 1) {
+        _currentTick += ticks;
+        _updateTick();
+    }
+
     /// Avance l’animation
     override void update() {
         if (!_isRunning) {
@@ -160,6 +165,10 @@ final class Animation : Image, Resource!Animation {
         }
 
         _currentTick++;
+        _updateTick();
+    }
+
+    private void _updateTick() {
         if (_currentTick >= frameTime()) {
             _currentTick = 0;
 

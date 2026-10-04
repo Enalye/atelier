@@ -29,6 +29,8 @@ package(atelier.core.loader) struct EntityGraphicData {
         int[] xOffsets;
         int[] yOffsets;
         float[] angleOffsets;
+        bool overrideIsBehind;
+        int[] isBehind;
 
         bool hasDir(uint dir) const {
             if (!dirs.length)
@@ -187,6 +189,12 @@ package(atelier.core.loader) void serializeEntityGraphicData(const Farfadet ffd,
                         graphic.angleOffsets = auxNode.getNode("angleOffsets").get!(float[])(0);
                     }
 
+                    graphic.overrideIsBehind = false;
+                    if (auxNode.hasNode("isBehind")) {
+                        graphic.overrideIsBehind = true;
+                        graphic.isBehind = auxNode.getNode("isBehind").get!(int[])(0);
+                    }
+
                     graphicData.auxGraphics ~= graphic;
                 }
             }
@@ -241,7 +249,7 @@ package(atelier.core.loader) EntityGraphic createEntityGraphicData(EntityGraphic
 
         foreach (auxGraphic; data.auxGraphics) {
             graphic.addAuxGraphics(auxGraphic.id, auxGraphic.dirs, auxGraphic.xOffsets, auxGraphic.yOffsets, auxGraphic
-                    .angleOffsets);
+                    .angleOffsets, auxGraphic.overrideIsBehind, auxGraphic.isBehind);
         }
     }
 

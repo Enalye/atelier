@@ -41,6 +41,8 @@ final class EntityRenderData {
         int[] xOffsets;
         int[] yOffsets;
         float[] angleOffsets;
+        bool overrideIsBehind;
+        int[] isBehind;
 
         bool hasDir(uint dir) const {
             if (!dirs.length)
@@ -65,6 +67,8 @@ final class EntityRenderData {
         int x;
         int y;
         float angle = 0f;
+        bool overrideIsBehind;
+        int[] isBehind;
     }
 
     AuxOffset auxOffset;
@@ -186,6 +190,12 @@ final class EntityRenderData {
                     graphic.angleOffsets = auxNode.getNode("angleOffsets").get!(float[])(0);
                 }
 
+                graphic.overrideIsBehind = false;
+                if (auxNode.hasNode("isBehind")) {
+                    graphic.overrideIsBehind = true;
+                    graphic.isBehind = auxNode.getNode("isBehind").get!(int[])(0);
+                }
+
                 auxGraphics ~= graphic;
             }
         }
@@ -243,6 +253,10 @@ final class EntityRenderData {
                 auxNode.addNode("xOffsets").add(graphic.xOffsets);
                 auxNode.addNode("yOffsets").add(graphic.yOffsets);
                 auxNode.addNode("angleOffsets").add(graphic.angleOffsets);
+
+                if (graphic.overrideIsBehind) {
+                    auxNode.addNode("isBehind").add(graphic.isBehind);
+                }
             }
         }
         return node;
@@ -258,12 +272,22 @@ final class EntityRenderData {
     }
 
     bool getIsBehind() const {
-        if (_mdiranim) {
-            if (_mdiranim.currentDir < isBehind.length)
-                return isBehind[_mdiranim.currentDir] != 0;
+        if (auxOffset.overrideIsBehind) {
+            if (_mdiranim) {
+                if (_mdiranim.currentDir < auxOffset.isBehind.length)
+                    return auxOffset.isBehind[_mdiranim.currentDir] != 0;
+            }
+            else if (auxOffset.isBehind.length > 0)
+                return auxOffset.isBehind[0] != 0;
         }
-        else if (isBehind.length > 0)
-            return isBehind[0] != 0;
+        else {
+            if (_mdiranim) {
+                if (_mdiranim.currentDir < isBehind.length)
+                    return isBehind[_mdiranim.currentDir] != 0;
+            }
+            else if (isBehind.length > 0)
+                return isBehind[0] != 0;
+        }
         return false;
     }
 
@@ -304,6 +328,16 @@ final class EntityRenderData {
 
         if (_mdiranim) {
             _mdiranim.stop();
+        }
+    }
+
+    void advance(uint ticks) {
+        if (_anim) {
+            _anim.advance(ticks);
+        }
+
+        if (_mdiranim) {
+            _mdiranim.advance(ticks);
         }
     }
 
@@ -360,23 +394,25 @@ final class EntityRenderData {
             }
         }
 
-        float angle = angleOffset + auxOffset.angle;
-        if (isRotating) {
-            angle += dirAngle;
-        }
-
         if (_sprite) {
+            float angle = 0f;
+            if (isRotating) {
+                angle = angleOffset + dirAngle + auxOffset.angle;
+            }
             _sprite.angle = angle;
             _sprite.blend = blend;
         }
         if (_anim) {
+            float angle = 0f;
+            if (isRotating) {
+                angle = angleOffset + dirAngle + auxOffset.angle;
+            }
             _anim.angle = angle;
             _anim.blend = blend;
         }
         if (_mdiranim) {
-            _mdiranim.angle = angle;
+            _mdiranim.dirAngle = angleOffset + dirAngle + auxOffset.angle;
             _mdiranim.blend = blend;
-            _mdiranim.dirAngle = dirAngle;
         }
 
         if (_image) {
@@ -397,6 +433,16 @@ final class EntityRenderData {
     uint getDir() const {
         if (_mdiranim) {
             return _mdiranim.currentDir();
+        }
+        return 0;
+    }
+
+    uint getFrameTime() const {
+        if (_anim) {
+            return _anim.frameTime();
+        }
+        if (_mdiranim) {
+            return _mdiranim.frameTime();
         }
         return 0;
     }
@@ -426,6 +472,9 @@ final class EntityRenderData {
                     else
                         result.angle = auxGraphic.angleOffsets[$ - 1];
                 }
+
+                result.overrideIsBehind = auxGraphic.overrideIsBehind;
+                result.isBehind = auxGraphic.isBehind;
                 break;
             }
         }

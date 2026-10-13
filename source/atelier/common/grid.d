@@ -86,6 +86,20 @@ final class Grid(T) : Resource!Grid {
         return _values[x + y * _columns];
     }
 
+    T* getValuePtr(int id) {
+        if (id < 0 || id >= _values.length)
+            return &defaultValue;
+
+        return &_values[id];
+    }
+
+    T* getValuePtr(int x, int y) {
+        if (x < 0 || y < 0 || x >= _columns || y >= _lines)
+            return &defaultValue;
+
+        return &_values[x + y * _columns];
+    }
+
     void setValue(int x, int y, T value) {
         if (x < 0 || y < 0 || x >= _columns || y >= _lines)
             return;

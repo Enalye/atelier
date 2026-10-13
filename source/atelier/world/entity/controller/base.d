@@ -118,6 +118,7 @@ abstract class EntityController : ControllerWrapper {
             if (_currentState) {
                 _currentStateTime = 0;
                 _currentState.onStart();
+                onStateChange();
             }
         }
         else {
@@ -143,6 +144,9 @@ abstract class EntityController : ControllerWrapper {
     }
 
     void onUpdate() {
+    }
+
+    void onStateChange() {
     }
 
     final void onEvent(string event) {
@@ -215,6 +219,7 @@ abstract class EntityController : ControllerWrapper {
                     if (_currentState) {
                         _currentStateTime = 0;
                         _currentState.onStart();
+                        onStateChange();
                     }
                     goto __checkTransition;
                 }

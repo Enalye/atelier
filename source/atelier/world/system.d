@@ -960,6 +960,10 @@ final class World {
                 }
             }
 
+            foreach (component; _scene.getComponents()) {
+                component.drawAbove(offset, entityOffset);
+            }
+
             // Entités en post-rendu additif
             _glow.drawTransition(_transition, _postRenderListGlow, entityOffset);
 
@@ -1089,6 +1093,10 @@ final class World {
                     entity.isRendered = true;
                     entity.draw(entityOffset);
                 }
+            }
+
+            foreach (component; _scene.getComponents()) {
+                component.drawAbove(offset, entityOffset);
             }
 
             // Entités en post-rendu additif

@@ -39,13 +39,13 @@ struct Option(T) {
         return defaultValue;
     }
 
-    bool opEquals(const Option!T other) const @safe pure nothrow {
+    bool opEquals(const Option!T other) const {
         if (other._hasValue != _hasValue)
             return false;
         return (!_hasValue) || (other._value == _value);
     }
 
-    bool opEquals(const T other) const @safe pure nothrow {
+    bool opEquals(const T other) const {
         if (!_hasValue)
             return false;
         return other == _value;
@@ -60,7 +60,7 @@ struct Option(T) {
         _hasValue = true;
     }
 
-    size_t toHash() const @safe pure nothrow {
+    size_t toHash() const {
         import std.typecons : tuple;
 
         return tuple(_value, _hasValue).toHash();

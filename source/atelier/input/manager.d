@@ -643,6 +643,13 @@ final class InputManager {
         return action ? (*action).activated : false;
     }
 
+    void consumeAction(string id) {
+        auto action = id in _actionStates;
+        if (action) {
+            (*action).activated = false;
+        }
+    }
+
     /// L’action est-t’elle activée ?
     bool isActionEcho(string id) const {
         if (_isLocked)

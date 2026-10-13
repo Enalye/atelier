@@ -21,6 +21,7 @@ abstract class SceneComponent {
     void deserialize(InStream);
     void start();
     void update();
+    void drawAbove(Vec2f offset, Vec2f entityOffset);
     void drawLine(int y, int level, Vec2f offset, Vec2f entityOffset);
 }
 

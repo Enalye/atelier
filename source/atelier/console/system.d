@@ -595,8 +595,13 @@ private final class ConsoleUI : UIElement {
             if (keyEvent.state.down) {
                 switch (keyEvent.button) with (InputEvent.KeyButton.Button) {
                 case enter:
+                case enter2:
+                case numEnter:
                     _runCommand(_inputField.value);
                     _inputField.value = "";
+                    break;
+                case space:
+                    _inputField.autocomplete();
                     break;
                 case up:
                     if (_historyPos > 0) {

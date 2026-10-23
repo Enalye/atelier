@@ -393,6 +393,14 @@ class UIElement {
         return _size / 2f;
     }
 
+    final float getCenterX() const {
+        return _size.x / 2f;
+    }
+
+    final float getCenterY() const {
+        return _size.y / 2f;
+    }
+
     final Vec2f getPivot() const {
         return _pivot;
     }

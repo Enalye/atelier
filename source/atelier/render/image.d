@@ -9,6 +9,7 @@ abstract class Image {
     Vec4u clip;
 
     Vec2f position = Vec2f.zero;
+    Vec2f alignment = Vec2f.zero;
 
     double angle = 0.0;
 
@@ -45,6 +46,7 @@ abstract class Image {
 
     this(Image image) {
         position = image.position;
+        alignment = image.alignment;
         clip = image.clip;
         angle = image.angle;
         flipX = image.flipX;

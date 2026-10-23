@@ -404,9 +404,7 @@ final class TextField : UIElement {
             }
             break;
         case tab:
-            if (_autocompleteLabel && _autocompleteLabel.text.length) {
-                _insertText(to!dstring(_autocompleteLabel.text));
-            }
+            autocomplete();
             break;
         case enter:
         case enter2:
@@ -570,5 +568,11 @@ final class TextField : UIElement {
         _font = font ? font : Atelier.theme.font;
         _label.font = _font;
         _textContainer.setSize(Vec2f(getWidth() - _innerMargins.sum(), _font.size()));
+    }
+
+    void autocomplete() {
+        if (_autocompleteLabel && _autocompleteLabel.text.length) {
+            _insertText(to!dstring(_autocompleteLabel.text));
+        }
     }
 }

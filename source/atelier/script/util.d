@@ -8,6 +8,10 @@ import atelier.world;
 final class SVec2(T) {
     Vec2!T _vector;
     alias _vector this;
+
+    U opCast(U : GrPointer)() const @safe pure nothrow {
+        return cast(GrPointer) this;
+    }
 }
 
 alias SVec2f = SVec2!GrFloat;
@@ -22,9 +26,21 @@ SVec2!T svec2(T)(Vec2!T vec) {
     return result;
 }
 
+GrList svec2(T)(Vec2!(T)[] list) {
+    GrList result = new GrList;
+    for (size_t i; i < list.length; ++i) {
+        result.pushBack(GrValue(svec2(list[i])));
+    }
+    return result;
+}
+
 final class SVec3(T) {
     Vec3!T _vector;
     alias _vector this;
+
+    U opCast(U : GrPointer)() const @safe pure nothrow {
+        return cast(GrPointer) this;
+    }
 }
 
 alias SVec3f = SVec3!GrFloat;
@@ -40,9 +56,21 @@ SVec3!T svec3(T)(Vec3!T vec) {
     return result;
 }
 
+GrList svec3(T)(Vec3!(T)[] list) {
+    GrList result = new GrList;
+    for (size_t i; i < list.length; ++i) {
+        result.pushBack(GrValue(svec3(list[i])));
+    }
+    return result;
+}
+
 final class SVec4(T) {
     Vec4!T _vector;
     alias _vector this;
+
+    U opCast(U : GrPointer)() const @safe pure nothrow {
+        return cast(GrPointer) this;
+    }
 }
 
 alias SVec4f = SVec4!GrFloat;
@@ -59,9 +87,21 @@ SVec4!T svec4(T)(Vec4!T vec) {
     return result;
 }
 
+GrList svec4(T)(Vec4!(T)[] list) {
+    GrList result = new GrList;
+    for (size_t i; i < list.length; ++i) {
+        result.pushBack(GrValue(svec4(list[i])));
+    }
+    return result;
+}
+
 final class SColor {
     Color _color;
     alias _color this;
+
+    U opCast(U : GrPointer)() const @safe pure nothrow {
+        return cast(GrPointer) this;
+    }
 }
 
 SColor scolor(Color color) {
@@ -73,6 +113,10 @@ SColor scolor(Color color) {
 final class SHSLColor {
     HSLColor _hslcolor;
     alias _hslcolor this;
+
+    U opCast(U : GrPointer)() const @safe pure nothrow {
+        return cast(GrPointer) this;
+    }
 }
 
 SHSLColor shslcolor(HSLColor hslcolor) {

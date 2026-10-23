@@ -449,9 +449,10 @@ final class UIManager {
             Atelier.renderer.pushCanvas(cast(uint) element.getWidth(), cast(uint) element.getHeight());
         }
 
+        Vec2f elementSize = element.getSize();
         foreach (Image image; element.getImages()) {
             if (image.isVisible)
-                image.draw(Vec2f.zero);
+                image.draw(image.alignment * elementSize);
         }
 
         element.dispatchEvent("draw", false);

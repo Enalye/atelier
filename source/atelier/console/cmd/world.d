@@ -4,8 +4,8 @@ import atelier.common;
 import atelier.core;
 import atelier.world;
 import atelier.console.command;
-import atelier.console.value;
 import atelier.console.system;
+import atelier.console.value;
 
 package void _worldCmd(Console console) {
     // scene
@@ -37,14 +37,14 @@ package void _worldCmd(Console console) {
     scene_set.setHint("Change le niveau instantanément");
     scene_set.setCallback(&_scene_set);
 
-    // ui
-    ConsoleCommand ui = console.addCommand("ui");
+    // scene ui
+    ConsoleCommand scene_ui = scene.addCommand("ui");
 
-    // ui debug <B:active>
-    ConsoleCommand ui_debug = ui.addCommand("debug");
-    ui_debug.addOption("active", ConsoleType.bool_, ConsoleValue(true));
-    ui_debug.setHint("Active le débug de l’interface");
-    ui_debug.setCallback(&_ui_debug);
+    // scene ui debug <B:active>
+    ConsoleCommand scene_ui_debug = scene_ui.addCommand("debug");
+    scene_ui_debug.addOption("active", ConsoleType.bool_, ConsoleValue(true));
+    scene_ui_debug.setHint("Active le débug de l’interface de scène");
+    scene_ui_debug.setCallback(&_scene_ui_debug);
 }
 
 private void _scene(ConsoleCall call) {
@@ -88,8 +88,8 @@ private void _scene_set(ConsoleCall call) {
     }
 }
 
-private void _ui_debug(ConsoleCall call) {
+private void _scene_ui_debug(ConsoleCall call) {
     Atelier.world.isDebugUI = call.getArgument!bool("active");
-    call.console.log("Le mode débug de l’interface est maintenant ",
-        Atelier.world.isDebugUI ? "active" : "inactive");
+    call.console.log("Le mode débug de l’interface de scène est maintenant ",
+        Atelier.ui.isDebug ? "active" : "inactive");
 }

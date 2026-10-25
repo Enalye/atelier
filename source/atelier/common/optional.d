@@ -2,6 +2,8 @@ module atelier.common.optional;
 
 import std.exception : enforce;
 
+import grimoire;
+
 struct Option(T) {
     private {
         T _value;
@@ -73,4 +75,22 @@ Option!T some(T)(T value) {
 
 Option!T none(T)() {
     return Option!T();
+}
+
+void setOption(T)(GrCall call, Option!T option) {
+    if (option) {
+        call.setNative!T(option.get());
+    }
+    else {
+        call.setNull();
+    }
+}
+
+Option!T getOption(T)(GrCall call, size_t index) {
+    if (call.isNull(index)) {
+        return none!T();
+    }
+    else {
+        return some(call.getNative!T());
+    }
 }

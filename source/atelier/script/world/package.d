@@ -4,6 +4,7 @@ import grimoire;
 import atelier.script.world.audio;
 import atelier.script.world.behavior;
 import atelier.script.world.camera;
+import atelier.script.world.component;
 import atelier.script.world.controller;
 import atelier.script.world.dialog;
 import atelier.script.world.effect;
@@ -21,6 +22,7 @@ package(atelier.script) GrModuleLoader[] getLibLoaders_world() {
         &loadLibWorld_audio, //
         &loadLibWorld_behavior, //
         &loadLibWorld_camera, //
+        &loadLibWorld_component, //
         &loadLibWorld_controller, //
         &loadLibWorld_dialog, //
         &loadLibWorld_effect, //

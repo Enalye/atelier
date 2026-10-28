@@ -138,6 +138,11 @@ struct Vec3(T) {
         z = yz_.y;
     }
 
+    /// La distance cumulée des coordonnées
+    T walkDistance(Vec3!T v) const {
+        return std.math.abs(x - v.x) + std.math.abs(y - v.y) + std.math.abs(z - v.z);
+    }
+
     /// The distance between this point and the other one.
     T distance(Vec3!T v) const {
         static if (__traits(isUnsigned, T))

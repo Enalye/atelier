@@ -59,6 +59,11 @@ struct Vec2(T) {
         y = y_;
     }
 
+    /// La distance cumulée des coordonnées
+    T walkDistance(Vec2!T v) const {
+        return std.math.abs(x - v.x) + std.math.abs(y - v.y);
+    }
+
     /// The distance between this point and the other one.
     T distance(Vec2!T v) const {
         static if (__traits(isUnsigned, T))

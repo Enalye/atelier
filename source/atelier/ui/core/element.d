@@ -47,7 +47,8 @@ class UIElement {
         Vec2f _pivot = Vec2f.half;
         Vec2f _mousePosition = Vec2f.zero;
 
-        bool _isHovered, _hasFocus, _isPressed, _isSelected, _isActive, _isGrabbed;
+        bool _isHovered, _hasFocus, _isPressed, _isSelected, _isGrabbed;
+        bool _isActive = true;
         bool _isEnabled = true;
         bool _isAlive;
         bool _widthLock, _heightLock;

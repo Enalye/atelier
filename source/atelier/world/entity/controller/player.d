@@ -64,7 +64,6 @@ final class DefaultPlayerController : EntityController {
         entity.setAngle(radToDeg(acceldir.angle()));
         entity.setAccel(Vec3f(acceldir, 0f));
 
-        Atelier.log(_timer.value01());
         if (!_timer.isRunning) {
             setState("move");
         }

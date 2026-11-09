@@ -219,7 +219,7 @@ final class StateData {
     void loadDefault() {
         if (_gameData) {
             _gameData.clear();
-            _gameData.loadDefault();
+            _gameData.loadDefault(this);
         }
     }
 }
